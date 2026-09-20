@@ -1,0 +1,12 @@
+# Pins for the FHIR toolchain (hard rule 11, Update 02 section 11.4). CI reads this file.
+ig_repo: https://github.com/hl7-eu/oah
+ig_commit: b907cf0
+ig_package_id: hl7.eu.fhir.oah
+ig_canonical: http://hl7.eu/fhir/ig/oah
+fhir_version: 4.0.1
+sushi_version: 3.20.1
+node_version: 20
+java_version: 17
+validator_version: 6.10.4
+validator_url: https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.10.4/validator_cli.jar
+# package sha256 is written by scripts/fhir_build.sh once the build is reproducible

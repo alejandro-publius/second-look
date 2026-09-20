@@ -1,0 +1,11 @@
+date_utc: 2026-09-20T21:37:18Z
+base: https://sandbox.hl7europe.eu/oneaquahealth/fhir
+--- 1. conditional create
+create_status: 201
+created_id: 451
+--- 2. read back
+read_status: 200
+--- 3. record id in ledger, then delete that id only
+delete_status: 200
+read_after_delete_status: 410 (410 or 404 means the delete worked)
+verdict: WRITE OK. Mirror as planned.
