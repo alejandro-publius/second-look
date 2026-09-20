@@ -1,0 +1,22 @@
+# The 16 test items: 4 per feature, 2 present and 2 absent. Photo ids point at photos/manifest.csv.
+# Gold labels are Rachel's, blind, from written definitions. These rows point at placeholders until then.
+items:
+  - { id: t01, feature: artificial_bank, photo_id: ph-test-01, gold: present }
+  - { id: t02, feature: artificial_bank, photo_id: ph-test-02, gold: present }
+  - { id: t03, feature: artificial_bank, photo_id: ph-test-03, gold: absent }
+  - { id: t04, feature: artificial_bank, photo_id: ph-test-04, gold: absent }
+  - { id: t05, feature: dug_out_channel, photo_id: ph-test-05, gold: present }
+  - { id: t06, feature: dug_out_channel, photo_id: ph-test-06, gold: present }
+  - { id: t07, feature: dug_out_channel, photo_id: ph-test-07, gold: absent }
+  - { id: t08, feature: dug_out_channel, photo_id: ph-test-08, gold: absent }
+  - { id: t09, feature: invasive_plant, photo_id: ph-test-09, gold: present }
+  - { id: t10, feature: invasive_plant, photo_id: ph-test-10, gold: present }
+  - { id: t11, feature: invasive_plant, photo_id: ph-test-11, gold: absent }
+  - { id: t12, feature: invasive_plant, photo_id: ph-test-12, gold: absent }
+  - { id: t13, feature: pipe_running, photo_id: ph-test-13, gold: present }
+  - { id: t14, feature: pipe_running, photo_id: ph-test-14, gold: present }
+  - { id: t15, feature: pipe_running, photo_id: ph-test-15, gold: absent }
+  - { id: t16, feature: pipe_running, photo_id: ph-test-16, gold: absent }
+warmup:
+  - { id: w01, photo_id: ph-warmup-01, description: "tidy, pretty, damaged creek (placeholder)" }
+  - { id: w02, photo_id: ph-warmup-02, description: "messy, healthy creek (placeholder)" }

@@ -1,0 +1,14 @@
+# PLACEHOLDER lesson for invasive_plant. Rachel owns the wording. approved stays false until she approves it.
+# Drafts to start from: content/drafts/lessons/invasive_plant.yaml (W7). Screens hold 25 words at most.
+feature: invasive_plant
+approved: false
+rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
+source: ""
+contrast_pairs:
+  - { assume_photo_id: ph-lesson-invasive_plant-a1, actual_photo_id: ph-lesson-invasive_plant-a2, assume_caption: "PLACEHOLDER what people assume", actual_caption: "PLACEHOLDER what is there" }
+  - { assume_photo_id: ph-lesson-invasive_plant-b1, actual_photo_id: ph-lesson-invasive_plant-b2, assume_caption: "PLACEHOLDER what people assume", actual_caption: "PLACEHOLDER what is there" }
+practice:
+  photo_id: ph-practice-invasive_plant
+  gold: present
+  feedback_correct: "PLACEHOLDER feedback that names the cue."
+  feedback_wrong: "PLACEHOLDER feedback that names the cue."

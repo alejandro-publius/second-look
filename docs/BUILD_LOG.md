@@ -15,3 +15,10 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: the only validator errors were mine, UI labels placed in coding displays; their preferred binding on Observation.code accepts our local codes with an information note, exactly as hoped. Java 17 came from Homebrew in two minutes.
 - Decisions: their codes for values and categories, ours for the four feature codes; F2 not needed; the mirror goes ahead behind a flag.
 - Next: Phase 2, contracts first, then W1 to W7 in parallel.
+
+## Phase 2 prep, foundation for parallel work, 2026-09-20 22:30Z
+- What: docs/CONTRACTS.md (folder ownership, shared shapes, API and export schemas, results and audit conventions), core/records.py, core/content_loader.py with every fail-loud check, content files (4 features, 24 form items mirroring the official app with every item unverified, 16 test items, follow-up rules, empty approved sentences, locale strings), 40 labelled gray placeholders with manifest rows, docs/analysis_plan.md with the eight amendments folded in, project made installable so scripts import core.
+- Proof: `make check` CHECK GREEN; the loader reports 40 photos, 16 test items and 89 missing human inputs, which is what preflight will fail on.
+- Surprises: an in-memory SQLite test database needs a static pool or each request sees an empty database. Scripts could not import core until the project became a package. The Next.js generator writes an AGENTS.md with em dashes; replaced.
+- Decisions: the app's "Which ones?" free text becomes a pick list from the region pack plus Not sure, so no free text is stored; subagents never commit and never edit pyproject.
+- Next: spawn W1 to W7 in parallel on their folders.

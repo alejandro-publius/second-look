@@ -1,0 +1,6 @@
+# Region pack. Species names appear on screen only on a photo Rachel has verified, with a source.
+region: california-bay-area
+name: "California, San Francisco Bay Area"
+approved: false
+invasive_plants: []
+source: "Cal-IPC inventory (to be checked by Rachel)"

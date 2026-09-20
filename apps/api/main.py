@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from sqlmodel import Session, func, select
@@ -29,7 +30,7 @@ def health() -> dict[str, str]:
 
 
 @app.post("/api/skeleton/ping")
-def skeleton_ping(session: Session = Depends(get_session)) -> dict[str, int]:
+def skeleton_ping(session: Annotated[Session, Depends(get_session)]) -> dict[str, int]:
     session.add(SkeletonPing(note="walking skeleton"))
     session.commit()
     count = session.exec(select(func.count()).select_from(SkeletonPing)).one()

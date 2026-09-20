@@ -1,0 +1,267 @@
+# The guided creek check. Mirrors the official OneAquaHealth Citizen Science App in its order.
+# wording_source app_public_text means the words came from the app's public text; master_brief means the
+# quote in docs/MASTER_BRIEF.md section 3; own means our wording. Every item is unverified until Alex
+# checks it against his screenshots (verified_against_app: true). Ids are stable: they become FHIR linkIds.
+# Option values map to FHIR: present / absent / cant_tell, or a coded choice.
+version: 1
+sections:
+  - id: what_you_see
+    title: "What do you see from where you stand, in about 100 m?"
+  - id: water
+    title: "How is the water?"
+  - id: margins
+    title: "In the margins, 5 to 10 m from the channel bank top"
+  - id: feelings
+    title: "How do you feel here?"
+  - id: overall
+    title: "Overall"
+items:
+  - id: channel_form
+    section: what_you_see
+    type: choice
+    text: "Channel form"
+    options:
+      - { id: flat, label: "Flat", value: flat }
+      - { id: u_shape, label: "U shape", value: u_shape }
+      - { id: v_shape, label: "V shape", value: v_shape }
+      - { id: not_sure, label: "I'm not sure", value: cant_tell }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: morophology }
+  - id: bottom_type
+    section: what_you_see
+    type: choice
+    text: "Bottom type"
+    options:
+      - { id: natural, label: "Natural", value: absent }
+      - { id: artificial, label: "Artificial (concrete or stones with concrete)", value: present }
+      - { id: not_sure, label: "Not sure", value: cant_tell }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: morophology }
+  - id: bank_type
+    section: what_you_see
+    type: choice
+    text: "Bank type"
+    options:
+      - { id: natural, label: "Natural", value: absent }
+      - { id: artificial, label: "Artificial (concrete or stones with concrete)", value: present }
+      - { id: laid_stones, label: "Laid stones with no concrete", value: absent }
+      - { id: not_sure, label: "Not sure", value: cant_tell }
+    wording_source: master_brief
+    verified_against_app: false
+    feature: artificial_bank
+    fhir: { code_system: sl, code: artificial-bank, category: morophology }
+  - id: habitats
+    section: what_you_see
+    type: multi
+    text: "Habitats"
+    options:
+      - { id: sand_banks, label: "Sand banks", value: sand_banks }
+      - { id: sand_islands, label: "Sand islands", value: sand_islands }
+      - { id: stone_deposits, label: "Stone deposits", value: stone_deposits }
+      - { id: riffles, label: "Riffles, rapids, falls", value: riffles }
+      - { id: aquatic_vegetation, label: "Aquatic vegetation", value: aquatic_vegetation }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: morophology }
+  - id: natural_debris
+    section: what_you_see
+    type: multi
+    text: "Natural debris"
+    options:
+      - { id: fallen_trees, label: "Fallen trees", value: fallen_trees }
+      - { id: fallen_branches, label: "Fallen branches", value: fallen_branches }
+      - { id: leaf_deposits, label: "Deposits of fallen leaves", value: leaf_deposits }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: morophology }
+  - id: water_flow
+    section: what_you_see
+    type: choice
+    text: "Water flow"
+    options:
+      - { id: fast, label: "Fast (with waves or high velocity)", value: fast }
+      - { id: slow, label: "Slow", value: slow }
+      - { id: stagnant, label: "Stagnant or intermittent", value: stagnant }
+      - { id: dry, label: "Dry", value: dry }
+      - { id: not_sure, label: "Not sure", value: cant_tell }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: hydrology }
+  - id: water_aspect
+    section: water
+    type: choice
+    text: "How is the water?"
+    options:
+      - { id: clear, label: "Clear or transparent", value: absent }
+      - { id: muddy, label: "Muddy or turbid", value: present }
+      - { id: foam, label: "Has foam", value: present }
+      - { id: colour, label: "Has colours or altered colour", value: present }
+      - { id: not_sure, label: "Not sure", value: cant_tell }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: foam }
+  - id: water_withdrawal
+    section: water
+    type: yesno
+    text: "Is there any kind of obvious water collection, use or removal from the stream?"
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: hydrology }
+  - id: barriers
+    section: water
+    type: yesno
+    text: "Do you see any dams or other transversal artificial barriers?"
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: morophology }
+  - id: draining_pipes
+    section: water
+    type: yesno
+    text: "Are there pipes draining polluted water into the stream?"
+    wording_source: master_brief
+    verified_against_app: false
+    feature: pipe_running
+    fhir: { code_system: sl, code: pipe-running, category: hydrology }
+  - id: sewage_discharge
+    section: water
+    type: yesno
+    text: "Is there any kind of water entry or discharge of sewage?"
+    wording_source: master_brief
+    verified_against_app: false
+    feature: pipe_running
+    fhir: { code_system: sl, code: pipe-running, category: hydrology }
+  - id: construction
+    section: water
+    type: yesno
+    text: "Is there any construction or works in the stream?"
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: morophology }
+  - id: water_height_m
+    section: water
+    type: number
+    text: "Water height in metres"
+    unit: m
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: hydrology, unit: m }
+  - id: impervious_left
+    section: margins
+    type: yesno
+    text: "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?"
+    wording_source: master_brief
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: LandUse }
+  - id: impervious_right
+    section: margins
+    type: yesno
+    text: "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?"
+    wording_source: master_brief
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: LandUse }
+  - id: vegetation_left
+    section: margins
+    type: yesno
+    text: "Is the left margin covered by vegetation?"
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: riparianVegetation }
+  - id: vegetation_right
+    section: margins
+    type: yesno
+    text: "Is the right margin covered by vegetation?"
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: riparianVegetation }
+  - id: vegetation_type_left
+    section: margins
+    type: choice
+    text: "Left margin: what is dominant (more than half) in the first 5 m?"
+    options:
+      - { id: herbs, label: "Herbs", value: herbaceous }
+      - { id: shrubs, label: "Shrubs", value: bushes }
+      - { id: trees, label: "Trees", value: trees }
+      - { id: not_sure, label: "Not sure", value: cant_tell }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: riparianVegetation }
+  - id: vegetation_type_right
+    section: margins
+    type: choice
+    text: "Right margin: what is dominant (more than half) in the first 5 m?"
+    options:
+      - { id: herbs, label: "Herbs", value: herbaceous }
+      - { id: shrubs, label: "Shrubs", value: bushes }
+      - { id: trees, label: "Trees", value: trees }
+      - { id: not_sure, label: "Not sure", value: cant_tell }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: riparianVegetation }
+  - id: invasive_species
+    section: margins
+    type: yesno
+    text: "Do you see any non-native or invasive plant species?"
+    wording_source: master_brief
+    verified_against_app: false
+    feature: invasive_plant
+    fhir: { code_system: sl, code: invasive-plant, category: invasiveOrganisms }
+  - id: invasive_which
+    section: margins
+    type: pick_region_list
+    text: "Which ones?"
+    depends_on: { item: invasive_species, value: present }
+    region_list: invasive_plants
+    note: "The app offers free text here. We offer the regional list plus Not sure, so no free text is stored."
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: invasive_plant
+    fhir: { code_system: sl, code: invasive-plant, category: invasiveOrganisms }
+  - id: vegetation_cuts
+    section: margins
+    type: yesno
+    text: "Have there been recent cuts of vegetation (partial or total) on the banks?"
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: { code_system: oah, code: riparianVegetation }
+  - id: feelings
+    section: feelings
+    type: sliders
+    text: "Which feelings best describe your experience?"
+    sliders: [joy, serenity, anger, fear]
+    allow_not_applicable: true
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: null
+  - id: overall_rating
+    section: overall
+    type: choice
+    text: "Overall, how would you rate this stream?"
+    options:
+      - { id: good, label: "Good: the ecosystem components are there, riparian vegetation, natural channel, good water quality, biodiversity", value: good }
+      - { id: moderate, label: "Moderate: some alterations, still biodiverse, with vegetation in the margins, water looks good", value: moderate }
+      - { id: poor, label: "Poor: highly modified or artificialized, loss of riparian vegetation, loss of habitats, polluted", value: poor }
+    wording_source: app_public_text
+    verified_against_app: false
+    feature: null
+    fhir: null
+    rating_check: true

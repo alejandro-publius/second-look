@@ -1,5 +1,7 @@
-"""Smoke test against a running stack (compose or deployed). Proves: static page paints, API answers,
-a database row is written and read back. Set WEB_ORIGIN and API_ORIGIN to point elsewhere."""
+"""Smoke test against a running stack (compose or deployed).
+
+Proves: the static page paints, the API answers, a database row is written and read back.
+Set WEB_ORIGIN and API_ORIGIN to point elsewhere."""
 
 from __future__ import annotations
 

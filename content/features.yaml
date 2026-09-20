@@ -1,0 +1,48 @@
+# The four features a volunteer is tested on. Data, so Rachel can edit without touching code.
+# wording_status: draft until Rachel freezes the question wording in docs/analysis_plan.md.
+# verified_against_app: true only after Alex checks his screenshots of the official app.
+features:
+  - id: artificial_bank
+    name: Built banks
+    plain: concrete walls and other built banks
+    question: "Are the banks artificial, such as concrete or stones set in concrete?"
+    wording_source: app_public_text
+    wording_status: draft
+    app_item: bank_type
+    verified_against_app: false
+    oah_category: morophology
+    fhir_code: artificial-bank
+    glossary_term: artificial bank
+  - id: dug_out_channel
+    name: Dug-out channel
+    plain: a channel that was deepened or straightened
+    question: "Does this channel look dug out or straightened?"
+    wording_source: own
+    wording_status: draft
+    app_item: null
+    verified_against_app: false
+    oah_category: morophology
+    fhir_code: dug-out-channel
+    glossary_term: dug-out channel
+  - id: invasive_plant
+    name: Plants that do not belong
+    plain: pretty plants that do not belong here
+    question: "Do you see any non-native or invasive plant species?"
+    wording_source: app_public_text
+    wording_status: draft
+    app_item: invasive_species
+    verified_against_app: false
+    oah_category: invasiveOrganisms
+    fhir_code: invasive-plant
+    glossary_term: invasive plant
+  - id: pipe_running
+    name: Pipes and sewage signs
+    plain: pipes with something coming out, and sewage signs
+    question: "Are there pipes draining polluted water into the stream?"
+    wording_source: app_public_text
+    wording_status: draft
+    app_item: draining_pipes
+    verified_against_app: false
+    oah_category: hydrology
+    fhir_code: pipe-running
+    glossary_term: outfall

@@ -1,0 +1,28 @@
+# Follow-up questions, chosen by code and never by a model. Priority order. At most two are asked.
+max_questions: 2
+rules:
+  - id: dry_pipe
+    priority: 1
+    needs_items: [draining_pipes, sewage_discharge]
+    trigger: "draining_pipes or sewage_discharge answered present, and rainfall status is dry"
+    dry_rule: { window_hours: 72, max_mm: 2.5 }
+    question_key: followup.dry_pipe
+    fail_closed: "if rainfall or location is unknown, this rule does not fire"
+  - id: rating_check
+    priority: 2
+    needs_items: [overall_rating, bank_type, impervious_left, impervious_right, invasive_species, sewage_discharge]
+    trigger: "overall_rating is good, and any of bank_type present, impervious_left present, impervious_right present, invasive_species present, sewage_discharge present"
+    question_key: followup.rating_check
+    stores: [first_rating, final_rating]
+  - id: checker_flag
+    priority: 3
+    needs_items: []
+    trigger: "a Flag from core.gate for a feature the model passed, shown only after the person answered"
+    question_key: followup.checker_flag
+    feature_flag: CHECKER_ENABLED
+  - id: low_score
+    priority: 4
+    needs_items: [bank_type, draining_pipes, invasive_species]
+    trigger: "observer scored 2 of 4 or lower on a feature and answered absent for that feature"
+    question_key: followup.low_score
+    asks_for: photo

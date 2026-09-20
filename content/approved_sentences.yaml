@@ -1,0 +1,4 @@
+# Every health or ecology sentence a user sees comes from here, by id, with a source (hard rule 5).
+# approved stays false until Rachel has read the OneAquaHealth indicator factsheets and approved it.
+# Candidate drafts live in content/drafts/approved_sentences.yaml and are copied here when approved.
+sentences: []

@@ -1,0 +1,14 @@
+# PLACEHOLDER lesson for dug_out_channel. Rachel owns the wording. approved stays false until she approves it.
+# Drafts to start from: content/drafts/lessons/dug_out_channel.yaml (W7). Screens hold 25 words at most.
+feature: dug_out_channel
+approved: false
+rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
+source: ""
+contrast_pairs:
+  - { assume_photo_id: ph-lesson-dug_out_channel-a1, actual_photo_id: ph-lesson-dug_out_channel-a2, assume_caption: "PLACEHOLDER what people assume", actual_caption: "PLACEHOLDER what is there" }
+  - { assume_photo_id: ph-lesson-dug_out_channel-b1, actual_photo_id: ph-lesson-dug_out_channel-b2, assume_caption: "PLACEHOLDER what people assume", actual_caption: "PLACEHOLDER what is there" }
+practice:
+  photo_id: ph-practice-dug_out_channel
+  gold: present
+  feedback_correct: "PLACEHOLDER feedback that names the cue."
+  feedback_wrong: "PLACEHOLDER feedback that names the cue."
