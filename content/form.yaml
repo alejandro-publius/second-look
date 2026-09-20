@@ -45,6 +45,7 @@ items:
     section: what_you_see
     type: choice
     text: "Bank type"
+    short_label: "artificial banks"
     options:
       - { id: natural, label: "Natural", value: absent }
       - { id: artificial, label: "Artificial (concrete or stones with concrete)", value: present }
@@ -135,6 +136,7 @@ items:
   - id: sewage_discharge
     section: water
     type: yesno
+    short_label: "a sewage discharge"
     text: "Is there any kind of water entry or discharge of sewage?"
     wording_source: master_brief
     verified_against_app: false
@@ -160,6 +162,7 @@ items:
   - id: impervious_left
     section: margins
     type: yesno
+    short_label: "a paved left margin"
     text: "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?"
     wording_source: master_brief
     verified_against_app: false
@@ -168,6 +171,7 @@ items:
   - id: impervious_right
     section: margins
     type: yesno
+    short_label: "a paved right margin"
     text: "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?"
     wording_source: master_brief
     verified_against_app: false
@@ -218,6 +222,7 @@ items:
   - id: invasive_species
     section: margins
     type: yesno
+    short_label: "invasive plants"
     text: "Do you see any non-native or invasive plant species?"
     wording_source: master_brief
     verified_against_app: false
