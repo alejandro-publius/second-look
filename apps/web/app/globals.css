@@ -1,0 +1,17 @@
+:root {
+  --ink: #14211b;
+  --paper: #fbfaf6;
+  --accent: #1f3a2e;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+}
+button, input, select, textarea { font: inherit; }

@@ -1,0 +1,64 @@
+[project]
+name = "second-look"
+version = "0.1.0"
+description = "A two minute test that scores volunteer creek assessors and carries the score into OneAquaHealth FHIR records."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "sqlmodel>=0.0.22",
+  "sqlalchemy>=2.0",
+  "psycopg[binary]>=3.2",
+  "alembic>=1.13",
+  "pydantic>=2.8",
+  "pydantic-settings>=2.4",
+  "pyyaml>=6.0",
+  "numpy>=2.0",
+  "scipy>=1.14",
+  "pandas>=2.2",
+  "duckdb>=1.1",
+  "pillow>=10.4",
+  "httpx>=0.27",
+  "matplotlib>=3.9",
+  "anthropic>=0.40",
+  "python-multipart>=0.0.9",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "hypothesis>=6.112",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "types-PyYAML",
+  "pandas-stubs",
+  "types-requests",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["core", "apps/api", "evals", "scripts"]
+addopts = "-q -p no:cacheprovider"
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["fhir/ig-src", "apps/web", "results", "photos"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+exclude = ["fhir/ig-src", "apps/web", "\\.venv"]
