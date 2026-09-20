@@ -18,11 +18,11 @@ Read this before touching anything. It is the one place where folder ownership, 
 
 | Workstream | Owns | Reads |
 |---|---|---|
-| W1 API | `apps/api/` (all of it except `apps/api/fhir_routes.py`, which W3 owns) | `core/`, `content/`, `photos/manifest.csv` |
+| W1 API | `apps/api/` (all of it except `apps/api/fhir_routes.py`, which W3 owns), `core/allocator.py`, `core/scoring.py`, `core/tests/test_allocator.py`, `core/tests/test_scoring.py` | `core/`, `content/`, `photos/manifest.csv` |
 | W2 Analysis | `evals/` except `evals/model_sweep.py`, `evals/benchmark.py`, `evals/agreement.py`, `evals/ablation.py`, `evals/fixtures/` | `core/lock.py`, `core/records.py`, `docs/analysis_plan.md` |
 | W3 FHIR | `fhir/` (except `fhir/ig-src`, `fhir/tools`, `fhir/build`), `core/fhir_emit.py`, `core/tests/test_fhir_emit*.py`, `apps/api/fhir_routes.py`, `scripts/repush_sandbox.py`, `docs/ig_proposal.md` | `core/records.py`, `docs/fhir_mapping.md`, `results/fhir_validation.json` |
 | W4 Web | `apps/web/` | `content/`, `photos/`, this file |
-| W5 Core | `core/gate.py`, `core/followups.py`, `core/rainfall.py`, `core/labels.py`, `core/healthcard.py`, `core/scoring.py`, `core/allocator.py`, `core/tests/` (except W3 and W6 test files) | `content/`, `core/records.py`, `core/content_loader.py` |
+| W5 Core | `core/gate.py`, `core/followups.py`, `core/rainfall.py`, `core/labels.py`, `core/healthcard.py`, `core/tests/` (except W1, W3 and W6 test files) | `content/`, `core/records.py`, `core/content_loader.py` |
 | W6 AI | `evals/model_sweep.py`, `evals/benchmark.py`, `evals/agreement.py`, `evals/ablation.py`, `evals/fixtures/`, `evals/tests/test_model_*.py`, `evals/tests/test_benchmark*.py`, `core/checker.py`, `core/tests/test_checker*.py`, `results/model_pass_table.json`, `results/cost_log.jsonl` | `core/gate.py` (W5), `content/test_items.yaml` |
 | W7 Tools and docs | `scripts/` (except `scripts/repush_sandbox.py`, `scripts/fhir_build.sh`, `scripts/fhir_validate.py`, `scripts/check_*.py`, `scripts/verify_claims.py`, `scripts/make_placeholders.py`, `scripts/smoke.py`, `scripts/deploy.sh`, `scripts/sandbox_write_test.sh`), `audit/`, `docs/` (except `docs/MASTER_BRIEF.md`, `docs/updates/`, `docs/CONTRACTS.md`, `docs/fhir_mapping.md`, `docs/ig_proposal.md`, `docs/BUILD_LOG.md`, `docs/DECISIONS.md`), `content/drafts/`, `README.md` | everything |
 
@@ -88,3 +88,72 @@ See `.env.example`. Settings are read once in `apps/api/settings.py`. Web reads 
 ## Gold key handling
 
 The gold labels live in `content/test_items.yaml` and `photos/manifest.csv` on the server. They never reach the browser during the test. `/demo` learns correctness only through `POST /api/demo/answer`. `scripts/freeze_key.py` (W7) writes `results/key_hash.json` with the sha256 of the sorted `(item_id, gold)` pairs.
+
+## Core function signatures (W5 writes them, W1 and W4 call them; build against these exactly)
+
+```python
+# core/gate.py (W5)
+class Flag(Frozen):
+    feature: FeatureId
+    confidence: float            # 0 to 1
+    note: str                    # 160 characters at most, shown only as "the checker noticed ..."
+    region: tuple[float, float, float, float] | None = None   # x, y, w, h as fractions of the image
+def parse_flags(raw: object, *, model_id: str, pass_table: Mapping[str, Any]) -> tuple[list[Flag], list[str]]:
+    """Parse any model output into Flags or drop it. Returns (flags for passed features only, drop reasons)."""
+def build_record(*, visit_id: str, spot: Spot, observer: Observer, answered_at: datetime,
+                 answers: Mapping[str, str | float | list[str]], first_rating: str | None,
+                 final_rating: str | None, checks: Sequence[CheckResult], photo_ids: Sequence[str]) -> VisitRecord:
+    """The only way a VisitRecord is made. No parameter carries model output."""
+
+# core/followups.py (W5)
+class SiteContext(Frozen):
+    rain: Literal["dry", "wet", "unknown"]
+    dry_days: int | None = None
+    mm_in_window: float | None = None
+class Followup(Frozen):
+    rule_id: str                 # dry_pipe, rating_check, checker_flag, low_score
+    kind: Literal["yesno", "keep_rating", "look_again", "photo"]
+    question_key: str            # locale key
+    params: dict[str, str | int | float]   # fills the locale string, e.g. days, issues, note, feature, correct
+def select_followups(answers: Mapping[str, str | float | list[str]], site: SiteContext,
+                     observer: Observer | None, flags: Sequence[Flag], table: Mapping[str, Any],
+                     *, form_items: Sequence[Mapping[str, Any]], checker_enabled: bool = False) -> list[Followup]:
+    """Pure. At most table["max_questions"] (2). Priority order from the table. No model call."""
+
+# core/rainfall.py (W5)
+class RainStatus(Frozen):
+    status: Literal["dry", "wet", "unknown"]
+    mm_in_window: float | None
+    dry_days: int | None
+    source: str                  # "open-meteo" or "unknown"
+def dry_status(latitude: float, longitude: float, now: datetime, *, dry_mm: float = 2.5,
+               window_hours: int = 72, fetch: Callable[[str], dict] | None = None,
+               cache: MutableMapping[str, tuple[datetime, dict]] | None = None) -> RainStatus:
+    """Open-Meteo hourly precipitation for the window. Timeout and one retry inside fetch. Any failure -> unknown."""
+
+# core/labels.py (W5)
+HUMAN_PASS_MIN = 3               # a person "passed" a feature with 3 of 4 or better
+class Label(Frozen):
+    text: str                    # "4 of 4 on built banks, tested Sep 23" or the expired sentence
+    expired: bool
+    passed: bool | None          # None when there is no score
+def observer_label(score: FeatureScore | None, feature_name: str, today: date, locale: Mapping[str, str]) -> Label: ...
+
+# core/healthcard.py (W5)
+class HealthCard(Frozen):
+    person: str
+    pet: str
+    city: str
+    sources: tuple[str, str, str]
+def pick_actions(sentences: Sequence[Mapping[str, Any]], seed: str) -> HealthCard | None:
+    """Only sentences with approved == True. One per audience, chosen by a seeded pick. None if any audience has none."""
+
+# core/scoring.py (W1)
+def is_correct(answer: TestAnswer, gold: GoldLabel) -> bool: ...
+def score_sitting(responses: Mapping[str, TestAnswer], items: Sequence[Mapping[str, Any]], tested_on: date) -> list[FeatureScore]:
+    """Missing or cant_tell answers count as incorrect."""
+
+# core/allocator.py (W1)
+def arm_for_position(seed: str, position: int, *, k: int = 2, block: int = 4) -> tuple[Arm, int]:
+    """Deterministic: the arm and block id for the nth randomized session. Permuted blocks of `block` over `k` arms."""
+```
