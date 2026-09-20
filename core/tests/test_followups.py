@@ -114,8 +114,8 @@ def test_rating_check_fires_with_labels_from_the_form() -> None:
     assert chosen[0].kind == "keep_rating"
     assert chosen[0].question_key == "followup.rating_check"
     issues = str(chosen[0].params["issues"])
-    assert issues.startswith("Artificial (concrete or stones with concrete), ")
-    assert "invasive plant species" in issues
+    # content/form.yaml now carries short labels for these items, so the plain phrases win.
+    assert issues == "artificial banks, invasive plants"
     assert chosen[0].params["first_rating"] == "good"
 
 
