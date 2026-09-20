@@ -1,0 +1,32 @@
+# DRAFT lesson for invasive_plant. Written by W7b on 2026-09-20 from fetched sources (docs/notes/sources.md).
+# Rachel owns the wording. approved stays false until she flips it. Nothing here reaches a screen before that.
+# Photo ids are the gray placeholders. Each comment names the shot the caption expects, from the shot list.
+# Limits: rule_of_thumb 12 words or fewer, every caption and feedback 25 words or fewer. No health claims.
+# Cue sources: the Cal-IPC Inventory (ratings High, Moderate, Limited for plants that damage California
+# wildlands) and the OneAquaHealth Key Indicators Factsheet XI, "Invasive Alien Plants of the riparian
+# corridor", which says these plants "spread rapidly" and "thrive in disturbed, nutrient-enriched, or poorly
+# managed environments". The species list for the Bay Area is content/drafts/regions/california-bay-area.yaml.
+# Captions name no species. A species name goes on a caption only once Rachel has verified that photo.
+# An ecologist's likely objection, for Rachel: some native plants also grow in single stands (for example
+# cattails or willow thickets). The rule therefore sends people to the regional list, not to a verdict.
+feature: invasive_plant
+approved: false
+rule_of_thumb: "One pretty plant smothering the whole bank? Check the regional list."
+source: "https://www.cal-ipc.org/plants/inventory/"
+contrast_pairs:
+  # Pair A. Assume shot (gold absent): scruffy native trees and shrubs, dead branches, leaf litter. Actual shot (gold present): one plant wall to wall, checked against the regional list.
+  - assume_photo_id: ph-lesson-invasive_plant-a1
+    actual_photo_id: ph-lesson-invasive_plant-a2
+    assume_caption: "Scruffy trees and shrubs of many kinds, some dead branches, leaf litter. Mixed and native. Nothing to report."
+    actual_caption: "One plant, wall to wall, nothing growing under it. Pretty, but it does not belong here. Check the list."
+  # Pair B. Assume shot (gold absent): a bank in flower with many kinds mixed in. Actual shot (gold present): a glossy carpet of one leaf shape on the ground and up the trees.
+  - assume_photo_id: ph-lesson-invasive_plant-b1
+    actual_photo_id: ph-lesson-invasive_plant-b2
+    assume_caption: "Flowers of several shapes and colours mixed with grasses and shrubs. Many kinds share the bank. Nothing to report."
+    actual_caption: "A neat, glossy carpet of one leaf shape covering the ground and climbing the trees. A garden escape. Check the list."
+practice:
+  # Practice shot (gold present): a solid single-species stand crowding the bank, from a plant on the regional list, verified by Rachel.
+  photo_id: ph-practice-invasive_plant
+  gold: present
+  feedback_correct: "Right. One plant in a solid stand, crowding out everything else, is the cue. The regional list names it."
+  feedback_wrong: "Count how many kinds of plant you can see. Here it is one, in a solid stand. That is the cue."

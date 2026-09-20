@@ -1,0 +1,68 @@
+# DRAFT region pack for the San Francisco Bay Area. Written by W7b on 2026-09-20.
+# Every plant below was checked against the Cal-IPC Inventory (California Invasive Plant Council) on
+# 2026-09-20 by fetching its profile page; the rating is quoted from that page. Rachel prunes this list
+# to plants she has seen on East Bay creek banks, and approved stays false until she does.
+# Cal-IPC rating meanings, from https://www.cal-ipc.org/plants/inventory/ :
+#   High: severe ecological impacts on physical processes, plant and animal communities, and vegetation structure.
+#   Moderate: substantial and apparent, but generally not severe, ecological impacts.
+#   Limited: invasive, but impacts minor statewide, or not enough information for a higher score.
+# The Inventory has no regulatory authority. A species name appears on a screen only on a photo Rachel has verified.
+region: california-bay-area
+name: "California, San Francisco Bay Area"
+approved: false
+source: "https://www.cal-ipc.org/plants/inventory/"
+invasive_plants:
+  - common_name: "Giant reed"
+    latin_name: "Arundo donax"
+    cal_ipc_rating: "High"
+    source: "https://www.cal-ipc.org/plants/profile/arundo-donax-profile/"
+    note: "Profile: threatens riparian ecosystems and wetlands throughout California."
+  - common_name: "English ivy"
+    latin_name: "Hedera helix"
+    cal_ipc_rating: "High"
+    source: "https://www.cal-ipc.org/plants/profile/hedera-helix-profile/"
+    note: "Profile: grows vigorously in forests and stops understory plants and new trees from coming back."
+  - common_name: "Algerian ivy"
+    latin_name: "Hedera canariensis"
+    cal_ipc_rating: "High"
+    source: "https://www.cal-ipc.org/plants/profile/hedera-canariensis-profile/"
+    note: "Profile: along the coast; same habit as English ivy. Hard to tell apart by eye; Rachel decides whether to list both."
+  - common_name: "Cape ivy"
+    latin_name: "Delairea odorata"
+    cal_ipc_rating: "High"
+    source: "https://www.cal-ipc.org/plants/profile/delairea-odorata-profile/"
+    note: "Profile: especially problematic in coastal riparian areas; forms dense mats over trees and shrubs."
+  - common_name: "Himalayan blackberry"
+    latin_name: "Rubus armeniacus"
+    cal_ipc_rating: "High"
+    source: "https://www.cal-ipc.org/plants/profile/rubus-armeniacus-profile/"
+    note: "Profile: coast ranges, Central Valley, Sierra Nevada. No riparian note on the profile; common on Bay Area creek banks in our experience, for Rachel to confirm."
+  - common_name: "Periwinkle"
+    latin_name: "Vinca major"
+    cal_ipc_rating: "Moderate"
+    source: "https://www.cal-ipc.org/plants/profile/vinca-major-profile/"
+    note: "Profile: riparian zones are particularly sensitive; vine fragments break off and start new patches downstream."
+  - common_name: "Fennel"
+    latin_name: "Foeniculum vulgare"
+    cal_ipc_rating: "Moderate"
+    source: "https://www.cal-ipc.org/plants/profile/foeniculum-vulgare-profile/"
+    note: "Profile: alters grassland, coastal scrub, riparian and wetland communities."
+  - common_name: "Poison hemlock"
+    latin_name: "Conium maculatum"
+    cal_ipc_rating: "Moderate"
+    source: "https://www.cal-ipc.org/plants/profile/conium-maculatum-profile/"
+    note: "Profile: occasionally in riparian forests and floodplains, prefers disturbed areas. Do not touch it."
+  - common_name: "Tree of heaven"
+    latin_name: "Ailanthus altissima"
+    cal_ipc_rating: "Moderate"
+    source: "https://www.cal-ipc.org/plants/profile/ailanthus-altissima-profile/"
+    note: "Profile: coast and foothills, disturbed semi-natural habitats. No riparian note on the profile."
+  - common_name: "Jubata grass"
+    latin_name: "Cortaderia jubata"
+    cal_ipc_rating: "High"
+    source: "https://www.cal-ipc.org/plants/profile/cortaderia-jubata-profile/"
+    note: "Profile: dunes, bluffs and disturbed areas. No riparian note on the profile; Rachel decides whether to keep it."
+not_listed:
+  - common_name: "Small-leaf spiderwort"
+    latin_name: "Tradescantia fluminensis"
+    note: "Named on the OneAquaHealth factsheet XI as a European riparian invader. Not found in the Cal-IPC Inventory on 2026-09-20: the profile URL returned 404 and the site search returned nothing. Left out until Rachel finds a Californian source."

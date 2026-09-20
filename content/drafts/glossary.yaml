@@ -1,0 +1,164 @@
+# DRAFT glossary. Written by W7b on 2026-09-20. Every technical word in content/form.yaml and
+# content/features.yaml, in one plain sentence each, reading age about 12. Rachel checks each sentence,
+# then the integrator copies approved terms into content/glossary.yaml.
+# Sources are in docs/notes/sources.md. RHS = River Habitat Survey manual 2003 (2022 reprint).
+# OAH = OneAquaHealth Field Sampling Protocols (DOI 10.5281/zenodo.20344421).
+# EPA = Illicit Discharge Detection and Elimination guidance manual (2004).
+approved: false
+terms:
+  - term: channel
+    plain: "The trench the water runs in, from one bank to the other."
+    source: ""
+  - term: channel form
+    plain: "The shape of the channel seen from the side: flat and wide, a rounded U, or a sharp V."
+    source: ""
+  - term: bank
+    plain: "The sloping edge of the stream where the water meets the land, on the left and on the right when you face downstream."
+    source: "RHS, spot-check key: banks are determined by looking downstream"
+  - term: bank top
+    plain: "The line at the top of the bank where the ground levels out and people could walk or build."
+    source: "RHS, spot-check key: banktop is the first major break in slope above which cultivation or development is possible"
+  - term: artificial bank
+    plain: "A bank a person built or armoured, such as a concrete wall or stones set in concrete."
+    source: "RHS, Section E, Reinforced bank (RI)"
+  - term: laid stones
+    plain: "Stones stacked along the bank with nothing holding them together, no concrete or mortar."
+    source: "OAH field form: Layed Stones (natural stones not compacted by concrete)"
+  - term: gabion
+    plain: "A wire basket filled with stones, used to hold up a bank."
+    source: "OAH field form: Gabion (stones inside a metal mesh)"
+  - term: bottom type
+    plain: "What the bed of the stream is made of: natural rock, gravel, sand or mud, or a concrete floor."
+    source: "OAH field form: substrate types in the channel"
+  - term: dug-out channel
+    plain: "A channel a machine has straightened, deepened or reshaped, so the banks are even and the width is the same all along."
+    source: "RHS, spot-check key: channel modification indicators"
+  - term: riffle
+    plain: "A shallow, fast stretch where the water bubbles over gravel or cobbles."
+    source: "RHS, Section C, Riffle(s)"
+  - term: rapid
+    plain: "A faster, rougher stretch than a riffle, with white tumbling waves over rocks."
+    source: "RHS, Section E, Broken standing waves (BW)"
+  - term: fall
+    plain: "A place where the water drops straight down over a step of rock or a built wall."
+    source: "RHS, Section E, Free fall (FF)"
+  - term: pool
+    plain: "A deeper, slower patch of water, often on a bend or below a fall."
+    source: "RHS, Section C, Pool(s)"
+  - term: sand bank
+    plain: "A heap of sand the water has dropped along one edge of the channel."
+    source: ""
+  - term: sand island
+    plain: "A heap of sand in the middle of the channel with water on both sides."
+    source: ""
+  - term: stone deposit
+    plain: "A pile of gravel or stones the water has dropped in one place."
+    source: ""
+  - term: habitat
+    plain: "A spot with the right conditions for certain plants or animals to live, such as a riffle, a pool or a sand bank."
+    source: ""
+  - term: aquatic vegetation
+    plain: "Plants growing in the water itself, rooted on the bottom or floating."
+    source: "OAH field form: channel vegetation types"
+  - term: macrophyte
+    plain: "A water plant big enough to see without a microscope, such as reeds, pondweed or duckweed."
+    source: "OAH protocols, section 3.4 Macrophytes"
+  - term: natural debris
+    plain: "Fallen trees, branches and leaves lying in or over the water. They are food and shelter, not litter."
+    source: ""
+  - term: water flow
+    plain: "How fast the water is moving: fast with waves, slow, standing still, or gone dry."
+    source: ""
+  - term: stagnant
+    plain: "Water that is not moving at all."
+    source: "RHS, Section E, No perceptible flow (NP)"
+  - term: intermittent
+    plain: "A stream that runs for part of the year and dries up for the rest."
+    source: "OAH field form: Dry areas/Intermittent flow"
+  - term: turbid
+    plain: "Cloudy or muddy water you cannot see through."
+    source: ""
+  - term: foam
+    plain: "Bubbles or froth on the water surface. Some foam is natural; a lot of it, or a smell with it, is worth noting."
+    source: ""
+  - term: water withdrawal
+    plain: "Taking water out of the stream with a pipe, a pump or a channel."
+    source: "OAH field form: Intakes (pipes abstracting water from the stream)"
+  - term: barrier
+    plain: "A dam, weir or wall built across the stream that stops water, sand and animals moving downstream."
+    source: "OAH field form: barriers to longitudinal connectivity (weirs/dams)"
+  - term: dam
+    plain: "A wall built across a stream to hold water back."
+    source: ""
+  - term: outfall
+    plain: "The open end of a pipe or drain where water comes out into the stream."
+    source: "EPA, Chapter 1"
+  - term: dry weather flow
+    plain: "Water coming out of a pipe when it has not rained for about three days. Nothing should be running then, so it is worth testing."
+    source: "EPA, page 337: the traditional definition of dry weather has been 72 hours without rainfall"
+  - term: discharge
+    plain: "Water flowing out of a pipe into the stream, whatever is in it."
+    source: "EPA, Chapter 1"
+  - term: sewage
+    plain: "Waste water from toilets, sinks and drains inside buildings. Only a test can tell if a pipe is carrying it."
+    source: "EPA, page 6: field testing is needed to classify a dry weather flow"
+  - term: polluted
+    plain: "Carrying something that should not be there, such as waste, oil or chemicals."
+    source: ""
+  - term: construction
+    plain: "Building work or digging in or beside the stream."
+    source: ""
+  - term: water height
+    plain: "How deep the water is, measured in metres from the bed to the surface."
+    source: ""
+  - term: margin
+    plain: "The strip of land along each side of the stream, from the bank top out to about 10 metres."
+    source: "OAH protocols, section 3.5: 10 m in each margin"
+  - term: impervious
+    plain: "A surface water cannot soak into, such as a road, a sidewalk, a roof or a parking lot."
+    source: ""
+  - term: riparian
+    plain: "To do with the strip of land right next to a stream or river."
+    source: ""
+  - term: riparian vegetation
+    plain: "The trees, shrubs and grasses growing along the stream margins."
+    source: "OAH protocols, section 3.5 Riparian vegetation"
+  - term: herbaceous
+    plain: "Soft-stemmed plants such as grasses and wildflowers, under about 1.5 metres tall."
+    source: "OAH protocols: Herbaceous (height < 1.5 m)"
+  - term: shrub
+    plain: "A woody plant with many stems, roughly waist to head height."
+    source: "OAH protocols: Shrubby (height 1.5 to 3 m)"
+  - term: dominant
+    plain: "The kind of plant that covers more than half of the strip you are looking at."
+    source: ""
+  - term: vegetation cuts
+    plain: "Plants along the bank that have been mown, trimmed or cleared recently."
+    source: ""
+  - term: native
+    plain: "A plant or animal that has lived in this region for a very long time without people bringing it."
+    source: ""
+  - term: non-native
+    plain: "A plant or animal that people brought here from somewhere else, on purpose or by accident."
+    source: "OAH factsheet XI: Invasive Alien Plants"
+  - term: invasive
+    plain: "A non-native plant or animal that spreads fast and crowds out the ones that belong here."
+    source: "Cal-IPC Inventory, rating definitions"
+  - term: species
+    plain: "One kind of plant or animal, such as giant reed or English ivy."
+    source: ""
+  - term: ecosystem
+    plain: "All the living things in a place together with the water, soil and air they depend on."
+    source: ""
+  - term: biodiversity
+    plain: "The number of different kinds of living things in a place."
+    source: ""
+  - term: artificialized
+    plain: "Changed so much by building that little of the natural stream is left."
+    source: ""
+  - term: reach
+    plain: "A stretch of stream, here about 100 metres, that you can see from where you stand."
+    source: "OAH protocols, section 2.4: 100 meters reach"
+  - term: floodplain
+    plain: "The flat land beside a stream that goes under water when the stream floods."
+    source: ""

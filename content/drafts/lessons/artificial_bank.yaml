@@ -1,0 +1,30 @@
+# DRAFT lesson for artificial_bank. Written by W7b on 2026-09-20 from fetched sources (docs/notes/sources.md).
+# Rachel owns the wording. approved stays false until she flips it. Nothing here reaches a screen before that.
+# Photo ids are the gray placeholders. Each comment names the shot the caption expects, from the shot list.
+# Limits: rule_of_thumb 12 words or fewer, every caption and feedback 25 words or fewer. No health claims.
+# Cue source: River Habitat Survey manual 2003 (2022 reprint), Section E, "Reinforced bank (RI)": a bank
+# "artificially strengthened" with "concrete, sheet piling, corrugated iron, wood piling, gabion, brick/laid
+# stone, rip-rap". The app's own option reads "Artificial (concrete or stones with concrete)", so the lesson
+# centres on concrete. Loose laid stones with no concrete count as not built in content/form.yaml; gabions
+# (wire baskets) are a judgment call for Rachel to settle against the app wording.
+feature: artificial_bank
+approved: false
+rule_of_thumb: "Under the plants, look for concrete or stones set in concrete."
+source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
+contrast_pairs:
+  # Pair A. Assume shot (gold absent): a raw earth bank that looks messy. Actual shot (gold present): a wall hidden under ivy.
+  - assume_photo_id: ph-lesson-artificial_bank-a1
+    actual_photo_id: ph-lesson-artificial_bank-a2
+    assume_caption: "Messy earth, roots and slumped soil look like damage. This is a natural bank doing its job."
+    actual_caption: "Tidy green ivy looks healthy. Under it runs a straight concrete wall. That is a built bank."
+  # Pair B. Assume shot (gold absent): natural rock along the bank. Actual shot (gold present): stones set in concrete.
+  - assume_photo_id: ph-lesson-artificial_bank-b1
+    actual_photo_id: ph-lesson-artificial_bank-b2
+    assume_caption: "Rocks in odd sizes, tumbled about, with soil and plants between them. Natural rock, not built."
+    actual_caption: "Stones all one size, in a flat face, with grey mortar in every gap. Someone set these in concrete."
+practice:
+  # Practice shot (gold present): a bank of stones set in concrete, seen from the opposite bank.
+  photo_id: ph-practice-artificial_bank
+  gold: present
+  feedback_correct: "Right. The straight line, the flat face and the concrete between the stones give it away."
+  feedback_wrong: "Look again at the bank edge. It runs straight and flat, and there is concrete between the stones. Built."

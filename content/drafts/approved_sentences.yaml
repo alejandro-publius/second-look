@@ -1,0 +1,80 @@
+# DRAFT candidate sentences for the health card. Written by W7b on 2026-09-20 from fetched sources.
+# Every sentence carries approved: false. Nothing here reaches a screen until Rachel has read the
+# OneAquaHealth Key Indicators Factsheets (DOI 10.5281/zenodo.20345207) and flipped a sentence to true.
+# Rule: plain safe practice only. No sentence states a risk for any site. City actions point at the four
+# measures OneAquaHealth's decision tool names: replant margins, fix sewers, reconnect the floodplain,
+# remove barriers. Sources are quoted in docs/notes/sources.md.
+sentences:
+  # Person
+  - id: person_rinse_hands
+    audience: person
+    text: "If you touch creek water, rinse your hands with tap water afterwards, and wash them before you eat."
+    source: "CDC, Preventing Illness from Harmful Algal Blooms: rinse off immediately after touching water; CDC, Healthy Swimming, Steps to Take: wash your hands before eating. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html and https://www.cdc.gov/healthy-swimming/prevention/index.html"
+    approved: false
+  - id: person_avoid_foam_scum
+    audience: person
+    text: "Stay out of water that smells bad, looks discoloured, or has foam, scum or mats on the surface."
+    source: "CDC, Preventing Illness from Harmful Algal Blooms: if water looks or smells bad, stay out. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html"
+    approved: false
+  - id: person_no_swallow
+    audience: person
+    text: "Do not swallow creek water, and keep it out of open cuts."
+    source: "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html"
+    approved: false
+  - id: person_avoid_pipes
+    audience: person
+    text: "Stay out of the water right below a pipe that drains into the creek."
+    source: "CDC, Healthy Swimming, Steps to Take: stay out if you see pipes. https://www.cdc.gov/healthy-swimming/prevention/index.html"
+    approved: false
+  - id: person_report_dry_pipe
+    audience: person
+    text: "If a pipe is running after three dry days, note the place and the date and tell the city. It is worth testing."
+    source: "EPA, Illicit Discharge Detection and Elimination guidance manual (2004), page 337 (72 hours dry) and page 6 (testing is needed before calling a flow polluted). https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf"
+    approved: false
+  # Pet
+  - id: pet_keep_out_foam
+    audience: pet
+    text: "Keep dogs out of water that smells bad, looks discoloured, or has foam, scum or mats, and do not let them drink it."
+    source: "CDC, Preventing Illness from Harmful Algal Blooms: keep pets and livestock away from water with signs of a bloom. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html"
+    approved: false
+  - id: pet_rinse_after
+    audience: pet
+    text: "If your dog goes in, rinse it with tap water straight away and do not let it lick its fur first."
+    source: "CDC, Preventing Illness from Harmful Algal Blooms: rinse them off immediately; do not let them lick their fur before you rinse them. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html"
+    approved: false
+  - id: pet_bring_water
+    audience: pet
+    text: "Bring drinking water for your dog so it does not need to drink from the creek."
+    source: "CDC, Preventing Illness from Harmful Algal Blooms: keep pets away from water with signs of a bloom. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html"
+    approved: false
+  - id: pet_call_vet
+    audience: pet
+    text: "If your dog seems sick after being in or near the water, call a vet right away."
+    source: "CDC, Preventing Illness from Harmful Algal Blooms: if your pets seem sick after going in or near water, call a veterinarian right away. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html"
+    approved: false
+  # City
+  - id: city_replant_margins
+    audience: city
+    text: "Replant both margins with native trees and shrubs, and stop cutting them back."
+    source: "OneAquaHealth Policy Brief (2026), page 9: rehabilitation of the riparian vegetation should prioritize a diverse corridor with native species, along both stream margins, free from unnecessary clearing. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf"
+    approved: false
+  - id: city_fix_sewers
+    audience: city
+    text: "Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water."
+    source: "OneAquaHealth Policy Brief (2026), page 9: improvement of sewage systems and water treatments. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf"
+    approved: false
+  - id: city_reconnect_floodplain
+    audience: city
+    text: "Give the stream room to flood: move walls, pavement and pipes back from the banks and the floodplain."
+    source: "OneAquaHealth Policy Brief (2026), page 9: creation of space for natural flooding, removal of grey infrastructure from the margins and floodplains. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf"
+    approved: false
+  - id: city_remove_barriers
+    audience: city
+    text: "Remove dams, weirs and grids that stop water, sand and animals moving along the stream."
+    source: "OneAquaHealth Policy Brief (2026), page 9: removal of barriers to the longitudinal connectivity (dams, weirs, grids). https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf"
+    approved: false
+  - id: city_remove_concrete
+    audience: city
+    text: "Take the concrete out of the channel and banks and rebuild them with natural materials."
+    source: "OneAquaHealth Policy Brief (2026), page 9: removal of artificial materials (e.g. concrete); renaturalization of channels and margins with natural materials. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf"
+    approved: false

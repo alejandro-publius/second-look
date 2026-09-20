@@ -1,0 +1,31 @@
+# DRAFT lesson for dug_out_channel. Written by W7b on 2026-09-20 from fetched sources (docs/notes/sources.md).
+# Rachel owns the wording. approved stays false until she flips it. Nothing here reaches a screen before that.
+# Photo ids are the gray placeholders. Each comment names the shot the caption expects, from the shot list.
+# Limits: rule_of_thumb 12 words or fewer, every caption and feedback 25 words or fewer. No health claims.
+# Cue source: River Habitat Survey manual 2003 (2022 reprint), spot-check key page 14, "Channel modification
+# indicators. One or more of the following may be indicative of resectioning: uniform bank profile;
+# straightened planform; bankfull width/bankfull height ratio <4:1; uniform/low energy flow-types; no
+# trees/uniformly-aged trees along bank; intensive/urban land-use." Section E adds that recent re-profiling
+# "will produce a relatively smooth, uniformly angled, bank slope". The official app has no such question;
+# this feature supports the overall rating, whose worst option says "highly modified".
+feature: dug_out_channel
+approved: false
+rule_of_thumb: "Straight, even banks, same width, flat water: someone dug this channel."
+source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
+contrast_pairs:
+  # Pair A. Assume shot (gold absent): bends, bars, a fallen log, changing width. Actual shot (gold present): a straight reach with even sloped banks.
+  - assume_photo_id: ph-lesson-dug_out_channel-a1
+    actual_photo_id: ph-lesson-dug_out_channel-a2
+    assume_caption: "Bends, gravel bars, a fallen log and changing width look untidy. This is how a stream shapes itself."
+    actual_caption: "Straight course, banks sloped at one even angle, the same width all along. A machine cut this."
+  # Pair B. Assume shot (gold absent): trees of many ages over riffles and pools. Actual shot (gold present): flat slow water in a trench, no trees or trees all one age.
+  - assume_photo_id: ph-lesson-dug_out_channel-b1
+    actual_photo_id: ph-lesson-dug_out_channel-b2
+    assume_caption: "Old trees and young ones lean over riffles and pools. Water runs fast here, slow there. Left alone."
+    actual_caption: "Flat, slow water in a trench. No trees, or a row of trees all the same age. Dug out."
+practice:
+  # Practice shot (gold present): a straight reach, both banks at the same even slope, flat water, from the bank top.
+  photo_id: ph-practice-dug_out_channel
+  gold: present
+  feedback_correct: "Right. Even sloped banks, one width all along and flat slow water are the signs of a dug-out channel."
+  feedback_wrong: "Check the banks: sloped at one even angle. Check the width: the same all along. Check the water: flat. Dug out."

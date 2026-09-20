@@ -1,0 +1,33 @@
+# DRAFT lesson for pipe_running. Written by W7b on 2026-09-20 from fetched sources (docs/notes/sources.md).
+# Rachel owns the wording. approved stays false until she flips it. Nothing here reaches a screen before that.
+# Photo ids are the gray placeholders. Each comment names the shot the caption expects, from the shot list.
+# Limits: rule_of_thumb 12 words or fewer, every caption and feedback 25 words or fewer. No health claims.
+# The lesson teaches one rule: a pipe still running after three dry days is worth a second look.
+# Source: EPA and Center for Watershed Protection, "Illicit Discharge Detection and Elimination: A Guidance
+# Manual" (2004). Page 337: "the traditional definition of dry weather has been 72 hours without rainfall".
+# Page 6: "Not all dry weather storm drain flow contains pollutants or pathogens ... Flow in these drains may
+# be derived from springs, groundwater seepage, or leaks from water distribution pipes. Consequently, field
+# testing and/or water quality sampling are needed". So the wording is always "worth testing", never a verdict.
+# A photo cannot show that it has not rained. Rachel shoots the present cases after three dry days and
+# writes the date and the weather next to the photo id. The caption supplies the dry-weather fact.
+feature: pipe_running
+approved: false
+rule_of_thumb: "A pipe still running after three dry days is worth testing."
+source: "https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf"
+contrast_pairs:
+  # Pair A. Assume shot (gold absent): a dry pipe with no stain below it. Actual shot (gold present): a pipe running in dry weather with staining below the outlet.
+  - assume_photo_id: ph-lesson-pipe_running-a1
+    actual_photo_id: ph-lesson-pipe_running-a2
+    assume_caption: "A pipe in the bank, dry inside, no stain below it. In dry weather it carries nothing. Nothing to report."
+    actual_caption: "It has not rained for days, yet this pipe runs. A dark stain below the outlet. Worth testing."
+  # Pair B. Assume shot (gold absent): a natural seep, clear water out of the soil, no pipe. Actual shot (gold present): grey cloudy water pouring from a pipe on a dry day.
+  - assume_photo_id: ph-lesson-pipe_running-b1
+    actual_photo_id: ph-lesson-pipe_running-b2
+    assume_caption: "Clear water trickles out of the soil between roots. No pipe, no stain. A natural seep, not a drain."
+    actual_caption: "Grey, cloudy water pouring from a pipe on a dry day, with a smell. Do not decide what it is. Worth testing."
+practice:
+  # Practice shot (gold present): a pipe running on a dry day with a stained rock or wall below the outlet.
+  photo_id: ph-practice-pipe_running
+  gold: present
+  feedback_correct: "Right. Dry weather, a pipe still running, and a stain below the outlet. Say worth testing, not what it is."
+  feedback_wrong: "Look at the outlet. Water is coming out although it has not rained for days, and the rock below is stained. Worth testing."
