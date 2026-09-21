@@ -403,8 +403,157 @@ def act_vectors(
         )
 
     found_mixed = act.findings_from_visits(mixed, finding_key_for)
+
+    # The downstream note (Update 10C): every reach below a finding gets one plain line.
+    def reach(slug: str, flows_into: str | None) -> regions.Reach:
+        return regions.Reach(
+            slug=slug, name=slug.capitalize(), creek_slug="c", flows_into=flows_into
+        )
+
+    joined = regions.Creek(
+        slug="c",
+        name="Creek",
+        reaches=(reach("top", "middle"), reach("middle", "bottom"), reach("bottom", None)),
+    )
+    apart = regions.Creek(
+        slug="c",
+        name="Creek",
+        reaches=(reach("top", None), reach("middle", None), reach("bottom", None)),
+    )
+    elsewhere = regions.Reach(slug="x", name="X", creek_slug="elsewhere", flows_into=None)
+    bay = regions.creeks_from_regions(load_content(ROOT, strict=True).regions)
+    strawberry = regions.creek_by_slug("strawberry-creek", bay)
+    assert strawberry is not None
+    labels = {"pipe_running": "pipes and sewage signs", "artificial_bank": "built banks"}
+    one_person = act.findings_from_visits([visit("v20", "alicetoken23456", day=5)], finding_key_for)
+    two_people = act.findings_from_visits(
+        [visit("v21", "alicetoken23456", day=22), visit("v22", "bobtoken23456789", day=23)],
+        finding_key_for,
+    )
+    assert len(one_person) == 1 and len(two_people) == 1
+
+    def creek_doc(c: regions.Creek) -> dict[str, Any]:
+        return {
+            "slug": c.slug,
+            "name": c.name,
+            "source": c.source,
+            "reaches": [
+                {
+                    "slug": r.slug,
+                    "name": r.name,
+                    "flows_into": r.flows_into,
+                    "bbox": list(r.bbox) if r.bbox else None,
+                }
+                for r in c.reaches
+            ],
+        }
+
+    def notes(
+        name: str,
+        findings: list[act.Finding],
+        reach_of: dict[str, regions.Reach | None],
+        creek: regions.Creek,
+        note_labels: dict[str, str],
+    ) -> dict[str, Any]:
+        return case(
+            name,
+            {
+                "findings": dump(findings),
+                "reach_of": {k: (r.slug if r is not None else None) for k, r in reach_of.items()},
+                "creek": creek_doc(creek),
+                "labels": note_labels,
+            },
+            act.notes_below(findings, reach_of, creek, note_labels),
+        )
+
+    notes_cases = [
+        notes(
+            "top of a joined creek: middle and bottom get the line",
+            two_people,
+            {SPOT.spot_id: joined.reach("top")},
+            joined,
+            labels,
+        ),
+        notes(
+            "no flows_into anywhere: no line",
+            two_people,
+            {SPOT.spot_id: apart.reach("top")},
+            apart,
+            labels,
+        ),
+        notes(
+            "the bottom reach has nothing below it",
+            two_people,
+            {SPOT.spot_id: joined.reach("bottom")},
+            joined,
+            labels,
+        ),
+        notes(
+            "an unknown reach, a coarse pin: no line",
+            two_people,
+            {SPOT.spot_id: None},
+            joined,
+            labels,
+        ),
+        notes("a spot the map does not know: no line", two_people, {}, joined, labels),
+        notes(
+            "no label: the finding key with spaces",
+            one_person,
+            {SPOT.spot_id: joined.reach("top")},
+            joined,
+            {},
+        ),
+        notes(
+            "strawberry creek, the south fork through the campus",
+            found_mixed,
+            {SPOT.spot_id: strawberry.reach("south-fork-campus"), COARSE_SPOT.spot_id: None},
+            strawberry,
+            labels,
+        ),
+    ]
+    # The reach of another creek is not this creek's business; Reach carries its creek slug.
+    notes_cases.append(
+        case(
+            "a reach of another creek: no line",
+            {
+                "findings": dump(two_people),
+                "reach_of": {SPOT.spot_id: elsewhere.slug},
+                "creek": creek_doc(joined),
+                "labels": labels,
+                "foreign_reach": dump(elsewhere),
+            },
+            act.notes_below(two_people, {SPOT.spot_id: elsewhere}, joined, labels),
+        )
+    )
+    line_cases = [
+        case(
+            "one person, a single digit day",
+            {
+                "finding": dump(one_person[0]),
+                "feature_name": "a pipe running",
+                "reaches_below": ["middle", "bottom"],
+            },
+            act.downstream_note(one_person[0], "a pipe running", ["middle", "bottom"]),
+        ),
+        case(
+            "two people",
+            {
+                "finding": dump(two_people[0]),
+                "feature_name": "pipes and sewage signs",
+                "reaches_below": ["west-culvert"],
+            },
+            act.downstream_note(two_people[0], "pipes and sewage signs", ["west-culvert"]),
+        ),
+        case(
+            "no reach below: an empty map",
+            {"finding": dump(two_people[0]), "feature_name": "built banks", "reaches_below": []},
+            act.downstream_note(two_people[0], "built banks", []),
+        ),
+    ]
     return {
         "function": "core.act",
+        "notes_below": notes_cases,
+        "downstream_note": line_cases,
         "nearest_spot": [
             nearest("a few metres away", 37.8731, -122.2604),
             nearest("a kilometre away", 37.8719, -122.27),
@@ -441,7 +590,8 @@ def act_vectors(
             )
         ],
         "findings_from_visits": [
-            findings("one person twice and another once", visits_two, None),
+            findings("one person twice and another once", visits_two, finding_key_for),
+            findings("without the form mapping a pipe item is not a finding key", visits_two, None),
             findings("form item keys map to features, coarse spot apart", mixed, finding_key_for),
             findings(
                 "absent and cant tell are not findings",

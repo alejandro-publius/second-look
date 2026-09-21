@@ -195,7 +195,11 @@ def push(
     sleep: Callable[[float], None] = time.sleep,
     out: Callable[[str], None] = print,
     only: Sequence[Path] = (),
+    provenances: list[str] | None = None,
 ) -> int:
+    """Mirror every visit Bundle. When `provenances` is a list, every Provenance this run created
+    or found already there is appended to it as "Provenance/<id>", so the Library entry can list
+    exactly what is on the server after this run (Update 10C answer 3)."""
     base = check_base(base)
     txs = transactions(store, only)
     if not txs:
@@ -226,6 +230,8 @@ def push(
                     created += 1
                 else:
                     matched += 1
+                if rtype == "Provenance" and provenances is not None:
+                    provenances.append(f"Provenance/{rid}")
                 rows.append(
                     {
                         "ts_utc": _now(),
@@ -260,6 +266,19 @@ def created_provenances(base: str) -> list[str]:
     return out
 
 
+def library_on_server(base: str) -> str | None:
+    """The id of our Library on this server according to the ledger, or None."""
+    found: str | None = None
+    for r in read_ledger():
+        if r.get("resourceType") != "Library" or r.get("base", base) != base:
+            continue
+        if r.get("action") in {"create", "exists", "update"}:
+            found = str(r["id"])
+        elif r.get("action") == "delete" and str(r.get("id")) == found:
+            found = None
+    return found
+
+
 def register_library(
     base: str,
     *,
@@ -267,31 +286,51 @@ def register_library(
     sleep: Callable[[float], None] = time.sleep,
     out: Callable[[str], None] = print,
     evidence: Path | None = None,
+    refs: Sequence[str] | None = None,
 ) -> int:
-    """Register (or find) our Library entry with a conditional create, read it back, and write
-    the evidence. The Library lists every Provenance the ledger says we created here."""
+    """Register our Library entry, or update the one that is there, read it back, and write the
+    evidence. `refs` are the Provenances the push just put on the server; without them the
+    ledger's created and not deleted ones are used. The first time it is a conditional create.
+    Every later time it is a conditional update on our own identifier, which can only match our
+    own resource, so the count and the list follow each push (Update 10C answer 3)."""
     base = check_base(base)
     day = today or datetime.now(UTC).date()
-    refs = created_provenances(base)
-    library = library_entry(today=day, n_records=len(refs), provenance_refs=refs)
+    listed = list(refs) if refs is not None else created_provenances(base)
+    library = library_entry(today=day, n_records=len(listed), provenance_refs=listed)
     problems = check_library(library)
     if problems:
         raise RepushError("library: " + "; ".join(problems))
     collection = {"resourceType": "Bundle", "type": "collection", "entry": [{"resource": library}]}
     tx = to_transaction(collection, tag_system=repo_url(), tag_code=TAG_CODE)
+    tagged = dict(tx["entry"][0]["resource"])
+    ident = library["identifier"][0]
+    existing = library_on_server(base)
     with _client() as client:
-        response = client.post(base, content=json.dumps(tx))
-        if response.status_code != 200:
-            out(f"library: sandbox answered {response.status_code}, nothing recorded")
-            out(response.text[:400])
-            return 1
-        entry = (response.json().get("entry") or [{}])[0].get("response", {})
-        parsed = _parse_location(str(entry.get("location", "")))
-        if parsed is None:
-            out("library: the sandbox gave no location back, nothing recorded")
-            return 1
-        rtype, rid = parsed
-        action = "create" if str(entry.get("status", "")).startswith("201") else "exists"
+        if existing is not None:
+            # A conditional update by our identifier: PUT Library?identifier=system|value.
+            url = f"{base}/Library?identifier={ident['system']}|{ident['value']}"
+            response = client.put(url, content=json.dumps(tagged))
+            if response.status_code not in {200, 201}:
+                out(f"library: sandbox answered {response.status_code} to the update")
+                out(response.text[:400])
+                return 1
+            body = response.json() if response.content else {}
+            rid = str(body.get("id") or existing)
+            rtype = "Library"
+            action = "update"
+        else:
+            response = client.post(base, content=json.dumps(tx))
+            if response.status_code != 200:
+                out(f"library: sandbox answered {response.status_code}, nothing recorded")
+                out(response.text[:400])
+                return 1
+            entry = (response.json().get("entry") or [{}])[0].get("response", {})
+            parsed = _parse_location(str(entry.get("location", "")))
+            if parsed is None:
+                out("library: the sandbox gave no location back, nothing recorded")
+                return 1
+            rtype, rid = parsed
+            action = "create" if str(entry.get("status", "")).startswith("201") else "exists"
         append_ledger(
             [
                 {
@@ -306,8 +345,10 @@ def register_library(
         )
         sleep(MIN_INTERVAL_SECONDS)
         back = client.get(f"{base}/{rtype}/{rid}")
-    out(f"library: {action} {rtype}/{rid}, read back {back.status_code}")
-    _audit({"base": base, "library": f"{rtype}/{rid}", "action": action, "provenances": len(refs)})
+    out(f"library: {action} {rtype}/{rid}, read back {back.status_code}, {len(listed)} records")
+    _audit(
+        {"base": base, "library": f"{rtype}/{rid}", "action": action, "provenances": len(listed)}
+    )
     if evidence is not None:
         _write_evidence(evidence, base=base, ref=f"{rtype}/{rid}", action=action, back=back)
     return 0 if back.status_code == 200 else 1
@@ -419,13 +460,15 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         if args.delete_ledger_id:
             return delete_ledger_id(args.delete_ledger_id, args.base_url)
+        seen: list[str] | None = None
         if only or not args.library:
-            code = push(store, args.base_url, only=only)
+            seen = []
+            code = push(store, args.base_url, only=only, provenances=seen)
             if code != 0:
                 return code
         if args.library:
             evidence = Path(args.evidence) if args.evidence else None
-            return register_library(args.base_url, evidence=evidence)
+            return register_library(args.base_url, evidence=evidence, refs=seen)
         return 0
     except RepushError as exc:
         print(f"repush: {exc}", file=sys.stderr)

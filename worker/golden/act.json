@@ -1,5 +1,319 @@
 {
+  "downstream_note": [
+    {
+      "expected": {
+        "bottom": "Upstream of here, one person reported a pipe running on Sep 5.",
+        "middle": "Upstream of here, one person reported a pipe running on Sep 5."
+      },
+      "input": {
+        "feature_name": "a pipe running",
+        "finding": {
+          "feature": "pipe_running",
+          "first_seen": "2026-09-05",
+          "last_seen": "2026-09-05",
+          "observers": [
+            "alicetoken23456"
+          ],
+          "passed_observers": [
+            "alicetoken23456"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v20"
+          ]
+        },
+        "reaches_below": [
+          "middle",
+          "bottom"
+        ]
+      },
+      "name": "one person, a single digit day"
+    },
+    {
+      "expected": {
+        "west-culvert": "Upstream of here, 2 people reported pipes and sewage signs on Sep 23."
+      },
+      "input": {
+        "feature_name": "pipes and sewage signs",
+        "finding": {
+          "feature": "pipe_running",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-23",
+          "observers": [
+            "alicetoken23456",
+            "bobtoken23456789"
+          ],
+          "passed_observers": [
+            "alicetoken23456",
+            "bobtoken23456789"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v21",
+            "v22"
+          ]
+        },
+        "reaches_below": [
+          "west-culvert"
+        ]
+      },
+      "name": "two people"
+    },
+    {
+      "expected": {},
+      "input": {
+        "feature_name": "built banks",
+        "finding": {
+          "feature": "pipe_running",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-23",
+          "observers": [
+            "alicetoken23456",
+            "bobtoken23456789"
+          ],
+          "passed_observers": [
+            "alicetoken23456",
+            "bobtoken23456789"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v21",
+            "v22"
+          ]
+        },
+        "reaches_below": []
+      },
+      "name": "no reach below: an empty map"
+    }
+  ],
   "findings_from_visits": [
+    {
+      "expected": [
+        {
+          "feature": "pipe_running",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-23",
+          "observers": [
+            "alicetoken23456",
+            "bobtoken23456789"
+          ],
+          "passed_observers": [
+            "alicetoken23456",
+            "bobtoken23456789"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v1",
+            "v2",
+            "v3"
+          ]
+        }
+      ],
+      "input": {
+        "finding_key_for": {
+          "bank_type": "artificial_bank",
+          "draining_pipes": "pipe_running",
+          "invasive_species": "invasive_plant",
+          "invasive_which": "invasive_plant",
+          "sewage_discharge": "pipe_running"
+        },
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v1"
+          },
+          {
+            "answered_at": "2026-09-23T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 6,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v2"
+          },
+          {
+            "answered_at": "2026-09-23T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 9,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "bobtoken23456789",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v3"
+          }
+        ]
+      },
+      "name": "one person twice and another once"
+    },
     {
       "expected": [],
       "input": {
@@ -199,7 +513,7 @@
           }
         ]
       },
-      "name": "one person twice and another once"
+      "name": "without the form mapping a pipe item is not a finding key"
     },
     {
       "expected": [
@@ -1066,6 +1380,772 @@
         ]
       },
       "name": "nothing approved"
+    }
+  ],
+  "notes_below": [
+    {
+      "expected": [
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "Top",
+          "from_reach_slug": "top",
+          "line": "Upstream of here, 2 people reported pipes and sewage signs on Sep 23.",
+          "observers": 2,
+          "reach_name": "Middle",
+          "reach_slug": "middle",
+          "visit_ids": [
+            "v21",
+            "v22"
+          ]
+        },
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "Top",
+          "from_reach_slug": "top",
+          "line": "Upstream of here, 2 people reported pipes and sewage signs on Sep 23.",
+          "observers": 2,
+          "reach_name": "Bottom",
+          "reach_slug": "bottom",
+          "visit_ids": [
+            "v21",
+            "v22"
+          ]
+        }
+      ],
+      "input": {
+        "creek": {
+          "name": "Creek",
+          "reaches": [
+            {
+              "bbox": null,
+              "flows_into": "middle",
+              "name": "Top",
+              "slug": "top"
+            },
+            {
+              "bbox": null,
+              "flows_into": "bottom",
+              "name": "Middle",
+              "slug": "middle"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Bottom",
+              "slug": "bottom"
+            }
+          ],
+          "slug": "c",
+          "source": ""
+        },
+        "findings": [
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-23",
+            "observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "passed_observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v21",
+              "v22"
+            ]
+          }
+        ],
+        "labels": {
+          "artificial_bank": "built banks",
+          "pipe_running": "pipes and sewage signs"
+        },
+        "reach_of": {
+          "spot-1": "top"
+        }
+      },
+      "name": "top of a joined creek: middle and bottom get the line"
+    },
+    {
+      "expected": [],
+      "input": {
+        "creek": {
+          "name": "Creek",
+          "reaches": [
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Top",
+              "slug": "top"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Middle",
+              "slug": "middle"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Bottom",
+              "slug": "bottom"
+            }
+          ],
+          "slug": "c",
+          "source": ""
+        },
+        "findings": [
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-23",
+            "observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "passed_observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v21",
+              "v22"
+            ]
+          }
+        ],
+        "labels": {
+          "artificial_bank": "built banks",
+          "pipe_running": "pipes and sewage signs"
+        },
+        "reach_of": {
+          "spot-1": "top"
+        }
+      },
+      "name": "no flows_into anywhere: no line"
+    },
+    {
+      "expected": [],
+      "input": {
+        "creek": {
+          "name": "Creek",
+          "reaches": [
+            {
+              "bbox": null,
+              "flows_into": "middle",
+              "name": "Top",
+              "slug": "top"
+            },
+            {
+              "bbox": null,
+              "flows_into": "bottom",
+              "name": "Middle",
+              "slug": "middle"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Bottom",
+              "slug": "bottom"
+            }
+          ],
+          "slug": "c",
+          "source": ""
+        },
+        "findings": [
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-23",
+            "observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "passed_observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v21",
+              "v22"
+            ]
+          }
+        ],
+        "labels": {
+          "artificial_bank": "built banks",
+          "pipe_running": "pipes and sewage signs"
+        },
+        "reach_of": {
+          "spot-1": "bottom"
+        }
+      },
+      "name": "the bottom reach has nothing below it"
+    },
+    {
+      "expected": [],
+      "input": {
+        "creek": {
+          "name": "Creek",
+          "reaches": [
+            {
+              "bbox": null,
+              "flows_into": "middle",
+              "name": "Top",
+              "slug": "top"
+            },
+            {
+              "bbox": null,
+              "flows_into": "bottom",
+              "name": "Middle",
+              "slug": "middle"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Bottom",
+              "slug": "bottom"
+            }
+          ],
+          "slug": "c",
+          "source": ""
+        },
+        "findings": [
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-23",
+            "observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "passed_observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v21",
+              "v22"
+            ]
+          }
+        ],
+        "labels": {
+          "artificial_bank": "built banks",
+          "pipe_running": "pipes and sewage signs"
+        },
+        "reach_of": {
+          "spot-1": null
+        }
+      },
+      "name": "an unknown reach, a coarse pin: no line"
+    },
+    {
+      "expected": [],
+      "input": {
+        "creek": {
+          "name": "Creek",
+          "reaches": [
+            {
+              "bbox": null,
+              "flows_into": "middle",
+              "name": "Top",
+              "slug": "top"
+            },
+            {
+              "bbox": null,
+              "flows_into": "bottom",
+              "name": "Middle",
+              "slug": "middle"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Bottom",
+              "slug": "bottom"
+            }
+          ],
+          "slug": "c",
+          "source": ""
+        },
+        "findings": [
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-23",
+            "observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "passed_observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v21",
+              "v22"
+            ]
+          }
+        ],
+        "labels": {
+          "artificial_bank": "built banks",
+          "pipe_running": "pipes and sewage signs"
+        },
+        "reach_of": {}
+      },
+      "name": "a spot the map does not know: no line"
+    },
+    {
+      "expected": [
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "Top",
+          "from_reach_slug": "top",
+          "line": "Upstream of here, one person reported pipe running on Sep 5.",
+          "observers": 1,
+          "reach_name": "Middle",
+          "reach_slug": "middle",
+          "visit_ids": [
+            "v20"
+          ]
+        },
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "Top",
+          "from_reach_slug": "top",
+          "line": "Upstream of here, one person reported pipe running on Sep 5.",
+          "observers": 1,
+          "reach_name": "Bottom",
+          "reach_slug": "bottom",
+          "visit_ids": [
+            "v20"
+          ]
+        }
+      ],
+      "input": {
+        "creek": {
+          "name": "Creek",
+          "reaches": [
+            {
+              "bbox": null,
+              "flows_into": "middle",
+              "name": "Top",
+              "slug": "top"
+            },
+            {
+              "bbox": null,
+              "flows_into": "bottom",
+              "name": "Middle",
+              "slug": "middle"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Bottom",
+              "slug": "bottom"
+            }
+          ],
+          "slug": "c",
+          "source": ""
+        },
+        "findings": [
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-05",
+            "last_seen": "2026-09-05",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v20"
+            ]
+          }
+        ],
+        "labels": {},
+        "reach_of": {
+          "spot-1": "top"
+        }
+      },
+      "name": "no label: the finding key with spaces"
+    },
+    {
+      "expected": [
+        {
+          "feature": "artificial_bank",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, 2 people reported built banks on Sep 22.",
+          "observers": 2,
+          "reach_name": "Below the forks, west campus",
+          "reach_slug": "campus-west",
+          "visit_ids": [
+            "v4",
+            "v5"
+          ]
+        },
+        {
+          "feature": "artificial_bank",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, 2 people reported built banks on Sep 22.",
+          "observers": 2,
+          "reach_name": "Downtown culvert",
+          "reach_slug": "downtown-culvert",
+          "visit_ids": [
+            "v4",
+            "v5"
+          ]
+        },
+        {
+          "feature": "artificial_bank",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, 2 people reported built banks on Sep 22.",
+          "observers": 2,
+          "reach_name": "Strawberry Creek Park",
+          "reach_slug": "strawberry-creek-park",
+          "visit_ids": [
+            "v4",
+            "v5"
+          ]
+        },
+        {
+          "feature": "artificial_bank",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, 2 people reported built banks on Sep 22.",
+          "observers": 2,
+          "reach_name": "West Berkeley culvert, to the Bay",
+          "reach_slug": "west-culvert",
+          "visit_ids": [
+            "v4",
+            "v5"
+          ]
+        },
+        {
+          "feature": "barriers",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported barriers on Sep 22.",
+          "observers": 1,
+          "reach_name": "Below the forks, west campus",
+          "reach_slug": "campus-west",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "barriers",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported barriers on Sep 22.",
+          "observers": 1,
+          "reach_name": "Downtown culvert",
+          "reach_slug": "downtown-culvert",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "barriers",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported barriers on Sep 22.",
+          "observers": 1,
+          "reach_name": "Strawberry Creek Park",
+          "reach_slug": "strawberry-creek-park",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "barriers",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported barriers on Sep 22.",
+          "observers": 1,
+          "reach_name": "West Berkeley culvert, to the Bay",
+          "reach_slug": "west-culvert",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported pipes and sewage signs on Sep 22.",
+          "observers": 1,
+          "reach_name": "Below the forks, west campus",
+          "reach_slug": "campus-west",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported pipes and sewage signs on Sep 22.",
+          "observers": 1,
+          "reach_name": "Downtown culvert",
+          "reach_slug": "downtown-culvert",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported pipes and sewage signs on Sep 22.",
+          "observers": 1,
+          "reach_name": "Strawberry Creek Park",
+          "reach_slug": "strawberry-creek-park",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "pipe_running",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported pipes and sewage signs on Sep 22.",
+          "observers": 1,
+          "reach_name": "West Berkeley culvert, to the Bay",
+          "reach_slug": "west-culvert",
+          "visit_ids": [
+            "v4"
+          ]
+        }
+      ],
+      "input": {
+        "creek": {
+          "name": "Strawberry Creek",
+          "reaches": [
+            {
+              "bbox": [
+                37.869,
+                -122.253,
+                37.878,
+                -122.235
+              ],
+              "flows_into": "south-fork-campus",
+              "name": "South Fork, Strawberry Canyon",
+              "slug": "south-fork-canyon"
+            },
+            {
+              "bbox": [
+                37.8695,
+                -122.2645,
+                37.873,
+                -122.253
+              ],
+              "flows_into": "campus-west",
+              "name": "South Fork, central campus",
+              "slug": "south-fork-campus"
+            },
+            {
+              "bbox": [
+                37.8731,
+                -122.2645,
+                37.8775,
+                -122.253
+              ],
+              "flows_into": "campus-west",
+              "name": "North Fork, campus",
+              "slug": "north-fork-campus"
+            },
+            {
+              "bbox": [
+                37.87,
+                -122.267,
+                37.8735,
+                -122.2645
+              ],
+              "flows_into": "downtown-culvert",
+              "name": "Below the forks, west campus",
+              "slug": "campus-west"
+            },
+            {
+              "bbox": [
+                37.866,
+                -122.286,
+                37.874,
+                -122.267
+              ],
+              "flows_into": "strawberry-creek-park",
+              "name": "Downtown culvert",
+              "slug": "downtown-culvert"
+            },
+            {
+              "bbox": [
+                37.8655,
+                -122.2905,
+                37.869,
+                -122.286
+              ],
+              "flows_into": "west-culvert",
+              "name": "Strawberry Creek Park",
+              "slug": "strawberry-creek-park"
+            },
+            {
+              "bbox": [
+                37.86,
+                -122.32,
+                37.872,
+                -122.2905
+              ],
+              "flows_into": null,
+              "name": "West Berkeley culvert, to the Bay",
+              "slug": "west-culvert"
+            }
+          ],
+          "slug": "strawberry-creek",
+          "source": "Hand filled 2026-09-21 from public maps of the UC Berkeley campus and the City of Berkeley. Boxes are approximate."
+        },
+        "findings": [
+          {
+            "feature": "artificial_bank",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "davetoken234567"
+            ],
+            "passed_observers": [],
+            "spot_id": "codornices-lower-2",
+            "visit_ids": [
+              "v6"
+            ]
+          },
+          {
+            "feature": "artificial_bank",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456",
+              "caroltoken2345"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4",
+              "v5"
+            ]
+          },
+          {
+            "feature": "barriers",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          },
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          }
+        ],
+        "labels": {
+          "artificial_bank": "built banks",
+          "pipe_running": "pipes and sewage signs"
+        },
+        "reach_of": {
+          "codornices-lower-2": null,
+          "spot-1": "south-fork-campus"
+        }
+      },
+      "name": "strawberry creek, the south fork through the campus"
+    },
+    {
+      "expected": [],
+      "input": {
+        "creek": {
+          "name": "Creek",
+          "reaches": [
+            {
+              "bbox": null,
+              "flows_into": "middle",
+              "name": "Top",
+              "slug": "top"
+            },
+            {
+              "bbox": null,
+              "flows_into": "bottom",
+              "name": "Middle",
+              "slug": "middle"
+            },
+            {
+              "bbox": null,
+              "flows_into": null,
+              "name": "Bottom",
+              "slug": "bottom"
+            }
+          ],
+          "slug": "c",
+          "source": ""
+        },
+        "findings": [
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-23",
+            "observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "passed_observers": [
+              "alicetoken23456",
+              "bobtoken23456789"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v21",
+              "v22"
+            ]
+          }
+        ],
+        "foreign_reach": {
+          "bbox": null,
+          "creek_slug": "elsewhere",
+          "flows_into": null,
+          "name": "X",
+          "slug": "x"
+        },
+        "labels": {
+          "artificial_bank": "built banks",
+          "pipe_running": "pipes and sewage signs"
+        },
+        "reach_of": {
+          "spot-1": "x"
+        }
+      },
+      "name": "a reach of another creek: no line"
     }
   ],
   "pipes_worth_testing": [

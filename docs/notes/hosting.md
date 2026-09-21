@@ -103,10 +103,39 @@ and `two.ts` port `apps/api/check.py`, `city.py` and `fhir_routes.py`; the pure 
 30 day expiry. `make worker-e2e` runs the whole thing under `wrangler dev` with a local D1 and
 KV, rain from a stub, and drives every route: 9 sections, green on 2026-09-21.
 
-To deploy it from `main` at merge time: `cd worker && npx wrangler d1 execute second-look
---remote --file schema.sql` (the new tables are `CREATE TABLE IF NOT EXISTS`), then
-`npx wrangler deploy`. Until then the depth preview's `/api/*` reaches the production Worker,
-which answers the study routes and 404s the rest.
+Until the merge, the depth preview's `/api/*` reaches the production Worker, which answers
+the study routes and 404s the rest.
+
+## The merge, after data lock (Update 10C answer 2)
+
+The merge waits until after data lock on 2026-09-28T01:00:00Z. Production stays exactly as it is
+while strangers take the test: nothing about the study's network path changes mid study. At the
+merge, both halves go in one session, in this order, and not the other way round:
+
+1. Apply the new D1 tables. They are additive only, every one is `CREATE TABLE IF NOT EXISTS`:
+   `cd worker && npx wrangler d1 execute second-look --remote --file schema.sql`.
+2. Deploy the Worker: `cd worker && npx wrangler deploy`. The study routes are unchanged in it.
+3. Run the study contract tests and the phone end to end tests against production:
+   `uv run pytest -q apps/api/tests/test_study.py` for the contract, and
+   `SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-check.mjs` on the phone
+   viewport with the QA key, so the check lands in no study data.
+4. Only then ship the Pages file that puts the API behind the same origin: deploy `main` with
+   `apps/web/wrangler.jsonc`, `functions/` and `public/_routes.json`, the export built with
+   `NEXT_PUBLIC_API_ORIGIN=""`.
+5. Run the phone tests again against production, and check with curl that `/health` and
+   `/api/test/counts` answer through the Pages origin, `/api/share/13` is still an SVG, and the
+   policy reads `connect-src 'self'`.
+
+## The sandbox mirror after launch (Update 10C answer 3)
+
+Real creek visits are mirrored once, as one tagged batch after data lock, not as they arrive:
+fewer writes on a server everyone shares, and one clean ledger. Two minute test sessions are
+never mirrored, because they are not creek observations; the repush script mirrors visit
+Bundles only and refuses anything else by shape. The repush runs again just before the video is
+recorded, again on Sep 30 and again on Oct 1, because anyone can delete records there. Each run
+updates the Library entry's count and its list of Provenances to what that run put on the
+server: `SANDBOX_MIRROR_ENABLED=true uv run python scripts/repush_sandbox.py --library
+--evidence docs/notes/sandbox_library.md`.
 
 ## What is not done
 

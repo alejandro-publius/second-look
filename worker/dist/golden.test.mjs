@@ -1209,6 +1209,37 @@ function looksLikeATestName(name) {
   if (words.some((w) => TEST_NAME_WORDS.has(w))) return true;
   return !/\p{L}/u.test(name);
 }
+function downstreamNote(finding, featureName, reachSlugs) {
+  const n = finding.observers.length;
+  const people = n === 1 ? "one person" : `${n} people`;
+  const line = `Upstream of here, ${people} reported ${featureName} on ${shortDate(finding.last_seen)}.`;
+  return Object.fromEntries(reachSlugs.map((slug) => [slug, line]));
+}
+function notesBelow(findings, reachOfSpot, creek, labels) {
+  const out = [];
+  for (const f of findings) {
+    const reach = reachOfSpot[f.spot_id];
+    if (!reach) continue;
+    if (!creek.reaches.some((r) => r.slug === reach.slug)) continue;
+    const below = reachesBelow(reach, creek);
+    if (below.length === 0) continue;
+    const label = labels[f.feature] ?? f.feature.replace(/_/g, " ");
+    const lines = downstreamNote(f, label, below.map((r) => r.slug));
+    for (const r of below) {
+      out.push({
+        reach_slug: r.slug,
+        reach_name: r.name,
+        from_reach_slug: reach.slug,
+        from_reach_name: reach.name,
+        feature: f.feature,
+        line: lines[r.slug],
+        observers: f.observers.length,
+        visit_ids: f.visit_ids
+      });
+    }
+  }
+  return out;
+}
 
 // src/core/pyround.ts
 function pyRound(x, digits) {
@@ -2143,6 +2174,21 @@ test("act: findings, needs, pipes worth testing, and both pin guards", () => {
       assert.equal(found.spot.spot_id, c.expected.spot_id, c.name);
       assert.ok(Math.abs(found.metres - c.expected.metres) < 2e-3, `${c.name}: ${found.metres} vs ${c.expected.metres}`);
     }
+  }
+});
+test("act: the downstream note, only where flows_into is set", () => {
+  const doc = golden("act");
+  for (const c of doc.downstream_note) same(downstreamNote(c.input.finding, c.input.feature_name, c.input.reaches_below), c.expected, c.name);
+  for (const c of doc.notes_below) {
+    const creek = c.input.creek;
+    const foreign = c.input.foreign_reach ?? null;
+    const reachOfSpot = Object.fromEntries(
+      Object.entries(c.input.reach_of).map(([spotId, slug]) => [
+        spotId,
+        slug === null ? null : foreign && foreign.slug === slug ? foreign : reachOf(creek, slug)
+      ])
+    );
+    same(notesBelow(c.input.findings, reachOfSpot, creek, c.input.labels), c.expected, c.name);
   }
 });
 test("regions: placement on a creek and a reach, and the reaches below", () => {

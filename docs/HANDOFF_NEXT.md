@@ -22,6 +22,14 @@ Two branches, two jobs.
 ## What is done on `depth`
 
 - `docs/DEPTH_MAP.md`: every feature, read out of the repo. 45 built, 3 parked, 6 missing.
+- **Update 10C.** Draft pull request #1, "Depth: do not merge before data lock", exists so CI
+  runs on every push to `depth`; it stays a draft. The merge order after data lock is written in
+  `docs/notes/hosting.md` (Worker first, phone tests, then the Pages file, phone tests again).
+  The sandbox mirror schedule is there too: one tagged batch after data lock, again before the
+  video, on Sep 30 and on Oct 1, never a test session. `scripts/repush_sandbox.py --library`
+  now updates the Library entry that exists by a conditional update on our own identifier, and
+  its count and list are what that run put on the server. The downstream note is pinned by
+  golden vectors like every other port: 111 cases, 9 TypeScript suites.
 - `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
   guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
 - `GET /api/city/{creek_id}` and `/city?creek=`: the analyst's view. No number without its
@@ -98,11 +106,13 @@ Two branches, two jobs.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Nothing from Update 10B is left. Tiers 1 and 2 and answers A1, A2 and A3 are done on this
-   branch. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
-2. At merge time: append the two pending audit lines (`docs/notes/sandbox_library.md`), apply
-   `worker/schema.sql` to the remote D1 and deploy the Worker (`docs/notes/hosting.md`), and
-   deploy `main` with `apps/web/wrangler.jsonc` so production gets the same origin API. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+1. Nothing from Update 10B or 10C is left. Tiers 1 and 2 and answers A1, A2 and A3 are done on
+   this branch; the pull request stays a draft. Tier 3 waits for its own session after data lock
+   on Sep 27; tier 4 waits for the freeze.
+2. At merge time, after data lock, in the order in `docs/notes/hosting.md`: the D1 tables and
+   the Worker, the study contract and phone tests against production, then the Pages file, then
+   the phone tests again. Also append the two pending audit lines from
+   `docs/notes/sandbox_library.md`, and run the first real mirror as one tagged batch. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
 
@@ -133,6 +143,8 @@ Two branches, two jobs.
   `uv run python scripts/build_worker_content.py` and `uv run python evals/golden_vectors.py`.
 - Python's `round()` rounds an exact tie to even; `toFixed` rounds it up. `pyround.ts` matches
   Python, and a coordinate stored by the Worker must go through it or the two records differ.
+- CI runs on pushes to `main` and on pull requests. Pull request #1 is what makes it run for
+  `depth`; closing it would stop that.
 - The local Workers runtime lags the edge: `wrangler dev` refuses the production compatibility
   date, so the e2e passes `--compatibility-date 2026-08-18` (or `E2E_COMPAT_DATE`). Production
   keeps its date in `worker/wrangler.jsonc`.

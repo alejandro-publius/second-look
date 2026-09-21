@@ -327,7 +327,7 @@ def test_register_library_lists_the_ledgers_provenances_and_saves_the_evidence(
         and rows[-1]["id"] == "900"
     )
     assert rows[-1]["bundle"] == "library:second-look-citizen-creek-checks"
-    assert lines[-1] == "library: create Library/900, read back 200"
+    assert lines[-1] == "library: create Library/900, read back 200, 1 records"
     text = evidence.read_text()
     assert "Library: `Library/900` (create)" in text
     assert "docs/screens/sandbox-library.png" in text
@@ -380,3 +380,78 @@ def test_main_mirrors_one_bundle_then_registers_the_library(
 def test_library_alone_refuses_without_the_flag(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("SANDBOX_MIRROR_ENABLED", raising=False)
     assert rs.main(["--library"]) == 2
+
+
+@respx.mock
+def test_a_second_library_run_updates_the_entry_on_our_own_identifier(
+    ledger: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Update 10C answer 3: the count follows each push. The first run created Library/900; the
+    second run finds it in the ledger and does a conditional update by our identifier, which can
+    only ever match our own resource. No search deletes anything."""
+    monkeypatch.setenv("SANDBOX_MIRROR_ENABLED", "true")
+    with ledger.open("a") as f:
+        row = {
+            "ts_utc": "t",
+            "action": "create",
+            "resourceType": "Library",
+            "id": "900",
+            "base": BASE,
+        }
+        f.write(json.dumps(row) + "\n")
+    assert rs.library_on_server(BASE) == "900"
+    put = respx.put(f"{BASE}/Library").mock(
+        return_value=httpx.Response(200, json={"resourceType": "Library", "id": "900"})
+    )
+    respx.get(f"{BASE}/Library/900").mock(
+        return_value=httpx.Response(200, json={"resourceType": "Library"})
+    )
+    lines: list[str] = []
+    from datetime import date
+
+    code = rs.register_library(
+        BASE,
+        today=date(2026, 9, 28),
+        sleep=lambda _s: None,
+        out=lines.append,
+        refs=["Provenance/480", "Provenance/481"],
+    )
+    assert code == 0
+    request = put.calls.last.request
+    assert request.url.params["identifier"] == (
+        "https://github.com/alejandro-publius/second-look/fhir/library-id|second-look-citizen-creek-checks"
+    )
+    sent = json.loads(request.content)
+    assert sent["extension"][1]["valueInteger"] == 2, "the count is what this run put there"
+    assert [c["url"] for c in sent["content"]][-2:] == ["Provenance/480", "Provenance/481"]
+    tag = {"system": "https://github.com/alejandro-publius/second-look", "code": "second-look"}
+    assert tag in sent["meta"]["tag"]
+    rows = [json.loads(line) for line in ledger.read_text().splitlines()]
+    assert rows[-1]["action"] == "update" and rows[-1]["id"] == "900"
+    assert lines[-1] == "library: update Library/900, read back 200, 2 records"
+    # A Library we deleted is not updated; a fresh one would be created.
+    with ledger.open("a") as f:
+        row = {
+            "ts_utc": "t",
+            "action": "delete",
+            "resourceType": "Library",
+            "id": "900",
+            "base": BASE,
+        }
+        f.write(json.dumps(row) + "\n")
+    assert rs.library_on_server(BASE) is None
+
+
+@respx.mock
+def test_push_hands_its_provenances_to_the_library(
+    ledger: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("SANDBOX_MIRROR_ENABLED", "true")
+    tx = rs.transactions(tmp_path, [GOLDEN])[0][1]
+    respx.post(BASE).mock(return_value=httpx.Response(200, json=transaction_response(tx, "200 OK")))
+    seen: list[str] = []
+    code = rs.push(
+        tmp_path, BASE, sleep=lambda _s: None, out=lambda _l: None, only=[GOLDEN], provenances=seen
+    )
+    assert code == 0
+    assert len(seen) == 1 and seen[0].startswith("Provenance/"), "one Provenance per visit"

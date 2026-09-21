@@ -9,7 +9,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import CONTENT from "../src/content.json";
-import { findingsFromVisits, looksLikeATestName, metresBetween, nearestSpot, needsFromFindings, pipesWorthTesting } from "../src/core/act";
+import { downstreamNote, findingsFromVisits, looksLikeATestName, metresBetween, nearestSpot, needsFromFindings, notesBelow, pipesWorthTesting } from "../src/core/act";
 import { checkBundle, emitVisit, fhirId } from "../src/core/fhir_emit";
 import { exampleLabResult, isExample, referralBundle } from "../src/core/fhir_referral";
 import { selectFollowups } from "../src/core/followups";
@@ -82,6 +82,23 @@ test("act: findings, needs, pipes worth testing, and both pin guards", () => {
       assert.equal(found!.spot.spot_id, c.expected.spot_id, c.name);
       assert.ok(Math.abs(found!.metres - c.expected.metres) < 0.002, `${c.name}: ${found!.metres} vs ${c.expected.metres}`);
     }
+  }
+});
+
+test("act: the downstream note, only where flows_into is set", () => {
+  const doc = golden("act");
+  for (const c of doc.downstream_note) same(downstreamNote(c.input.finding, c.input.feature_name, c.input.reaches_below), c.expected, c.name);
+  for (const c of doc.notes_below) {
+    const creek = c.input.creek;
+    // A reach of another creek, when the case names one, or the creek's own reach by slug.
+    const foreign = c.input.foreign_reach ?? null;
+    const reachOfSpot = Object.fromEntries(
+      Object.entries(c.input.reach_of as Record<string, string | null>).map(([spotId, slug]) => [
+        spotId,
+        slug === null ? null : foreign && foreign.slug === slug ? foreign : reachOf(creek, slug),
+      ]),
+    );
+    same(notesBelow(c.input.findings, reachOfSpot, creek, c.input.labels), c.expected, c.name);
   }
 });
 
