@@ -1,0 +1,490 @@
+{
+  "entry": [
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+      "resource": {
+        "active": true,
+        "id": "sl-org",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+            "value": "second-look"
+          }
+        ],
+        "name": "Second Look project",
+        "resourceType": "Organization",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+          "status": "generated"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-strawberry-creek",
+      "resource": {
+        "id": "sl-loc-strawberry-creek",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+            "value": "strawberry-creek"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+          ]
+        },
+        "mode": "instance",
+        "name": "Strawberry Creek",
+        "resourceType": "Location",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Strawberry Creek. A creek used in Second Look creek checks.</p></div>",
+          "status": "generated"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "code": "420531007",
+                "display": "River",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-campus-reach",
+      "resource": {
+        "id": "sl-loc-campus-reach",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+            "value": "campus-reach"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+          ]
+        },
+        "mode": "instance",
+        "name": "Strawberry Creek, campus reach",
+        "partOf": {
+          "reference": "Location/sl-loc-strawberry-creek"
+        },
+        "resourceType": "Location",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Strawberry Creek, campus reach. A reach used in Second Look creek checks.</p></div>",
+          "status": "generated"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "code": "420531007",
+                "display": "River",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-spot-1",
+      "resource": {
+        "id": "sl-loc-spot-1",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+            "value": "spot-1"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+          ]
+        },
+        "mode": "instance",
+        "name": "Strawberry Creek, campus reach, spot 1",
+        "partOf": {
+          "reference": "Location/sl-loc-campus-reach"
+        },
+        "position": {
+          "latitude": 37.8719,
+          "longitude": -122.2585
+        },
+        "resourceType": "Location",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Strawberry Creek, campus reach, spot 1. A spot used in Second Look creek checks.</p></div>",
+          "status": "generated"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "code": "420531007",
+                "display": "River",
+                "system": "http://snomed.info/sct"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-771e0423b610",
+      "resource": {
+        "active": true,
+        "id": "sl-practitioner-771e0423b610",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+            "value": "sl-practitioner-771e0423b610"
+          }
+        ],
+        "qualification": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "code": "second-look-test",
+                  "display": "Second Look observer test",
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              ]
+            },
+            "issuer": {
+              "reference": "Organization/sl-org"
+            },
+            "period": {
+              "end": "2026-12-22",
+              "start": "2026-09-23"
+            }
+          }
+        ],
+        "resourceType": "Practitioner",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token. Took the Second Look test on 2026-09-23. The score counts until 2026-12-22.</p></div>",
+          "status": "generated"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-776feedf7f16",
+      "resource": {
+        "active": true,
+        "id": "sl-practitioner-776feedf7f16",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+            "value": "sl-practitioner-776feedf7f16"
+          }
+        ],
+        "qualification": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "code": "second-look-test",
+                  "display": "Second Look observer test",
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              ]
+            },
+            "issuer": {
+              "reference": "Organization/sl-org"
+            },
+            "period": {
+              "end": "2026-12-22",
+              "start": "2026-09-23"
+            }
+          }
+        ],
+        "resourceType": "Practitioner",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token. Took the Second Look test on 2026-09-23. The score counts until 2026-12-22.</p></div>",
+          "status": "generated"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-visit-0002",
+      "resource": {
+        "author": {
+          "reference": "Practitioner/sl-practitioner-771e0423b610"
+        },
+        "authored": "2026-09-22T12:00:00Z",
+        "id": "sl-qr-visit-visit-0002",
+        "identifier": {
+          "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+          "value": "visit-0002"
+        },
+        "item": [
+          {
+            "answer": [
+              {
+                "valueCoding": {
+                  "code": "slow",
+                  "display": "Slow flow",
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              }
+            ],
+            "linkId": "water_flow"
+          },
+          {
+            "answer": [
+              {
+                "valueCoding": {
+                  "code": "present",
+                  "display": "Present",
+                  "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                }
+              }
+            ],
+            "linkId": "draining_pipes"
+          }
+        ],
+        "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+        "resourceType": "QuestionnaireResponse",
+        "status": "completed",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 2 items answered.</p></div>",
+          "status": "generated"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-visit-0003",
+      "resource": {
+        "author": {
+          "reference": "Practitioner/sl-practitioner-776feedf7f16"
+        },
+        "authored": "2026-09-23T12:00:00Z",
+        "id": "sl-qr-visit-visit-0003",
+        "identifier": {
+          "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+          "value": "visit-0003"
+        },
+        "item": [
+          {
+            "answer": [
+              {
+                "valueCoding": {
+                  "code": "slow",
+                  "display": "Slow flow",
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              }
+            ],
+            "linkId": "water_flow"
+          },
+          {
+            "answer": [
+              {
+                "valueCoding": {
+                  "code": "present",
+                  "display": "Present",
+                  "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                }
+              }
+            ],
+            "linkId": "draining_pipes"
+          }
+        ],
+        "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+        "resourceType": "QuestionnaireResponse",
+        "status": "completed",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 2 items answered.</p></div>",
+          "status": "generated"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0002-draining-pipes",
+      "resource": {
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "hydrology",
+                "display": "Hydrology of the stream",
+                "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "code": "pipe-running",
+              "display": "Pipe running",
+              "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ],
+          "text": "Are there pipes draining polluted water into the stream?"
+        },
+        "derivedFrom": [
+          {
+            "reference": "QuestionnaireResponse/sl-qr-visit-visit-0002"
+          }
+        ],
+        "effectiveDateTime": "2026-09-22T12:00:00Z",
+        "id": "sl-obs-visit-0002-draining-pipes",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+            "value": "visit-0002-draining_pipes"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        "performer": [
+          {
+            "reference": "Practitioner/sl-practitioner-771e0423b610"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Location/sl-loc-spot-1"
+        },
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Are there pipes draining polluted water into the stream? at Strawberry Creek, campus reach, spot 1: present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "status": "generated"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "code": "present",
+              "display": "Present",
+              "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0003-draining-pipes",
+      "resource": {
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "hydrology",
+                "display": "Hydrology of the stream",
+                "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "code": "pipe-running",
+              "display": "Pipe running",
+              "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ],
+          "text": "Are there pipes draining polluted water into the stream?"
+        },
+        "derivedFrom": [
+          {
+            "reference": "QuestionnaireResponse/sl-qr-visit-visit-0003"
+          }
+        ],
+        "effectiveDateTime": "2026-09-23T12:00:00Z",
+        "id": "sl-obs-visit-0003-draining-pipes",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+            "value": "visit-0003-draining_pipes"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        "performer": [
+          {
+            "reference": "Practitioner/sl-practitioner-776feedf7f16"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Location/sl-loc-spot-1"
+        },
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Are there pipes draining polluted water into the stream? at Strawberry Creek, campus reach, spot 1: present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "status": "generated"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "code": "present",
+              "display": "Present",
+              "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/ServiceRequest/sl-referral-spot-1",
+      "resource": {
+        "authoredOn": "2026-09-25T09:00:00Z",
+        "code": {
+          "coding": [
+            {
+              "code": "test-pipe-outflow",
+              "display": "Test the water coming out of this pipe",
+              "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ]
+        },
+        "id": "sl-referral-spot-1",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/referral",
+            "value": "spot-1"
+          }
+        ],
+        "intent": "proposal",
+        "priority": "routine",
+        "reasonReference": [
+          {
+            "reference": "Observation/sl-obs-visit-0002-draining-pipes"
+          },
+          {
+            "reference": "Observation/sl-obs-visit-0003-draining-pipes"
+          }
+        ],
+        "requester": {
+          "reference": "Organization/sl-org"
+        },
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "subject": {
+          "reference": "Location/sl-loc-spot-1"
+        },
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Referral to test the water coming out of the pipe at Strawberry Creek, campus reach, spot 1. Reported running after dry weather by 2 people who both passed the pipe feature, last on 2026-09-23.</p></div>",
+          "status": "generated"
+        }
+      }
+    }
+  ],
+  "id": "sl-referral-bundle-spot-1",
+  "resourceType": "Bundle",
+  "timestamp": "2026-09-25T09:00:00Z",
+  "type": "collection"
+}

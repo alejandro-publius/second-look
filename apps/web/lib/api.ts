@@ -214,6 +214,28 @@ export interface CityPipe {
   last_seen: string;
   visit_ids: string[];
   fhir: string[];
+  /** The ServiceRequest for this pipe, real and computed from the visits above. */
+  referral: string;
+  /** How a laboratory result would come back to the same record. An example, tagged as one. */
+  example_result: string;
+}
+
+/** The little of FHIR the example panel needs to draw a table. */
+export interface FhirBundle {
+  resourceType: "Bundle";
+  meta?: { tag?: { system?: string; code?: string; display?: string }[] };
+  entry?: { resource: FhirResource }[];
+}
+
+export interface FhirResource {
+  resourceType: string;
+  id?: string;
+  meta?: { tag?: { system?: string; code?: string; display?: string }[] };
+  code?: { coding?: { code?: string; display?: string }[]; text?: string };
+  valueQuantity?: { value?: number; unit?: string; code?: string };
+  valueCodeableConcept?: { coding?: { code?: string; display?: string }[] };
+  specimen?: { reference?: string };
+  [k: string]: unknown;
 }
 
 export interface CityOut {
@@ -338,6 +360,13 @@ export const api = {
   },
   city(creek_id: string) {
     return request<CityOut>("GET", `/api/city/${encodeURIComponent(creek_id)}`);
+  },
+  /** A path the city view handed us, such as a pipe's referral or its example result. */
+  fhirAt(path: string) {
+    return request<FhirBundle>("GET", path);
+  },
+  fhirUrl(path: string) {
+    return `${API_ORIGIN}${path}`;
   },
   two() {
     return request<TwoOut>("GET", "/api/two");

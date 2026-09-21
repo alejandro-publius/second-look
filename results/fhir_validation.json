@@ -1,5 +1,5 @@
 {
-  "ran_at_utc": "2026-09-21T06:14:37+00:00",
+  "ran_at_utc": "2026-09-21T06:38:55+00:00",
   "validator_version": "6.10.4",
   "ig_commit": "b907cf0",
   "fhir_version": "4.0.1",
@@ -7,16 +7,28 @@
   "terminology_server": "n/a",
   "files": [
     "fhir/build/ig/fsh-generated/resources/Bundle-sl-visit-1-bundle.json",
+    "fhir/golden/example-lab-result-strawberry-creek-1.json",
+    "fhir/golden/referral-strawberry-creek-1.json",
     "fhir/golden/visit-strawberry-creek-1.json",
     "fhir/golden/visit-strawberry-creek-1.transaction.json"
   ],
   "errors": 0,
-  "warnings": 17,
+  "warnings": 20,
   "by_file": {
     "Bundle-sl-visit-1-bundle.json": {
       "error": 0,
       "warning": 15,
       "information": 7
+    },
+    "example-lab-result-strawberry-creek-1.json": {
+      "error": 0,
+      "warning": 3,
+      "information": 9
+    },
+    "referral-strawberry-creek-1.json": {
+      "error": 0,
+      "warning": 0,
+      "information": 5
     },
     "visit-strawberry-creek-1.json": {
       "error": 0,
@@ -119,6 +131,24 @@
       "severity": "warning",
       "location": "Bundle.entry[13].resource/*Provenance/sl-provenance-visit-1*/",
       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      "file": "example-lab-result-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[13].resource/*Specimen/sl-example-specimen-spot-1*/.collection.quantity",
+      "text": "Unable to validate code 'mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+    },
+    {
+      "file": "example-lab-result-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[14].resource/*Observation/sl-example-obs-spot-1-lab-enterobacteriaceae-share*/.value.ofType(Quantity)",
+      "text": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+    },
+    {
+      "file": "example-lab-result-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[16].resource/*Observation/sl-example-obs-spot-1-lab-ecoli-cfu*/.value.ofType(Quantity)",
+      "text": "Unable to validate code '[CFU]/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
     },
     {
       "file": "visit-strawberry-creek-1.json",

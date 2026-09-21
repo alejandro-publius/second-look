@@ -5,8 +5,103 @@ import { FocusHeading } from "./FocusHeading";
 import { Icon } from "./ui/Icon";
 import { Row } from "./ui/Row";
 import { Skeleton } from "./ui/Skeleton";
-import { api, type CityOut } from "@/lib/api";
+import { api, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
 import { t } from "@/lib/t";
+
+/** The laboratory Observations of an example result: the ones that point at a Specimen. */
+function panelOf(entries: { resource: FhirResource }[] | undefined): FhirResource[] {
+  return (entries ?? []).map((e) => e.resource).filter((r) => r.resourceType === "Observation" && r.specimen !== undefined);
+}
+
+function measureOf(r: FhirResource): string {
+  return r.code?.coding?.[0]?.display ?? r.code?.text ?? r.id ?? "";
+}
+
+function valueOf(r: FhirResource): string {
+  if (r.valueQuantity) return `${r.valueQuantity.value ?? ""} ${r.valueQuantity.unit ?? r.valueQuantity.code ?? ""}`.trim();
+  const coding = r.valueCodeableConcept?.coding?.[0];
+  return coding?.display ?? coding?.code ?? "";
+}
+
+/**
+ * One pipe worth testing. The referral link is real. The example result is fetched only when
+ * asked for, wears the word Example in a badge and in a notice, and is never a number on this page.
+ */
+function PipeRow({ pipe, people }: { pipe: CityPipe; people: (n: number) => string }) {
+  const [example, setExample] = useState<FhirResource[] | null>(null);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function toggle() {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    setOpen(true);
+    if (example === null) {
+      try {
+        const bundle = await api.fhirAt(pipe.example_result);
+        setExample(panelOf(bundle.entry));
+      } catch {
+        setError(t("error.network"));
+      }
+    }
+  }
+
+  return (
+    <div className="stack">
+      <Row
+        label={pipe.spot_name}
+        value={`${people(pipe.observers)}, ${t("city.dry_days", { days: Math.max(...pipe.dry_days) })}`}
+        end={
+          <a href={pipe.fhir[0]} rel="noreferrer">
+            {t("city.evidence")}
+          </a>
+        }
+      />
+      <div className="btn-row">
+        <a className="btn btn-secondary" href={pipe.referral} rel="noreferrer">
+          {t("city.referral_link")}
+        </a>
+        <button type="button" className="btn btn-secondary" aria-expanded={open} onClick={() => void toggle()}>
+          {open ? t("city.example_hide") : t("city.example_show")}
+        </button>
+      </div>
+      {open ? (
+        <section className="stack" aria-label={t("city.example_badge")}>
+          <span className="badge badge-warn">{t("city.example_badge")}</span>
+          <div className="notice notice-warn">
+            <Icon name="info" />
+            <p>{t("city.example_note")}</p>
+          </div>
+          {error ? <p className="notice notice-bad">{error}</p> : null}
+          {example === null && !error ? <p className="muted">{t("city.example_loading")}</p> : null}
+          {example !== null ? (
+            <table className="tabular">
+              <thead>
+                <tr>
+                  <th scope="col">{t("city.example_measure")}</th>
+                  <th scope="col">{t("city.example_value")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {example.map((r) => (
+                  <tr key={r.id}>
+                    <td>{measureOf(r)}</td>
+                    <td>{valueOf(r)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+          <a href={pipe.example_result} rel="noreferrer">
+            {t("city.example_fhir")}
+          </a>
+        </section>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * What a city analyst sees. Two lists decided by code, and never a number without the records
@@ -78,14 +173,9 @@ export function CityView({ creekId }: { creekId: string }) {
       {view.pipes_worth_testing.length === 0 ? (
         <p className="muted">{t("city.pipes_none")}</p>
       ) : (
-        <div className="card">
+        <div className="card stack">
           {view.pipes_worth_testing.map((p) => (
-            <Row
-              key={p.spot_id}
-              label={p.spot_name}
-              value={`${people(p.observers)}, ${t("city.dry_days", { days: Math.max(...p.dry_days) })}`}
-              end={evidence(p.fhir)}
-            />
+            <PipeRow key={p.spot_id} pipe={p} people={people} />
           ))}
         </div>
       )}

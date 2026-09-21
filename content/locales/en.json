@@ -332,5 +332,14 @@
   "city.flagged_note": "These are kept out of every number above. Nothing is deleted.",
   "city.none": "Nobody has checked this creek yet.",
   "city.dry_days": "after {days} dry days",
-  "nav.city": "For a city"
+  "nav.city": "For a city",
+  "city.referral_link": "Referral as FHIR",
+  "city.example_show": "Show how a result would come back",
+  "city.example_hide": "Hide the example result",
+  "city.example_badge": "Example",
+  "city.example_note": "This is an example, not a real result. The numbers are made up to show the shape of a laboratory result coming back to the same record. No sample has been taken and nothing here is counted anywhere.",
+  "city.example_measure": "Measure",
+  "city.example_value": "Value",
+  "city.example_fhir": "Example as FHIR",
+  "city.example_loading": "Loading the example"
 }

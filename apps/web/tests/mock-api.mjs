@@ -56,10 +56,70 @@ export const exampleCity = {
       last_seen: "2026-09-23",
       visit_ids: ["v1", "v2"],
       fhir: ["/api/fhir/Bundle/v1", "/api/fhir/Bundle/v2"],
+      referral: "/api/fhir/referral/example",
+      example_result: "/api/fhir/referral/example/example-result",
     },
   ],
   flagged_spots: [{ spot_id: "t1", spot_name: "test spot", why: "the name reads like a test" }],
   measures_waiting_for_approval: true,
+};
+
+const SL = "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look";
+const exampleTag = { system: SL, code: "example", display: "Example, not a real result" };
+
+// The referral is real: a ServiceRequest whose reasons are the two pipe Observations.
+export const exampleReferral = {
+  resourceType: "Bundle",
+  id: "sl-referral-bundle-example",
+  type: "collection",
+  entry: [
+    { resource: { resourceType: "Location", id: "sl-loc-example", name: "Footbridge below the library" } },
+    {
+      resource: {
+        resourceType: "ServiceRequest",
+        id: "sl-referral-example",
+        status: "active",
+        intent: "proposal",
+        code: { coding: [{ system: SL, code: "test-pipe-outflow", display: "Test the water coming out of this pipe" }] },
+        subject: { reference: "Location/sl-loc-example" },
+        reasonReference: [{ reference: "Observation/o1" }, { reference: "Observation/o2" }],
+      },
+    },
+  ],
+};
+
+// How a result would come back: a Specimen and a small panel, every one tagged as an example.
+export const exampleLabResult = {
+  resourceType: "Bundle",
+  id: "sl-example-result-example",
+  meta: { tag: [exampleTag] },
+  type: "collection",
+  entry: [
+    ...exampleReferral.entry,
+    { resource: { resourceType: "Specimen", id: "sl-example-specimen-example", meta: { tag: [exampleTag] }, subject: { reference: "Location/sl-loc-example" } } },
+    {
+      resource: {
+        resourceType: "Observation",
+        id: "sl-example-obs-1",
+        meta: { tag: [exampleTag] },
+        status: "final",
+        code: { coding: [{ system: SL, code: "lab-enterobacteriaceae-share", display: "Enterobacteriaceae, share of 16S reads" }] },
+        specimen: { reference: "Specimen/sl-example-specimen-example" },
+        valueQuantity: { value: 1.8, unit: "percent", code: "%" },
+      },
+    },
+    {
+      resource: {
+        resourceType: "Observation",
+        id: "sl-example-obs-2",
+        meta: { tag: [exampleTag] },
+        status: "final",
+        code: { coding: [{ system: SL, code: "lab-hf183", display: "Human faecal marker HF183" }] },
+        specimen: { reference: "Specimen/sl-example-specimen-example" },
+        valueCodeableConcept: { coding: [{ code: "absent", display: "Absent" }] },
+      },
+    },
+  ],
 };
 
 export const exampleSpot = {
@@ -220,6 +280,9 @@ export async function mockApi(page, options = {}) {
       if (id !== "example") return json({ detail: "not found" }, 404);
       return json(exampleSpot);
     }
+    if (path === "/api/fhir/referral/example/example-result") return json(exampleLabResult);
+    if (path === "/api/fhir/referral/example") return json(exampleReferral);
+    if (path.startsWith("/api/fhir/referral/")) return json({ detail: "No referral: this pipe is not on the list." }, 404);
     if (path.startsWith("/api/city/")) {
       const creek = decodeURIComponent(path.slice("/api/city/".length));
       if (creek !== "example") return json({ detail: "not found" }, 404);

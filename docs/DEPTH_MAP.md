@@ -42,8 +42,8 @@ scale 15.
 | The gate: model output becomes a Flag or is rejected | built | `core/gate.py` | `core/tests/test_gate.py` | Innovation, Technical | digital health |
 | Rainfall lookup for the dry pipe rule | built | `core/rainfall.py` | `core/tests/test_rainfall.py` | Innovation | ecologist |
 | A model may only ask where it passed | built | `core/checker.py` | `core/tests/test_checker.py` | Innovation | digital health |
-| Duplicate pin guard, 30 metres | **missing** | none | none | Technical | data tools |
-| Test pin guard, names that look like tests | **missing** | none | none | Technical | data tools |
+| Duplicate pin guard, 30 metres | built | `core/act.py`, `apps/api/check.py` | `core/tests/test_act.py`, `apps/api/tests/test_city.py` | Technical | data tools |
+| Test pin guard, names that look like tests | built | `core/act.py`, `apps/api/city.py` | `core/tests/test_act.py`, `apps/api/tests/test_city.py` | Technical | data tools |
 
 ## RECORD
 
@@ -65,11 +65,11 @@ scale 15.
 | Health card for the person and the pet | built | `core/healthcard.py` | `core/tests/test_healthcard.py` | Impact | digital health |
 | The record: a spot's timeline with scores beside answers | built | `apps/web/components/SpotRecord.tsx` | `apps/web/tests/record.spec.ts` | Impact | ecologist |
 | Two observer screen, ours beside a laboratory result | built | `apps/web/components/TwoObservers.tsx` | `apps/web/tests/record.spec.ts` | Impact | standards |
-| `/city`: what this creek needs, pipes worth testing | **missing** | none | none | **Impact (30)** | ecologist, digital health |
-| Measures from the decision tool, approved sentences only | **missing** | none | none | Impact | ecologist |
-| ServiceRequest referral for a pipe worth testing | **missing** | none | none | Impact | standards, digital health |
-| A laboratory result returning to the same record | **missing** | none | none | Impact | digital health |
-| Downstream note on reaches below a finding | **missing** | none | none | Innovation | ecologist |
+| `/city`: what this creek needs, pipes worth testing | built | `core/act.py`, `apps/api/city.py` | `core/tests/test_act.py`, `apps/api/tests/test_city.py` | **Impact (30)** | ecologist, digital health |
+| Measures from the decision tool, approved sentences only | built, empty until a sentence is approved | `core/act.py` | `core/tests/test_act.py` | Impact | ecologist |
+| ServiceRequest referral for a pipe worth testing | built | `core/fhir_referral.py` | `core/tests/test_fhir_referral.py`, `apps/api/tests/test_city.py` | Impact | standards, digital health |
+| A laboratory result returning to the same record | built, as a tagged example | `core/fhir_referral.py` | `core/tests/test_fhir_referral.py` | Impact | digital health |
+| Downstream note on reaches below a finding | parked (pure function, nothing calls it) | `core/act.py` | `core/tests/test_act.py` | Innovation | ecologist |
 | MCP server over our records, read only, local | **missing** | none | none | Innovation | agents |
 | `make new-city`, the follower city recipe | **missing** | none | none | **Feasibility (15)** | outreach |
 
@@ -80,7 +80,7 @@ scale 15.
 | Live site and API on Cloudflare, no card | built | `worker/src/index.ts` | `docs/notes/hosting.md` | Feasibility | data tools |
 | API on a second origin, so CORS is needed | parked (Update 10 A1 moves it) | `worker/wrangler.jsonc` | none | Technical | data tools |
 | Launch gate and judges gate, split | built | `scripts/preflight.py` | `scripts/tests/test_preflight.py` | Feasibility | data tools |
-| Daily backup, schedule on, secrets missing | parked (Update 10 A2 makes it manual) | `.github/workflows/backup.yml` | `scripts/tests/test_preflight.py` | Feasibility | data tools |
+| Daily backup, manual runs only until the secrets exist | parked (Update 10 A2) | `.github/workflows/backup.yml` | `scripts/tests/test_preflight.py` | Feasibility | data tools |
 | Pre registered analysis plan, refuses before lock | built, not tagged | `evals/usability_analysis.py` | `evals/tests/` | Technical | data tools |
 | Design tokens, one accent, the staff gauge | built | `apps/web/styles/tokens.css` | `apps/web/scripts/design-check.mjs` | UX | outreach |
 | Photo credits, build fails without an author | built | `apps/web/app/credits/page.tsx` | `apps/web/tests/landing.spec.ts` | Technical | standards |
@@ -94,10 +94,11 @@ scale 15.
 
 | Status | Count |
 |---|---|
-| built | 33 |
+| built | 39 |
 | parked | 5 |
-| missing | 17 |
+| missing | 9 |
 
-The missing rows cluster in one place: **ACT**. Everything up to a validated record exists and is
-tested. What a city does with the record, and what an agent can fetch, is the gap, and it is the
-heaviest rubric line. That is what Update 10 tier 1 and tier 2 fill.
+Counted again on 2026-09-21 after Update 10 tier 1 items 1 to 3. The remaining missing rows are
+the agents and integration line (the MCP server, the Library entry, `make new-city`) and the
+documentation and gates of tier 3 and tier 4. What a city does with the record now exists; what an
+agent can fetch does not yet.

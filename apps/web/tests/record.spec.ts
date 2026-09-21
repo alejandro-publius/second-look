@@ -101,6 +101,21 @@ test("/city shows two lists decided by code, and no number without its records",
   // A pin that reads like a test is listed and kept out of the numbers.
   await expect(page.getByText("test spot")).toBeVisible();
   await expect(page.getByText("Nothing is deleted.")).toBeVisible();
+
+  // The referral is one tap away, and the example result says what it is before it says anything else.
+  await expect(page.getByRole("link", { name: "Referral as FHIR" })).toHaveAttribute("href", "/api/fhir/referral/example");
+  await expect(page.getByText("Example", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Show how a result would come back" }).click();
+  await expect(page.getByText("Example", { exact: true })).toBeVisible();
+  await expect(page.getByText("This is an example, not a real result.")).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Enterobacteriaceae, share of 16S reads" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "1.8 percent" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Absent" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Example as FHIR" })).toHaveAttribute("href", "/api/fhir/referral/example/example-result");
+  // The page's own numbers did not move: the example is counted by nothing.
+  await expect(page.getByText("5 visits at 2 spots")).toBeVisible();
+  await page.getByRole("button", { name: "Hide the example result" }).click();
+  await expect(page.getByText("Example", { exact: true })).toHaveCount(0);
 });
 
 test("/city with no creek says so rather than showing an empty page", async ({ page }) => {

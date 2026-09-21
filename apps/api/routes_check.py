@@ -37,6 +37,20 @@ def city(creek_id: str, db: DB, now: Now) -> dict[str, Any]:
     return city_mod.city_view(db, creek_id, today=now.date())
 
 
+@router.get("/fhir/referral/{spot_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])
+def referral(spot_id: str, db: DB, now: Now) -> dict[str, Any]:
+    """A ServiceRequest for a pipe on the worth testing list. 404 with the reason otherwise."""
+    return city_mod.referral_view(db, spot_id, now=now)
+
+
+@router.get(
+    "/fhir/referral/{spot_id}/example-result", dependencies=[Depends(rate_limited(READ_LIMIT))]
+)
+def example_result(spot_id: str, db: DB, now: Now) -> dict[str, Any]:
+    """How a laboratory result would return to that record. An example, tagged as one."""
+    return city_mod.example_result_view(db, spot_id, now=now)
+
+
 @router.post("/quick/{spot_id}", dependencies=[Depends(rate_limited(STUDY_LIMIT))])
 def quick(spot_id: str, body: check.QuickBody, db: DB, now: Now) -> dict[str, Any]:
     return check.quick_check(db, spot_id, body, now=now)

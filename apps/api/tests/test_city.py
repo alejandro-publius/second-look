@@ -7,6 +7,7 @@ that every number comes back with the visit ids behind it.
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 
 from apps.api import core_calls
@@ -190,3 +191,95 @@ def test_a_coarse_pin_is_never_offered_a_neighbour(client, monkeypatch):
         json={"spot": coarse, "answers": GOOD_ANSWERS, "first_rating": "good", "photo_ids": []},
     ).json()
     assert draft["nearby_spot"] is None
+
+
+# The referral and the way back (Update 10 tier 1 item 2) ------------------------------------------
+
+
+def passing_session(client) -> str:
+    """A sitting that answers every item from the gold key, so every feature is 4 of 4."""
+    from apps.api import content
+    from apps.api.tests.conftest import SESSION_BODY
+
+    created = client.post("/api/test/session", json=SESSION_BODY).json()
+    sid = created["session_id"]
+    for position, item_id in enumerate(created["item_order"]):
+        answer = "yes" if content.gold_for(item_id) == "present" else "no"
+        r = client.post(
+            "/api/test/response",
+            json={
+                "session_id": sid,
+                "item_id": item_id,
+                "answer": answer,
+                "rt_ms": 900,
+                "position": position,
+            },
+        )
+        assert r.status_code == 200, r.text
+    done = client.post(
+        "/api/test/complete", json={"session_id": sid, "prior_experience": "no", "keep_score": True}
+    ).json()
+    assert all(s["correct"] == 4 for s in done["scores"]), done
+    return done["contributor_token"]
+
+
+def test_two_people_who_passed_put_a_referral_on_the_pipe_and_the_example_counts_for_nothing(
+    client, monkeypatch
+):
+    from apps.api import fhir_store
+    from core.fhir_referral import check_example_bundle, check_referral_bundle, is_example
+
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    # The store folder is shared by every test in this process, so count from here.
+    stored_before = set(fhir_store.stored_bundle_paths())
+    first = a_visit(client, token=passing_session(client), spot=NEW_SPOT, answers=GOOD_ANSWERS)
+    a_visit(
+        client,
+        token=passing_session(client),
+        spot={"spot_id": first["spot_id"]},
+        answers=GOOD_ANSWERS,
+    )
+    creek = creek_of(client, first["spot_id"])
+    before = client.get(f"/api/city/{creek}").json()
+    (pipe,) = before["pipes_worth_testing"]
+    assert pipe["observers"] == 2
+    assert pipe["referral"] == f"/api/fhir/referral/{first['spot_id']}"
+    assert pipe["example_result"] == f"/api/fhir/referral/{first['spot_id']}/example-result"
+
+    referral = client.get(pipe["referral"])
+    assert referral.status_code == 200, referral.text
+    bundle = referral.json()
+    assert check_referral_bundle(bundle) == []
+    (request,) = [
+        e["resource"] for e in bundle["entry"] if e["resource"]["resourceType"] == "ServiceRequest"
+    ]
+    assert len(request["reasonReference"]) == 2, "one Observation per person"
+    assert request["subject"]["reference"].endswith(first["spot_id"])
+    assert request["authoredOn"] == "2026-09-25T15:00:00Z", "authored when it was fetched"
+
+    example = client.get(pipe["example_result"])
+    assert example.status_code == 200, example.text
+    result = example.json()
+    assert is_example(result) and check_example_bundle(result) == []
+    assert "EXAMPLE" in json.dumps(result)
+
+    # The example is counted by nothing: the numbers are what they were, and the store holds
+    # exactly the two visits.
+    after = client.get(f"/api/city/{creek}").json()
+    assert after == before
+    new_files = set(fhir_store.stored_bundle_paths()) - stored_before
+    assert len(new_files) == 2
+    assert not any("example" in p.name or "referral" in p.name for p in new_files)
+
+
+def test_a_pipe_not_on_the_list_has_no_referral(client, monkeypatch):
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    # One person, however good, is not two.
+    made = a_visit(client, token=passing_session(client), spot=NEW_SPOT, answers=GOOD_ANSWERS)
+    r = client.get(f"/api/fhir/referral/{made['spot_id']}")
+    assert r.status_code == 404
+    assert "not on the list" in r.json()["detail"]
+    assert client.get(f"/api/fhir/referral/{made['spot_id']}/example-result").status_code == 404
+    assert client.get("/api/fhir/referral/spot-nowhere").status_code == 404
