@@ -4,7 +4,8 @@ Run: uv run python scripts/ingest_photos.py --originals ~/Downloads/rachel --lab
         --batch rachel1
 
 In: originals (JPEG, PNG, HEIC) and a CSV with columns photo_file, role, feature, gold_label,
-scene_id, capture_date, coarse_location, author, license, source_url (notes optional).
+scene_id, capture_date, coarse_location, author, license, source_url (notes and
+label_evidence optional).
 Out: photos/<batch>/ph-<batch>-<nn>.jpg, 1600 px on the long side, no EXIF, no ICC, no comments;
 rows appended to photos/manifest.csv with the sha256 computed after processing; the originals
 copied to data/originals/<batch>/ (gitignored). Originals never land under photos/.
@@ -63,6 +64,7 @@ MANIFEST_COLUMNS = [
     "synthetic",
     "faces",
     "notes",
+    "label_evidence",
 ]
 GOLD_VALUES = {"present", "absent", "ambiguous", ""}
 HEIC_SUFFIXES = {".heic", ".heif"}
@@ -259,6 +261,9 @@ def ingest(originals: Path, labels: Path, batch: str, root: Path = ROOT) -> list
                     "synthetic": "false",
                     "faces": "false",
                     "notes": row.get("notes", ""),
+                    # Where the source itself supports the label (Update 09 section 1). Optional
+                    # in the labels CSV, because a photo from our own creek trip has no source.
+                    "label_evidence": row.get("label_evidence", ""),
                 }
             )
         # Every conversion worked. Now, and only now, write.

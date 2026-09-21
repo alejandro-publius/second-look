@@ -44,7 +44,7 @@ The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`
 - `content/lessons/<feature>.yaml`: `feature`, `approved`, `rule_of_thumb`, `source`, `contrast_pairs[] {assume_photo_id, actual_photo_id, assume_caption, actual_caption}`, `practice {photo_id, gold, feedback_correct, feedback_wrong}`.
 - `content/regions/<region>.yaml`: `region`, `name`, `approved`, `invasive_plants[] {common_name, latin_name, source}`.
 - `content/locales/en.json`: flat `key: string` with `{placeholders}`. All UI strings come from here.
-- `photos/manifest.csv`: columns `id, file, sha256, source_url, author, license, capture_date, coarse_location, scene_id, role, feature, gold_label, labeller_2, synthetic, faces, notes`. License `placeholder` marks a gray block.
+- `photos/manifest.csv`: columns `id, file, sha256, source_url, author, license, capture_date, coarse_location, scene_id, role, feature, gold_label, labeller_2, synthetic, faces, notes, label_evidence`. License `placeholder` marks a gray block. `label_evidence` says where the source itself supports the label: a research grade identification, a caption, a category name. A photo with a `source_url` needs one, and an invasive plant row needs the Cal-IPC profile link in it (Update 09 section 1).
 
 ## W1 API contract (W4 builds against this)
 

@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / "photos" / "manifest.csv"
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 REQUIRED_COLUMNS = [
     "id",
@@ -27,7 +26,9 @@ REQUIRED_COLUMNS = [
     "synthetic",
     "faces",
     "notes",
+    "label_evidence",
 ]
+CAL_IPC = "cal-ipc.org"
 LICENSE_ALLOWLIST = {
     "CC0-1.0",
     "CC-BY-4.0",
@@ -46,12 +47,13 @@ def sha256_of(path: Path) -> str:
     return h.hexdigest()
 
 
-def main() -> int:
+def main(root: Path = ROOT) -> int:
     problems: list[str] = []
-    if not MANIFEST.exists():
-        print(f"manifest-check: {MANIFEST.relative_to(ROOT)} missing")
+    manifest = root / "photos" / "manifest.csv"
+    if not manifest.exists():
+        print("manifest-check: photos/manifest.csv missing")
         return 1
-    with MANIFEST.open(newline="", encoding="utf-8") as f:
+    with manifest.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         columns = reader.fieldnames or []
         rows = list(reader)
@@ -59,9 +61,9 @@ def main() -> int:
     if missing_cols:
         problems.append(f"manifest missing columns: {missing_cols}")
     by_file = {row["file"]: row for row in rows if row.get("file")}
-    images = [p for p in (ROOT / "photos").rglob("*") if p.suffix.lower() in IMAGE_SUFFIXES]
+    images = [p for p in (root / "photos").rglob("*") if p.suffix.lower() in IMAGE_SUFFIXES]
     for img in images:
-        rel = str(img.relative_to(ROOT / "photos"))
+        rel = str(img.relative_to(root / "photos"))
         row = by_file.get(rel)
         if row is None:
             problems.append(f"no manifest row: photos/{rel}")
@@ -74,8 +76,16 @@ def main() -> int:
             problems.append(f"synthetic must be false: photos/{rel}")
         if row["faces"].strip().lower() not in {"false", "0", ""}:
             problems.append(f"faces must be false: photos/{rel}")
+        evidence = row.get("label_evidence", "").strip()
+        # A photo from someone else's collection has to say where the source itself supports the
+        # label: a research grade identification, a caption, a category (Update 09 section 1).
+        if row["source_url"].strip() and row["license"] != "placeholder" and not evidence:
+            problems.append(f"label_evidence is empty on a photo from a source: photos/{rel}")
+        # For a plant, the species has to be on the Cal-IPC inventory, with the link.
+        if row["feature"] == "invasive_plant" and evidence and CAL_IPC not in evidence:
+            problems.append(f"label_evidence has no Cal-IPC link: photos/{rel}")
     for rel in by_file:
-        if not (ROOT / "photos" / rel).exists():
+        if not (root / "photos" / rel).exists():
             problems.append(f"manifest row without file: photos/{rel}")
     if problems:
         print("\n".join(problems))
