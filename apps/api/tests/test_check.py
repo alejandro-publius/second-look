@@ -242,7 +242,11 @@ def test_spot_view_shows_answers_beside_the_observer_label(client, monkeypatch):
     assert view["place"]["creek_slug"] == "strawberry-creek"
     assert view["place"]["reach_slug"] is None
     assert view["downstream_notes"] == []
-    assert view["health_card"] is None  # no approved sentence yet, so nothing is shown
+    # Update 13: one approved action each for the person, the pet and the city, with sources.
+    card = view["health_card"]
+    assert set(card) == {"person", "pet", "city", "sources"}
+    assert card["person"] and card["pet"] and card["city"] and len(card["sources"]) == 3
+    assert "Policy Brief" in card["sources"][2]
     assert len(view["visits"]) == 1
     visit = view["visits"][0]
     assert set(visit) >= {

@@ -876,7 +876,152 @@ var content_default = {
       "xxx"
     ]
   },
-  sentences: [],
+  sentences: [
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_replant_margins",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: rehabilitation of the riparian vegetation should prioritize a diverse corridor with native species, along both stream margins, free from unnecessary clearing. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Replant both margins with native trees and shrubs, and stop cutting them back."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_fix_sewers",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: improvement of sewage systems and water treatments. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_reconnect_floodplain",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: creation of space for natural flooding, removal of grey infrastructure from the margins and floodplains. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Give the stream room to flood: move walls, pavement and pipes back from the banks and the floodplain."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_remove_barriers",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: removal of barriers to the longitudinal connectivity (dams, weirs, grids). https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Remove dams, weirs and grids that stop water, sand and animals moving along the stream."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_remove_concrete",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: removal of artificial materials (e.g. concrete); renaturalization of channels and margins with natural materials. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Take the concrete out of the channel and banks and rebuild them with natural materials."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_keep_out_foam",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: keep pets and livestock away from water with signs of a bloom. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "Keep dogs out of water that smells bad, looks discoloured, or has foam, scum or mats, and do not let them drink it."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_rinse_after",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: rinse them off immediately; do not let them lick their fur before you rinse them. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "If your dog goes in, rinse it with tap water straight away and do not let it lick its fur first."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_bring_water",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: keep pets away from water with signs of a bloom. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "Bring drinking water for your dog so it does not need to drink from the creek."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_call_vet",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: if your pets seem sick after going in or near water, call a veterinarian right away. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "If your dog seems sick after being in or near the water, call a vet right away."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_avoid_foam_scum",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: if water looks or smells bad, stay out. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "Stay out of water that smells bad, looks discoloured, or has foam, scum or mats on the surface."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_rinse_hands",
+      note: "Both cited pages fetched again on 2026-09-21; the matching sentences are in source_quote.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: rinse off immediately after touching water; CDC, Healthy Swimming, Steps to Take: wash your hands before eating. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html and https://www.cdc.gov/healthy-swimming/prevention/index.html",
+      source_quote: "If you do go in or touch water that may have a harmful algal bloom, rinse off immediately after. Use tap water from a sink, shower, hose, or outdoor spigot. (CDC, Harmful Algal Blooms, Prevention.) Wash your hands for 20 seconds before eating, especially if you have been playing in or touching sand. (CDC, Healthy Swimming, Prevention.)",
+      text: "If you touch creek water, rinse your hands with tap water afterwards, and wash them before you eat."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_no_swallow",
+      note: "Cited page fetched again on 2026-09-21. The draft said keep water out of open cuts; the page says stay out if you have one, so the sentence now says what the page says.",
+      source: "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html",
+      source_quote: "Don't swallow the water. Even if water looks clean, it can still have germs in it that could make you sick. Protect open cuts or wounds. Stay out if you have an open cut or wound (particularly from a surgery or piercing).",
+      text: "Do not swallow creek water, and stay out if you have an open cut or wound."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_avoid_pipes",
+      note: "Cited page fetched again on 2026-09-21; the matching sentence is in source_quote.",
+      source: "CDC, Healthy Swimming, Steps to Take: stay out if you see pipes. https://www.cdc.gov/healthy-swimming/prevention/index.html",
+      source_quote: "Stay out if you see pipes. Pipes draining into or around the water could be putting germs or harmful chemicals into the water.",
+      text: "Stay out of the water right below a pipe that drains into the creek."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_report_dry_pipe",
+      note: "The PDF was fetched again on 2026-09-21 and both sentences found by text search; they are in source_quote.",
+      source: "EPA, Illicit Discharge Detection and Elimination guidance manual (2004), page 337 (72 hours dry) and page 6 (testing is needed before calling a flow polluted). https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf",
+      source_quote: "While the traditional definition of dry weather has been 72 hours without rainfall, some communities have shortened this window to 48 hours to make sampling more practical. (page 337) Consequently, field testing and/or water quality sampling are needed to confirm whether pollutants are actually present in dry weather flow, in order to classify them as an illicit discharge. (chapter 1, page 6, PDF page 20)",
+      text: "If a pipe is running after three dry days, note the place and the date and tell the city. It is worth testing."
+    }
+  ],
   test_items: [
     {
       feature: "artificial_bank",

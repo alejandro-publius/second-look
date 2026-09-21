@@ -17,6 +17,12 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText("Score expired.")).toBeVisible();
   await expect(page.getByText("dry_pipe")).toBeVisible();
   await expect(page.getByText("First rating: good. Final rating: moderate.")).toBeVisible();
+  // The health card: one approved action each for the person, the pet and the city, with sources.
+  await expect(page.getByRole("heading", { name: "What you can do" })).toBeVisible();
+  await expect(page.getByText("Stay out of water that smells bad, looks discoloured, or has foam, scum or mats on the surface.")).toBeVisible();
+  await expect(page.getByText("If your dog seems sick after being in or near the water, call a vet right away.")).toBeVisible();
+  await expect(page.getByText("Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water.")).toBeVisible();
+  await expect(page.getByText("Sources:")).toBeVisible();
 
   await page.getByLabel("Only people who passed this feature").check();
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
@@ -91,8 +97,10 @@ test("/city shows two lists decided by code, and no number without its records",
   await expect(page.getByRole("heading", { name: "What this creek needs", level: 1 })).toBeVisible();
   await expect(page.getByText("5 visits at 2 spots")).toBeVisible();
 
-  // No measure is approved yet, so the page says why rather than leaving a blank.
-  await expect(page.getByText("No measure is shown yet.")).toBeVisible();
+  // The approved measures, each with its source, and the one sentence that says whose they are.
+  await expect(page.getByText("Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water.")).toBeVisible();
+  await expect(page.getByText("Replant both margins with native trees and shrubs, and stop cutting them back.")).toBeVisible();
+  await expect(page.getByText("No measure is shown yet.")).toHaveCount(0);
 
   // A pipe two people who passed saw running in dry weather, with its records one tap away.
   await expect(page.getByText("Footbridge below the library").first()).toBeVisible();

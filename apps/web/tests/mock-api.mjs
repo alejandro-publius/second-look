@@ -46,7 +46,25 @@ export const exampleCity = {
       fhir: ["/api/fhir/Bundle/v1", "/api/fhir/Bundle/v2"],
     },
   ],
-  needs: [],
+  // Update 13: the approved city measures, OneAquaHealth's own, from the Policy Brief page 9.
+  needs: [
+    {
+      sentence_id: "city_fix_sewers",
+      text: "Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: improvement of sewage systems and water treatments. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      because: ["Pipes and sewage signs"],
+      visit_ids: ["v1", "v2"],
+      fhir: ["/api/fhir/Bundle/v1", "/api/fhir/Bundle/v2"],
+    },
+    {
+      sentence_id: "city_replant_margins",
+      text: "Replant both margins with native trees and shrubs, and stop cutting them back.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: rehabilitation of the riparian vegetation should prioritize a diverse corridor with native species, along both stream margins, free from unnecessary clearing. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      because: ["Built banks"],
+      visit_ids: ["v2"],
+      fhir: ["/api/fhir/Bundle/v2"],
+    },
+  ],
   pipes_worth_testing: [
     {
       spot_id: "example",
@@ -61,7 +79,7 @@ export const exampleCity = {
     },
   ],
   flagged_spots: [{ spot_id: "t1", spot_name: "test spot", why: "the name reads like a test" }],
-  measures_waiting_for_approval: true,
+  measures_waiting_for_approval: false,
   creek_slug: "strawberry-creek",
   unplaced_spots: 1,
   downstream_notes: [],
@@ -172,7 +190,16 @@ export const exampleSpot = {
       checks: [],
     },
   ],
-  health_card: null,
+  health_card: {
+    person: "Stay out of water that smells bad, looks discoloured, or has foam, scum or mats on the surface.",
+    pet: "If your dog seems sick after being in or near the water, call a vet right away.",
+    city: "Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water.",
+    sources: [
+      "CDC, Preventing Illness from Harmful Algal Blooms: if water looks or smells bad, stay out. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      "CDC, Preventing Illness from Harmful Algal Blooms: if your pets seem sick after going in or near water, call a veterinarian right away. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      "OneAquaHealth Policy Brief (2026), page 9: improvement of sewage systems and water treatments. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+    ],
+  },
   place: { creek_slug: "strawberry-creek", creek_name: "Strawberry Creek", reach_slug: "campus-west", reach_name: "Below the forks, west campus" },
   downstream_notes: [exampleNote],
 };

@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 
-from apps.api import core_calls
+from apps.api import content, core_calls
 from apps.api.tests.conftest import freeze_now, full_session
 from apps.api.tests.test_check import GOOD_ANSWERS, NEW_SPOT, _dry
 
@@ -73,14 +73,29 @@ def test_a_finding_carries_the_visits_behind_it_and_counts_people_not_visits(cli
     assert bank["feature_name"] == "Built banks"
 
 
-def test_no_measure_is_shown_while_no_sentence_is_approved(client, monkeypatch):
-    """Hard rule 5, at the endpoint. A city sees nothing rather than words nobody checked."""
+def test_what_this_creek_needs_comes_from_approved_sentences_with_their_source(client, monkeypatch):
+    """Hard rule 5, at the endpoint. Update 13 approved the city measures, so a built bank and a
+    running pipe now point at OneAquaHealth's own restoration measures, each with its source and
+    the visits behind it. Nothing unapproved can appear: every need is an approved sentence."""
     monkeypatch.setattr(core_calls, "rain_status", _dry)
     freeze_now(NOW)
     made = a_visit(client, token=None, spot=NEW_SPOT, answers=GOOD_ANSWERS)
     view = client.get(f"/api/city/{creek_of(client, made['spot_id'])}").json()
-    assert view["needs"] == []
-    assert view["measures_waiting_for_approval"] is True
+    assert view["measures_waiting_for_approval"] is False
+    ids = [n["sentence_id"] for n in view["needs"]]
+    assert (
+        "city_fix_sewers" in ids and "city_replant_margins" in ids and "city_remove_concrete" in ids
+    )
+    for need in view["needs"]:
+        assert need["text"] and "Policy Brief" in need["source"]
+        assert need["visit_ids"] == [made["visit_id"]] and need["fhir"]
+    # Only approved sentences, and only city ones, ever reach this list.
+    approved = {
+        s["id"]
+        for s in content.get_content().sentences
+        if s.get("approved") is True and s["audience"] == "city"
+    }
+    assert set(ids) <= approved
 
 
 def test_a_pipe_needs_two_people_who_both_passed(client, monkeypatch):
