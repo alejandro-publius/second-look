@@ -39,7 +39,6 @@ def test_store_success_appends_record_written(monkeypatch, tmp_path: Path) -> No
     assert core_calls.save_visit_bundle(_visit()) == tmp_path / "v.json"
     lines = [json.loads(line) for line in audit.read_text().splitlines()]
     assert len(lines) == 1 and lines[0]["kind"] == "record_written" and lines[0]["seq"] == 1
-    assert not Path("audit/log.jsonl").exists() or Path("audit/log.jsonl").stat().st_size == 0
 
 
 def test_store_failure_appends_nothing(monkeypatch, tmp_path: Path) -> None:

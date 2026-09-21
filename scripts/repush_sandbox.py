@@ -118,7 +118,9 @@ def _audit(payload: dict[str, Any]) -> None:
     except ImportError:
         return
     try:
-        append("sandbox_push", payload)
+        append(
+            "sandbox_push", payload, path=Path(os.environ.get("AUDIT_LOG_PATH", "audit/log.jsonl"))
+        )
     except Exception as exc:  # noqa: BLE001  (the audit log must never block a mirror)
         print(f"audit log not written: {exc}", file=sys.stderr)
 
