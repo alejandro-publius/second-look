@@ -144,7 +144,11 @@ Two branches, two jobs.
 - Python's `round()` rounds an exact tie to even; `toFixed` rounds it up. `pyround.ts` matches
   Python, and a coordinate stored by the Worker must go through it or the two records differ.
 - CI runs on pushes to `main` and on pull requests. Pull request #1 is what makes it run for
-  `depth`; closing it would stop that.
+  `depth`; closing it would stop that. It went green on 2026-09-21 after three CI only fixes:
+  the runner needed Playwright's Chromium for design-check, wrangler 4.135 needs Node 22 so the
+  e2e step sets it up after the Node 20 web build, and the e2e now runs wrangler's CLI script
+  directly with a watchdog, because through npx a kill left a process holding the job's output
+  and the step ran silent until the runner's limit.
 - The local Workers runtime lags the edge: `wrangler dev` refuses the production compatibility
   date, so the e2e passes `--compatibility-date 2026-08-18` (or `E2E_COMPAT_DATE`). Production
   keeps its date in `worker/wrangler.jsonc`.
