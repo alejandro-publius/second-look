@@ -62,6 +62,9 @@ def weight_for_correct(c: int, others: int = ITEMS_PER_FEATURE - 1) -> float:
 WEIGHTS = tuple(weight_for_correct(c) for c in range(ITEMS_PER_FEATURE))
 
 
+TIE_TOLERANCE = 1e-9
+
+
 def plain_vote_correct(votes: np.ndarray, gold_sign: np.ndarray) -> np.ndarray:
     """votes: (..., people, items) in {-1, 0, 1}. Returns (..., items) bools. Zero sum is wrong."""
     total = votes.sum(axis=-2)
@@ -75,6 +78,9 @@ def scored_vote_correct(
     if np.any(weights < 0):
         raise ValueError("weights must never be negative")
     total = (votes * weights).sum(axis=-2)
+    # A tie counts as a wrong answer (analysis plan item 11). Adding floats in a different order
+    # leaves a speck instead of a clean zero, which would read as a decisive vote, so snap it.
+    total = np.where(np.abs(total) < TIE_TOLERANCE, 0.0, total)
     return np.sign(total) == gold_sign
 
 

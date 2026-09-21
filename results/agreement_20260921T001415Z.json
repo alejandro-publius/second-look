@@ -1,0 +1,54 @@
+{
+  "features": {
+    "artificial_bank": {
+      "agree": 0,
+      "agreement_share": null,
+      "kappa": null,
+      "missing_gold_label": 0,
+      "missing_labeller_2": 4,
+      "n_pairs": 0,
+      "note": "no photo of artificial_bank has both labels yet"
+    },
+    "dug_out_channel": {
+      "agree": 0,
+      "agreement_share": null,
+      "kappa": null,
+      "missing_gold_label": 0,
+      "missing_labeller_2": 4,
+      "n_pairs": 0,
+      "note": "no photo of dug_out_channel has both labels yet"
+    },
+    "invasive_plant": {
+      "agree": 0,
+      "agreement_share": null,
+      "kappa": null,
+      "missing_gold_label": 0,
+      "missing_labeller_2": 4,
+      "n_pairs": 0,
+      "note": "no photo of invasive_plant has both labels yet"
+    },
+    "pipe_running": {
+      "agree": 0,
+      "agreement_share": null,
+      "kappa": null,
+      "missing_gold_label": 0,
+      "missing_labeller_2": 4,
+      "n_pairs": 0,
+      "note": "no photo of pipe_running has both labels yet"
+    }
+  },
+  "generated_at_utc": "2026-09-21T00:14:15+00:00",
+  "n_placeholders_in_pool": 18,
+  "placeholder_note": "The pool still holds gray placeholders, so any label here is a stand-in.",
+  "script": "evals/agreement.py",
+  "sentence": "The labeller_2 column is empty for every photo, so there is no agreement to compute yet.",
+  "source": {
+    "columns": [
+      "gold_label",
+      "labeller_2"
+    ],
+    "manifest": "photos/manifest.csv"
+  },
+  "stamp": "SYNTHETIC",
+  "synthetic": true
+}

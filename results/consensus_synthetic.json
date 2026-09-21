@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-21T00:05:56Z",
+  "generated_at_utc": "2026-09-21T00:18:41Z",
   "script": "evals/consensus.py",
   "synthetic": true,
   "stamp": "SYNTHETIC",
@@ -13,7 +13,7 @@
     "untrained_scored_size5": 81.3,
     "untrained_scored_minus_plain_size5": 12.3,
     "untrained_plain_size7": 72.2,
-    "untrained_scored_size7": 87.3,
+    "untrained_scored_size7": 87.2,
     "untrained_scored_minus_plain_size7": 15.1,
     "trained_plain_size3": 77.0,
     "trained_scored_size3": 78.3,
@@ -87,12 +87,12 @@
             "sd_over_draws": 0.1376
           },
           "scored": {
-            "mean_share_right": 0.8726,
+            "mean_share_right": 0.8725,
             "p2_5": 0.5625,
             "p97_5": 1.0,
-            "sd_over_draws": 0.1234
+            "sd_over_draws": 0.1233
           },
-          "scored_minus_plain_mean": 0.1507
+          "scored_minus_plain_mean": 0.1506
         }
       }
     },
@@ -140,12 +140,12 @@
             "sd_over_draws": 0.1024
           },
           "scored": {
-            "mean_share_right": 0.9192,
+            "mean_share_right": 0.9189,
             "p2_5": 0.6875,
             "p97_5": 1.0,
             "sd_over_draws": 0.0895
           },
-          "scored_minus_plain_mean": 0.0555
+          "scored_minus_plain_mean": 0.0553
         }
       }
     }

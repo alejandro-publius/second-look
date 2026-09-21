@@ -1,0 +1,91 @@
+# Vision models that take the same 16 item test as the volunteers (master brief section 8).
+# Read by evals/model_sweep.py, evals/benchmark.py and evals/ablation.py. Data, not code.
+#
+# confirmed_against_models_page: false means nobody has checked this id against the live
+# models page yet. The real client refuses to run while any used model is unconfirmed.
+# Session C flips the flag after checking, before the first paid run.
+#
+# accepts_temperature: newer models reject sampling settings with a 400 error. The real client
+# sends temperature only where this is true. The fake client ignores it.
+
+models:
+  - id: claude-haiku-4-5-20251001
+    short: haiku
+    confirmed_against_models_page: false
+    accepts_temperature: true
+  - id: claude-sonnet-5
+    short: sonnet
+    confirmed_against_models_page: false
+    accepts_temperature: false
+  - id: claude-opus-5
+    short: opus
+    confirmed_against_models_page: false
+    accepts_temperature: false
+
+settings:
+  temperature: 0
+  max_tokens: 2048
+  runs: 3
+  # Every photo is resized so its longer side is exactly this many pixels before it is sent.
+  # People see the photo at phone size (docs/analysis_plan.md item 8).
+  resize_long_side_px: 1092
+  image_format: JPEG
+  image_quality: 90
+  # The note is cut to this many characters before it is stored or shown.
+  note_max_chars: 160
+
+prompt:
+  # The system text is the same for every model and every item.
+  system: >-
+    You are looking at one photo of a stream taken by a volunteer. Answer one question about
+    what is visible in the photo. If the photo does not show a stream, or you cannot tell,
+    answer cant_tell. Do not guess.
+  # {question} is replaced with the feature question from content/features.yaml, word for word.
+  # Nothing else is added to the question text.
+  user_template: |-
+    {question}
+
+    Reply by calling the tool named answer, or with only this JSON and nothing else:
+    {"answer": "yes" | "no" | "cant_tell", "note": "<160 characters at most>"}
+    The note says in plain words what you saw that led to the answer.
+  tool:
+    name: answer
+    description: Give the one word answer and a short note about what you saw.
+    input_schema:
+      type: object
+      properties:
+        answer:
+          type: string
+          enum: [yes, no, cant_tell]
+        note:
+          type: string
+          maxLength: 160
+      required: [answer, note]
+      additionalProperties: false
+
+# How the fake client behaves when no key is present. Accuracy is the chance a fake answer
+# matches the gold label for that feature. malformed_rate is the chance the fake returns
+# text the parser has to reject. These numbers are made up so that one model passes some
+# features and another fails them; they say nothing about any real model.
+fake_profiles:
+  claude-haiku-4-5-20251001:
+    malformed_rate: 0.10
+    accuracy:
+      artificial_bank: 0.60
+      dug_out_channel: 0.50
+      invasive_plant: 0.55
+      pipe_running: 0.60
+  claude-sonnet-5:
+    malformed_rate: 0.03
+    accuracy:
+      artificial_bank: 0.90
+      dug_out_channel: 0.70
+      invasive_plant: 0.60
+      pipe_running: 0.95
+  claude-opus-5:
+    malformed_rate: 0.0
+    accuracy:
+      artificial_bank: 1.0
+      dug_out_channel: 0.95
+      invasive_plant: 0.80
+      pipe_running: 1.0

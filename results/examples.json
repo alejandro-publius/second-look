@@ -1,12 +1,12 @@
 {
-  "generated_at_utc": "2026-09-21T00:06:04Z",
+  "generated_at_utc": "2026-09-21T00:18:42Z",
   "script": "evals/pick_examples.py",
   "synthetic": true,
   "stamp": "SYNTHETIC",
   "rule": "the three test items with the largest gap between trained-arm accuracy and the best model's accuracy, in either direction",
   "best_model": {
-    "model_id": "fake-vision-b",
-    "mean_accuracy": 0.7073
+    "model_id": "claude-opus-5",
+    "mean_accuracy": 0.9375
   },
   "inputs": {
     "usability": "/Users/alexvintera/second-look/results/usability_synthetic.json",
@@ -19,29 +19,29 @@
       "gold": "present",
       "photo_id": "ph-test-05",
       "trained_accuracy": 0.5,
-      "model_accuracy": 0.907,
-      "gap_points": -40.7,
-      "direction": "model ahead"
-    },
-    {
-      "item_id": "t07",
-      "feature": "dug_out_channel",
-      "gold": "absent",
-      "photo_id": "ph-test-07",
-      "trained_accuracy": 0.5952,
       "model_accuracy": 1.0,
-      "gap_points": -40.5,
+      "gap_points": -50.0,
       "direction": "model ahead"
     },
     {
-      "item_id": "t14",
-      "feature": "pipe_running",
+      "item_id": "t01",
+      "feature": "artificial_bank",
       "gold": "present",
-      "photo_id": "ph-test-14",
-      "trained_accuracy": 0.5952,
+      "photo_id": "ph-test-01",
+      "trained_accuracy": 0.5476,
       "model_accuracy": 1.0,
-      "gap_points": -40.5,
+      "gap_points": -45.2,
       "direction": "model ahead"
+    },
+    {
+      "item_id": "t09",
+      "feature": "invasive_plant",
+      "gold": "present",
+      "photo_id": "ph-test-09",
+      "trained_accuracy": 0.7857,
+      "model_accuracy": 0.3333,
+      "gap_points": 45.2,
+      "direction": "people ahead"
     }
   ]
 }

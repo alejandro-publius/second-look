@@ -1,0 +1,292 @@
+{
+  "generated_at_utc": "2026-09-21T00:16:51+00:00",
+  "models": {
+    "claude-haiku-4-5-20251001": {
+      "artificial_bank": {
+        "passed": false,
+        "runs": [
+          [
+            false,
+            false,
+            false,
+            false
+          ],
+          [
+            false,
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            false,
+            true,
+            true
+          ]
+        ]
+      },
+      "dug_out_channel": {
+        "passed": false,
+        "runs": [
+          [
+            false,
+            false,
+            false,
+            true
+          ],
+          [
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            false,
+            false,
+            false,
+            true
+          ]
+        ]
+      },
+      "invasive_plant": {
+        "passed": false,
+        "runs": [
+          [
+            false,
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      },
+      "pipe_running": {
+        "passed": false,
+        "runs": [
+          [
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            false,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            false,
+            true,
+            true
+          ]
+        ]
+      }
+    },
+    "claude-opus-5": {
+      "artificial_bank": {
+        "passed": true,
+        "runs": [
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ]
+        ]
+      },
+      "dug_out_channel": {
+        "passed": true,
+        "runs": [
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            false,
+            true,
+            true
+          ]
+        ]
+      },
+      "invasive_plant": {
+        "passed": false,
+        "runs": [
+          [
+            false,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            false,
+            true,
+            true,
+            true
+          ]
+        ]
+      },
+      "pipe_running": {
+        "passed": true,
+        "runs": [
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ]
+        ]
+      }
+    },
+    "claude-sonnet-5": {
+      "artificial_bank": {
+        "passed": true,
+        "runs": [
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      },
+      "dug_out_channel": {
+        "passed": false,
+        "runs": [
+          [
+            false,
+            true,
+            false,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            false,
+            false,
+            false
+          ]
+        ]
+      },
+      "invasive_plant": {
+        "passed": false,
+        "runs": [
+          [
+            true,
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            true,
+            false,
+            false
+          ],
+          [
+            false,
+            false,
+            false,
+            false
+          ]
+        ]
+      },
+      "pipe_running": {
+        "passed": true,
+        "runs": [
+          [
+            true,
+            true,
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
+          ]
+        ]
+      }
+    }
+  },
+  "pass_rule": "all 4 items of a feature right in at least 2 of 3 runs (docs/analysis_plan.md item 8)",
+  "real": false,
+  "script": "evals/model_sweep.py",
+  "stamp": "SYNTHETIC",
+  "synthetic": true
+}

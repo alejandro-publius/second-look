@@ -1,0 +1,471 @@
+{
+  "adversarial": {
+    "blank_black": {
+      "artificial_bank": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "dug_out_channel": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "invasive_plant": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "pipe_running": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      }
+    },
+    "blank_white": {
+      "artificial_bank": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "dug_out_channel": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "invasive_plant": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "pipe_running": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      }
+    },
+    "indoor_scene": {
+      "artificial_bank": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "dug_out_channel": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "invasive_plant": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "pipe_running": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      }
+    },
+    "text_screenshot": {
+      "artificial_bank": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "dug_out_channel": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "invasive_plant": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      },
+      "pipe_running": {
+        "all_three": "cant_tell",
+        "context_only": "cant_tell",
+        "rules_only": "cant_tell",
+        "vision_only": "cant_tell"
+      }
+    }
+  },
+  "adversarial_yes_answers": [],
+  "conditions": {
+    "all_three": {
+      "all": {
+        "accuracy": 0.8125,
+        "correct": 13,
+        "n": 16,
+        "wilson_95": [
+          0.5699,
+          0.9341
+        ]
+      },
+      "artificial_bank": {
+        "accuracy": 1.0,
+        "correct": 4,
+        "n": 4,
+        "wilson_95": [
+          0.5101,
+          1.0
+        ]
+      },
+      "dug_out_channel": {
+        "accuracy": 1.0,
+        "correct": 4,
+        "n": 4,
+        "wilson_95": [
+          0.5101,
+          1.0
+        ]
+      },
+      "invasive_plant": {
+        "accuracy": 0.75,
+        "correct": 3,
+        "n": 4,
+        "wilson_95": [
+          0.3006,
+          0.9544
+        ]
+      },
+      "pipe_running": {
+        "accuracy": 0.5,
+        "correct": 2,
+        "n": 4,
+        "wilson_95": [
+          0.15,
+          0.85
+        ]
+      }
+    },
+    "context_only": {
+      "all": {
+        "accuracy": 0.0625,
+        "correct": 1,
+        "n": 16,
+        "wilson_95": [
+          0.0111,
+          0.2833
+        ]
+      },
+      "artificial_bank": {
+        "accuracy": 0.0,
+        "correct": 0,
+        "n": 4,
+        "wilson_95": [
+          0.0,
+          0.4899
+        ]
+      },
+      "dug_out_channel": {
+        "accuracy": 0.0,
+        "correct": 0,
+        "n": 4,
+        "wilson_95": [
+          0.0,
+          0.4899
+        ]
+      },
+      "invasive_plant": {
+        "accuracy": 0.0,
+        "correct": 0,
+        "n": 4,
+        "wilson_95": [
+          0.0,
+          0.4899
+        ]
+      },
+      "pipe_running": {
+        "accuracy": 0.25,
+        "correct": 1,
+        "n": 4,
+        "wilson_95": [
+          0.0456,
+          0.6994
+        ]
+      }
+    },
+    "rules_only": {
+      "all": {
+        "accuracy": 0.5625,
+        "correct": 9,
+        "n": 16,
+        "wilson_95": [
+          0.3318,
+          0.769
+        ]
+      },
+      "artificial_bank": {
+        "accuracy": 0.75,
+        "correct": 3,
+        "n": 4,
+        "wilson_95": [
+          0.3006,
+          0.9544
+        ]
+      },
+      "dug_out_channel": {
+        "accuracy": 0.5,
+        "correct": 2,
+        "n": 4,
+        "wilson_95": [
+          0.15,
+          0.85
+        ]
+      },
+      "invasive_plant": {
+        "accuracy": 0.75,
+        "correct": 3,
+        "n": 4,
+        "wilson_95": [
+          0.3006,
+          0.9544
+        ]
+      },
+      "pipe_running": {
+        "accuracy": 0.25,
+        "correct": 1,
+        "n": 4,
+        "wilson_95": [
+          0.0456,
+          0.6994
+        ]
+      }
+    },
+    "vision_only": {
+      "all": {
+        "accuracy": 0.9375,
+        "correct": 15,
+        "n": 16,
+        "wilson_95": [
+          0.7167,
+          0.9889
+        ]
+      },
+      "artificial_bank": {
+        "accuracy": 1.0,
+        "correct": 4,
+        "n": 4,
+        "wilson_95": [
+          0.5101,
+          1.0
+        ]
+      },
+      "dug_out_channel": {
+        "accuracy": 1.0,
+        "correct": 4,
+        "n": 4,
+        "wilson_95": [
+          0.5101,
+          1.0
+        ]
+      },
+      "invasive_plant": {
+        "accuracy": 0.75,
+        "correct": 3,
+        "n": 4,
+        "wilson_95": [
+          0.3006,
+          0.9544
+        ]
+      },
+      "pipe_running": {
+        "accuracy": 1.0,
+        "correct": 4,
+        "n": 4,
+        "wilson_95": [
+          0.5101,
+          1.0
+        ]
+      }
+    }
+  },
+  "context_accuracy_planted": 0.5,
+  "generated_at_utc": "2026-09-21T00:14:15+00:00",
+  "note": "The rules and the context are stubs with a set accuracy and the vision signal is the fake client. Only the shape of the comparison is real.",
+  "per_item": [
+    {
+      "all_three": "yes",
+      "context_only": "cant_tell",
+      "feature": "artificial_bank",
+      "gold": "present",
+      "item_id": "t01",
+      "rain": "dry",
+      "rules_only": "no",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "cant_tell",
+      "feature": "artificial_bank",
+      "gold": "present",
+      "item_id": "t02",
+      "rain": "dry",
+      "rules_only": "yes",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "no",
+      "context_only": "cant_tell",
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "item_id": "t03",
+      "rain": "dry",
+      "rules_only": "no",
+      "vision_only": "no"
+    },
+    {
+      "all_three": "no",
+      "context_only": "cant_tell",
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "item_id": "t04",
+      "rain": "dry",
+      "rules_only": "no",
+      "vision_only": "no"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "cant_tell",
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "item_id": "t05",
+      "rain": "dry",
+      "rules_only": "yes",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "cant_tell",
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "item_id": "t06",
+      "rain": "dry",
+      "rules_only": "no",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "no",
+      "context_only": "cant_tell",
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "item_id": "t07",
+      "rain": "wet",
+      "rules_only": "yes",
+      "vision_only": "no"
+    },
+    {
+      "all_three": "no",
+      "context_only": "cant_tell",
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "item_id": "t08",
+      "rain": "dry",
+      "rules_only": "no",
+      "vision_only": "no"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "cant_tell",
+      "feature": "invasive_plant",
+      "gold": "present",
+      "item_id": "t09",
+      "rain": "dry",
+      "rules_only": "yes",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "cant_tell",
+      "feature": "invasive_plant",
+      "gold": "present",
+      "item_id": "t10",
+      "rain": "wet",
+      "rules_only": "yes",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "cant_tell",
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "item_id": "t11",
+      "rain": "dry",
+      "rules_only": "no",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "no",
+      "context_only": "cant_tell",
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "item_id": "t12",
+      "rain": "wet",
+      "rules_only": "yes",
+      "vision_only": "no"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "yes",
+      "feature": "pipe_running",
+      "gold": "present",
+      "item_id": "t13",
+      "rain": "dry",
+      "rules_only": "yes",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "cant_tell",
+      "context_only": "cant_tell",
+      "feature": "pipe_running",
+      "gold": "present",
+      "item_id": "t14",
+      "rain": "wet",
+      "rules_only": "no",
+      "vision_only": "yes"
+    },
+    {
+      "all_three": "no",
+      "context_only": "cant_tell",
+      "feature": "pipe_running",
+      "gold": "absent",
+      "item_id": "t15",
+      "rain": "wet",
+      "rules_only": "yes",
+      "vision_only": "no"
+    },
+    {
+      "all_three": "yes",
+      "context_only": "yes",
+      "feature": "pipe_running",
+      "gold": "absent",
+      "item_id": "t16",
+      "rain": "dry",
+      "rules_only": "yes",
+      "vision_only": "no"
+    }
+  ],
+  "rules_accuracy_planted": 0.65,
+  "script": "evals/ablation.py",
+  "seed": 20260920,
+  "stamp": "SYNTHETIC",
+  "stubs": true,
+  "synthetic": true,
+  "vision_model": "claude-opus-5"
+}
