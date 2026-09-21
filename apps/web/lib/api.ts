@@ -184,6 +184,50 @@ export interface FhirValidationOut {
 
 export type FhirObservation = Record<string, unknown>;
 
+/** The analyst's view. Every number carries the visit ids and Bundle links behind it. */
+export interface CityFinding {
+  spot_id: string;
+  spot_name: string;
+  feature: string;
+  feature_name: string;
+  observers: number;
+  first_seen: string;
+  last_seen: string;
+  visit_ids: string[];
+  fhir: string[];
+}
+
+export interface CityNeed {
+  sentence_id: string;
+  text: string;
+  source: string;
+  because: string[];
+  visit_ids: string[];
+  fhir: string[];
+}
+
+export interface CityPipe {
+  spot_id: string;
+  spot_name: string;
+  observers: number;
+  dry_days: number[];
+  last_seen: string;
+  visit_ids: string[];
+  fhir: string[];
+}
+
+export interface CityOut {
+  creek_id: string;
+  creek_name: string;
+  visits: number;
+  spots: number;
+  findings: CityFinding[];
+  needs: CityNeed[];
+  pipes_worth_testing: CityPipe[];
+  flagged_spots: { spot_id: string; spot_name: string; why: string }[];
+  measures_waiting_for_approval: boolean;
+}
+
 export interface TwoOut {
   ours: FhirObservation;
   theirs: FhirObservation | null;
@@ -291,6 +335,9 @@ export const api = {
   },
   fhirValidation() {
     return request<FhirValidationOut>("GET", "/api/fhir/validation");
+  },
+  city(creek_id: string) {
+    return request<CityOut>("GET", `/api/city/${encodeURIComponent(creek_id)}`);
   },
   two() {
     return request<TwoOut>("GET", "/api/two");

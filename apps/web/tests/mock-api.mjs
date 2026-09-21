@@ -27,6 +27,41 @@ function isCorrect(answer, gold) {
   return (answer === "yes" && gold === "present") || (answer === "no" && gold === "absent");
 }
 
+// The analyst's view. Every number carries the visit ids and Bundle links behind it.
+export const exampleCity = {
+  creek_id: "example",
+  creek_name: "Strawberry Creek",
+  visits: 5,
+  spots: 2,
+  findings: [
+    {
+      spot_id: "example",
+      spot_name: "Footbridge below the library",
+      feature: "pipe_running",
+      feature_name: "Pipes and sewage signs",
+      observers: 2,
+      first_seen: "2026-09-22",
+      last_seen: "2026-09-23",
+      visit_ids: ["v1", "v2"],
+      fhir: ["/api/fhir/Bundle/v1", "/api/fhir/Bundle/v2"],
+    },
+  ],
+  needs: [],
+  pipes_worth_testing: [
+    {
+      spot_id: "example",
+      spot_name: "Footbridge below the library",
+      observers: 2,
+      dry_days: [5, 9],
+      last_seen: "2026-09-23",
+      visit_ids: ["v1", "v2"],
+      fhir: ["/api/fhir/Bundle/v1", "/api/fhir/Bundle/v2"],
+    },
+  ],
+  flagged_spots: [{ spot_id: "t1", spot_name: "test spot", why: "the name reads like a test" }],
+  measures_waiting_for_approval: true,
+};
+
 export const exampleSpot = {
   spot: { spot_id: "example", spot_name: "Footbridge below the library", reach_id: "campus", reach_name: "Campus reach", creek_id: "strawberry", creek_name: "Strawberry Creek", latitude: 37.87, longitude: -122.26, coarse: true },
   visits: [
@@ -184,6 +219,11 @@ export async function mockApi(page, options = {}) {
       const id = decodeURIComponent(path.slice("/api/spot/".length));
       if (id !== "example") return json({ detail: "not found" }, 404);
       return json(exampleSpot);
+    }
+    if (path.startsWith("/api/city/")) {
+      const creek = decodeURIComponent(path.slice("/api/city/".length));
+      if (creek !== "example") return json({ detail: "not found" }, 404);
+      return json(exampleCity);
     }
     if (path === "/api/fhir/validation") return json(exampleValidation);
     if (path === "/api/two") {

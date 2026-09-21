@@ -1,44 +1,56 @@
-# Handoff: where Second Look stands, 2026-09-21 01:30Z
+# Handoff: where Second Look stands, 2026-09-21
 
-Repo `~/second-look`, private, `alejandro-publius/second-look`, branch main, commit 138751d.
-Read CLAUDE.md, then PLAN.md, then only the brief section a session names.
+Two branches, two jobs.
 
-## Workstreams
+- **`main`, in `~/second-look`.** The launch build. Production deploys come from here only. It is
+  waiting on photo picks: open `photos/candidates/*.html`, tick photos, press the download button.
+  `make preflight-launch` is the gate, 66 failures, all of them content.
+- **`depth`, in the `~/second-look-depth` worktree.** Update 10, the full loop. Nothing here is
+  deployed to the live link. Merge into `main` only after `make check` and the phone end to end
+  tests pass, and never between the `prereg-v1` tag and data lock unless the diff leaves the test
+  flow untouched.
 
-| Line | State |
+## Live
+
+| Thing | Where |
 |---|---|
-| W1 API and data | Done. Study and creek check endpoints, alembic on SQLite and Postgres, rate limit, hidden field, CSP, no addresses in logs, backup and restore with a drill. |
-| W2 Analysis | Done. The plan implemented exactly, five synthetic scenarios, bootstrap and permutation, power, consensus, example picker. Refuses real data before the lock or without the tag. |
-| W3 FHIR | Done. Emitter, goldens, store, routes, sandbox mirror script, Postman, guide proposal. |
-| W4 Web | Done. Landing, test flow, judge mode, creek check with offline queue, record with View as FHIR, two observer screen, quick check, poster, about, privacy, how we know. 28 Playwright tests, axe clean on nine screens. |
-| W5 Core | Done. Gate, follow-ups, rainfall, labels, health card. Pure functions, 142 tests. |
-| W6 AI | Done. Model sweep on a fake client, benchmark, agreement, ablation, the checker. No paid call has ever run. |
-| W7a Tools | Done. Audit log, photo ingest and blind labelling, preflight (17 checks), submit check, third party list. |
-| W7b Docs | Done. Sourced lesson drafts, glossary, candidate sentences, region pack, human packs, video script, Devpost draft, README. |
-| W8 Review | Done. docs/reviews/REVIEW_01.md: eight findings fixed, the rest deferred with one line each. |
+| Site | https://second-look-79t.pages.dev (from `main`) |
+| API | https://second-look-api.thealexschroeder.workers.dev |
+| Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
 
-## Proofs
+## What is done on `depth`
 
-- P1 walking skeleton: PASS. `docker compose up -d` then `uv run python scripts/smoke.py` prints landing 200 in about 90 ms, api health ok, a database row written and read back.
-- P2 the record validates: PASS, and no fallback is in force. Our Bundle validates against their profiles built from hl7-eu/oah at b907cf0 with 0 errors. Fallback F2 (plain R4) is NOT needed. Evidence: results/fhir_validation.json, docs/fhir_mapping.md.
-- K6 sandbox write: PASS on 2026-09-20 21:37Z. One tagged Location, create 201, read 200, delete 200, read after delete 410. Evidence: docs/notes/sandbox_write_test.txt, fhir/sandbox_ledger.jsonl. The mirror is built and stays behind SANDBOX_MIRROR_ENABLED.
+- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 33 built, 5 parked, 17 missing, and
+  the missing ones cluster under one verb, ACT.
+- `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
+  guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
+- `GET /api/city/{creek_id}` and `/city?creek=` : the analyst's view. No number without its
+  Bundle links. An unapproved measure is absent and the page says why.
+- A pin within 30 metres of an existing precise spot is offered on the draft response. A coarse
+  pin is never compared, because its position is rounded to about a kilometre.
+- The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
+- `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
+  green only on the machine that happened to have them.
 
-## The next five steps
+## What is next on `depth`, in order
 
-1. Rachel's photos land. `uv run python scripts/ingest_photos.py <folder> <labels.csv>` then `uv run python scripts/check_manifest.py`.
-2. Both label blind. `uv run python scripts/label_photos.py --name rachel` and `--name alex`, then `uv run python scripts/merge_labels.py --apply`, which must print kappa per feature and no disagreements.
-3. Freeze and register. `uv run python scripts/freeze_key.py`, then tag: `git tag prereg-v1 && git push origin prereg-v1`, then `uv run python scripts/preflight.py` must print 0 failed.
-4. The real model run, on this Mac. The key goes in `.env` in this repo; it does not need a second machine. The only rule is that Alex never exports it in the shell that starts `claude`. Check the three model ids and prices first, flip the two confirmed flags, put the key in `.env`, then `uv run python evals/model_sweep.py --real`.
-5. Deploy and launch. `fly auth login`, `vercel login`, `make deploy`, then post the link. After the lock on 2026-09-28T01:00:00Z, `uv run python evals/usability_analysis.py`, `make render-readme`, `make submit-check`.
+1. Tier 1 item 2: the ServiceRequest referral for a pipe worth testing, and the example lab
+   result coming back. Watermarked, tagged as an example, never counted.
+2. Tier 1 item 4: the downstream note wired into the record. `core.act.downstream_note` exists
+   and is tested; nothing calls it, because the store does not yet say which reach flows into
+   which.
+3. Tier 2: the sandbox Library entry, the MCP server, `make new-city`, the proposal.
+4. Tier 3: the README in the winning shape, `make judge-check`, the diagrams, the scorecard.
+5. Tier 4: design stage 2 for `/city` and `/judges`, the Spanish draft, `make readability`.
+6. Answer A1: put the API behind `/api/*` on the Pages origin, so the policy can say
+   `connect-src 'self'`. Answer A3: port the judge facing endpoints to the Worker, proved by
+   golden vectors the Python writes and the TypeScript has to reproduce.
 
 ## Traps
 
 - `make check` needs Java 17: `export JAVA17_HOME=/opt/homebrew/opt/openjdk@17`.
-- A stale compose volume breaks the migration. `docker compose down -v` before a rebuild.
-- Never create the prereg-v1 tag until Rachel's wording is frozen; the analysis refuses without it and refuses a plan that differs from the tagged one.
-- `--now` and `--repo` on the analysis are test only now and refuse outside a test.
-- Fake model runs write results/cost_log_fake.jsonl. The real cost log stays about money.
-- Tests point the audit log and the sandbox ledger at a temporary folder. Never run a test with AUDIT_LOG_PATH unset in a shell where it matters.
-- The sandbox is shared: conditional creates only, delete only a ledger id, never by search, never expunge.
-- Update 03 was never pasted into the terminal. P1, P2, P3, K6 and F2 were inferred from Update 04. If Update 03 exists, paste it and check docs/KILL_TESTS.md against it.
-- One browser now keeps one arm. A test that wants many randomized visitors needs many client tokens.
+- NEXT_PUBLIC_* are inlined at build time. A plain `npm run build` bakes the default API origin.
+- Kill anything on port 3100 before measuring: a stale server serves an old build.
+- `npm run export` does not fire npm's prebuild hook; the export script runs those steps itself.
+- A stored answer is keyed by the form item, a measure by the feature. `content/form.yaml` is the
+  one home for that mapping.

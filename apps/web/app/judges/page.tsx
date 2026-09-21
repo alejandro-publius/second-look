@@ -14,6 +14,7 @@ const DOORS: { href: string; label: string; note?: string }[] = [
   { href: "/check", label: "judges.check" },
   { href: "/spot?id=example", label: "judges.record" },
   { href: "/two", label: "judges.two" },
+  { href: "/city?creek=example", label: "nav.city" },
   { href: "/how-we-know", label: "judges.how" },
   { href: "/credits", label: "nav.credits" },
 ];

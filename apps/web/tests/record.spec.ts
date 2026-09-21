@@ -80,3 +80,31 @@ test("share card route returns an SVG built from the score and rejects bad score
   expect(html).toContain('property="og:image"');
   expect(html).toContain("/api/share/13");
 });
+
+test("/city shows two lists decided by code, and no number without its records", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/city?creek=example");
+  await expect(page.getByRole("heading", { name: "What this creek needs", level: 1 })).toBeVisible();
+  await expect(page.getByText("5 visits at 2 spots")).toBeVisible();
+
+  // No measure is approved yet, so the page says why rather than leaving a blank.
+  await expect(page.getByText("No measure is shown yet.")).toBeVisible();
+
+  // A pipe two people who passed saw running in dry weather, with its records one tap away.
+  await expect(page.getByText("Footbridge below the library").first()).toBeVisible();
+  await expect(page.getByText("2 people, after 9 dry days")).toBeVisible();
+  const evidence = page.getByRole("link", { name: "Open the records" });
+  await expect(evidence.first()).toHaveAttribute("href", "/api/fhir/Bundle/v1");
+  // Every list that shows a number shows a way to open it.
+  expect(await evidence.count()).toBeGreaterThanOrEqual(2);
+
+  // A pin that reads like a test is listed and kept out of the numbers.
+  await expect(page.getByText("test spot")).toBeVisible();
+  await expect(page.getByText("Nothing is deleted.")).toBeVisible();
+});
+
+test("/city with no creek says so rather than showing an empty page", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/city");
+  await expect(page.getByText("Nobody has checked this creek yet.")).toBeVisible();
+});
