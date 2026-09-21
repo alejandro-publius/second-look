@@ -116,15 +116,24 @@ def _present(value: object) -> bool:
     return value in {"present", "yes", True}
 
 
-def findings_from_visits(visits: Iterable[VisitRecord]) -> list[Finding]:
+def findings_from_visits(
+    visits: Iterable[VisitRecord], finding_key_for: Mapping[str, str] | None = None
+) -> list[Finding]:
     """Every feature reported present at each spot, with its observers and visit ids.
 
     A person who visits twice counts once: the list is of people, not of visits.
+
+    A stored answer is keyed by the creek check form item, `bank_type`, not by the feature,
+    `artificial_bank`. `finding_key_for` maps one to the other and comes from content/form.yaml,
+    so the mapping has one home. Without it the answer keys are taken as finding keys, which is
+    what the pure tests do.
     """
+    lookup = dict(finding_key_for or {})
     seen: dict[tuple[str, str], dict[str, object]] = {}
     for v in visits:
-        for feature in MEASURE_FOR_FEATURE:
-            if not _present(v.answers.get(feature)):
+        for answer_key, value in v.answers.items():
+            feature = lookup.get(answer_key, answer_key)
+            if feature not in MEASURE_FOR_FEATURE or not _present(value):
                 continue
             key = (v.spot.spot_id, feature)
             day = v.answered_at.date()

@@ -24,6 +24,7 @@ from apps.api.db import as_utc
 from apps.api.models import CheckResultRow, ObserverRow, SpotRow, UploadRow, VisitRow
 from apps.api.security import sha256_hex
 from apps.api.settings import settings
+from core import act
 from core.records import CheckResult, FeatureId, FeatureScore, Observer, Spot
 
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024
@@ -177,6 +178,36 @@ def _round_coarse(value: float | None, coarse: bool) -> float | None:
     return round(value, COARSE_DECIMALS) if coarse else round(value, 6)
 
 
+def nearby_existing_spot(db: Session, ref: SpotRef) -> dict[str, Any] | None:
+    """An existing spot within 30 metres of a new pin, so the app can offer it first.
+
+    A suggestion, never a merge. Two spots twenty five metres apart can be two real places, and
+    quietly folding one into the other would lose a visit nobody could get back. Update 10
+    tier 1 item 3; the arithmetic is core.act.nearest_spot, which is pure and tested.
+    """
+    if ref.spot_id or ref.new is None:
+        return None
+    if ref.new.latitude is None or ref.new.longitude is None:
+        return None
+    # Only precise pins can be compared. A coarse spot is deliberately rounded to about a
+    # kilometre for privacy, so asking whether it is within thirty metres of anything is noise,
+    # and answering would offer the wrong spot far more often than the right one.
+    if ref.new.coarse:
+        return None
+    existing = [
+        spot_from_row(r)
+        for r in db.exec(select(SpotRow).where(SpotRow.coarse == False)).all()  # noqa: E712
+    ]
+    near = act.nearest_spot(ref.new.latitude, ref.new.longitude, existing)
+    if near is None:
+        return None
+    return {
+        "spot_id": near.spot.spot_id,
+        "spot_name": near.spot.spot_name,
+        "metres": round(near.metres),
+    }
+
+
 def resolve_spot(db: Session, ref: SpotRef, *, now: datetime) -> SpotRow:
     if ref.spot_id:
         row = db.get(SpotRow, ref.spot_id)
@@ -277,6 +308,8 @@ def create_draft(db: Session, body: DraftBody, *, now: datetime) -> dict[str, An
     answers = validate_answers(body.answers)
     first_rating = validate_rating(body.first_rating)
     photo_ids = _check_photo_ids(db, body.photo_ids)
+    # Look before the new spot is made, or it finds itself.
+    nearby = nearby_existing_spot(db, body.spot)
     spot = resolve_spot(db, body.spot, now=now)
     rain = core_calls.rain_status(spot.latitude, spot.longitude, now)
     c = content.get_content()
@@ -316,6 +349,8 @@ def create_draft(db: Session, body: DraftBody, *, now: datetime) -> dict[str, An
     db.commit()
     return {
         "draft_id": visit_id,
+        # Not a merge: the app offers this spot first and the person decides.
+        "nearby_spot": nearby,
         "followups": [
             {
                 "rule_id": f["rule_id"],

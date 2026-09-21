@@ -64,7 +64,8 @@ def test_draft_asks_the_dry_pipe_and_rating_check_questions(client, monkeypatch)
     r = _draft(client)
     assert r.status_code == 200, r.text
     body = r.json()
-    assert set(body) == {"draft_id", "followups"}
+    assert set(body) == {"draft_id", "followups", "nearby_spot"}
+    assert body["nearby_spot"] is None, "the first pin on an empty map has no neighbour"
     rules = [f["rule_id"] for f in body["followups"]]
     assert rules == ["dry_pipe", "rating_check"]
     dry, rating = body["followups"]
