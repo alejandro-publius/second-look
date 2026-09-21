@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight submit-check poster deploy audit-verify
+.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -60,6 +60,14 @@ smoke:
 
 preflight:
 	$(PY) scripts/preflight.py
+
+# Update 11 section 1. preflight-launch gates only what the two minute test uses, so the creek
+# check form and the health sentences cannot hold up Wednesday. preflight-judges is the rest.
+preflight-launch:
+	$(PY) scripts/preflight.py --gate launch
+
+preflight-judges:
+	$(PY) scripts/preflight.py --gate judges
 
 submit-check:
 	$(PY) scripts/submit_check.py

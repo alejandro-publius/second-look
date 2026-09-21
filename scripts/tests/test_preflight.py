@@ -60,6 +60,13 @@ def green_root(tmp_path: Path) -> Path:
     (root / "results").mkdir()
     (root / "apps" / "web" / "app" / "t").mkdir(parents=True)
 
+    # Update 11 section 6 puts backups in the launch gate, so a green repo has a drill on record.
+    (root / ".github" / "workflows").mkdir(parents=True)
+    (root / ".github" / "workflows" / "backup.yml").write_text("name: backup", encoding="utf-8")
+    (root / "results" / "backup_drill.json").write_text(
+        json.dumps({"restored_rows_match": True}), encoding="utf-8"
+    )
+
     features_path = root / "content" / "features.yaml"
     doc = yaml.safe_load(features_path.read_text())
     for f in doc["features"]:
@@ -161,6 +168,14 @@ def test_green_root_guards_fire_when_broken(tmp_path: Path) -> None:
     assert failed() == {"model_pass_table_real": "HUMAN", "verify_claims": "BUILD"}
     table.write_text(json.dumps({"real": True, "synthetic": False, "models": {}}))
 
+    # The backup guard fires too: remove the drill and the launch gate blocks on it.
+    drill = root / "results" / "backup_drill.json"
+    kept = drill.read_text()
+    drill.unlink()
+    assert "backups" in failed("HUMAN")
+    drill.write_text(kept, encoding="utf-8")
+    assert "backups" not in failed()
+
     plan = root / "docs" / "analysis_plan.md"
     original = plan.read_text()
     plan.write_text(original + "\nan edit after the tag\n")
@@ -220,3 +235,83 @@ def test_report_groups_by_what_clears_it_and_counts_reasons(
 def test_main_exits_1_on_the_current_repo(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(preflight, "default_runner", lambda root: ok_runner)
     assert preflight.main([]) == 1
+
+
+def test_the_launch_gate_leaves_out_what_the_two_minute_test_never_touches(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Update 11 section 1: the creek check form must not hold up Wednesday."""
+    checks = [
+        preflight.Check("human_inputs", "HUMAN", ["placeholder photo in role test: ph-test-01"]),
+        preflight.Check(
+            "judges_inputs", "HUMAN", ["form item bank_type not verified"], gate="judges"
+        ),
+        preflight.Check("results_real", "HUMAN", ["README cites synthetic"], gate="judges"),
+    ]
+    launch_failed, _ = preflight.report(checks, "launch")
+    launch_out = capsys.readouterr().out
+    assert launch_failed == 1
+    assert "placeholder photo" in launch_out
+    assert "form item" not in launch_out and "synthetic" not in launch_out
+
+    judges_failed, _ = preflight.report(checks, "judges")
+    judges_out = capsys.readouterr().out
+    assert judges_failed == 2
+    assert "form item" in judges_out and "synthetic" in judges_out
+    assert "placeholder photo" not in judges_out
+
+    # With no gate the run is everything, which is what make preflight still does.
+    both, _ = preflight.report(checks)
+    assert both == 3
+
+
+def test_a_form_item_is_a_judges_reason_and_a_photo_is_a_launch_one() -> None:
+    launch, judges = preflight.split_by_gate(
+        [
+            "placeholder photo in role test: ph-test-01",
+            "feature artificial_bank question wording not frozen",
+            "form item bank_type not verified against the app",
+            "sentence s01 not approved",
+            "lesson pipe_running not approved",
+        ]
+    )
+    assert launch == [
+        "placeholder photo in role test: ph-test-01",
+        "feature artificial_bank question wording not frozen",
+        "lesson pipe_running not approved",
+    ]
+    assert judges == [
+        "form item bank_type not verified against the app",
+        "sentence s01 not approved",
+    ]
+
+
+def test_backups_block_the_launch_until_a_drill_has_run(tmp_path: Path) -> None:
+    """Update 11 section 6. A study with no backup is one bad afternoon from having no data."""
+    root = green_root(tmp_path)
+    drill = root / "results" / "backup_drill.json"
+
+    def backups() -> preflight.Check:
+        return {c.name: c for c in preflight.run_checks(root, runner=ok_runner)}["backups"]
+
+    assert backups().gate == "launch", "a lost database would sink the study, so it gates launch"
+    assert backups().passed, "the green fixture records a drill"
+
+    # No drill at all: the launch is blocked and the line says what to do.
+    drill.unlink()
+    blocked = backups()
+    assert not blocked.passed
+    assert "GitHub secrets" in blocked.reasons[0]
+
+    # A drill that ran and did not match is worse than none, so it must not pass either.
+    drill.write_text(json.dumps({"restored_rows_match": False}), encoding="utf-8")
+    mismatch = backups()
+    assert not mismatch.passed
+    assert "did not match" in mismatch.reasons[0]
+
+    # And a workflow that is not there at all is named plainly.
+    drill.write_text(json.dumps({"restored_rows_match": True}), encoding="utf-8")
+    (root / ".github" / "workflows" / "backup.yml").unlink()
+    gone = backups()
+    assert not gone.passed
+    assert "backup.yml" in gone.reasons[0]

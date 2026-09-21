@@ -31,7 +31,7 @@ features:
     wording_source: app_public_text
     wording_status: draft
     app_item: invasive_species
-    verified_against_app: false
+    verified_against_app: true  # app text quoted word for word, checked 2026-09-20
     oah_category: invasiveOrganisms
     fhir_code: invasive-plant
     glossary_term: invasive plant
@@ -42,7 +42,7 @@ features:
     wording_source: app_public_text
     wording_status: draft
     app_item: draining_pipes
-    verified_against_app: false
+    verified_against_app: true  # app text quoted word for word, checked 2026-09-20
     oah_category: hydrology
     fhir_code: pipe-running
     glossary_term: outfall

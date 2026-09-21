@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import os
 import re
 import sys
@@ -629,6 +630,101 @@ def collect(
     return trim(found, per_sheet), problems
 
 
+# What a finished pick list holds, per sheet. 16 test items is 4 per feature; a lesson is two
+# contrast pairs (4 photos) plus one practice photo; the warm-up is one pair.
+PICK_TARGETS = {
+    "warmup": {"warmup": 2},
+    "_feature": {"test": 4, "lesson": 4, "practice": 1},
+}
+
+
+def pick_targets(feature: str) -> dict[str, int]:
+    return PICK_TARGETS.get(feature, PICK_TARGETS["_feature"])
+
+
+def pick_control(feature: str, c: Candidate) -> str:
+    """The checkbox, the role and the optional scene id for one candidate.
+
+    Only a candidate fetch can actually record gets one, so a person cannot pick something the
+    tool will refuse afterwards. The guard lives here rather than in the caller, so a second
+    caller cannot forget it.
+    """
+    if not c.licence.manifest:
+        return ""
+    e = html.escape
+    roles = list(pick_targets(feature))
+    options = "".join(f'<option value="{e(r)}">{e(r)}</option>' for r in roles)
+    return (
+        '<div class="pick">'
+        f'<label><input type="checkbox" class="take" data-url="{e(c.page_url)}" '
+        f'data-side="{e(c.side)}"> pick this</label>'
+        f'<select class="role">{options}</select>'
+        '<input class="scene" size="14" placeholder="scene id, optional">'
+        "</div>"
+    )
+
+
+def pick_script(feature: str) -> str:
+    """Builds the picks file in the browser. No server, no upload, nothing leaves the machine."""
+    targets = json.dumps(pick_targets(feature))
+    return f"""<script>
+(function () {{
+  var TARGETS = {targets};
+  var FEATURE = {json.dumps(feature)};
+  function rows() {{
+    var out = [];
+    document.querySelectorAll('.take').forEach(function (box) {{
+      if (!box.checked) return;
+      var pick = box.closest('.pick');
+      out.push({{
+        url: box.dataset.url,
+        feature: FEATURE,
+        role: pick.querySelector('.role').value,
+        side: box.dataset.side,
+        scene: pick.querySelector('.scene').value.trim()
+      }});
+    }});
+    return out;
+  }}
+  function csv() {{
+    var head = 'url,feature,role,side,scene,notes';
+    var lines = rows().map(function (r) {{
+      return [r.url, r.feature, r.role, r.side, r.scene, ''].map(function (v) {{
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }}).join(',');
+    }});
+    return [head].concat(lines).join('\n') + '\n';
+  }}
+  function tally() {{
+    var got = {{}};
+    rows().forEach(function (r) {{ got[r.role] = (got[r.role] || 0) + 1; }});
+    var bits = Object.keys(TARGETS).map(function (role) {{
+      var n = got[role] || 0, want = TARGETS[role];
+      var cls = n === want ? 'full' : (n > want ? 'over' : '');
+      return '<span class="' + cls + '">' + role + ' ' + n + ' of ' + want + '</span>';
+    }});
+    document.getElementById('tally').innerHTML = bits.join(' &middot; ');
+  }}
+  document.addEventListener('change', tally);
+  document.addEventListener('input', tally);
+  document.getElementById('save').addEventListener('click', function () {{
+    var blob = new Blob([csv()], {{ type: 'text/csv' }});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'picks-' + FEATURE + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }});
+  document.getElementById('copy').addEventListener('click', function () {{
+    navigator.clipboard.writeText(csv()).then(function () {{
+      document.getElementById('copy').textContent = 'Copied';
+    }});
+  }});
+  tally();
+}})();
+</script>"""
+
+
 def sheet_html(feature: str, candidates: list[Candidate], ran_at: datetime) -> str:
     e = html.escape
     sides: dict[str, list[Candidate]] = {}
@@ -651,6 +747,13 @@ def sheet_html(feature: str, candidates: list[Candidate], ran_at: datetime) -> s
         ".meta{font-size:.9rem;line-height:1.4}",
         "code{background:#f2f2f2;padding:.15rem .3rem;display:inline-block;word-break:break-all}",
         ".warn{color:#8a1c1c}",
+        "#bar{position:sticky;top:0;background:#fff;border-bottom:2px solid #333;padding:.6rem 0;"
+        "margin-bottom:.6rem;font-size:1rem}",
+        "#bar button{font-size:1rem;padding:.4rem .9rem;margin-left:.6rem}",
+        ".pick{display:flex;gap:.6rem;align-items:center;margin-top:.4rem;flex-wrap:wrap}",
+        ".pick label{font-weight:700}",
+        ".full{color:#1f7a4d;font-weight:700}",
+        ".over{color:#8a1c1c;font-weight:700}",
         "h2{margin-top:1.6rem;border-top:2px solid #333;padding-top:.6rem}",
         "</style></head><body>",
         f"<h1>Candidates for {e(feature)}</h1>",
@@ -663,6 +766,9 @@ def sheet_html(feature: str, candidates: list[Candidate], ran_at: datetime) -> s
         "from the source, so this page needs the internet. Every photo below claims CC0, CC BY or "
         "CC BY-SA, and every iNaturalist record below is research grade. You pick, you label. "
         "Check each photo you pick for faces, house numbers and plates before you fetch it.</p>",
+        '<div id="bar"><span id="tally">Nothing picked yet.</span>'
+        '<button id="save" type="button">Download the picks file</button>'
+        '<button id="copy" type="button">Copy as CSV</button></div>',
     ]
     for side, items in sides.items():
         parts.append(f"<h2>{e(side)} ({len(items)})</h2>")
@@ -691,9 +797,11 @@ def sheet_html(feature: str, candidates: list[Candidate], ran_at: datetime) -> s
                     f"<p>Source says: {e(c.words)}</p>",
                     f"<p>Label evidence it would record: {e(c.evidence)}</p>",
                     f"<p><code>{e(command)}</code></p>",
+                    pick_control(feature, c),
                     "</div></div>",
                 ]
             )
+    parts.append(pick_script(feature))
     parts.append("</body></html>")
     return "\n".join(parts)
 

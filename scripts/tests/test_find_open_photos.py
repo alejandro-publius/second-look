@@ -280,3 +280,58 @@ def test_the_sheet_shows_what_a_person_needs_and_downloads_nothing(tmp_path: Pat
     assert path == tmp_path / "photos" / "candidates" / "artificial_bank.html"
     written = sorted(p.name for p in (tmp_path / "photos").rglob("*") if p.is_file())
     assert written == ["artificial_bank.html"], "nothing is downloaded into the repo"
+
+
+@respx.mock
+def test_the_sheet_lets_a_person_pick_and_build_the_picks_file() -> None:
+    """Update 11 needs photos/candidates/picks-<feature>.csv, and this is where it comes from."""
+    got = search_commons(commons_payload(commons_page("Bank.jpg", "cc-by-sa-4.0")))
+    html = sheet_html("artificial_bank", got, datetime(2026, 9, 21, 5, 0, tzinfo=UTC))
+
+    # One pick control per candidate fetch could actually record.
+    assert html.count('class="take"') == len(got)
+    assert 'class="role"' in html and 'class="scene"' in html
+    # A feature sheet offers the three roles the test flow uses, with their targets.
+    for role in ("test", "lesson", "practice"):
+        assert f'<option value="{role}">' in html
+    assert '"test": 4' in html and '"lesson": 4' in html and '"practice": 1' in html
+    # It builds the file itself, in the browser, so nothing leaves the machine.
+    assert "picks-' + FEATURE + '.csv" in html
+    assert "url,feature,role,side,scene,notes" in html
+
+
+@respx.mock
+def test_the_warmup_sheet_only_offers_the_warmup_role() -> None:
+    got = search_commons(commons_payload(commons_page("Creek.jpg", "cc0-1.0")))
+    html = sheet_html("warmup", got, datetime(2026, 9, 21, 5, 0, tzinfo=UTC))
+    assert '<option value="warmup">' in html
+    for role in ("test", "lesson", "practice"):
+        assert f'<option value="{role}">' not in html
+    assert '"warmup": 2' in html
+
+
+def test_a_candidate_fetch_would_refuse_gets_no_pick_control() -> None:
+    """Picking something the tool then refuses wastes a person's evening."""
+    from scripts.find_open_photos import pick_control
+
+    refused = Candidate(
+        feature="artificial_bank",
+        side="present",
+        source="wikimedia-commons",
+        title="x",
+        page_url="https://commons.wikimedia.org/wiki/File:X.jpg",
+        image_url="https://x/x.jpg",
+        thumb_url="https://x/t.jpg",
+        author="Someone",
+        licence=Licence("cc-by-1.0", "CC BY 1.0", "", "cc-by-1.0"),
+        words="",
+        evidence="",
+        term="t",
+    )
+    got = search_commons(commons_payload(commons_page("Ok.jpg", "cc-by-4.0")))
+    html = sheet_html("artificial_bank", [*got, refused], datetime(2026, 9, 21, 5, 0, tzinfo=UTC))
+    # Every candidate gets a card, but only the ones fetch can record get a pick control.
+    assert html.count('class="card"') == len(got) + 1
+    assert html.count('class="take"') == len(got)
+    # The helper is what the sheet relies on, so check it directly too.
+    assert pick_control("artificial_bank", refused) == ""

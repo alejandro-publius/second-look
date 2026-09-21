@@ -280,7 +280,7 @@ def placeholder_report(content: Content) -> list[str]:
         if not f.get("verified_against_app") and f.get("app_item"):
             out.append(f"feature {f['id']} question not verified against the app")
         if f.get("wording_status") != "frozen":
-            out.append(f"feature {f['id']} question wording not frozen by Rachel")
+            out.append(f"feature {f['id']} question wording not frozen")
     for item in content.form.get("items", []):
         if not item.get("verified_against_app"):
             out.append(f"form item {item['id']} not verified against the app")

@@ -29,6 +29,7 @@ from scripts.verify_claims import CLAIM_RE, resolve_pointer
 
 ROOT = Path(__file__).resolve().parents[1]
 Owner = Literal["HUMAN", "BUILD", "NOTE"]
+Gate = Literal["launch", "judges"]
 Runner = Callable[[list[str]], tuple[int, str]]
 WEB_SKIP = {"node_modules", ".next", "out", "playwright-report", "test-results"}
 WEB_SUFFIXES = {".tsx", ".ts", ".jsx", ".js", ".html"}
@@ -37,12 +38,19 @@ WEB_SUFFIXES = {".tsx", ".ts", ".jsx", ".js", ".html"}
 @dataclass
 class Check:
     """`clears` says what would clear this check, so the report groups by the work and not by a
-    person (Update 09 section 1). A NOTE is printed and never counted: nothing waits on it."""
+    person (Update 09 section 1). A NOTE is printed and never counted: nothing waits on it.
+
+    `gate` says which run this check belongs to (Update 11 section 1). "launch" is only what the
+    two minute test uses, so Wednesday is not held up by the creek check form or a health
+    sentence. "judges" is everything else. A check in neither list would be invisible, so every
+    check names one.
+    """
 
     name: str
     owner: Owner
     reasons: list[str] = field(default_factory=list)
     clears: str = "our build"
+    gate: Gate = "launch"
 
     @property
     def passed(self) -> bool:
@@ -84,6 +92,18 @@ def unapproved_marks(lessons: dict[str, Any]) -> list[str]:
     return out
 
 
+# What the two minute test never touches: the creek check form and the health sentences.
+# Both still have to be right before a judge looks, which is what make preflight-judges is for.
+JUDGES_ONLY_RE = re.compile(r"^(form item |sentence )")
+
+
+def split_by_gate(reasons: list[str]) -> tuple[list[str], list[str]]:
+    """Returns (what the launch needs, what only the judges' run needs)."""
+    judges = [r for r in reasons if JUDGES_ONLY_RE.match(r)]
+    launch = [r for r in reasons if not JUDGES_ONLY_RE.match(r)]
+    return launch, judges
+
+
 # A missing second label no longer blocks launch (Update 09 section 1). The first team member to
 # label a photo sets the gold label; a second is welcome and optional. If every test photo has
 # two by the tag we report Cohen's kappa, and if not the plan and the README say so plainly.
@@ -108,19 +128,39 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
     # what waits for her yes.
     content_loads = Check("content_loads", "BUILD")
     human_inputs = Check("human_inputs", "HUMAN", clears="real photos and frozen wording")
+    judges_inputs = Check(
+        "judges_inputs", "HUMAN", clears="the creek check form and the sentences", gate="judges"
+    )
     second_labels = Check("second_labels", "NOTE", clears="a second labeller, optional")
     marks_approved = Check("marks_approved", "HUMAN", clears="team approval")
     try:
         content = load_content(root, strict=False)
         content_loads.reasons = list(content.problems)
         blocking, notes = split_second_labels(placeholder_report(content))
-        human_inputs.reasons, second_labels.reasons = blocking, notes
+        human_inputs.reasons, judges_inputs.reasons = split_by_gate(blocking)
+        second_labels.reasons = notes
         marks_approved.reasons = unapproved_marks(content.lessons)
     except Exception as e:  # a missing or unreadable content file
         content_loads.reasons = [f"content did not load: {e}"]
         human_inputs.reasons = ["content did not load, so human inputs cannot be checked"]
         marks_approved.reasons = ["content did not load, so marks cannot be checked"]
-    checks += [content_loads, human_inputs, second_labels, marks_approved]
+    checks += [content_loads, human_inputs, judges_inputs, second_labels, marks_approved]
+
+    # 2c. Backups. Update 11 section 6 puts this in the launch gate: a study with no backup is
+    # one bad afternoon from having no data. The drill file is written by the backup step.
+    backups = Check("backups", "HUMAN", clears="two GitHub secrets and one drill")
+    workflow = root / ".github" / "workflows" / "backup.yml"
+    drill = _read_json(root / "results" / "backup_drill.json")
+    if not workflow.exists():
+        backups.reasons.append("no .github/workflows/backup.yml")
+    elif drill is None:
+        backups.reasons.append(
+            "no backup has run: add the two GitHub secrets, then run the workflow and the "
+            "restore drill (results/backup_drill.json records it)"
+        )
+    elif not drill.get("restored_rows_match"):
+        backups.reasons.append("the restore drill did not match the live row counts")
+    checks.append(backups)
 
     # 3. The analysis plan carries no TODO wording.
     plan_wording = Check("plan_wording", "HUMAN")
@@ -212,7 +252,7 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
     # 9. Every README claim resolves (same rules as scripts/verify_claims.py), and
     # 10. no cited result file is synthetic.
     claims = Check("verify_claims", "BUILD")
-    results_real = Check("results_real", "HUMAN")
+    results_real = Check("results_real", "HUMAN", gate="judges")
     readme = root / "README.md"
     if not readme.exists():
         claims.reasons.append("README.md missing")
@@ -287,8 +327,8 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
     checks.append(contact)
 
     # 14. The model pass table exists and comes from a real run.
-    table_exists = Check("model_pass_table_exists", "BUILD")
-    table_real = Check("model_pass_table_real", "HUMAN")
+    table_exists = Check("model_pass_table_exists", "BUILD", gate="judges")
+    table_real = Check("model_pass_table_real", "HUMAN", gate="judges")
     table = _read_json(root / "results" / "model_pass_table.json")
     if not isinstance(table, dict):
         table_exists.reasons.append("results/model_pass_table.json missing (evals/model_sweep.py)")
@@ -300,8 +340,13 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
     return checks
 
 
-def report(checks: list[Check]) -> tuple[int, int]:
-    """Grouped by what clears it, not by who owes it: any team member can pick up any group."""
+def report(checks: list[Check], gate: Gate | None = None) -> tuple[int, int]:
+    """Grouped by what clears it, not by who owes it: any team member can pick up any group.
+
+    `gate` narrows the run: "launch" is only what the two minute test uses.
+    """
+    if gate is not None:
+        checks = [c for c in checks if c.gate == gate]
     failed = human = notes = 0
     passed = [c.name for c in checks if c.passed]
     groups: dict[str, list[Check]] = {}
@@ -331,8 +376,17 @@ def report(checks: list[Check]) -> tuple[int, int]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--gate",
+        choices=("launch", "judges", "all"),
+        default="all",
+        help="launch gates only what the two minute test uses; judges is everything else",
+    )
     args = parser.parse_args(argv)
-    failed, _ = report(run_checks(args.root))
+    gate: Gate | None = None if args.gate == "all" else args.gate
+    if gate:
+        print(f"preflight gate: {gate}")
+    failed, _ = report(run_checks(args.root), gate)
     return 1 if failed else 0
 
 
