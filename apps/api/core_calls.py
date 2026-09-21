@@ -195,7 +195,25 @@ def save_visit_bundle(visit: VisitRecord) -> Path | None:
     except ImportError:
         return None
     try:
-        return store(visit)
+        path = store(visit)
     except Exception as exc:
         log.warning("fhir store refused visit %s: %s", visit.visit_id, type(exc).__name__)
         return None
+    _audit_record_written(visit, path)
+    return path
+
+
+def _audit_record_written(visit: VisitRecord, path: Path) -> None:
+    """One hash chained audit line per stored record (Update 02 section 6). Never raises."""
+    try:
+        from scripts.audit_log import append
+
+        from apps.api.settings import settings
+
+        append(
+            "record_written",
+            {"visit_id": visit.visit_id, "spot_id": visit.spot.spot_id, "file": path.name},
+            path=Path(settings.audit_log_path),
+        )
+    except Exception as exc:
+        log.warning("audit append skipped for %s: %s", visit.visit_id, type(exc).__name__)

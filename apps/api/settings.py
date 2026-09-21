@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     content_root: str = "."
     # Private folder for re-encoded uploads. Never served as static files.
     upload_dir: str = "./data/uploads"
+    audit_log_path: str = "./audit/log.jsonl"
     # Empty means the API makes one at first use and keeps it in the randomization counter row.
     randomization_seed: str = ""
 

@@ -20,6 +20,7 @@ os.environ["UPLOAD_DIR"] = str(_TMP / "uploads")
 os.environ["FHIR_STORE_DIR"] = str(_TMP / "fhir_store")
 os.environ["RANDOMIZATION_SEED"] = "test-seed"
 os.environ["BUILD_HASH"] = "test-build"
+os.environ["AUDIT_LOG_PATH"] = str(_TMP / "audit.jsonl")
 
 from fastapi.testclient import TestClient  # noqa: E402
 
