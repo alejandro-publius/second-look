@@ -32,8 +32,10 @@ SERVICES = """## External services
 - hl7-eu/oah implementation guide, commit b907cf0, built from source in CI with SUSHI 3.20.1 and
   validated with the HL7 validator. That repo has no LICENSE file, so nothing from it is
   redistributed here; `fhir/ig.lock` records the commit and the package sha256.
-- Vercel (web) and Fly.io (API) host the app. What they log on their own is written in
-  docs/DATA_HANDLING.md.
+- Cloudflare Pages (web) and Cloudflare Workers with D1 (API) host the app (Update 09). What
+  they log on their own is written in docs/DATA_HANDLING.md.
+- The MCP server in `apps/mcp/` runs locally over stdio through the `mcp` Python SDK (MIT). It
+  reads our own read only endpoint or a local export and calls no other service.
 """
 
 REFERENCES = """## Design references

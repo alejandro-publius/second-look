@@ -25,7 +25,7 @@ from datetime import date
 from pydantic import Field
 
 from core.labels import HUMAN_PASS_MIN
-from core.records import Frozen, Spot, VisitRecord
+from core.records import FEATURES, Frozen, Spot, VisitRecord
 from core.regions import Creek, Reach, reaches_below
 
 # The four measures OneAquaHealth's own decision tool returns, and which finding points at each.
@@ -85,10 +85,17 @@ class Finding(Frozen):
     visit_ids: tuple[str, ...]
     first_seen: date
     last_seen: date
+    # The observers above who held a passing, unexpired score for this feature on the day they
+    # last reported it. A form item nobody is tested on has none.
+    passed_observers: tuple[str, ...] = ()
 
     @property
     def n_observers(self) -> int:
         return len(self.observers)
+
+    @property
+    def n_passed(self) -> int:
+        return len(self.passed_observers)
 
 
 class Need(Frozen):
@@ -140,13 +147,17 @@ def findings_from_visits(
             day = v.answered_at.date()
             row = seen.setdefault(
                 key,
-                {"observers": [], "visits": [], "first": day, "last": day},
+                {"observers": [], "passed": [], "visits": [], "first": day, "last": day},
             )
             token = v.observer.contributor_token
             observers = row["observers"]
             assert isinstance(observers, list)
             if token not in observers:
                 observers.append(token)
+            passed = row["passed"]
+            assert isinstance(passed, list)
+            if token not in passed and _passed_feature(v, feature, day):
+                passed.append(token)
             visit_ids = row["visits"]
             assert isinstance(visit_ids, list)
             visit_ids.append(v.visit_id)
@@ -164,6 +175,7 @@ def findings_from_visits(
                 visit_ids=tuple(row["visits"]),  # type: ignore[arg-type]
                 first_seen=row["first"],  # type: ignore[arg-type]
                 last_seen=row["last"],  # type: ignore[arg-type]
+                passed_observers=tuple(row["passed"]),  # type: ignore[arg-type]
             )
         )
     return out
@@ -206,11 +218,18 @@ def needs_from_findings(
     return out
 
 
-def _passed_pipe(v: VisitRecord, today: date) -> bool:
-    score = v.observer.score_for("pipe_running")
+def _passed_feature(v: VisitRecord, feature: str, today: date) -> bool:
+    """A passing, unexpired score for this feature. A form item nobody is tested on never passes."""
+    if feature not in FEATURES:
+        return False
+    score = v.observer.score_for(feature)
     if score is None or score.expired_on(today):
         return False
     return score.correct >= HUMAN_PASS_MIN
+
+
+def _passed_pipe(v: VisitRecord, today: date) -> bool:
+    return _passed_feature(v, "pipe_running", today)
 
 
 def _dry_pipe_days(v: VisitRecord) -> int | None:

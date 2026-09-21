@@ -418,3 +418,68 @@ def test_a_coarse_pin_counts_on_the_creek_but_neither_gives_nor_gets_a_note(clie
         "reach_name": None,
     }
     assert record["downstream_notes"] == []
+
+
+# /api/creeks, and the score carried structurally in the record ------------------------------------
+
+
+def test_creeks_lists_every_creek_with_its_visit_ids(client, monkeypatch):
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    assert client.get("/api/creeks").json() == {"creeks": []}
+    glade = a_visit(client, token=None, spot=SOUTH_FORK_PIN, answers=GOOD_ANSWERS)
+    far = {
+        "new": {
+            "name": "Codornices Creek",
+            "latitude": 37.89,
+            "longitude": -122.28,
+            "coarse": False,
+        }
+    }
+    other = a_visit(client, token=None, spot=far, answers=GOOD_ANSWERS)
+    a_visit(
+        client,
+        token=None,
+        spot={"new": {"name": "test spot", "latitude": 37.9, "longitude": -122.3, "coarse": False}},
+        answers=GOOD_ANSWERS,
+    )
+    listed = client.get("/api/creeks").json()["creeks"]
+    assert [c["creek"] for c in listed][0] == "strawberry-creek", "slug creeks first"
+    assert len(listed) == 2, "the pin named like a test makes no creek"
+    strawberry, codornices = listed
+    assert strawberry["visit_ids"] == [glade["visit_id"]] and strawberry["visits"] == 1
+    assert strawberry["fhir"] == [f"/api/fhir/Bundle/{glade['visit_id']}"]
+    assert strawberry["record"] == "/api/city/strawberry-creek"
+    assert codornices["creek_slug"] is None and codornices["name"] == "Codornices Creek"
+    assert codornices["visit_ids"] == [other["visit_id"]]
+
+
+def test_the_stored_record_carries_the_observer_score_structurally(client, monkeypatch):
+    """An agent reading the FHIR finds k of 4 per feature in the test sitting response, not only
+    in a narrative sentence."""
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    made = a_visit(client, token=passing_session(client), spot=SOUTH_FORK_PIN, answers=GOOD_ANSWERS)
+    bundle = client.get(f"/api/fhir/Bundle/{made['visit_id']}").json()
+    responses = [
+        e["resource"]
+        for e in bundle["entry"]
+        if e["resource"]["resourceType"] == "QuestionnaireResponse"
+    ]
+    sittings = [r for r in responses if r["id"].startswith("sl-qr-test-")]
+    assert len(sittings) == 1
+    scores = {i["linkId"]: i["item"][0]["answer"][0]["valueInteger"] for i in sittings[0]["item"]}
+    assert scores == {
+        "artificial_bank": 4,
+        "dug_out_channel": 4,
+        "invasive_plant": 4,
+        "pipe_running": 4,
+    }
+    assert (
+        "sitting-" in sittings[0]["identifier"]["value"]
+        and len(sittings[0]["identifier"]["value"]) < 30
+    )
+    # An anonymous visit carries no sitting at all.
+    quiet = a_visit(client, token=None, spot=PARK_PIN, answers=QUIET_ANSWERS)
+    anon = client.get(f"/api/fhir/Bundle/{quiet['visit_id']}").json()
+    assert not any(e["resource"].get("id", "").startswith("sl-qr-test-") for e in anon["entry"])

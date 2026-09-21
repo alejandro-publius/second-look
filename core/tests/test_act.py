@@ -336,3 +336,23 @@ def test_a_finding_on_an_unknown_reach_gives_no_note() -> None:
     # A reach of some other creek is not this creek's business.
     other = Reach(slug="x", name="X", creek_slug="elsewhere", flows_into=None)
     assert notes_below(findings, {SPOT.spot_id: other}, creek, {}) == []
+
+
+def test_a_finding_counts_the_people_who_passed_separately() -> None:
+    """Three people saw the pipe. Two passed, one scored 2 of 4, so passed_observers is two."""
+    found = findings_from_visits(
+        [
+            visit("v1", ALICE, pipe_correct=4),
+            visit("v2", BOB, pipe_correct=3),
+            visit("v3", "caroltoken2345", pipe_correct=2),
+        ]
+    )
+    (f,) = found
+    assert f.n_observers == 3
+    assert f.passed_observers == (ALICE, BOB) and f.n_passed == 2
+    # An expired score does not pass, however good it was.
+    stale = findings_from_visits([visit("v1", ALICE, pipe_correct=4, tested_on=date(2026, 5, 1))])
+    assert stale[0].n_passed == 0
+    # A form item nobody is tested on, such as barriers, never has a passed observer.
+    barrier = findings_from_visits([visit("v1", ALICE, answers={"barriers": "present"})])
+    assert barrier[0].feature == "barriers" and barrier[0].n_passed == 0

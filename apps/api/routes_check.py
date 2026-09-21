@@ -35,6 +35,12 @@ def spot(spot_id: str, db: DB, now: Now) -> dict[str, Any]:
     return view
 
 
+@router.get("/creeks", dependencies=[Depends(rate_limited(READ_LIMIT))])
+def creeks(db: DB) -> dict[str, Any]:
+    """Every creek with a record, each with the visit ids behind its count."""
+    return city_mod.creeks_view(db)
+
+
 @router.get("/city/{creek_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])
 def city(creek_id: str, db: DB, now: Now) -> dict[str, Any]:
     """The analyst's view. Every number in it carries the visit ids behind it."""

@@ -211,7 +211,7 @@ def test_finalize_without_the_record_builder_is_a_plain_503(client, monkeypatch)
 
 def test_finalize_survives_a_missing_fhir_store(client, monkeypatch):
     monkeypatch.setattr(core_calls, "rain_status", _unknown)
-    monkeypatch.setattr(core_calls, "save_visit_bundle", lambda visit: None)
+    monkeypatch.setattr(core_calls, "save_visit_bundle", lambda visit, **_kw: None)
     draft = _draft(client).json()
     body = client.post("/api/check/finalize", json={"draft_id": draft["draft_id"]}).json()
     assert body["fhir_saved"] is False

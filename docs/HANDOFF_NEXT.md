@@ -20,7 +20,7 @@ Two branches, two jobs.
 
 ## What is done on `depth`
 
-- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 41 built, 4 parked, 8 missing.
+- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 42 built, 4 parked, 7 missing.
 - `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
   guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
 - `GET /api/city/{creek_id}` and `/city?creek=`: the analyst's view. No number without its
@@ -51,19 +51,25 @@ Two branches, two jobs.
   `docs/screens/sandbox-library.png` is the screenshot. `scripts/repush_sandbox.py` gained
   `--bundle`, `--library` and `--evidence`, and mirrors visit Bundles only: a referral, an example
   or a transaction file is refused by name and skipped in a folder.
+- **The MCP server** (`apps/mcp/`, Update 10 tier 2 item 2). Read only, local over stdio,
+  through the `mcp` Python SDK 2.x (`MCPServer`, not the 1.x `FastMCP`). Five tools; every
+  answer carries `resource_ids` and `fhir`. Reads our read only API (`--api`) or a local export
+  (`--export`, written by `scripts/export_records.py`, `make export-records`). `GET /api/creeks`
+  is new so the server can list creeks. Stored records now carry the observer's test sitting, so
+  the per feature score is structured in FHIR and `get_observer_score` reads it from the record.
+  Eight contract tests, including one real run over stdio. `examples/mcp/README.md` has the
+  Claude config; `examples/mcp/transcript.md` is one real session from a throwaway database.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Tier 2 item 2: the MCP server, read only, local over stdio, five tools, contract tests, a
-   transcript in `examples/mcp/`.
-2. Tier 2 item 3: `make new-city`, run once for Heraklion. Record the two durations.
-3. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
-4. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
+1. Tier 2 item 3: `make new-city`, run once for Heraklion. Record the two durations.
+2. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
+3. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
    on the Worker, proved by golden vectors the Python writes and the TypeScript reproduces.
-5. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+4. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
 
@@ -84,5 +90,10 @@ Two branches, two jobs.
   two branches and merged. The two `sandbox_push` lines from the write back went to a scratch
   file; `docs/notes/sandbox_library.md` lists them for appending to the real chain at merge time.
   Anything on `depth` that would write the audit log should set `AUDIT_LOG_PATH` outside the repo.
+- The `mcp` SDK is 2.x: `from mcp.server.mcpserver import MCPServer`; a plain exception inside a
+  tool is hidden behind "Error executing tool", so raise `ToolError` for a message an agent may
+  read. `mcp.client.Client(server)` connects in memory for tests.
+- pytest fixtures are per folder. `apps/mcp/tests/conftest.py` imports the API's `client`
+  fixture so the MCP tests can make real records.
 - The region pack's boxes are approximate and hand filled. A wrong box misplaces a precise pin
   onto the wrong reach; the fix is in `content/regions/california-bay-area.yaml`, nowhere else.

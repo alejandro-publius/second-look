@@ -53,7 +53,7 @@ scale 15.
 | HL7 validator, their guide at b907cf0, terminology on | built, 0 errors | `scripts/fhir_validate.py` | `docs/notes/p2_validator_run.md` | Technical | standards |
 | Observer score travels with every observation | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Innovation | standards, digital health |
 | Provenance links an Observation to both responses | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Technical | standards |
-| Our own read only FHIR endpoint | built (Python only) | `apps/api/fhir_routes.py` | `apps/api/tests/test_fhir_routes.py` | Technical | agents |
+| Our own read only FHIR endpoint, plus `/api/creeks` and a local export | built (Python only) | `apps/api/fhir_routes.py`, `scripts/export_records.py` | `apps/api/tests/test_fhir_routes.py`, `apps/mcp/tests/test_server.py` | Technical | agents |
 | Sandbox mirror, conditional creates, ledger | built, the worked visit mirrored 2026-09-21 | `scripts/repush_sandbox.py` | `apps/api/tests/test_fhir_store.py` | Technical | standards |
 | Library entry in their sandbox, the FAIR pattern | built, Library/466 live since 2026-09-21 | `core/fhir_library.py`, `scripts/repush_sandbox.py` | `core/tests/test_fhir_library.py`, `scripts/tests/test_repush_sandbox.py` | Impact | standards |
 | Hash chained audit log | built | `scripts/audit_log.py` | `scripts/verify_audit.py` | Technical | data tools |
@@ -70,7 +70,7 @@ scale 15.
 | ServiceRequest referral for a pipe worth testing | built | `core/fhir_referral.py` | `core/tests/test_fhir_referral.py`, `apps/api/tests/test_city.py` | Impact | standards, digital health |
 | A laboratory result returning to the same record | built, as a tagged example | `core/fhir_referral.py` | `core/tests/test_fhir_referral.py` | Impact | digital health |
 | Downstream note on reaches below a finding | built | `core/regions.py`, `core/act.py`, `apps/api/city.py` | `core/tests/test_regions.py`, `apps/api/tests/test_city.py` | Innovation | ecologist |
-| MCP server over our records, read only, local | **missing** | none | none | Innovation | agents |
+| MCP server over our records, read only, local | built | `apps/mcp/server.py`, `apps/mcp/source.py` | `apps/mcp/tests/test_server.py` | Innovation | agents |
 | `make new-city`, the follower city recipe | **missing** | none | none | **Feasibility (15)** | outreach |
 
 ## The build, the docs and the gates
@@ -94,9 +94,9 @@ scale 15.
 
 | Status | Count |
 |---|---|
-| built | 41 |
+| built | 42 |
 | parked | 4 |
-| missing | 8 |
+| missing | 7 |
 
 Counted again on 2026-09-21 after Update 10 tier 1 (all four items). The remaining missing rows are
 the agents and integration line (the MCP server, the Library entry, `make new-city`) and the

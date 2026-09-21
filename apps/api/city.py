@@ -109,6 +109,8 @@ def _finding_view(f: Finding, spot_names: dict[str, str], feature_names: dict[st
         "feature": f.feature,
         "feature_name": feature_names.get(f.feature, f.feature),
         "observers": f.n_observers,
+        # How many of them held a passing, unexpired score for this feature when they reported.
+        "passed_observers": f.n_passed,
         "first_seen": f.first_seen.isoformat(),
         "last_seen": f.last_seen.isoformat(),
         # Every number opens the resources behind it.
@@ -264,6 +266,9 @@ def city_view(db: Session, creek_ref: str, *, today: date) -> dict[str, Any]:
         "creek_slug": creek.slug if creek else None,
         "creek_name": creek_name,
         "visits": len(visits),
+        # The visits behind that count, so even the total opens its records.
+        "visit_ids": [v.visit_id for v in visits],
+        "fhir": [f"/api/fhir/Bundle/{v.visit_id}" for v in visits],
         "spots": len(real),
         "findings": [_finding_view(f, spot_names, feature_names) for f in findings],
         "needs": [
@@ -378,3 +383,45 @@ def example_result_view(db: Session, spot_id: str, *, now: datetime) -> dict[str
         collected_at=now + EXAMPLE_SAMPLE_AFTER,
         reported_at=now + EXAMPLE_REPORT_AFTER,
     )
+
+
+def creeks_view(db: Session) -> dict[str, Any]:
+    """Every creek that has at least one real spot, by its readable slug where the region pack
+    knows it and by its stored id otherwise, each with the visit ids behind its count."""
+    known = creeks()
+    all_spots = list(db.exec(select(SpotRow)).all())
+    placements = placements_for(all_spots, known)
+    groups: dict[str, dict[str, Any]] = {}
+    for row in all_spots:
+        if looks_like_a_test_name(row.spot_name):
+            continue
+        placed = placements.get(row.spot_id)
+        key = placed.creek.slug if placed else row.creek_id
+        name = placed.creek.name if placed else row.creek_name
+        group = groups.setdefault(
+            key,
+            {
+                "creek": key,
+                "creek_slug": placed.creek.slug if placed else None,
+                "name": name,
+                "spots": [],
+            },
+        )
+        group["spots"].append(row)
+    out: list[dict[str, Any]] = []
+    for key, group in groups.items():
+        visits = _records_for(db, group["spots"])
+        out.append(
+            {
+                "creek": key,
+                "creek_slug": group["creek_slug"],
+                "name": group["name"],
+                "spots": len(group["spots"]),
+                "visits": len(visits),
+                "visit_ids": [v.visit_id for v in visits],
+                "fhir": [f"/api/fhir/Bundle/{v.visit_id}" for v in visits],
+                "record": f"/api/city/{key}",
+            }
+        )
+    out.sort(key=lambda c: (c["creek_slug"] is None, c["name"]))
+    return {"creeks": out}

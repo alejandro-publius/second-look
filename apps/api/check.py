@@ -11,7 +11,7 @@ import io
 import json
 import re
 import secrets
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -25,7 +25,7 @@ from apps.api.models import CheckResultRow, ObserverRow, SpotRow, UploadRow, Vis
 from apps.api.security import sha256_hex
 from apps.api.settings import settings
 from core import act
-from core.records import CheckResult, FeatureId, FeatureScore, Observer, Spot
+from core.records import CheckResult, FeatureId, FeatureScore, Observer, Spot, TestSitting
 
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 MAX_IMAGE_SIDE = 1600
@@ -442,8 +442,30 @@ def finalize(db: Session, body: FinalizeBody, *, now: datetime) -> dict[str, Any
     row.finalized_at = now
     db.add(row)
     db.commit()
-    saved = core_calls.save_visit_bundle(record)
+    saved = core_calls.save_visit_bundle(
+        record, test_sitting=sitting_for(db, row.contributor_token)
+    )
     return {"visit_id": row.visit_id, "spot_id": row.spot_id, "fhir_saved": saved is not None}
+
+
+def sitting_for(db: Session, token: str | None) -> TestSitting | None:
+    """The observer's test sitting as the record carries it: the per feature k of 4, structured,
+    so a reader of the FHIR does not have to parse a narrative to find the score. The sitting id
+    is a hash of the token, like the Practitioner id, so the token itself never appears."""
+    if not token:
+        return None
+    row = db.get(ObserverRow, token)
+    if row is None:
+        return None
+    observer = observer_from_token(db, token)
+    if observer is None or not observer.scores:
+        return None
+    return TestSitting(
+        sitting_id=f"sitting-{sha256_hex(token)[:12]}",
+        contributor_token=token,
+        completed_at=datetime.combine(row.tested_on, datetime.min.time(), tzinfo=UTC),
+        scores=observer.scores,
+    )
 
 
 def quick_check(db: Session, spot_id: str, body: QuickBody, *, now: datetime) -> dict[str, Any]:

@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -21,7 +21,7 @@ lint:
 	uv run ruff format --check .
 
 types:
-	uv run mypy core apps/api evals scripts
+	uv run mypy core apps/api apps/mcp evals scripts
 
 test:
 	uv run pytest
@@ -51,6 +51,14 @@ fhir-validate:
 
 audit-verify:
 	$(PY) scripts/verify_audit.py
+
+# The read only MCP server over our records (Update 10 tier 2 item 2). Local, over stdio.
+# make export-records writes data/export from the local database; make mcp serves it.
+export-records:
+	$(PY) scripts/export_records.py --out data/export
+
+mcp:
+	$(PY) -m apps.mcp.server --export data/export
 
 e2e:
 	cd $(WEB) && npm run build --silent && npx playwright test
