@@ -1,0 +1,39 @@
+# Second Look creek records, for the VS Code REST Client or IntelliJ HTTP client.
+# Same five steps as second-look.postman_collection.json. Point baseUrl at a local HAPI
+# (docker run -d --name sl-hapi -p 8085:8080 hapiproject/hapi:latest) or the OneAquaHealth
+# sandbox. Delete only ids you created and recorded in fhir/sandbox_ledger.jsonl.
+
+@baseUrl = http://localhost:8085/fhir
+@tagSystem = https://github.com/alejandro-publius/second-look
+@tagCode = second-look
+@observationIdentifierSystem = https://github.com/alejandro-publius/second-look/fhir/observation
+@locationIdentifierSystem = https://github.com/alejandro-publius/second-look/fhir/location-id
+@userAgent = second-look (+https://github.com/alejandro-publius/second-look)
+
+### 1. Create the visit: a transaction of conditional creates, safe to run twice
+POST {{baseUrl}}
+Content-Type: application/fhir+json
+Accept: application/fhir+json
+User-Agent: {{userAgent}}
+
+< ../golden/visit-strawberry-creek-1.transaction.json
+
+### 2. Read our Observations by tag
+GET {{baseUrl}}/Observation?_tag={{tagSystem}}|{{tagCode}}&_count=20
+Accept: application/fhir+json
+User-Agent: {{userAgent}}
+
+### 3. Read the Provenance by target (from an answer to the person who gave it)
+GET {{baseUrl}}/Provenance?target:Observation.identifier={{observationIdentifierSystem}}|visit-0001-channel_form
+Accept: application/fhir+json
+User-Agent: {{userAgent}}
+
+### 4. Read the spot Location
+GET {{baseUrl}}/Location?identifier={{locationIdentifierSystem}}|spot-1
+Accept: application/fhir+json
+User-Agent: {{userAgent}}
+
+### 5. Delete one Location by id. Replace the id with one from fhir/sandbox_ledger.jsonl.
+DELETE {{baseUrl}}/Location/REPLACE-WITH-AN-ID-FROM-THE-LEDGER
+Accept: application/fhir+json
+User-Agent: {{userAgent}}

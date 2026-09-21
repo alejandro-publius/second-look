@@ -1,7 +1,7 @@
 CodeSystem: SecondLookCS
 Id: second-look
 Title: "Second Look codes"
-Description: """Codes for the four stream features a volunteer is tested on, the answer a person cannot give, and the test itself. Everything else reuses the OneAquaHealth temporary code system."""
+Description: """Codes for the four stream features a volunteer is tested on, the answer a person cannot give, the test itself, and the coded form answers that have no OneAquaHealth code. Everything else reuses the OneAquaHealth temporary code system."""
 * ^url = "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
 * ^status = #draft
 * ^experimental = true
@@ -14,6 +14,25 @@ Description: """Codes for the four stream features a volunteer is tested on, the
 * #cant-tell "Can't tell" "The observer could not decide from what they saw."
 * #second-look-test "Second Look observer test" "A two minute photo test on the four features, scored per feature out of 4."
 * #software "Second Look software" "The Second Look application acting as an agent."
+// Coded answers from the creek check form (content/form.yaml) that the OneAquaHealth system has no code for.
+* #flat "Flat channel" "Channel form: flat."
+* #u-shape "U shaped channel" "Channel form: U shape."
+* #v-shape "V shaped channel" "Channel form: V shape."
+* #fast "Fast flow" "Water flow: fast, with waves or high velocity."
+* #slow "Slow flow" "Water flow: slow."
+* #stagnant "Stagnant or intermittent flow" "Water flow: stagnant or intermittent."
+* #dry "Dry channel" "Water flow: none, the channel is dry."
+* #sand-banks "Sand banks" "Habitat: sand banks."
+* #sand-islands "Sand islands" "Habitat: sand islands."
+* #stone-deposits "Stone deposits" "Habitat: stone deposits."
+* #riffles "Riffles, rapids or falls" "Habitat: riffles, rapids or falls."
+* #aquatic-vegetation "Aquatic vegetation" "Habitat: aquatic vegetation."
+* #fallen-trees "Fallen trees" "Natural debris: fallen trees."
+* #fallen-branches "Fallen branches" "Natural debris: fallen branches."
+* #leaf-deposits "Deposits of fallen leaves" "Natural debris: deposits of fallen leaves."
+* #good "Good overall rating" "Overall rating: the ecosystem components are there."
+* #moderate "Moderate overall rating" "Overall rating: some alterations, still biodiverse."
+* #poor "Poor overall rating" "Overall rating: highly modified, loss of vegetation and habitats, polluted."
 
 ValueSet: SecondLookFeatureVS
 Id: second-look-feature-vs

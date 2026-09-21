@@ -1,0 +1,112 @@
+{
+  "info": {
+    "name": "Second Look creek records",
+    "description": "Create, read and delete Second Look creek records on a FHIR R4 server. Set baseUrl to the OneAquaHealth sandbox (https://sandbox.hl7europe.eu/oneaquahealth/fhir) or a local HAPI (http://localhost:8085/fhir). Every resource we write carries meta.tag {tagSystem}|{tagCode}. Delete only ids you created; never delete by search, never $expunge.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8085/fhir" },
+    { "key": "tagSystem", "value": "https://github.com/alejandro-publius/second-look" },
+    { "key": "tagCode", "value": "second-look" },
+    { "key": "observationIdentifierSystem", "value": "https://github.com/alejandro-publius/second-look/fhir/observation" },
+    { "key": "locationIdentifierSystem", "value": "https://github.com/alejandro-publius/second-look/fhir/location-id" },
+    { "key": "spotIdentifier", "value": "spot-1" },
+    { "key": "firstObservationIdentifier", "value": "visit-0001-channel_form" },
+    { "key": "locationId", "value": "REPLACE-WITH-AN-ID-FROM-THE-LEDGER" },
+    { "key": "userAgent", "value": "second-look (+https://github.com/alejandro-publius/second-look)" }
+  ],
+  "item": [
+    {
+      "name": "1. Create the visit (transaction of conditional creates)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/fhir+json" },
+          { "key": "Accept", "value": "application/fhir+json" },
+          { "key": "User-Agent", "value": "{{userAgent}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}", "host": ["{{baseUrl}}"] },
+        "body": {
+          "mode": "file",
+          "file": { "src": "../golden/visit-strawberry-creek-1.transaction.json" }
+        },
+        "description": "Body: fhir/golden/visit-strawberry-creek-1.transaction.json. Every entry is POST with If-None-Exist on the resource identifier, so running it twice creates nothing new. Each response entry says 201 Created or 200 OK and gives the server id; record created ids in fhir/sandbox_ledger.jsonl."
+      }
+    },
+    {
+      "name": "2. Read our Observations by tag",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/fhir+json" },
+          { "key": "User-Agent", "value": "{{userAgent}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Observation?_tag={{tagSystem}}|{{tagCode}}&_count=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["Observation"],
+          "query": [
+            { "key": "_tag", "value": "{{tagSystem}}|{{tagCode}}" },
+            { "key": "_count", "value": "20" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Read the Provenance by target",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/fhir+json" },
+          { "key": "User-Agent", "value": "{{userAgent}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Provenance?target:Observation.identifier={{observationIdentifierSystem}}|{{firstObservationIdentifier}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Provenance"],
+          "query": [
+            {
+              "key": "target:Observation.identifier",
+              "value": "{{observationIdentifierSystem}}|{{firstObservationIdentifier}}"
+            }
+          ]
+        },
+        "description": "Walks from an Observation to the Provenance that names the volunteer (author) and the software (assembler), and from there to the test sitting."
+      }
+    },
+    {
+      "name": "4. Read the spot Location",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/fhir+json" },
+          { "key": "User-Agent", "value": "{{userAgent}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Location?identifier={{locationIdentifierSystem}}|{{spotIdentifier}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Location"],
+          "query": [
+            { "key": "identifier", "value": "{{locationIdentifierSystem}}|{{spotIdentifier}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Delete one Location by id (ledger ids only)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Accept", "value": "application/fhir+json" },
+          { "key": "User-Agent", "value": "{{userAgent}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/Location/{{locationId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["Location", "{{locationId}}"]
+        },
+        "description": "Set locationId to an id recorded as created in fhir/sandbox_ledger.jsonl, then record the delete there too. Never delete by search, never call $expunge."
+      }
+    }
+  ]
+}

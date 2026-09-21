@@ -100,16 +100,16 @@ Usage: #inline
 * status = #completed
 * authored = "2026-09-24T16:40:00Z"
 * author = Reference(Practitioner/sl-practitioner-1)
-* item[0].linkId = "bank_type"
-* item[0].answer.valueCoding = TemporaryOahSystem#present "Present"
-* item[1].linkId = "channel_form"
-* item[1].answer.valueCoding = TemporaryOahSystem#absent "Absent"
-* item[2].linkId = "invasive_species"
-* item[2].answer.valueCoding = TemporaryOahSystem#present "Present"
-* item[3].linkId = "draining_pipes"
-* item[3].answer.valueCoding = SecondLookCS#cant-tell "Can't tell"
-* item[4].linkId = "water_height_m"
-* item[4].answer.valueDecimal = 0.2
+* item[0].linkId = "channel_form"
+* item[0].answer.valueCoding = SecondLookCS#u-shape "U shaped channel"
+* item[1].linkId = "bank_type"
+* item[1].answer.valueCoding = TemporaryOahSystem#present "Present"
+* item[2].linkId = "draining_pipes"
+* item[2].answer.valueCoding = SecondLookCS#cant-tell "Can't tell"
+* item[3].linkId = "water_height_m"
+* item[3].answer.valueDecimal = 0.2
+* item[4].linkId = "invasive_species"
+* item[4].answer.valueCoding = TemporaryOahSystem#present "Present"
 
 Instance: sl-obs-bank-1
 InstanceOf: ObservationIndicatorsOah
