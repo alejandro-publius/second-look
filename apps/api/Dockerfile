@@ -6,6 +6,9 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY apps ./apps
 COPY core ./core
 COPY content ./content
+COPY photos ./photos
+COPY scripts ./scripts
+RUN mkdir -p /app/data
 ENV PATH="/app/.venv/bin:$PATH" PYTHONPATH=/app
 EXPOSE 8000
-CMD ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "alembic -c apps/api/alembic.ini upgrade head && uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --no-access-log --proxy-headers"]
