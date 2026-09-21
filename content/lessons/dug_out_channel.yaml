@@ -2,7 +2,12 @@
 # Captions are written from what each source page says about its own photo, so Alex checks them
 # against the picture before approving. approved stays false until he does.
 feature: dug_out_channel
-approved: false
+approved: true
+approved_by: "Alex Velazquez"
+approved_on: "2026-09-21"
+# Rules of thumb, captions and practice feedback approved in Update 11C on three
+# conditions, all met: 11 words, a source fetched on the day, no health claim. The marks
+# on this lesson were approved in Update 11D and carry their own stamp.
 rule_of_thumb: "Straight, even banks, same width, flat water: someone dug this channel."
 source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
 contrast_pairs:
@@ -12,16 +17,16 @@ contrast_pairs:
     assume_caption: "Bends, gravel and changing width look untidy. This is how a stream shapes itself when nobody stops it."
     actual_caption: "Straight from edge to edge, both banks at one even slope, the same width all along. A machine cut this."
     marks:
-      - { x: 0.28, y: 0.56, label: "Bank cut at one angle", approved: false }
-      - { x: 0.5, y: 0.37, label: "Straight, same width throughout", approved: false }
+      - { x: 0.28, y: 0.56, label: "Bank cut at one angle", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.5, y: 0.37, label: "Straight, same width throughout", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
   # Pair B. Assume: Hanshaeger Bach, a meander. Actual: Herringer Bach, a straightened course.
   - assume_photo_id: ph-channel-08
     actual_photo_id: ph-channel-07
     assume_caption: "The brook swings left and right across its meadow. Nobody set that line. Left alone."
     actual_caption: "A cut channel between banks trimmed to one even slope, holding the same width all along. Dug out."
     marks:
-      - { x: 0.52, y: 0.74, label: "Trimmed bank, one angle", approved: false }
-      - { x: 0.6, y: 0.53, label: "Same width all along", approved: false }
+      - { x: 0.52, y: 0.74, label: "Trimmed bank, one angle", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.6, y: 0.53, label: "Same width all along", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
 practice:
   # A small canalised stream at Butler's Hill: straight, narrow, even.
   photo_id: ph-channel-09
@@ -29,5 +34,5 @@ practice:
   feedback_correct: "Right. Straight, narrow and the same width all along. Dug out."
   feedback_wrong: "Follow the line of the water. It runs straight and keeps one width the whole way. Dug out."
 practice_marks:
-  - { x: 0.6, y: 0.6, label: "Straight, narrow, same width", approved: false }
-  - { x: 0.73, y: 0.76, label: "Even cut bank", approved: false }
+  - { x: 0.6, y: 0.6, label: "Straight, narrow, same width", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  - { x: 0.73, y: 0.76, label: "Even cut bank", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }

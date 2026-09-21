@@ -114,12 +114,19 @@ export interface Content {
   features: Feature[];
   form: { version: number; sections: FormSection[]; items: FormItem[] };
   test_items: TestItem[];
-  warmup: { id: string; photo_id: string }[];
+  warmup: WarmupItem[];
   glossary: GlossaryTerm[];
   regions: Record<string, Region>;
   lessons: Record<string, Lesson>;
   locale: Record<string, string>;
   photos: Record<string, Photo>;
+}
+
+export interface WarmupItem {
+  id: string;
+  photo_id: string;
+  /** True on the creek in the more natural state. Exactly one of the pair carries it. */
+  more_natural: boolean;
 }
 
 export const content = raw as unknown as Content;
@@ -161,6 +168,11 @@ const LICENSE_URLS: Record<string, string> = {
   "CC-BY-SA-3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
   "CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
 };
+
+/** The creek in the more natural state, whichever side of the pair it was shown on. */
+export function moreNatural(pair: WarmupItem[]): WarmupItem | undefined {
+  return pair.find((w) => w.more_natural);
+}
 
 export function licenseUrl(license: string): string | undefined {
   return LICENSE_URLS[license];

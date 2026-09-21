@@ -7,6 +7,7 @@ import { Gauge } from "./ui/Gauge";
 import { Row } from "./ui/Row";
 import { PhotoFrame } from "./ui/PhotoFrame";
 import type { FeatureScoreOut } from "@/lib/api";
+import type { WarmupItem } from "@/lib/content";
 import { content, featureById } from "@/lib/content";
 import { siteUrl } from "@/lib/session";
 import { t } from "@/lib/t";
@@ -16,21 +17,24 @@ import { t } from "@/lib/t";
  * test it would be a small lesson handed to both arms, which would shrink the gap the study
  * measures. It says one creek is in a more natural state, and says plainly that a photo cannot
  * tell anyone whether the water is safe.
+ *
+ * It never says "the one on the right". On a phone the two photographs stack, and the order they
+ * were shown in may be shuffled, so the badge travels with the photograph itself.
  */
-function WarmupReveal() {
-  const [left, right] = content.warmup;
+export function WarmupReveal({ pair = content.warmup }: { pair?: WarmupItem[] }) {
   return (
     <div className="card stack" aria-labelledby="warmup-reveal">
       <h2 id="warmup-reveal" className="small">{t("warmup.reveal_title")}</h2>
       <div className="pair">
-        <div>
-          <PhotoFrame id={left.photo_id} />
-          <p className="small">{t("warmup.reveal_left")}</p>
-        </div>
-        <div>
-          <PhotoFrame id={right.photo_id} />
-          <p className="small">{t("warmup.reveal_right")}</p>
-        </div>
+        {pair.map((w) => (
+          <div key={w.id} data-testid={w.more_natural ? "reveal-natural" : "reveal-modified"}>
+            <PhotoFrame id={w.photo_id} />
+            <p className="small">
+              <strong>{t(w.more_natural ? "warmup.reveal_badge" : "warmup.reveal_other")}</strong>{" "}
+              {t(w.more_natural ? "warmup.reveal_natural_note" : "warmup.reveal_modified_note")}
+            </p>
+          </div>
+        ))}
       </div>
       <p>{t("warmup.reveal_point")}</p>
       <p className="small muted">{t("warmup.reveal_limit")}</p>

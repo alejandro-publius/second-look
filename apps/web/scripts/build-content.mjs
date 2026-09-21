@@ -252,6 +252,7 @@ function main() {
     return { id, feature, photo_id };
   });
   for (const w of warmup) if (!photos[w.photo_id]) fail(`warmup ${w.id} uses unknown photo ${w.photo_id}`);
+  if (warmup.filter((w) => w.more_natural === true).length !== 1) fail("exactly one warm-up photo must be more_natural");
   for (const [fid, lesson] of Object.entries(lessons)) {
     for (const pair of lesson.contrast_pairs ?? []) {
       for (const pid of [pair.assume_photo_id, pair.actual_photo_id]) {
@@ -268,7 +269,9 @@ function main() {
     features,
     form,
     test_items: strippedItems,
-    warmup: warmup.map(({ id, photo_id }) => ({ id, photo_id })),
+    // more_natural travels with the pair so the reveal can badge the right photo wherever it
+    // sits. It is not an answer to a scored item, so it gives nothing away before the test.
+    warmup: warmup.map(({ id, photo_id, more_natural }) => ({ id, photo_id, more_natural: more_natural === true })),
     followups: { max_questions: followups.max_questions ?? 2 },
     glossary,
     regions,

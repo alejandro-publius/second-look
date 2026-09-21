@@ -14,11 +14,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -33,6 +35,22 @@ Gate = Literal["launch", "judges"]
 Runner = Callable[[list[str]], tuple[int, str]]
 WEB_SKIP = {"node_modules", ".next", "out", "playwright-report", "test-results"}
 WEB_SUFFIXES = {".tsx", ".ts", ".jsx", ".js", ".html"}
+
+
+# Where scripts/backup_d1.sh leaves its receipt. Outside the repo, because the dumps beside it
+# hold people's answers. A test or CI points this somewhere harmless.
+BACKUP_DIR = os.environ.get("SECOND_LOOK_BACKUP_DIR", "~/second-look-backups")
+# A backup a day, with an hour of slack for a Mac that was asleep at 21:00 and caught up at wake.
+BACKUP_MAX_HOURS = 26.0
+
+
+def _age_hours(stamp: str) -> float | None:
+    """How old an ISO UTC timestamp is, in hours, or None if it cannot be read."""
+    try:
+        when = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+    except ValueError:
+        return None
+    return (datetime.now(UTC) - when).total_seconds() / 3600.0
 
 
 @dataclass
@@ -117,7 +135,9 @@ def split_second_labels(reasons: list[str]) -> tuple[list[str], list[str]]:
     return blocking, notes
 
 
-def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
+def run_checks(
+    root: Path, *, runner: Runner | None = None, backup_dir: Path | str | None = None
+) -> list[Check]:
     root = root.resolve()
     run = runner or default_runner(root)
     checks: list[Check] = []
@@ -148,17 +168,32 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
 
     # 2c. Backups. Update 11 section 6 puts this in the launch gate: a study with no backup is
     # one bad afternoon from having no data. The drill file is written by the backup step.
-    backups = Check("backups", "HUMAN", clears="two GitHub secrets and one drill")
-    workflow = root / ".github" / "workflows" / "backup.yml"
+    # A backup counts when one has actually run recently and a restore drill proved it comes
+    # back. The daily run is a launchd job on this Mac using the wrangler login already here, so
+    # it needs no GitHub secret; the workflow stays on manual (Update 11D item 4). The dump lives
+    # outside the repo, so this reads only the small receipt beside it, never the answers.
+    backups = Check("backups", "HUMAN", clears="one backup run and one drill")
     drill = _read_json(root / "results" / "backup_drill.json")
-    if not workflow.exists():
-        backups.reasons.append("no .github/workflows/backup.yml")
-    elif drill is None:
+    backups_at = Path(backup_dir or BACKUP_DIR).expanduser()
+    receipt = _read_json(backups_at / "last_backup.json")
+    if receipt is None:
         backups.reasons.append(
-            "no backup has run: add the two GitHub secrets, then run the workflow and the "
-            "restore drill (results/backup_drill.json records it)"
+            f"no backup receipt at {backups_at}/last_backup.json: run make backup"
         )
-    elif not drill.get("restored_rows_match"):
+    else:
+        age = _age_hours(str(receipt.get("generated_at_utc", "")))
+        if age is None:
+            backups.reasons.append("the backup receipt has no readable timestamp: run make backup")
+        elif age > BACKUP_MAX_HOURS:
+            backups.reasons.append(
+                f"the newest backup is {age:.0f} hours old, over "
+                f"{BACKUP_MAX_HOURS}: run make backup"
+            )
+    if drill is None:
+        backups.reasons.append(
+            "no restore drill has run: make restore-drill writes results/backup_drill.json"
+        )
+    elif not drill.get("restored"):
         backups.reasons.append("the restore drill did not match the live row counts")
     checks.append(backups)
 
@@ -196,10 +231,24 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
                 )
     checks += [key_frozen, key_matches]
 
-    # 5. Two labellers agreed, and kappa is written per feature.
-    agreement = Check("key_agreement", "HUMAN")
+    # 5. Two labellers agreed, and kappa is written per feature. Unless the frozen key says
+    # plainly that one person set it, in which case there is no agreement to report and this
+    # becomes a note. The weakness is named in the plan and under Known weaknesses instead of
+    # being hidden behind a check nobody can ever clear (Update 11D item 3).
+    key_doc = _read_json(root / "results" / "key_hash.json") or {}
+    one_labeller = key_doc.get("labellers") == 1
+    agreement = Check(
+        "key_agreement",
+        "NOTE" if one_labeller else "HUMAN",
+        clears="a second labeller, optional" if one_labeller else "our build",
+    )
     agree = _read_json(root / "results" / "key_agreement.json")
-    if agree is None:
+    if one_labeller:
+        agreement.reasons.append(
+            "one labeller set the whole key, so no agreement figure is reported: "
+            "named in docs/analysis_plan.md and under Known weaknesses"
+        )
+    elif agree is None:
         agreement.reasons.append(
             "results/key_agreement.json missing: run scripts/merge_labels.py on both label files"
         )

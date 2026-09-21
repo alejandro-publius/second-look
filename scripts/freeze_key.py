@@ -2,9 +2,14 @@
 
 Run: uv run python scripts/freeze_key.py
 The hash is sha256 of the JSON list of sorted (item_id, gold) pairs from content/test_items.yaml.
-It refuses while any test photo is a placeholder or lacks a second label, unless
---allow-placeholders is given for the synthetic dry run; the file then says placeholders true
-and preflight keeps failing on it.
+It refuses while any test photo is a placeholder, and refuses while a test photo lacks a second
+label unless --one-labeller says plainly that there is only one. A placeholder can still be
+forced through with --allow-placeholders for the synthetic dry run; the file then says
+placeholders true and preflight keeps failing on it.
+
+The two flags are not the same thing. A placeholder means the key is not real. One labeller means
+the key is real and nobody checked it, which is a weakness we name in the README rather than a
+reason to stop (Update 11D item 3).
 """
 
 from __future__ import annotations
@@ -41,6 +46,7 @@ def key_hash(items: list[dict[str, Any]]) -> str:
 
 
 def placeholder_problems(root: Path, items: list[dict[str, Any]]) -> list[str]:
+    """Every reason this key is not ready, one line each. A second label counts as its own kind."""
     with (root / "photos" / "manifest.csv").open(newline="", encoding="utf-8") as f:
         photos = {r["id"]: r for r in csv.DictReader(f)}
     problems: list[str] = []
@@ -61,7 +67,9 @@ def placeholder_problems(root: Path, items: list[dict[str, Any]]) -> list[str]:
     return problems
 
 
-def freeze(root: Path, *, allow_placeholders: bool = False) -> dict[str, Any]:
+def freeze(
+    root: Path, *, allow_placeholders: bool = False, one_labeller: bool = False
+) -> dict[str, Any]:
     root = root.resolve()
     items = load_items(root)
     if not items:
@@ -70,10 +78,17 @@ def freeze(root: Path, *, allow_placeholders: bool = False) -> dict[str, Any]:
     disagreements = [p for p in problems if "disagrees" in p]
     if disagreements:
         raise FreezeError("\n".join(disagreements))
+    second_label = [p for p in problems if "no second label" in p]
+    if second_label and one_labeller:
+        problems = [p for p in problems if p not in second_label]
     if problems and not allow_placeholders:
-        raise FreezeError(
-            "\n".join(problems) + "\n(pass --allow-placeholders only for the synthetic dry run)"
-        )
+        hint = "\n(pass --allow-placeholders only for the synthetic dry run)"
+        if second_label and not one_labeller:
+            hint = (
+                "\n(pass --one-labeller if one person really did set the whole key, and say so "
+                "in the plan and under Known weaknesses)"
+            )
+        raise FreezeError("\n".join(problems) + hint)
     placeholders = bool(problems)
     digest = key_hash(items)
     record: dict[str, Any] = {
@@ -83,14 +98,26 @@ def freeze(root: Path, *, allow_placeholders: bool = False) -> dict[str, Any]:
         "key_sha256": digest,
         "n_items": len(items),
         "placeholders": placeholders,
+        "labellers": 1 if one_labeller else 2,
+        "agreement_reported": not one_labeller,
         "hash_of": "sha256 of the JSON list of sorted [item_id, gold] pairs",
     }
+    if one_labeller:
+        record["one_labeller_note"] = (
+            "One person set every gold label. No second independent label exists, so no Cohen's "
+            "kappa is reported. Named in docs/analysis_plan.md and under Known weaknesses."
+        )
     if placeholders:
         record["stamp"] = "SYNTHETIC"
         record["placeholder_problems"] = problems
     audit_hash = audit_log.append(
         "key_frozen",
-        {"key_sha256": digest, "n_items": len(items), "placeholders": placeholders},
+        {
+            "key_sha256": digest,
+            "n_items": len(items),
+            "placeholders": placeholders,
+            "labellers": 1 if one_labeller else 2,
+        },
         path=root / "audit" / "log.jsonl",
     )
     record["audit_hash"] = audit_hash
@@ -103,10 +130,19 @@ def freeze(root: Path, *, allow_placeholders: bool = False) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--allow-placeholders", action="store_true", help="synthetic dry run only")
+    parser.add_argument(
+        "--one-labeller",
+        action="store_true",
+        help="one person set the whole key, so no agreement figure is reported",
+    )
     parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     try:
-        record = freeze(args.root, allow_placeholders=args.allow_placeholders)
+        record = freeze(
+            args.root,
+            allow_placeholders=args.allow_placeholders,
+            one_labeller=args.one_labeller,
+        )
     except FreezeError as e:
         print("freeze-key: refused, nothing written:")
         print(e)
@@ -115,6 +151,8 @@ def main(argv: list[str] | None = None) -> int:
         f"freeze-key: {record['n_items']} items, key sha256 {record['key_sha256']}, "
         f"placeholders {str(record['placeholders']).lower()}, audit hash {record['audit_hash']}"
     )
+    if record["labellers"] == 1:
+        print("freeze-key: one labeller, so no agreement figure is reported")
     if record["placeholders"]:
         print("freeze-key: this key is SYNTHETIC; preflight will fail until real labels land")
     return 0

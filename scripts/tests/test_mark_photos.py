@@ -92,6 +92,17 @@ def marks_in(repo: Path, target: MarkTarget) -> list[dict[str, Any]]:
     return label_photos.read_marks(lesson_doc(repo, target.feature), target)
 
 
+def unapprove_every_mark(root: Path) -> None:
+    """Strip the approvals from a copy of the lessons. The real ones were approved in Update 11D,
+    so a test that wants the blocking path has to put the repo back into that state itself."""
+    for path in sorted((root / "content" / "lessons").glob("*.yaml")):
+        doc = label_photos.load_lesson(path)
+        for _, mark in label_photos.iter_marks(doc):
+            for key in ("approved", "approved_by", "approved_at"):
+                mark.pop(key, None)
+        path.write_text(yaml.safe_dump(doc), encoding="utf-8")
+
+
 def marks_check(root: Path) -> preflight.Check:
     checks = {c.name: c for c in preflight.run_checks(root, runner=ok_runner)}
     return checks["marks_approved"]
@@ -209,13 +220,11 @@ def test_the_write_keeps_the_comments_and_the_rest_of_the_file(repo: Path) -> No
 
 def test_the_tool_says_so_when_a_write_would_drop_a_comment(repo: Path) -> None:
     path = label_photos.lesson_path(repo, LESSON)
-    text = path.read_text().replace(
-        '      - { x: 0.72, y: 0.45, label: "Concrete wall, not soil", approved: false }',
-        "      # Rachel: keep this one on the far bank\n"
-        '      - { x: 0.72, y: 0.45, label: "Concrete wall, not soil", approved: false }',
-        1,
-    )
-    path.write_text(text)
+    # Put a comment above the first mark, whatever that mark happens to say today.
+    lines = path.read_text().splitlines()
+    first = next(i for i, line in enumerate(lines) if line.lstrip().startswith("- { x:"))
+    lines.insert(first, "      # Rachel: keep this one on the far bank")
+    path.write_text("\n".join(lines) + "\n")
     said: list[str] = []
     label_photos.write_marks(
         path, PAIR, [{"x": 0.3, "y": 0.3, "label": "the built edge"}], say=said.append
@@ -259,6 +268,8 @@ def test_the_photo_route_serves_only_lesson_photos(server: str) -> None:
 
 
 def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo: Path) -> None:
+    assert marks_check(repo).passed, "the real lessons ship approved (Update 11D)"
+    unapprove_every_mark(repo)
     check = marks_check(repo)
     assert check.owner == "HUMAN" and not check.passed
     assert (
@@ -273,7 +284,7 @@ def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo: 
         for _, mark in label_photos.iter_marks(doc):
             mark["approved"] = True
         path.write_text(yaml.safe_dump(doc), encoding="utf-8")
-    assert marks_check(repo).passed, "Rachel approved every mark, so the gate opens"
+    assert marks_check(repo).passed, "every mark approved, so the gate opens"
 
     doc = label_photos.load_lesson(label_photos.lesson_path(repo, LESSON))
     doc["practice_marks"][0]["approved"] = False
@@ -286,6 +297,7 @@ def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo: 
 def test_the_printed_line_names_the_lesson_and_the_label(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    unapprove_every_mark(repo)
     preflight.report([marks_check(repo)])
     out = capsys.readouterr().out
     assert 'HUMAN  marks_approved: lesson artificial_bank pair 1: mark "Concrete' in out

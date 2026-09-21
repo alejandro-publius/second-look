@@ -145,9 +145,10 @@ Claude Code wrote most of the code and text in this repository, from briefs writ
 
 ## Known weaknesses
 
+- One labeller. Every gold label was set by one person from written definitions and from what each source says about its own photo. There is no second independent labeller, so we report no agreement figure. A disagreement we never saw is a disagreement we never counted.
 - 16 items is a small test. The per-feature model results in particular have wide intervals, and the pass rule is strict on purpose.
 - The sample is whoever opens a link in one week in Berkeley. Below 20 completed sessions per arm the result is a description, not a claim.
-- Photos come from three East Bay creeks in September. The lesson may not transfer to other regions or seasons; the plant list is regional by design.
+- Photos are openly licensed ones from Wikimedia Commons and iNaturalist, from several countries and seasons, not from the creeks a Berkeley visitor will stand in. The lesson may not transfer to another region or season; the plant list is regional by design and every plant we call invasive is on the Cal-IPC Inventory.
 - People see the photo at phone size; models receive it resized to 1092 px on the long side.
 - The dry pipe rule depends on Open-Meteo. When rainfall or location is unknown the question is skipped rather than guessed.
 - The sandbox is shared and allows deletes; our store is the source of truth and the mirror can be rebuilt from the ledger.

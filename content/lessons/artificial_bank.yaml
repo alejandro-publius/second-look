@@ -5,7 +5,12 @@
 # The app's own option reads "Artificial (concrete or stones with concrete)", so the lesson
 # centres on concrete. No laid stone photo is in the test set: the app gives it its own category.
 feature: artificial_bank
-approved: false
+approved: true
+approved_by: "Alex Velazquez"
+approved_on: "2026-09-21"
+# Rules of thumb, captions and practice feedback approved in Update 11C on three
+# conditions, all met: 11 words, a source fetched on the day, no health claim. The marks
+# on this lesson were approved in Update 11D and carry their own stamp.
 rule_of_thumb: "Under the plants, look for concrete or stones set in concrete."
 source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
 contrast_pairs:
@@ -15,16 +20,16 @@ contrast_pairs:
     assume_caption: "Bare soil, roots and a slumped edge look like damage. This is a natural bank doing its job."
     actual_caption: "Straight grey walls run down both sides. That is concrete, not soil. A built bank."
     marks:
-      - { x: 0.72, y: 0.45, label: "Concrete wall, not soil", approved: false }
-      - { x: 0.2, y: 0.27, label: "Same wall, far side", approved: false }
+      - { x: 0.72, y: 0.45, label: "Concrete wall, not soil", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.2, y: 0.27, label: "Same wall, far side", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
   # Pair B. Assume: Whiteknowe Head Burn, raw but natural. Actual: Hale and Permanente confluence, dry concrete.
   - assume_photo_id: ph-bank-08
     actual_photo_id: ph-bank-07
     assume_caption: "A raw cut bank above a small burn. Nothing was built here. The stream is moving its own earth."
     actual_caption: "No water on the day, but the sides are still smooth grey concrete. Built banks stay built when a creek is dry."
     marks:
-      - { x: 0.51, y: 0.56, label: "Concrete wall between channels", approved: false }
-      - { x: 0.86, y: 0.6, label: "Smooth concrete, no soil", approved: false }
+      - { x: 0.51, y: 0.56, label: "Concrete wall between channels", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.86, y: 0.6, label: "Smooth concrete, no soil", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
 practice:
   # Iron Bark Creek, Wallsend: a concrete low flow channel in a mown reserve.
   photo_id: ph-bank-09
@@ -32,5 +37,5 @@ practice:
   feedback_correct: "Right. The flat grey strip the water runs in is concrete. A built bank."
   feedback_wrong: "Look at the middle of the grass. That flat grey strip the water runs in is concrete. Built."
 practice_marks:
-  - { x: 0.2, y: 0.52, label: "Sloped concrete bank", approved: false }
-  - { x: 0.83, y: 0.52, label: "Concrete on both sides", approved: false }
+  - { x: 0.2, y: 0.52, label: "Sloped concrete bank", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  - { x: 0.83, y: 0.52, label: "Concrete on both sides", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }

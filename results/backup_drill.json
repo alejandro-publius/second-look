@@ -1,0 +1,18 @@
+{
+  "generated_at_utc": "2026-09-21T19:45:23Z",
+  "script": "scripts/restore_drill_d1.sh",
+  "database": "second-look",
+  "scratch_database": "second-look-restore-drill",
+  "backup_file": "second-look-20260921T194424Z.sql",
+  "backup_bytes": 169908,
+  "restored": true,
+  "tables": {
+    "arm_slot": { "source": 2000, "restored": 2000 },
+    "counter": { "source": 1, "restored": 1 },
+    "session": { "source": 3, "restored": 3 },
+    "response": { "source": 17, "restored": 17 },
+    "observer": { "source": 0, "restored": 0 },
+    "skeleton_ping": { "source": 1, "restored": 1 }
+  },
+  "note": "The scratch database is deleted at the end of the drill. Production is never touched."
+}

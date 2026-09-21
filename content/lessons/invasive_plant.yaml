@@ -5,7 +5,12 @@
 # An ecologist's likely objection: some native plants also grow in single stands. The rule
 # therefore sends people to the regional list, never to a verdict of their own.
 feature: invasive_plant
-approved: false
+approved: true
+approved_by: "Alex Velazquez"
+approved_on: "2026-09-21"
+# Rules of thumb, captions and practice feedback approved in Update 11C on three
+# conditions, all met: 11 words, a source fetched on the day, no health claim. The marks
+# on this lesson were approved in Update 11D and carry their own stamp.
 rule_of_thumb: "One pretty plant smothering the whole bank? Check the regional list."
 source: "https://www.cal-ipc.org/plants/inventory/"
 contrast_pairs:
@@ -16,16 +21,16 @@ contrast_pairs:
     assume_caption: "Trailing blackberry, a native. Its leaves come in threes and the plant stays thin. Nothing to report."
     actual_caption: "Himalayan blackberry. Five big leaflets around one stalk, and hooked prickles down the cane. It is on the list."
     marks:
-      - { x: 0.42, y: 0.5, label: "Five leaflets, one stalk", approved: false }
-      - { x: 0.56, y: 0.44, label: "Hooked prickles on cane", approved: false }
+      - { x: 0.42, y: 0.5, label: "Five leaflets, one stalk", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.56, y: 0.44, label: "Hooked prickles on cane", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
   # Pair B. Assume: Erythranthe guttata, a showy native. Actual: Genista monspessulana, on the list.
   - assume_photo_id: ph-plant-08
     actual_photo_id: ph-plant-07
     assume_caption: "Seep monkeyflower, showy yellow and native here. Pretty is not the cue. The list is."
     actual_caption: "French broom, also showy yellow. Pea flowers crowd the stems and the small leaves come in threes. On the list."
     marks:
-      - { x: 0.58, y: 0.28, label: "Yellow pea flowers crowded", approved: false }
-      - { x: 0.4, y: 0.53, label: "Leaves in threes", approved: false }
+      - { x: 0.58, y: 0.28, label: "Yellow pea flowers crowded", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.4, y: 0.53, label: "Leaves in threes", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
 practice:
   # Hedera helix, common ivy, as ground cover. Cal-IPC rating High.
   photo_id: ph-plant-09
@@ -33,5 +38,5 @@ practice:
   feedback_correct: "Right. English ivy spreading over the ground and the leaf litter. It is on the list."
   feedback_wrong: "Look for the lobed leaf with pale veins, spreading over everything. That is English ivy, on the list."
 practice_marks:
-  - { x: 0.44, y: 0.55, label: "Lobed leaf, pale veins", approved: false }
-  - { x: 0.7, y: 0.22, label: "Ivy spreading over litter", approved: false }
+  - { x: 0.44, y: 0.55, label: "Lobed leaf, pale veins", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  - { x: 0.7, y: 0.22, label: "Ivy spreading over litter", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }

@@ -23,6 +23,9 @@ items:
 # study measures (Update 11b step 7). The claim is that one creek is in a more natural state,
 # which is what the photos show. It makes no claim about health.
 warmup_reveal_source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
+# more_natural marks the creek in the more natural state. The reveal badges that photo wherever
+# it sits, because on a phone the two stack and the order may be shuffled (Update 11D item 1).
+# Exactly one of the pair carries it, and core/content_loader.py refuses the file otherwise.
 warmup:
-  - { id: w01, photo_id: ph-warmup-03, description: "Norman Creek, a mown park and a concrete channel" }
-  - { id: w02, photo_id: ph-warmup-04, description: "Nurton Brook, a meander with fallen wood and an eroding bank" }
+  - { id: w01, photo_id: ph-warmup-03, more_natural: false, description: "Norman Creek, a mown park and a concrete channel" }
+  - { id: w02, photo_id: ph-warmup-04, more_natural: true, description: "Nurton Brook, a meander with fallen wood and an eroding bank" }
