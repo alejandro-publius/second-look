@@ -38,5 +38,9 @@ jobs:
       - run: cd worker && npm ci
       - run: make check
       # The Worker end to end under wrangler dev with a local D1 and KV, rain from a stub, no
-      # login and no network beyond this runner (Update 10 answer A3).
+      # login and no network beyond this runner (Update 10 answer A3). Wrangler 4.135 needs
+      # Node 22; the web build above keeps its Node 20 pin (PLAN.md), so the switch comes last.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - run: cd worker && npm run e2e
