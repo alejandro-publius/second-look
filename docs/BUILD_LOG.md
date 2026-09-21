@@ -36,3 +36,10 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: the stale Postgres volume from Phase 1 held tables the migration also creates, so the API crashed on start until the volume was recreated. The FHIR validation route answered 404 in the container purely because results/ was not in the image.
 - Decisions: web stays on 3000 for compose and production, Playwright keeps its own server on 3100; make e2e builds before it tests.
 - Next: Phase 4, the adversarial review, then fix what it finds.
+
+## Phase 4 and 6, review, fixes and report, 2026-09-21 01:35Z
+- What: an agent that wrote none of the code attacked the running stack and wrote docs/reviews/REVIEW_01.md. Eight findings broke a hard rule, lost data or blocked launch and were fixed with tests; the rest are deferred in that file with one line each. Phase 5 extras and the design pass were skipped on instruction.
+- Proof: `make check` green, 493 python tests, 28 Playwright tests; `preflight` 115 failed, all 115 human; `submit-check` 3 failed and they are the expected three; gitleaks clean against a fingerprint file that names every fake value.
+- Surprises: the review defeated the data lock with two test flags, harvested the whole answer key from judge mode in sixteen requests, and found a free text spot name published into the FHIR narrative. None of that was visible from inside the workstreams that wrote it.
+- Decisions: one browser keeps one arm; the record carries a hash of the contributor token, never the token; a pass table from the fake client licenses nothing anywhere.
+- Next: Rachel's photos, blind labels, merge, freeze the key, tag prereg-v1, then preflight must print 0 failed.
