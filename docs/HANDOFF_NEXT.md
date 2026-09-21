@@ -20,7 +20,7 @@ Two branches, two jobs.
 
 ## What is done on `depth`
 
-- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 40 built, 4 parked, 9 missing.
+- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 41 built, 4 parked, 8 missing.
 - `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
   guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
 - `GET /api/city/{creek_id}` and `/city?creek=`: the analyst's view. No number without its
@@ -43,21 +43,27 @@ Two branches, two jobs.
   `/city` and on the downstream spots' own records. A coarse pin is placed on the creek only, so it
   counts and neither gives nor gets a line. `/api/city/strawberry-creek` answers before anyone has
   checked the creek, with the reaches and zero visits.
+- **Write back** (Update 10 tier 2 item 1). The worked Strawberry Creek visit is mirrored to
+  their sandbox: 14 conditional creates, our tag on every resource, ids 452 to 465 in
+  `fhir/sandbox_ledger.jsonl`. Our Library entry under their LibraryOah profile is `Library/466`
+  there: it names the repository, the read only endpoint, the golden visit and `Provenance/465`.
+  `docs/notes/sandbox_library.md` holds what the sandbox returned plus the by tag searches, and
+  `docs/screens/sandbox-library.png` is the screenshot. `scripts/repush_sandbox.py` gained
+  `--bundle`, `--library` and `--evidence`, and mirrors visit Bundles only: a referral, an example
+  or a transaction file is refused by name and skipped in a folder.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Tier 2 item 1: mirror the sample record to the sandbox and register a Library entry there,
-   with evidence and a screenshot path saved at once.
-2. Tier 2 item 2: the MCP server, read only, local over stdio, five tools, contract tests, a
+1. Tier 2 item 2: the MCP server, read only, local over stdio, five tools, contract tests, a
    transcript in `examples/mcp/`.
-3. Tier 2 item 3: `make new-city`, run once for Heraklion. Record the two durations.
-4. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
-5. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
+2. Tier 2 item 3: `make new-city`, run once for Heraklion. Record the two durations.
+3. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
+4. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
    on the Worker, proved by golden vectors the Python writes and the TypeScript reproduces.
-6. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+5. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
 
@@ -74,5 +80,9 @@ Two branches, two jobs.
   `core/fhir_emit.py` and `fhir/fsh/codesystem-second-look.fsh`.
 - A visit whose answers ask no follow-up gets no `dry_pipe` question, and `finalize` refuses an
   answer to a question it never asked. Test helpers answer only what the draft asked.
+- `audit/log.jsonl` does not exist on either branch yet, and a hash chain cannot be started on
+  two branches and merged. The two `sandbox_push` lines from the write back went to a scratch
+  file; `docs/notes/sandbox_library.md` lists them for appending to the real chain at merge time.
+  Anything on `depth` that would write the audit log should set `AUDIT_LOG_PATH` outside the repo.
 - The region pack's boxes are approximate and hand filled. A wrong box misplaces a precise pin
   onto the wrong reach; the fix is in `content/regions/california-bay-area.yaml`, nowhere else.

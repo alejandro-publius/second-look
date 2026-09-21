@@ -9,6 +9,14 @@ $expunge.
   uv run python scripts/repush_sandbox.py --dry-run          prints what would be sent, no network
   SANDBOX_MIRROR_ENABLED=true uv run python scripts/repush_sandbox.py
   SANDBOX_MIRROR_ENABLED=true uv run python scripts/repush_sandbox.py --delete-ledger-id 451
+  SANDBOX_MIRROR_ENABLED=true uv run python scripts/repush_sandbox.py \
+      --bundle fhir/golden/visit-strawberry-creek-1.json --library --evidence docs/notes/x.md
+
+--bundle names one collection Bundle to mirror instead of the whole store. --library then
+registers our Library entry (core/fhir_library.py), which describes the data set and points at the
+repository and at every Provenance the ledger says we created here, and --evidence writes what came
+back to a note, because anyone can delete records on a shared sandbox (Update 10 tier 2 item 1).
+Only collection Bundles are mirrored: a transaction, a referral or an example is never sent.
 """
 
 from __future__ import annotations
@@ -18,14 +26,15 @@ import json
 import os
 import sys
 import time
-from collections.abc import Callable, Iterable
-from datetime import UTC, datetime
+from collections.abc import Callable, Iterable, Sequence
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
 import httpx
 
 from core.fhir_emit import to_transaction
+from core.fhir_library import LIBRARY_ID, check_library, library_entry
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = Path(os.environ.get("SANDBOX_LEDGER") or ROOT / "fhir" / "sandbox_ledger.jsonl")
@@ -50,23 +59,43 @@ def user_agent() -> str:
     return f"second-look (+{repo_url()})"
 
 
-def load_bundles(store: Path) -> list[tuple[Path, dict[str, Any]]]:
-    if not store.exists():
+def _is_visit_bundle(data: object) -> bool:
+    """A collection Bundle with one Provenance: a visit record. Nothing else is ever mirrored,
+    so a transaction file, a referral or an example laboratory result cannot be sent by mistake."""
+    if not isinstance(data, dict) or data.get("resourceType") != "Bundle":
+        return False
+    if data.get("type") != "collection":
+        return False
+    tags = data.get("meta", {}).get("tag", [])
+    if any(t.get("code") == "example" for t in tags):
+        return False
+    types = [e.get("resource", {}).get("resourceType") for e in data.get("entry", [])]
+    return types.count("Provenance") == 1 and "ServiceRequest" not in types
+
+
+def load_bundles(store: Path, only: Sequence[Path] = ()) -> list[tuple[Path, dict[str, Any]]]:
+    """Every visit Bundle in the store, or only the files named with --bundle."""
+    paths: list[Path]
+    if only:
+        paths = [Path(p) for p in only]
+    elif store.exists():
+        paths = [p for p in sorted(store.glob("*.json")) if p.name != "index.json"]
+    else:
         return []
     out: list[tuple[Path, dict[str, Any]]] = []
-    for path in sorted(store.glob("*.json")):
-        if path.name == "index.json":
-            continue
+    for path in paths:
         data = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(data, dict) and data.get("resourceType") == "Bundle":
+        if _is_visit_bundle(data):
             out.append((path, data))
+        elif only:
+            raise RepushError(f"{path.name}: not a visit Bundle, refusing to mirror it")
     return out
 
 
-def transactions(store: Path) -> list[tuple[Path, dict[str, Any]]]:
+def transactions(store: Path, only: Sequence[Path] = ()) -> list[tuple[Path, dict[str, Any]]]:
     return [
         (path, to_transaction(bundle, tag_system=repo_url(), tag_code=TAG_CODE))
-        for path, bundle in load_bundles(store)
+        for path, bundle in load_bundles(store, only)
     ]
 
 
@@ -78,8 +107,8 @@ def describe(path: Path, tx: dict[str, Any]) -> list[str]:
     return lines
 
 
-def dry_run(store: Path, out: Callable[[str], None] = print) -> int:
-    txs = transactions(store)
+def dry_run(store: Path, out: Callable[[str], None] = print, only: Sequence[Path] = ()) -> int:
+    txs = transactions(store, only)
     total = 0
     for path, tx in txs:
         for line in describe(path, tx):
@@ -165,9 +194,10 @@ def push(
     *,
     sleep: Callable[[float], None] = time.sleep,
     out: Callable[[str], None] = print,
+    only: Sequence[Path] = (),
 ) -> int:
     base = check_base(base)
-    txs = transactions(store)
+    txs = transactions(store, only)
     if not txs:
         out("nothing to push: the store is empty")
         return 0
@@ -211,6 +241,109 @@ def push(
     _audit({"base": base, "bundles": len(txs), "created": created, "matched": matched})
     out(f"pushed {len(txs)} bundle(s): {created} created, {matched} already there")
     return 0
+
+
+def created_provenances(base: str) -> list[str]:
+    """ "Provenance/<id>" for every Provenance the ledger says we created on this server and
+    never deleted, oldest first."""
+    rows = read_ledger()
+    deleted = {str(r["id"]) for r in rows if r.get("action") == "delete"}
+    out: list[str] = []
+    for r in rows:
+        if r.get("action") != "create" or r.get("resourceType") != "Provenance":
+            continue
+        if r.get("base", base) != base or str(r["id"]) in deleted:
+            continue
+        ref = f"Provenance/{r['id']}"
+        if ref not in out:
+            out.append(ref)
+    return out
+
+
+def register_library(
+    base: str,
+    *,
+    today: date | None = None,
+    sleep: Callable[[float], None] = time.sleep,
+    out: Callable[[str], None] = print,
+    evidence: Path | None = None,
+) -> int:
+    """Register (or find) our Library entry with a conditional create, read it back, and write
+    the evidence. The Library lists every Provenance the ledger says we created here."""
+    base = check_base(base)
+    day = today or datetime.now(UTC).date()
+    refs = created_provenances(base)
+    library = library_entry(today=day, n_records=len(refs), provenance_refs=refs)
+    problems = check_library(library)
+    if problems:
+        raise RepushError("library: " + "; ".join(problems))
+    collection = {"resourceType": "Bundle", "type": "collection", "entry": [{"resource": library}]}
+    tx = to_transaction(collection, tag_system=repo_url(), tag_code=TAG_CODE)
+    with _client() as client:
+        response = client.post(base, content=json.dumps(tx))
+        if response.status_code != 200:
+            out(f"library: sandbox answered {response.status_code}, nothing recorded")
+            out(response.text[:400])
+            return 1
+        entry = (response.json().get("entry") or [{}])[0].get("response", {})
+        parsed = _parse_location(str(entry.get("location", "")))
+        if parsed is None:
+            out("library: the sandbox gave no location back, nothing recorded")
+            return 1
+        rtype, rid = parsed
+        action = "create" if str(entry.get("status", "")).startswith("201") else "exists"
+        append_ledger(
+            [
+                {
+                    "ts_utc": _now(),
+                    "action": action,
+                    "resourceType": rtype,
+                    "id": rid,
+                    "bundle": f"library:{LIBRARY_ID}",
+                    "base": base,
+                }
+            ]
+        )
+        sleep(MIN_INTERVAL_SECONDS)
+        back = client.get(f"{base}/{rtype}/{rid}")
+    out(f"library: {action} {rtype}/{rid}, read back {back.status_code}")
+    _audit({"base": base, "library": f"{rtype}/{rid}", "action": action, "provenances": len(refs)})
+    if evidence is not None:
+        _write_evidence(evidence, base=base, ref=f"{rtype}/{rid}", action=action, back=back)
+    return 0 if back.status_code == 200 else 1
+
+
+def _write_evidence(path: Path, *, base: str, ref: str, action: str, back: httpx.Response) -> None:
+    """What came back, saved at once, because anyone can delete records on a shared sandbox."""
+    body: Any
+    try:
+        body = back.json()
+    except ValueError:
+        body = back.text[:2000]
+    shown = json.dumps(body, indent=2, ensure_ascii=False) if not isinstance(body, str) else body
+    screenshot = path.parent.parent / "screens" / "sandbox-library.png"
+    shot = screenshot.relative_to(ROOT) if screenshot.is_relative_to(ROOT) else screenshot
+    lines = [
+        "# Sandbox evidence: the Library entry",
+        "",
+        f"Written by `scripts/repush_sandbox.py --library` at {_now()}. The ledger is",
+        "`fhir/sandbox_ledger.jsonl`; every id below is in it.",
+        "",
+        f"- Server: `{base}`",
+        f"- Library: `{ref}` ({action})",
+        f"- Read back: HTTP {back.status_code}",
+        f"- Screenshot: `{shot}`",
+        f"- GET it yourself: `curl -H 'Accept: application/fhir+json' {base}/{ref}`",
+        "",
+        "## The Library as the sandbox returned it",
+        "",
+        "```json",
+        shown,
+        "```",
+        "",
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def delete_ledger_id(ledger_id: str, base: str, *, out: Callable[[str], None] = print) -> int:
@@ -262,17 +395,38 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--delete-ledger-id", metavar="ID", help="delete this one id, which must be in the ledger"
     )
+    parser.add_argument(
+        "--bundle",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="mirror this visit Bundle instead of the store (repeatable)",
+    )
+    parser.add_argument(
+        "--library", action="store_true", help="then register our Library entry, or find it"
+    )
+    parser.add_argument(
+        "--evidence", metavar="PATH", help="write what the sandbox returned for the Library here"
+    )
     args = parser.parse_args(argv)
     store = Path(args.store)
+    only = [Path(b) for b in args.bundle]
     try:
         if args.dry_run:
-            return dry_run(store)
+            return dry_run(store, only=only)
         if not mirror_enabled():
             print("mirror is off: set SANDBOX_MIRROR_ENABLED=true to push, or use --dry-run")
             return 2
         if args.delete_ledger_id:
             return delete_ledger_id(args.delete_ledger_id, args.base_url)
-        return push(store, args.base_url)
+        if only or not args.library:
+            code = push(store, args.base_url, only=only)
+            if code != 0:
+                return code
+        if args.library:
+            evidence = Path(args.evidence) if args.evidence else None
+            return register_library(args.base_url, evidence=evidence)
+        return 0
     except RepushError as exc:
         print(f"repush: {exc}", file=sys.stderr)
         return 2

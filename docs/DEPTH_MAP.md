@@ -54,8 +54,8 @@ scale 15.
 | Observer score travels with every observation | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Innovation | standards, digital health |
 | Provenance links an Observation to both responses | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Technical | standards |
 | Our own read only FHIR endpoint | built (Python only) | `apps/api/fhir_routes.py` | `apps/api/tests/test_fhir_routes.py` | Technical | agents |
-| Sandbox mirror, conditional creates, ledger | built, one write proven | `scripts/repush_sandbox.py` | `apps/api/tests/test_fhir_store.py` | Technical | standards |
-| Library entry in their sandbox, the FAIR pattern | **missing** | none | none | Impact | standards |
+| Sandbox mirror, conditional creates, ledger | built, the worked visit mirrored 2026-09-21 | `scripts/repush_sandbox.py` | `apps/api/tests/test_fhir_store.py` | Technical | standards |
+| Library entry in their sandbox, the FAIR pattern | built, Library/466 live since 2026-09-21 | `core/fhir_library.py`, `scripts/repush_sandbox.py` | `core/tests/test_fhir_library.py`, `scripts/tests/test_repush_sandbox.py` | Impact | standards |
 | Hash chained audit log | built | `scripts/audit_log.py` | `scripts/verify_audit.py` | Technical | data tools |
 
 ## ACT
@@ -94,9 +94,9 @@ scale 15.
 
 | Status | Count |
 |---|---|
-| built | 40 |
+| built | 41 |
 | parked | 4 |
-| missing | 9 |
+| missing | 8 |
 
 Counted again on 2026-09-21 after Update 10 tier 1 (all four items). The remaining missing rows are
 the agents and integration line (the MCP server, the Library entry, `make new-city`) and the
