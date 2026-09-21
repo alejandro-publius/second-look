@@ -1,0 +1,634 @@
+{
+  "generated_at_utc": "2026-09-21T00:05:52Z",
+  "script": "evals/usability_analysis.py",
+  "synthetic": true,
+  "stamp": "SYNTHETIC",
+  "scenario": "real_gain",
+  "input": "/Users/alexvintera/second-look/data/synthetic/real_gain",
+  "plan": {
+    "items": "docs/analysis_plan.md items 4 to 7 and 9",
+    "seed": 20260920,
+    "bootstrap_resamples": 10000,
+    "permutations": 10000,
+    "alpha": 0.05,
+    "min_completed_per_arm": 20,
+    "min_test_seconds": 40.0,
+    "data_lock_utc": "2026-09-28T01:00:00Z"
+  },
+  "counts": {
+    "randomized": {
+      "untrained": 51,
+      "trained": 52
+    },
+    "started": {
+      "untrained": 50,
+      "trained": 49
+    },
+    "completed": {
+      "untrained": 48,
+      "trained": 47
+    },
+    "analysed": {
+      "untrained": 42,
+      "trained": 42
+    },
+    "randomized_untrained": 51,
+    "randomized_trained": 52,
+    "started_untrained": 50,
+    "started_trained": 49,
+    "analysed_untrained": 42,
+    "analysed_trained": 42,
+    "completed_untrained": 42,
+    "completed_before_exclusions_untrained": 48,
+    "completed_trained": 42,
+    "completed_before_exclusions_trained": 47,
+    "note": "completed_<arm> counts completed sessions kept after the exclusions; completed.<arm> counts every session that finished all 16 items"
+  },
+  "exclusions": [
+    {
+      "order": 0,
+      "rule": "started at or after the data lock (never analysed, plan item 7)",
+      "removed": 3,
+      "remaining": 103,
+      "note": ""
+    },
+    {
+      "order": 1,
+      "rule": "did not finish all 16 items",
+      "removed": 8,
+      "remaining": 95,
+      "note": ""
+    },
+    {
+      "order": 2,
+      "rule": "test finished in under 40 seconds",
+      "removed": 3,
+      "remaining": 92,
+      "note": ""
+    },
+    {
+      "order": 3,
+      "rule": "repeat visit from the same browser token (only the first completed session counts)",
+      "removed": 4,
+      "remaining": 88,
+      "note": ""
+    },
+    {
+      "order": 4,
+      "rule": "flagged as QA (is_test)",
+      "removed": 2,
+      "remaining": 86,
+      "note": ""
+    },
+    {
+      "order": 5,
+      "rule": "filled the hidden form field",
+      "removed": 2,
+      "remaining": 84,
+      "note": ""
+    },
+    {
+      "order": 6,
+      "rule": "dry run before launch",
+      "removed": 0,
+      "remaining": 84,
+      "note": "no launch time given; the table was wiped at launch, so nothing to remove here"
+    }
+  ],
+  "primary": {
+    "n_trained": 42,
+    "n_untrained": 42,
+    "mean_trained": 0.689,
+    "mean_untrained": 0.6205,
+    "untrained_mean": 62.1,
+    "trained_mean": 68.9,
+    "difference": 6.8,
+    "ci_low": 0.1,
+    "ci_high": 13.4,
+    "difference_points": 6.85,
+    "ci95_points": [
+      0.15,
+      13.39
+    ],
+    "difference_share": 0.0685,
+    "ci95_share": [
+      0.0015,
+      0.1339
+    ],
+    "permutation_p": 0.051,
+    "rejects_at_alpha_05": false,
+    "hedges_g": 0.4352,
+    "bootstrap_resamples": 10000,
+    "permutations": 10000,
+    "seed": 20260920,
+    "status": "confirmatory",
+    "status_note": "at least 20 completed sessions in each arm, so the plan's one confirmatory test applies"
+  },
+  "score_distribution": {
+    "bins": "items right, 0 to 16",
+    "untrained": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      3,
+      5,
+      5,
+      6,
+      3,
+      5,
+      4,
+      7,
+      3,
+      0,
+      0
+    ],
+    "trained": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      1,
+      2,
+      6,
+      5,
+      9,
+      6,
+      5,
+      3,
+      2,
+      1
+    ]
+  },
+  "per_feature": {
+    "artificial_bank": {
+      "untrained": {
+        "n_answers": 168,
+        "accuracy": 0.6429,
+        "hit_rate": 0.5714,
+        "false_alarm_rate": 0.25,
+        "cant_tell_share": 0.0833
+      },
+      "trained": {
+        "n_answers": 168,
+        "accuracy": 0.7202,
+        "hit_rate": 0.6071,
+        "false_alarm_rate": 0.1548,
+        "cant_tell_share": 0.0417
+      }
+    },
+    "dug_out_channel": {
+      "untrained": {
+        "n_answers": 168,
+        "accuracy": 0.5238,
+        "hit_rate": 0.4524,
+        "false_alarm_rate": 0.3214,
+        "cant_tell_share": 0.0774
+      },
+      "trained": {
+        "n_answers": 168,
+        "accuracy": 0.6429,
+        "hit_rate": 0.5952,
+        "false_alarm_rate": 0.2024,
+        "cant_tell_share": 0.1131
+      }
+    },
+    "invasive_plant": {
+      "untrained": {
+        "n_answers": 168,
+        "accuracy": 0.6905,
+        "hit_rate": 0.6429,
+        "false_alarm_rate": 0.2262,
+        "cant_tell_share": 0.0655
+      },
+      "trained": {
+        "n_answers": 168,
+        "accuracy": 0.7619,
+        "hit_rate": 0.7857,
+        "false_alarm_rate": 0.2024,
+        "cant_tell_share": 0.0536
+      }
+    },
+    "pipe_running": {
+      "untrained": {
+        "n_answers": 168,
+        "accuracy": 0.625,
+        "hit_rate": 0.6071,
+        "false_alarm_rate": 0.2976,
+        "cant_tell_share": 0.0774
+      },
+      "trained": {
+        "n_answers": 168,
+        "accuracy": 0.631,
+        "hit_rate": 0.631,
+        "false_alarm_rate": 0.3452,
+        "cant_tell_share": 0.0357
+      }
+    }
+  },
+  "per_item": {
+    "t01": {
+      "feature": "artificial_bank",
+      "gold": "present",
+      "photo_id": "ph-test-01",
+      "untrained": 0.5714,
+      "n_untrained": 42,
+      "trained": 0.5476,
+      "n_trained": 42
+    },
+    "t02": {
+      "feature": "artificial_bank",
+      "gold": "present",
+      "photo_id": "ph-test-02",
+      "untrained": 0.5714,
+      "n_untrained": 42,
+      "trained": 0.6667,
+      "n_trained": 42
+    },
+    "t03": {
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "photo_id": "ph-test-03",
+      "untrained": 0.6667,
+      "n_untrained": 42,
+      "trained": 0.8571,
+      "n_trained": 42
+    },
+    "t04": {
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "photo_id": "ph-test-04",
+      "untrained": 0.7619,
+      "n_untrained": 42,
+      "trained": 0.8095,
+      "n_trained": 42
+    },
+    "t05": {
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "photo_id": "ph-test-05",
+      "untrained": 0.4524,
+      "n_untrained": 42,
+      "trained": 0.5,
+      "n_trained": 42
+    },
+    "t06": {
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "photo_id": "ph-test-06",
+      "untrained": 0.4524,
+      "n_untrained": 42,
+      "trained": 0.6905,
+      "n_trained": 42
+    },
+    "t07": {
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "photo_id": "ph-test-07",
+      "untrained": 0.5,
+      "n_untrained": 42,
+      "trained": 0.5952,
+      "n_trained": 42
+    },
+    "t08": {
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "photo_id": "ph-test-08",
+      "untrained": 0.6905,
+      "n_untrained": 42,
+      "trained": 0.7857,
+      "n_trained": 42
+    },
+    "t09": {
+      "feature": "invasive_plant",
+      "gold": "present",
+      "photo_id": "ph-test-09",
+      "untrained": 0.6905,
+      "n_untrained": 42,
+      "trained": 0.7857,
+      "n_trained": 42
+    },
+    "t10": {
+      "feature": "invasive_plant",
+      "gold": "present",
+      "photo_id": "ph-test-10",
+      "untrained": 0.5952,
+      "n_untrained": 42,
+      "trained": 0.7857,
+      "n_trained": 42
+    },
+    "t11": {
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "photo_id": "ph-test-11",
+      "untrained": 0.7143,
+      "n_untrained": 42,
+      "trained": 0.6905,
+      "n_trained": 42
+    },
+    "t12": {
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "photo_id": "ph-test-12",
+      "untrained": 0.7619,
+      "n_untrained": 42,
+      "trained": 0.7857,
+      "n_trained": 42
+    },
+    "t13": {
+      "feature": "pipe_running",
+      "gold": "present",
+      "photo_id": "ph-test-13",
+      "untrained": 0.5,
+      "n_untrained": 42,
+      "trained": 0.6667,
+      "n_trained": 42
+    },
+    "t14": {
+      "feature": "pipe_running",
+      "gold": "present",
+      "photo_id": "ph-test-14",
+      "untrained": 0.7143,
+      "n_untrained": 42,
+      "trained": 0.5952,
+      "n_trained": 42
+    },
+    "t15": {
+      "feature": "pipe_running",
+      "gold": "absent",
+      "photo_id": "ph-test-15",
+      "untrained": 0.6667,
+      "n_untrained": 42,
+      "trained": 0.5952,
+      "n_trained": 42
+    },
+    "t16": {
+      "feature": "pipe_running",
+      "gold": "absent",
+      "photo_id": "ph-test-16",
+      "untrained": 0.619,
+      "n_untrained": 42,
+      "trained": 0.6667,
+      "n_trained": 42
+    }
+  },
+  "cant_tell_share": {
+    "untrained": 0.0759,
+    "trained": 0.061
+  },
+  "yes_share": {
+    "untrained": 0.4211,
+    "trained": 0.4405
+  },
+  "median_times": {
+    "test_seconds": {
+      "untrained": {
+        "median": 106.3,
+        "n": 42
+      },
+      "trained": {
+        "median": 108.2,
+        "n": 42
+      }
+    },
+    "lesson_seconds": {
+      "untrained": {
+        "median": 92.7,
+        "n": 23,
+        "note": "lesson offered after the test; only people who opened it are counted"
+      },
+      "trained": {
+        "median": 123.7,
+        "n": 42,
+        "note": "lesson before the test"
+      }
+    }
+  },
+  "by_source": {
+    "chat": {
+      "untrained": 16,
+      "trained": 13
+    },
+    "creek_group": {
+      "untrained": 5,
+      "trained": 5
+    },
+    "friends": {
+      "untrained": 10,
+      "trained": 10
+    },
+    "other": {
+      "untrained": 3,
+      "trained": 3
+    },
+    "poster": {
+      "untrained": 8,
+      "trained": 11
+    }
+  },
+  "by_device": {
+    "desktop": {
+      "untrained": {
+        "n": 9,
+        "mean_accuracy": 0.5417
+      },
+      "trained": {
+        "n": 17,
+        "mean_accuracy": 0.6581
+      }
+    },
+    "phone": {
+      "untrained": {
+        "n": 27,
+        "mean_accuracy": 0.6458
+      },
+      "trained": {
+        "n": 25,
+        "mean_accuracy": 0.71
+      }
+    },
+    "tablet": {
+      "untrained": {
+        "n": 6,
+        "mean_accuracy": 0.625
+      },
+      "trained": {
+        "n": 0,
+        "mean_accuracy": null
+      }
+    }
+  },
+  "by_prior_experience": {
+    "no": {
+      "untrained": {
+        "n": 31,
+        "mean_accuracy": 0.6048
+      },
+      "trained": {
+        "n": 27,
+        "mean_accuracy": 0.6875
+      }
+    },
+    "not_answered": {
+      "untrained": {
+        "n": 1,
+        "mean_accuracy": 0.6875
+      },
+      "trained": {
+        "n": 4,
+        "mean_accuracy": 0.6562
+      }
+    },
+    "yes": {
+      "untrained": {
+        "n": 10,
+        "mean_accuracy": 0.6625
+      },
+      "trained": {
+        "n": 11,
+        "mean_accuracy": 0.7045
+      }
+    }
+  },
+  "warmup": {
+    "w01": {
+      "share": 0.3333,
+      "n": 28,
+      "untrained": 0.2857,
+      "trained": 0.381
+    },
+    "w02": {
+      "share": 0.6667,
+      "n": 56,
+      "untrained": 0.7143,
+      "trained": 0.619
+    }
+  },
+  "sensitivity": {
+    "partial_completers_scored_wrong": {
+      "n_trained": 44,
+      "n_untrained": 44,
+      "mean_trained": 0.6705,
+      "mean_untrained": 0.5952,
+      "untrained_mean": 59.5,
+      "trained_mean": 67.0,
+      "difference": 7.5,
+      "ci_low": -0.1,
+      "ci_high": 15.1,
+      "difference_points": 7.53,
+      "ci95_points": [
+        -0.14,
+        15.06
+      ],
+      "difference_share": 0.0753,
+      "ci95_share": [
+        -0.0014,
+        0.1506
+      ],
+      "permutation_p": 0.0665,
+      "rejects_at_alpha_05": false,
+      "hedges_g": 0.4028,
+      "bootstrap_resamples": 10000,
+      "permutations": 10000,
+      "seed": 20260920,
+      "status": "confirmatory",
+      "status_note": "at least 20 completed sessions in each arm, so the plan's one confirmatory test applies",
+      "exclusions": [
+        {
+          "order": 0,
+          "rule": "started at or after the data lock (never analysed, plan item 7)",
+          "removed": 3,
+          "remaining": 103,
+          "note": ""
+        },
+        {
+          "order": 1,
+          "rule": "answered no items at all (sensitivity run keeps partial completers)",
+          "removed": 4,
+          "remaining": 99,
+          "note": ""
+        },
+        {
+          "order": 2,
+          "rule": "test finished in under 40 seconds",
+          "removed": 3,
+          "remaining": 96,
+          "note": ""
+        },
+        {
+          "order": 3,
+          "rule": "repeat visit from the same browser token (only the first completed session counts)",
+          "removed": 4,
+          "remaining": 92,
+          "note": ""
+        },
+        {
+          "order": 4,
+          "rule": "flagged as QA (is_test)",
+          "removed": 2,
+          "remaining": 90,
+          "note": ""
+        },
+        {
+          "order": 5,
+          "rule": "filled the hidden form field",
+          "removed": 2,
+          "remaining": 88,
+          "note": ""
+        },
+        {
+          "order": 6,
+          "rule": "dry run before launch",
+          "removed": 0,
+          "remaining": 88,
+          "note": "no launch time given; the table was wiped at launch, so nothing to remove here"
+        }
+      ]
+    },
+    "without_prior_experience": {
+      "n_trained": 31,
+      "n_untrained": 32,
+      "mean_trained": 0.6835,
+      "mean_untrained": 0.6074,
+      "untrained_mean": 60.7,
+      "trained_mean": 68.3,
+      "difference": 7.6,
+      "ci_low": -0.2,
+      "ci_high": 15.5,
+      "difference_points": 7.6,
+      "ci95_points": [
+        -0.16,
+        15.55
+      ],
+      "difference_share": 0.076,
+      "ci95_share": [
+        -0.0016,
+        0.1555
+      ],
+      "permutation_p": 0.0674,
+      "rejects_at_alpha_05": false,
+      "hedges_g": 0.4668,
+      "bootstrap_resamples": 10000,
+      "permutations": 10000,
+      "seed": 20260920,
+      "status": "confirmatory",
+      "status_note": "at least 20 completed sessions in each arm, so the plan's one confirmatory test applies",
+      "removed_for_prior_experience": 21
+    }
+  },
+  "data_quality": {
+    "correct_column_mismatches": 0,
+    "note": "correctness is recomputed from answer and gold; the export column is only checked"
+  },
+  "chart_title": "SYNTHETIC: items right out of 16, per person, by arm (real_gain scenario)",
+  "outputs": {
+    "json": "usability_synthetic.json",
+    "markdown": "usability_synthetic.md",
+    "chart": "usability_synthetic.png"
+  }
+}

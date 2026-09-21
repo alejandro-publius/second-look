@@ -1,0 +1,47 @@
+{
+  "generated_at_utc": "2026-09-21T00:06:04Z",
+  "script": "evals/pick_examples.py",
+  "synthetic": true,
+  "stamp": "SYNTHETIC",
+  "rule": "the three test items with the largest gap between trained-arm accuracy and the best model's accuracy, in either direction",
+  "best_model": {
+    "model_id": "fake-vision-b",
+    "mean_accuracy": 0.7073
+  },
+  "inputs": {
+    "usability": "/Users/alexvintera/second-look/results/usability_synthetic.json",
+    "model_item_accuracy": "/Users/alexvintera/second-look/results/model_item_accuracy.json"
+  },
+  "examples": [
+    {
+      "item_id": "t05",
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "photo_id": "ph-test-05",
+      "trained_accuracy": 0.5,
+      "model_accuracy": 0.907,
+      "gap_points": -40.7,
+      "direction": "model ahead"
+    },
+    {
+      "item_id": "t07",
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "photo_id": "ph-test-07",
+      "trained_accuracy": 0.5952,
+      "model_accuracy": 1.0,
+      "gap_points": -40.5,
+      "direction": "model ahead"
+    },
+    {
+      "item_id": "t14",
+      "feature": "pipe_running",
+      "gold": "present",
+      "photo_id": "ph-test-14",
+      "trained_accuracy": 0.5952,
+      "model_accuracy": 1.0,
+      "gap_points": -40.5,
+      "direction": "model ahead"
+    }
+  ]
+}

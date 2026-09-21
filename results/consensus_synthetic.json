@@ -1,0 +1,157 @@
+{
+  "generated_at_utc": "2026-09-21T00:05:56Z",
+  "script": "evals/consensus.py",
+  "synthetic": true,
+  "stamp": "SYNTHETIC",
+  "scenario": "skill_spread",
+  "input": "/Users/alexvintera/second-look/data/synthetic/skill_spread",
+  "summary": {
+    "untrained_plain_size3": 64.1,
+    "untrained_scored_size3": 69.5,
+    "untrained_scored_minus_plain_size3": 5.4,
+    "untrained_plain_size5": 69.0,
+    "untrained_scored_size5": 81.3,
+    "untrained_scored_minus_plain_size5": 12.3,
+    "untrained_plain_size7": 72.2,
+    "untrained_scored_size7": 87.3,
+    "untrained_scored_minus_plain_size7": 15.1,
+    "trained_plain_size3": 77.0,
+    "trained_scored_size3": 78.3,
+    "trained_scored_minus_plain_size3": 1.3,
+    "trained_plain_size5": 82.2,
+    "trained_scored_size5": 86.6,
+    "trained_scored_minus_plain_size5": 4.4,
+    "trained_plain_size7": 86.4,
+    "trained_scored_size7": 91.9,
+    "trained_scored_minus_plain_size7": 5.5
+  },
+  "plan": {
+    "item": "docs/analysis_plan.md item 11",
+    "group_sizes": [
+      3,
+      5,
+      7
+    ],
+    "draws_per_arm_and_size": 2000,
+    "seed": 20260920,
+    "weights_by_correct_of_other_three": [
+      0.0,
+      0.0,
+      0.5108,
+      1.9459
+    ],
+    "tie_rule": "a sum of exactly zero counts as wrong for both methods"
+  },
+  "arms": {
+    "untrained": {
+      "n_people": 42,
+      "by_size": {
+        "3": {
+          "draws": 2000,
+          "plain": {
+            "mean_share_right": 0.6412,
+            "p2_5": 0.3125,
+            "p97_5": 0.9375,
+            "sd_over_draws": 0.1708
+          },
+          "scored": {
+            "mean_share_right": 0.6948,
+            "p2_5": 0.25,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.1989
+          },
+          "scored_minus_plain_mean": 0.0536
+        },
+        "5": {
+          "draws": 2000,
+          "plain": {
+            "mean_share_right": 0.6897,
+            "p2_5": 0.375,
+            "p97_5": 0.9375,
+            "sd_over_draws": 0.1516
+          },
+          "scored": {
+            "mean_share_right": 0.813,
+            "p2_5": 0.4375,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.154
+          },
+          "scored_minus_plain_mean": 0.1233
+        },
+        "7": {
+          "draws": 2000,
+          "plain": {
+            "mean_share_right": 0.7219,
+            "p2_5": 0.4375,
+            "p97_5": 0.9375,
+            "sd_over_draws": 0.1376
+          },
+          "scored": {
+            "mean_share_right": 0.8726,
+            "p2_5": 0.5625,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.1234
+          },
+          "scored_minus_plain_mean": 0.1507
+        }
+      }
+    },
+    "trained": {
+      "n_people": 42,
+      "by_size": {
+        "3": {
+          "draws": 2000,
+          "plain": {
+            "mean_share_right": 0.7705,
+            "p2_5": 0.4375,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.1426
+          },
+          "scored": {
+            "mean_share_right": 0.7832,
+            "p2_5": 0.375,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.1603
+          },
+          "scored_minus_plain_mean": 0.0127
+        },
+        "5": {
+          "draws": 2000,
+          "plain": {
+            "mean_share_right": 0.8221,
+            "p2_5": 0.5625,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.1167
+          },
+          "scored": {
+            "mean_share_right": 0.8662,
+            "p2_5": 0.625,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.116
+          },
+          "scored_minus_plain_mean": 0.0441
+        },
+        "7": {
+          "draws": 2000,
+          "plain": {
+            "mean_share_right": 0.8636,
+            "p2_5": 0.625,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.1024
+          },
+          "scored": {
+            "mean_share_right": 0.9192,
+            "p2_5": 0.6875,
+            "p97_5": 1.0,
+            "sd_over_draws": 0.0895
+          },
+          "scored_minus_plain_mean": 0.0555
+        }
+      }
+    }
+  },
+  "chart_title": "SYNTHETIC: group answers with and without scores (skill_spread scenario)",
+  "outputs": {
+    "chart": "consensus_synthetic.png"
+  }
+}
