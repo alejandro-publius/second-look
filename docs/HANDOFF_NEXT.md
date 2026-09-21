@@ -65,16 +65,21 @@ Two branches, two jobs.
   checklist. Run once for Heraklion as a dry example in English with no claims:
   `docs/cities/heraklion/`. `docs/cities/TIMES.md` records 0.1 seconds for Heraklion and, from
   git, 3 hours 21 minutes for the same four things by hand in Berkeley.
+- **The proposal** (`docs/ig_proposal.md`, Update 10 tier 2 item 4) now names three gaps: no
+  profile for the person or the trail from an answer to them, a volunteer modelled as a
+  Practitioner for want of a better fit, and `SpecimenOah.collection.collector` allowing only a
+  PractitionerRole, which made us invent a role for a laboratory. It lists the referral, the
+  example result and the Library beside the visit, carries the current validator line (7 files,
+  0 errors), and asks for six additions. Its FSH builds inside their guide at b907cf0 in CI.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
-2. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
+1. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
    on the Worker, proved by golden vectors the Python writes and the TypeScript reproduces.
-3. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+2. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
 
