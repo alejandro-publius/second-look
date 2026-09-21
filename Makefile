@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -13,8 +13,16 @@ dev:
 	@echo "API on :8000, web on :3000. Stop with Ctrl-C."
 	@bash -c 'trap "kill 0" EXIT; $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
 
-check: lint types test manifest-check dash-check verify-claims fhir-validate web-build design-check
+check: lint types test manifest-check dash-check verify-claims worker-check fhir-validate web-build design-check
 	@echo "CHECK GREEN"
+
+# Update 10 answer A3. Python is the reference: it writes worker/src/content.json and the golden
+# vectors in worker/golden; the TypeScript ports must reproduce every vector. The emitter's
+# Bundles land in fhir/build/instances, so fhir-validate, which runs next, checks them too.
+worker-check:
+	$(PY) scripts/build_worker_content.py --check
+	$(PY) evals/golden_vectors.py --check
+	cd worker && npm run typecheck --silent && npm test --silent
 
 lint:
 	uv run ruff check .

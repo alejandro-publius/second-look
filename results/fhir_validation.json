@@ -1,5 +1,5 @@
 {
-  "ran_at_utc": "2026-09-21T07:22:09+00:00",
+  "ran_at_utc": "2026-09-21T07:36:38+00:00",
   "validator_version": "6.10.4",
   "ig_commit": "b907cf0",
   "fhir_version": "4.0.1",
@@ -12,10 +12,13 @@
     "fhir/golden/library-second-look.json",
     "fhir/golden/referral-strawberry-creek-1.json",
     "fhir/golden/visit-strawberry-creek-1.json",
-    "fhir/golden/visit-strawberry-creek-1.transaction.json"
+    "fhir/golden/visit-strawberry-creek-1.transaction.json",
+    "fhir/build/instances/ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+    "fhir/build/instances/ts-sl-visit-visit-0001.json",
+    "fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json"
   ],
   "errors": 0,
-  "warnings": 24,
+  "warnings": 27,
   "by_file": {
     "Bundle-sl-city-heraklion-bundle.json": {
       "error": 0,
@@ -51,6 +54,21 @@
       "error": 0,
       "warning": 1,
       "information": 20
+    },
+    "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json": {
+      "error": 0,
+      "warning": 1,
+      "information": 8
+    },
+    "ts-sl-visit-visit-0001.json": {
+      "error": 0,
+      "warning": 1,
+      "information": 6
+    },
+    "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json": {
+      "error": 0,
+      "warning": 1,
+      "information": 5
     }
   },
   "messages": [
@@ -196,6 +214,24 @@
       "file": "visit-strawberry-creek-1.transaction.json",
       "severity": "warning",
       "location": "Bundle.entry[11].resource/*Observation/null*/.value.ofType(Quantity)",
+      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+    },
+    {
+      "file": "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+      "severity": "warning",
+      "location": "Bundle.entry[9].resource/*Observation/sl-obs-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f-water-height-m*/.value.ofType(Quantity)",
+      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+    },
+    {
+      "file": "ts-sl-visit-visit-0001.json",
+      "severity": "warning",
+      "location": "Bundle.entry[11].resource/*Observation/sl-obs-visit-0001-water-height-m*/.value.ofType(Quantity)",
+      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+    },
+    {
+      "file": "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
+      "severity": "warning",
+      "location": "Bundle.entry[9].resource/*Observation/sl-obs-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-70878bff68b4*/.value.ofType(Quantity)",
       "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
     }
   ]

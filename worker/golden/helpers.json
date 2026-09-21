@@ -1,0 +1,220 @@
+{
+  "fhir_id": [
+    {
+      "expected": "sl-loc-spot-1",
+      "input": {
+        "parts": [
+          "sl-loc",
+          "spot-1"
+        ]
+      },
+      "name": "plain"
+    },
+    {
+      "expected": "sl-obs-visit-1-bank-type",
+      "input": {
+        "parts": [
+          "sl-obs",
+          "visit 1",
+          "bank type"
+        ]
+      },
+      "name": "spaces and symbols"
+    },
+    {
+      "expected": "sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d",
+      "input": {
+        "parts": [
+          "sl-visit",
+          "visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ]
+      },
+      "name": "long, hashed tail"
+    },
+    {
+      "expected": "sl-spot",
+      "input": {
+        "parts": [
+          "--sl",
+          "spot--"
+        ]
+      },
+      "name": "leading and trailing junk"
+    }
+  ],
+  "function": "helpers",
+  "generated_by": "evals/golden_vectors.py",
+  "round": [
+    {
+      "expected": 0.12,
+      "input": {
+        "digits": 2,
+        "value": 0.125
+      },
+      "name": "0.125 to 2"
+    },
+    {
+      "expected": 37.88,
+      "input": {
+        "digits": 2,
+        "value": 37.875
+      },
+      "name": "37.875 to 2"
+    },
+    {
+      "expected": 2.67,
+      "input": {
+        "digits": 2,
+        "value": 2.675
+      },
+      "name": "2.675 to 2"
+    },
+    {
+      "expected": 0.01562,
+      "input": {
+        "digits": 5,
+        "value": 0.015625
+      },
+      "name": "0.015625 to 5"
+    },
+    {
+      "expected": 1.0,
+      "input": {
+        "digits": 2,
+        "value": 1.005
+      },
+      "name": "1.005 to 2"
+    },
+    {
+      "expected": 37.87,
+      "input": {
+        "digits": 2,
+        "value": 37.87312
+      },
+      "name": "37.87312 to 2"
+    },
+    {
+      "expected": -122.26,
+      "input": {
+        "digits": 2,
+        "value": -122.26041
+      },
+      "name": "-122.26041 to 2"
+    },
+    {
+      "expected": 37.87312,
+      "input": {
+        "digits": 5,
+        "value": 37.87312
+      },
+      "name": "37.87312 to 5"
+    },
+    {
+      "expected": -122.26041,
+      "input": {
+        "digits": 6,
+        "value": -122.26041
+      },
+      "name": "-122.26041 to 6"
+    },
+    {
+      "expected": 0.3,
+      "input": {
+        "digits": 6,
+        "value": 0.3
+      },
+      "name": "0.3 to 6"
+    },
+    {
+      "expected": 37.8719,
+      "input": {
+        "digits": 5,
+        "value": 37.8719
+      },
+      "name": "37.8719 to 5"
+    },
+    {
+      "expected": 1.0,
+      "input": {
+        "digits": 2,
+        "value": 1.0
+      },
+      "name": "1.0 to 2"
+    },
+    {
+      "expected": 2.0,
+      "input": {
+        "digits": 0,
+        "value": 2.5
+      },
+      "name": "2.5 to 0"
+    },
+    {
+      "expected": 4.0,
+      "input": {
+        "digits": 0,
+        "value": 3.5
+      },
+      "name": "3.5 to 0"
+    },
+    {
+      "expected": -0.12,
+      "input": {
+        "digits": 2,
+        "value": -0.125
+      },
+      "name": "-0.125 to 2"
+    }
+  ],
+  "sha256": [
+    {
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "input": {
+        "text": ""
+      },
+      "name": ""
+    },
+    {
+      "expected": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
+      "input": {
+        "text": "a"
+      },
+      "name": "a"
+    },
+    {
+      "expected": "20d03d930b1b56353f336f6f68b63ccb8fb4cc91729a840594a9a3dc0480bd04",
+      "input": {
+        "text": "ct_7f3a9c2e"
+      },
+      "name": "ct_7f3a9c2e"
+    },
+    {
+      "expected": "771e0423b61017a5f5b8e377e68d46e02c27ee68d3c1d2e55c355ba47d66e26e",
+      "input": {
+        "text": "alicetoken23456"
+      },
+      "name": "alicetoken23456"
+    },
+    {
+      "expected": "4cbd664fe5160b1a69a9e313dcbab193640775479cee4e369c916e31af1aa860",
+      "input": {
+        "text": "spot-1:city"
+      },
+      "name": "spot-1:city"
+    },
+    {
+      "expected": "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592",
+      "input": {
+        "text": "The quick brown fox jumps over the lazy dog"
+      },
+      "name": "The quick brown fox jumps over the lazy dog"
+    },
+    {
+      "expected": "76fd128528c8f06792074c093019cd12eaec0ae9576e8b6002e70c123869e95c",
+      "input": {
+        "text": "é ü 日本"
+      },
+      "name": "é ü 日本"
+    }
+  ]
+}

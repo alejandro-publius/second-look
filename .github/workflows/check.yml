@@ -16,7 +16,9 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: |
+            apps/web/package-lock.json
+            worker/package-lock.json
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -30,4 +32,5 @@ jobs:
           key: fhir-${{ hashFiles('fhir/ig.lock') }}
       - run: uv sync --frozen
       - run: cd apps/web && npm ci
+      - run: cd worker && npm ci
       - run: make check

@@ -77,15 +77,25 @@ Two branches, two jobs.
   keeps the static share cards out of the Function. Built with an empty API origin the policy
   says `connect-src 'self'`. Live on the depth preview, verified with curl; production is
   untouched until `main` deploys with the file. `make deploy-preview` is the one command.
+- **Answer A3, first half: the ports and their proof.** `evals/golden_vectors.py` writes
+  `worker/golden/*.json` from the Python reference: 97 cases over the follow-up selector, the
+  labels, the health card picker, the pin guards and the city functions, the region placement,
+  the FHIR emitter, and the hash and rounding helpers. `worker/src/core/*.ts` reproduces every
+  one (`cd worker && npm test`), and the TypeScript emitter's Bundles land in
+  `fhir/build/instances/` where `make fhir-validate` checks them with the HL7 validator. The
+  ports read their tables from `worker/src/content.json`, which Python writes; both files have
+  a `--check` that fails `make check` when stale. Nothing on the Worker serves them yet.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Answer A3: the judge facing endpoints on the Worker, proved by golden vectors the Python
-   writes and the TypeScript reproduces, in the brief's order: the creek check with its follow
-   ups and rainfall lookup, the record with View as FHIR, `/city`, the two observer screen.
+1. Answer A3, second half: the judge facing endpoints on the Worker over D1 and KV, in the
+   brief's order: the creek check with its follow ups and rainfall lookup, the record with View
+   as FHIR, `/city`, the two observer screen. The pure parts are ported and proved; this is the
+   storage and the routes. Prove it locally with `wrangler dev`; deploying the Worker is a
+   production deploy and stays with `main`.
 2. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
@@ -112,6 +122,11 @@ Two branches, two jobs.
   read. `mcp.client.Client(server)` connects in memory for tests.
 - pytest fixtures are per folder. `apps/mcp/tests/conftest.py` imports the API's `client`
   fixture so the MCP tests can make real records.
+- `worker/src/content.json` and `worker/golden/*.json` are written by Python and checked for
+  staleness in `make check`. After a change to `content/`, `core/` or the emitter, run
+  `uv run python scripts/build_worker_content.py` and `uv run python evals/golden_vectors.py`.
+- Python's `round()` rounds an exact tie to even; `toFixed` rounds it up. `pyround.ts` matches
+  Python, and a coordinate stored by the Worker must go through it or the two records differ.
 - A Pages wrangler file becomes the project's source of truth for the environment it is deployed
   to. `--branch depth` sets previews only; a `main` deploy with the file would set production, so
   merge it knowingly. `/api/share/*` must stay excluded in `_routes.json` or the share cards 404.

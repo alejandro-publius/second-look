@@ -1,0 +1,243 @@
+{
+  "function": "core.regions",
+  "generated_by": "evals/golden_vectors.py",
+  "place_spot": [
+    {
+      "expected": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "south-fork-campus"
+      },
+      "input": {
+        "spot": {
+          "coarse": false,
+          "creek_id": "c",
+          "creek_name": "A spot",
+          "latitude": 37.8716,
+          "longitude": -122.256,
+          "reach_id": "r",
+          "reach_name": "A spot",
+          "spot_id": "s",
+          "spot_name": "A spot"
+        }
+      },
+      "name": "faculty glade, precise"
+    },
+    {
+      "expected": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": null
+      },
+      "input": {
+        "spot": {
+          "coarse": true,
+          "creek_id": "c",
+          "creek_name": "A spot",
+          "latitude": 37.87,
+          "longitude": -122.26,
+          "reach_id": "r",
+          "reach_name": "A spot",
+          "spot_id": "s",
+          "spot_name": "A spot"
+        }
+      },
+      "name": "same point coarse"
+    },
+    {
+      "expected": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "strawberry-creek-park"
+      },
+      "input": {
+        "spot": {
+          "coarse": true,
+          "creek_id": "c",
+          "creek_name": "Strawberry Creek Park",
+          "latitude": 37.87,
+          "longitude": -122.26,
+          "reach_id": "r",
+          "reach_name": "Strawberry Creek Park",
+          "spot_id": "s",
+          "spot_name": "Strawberry Creek Park"
+        }
+      },
+      "name": "coarse but named reach"
+    },
+    {
+      "expected": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "north-fork-campus"
+      },
+      "input": {
+        "spot": {
+          "coarse": false,
+          "creek_id": "c",
+          "creek_name": "A spot",
+          "latitude": 37.875,
+          "longitude": -122.26,
+          "reach_id": "r",
+          "reach_name": "A spot",
+          "spot_id": "s",
+          "spot_name": "A spot"
+        }
+      },
+      "name": "north fork"
+    },
+    {
+      "expected": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "strawberry-creek-park"
+      },
+      "input": {
+        "spot": {
+          "coarse": false,
+          "creek_id": "c",
+          "creek_name": "A spot",
+          "latitude": 37.8666,
+          "longitude": -122.2885,
+          "reach_id": "r",
+          "reach_name": "A spot",
+          "spot_id": "s",
+          "spot_name": "A spot"
+        }
+      },
+      "name": "the park"
+    },
+    {
+      "expected": null,
+      "input": {
+        "spot": {
+          "coarse": false,
+          "creek_id": "c",
+          "creek_name": "Codornices Creek",
+          "latitude": 37.89,
+          "longitude": -122.28,
+          "reach_id": "r",
+          "reach_name": "Codornices Creek",
+          "spot_id": "s",
+          "spot_name": "Codornices Creek"
+        }
+      },
+      "name": "codornices"
+    },
+    {
+      "expected": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": null
+      },
+      "input": {
+        "spot": {
+          "coarse": true,
+          "creek_id": "c",
+          "creek_name": "Strawberry Creek footbridge",
+          "latitude": null,
+          "longitude": null,
+          "reach_id": "r",
+          "reach_name": "Strawberry Creek footbridge",
+          "spot_id": "s",
+          "spot_name": "Strawberry Creek footbridge"
+        }
+      },
+      "name": "no coordinates, named creek"
+    },
+    {
+      "expected": null,
+      "input": {
+        "spot": {
+          "coarse": true,
+          "creek_id": "c",
+          "creek_name": "Somewhere",
+          "latitude": null,
+          "longitude": null,
+          "reach_id": "r",
+          "reach_name": "Somewhere",
+          "spot_id": "s",
+          "spot_name": "Somewhere"
+        }
+      },
+      "name": "no coordinates, nothing"
+    }
+  ],
+  "reaches_below": [
+    {
+      "expected": [
+        "south-fork-campus",
+        "campus-west",
+        "downtown-culvert",
+        "strawberry-creek-park",
+        "west-culvert"
+      ],
+      "input": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "south-fork-canyon"
+      },
+      "name": "south-fork-canyon"
+    },
+    {
+      "expected": [
+        "campus-west",
+        "downtown-culvert",
+        "strawberry-creek-park",
+        "west-culvert"
+      ],
+      "input": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "south-fork-campus"
+      },
+      "name": "south-fork-campus"
+    },
+    {
+      "expected": [
+        "campus-west",
+        "downtown-culvert",
+        "strawberry-creek-park",
+        "west-culvert"
+      ],
+      "input": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "north-fork-campus"
+      },
+      "name": "north-fork-campus"
+    },
+    {
+      "expected": [
+        "downtown-culvert",
+        "strawberry-creek-park",
+        "west-culvert"
+      ],
+      "input": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "campus-west"
+      },
+      "name": "campus-west"
+    },
+    {
+      "expected": [
+        "strawberry-creek-park",
+        "west-culvert"
+      ],
+      "input": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "downtown-culvert"
+      },
+      "name": "downtown-culvert"
+    },
+    {
+      "expected": [
+        "west-culvert"
+      ],
+      "input": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "strawberry-creek-park"
+      },
+      "name": "strawberry-creek-park"
+    },
+    {
+      "expected": [],
+      "input": {
+        "creek_slug": "strawberry-creek",
+        "reach_slug": "west-culvert"
+      },
+      "name": "west-culvert"
+    }
+  ]
+}

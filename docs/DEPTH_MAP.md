@@ -38,7 +38,7 @@ scale 15.
 
 | Feature | Status | Main file | Test | Rubric line | Judge who cares |
 |---|---|---|---|---|---|
-| Follow up selector, pure, at most two questions | built | `core/followups.py` | `core/tests/test_followups.py` | Innovation | data tools |
+| Follow up selector, pure, at most two questions, in Python and in TypeScript | built, proved equal by golden vectors | `core/followups.py`, `worker/src/core/followups.ts` | `core/tests/test_followups.py`, `worker/test/golden.test.ts` | Innovation | data tools |
 | The gate: model output becomes a Flag or is rejected | built | `core/gate.py` | `core/tests/test_gate.py` | Innovation, Technical | digital health |
 | Rainfall lookup for the dry pipe rule | built | `core/rainfall.py` | `core/tests/test_rainfall.py` | Innovation | ecologist |
 | A model may only ask where it passed | built | `core/checker.py` | `core/tests/test_checker.py` | Innovation | digital health |
@@ -49,7 +49,7 @@ scale 15.
 
 | Feature | Status | Main file | Test | Rubric line | Judge who cares |
 |---|---|---|---|---|---|
-| FHIR emitter on their Location and Observation profiles | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Technical | standards |
+| FHIR emitter on their Location and Observation profiles, in Python and in TypeScript | built, the two proved equal by golden vectors | `core/fhir_emit.py`, `worker/src/core/fhir_emit.ts` | `core/tests/test_fhir_emit.py`, `worker/test/golden.test.ts` | Technical | standards |
 | HL7 validator, their guide at b907cf0, terminology on | built, 0 errors | `scripts/fhir_validate.py` | `docs/notes/p2_validator_run.md` | Technical | standards |
 | Observer score travels with every observation | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Innovation | standards, digital health |
 | Provenance links an Observation to both responses | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Technical | standards |

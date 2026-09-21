@@ -1,0 +1,1981 @@
+// test/golden.test.ts
+import assert from "node:assert/strict";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { test } from "node:test";
+import { fileURLToPath } from "node:url";
+
+// src/content.json
+var content_default = {
+  content_hash: "2ef5ed42924235eb",
+  creeks: [
+    {
+      name: "Strawberry Creek",
+      reaches: [
+        {
+          bbox: [
+            37.869,
+            -122.253,
+            37.878,
+            -122.235
+          ],
+          flows_into: "south-fork-campus",
+          name: "South Fork, Strawberry Canyon",
+          slug: "south-fork-canyon"
+        },
+        {
+          bbox: [
+            37.8695,
+            -122.2645,
+            37.873,
+            -122.253
+          ],
+          flows_into: "campus-west",
+          name: "South Fork, central campus",
+          slug: "south-fork-campus"
+        },
+        {
+          bbox: [
+            37.8731,
+            -122.2645,
+            37.8775,
+            -122.253
+          ],
+          flows_into: "campus-west",
+          name: "North Fork, campus",
+          slug: "north-fork-campus"
+        },
+        {
+          bbox: [
+            37.87,
+            -122.267,
+            37.8735,
+            -122.2645
+          ],
+          flows_into: "downtown-culvert",
+          name: "Below the forks, west campus",
+          slug: "campus-west"
+        },
+        {
+          bbox: [
+            37.866,
+            -122.286,
+            37.874,
+            -122.267
+          ],
+          flows_into: "strawberry-creek-park",
+          name: "Downtown culvert",
+          slug: "downtown-culvert"
+        },
+        {
+          bbox: [
+            37.8655,
+            -122.2905,
+            37.869,
+            -122.286
+          ],
+          flows_into: "west-culvert",
+          name: "Strawberry Creek Park",
+          slug: "strawberry-creek-park"
+        },
+        {
+          bbox: [
+            37.86,
+            -122.32,
+            37.872,
+            -122.2905
+          ],
+          flows_into: null,
+          name: "West Berkeley culvert, to the Bay",
+          slug: "west-culvert"
+        }
+      ],
+      slug: "strawberry-creek",
+      source: "Hand filled 2026-09-21 from public maps of the UC Berkeley campus and the City of Berkeley. Boxes are approximate."
+    }
+  ],
+  feature_list: [
+    {
+      id: "artificial_bank",
+      name: "Built banks",
+      plain: "concrete walls and other built banks",
+      question: "Are the banks artificial, such as concrete or stones set in concrete?"
+    },
+    {
+      id: "dug_out_channel",
+      name: "Dug-out channel",
+      plain: "a channel that was deepened or straightened",
+      question: "Does this channel look dug out or straightened?"
+    },
+    {
+      id: "invasive_plant",
+      name: "Plants that do not belong",
+      plain: "pretty plants that do not belong here",
+      question: "Do you see any non-native or invasive plant species?"
+    },
+    {
+      id: "pipe_running",
+      name: "Pipes and sewage signs",
+      plain: "pipes with something coming out, and sewage signs",
+      question: "Are there pipes draining polluted water into the stream?"
+    }
+  ],
+  features: [
+    "artificial_bank",
+    "dug_out_channel",
+    "invasive_plant",
+    "pipe_running"
+  ],
+  fhir: {
+    oah_displays: {
+      LandUse: "Land use in the margins",
+      absent: "Absent",
+      bushes: "Bushes (height (1.5-3m)",
+      foam: "Foam/colour/smell",
+      herbaceous: "Herbaceous (height < 1.5m)",
+      hydrology: "Hydrology of the stream",
+      invasiveOrganisms: "Invasive invertebrate, plants and fish",
+      morophology: "Morphology of the streams",
+      present: "Present",
+      riparianVegetation: "Riparian vegetation",
+      trees: "Trees (height >3m)"
+    },
+    oah_location_profile: "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah",
+    oah_observation_profile: "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah",
+    oah_system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu",
+    repo_url: "https://github.com/alejandro-publius/second-look",
+    sl_displays: {
+      "aquatic-vegetation": "Aquatic vegetation",
+      "artificial-bank": "Artificial bank",
+      "cant-tell": "Can't tell",
+      dry: "Dry channel",
+      "dug-out-channel": "Dug-out channel",
+      example: "Example, not a real result",
+      "fallen-branches": "Fallen branches",
+      "fallen-trees": "Fallen trees",
+      fast: "Fast flow",
+      flat: "Flat channel",
+      good: "Good overall rating",
+      "invasive-plant": "Invasive plant",
+      "lab-ecoli-cfu": "Escherichia coli, colony forming units",
+      "lab-enterobacteriaceae-share": "Enterobacteriaceae, share of 16S reads",
+      "lab-hf183": "Human faecal marker HF183",
+      "leaf-deposits": "Deposits of fallen leaves",
+      moderate: "Moderate overall rating",
+      "pipe-running": "Pipe running",
+      poor: "Poor overall rating",
+      riffles: "Riffles, rapids or falls",
+      "sand-banks": "Sand banks",
+      "sand-islands": "Sand islands",
+      "second-look-test": "Second Look observer test",
+      slow: "Slow flow",
+      software: "Second Look software",
+      stagnant: "Stagnant or intermittent flow",
+      "stone-deposits": "Stone deposits",
+      "test-pipe-outflow": "Test the water coming out of this pipe",
+      "u-shape": "U shaped channel",
+      "v-shape": "V shaped channel"
+    },
+    sl_system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look",
+    ucum_displays: {
+      "%": "percent",
+      Cel: "degree Celsius",
+      "[CFU]/dL": "colony forming units per 100 mL",
+      cm: "centimetre",
+      m: "metre",
+      mL: "millilitre"
+    }
+  },
+  followups: {
+    max_questions: 2,
+    rules: [
+      {
+        dry_rule: {
+          max_mm: 2.5,
+          window_hours: 72
+        },
+        fail_closed: "if rainfall or location is unknown, this rule does not fire",
+        id: "dry_pipe",
+        needs_items: [
+          "draining_pipes",
+          "sewage_discharge"
+        ],
+        priority: 1,
+        question_key: "followup.dry_pipe",
+        trigger: "draining_pipes or sewage_discharge answered present, and rainfall status is dry"
+      },
+      {
+        id: "rating_check",
+        needs_items: [
+          "overall_rating",
+          "bank_type",
+          "impervious_left",
+          "impervious_right",
+          "invasive_species",
+          "sewage_discharge"
+        ],
+        priority: 2,
+        question_key: "followup.rating_check",
+        stores: [
+          "first_rating",
+          "final_rating"
+        ],
+        trigger: "overall_rating is good, and any of bank_type present, impervious_left present, impervious_right present, invasive_species present, sewage_discharge present"
+      },
+      {
+        feature_flag: "CHECKER_ENABLED",
+        id: "checker_flag",
+        needs_items: [],
+        priority: 3,
+        question_key: "followup.checker_flag",
+        trigger: "a Flag from core.gate for a feature the model passed, shown only after the person answered"
+      },
+      {
+        asks_for: "photo",
+        id: "low_score",
+        needs_items: [
+          "bank_type",
+          "draining_pipes",
+          "invasive_species"
+        ],
+        priority: 4,
+        question_key: "followup.low_score",
+        trigger: "observer scored 2 of 4 or lower on a feature and answered absent for that feature"
+      }
+    ]
+  },
+  form_items: [
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "channel_form",
+      options: [
+        {
+          id: "flat",
+          label: "Flat",
+          value: "flat"
+        },
+        {
+          id: "u_shape",
+          label: "U shape",
+          value: "u_shape"
+        },
+        {
+          id: "v_shape",
+          label: "V shape",
+          value: "v_shape"
+        },
+        {
+          id: "not_sure",
+          label: "I'm not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      text: "Channel form",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "bottom_type",
+      options: [
+        {
+          id: "natural",
+          label: "Natural",
+          value: "absent"
+        },
+        {
+          id: "artificial",
+          label: "Artificial (concrete or stones with concrete)",
+          value: "present"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      text: "Bottom type",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: "artificial_bank",
+      fhir: {
+        category: "morophology",
+        code: "artificial-bank",
+        code_system: "sl"
+      },
+      id: "bank_type",
+      options: [
+        {
+          id: "natural",
+          label: "Natural",
+          value: "absent"
+        },
+        {
+          id: "artificial",
+          label: "Artificial (concrete or stones with concrete)",
+          value: "present"
+        },
+        {
+          id: "laid_stones",
+          label: "Laid stones with no concrete",
+          value: "absent"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      short_label: "artificial banks",
+      text: "Bank type",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "habitats",
+      options: [
+        {
+          id: "sand_banks",
+          label: "Sand banks",
+          value: "sand_banks"
+        },
+        {
+          id: "sand_islands",
+          label: "Sand islands",
+          value: "sand_islands"
+        },
+        {
+          id: "stone_deposits",
+          label: "Stone deposits",
+          value: "stone_deposits"
+        },
+        {
+          id: "riffles",
+          label: "Riffles, rapids, falls",
+          value: "riffles"
+        },
+        {
+          id: "aquatic_vegetation",
+          label: "Aquatic vegetation",
+          value: "aquatic_vegetation"
+        }
+      ],
+      section: "what_you_see",
+      text: "Habitats",
+      type: "multi",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "natural_debris",
+      options: [
+        {
+          id: "fallen_trees",
+          label: "Fallen trees",
+          value: "fallen_trees"
+        },
+        {
+          id: "fallen_branches",
+          label: "Fallen branches",
+          value: "fallen_branches"
+        },
+        {
+          id: "leaf_deposits",
+          label: "Deposits of fallen leaves",
+          value: "leaf_deposits"
+        }
+      ],
+      section: "what_you_see",
+      text: "Natural debris",
+      type: "multi",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "hydrology",
+        code_system: "oah"
+      },
+      id: "water_flow",
+      options: [
+        {
+          id: "fast",
+          label: "Fast (with waves or high velocity)",
+          value: "fast"
+        },
+        {
+          id: "slow",
+          label: "Slow",
+          value: "slow"
+        },
+        {
+          id: "stagnant",
+          label: "Stagnant or intermittent",
+          value: "stagnant"
+        },
+        {
+          id: "dry",
+          label: "Dry",
+          value: "dry"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      text: "Water flow",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "foam",
+        code_system: "oah"
+      },
+      id: "water_aspect",
+      options: [
+        {
+          id: "clear",
+          label: "Clear or transparent",
+          value: "absent"
+        },
+        {
+          id: "muddy",
+          label: "Muddy or turbid",
+          value: "present"
+        },
+        {
+          id: "foam",
+          label: "Has foam",
+          value: "present"
+        },
+        {
+          id: "colour",
+          label: "Has colours or altered colour",
+          value: "present"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "water",
+      text: "How is the water?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "hydrology",
+        code_system: "oah"
+      },
+      id: "water_withdrawal",
+      section: "water",
+      text: "Is there any kind of obvious water collection, use or removal from the stream?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "barriers",
+      section: "water",
+      text: "Do you see any dams or other transversal artificial barriers?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: "pipe_running",
+      fhir: {
+        category: "hydrology",
+        code: "pipe-running",
+        code_system: "sl"
+      },
+      id: "draining_pipes",
+      section: "water",
+      text: "Are there pipes draining polluted water into the stream?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: "pipe_running",
+      fhir: {
+        category: "hydrology",
+        code: "pipe-running",
+        code_system: "sl"
+      },
+      id: "sewage_discharge",
+      section: "water",
+      short_label: "a sewage discharge",
+      text: "Is there any kind of water entry or discharge of sewage?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "construction",
+      section: "water",
+      text: "Is there any construction or works in the stream?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "hydrology",
+        code_system: "oah",
+        unit: "m"
+      },
+      id: "water_height_m",
+      section: "water",
+      text: "Water height in metres",
+      type: "number",
+      unit: "m",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "LandUse",
+        code_system: "oah"
+      },
+      id: "impervious_left",
+      section: "margins",
+      short_label: "a paved left margin",
+      text: "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "LandUse",
+        code_system: "oah"
+      },
+      id: "impervious_right",
+      section: "margins",
+      short_label: "a paved right margin",
+      text: "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_left",
+      section: "margins",
+      text: "Is the left margin covered by vegetation?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_right",
+      section: "margins",
+      text: "Is the right margin covered by vegetation?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_type_left",
+      options: [
+        {
+          id: "herbs",
+          label: "Herbs",
+          value: "herbaceous"
+        },
+        {
+          id: "shrubs",
+          label: "Shrubs",
+          value: "bushes"
+        },
+        {
+          id: "trees",
+          label: "Trees",
+          value: "trees"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "margins",
+      text: "Left margin: what is dominant (more than half) in the first 5 m?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_type_right",
+      options: [
+        {
+          id: "herbs",
+          label: "Herbs",
+          value: "herbaceous"
+        },
+        {
+          id: "shrubs",
+          label: "Shrubs",
+          value: "bushes"
+        },
+        {
+          id: "trees",
+          label: "Trees",
+          value: "trees"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "margins",
+      text: "Right margin: what is dominant (more than half) in the first 5 m?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: "invasive_plant",
+      fhir: {
+        category: "invasiveOrganisms",
+        code: "invasive-plant",
+        code_system: "sl"
+      },
+      id: "invasive_species",
+      section: "margins",
+      short_label: "invasive plants",
+      text: "Do you see any non-native or invasive plant species?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      depends_on: {
+        item: "invasive_species",
+        value: "present"
+      },
+      feature: "invasive_plant",
+      fhir: {
+        category: "invasiveOrganisms",
+        code: "invasive-plant",
+        code_system: "sl"
+      },
+      id: "invasive_which",
+      note: "The app offers free text here. We offer the regional list plus Not sure, so no free text is stored.",
+      region_list: "invasive_plants",
+      section: "margins",
+      text: "Which ones?",
+      type: "pick_region_list",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_cuts",
+      section: "margins",
+      text: "Have there been recent cuts of vegetation (partial or total) on the banks?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      allow_not_applicable: true,
+      feature: null,
+      fhir: null,
+      id: "feelings",
+      section: "feelings",
+      sliders: [
+        "joy",
+        "serenity",
+        "anger",
+        "fear"
+      ],
+      text: "Which feelings best describe your experience?",
+      type: "sliders",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: null,
+      id: "overall_rating",
+      options: [
+        {
+          id: "good",
+          label: "Good: the ecosystem components are there, riparian vegetation, natural channel, good water quality, biodiversity",
+          value: "good"
+        },
+        {
+          id: "moderate",
+          label: "Moderate: some alterations, still biodiverse, with vegetation in the margins, water looks good",
+          value: "moderate"
+        },
+        {
+          id: "poor",
+          label: "Poor: highly modified or artificialized, loss of riparian vegetation, loss of habitats, polluted",
+          value: "poor"
+        }
+      ],
+      rating_check: true,
+      section: "overall",
+      text: "Overall, how would you rate this stream?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    }
+  ],
+  locale: {
+    "error.content": "This photo is missing from the content. Please tell us.",
+    "error.network": "Something did not send. Check your connection and try again.",
+    "error.nothing_here": "There is nothing to show on this screen. The content may be part way through an edit.",
+    "error.retry": "Try again",
+    "error.server": "The server could not take that. Try again in a moment.",
+    "error.start_over": "Start again",
+    "followup.checker_flag": "The checker noticed something that may be {note}. Want to look again?",
+    "followup.dry_pipe": "It has not rained here for {days} days. Is anything coming out of that pipe? A pipe still running after three dry days is worth testing.",
+    "followup.low_score": "You scored {correct} of 4 on {feature} in the test. Could you take a photo of the {feature} so a reviewer can check?",
+    "followup.rating_check": "You rated this stream Good, but you also reported {issues}. Do you want to keep your rating?",
+    "label.checker_noticed": "the checker noticed",
+    "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+    "label.score": "{correct} of {total} on {feature}, tested {date}",
+    "test.cant_tell": "Can't tell",
+    "test.no": "No",
+    "test.yes": "Yes"
+  },
+  rules: {
+    features_in_order: [
+      "artificial_bank",
+      "dug_out_channel",
+      "invasive_plant",
+      "pipe_running"
+    ],
+    human_pass_min: 3,
+    items_per_feature: 4,
+    low_score_max_correct: 2,
+    measure_for_feature: {
+      artificial_bank: [
+        "city_replant_margins",
+        "city_remove_concrete"
+      ],
+      barriers: [
+        "city_remove_barriers"
+      ],
+      dug_out_channel: [
+        "city_reconnect_floodplain"
+      ],
+      pipe_running: [
+        "city_fix_sewers"
+      ]
+    },
+    pipe_items: [
+      "draining_pipes",
+      "sewage_discharge"
+    ],
+    pipe_observers_needed: 2,
+    rating_issue_items: [
+      "bank_type",
+      "impervious_left",
+      "impervious_right",
+      "invasive_species",
+      "sewage_discharge"
+    ],
+    same_spot_metres: 30,
+    score_valid_days: 90,
+    test_name_words: [
+      "abc",
+      "asdf",
+      "bar",
+      "baz",
+      "delete",
+      "demo",
+      "dummy",
+      "example",
+      "foo",
+      "ignore",
+      "placeholder",
+      "qwerty",
+      "sample",
+      "test",
+      "testing",
+      "todo",
+      "xxx"
+    ]
+  },
+  sentences: [],
+  test_items: [
+    {
+      feature: "artificial_bank",
+      gold: "present",
+      id: "t01"
+    },
+    {
+      feature: "artificial_bank",
+      gold: "present",
+      id: "t02"
+    },
+    {
+      feature: "artificial_bank",
+      gold: "absent",
+      id: "t03"
+    },
+    {
+      feature: "artificial_bank",
+      gold: "absent",
+      id: "t04"
+    },
+    {
+      feature: "dug_out_channel",
+      gold: "present",
+      id: "t05"
+    },
+    {
+      feature: "dug_out_channel",
+      gold: "present",
+      id: "t06"
+    },
+    {
+      feature: "dug_out_channel",
+      gold: "absent",
+      id: "t07"
+    },
+    {
+      feature: "dug_out_channel",
+      gold: "absent",
+      id: "t08"
+    },
+    {
+      feature: "invasive_plant",
+      gold: "present",
+      id: "t09"
+    },
+    {
+      feature: "invasive_plant",
+      gold: "present",
+      id: "t10"
+    },
+    {
+      feature: "invasive_plant",
+      gold: "absent",
+      id: "t11"
+    },
+    {
+      feature: "invasive_plant",
+      gold: "absent",
+      id: "t12"
+    },
+    {
+      feature: "pipe_running",
+      gold: "present",
+      id: "t13"
+    },
+    {
+      feature: "pipe_running",
+      gold: "present",
+      id: "t14"
+    },
+    {
+      feature: "pipe_running",
+      gold: "absent",
+      id: "t15"
+    },
+    {
+      feature: "pipe_running",
+      gold: "absent",
+      id: "t16"
+    }
+  ],
+  warmup_ids: [
+    "w01",
+    "w02"
+  ]
+};
+
+// src/core/types.ts
+function scoreFor(observer, feature) {
+  for (const s of observer.scores) if (s.feature === feature) return s;
+  return null;
+}
+function parseDate(day) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(day);
+  if (!m) throw new Error(`not a date: ${day}`);
+  return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+function isoDate(ms) {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+function daysBetween(earlier, later) {
+  return Math.round((parseDate(later) - parseDate(earlier)) / 864e5);
+}
+function addDays(day, days) {
+  return isoDate(parseDate(day) + days * 864e5);
+}
+function parseInstant(iso) {
+  let text = iso.replace(/(\.\d{3})\d+/, "$1");
+  if (!/([zZ]|[+-]\d{2}:?\d{2})$/.test(text)) text += "Z";
+  const ms = Date.parse(text);
+  if (Number.isNaN(ms)) throw new Error(`not an instant: ${iso}`);
+  return ms;
+}
+function instant(iso) {
+  const ms = typeof iso === "number" ? iso : parseInstant(iso);
+  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+function dayOf(iso) {
+  return isoDate(parseInstant(iso));
+}
+function compareStrings(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+// src/core/labels.ts
+var HUMAN_PASS_MIN = content_default.rules.human_pass_min;
+var SCORE_VALID_DAYS = content_default.rules.score_valid_days;
+var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var KEY_SCORE = "label.score";
+var KEY_EXPIRED = "label.expired";
+function shortDate(day) {
+  const d = new Date(parseDate(day));
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
+}
+function expiredOn(score, today) {
+  return daysBetween(score.tested_on, today) > SCORE_VALID_DAYS;
+}
+function fill(template, params) {
+  return template.replace(/\{(\w+)\}/g, (whole, name) => name in params ? String(params[name]) : whole);
+}
+function observerLabel(score, featureName, today, locale) {
+  if (score === null) return { text: "", expired: false, passed: null };
+  const tested = shortDate(score.tested_on);
+  const params = { correct: score.correct, total: score.total, feature: featureName, date: tested };
+  if (expiredOn(score, today)) {
+    return { text: fill(locale[KEY_EXPIRED], params), expired: true, passed: null };
+  }
+  return { text: fill(locale[KEY_SCORE], params), expired: false, passed: score.correct >= HUMAN_PASS_MIN };
+}
+
+// src/core/act.ts
+var FEATURES = content_default.rules.features_in_order;
+var SCORE_VALID_DAYS2 = content_default.rules.score_valid_days;
+var MEASURE_FOR_FEATURE = content_default.rules.measure_for_feature;
+var DRY_PIPE_RULE = "dry_pipe";
+var PIPE_OBSERVERS_NEEDED = content_default.rules.pipe_observers_needed;
+var SAME_SPOT_METRES = content_default.rules.same_spot_metres;
+var EARTH_RADIUS_M = 6371e3;
+var TEST_NAME_WORDS = new Set(content_default.rules.test_name_words);
+function present(value) {
+  return value === "present" || value === "yes" || value === true || value === 1;
+}
+function passedFeature(v, feature, today) {
+  if (!FEATURES.includes(feature)) return false;
+  const score = scoreFor(v.observer, feature);
+  if (score === null || daysBetween(score.tested_on, today) > SCORE_VALID_DAYS2) return false;
+  return score.correct >= HUMAN_PASS_MIN;
+}
+function findingsFromVisits(visits, findingKeyFor) {
+  const lookup = findingKeyFor ?? {};
+  const seen = /* @__PURE__ */ new Map();
+  for (const v of visits) {
+    for (const [answerKey, value] of Object.entries(v.answers)) {
+      const feature = lookup[answerKey] ?? answerKey;
+      if (!(feature in MEASURE_FOR_FEATURE) || !present(value)) continue;
+      const key = `${v.spot.spot_id}\0${feature}`;
+      const day = dayOf(v.answered_at);
+      let row = seen.get(key);
+      if (!row) {
+        row = { spot_id: v.spot.spot_id, feature, observers: [], visit_ids: [], first_seen: day, last_seen: day, passed_observers: [] };
+        seen.set(key, row);
+      }
+      const token = v.observer.contributor_token;
+      if (!row.observers.includes(token)) row.observers.push(token);
+      if (!row.passed_observers.includes(token) && passedFeature(v, feature, day)) row.passed_observers.push(token);
+      row.visit_ids.push(v.visit_id);
+      if (day < row.first_seen) row.first_seen = day;
+      if (day > row.last_seen) row.last_seen = day;
+    }
+  }
+  return [...seen.values()].sort((a, b) => compareStrings(a.spot_id, b.spot_id) || compareStrings(a.feature, b.feature));
+}
+function needsFromFindings(findings, sentences) {
+  const approved = /* @__PURE__ */ new Map();
+  for (const s of sentences) if (s.approved === true && s.audience === "city") approved.set(String(s.id), s);
+  const wanted = /* @__PURE__ */ new Map();
+  for (const f of findings) {
+    for (const sentenceId of MEASURE_FOR_FEATURE[f.feature] ?? []) {
+      if (!approved.has(sentenceId)) continue;
+      let row = wanted.get(sentenceId);
+      if (!row) {
+        row = { because: [], visits: [] };
+        wanted.set(sentenceId, row);
+      }
+      if (!row.because.includes(f.feature)) row.because.push(f.feature);
+      row.visits.push(...f.visit_ids);
+    }
+  }
+  return [...wanted.entries()].sort(([a], [b]) => compareStrings(a, b)).map(([sentenceId, row]) => {
+    const s = approved.get(sentenceId);
+    return {
+      sentence_id: sentenceId,
+      text: String(s.text ?? ""),
+      source: String(s.source ?? ""),
+      because: row.because,
+      visit_ids: [...new Set(row.visits)]
+    };
+  });
+}
+function dryPipeDays(v) {
+  for (const c of v.checks) {
+    if (c.rule_id !== DRY_PIPE_RULE || !c.asked || c.answer !== "yes") continue;
+    const days = c.detail.days;
+    if (typeof days === "number" && Number.isInteger(days) && days >= 1) return days;
+  }
+  return null;
+}
+function pipesWorthTesting(visits, today) {
+  const bySpot = /* @__PURE__ */ new Map();
+  for (const v of visits) {
+    const days = dryPipeDays(v);
+    if (days === null || !passedFeature(v, "pipe_running", today)) continue;
+    const day = dayOf(v.answered_at);
+    let row = bySpot.get(v.spot.spot_id);
+    if (!row) {
+      row = { spot_id: v.spot.spot_id, spot_name: v.spot.spot_name, observers: [], visit_ids: [], dry_days: [], last_seen: day };
+      bySpot.set(v.spot.spot_id, row);
+    }
+    if (!row.observers.includes(v.observer.contributor_token)) row.observers.push(v.observer.contributor_token);
+    row.visit_ids.push(v.visit_id);
+    row.dry_days.push(days);
+    if (day > row.last_seen) row.last_seen = day;
+  }
+  return [...bySpot.values()].sort((a, b) => compareStrings(a.spot_id, b.spot_id)).filter((row) => row.observers.length >= PIPE_OBSERVERS_NEEDED);
+}
+function metresBetween(lat1, lon1, lat2, lon2) {
+  const rad = (d) => d * Math.PI / 180;
+  const p1 = rad(lat1);
+  const p2 = rad(lat2);
+  const dp = rad(lat2 - lat1);
+  const dl = rad(lon2 - lon1);
+  const a = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+function nearestSpot(latitude, longitude, spots, within = SAME_SPOT_METRES) {
+  let best = null;
+  for (const s of spots) {
+    if (s.latitude === null || s.longitude === null) continue;
+    const d = metresBetween(latitude, longitude, s.latitude, s.longitude);
+    if (d <= within && (best === null || d < best.metres)) best = { spot: s, metres: d };
+  }
+  return best;
+}
+function looksLikeATestName(name) {
+  const cleaned = Array.from(name.toLowerCase(), (ch) => /[\p{L}\p{N}]/u.test(ch) || /\s/.test(ch) ? ch : " ").join("");
+  const words = cleaned.split(/\s+/).filter((w) => w.length > 0);
+  if (words.length === 0) return true;
+  if (words.some((w) => TEST_NAME_WORDS.has(w))) return true;
+  return !/\p{L}/u.test(name);
+}
+
+// src/core/pyround.ts
+function pyRound(x, digits) {
+  if (!Number.isFinite(x)) return x;
+  const sign = x < 0 ? -1 : 1;
+  const magnitude = Math.abs(x);
+  const extra = 30;
+  const long = magnitude.toFixed(digits + extra);
+  const [whole, fraction = ""] = long.split(".");
+  const kept = fraction.slice(0, digits);
+  const rest = fraction.slice(digits);
+  const tie = rest === "5" + "0".repeat(extra - 1);
+  let result;
+  if (!tie) {
+    result = Number(magnitude.toFixed(digits));
+  } else {
+    const keptDigits = whole + kept;
+    const last = Number(keptDigits[keptDigits.length - 1]);
+    let asInteger = BigInt(keptDigits);
+    if (last % 2 === 1) asInteger += 1n;
+    const text = asInteger.toString().padStart(digits + 1, "0");
+    const cut = text.length - digits;
+    result = Number(digits === 0 ? text : `${text.slice(0, cut)}.${text.slice(cut)}`);
+  }
+  return sign * result === 0 ? 0 : sign * result;
+}
+
+// src/core/sha256.ts
+var K = new Uint32Array([
+  1116352408,
+  1899447441,
+  3049323471,
+  3921009573,
+  961987163,
+  1508970993,
+  2453635748,
+  2870763221,
+  3624381080,
+  310598401,
+  607225278,
+  1426881987,
+  1925078388,
+  2162078206,
+  2614888103,
+  3248222580,
+  3835390401,
+  4022224774,
+  264347078,
+  604807628,
+  770255983,
+  1249150122,
+  1555081692,
+  1996064986,
+  2554220882,
+  2821834349,
+  2952996808,
+  3210313671,
+  3336571891,
+  3584528711,
+  113926993,
+  338241895,
+  666307205,
+  773529912,
+  1294757372,
+  1396182291,
+  1695183700,
+  1986661051,
+  2177026350,
+  2456956037,
+  2730485921,
+  2820302411,
+  3259730800,
+  3345764771,
+  3516065817,
+  3600352804,
+  4094571909,
+  275423344,
+  430227734,
+  506948616,
+  659060556,
+  883997877,
+  958139571,
+  1322822218,
+  1537002063,
+  1747873779,
+  1955562222,
+  2024104815,
+  2227730452,
+  2361852424,
+  2428436474,
+  2756734187,
+  3204031479,
+  3329325298
+]);
+var rotr = (x, n) => x >>> n | x << 32 - n;
+function sha256Bytes(input) {
+  const data = typeof input === "string" ? new TextEncoder().encode(input) : input;
+  const bitLength = data.length * 8;
+  const padded = new Uint8Array(data.length + 9 + 63 >> 6 << 6);
+  padded.set(data);
+  padded[data.length] = 128;
+  const view = new DataView(padded.buffer);
+  view.setUint32(padded.length - 8, Math.floor(bitLength / 4294967296), false);
+  view.setUint32(padded.length - 4, bitLength >>> 0, false);
+  const h = new Uint32Array([1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225]);
+  const w = new Uint32Array(64);
+  for (let offset = 0; offset < padded.length; offset += 64) {
+    for (let i = 0; i < 16; i++) w[i] = view.getUint32(offset + i * 4, false);
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ w[i - 15] >>> 3;
+      const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ w[i - 2] >>> 10;
+      w[i] = w[i - 16] + s0 + w[i - 7] + s1 >>> 0;
+    }
+    let [a, b, c, d, e, f, g, hh] = h;
+    for (let i = 0; i < 64; i++) {
+      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+      const ch = e & f ^ ~e & g;
+      const t1 = hh + S1 + ch + K[i] + w[i] >>> 0;
+      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+      const maj = a & b ^ a & c ^ b & c;
+      const t2 = S0 + maj >>> 0;
+      hh = g;
+      g = f;
+      f = e;
+      e = d + t1 >>> 0;
+      d = c;
+      c = b;
+      b = a;
+      a = t1 + t2 >>> 0;
+    }
+    h[0] = h[0] + a >>> 0;
+    h[1] = h[1] + b >>> 0;
+    h[2] = h[2] + c >>> 0;
+    h[3] = h[3] + d >>> 0;
+    h[4] = h[4] + e >>> 0;
+    h[5] = h[5] + f >>> 0;
+    h[6] = h[6] + g >>> 0;
+    h[7] = h[7] + hh >>> 0;
+  }
+  const out = new Uint8Array(32);
+  const outView = new DataView(out.buffer);
+  for (let i = 0; i < 8; i++) outView.setUint32(i * 4, h[i], false);
+  return out;
+}
+function sha256Hex(input) {
+  return Array.from(sha256Bytes(input), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// src/core/fhir_emit.ts
+var FHIR = content_default.fhir;
+var REPO_URL = FHIR.repo_url;
+var FHIR_BASE = `${REPO_URL}/fhir`;
+var SL_SYSTEM = FHIR.sl_system;
+var OAH_SYSTEM = FHIR.oah_system;
+var OAH_LOCATION_PROFILE = FHIR.oah_location_profile;
+var OAH_OBSERVATION_PROFILE = FHIR.oah_observation_profile;
+var UCUM_SYSTEM = "http://unitsofmeasure.org";
+var SNOMED_SYSTEM = "http://snomed.info/sct";
+var PROVENANCE_TYPE_SYSTEM = "http://terminology.hl7.org/CodeSystem/provenance-participant-type";
+var QUESTIONNAIRE_TEST_URL = `${FHIR_BASE}/Questionnaire/sl-questionnaire-test`;
+var QUESTIONNAIRE_CHECK_URL = `${FHIR_BASE}/Questionnaire/sl-questionnaire-check`;
+var ID_SYSTEM_ORG = `${FHIR_BASE}/org`;
+var ID_SYSTEM_DEVICE = `${FHIR_BASE}/device`;
+var ID_SYSTEM_LOCATION = `${FHIR_BASE}/location-id`;
+var ID_SYSTEM_CONTRIBUTOR = `${FHIR_BASE}/contributor-token`;
+var ID_SYSTEM_QR = `${FHIR_BASE}/qr`;
+var ID_SYSTEM_OBSERVATION = `${FHIR_BASE}/observation`;
+var ORG_ID = "sl-org";
+var DEVICE_ID = "sl-device";
+var SL_DISPLAYS = FHIR.sl_displays;
+var OAH_DISPLAYS = FHIR.oah_displays;
+var UCUM_DISPLAYS = FHIR.ucum_displays;
+var FEATURES2 = content_default.rules.features_in_order;
+var SCORE_VALID_DAYS3 = content_default.rules.score_valid_days;
+var FORM_ITEMS = content_default.form_items;
+var FhirEmitError = class extends Error {
+};
+function fhirId(...parts) {
+  const raw = parts.join("-");
+  const cleaned = raw.replace(/[^A-Za-z0-9.-]/g, "-").replace(/^-+|-+$/g, "");
+  if (cleaned.length <= 64) return cleaned;
+  return `${cleaned.slice(0, 51)}-${sha256Hex(raw).slice(0, 12)}`;
+}
+function coding(system, code, display) {
+  const out = { system, code };
+  if (display !== void 0) out.display = display;
+  return out;
+}
+function slCoding(code) {
+  if (!(code in SL_DISPLAYS)) throw new FhirEmitError(`no Second Look display for ${code}`);
+  return coding(SL_SYSTEM, code, SL_DISPLAYS[code]);
+}
+function oahCoding(code) {
+  if (!(code in OAH_DISPLAYS)) throw new FhirEmitError(`no OneAquaHealth display for ${code}`);
+  return coding(OAH_SYSTEM, code, OAH_DISPLAYS[code]);
+}
+function concept(c, text) {
+  const out = { coding: [c] };
+  if (text) out.text = text;
+  return out;
+}
+var ref = (type, id) => ({ reference: `${type}/${id}` });
+var identifier = (system, value) => ({ system, value });
+function escapeXml(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function narrative(text) {
+  return { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"><p>${escapeXml(text)}</p></div>` };
+}
+function pyFloat(value) {
+  if (Number.isInteger(value) && Math.abs(value) < 1e16) return `${value}.0`;
+  return String(value);
+}
+function fullUrl(resource) {
+  return `${FHIR_BASE}/${resource.resourceType}/${resource.id}`;
+}
+var entry = (resource) => ({ fullUrl: fullUrl(resource), resource });
+function codeForAnswer(value) {
+  if (value === "cant_tell") return slCoding("cant-tell");
+  if (value in OAH_DISPLAYS) return oahCoding(value);
+  const hyphenated = value.replace(/_/g, "-");
+  if (hyphenated in SL_DISPLAYS) return slCoding(hyphenated);
+  return null;
+}
+function valueConcept(value) {
+  const c = codeForAnswer(value);
+  return c ? concept(c) : { text: value };
+}
+function itemCode(item) {
+  const fhir = item.fhir;
+  if (fhir.code_system === "sl") return slCoding(fhir.code);
+  if (fhir.code_system === "oah") return oahCoding(fhir.code);
+  throw new FhirEmitError(`item ${item.id}: unknown code_system ${JSON.stringify(fhir.code_system)}`);
+}
+function itemCategory(item) {
+  return oahCoding(item.fhir.category || item.fhir.code);
+}
+function quantity(value, unit) {
+  return { value, unit: UCUM_DISPLAYS[unit] ?? unit, system: UCUM_SYSTEM, code: unit };
+}
+function organization() {
+  return {
+    resourceType: "Organization",
+    id: ORG_ID,
+    text: narrative("Second Look project. Issues the observer test and keeps the record."),
+    identifier: [identifier(ID_SYSTEM_ORG, "second-look")],
+    name: "Second Look project",
+    active: true
+  };
+}
+function device(version) {
+  return {
+    resourceType: "Device",
+    id: DEVICE_ID,
+    text: narrative(`Second Look web app, version ${version}. Assembled this record.`),
+    identifier: [identifier(ID_SYSTEM_DEVICE, "second-look-web")],
+    status: "active",
+    type: concept(slCoding("software")),
+    deviceName: [{ name: "Second Look web app", type: "user-friendly-name" }],
+    version: [{ value: version }]
+  };
+}
+function location(opts) {
+  const out = {
+    resourceType: "Location",
+    id: opts.locationId,
+    meta: { profile: [OAH_LOCATION_PROFILE] },
+    text: narrative(`${opts.name}. A ${opts.kind} used in Second Look creek checks.`),
+    identifier: [identifier(ID_SYSTEM_LOCATION, opts.identifier)],
+    name: opts.name,
+    mode: "instance",
+    type: [concept(coding(SNOMED_SYSTEM, "420531007", "River"))]
+  };
+  if (opts.description) out.description = opts.description;
+  if (opts.position) out.position = { latitude: opts.position[0], longitude: opts.position[1] };
+  if (opts.partOf) out.partOf = ref("Location", opts.partOf);
+  return out;
+}
+function locations(visit) {
+  const spot = visit.spot;
+  const creekId = fhirId("sl-loc", spot.creek_id);
+  const reachId = fhirId("sl-loc", spot.reach_id);
+  const spotId = fhirId("sl-loc", spot.spot_id);
+  let position = null;
+  if (spot.latitude !== null && spot.longitude !== null) {
+    const digits = spot.coarse ? 2 : 5;
+    position = [pyRound(spot.latitude, digits), pyRound(spot.longitude, digits)];
+  }
+  const creek = location({ locationId: creekId, identifier: spot.creek_id, name: spot.creek_name, kind: "creek" });
+  const reach = location({ locationId: reachId, identifier: spot.reach_id, name: spot.reach_name, kind: "reach", partOf: creekId });
+  const point = location({
+    locationId: spotId,
+    identifier: spot.spot_id,
+    name: spot.spot_name,
+    kind: "spot",
+    partOf: reachId,
+    position,
+    description: position && spot.coarse ? "Coarse position, about 1 km." : null
+  });
+  return [creek, reach, point];
+}
+function practitionerId(contributorToken) {
+  return `sl-practitioner-${sha256Hex(contributorToken).slice(0, 12)}`;
+}
+function testedOn(visit, sitting) {
+  const scores = sitting ? sitting.scores : visit.observer.scores;
+  if (scores.length === 0) return null;
+  return scores.map((s) => s.tested_on).reduce((a, b) => b > a ? b : a);
+}
+function practitioner(visit, tested) {
+  const token = visit.observer.contributor_token;
+  let words = "Volunteer observer, known only by a random contributor token.";
+  const qualification = [];
+  if (tested !== null) {
+    const validUntil = addDays(tested, SCORE_VALID_DAYS3);
+    words += ` Took the Second Look test on ${tested}.`;
+    words += ` The score counts until ${validUntil}.`;
+    qualification.push({
+      code: concept(slCoding("second-look-test")),
+      period: { start: tested, end: validUntil },
+      issuer: ref("Organization", ORG_ID)
+    });
+  }
+  const out = {
+    resourceType: "Practitioner",
+    id: practitionerId(token),
+    text: narrative(words),
+    identifier: [identifier(ID_SYSTEM_CONTRIBUTOR, practitionerId(token))],
+    active: true
+  };
+  if (qualification.length) out.qualification = qualification;
+  return out;
+}
+function testResponse(sitting, pid) {
+  const byFeature = new Map(sitting.scores.map((s) => [s.feature, s]));
+  const items = [];
+  const words = [];
+  for (const feature of FEATURES2) {
+    const score = byFeature.get(feature);
+    if (!score) continue;
+    items.push({ linkId: feature, item: [{ linkId: `${feature}.score`, answer: [{ valueInteger: score.correct }] }] });
+    words.push(`${feature.replace(/_/g, " ")} ${score.correct} of ${score.total}`);
+  }
+  return {
+    resourceType: "QuestionnaireResponse",
+    id: fhirId("sl-qr-test", sitting.sitting_id),
+    text: narrative(`Observer test sitting, scored by code: ${words.join(", ")}.`),
+    identifier: identifier(ID_SYSTEM_QR, sitting.sitting_id),
+    questionnaire: QUESTIONNAIRE_TEST_URL,
+    status: "completed",
+    authored: instant(sitting.completed_at),
+    author: ref("Practitioner", pid),
+    item: items
+  };
+}
+function qrAnswers(value) {
+  if (typeof value === "boolean") return [{ valueBoolean: value }];
+  if (typeof value === "number") return [{ valueDecimal: value }];
+  if (typeof value === "string") {
+    const c = codeForAnswer(value);
+    return c ? [{ valueCoding: c }] : [{ valueString: value }];
+  }
+  const out = [];
+  for (const element of value) out.push(...qrAnswers(element));
+  return out;
+}
+function visitResponse(visit, pid, items) {
+  const qrItems = [];
+  for (const item of items) {
+    if (!(item.id in visit.answers) || item.type === "sliders") continue;
+    const answers = qrAnswers(visit.answers[item.id]);
+    if (answers.length) qrItems.push({ linkId: item.id, answer: answers });
+  }
+  return {
+    resourceType: "QuestionnaireResponse",
+    id: fhirId("sl-qr-visit", visit.visit_id),
+    text: narrative(`Creek check at ${visit.spot.spot_name} on ${instant(visit.answered_at)}, ${qrItems.length} items answered.`),
+    identifier: identifier(ID_SYSTEM_QR, visit.visit_id),
+    questionnaire: QUESTIONNAIRE_CHECK_URL,
+    status: "completed",
+    authored: instant(visit.answered_at),
+    author: ref("Practitioner", pid),
+    item: qrItems
+  };
+}
+function components(item, values) {
+  const out = [];
+  if (item.type === "multi") {
+    for (const value of values) {
+      const c = codeForAnswer(value);
+      const code = c ? concept(c) : concept(itemCode(item), value);
+      out.push({ code, valueCodeableConcept: concept(oahCoding("present")) });
+    }
+    return out;
+  }
+  for (const value of values) out.push({ code: concept(itemCode(item)), valueCodeableConcept: valueConcept(value) });
+  return out;
+}
+function observation(visit, item, value, pid, spotLocationId, visitQrId, score) {
+  const fhir = item.fhir;
+  let words = `${item.text ?? item.id} at ${visit.spot.spot_name}: `;
+  let valuePart;
+  if (typeof value === "boolean") {
+    throw new FhirEmitError(`item ${item.id}: boolean answers are not allowed, use present/absent`);
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 0) return null;
+    valuePart = { component: components(item, value) };
+    words += value.map((v) => String(v).replace(/_/g, " ")).join(", ") + ".";
+  } else if (typeof value === "number") {
+    const unit = fhir.unit || item.unit;
+    if (!unit) throw new FhirEmitError(`item ${item.id}: a number needs a UCUM unit in form.yaml`);
+    valuePart = { valueQuantity: quantity(value, unit) };
+    words += `${pyFloat(value)} ${UCUM_DISPLAYS[unit] ?? unit}.`;
+  } else {
+    valuePart = { valueCodeableConcept: valueConcept(value) };
+    words += value.replace(/_/g, " ") + ".";
+  }
+  if (score !== null) {
+    words += ` The observer scored ${score.correct} of ${score.total} on this feature, tested ${score.tested_on}.`;
+  }
+  const out = {
+    resourceType: "Observation",
+    id: fhirId("sl-obs", visit.visit_id, item.id),
+    meta: { profile: [OAH_OBSERVATION_PROFILE] },
+    text: narrative(words),
+    identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
+    status: "final",
+    category: [concept(itemCategory(item))],
+    code: concept(itemCode(item), item.text),
+    subject: ref("Location", spotLocationId),
+    effectiveDateTime: instant(visit.answered_at),
+    performer: [ref("Practitioner", pid)],
+    ...valuePart,
+    derivedFrom: [ref("QuestionnaireResponse", visitQrId)]
+  };
+  return out;
+}
+function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
+  const entities = [{ role: "source", what: ref("QuestionnaireResponse", visitQrId) }];
+  if (testQrId) entities.push({ role: "source", what: ref("QuestionnaireResponse", testQrId) });
+  return {
+    resourceType: "Provenance",
+    id: fhirId("sl-provenance", visit.visit_id),
+    text: narrative(
+      `${observations.length} observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.`
+    ),
+    target: observations.map((o) => ref("Observation", String(o.id))),
+    recorded: instant(emittedAt),
+    agent: [
+      { type: concept(coding(PROVENANCE_TYPE_SYSTEM, "author")), who: ref("Practitioner", pid) },
+      { type: concept(coding(PROVENANCE_TYPE_SYSTEM, "assembler")), who: ref("Device", DEVICE_ID) }
+    ],
+    entity: entities
+  };
+}
+function emitVisit(visit, testSitting, emittedAt, items = FORM_ITEMS) {
+  const [creek, reach, spot] = locations(visit);
+  const tested = testedOn(visit, testSitting);
+  const person = practitioner(visit, tested);
+  const pid = String(person.id);
+  const testQr = testSitting ? testResponse(testSitting, pid) : null;
+  const visitQr = visitResponse(visit, pid, items);
+  const scores = /* @__PURE__ */ new Map();
+  for (const s of testSitting ? testSitting.scores : visit.observer.scores) scores.set(s.feature, s);
+  const observations = [];
+  for (const item of items) {
+    if (!item.fhir || !(item.id in visit.answers)) continue;
+    const obs = observation(visit, item, visit.answers[item.id], pid, String(spot.id), String(visitQr.id), scores.get(String(item.feature ?? "")) ?? null);
+    if (obs !== null) observations.push(obs);
+  }
+  const prov = provenance(visit, observations, pid, String(visitQr.id), testQr ? String(testQr.id) : null, emittedAt);
+  const resources = [organization(), device(visit.software_version), creek, reach, spot, person];
+  if (testQr) resources.push(testQr);
+  resources.push(visitQr, ...observations, prov);
+  return {
+    resourceType: "Bundle",
+    id: fhirId("sl-visit", visit.visit_id),
+    type: "collection",
+    timestamp: instant(emittedAt),
+    entry: resources.map(entry)
+  };
+}
+function checkBundle(bundle) {
+  const problems = [];
+  if (bundle.resourceType !== "Bundle") return ["not a Bundle"];
+  const entries = bundle.entry ?? [];
+  const keys = /* @__PURE__ */ new Set();
+  for (const e of entries) {
+    const r = e.resource ?? {};
+    if (bundle.type === "transaction") keys.add(String(e.fullUrl ?? ""));
+    else {
+      keys.add(`${r.resourceType}/${r.id}`);
+      keys.add(String(e.fullUrl ?? ""));
+    }
+  }
+  const walk = (node, path) => {
+    if (Array.isArray(node)) node.forEach((v, i) => walk(v, `${path}[${i}]`));
+    else if (node && typeof node === "object") {
+      for (const [key, value] of Object.entries(node)) {
+        if (key === "reference" && typeof value === "string") {
+          if (!keys.has(value)) problems.push(`${path}: reference ${value} does not resolve in the Bundle`);
+        } else walk(value, `${path}.${key}`);
+      }
+    }
+  };
+  const observations = [];
+  const provenances = [];
+  entries.forEach((e, i) => {
+    const r = e.resource ?? {};
+    const rtype = String(r.resourceType);
+    const label = `entry[${i}] ${rtype}/${r.id ?? e.fullUrl ?? "?"}`;
+    walk(r, label);
+    if (rtype === "Observation") {
+      observations.push(bundle.type !== "transaction" ? `Observation/${r.id}` : String(e.fullUrl ?? ""));
+      for (const field of ["subject", "performer", "effectiveDateTime"]) if (!(field in r)) problems.push(`${label}: missing ${field}`);
+      const profiles = r.meta?.profile ?? [];
+      if (!profiles.includes(OAH_OBSERVATION_PROFILE)) problems.push(`${label}: missing the OneAquaHealth indicator profile`);
+      if (!Object.keys(r).some((k) => k.startsWith("value")) && !r.component) problems.push(`${label}: no value and no component`);
+    } else if (rtype === "Provenance") provenances.push(r);
+    else if (!["Organization", "Device", "Location", "Practitioner", "QuestionnaireResponse"].includes(rtype)) {
+      problems.push(`${label}: unexpected resource type`);
+    }
+    if (rtype !== "Bundle" && !("text" in r)) problems.push(`${label}: no narrative`);
+  });
+  if (provenances.length !== 1) problems.push(`expected one Provenance, found ${provenances.length}`);
+  else {
+    const targets = new Set((provenances[0].target ?? []).map((t) => t.reference));
+    for (const obs of observations) if (!targets.has(obs)) problems.push(`Provenance does not target ${obs}`);
+  }
+  return problems;
+}
+
+// src/core/followups.ts
+var DEFAULT_MAX_QUESTIONS = 2;
+var LOW_SCORE_MAX_CORRECT = content_default.rules.low_score_max_correct;
+var FEATURES3 = content_default.rules.features_in_order;
+var PIPE_ITEMS = content_default.rules.pipe_items;
+var RATING_ISSUE_ITEMS = content_default.rules.rating_issue_items;
+var PRESENT = "present";
+var ABSENT = "absent";
+var BEST_RATING = "good";
+var RATING_ITEM = "overall_rating";
+function itemById(formItems, id) {
+  for (const item of formItems) if (item.id === id) return item;
+  return null;
+}
+function issueLabel(item, itemId, value) {
+  if (item === null) return itemId.replace(/_/g, " ");
+  const short = item.short_label;
+  if (typeof short === "string" && short.trim()) return short.trim();
+  for (const option of item.options ?? []) {
+    if (option && option.value === value) {
+      const label = option.label;
+      if (typeof label === "string" && label.trim()) return label.trim();
+    }
+  }
+  const text = item.text;
+  if (typeof text === "string" && text.trim()) return text.trim();
+  return itemId.replace(/_/g, " ");
+}
+function dryPipe(rule, answers, site) {
+  if (site.rain !== "dry") return null;
+  if (site.dry_days === null || site.dry_days === void 0 || site.dry_days < 1) return null;
+  if (!PIPE_ITEMS.some((item) => answers[item] === PRESENT)) return null;
+  return {
+    rule_id: "dry_pipe",
+    kind: "yesno",
+    question_key: String(rule.question_key ?? "followup.dry_pipe"),
+    params: { days: Math.trunc(site.dry_days) }
+  };
+}
+function ratingCheck(rule, answers, formItems) {
+  if (answers[RATING_ITEM] !== BEST_RATING) return null;
+  const issues = [];
+  for (const itemId of RATING_ISSUE_ITEMS) {
+    const value = answers[itemId];
+    if (value === PRESENT) issues.push(issueLabel(itemById(formItems, itemId), itemId, value));
+  }
+  if (issues.length === 0) return null;
+  return {
+    rule_id: "rating_check",
+    kind: "keep_rating",
+    question_key: String(rule.question_key ?? "followup.rating_check"),
+    params: { issues: issues.join(", "), first_rating: BEST_RATING }
+  };
+}
+function lowScore(rule, answers, observer, formItems) {
+  if (observer === null) return null;
+  let best = null;
+  formItems.forEach((item, position) => {
+    const feature2 = item.feature;
+    const itemId2 = item.id;
+    if (typeof feature2 !== "string" || !FEATURES3.includes(feature2) || typeof itemId2 !== "string") return;
+    if (answers[itemId2] !== ABSENT) return;
+    const score = scoreFor(observer, feature2);
+    if (score === null || score.correct > LOW_SCORE_MAX_CORRECT) return;
+    const key = [score.correct, position, itemId2, feature2];
+    if (best === null || lessThan(key, best)) best = key;
+  });
+  if (best === null) return null;
+  const [correct, , itemId, feature] = best;
+  return {
+    rule_id: "low_score",
+    kind: "photo",
+    question_key: String(rule.question_key ?? "followup.low_score"),
+    params: { feature: feature.replace(/_/g, " "), feature_id: feature, item_id: itemId, correct }
+  };
+}
+function lessThan(a, b) {
+  for (let i = 0; i < 4; i++) {
+    if (a[i] === b[i]) continue;
+    return a[i] < b[i];
+  }
+  return false;
+}
+function rulesInPriority(table) {
+  const rules = table.rules;
+  if (!Array.isArray(rules)) return [];
+  const typed = rules.filter((r) => r !== null && typeof r === "object" && typeof r.id === "string");
+  return typed.sort((a, b) => {
+    const pa = Math.trunc(Number(a.priority ?? 0));
+    const pb = Math.trunc(Number(b.priority ?? 0));
+    if (pa !== pb) return pa - pb;
+    return String(a.id) < String(b.id) ? -1 : String(a.id) > String(b.id) ? 1 : 0;
+  });
+}
+function selectFollowups(answers, site, observer, flags, table, formItems, checkerEnabled = false) {
+  const cap = Math.trunc(Number(table.max_questions ?? DEFAULT_MAX_QUESTIONS));
+  if (cap <= 0) return [];
+  const chosen = [];
+  for (const rule of rulesInPriority(table)) {
+    if (chosen.length >= cap) break;
+    let followup = null;
+    switch (rule.id) {
+      case "dry_pipe":
+        followup = dryPipe(rule, answers, site);
+        break;
+      case "rating_check":
+        followup = ratingCheck(rule, answers, formItems);
+        break;
+      case "checker_flag":
+        followup = checkerEnabled && flags.length > 0 ? null : null;
+        break;
+      case "low_score":
+        followup = lowScore(rule, answers, observer, formItems);
+        break;
+      default:
+        followup = null;
+    }
+    if (followup !== null && chosen.every((f) => f.rule_id !== followup.rule_id)) chosen.push(followup);
+  }
+  return chosen.slice(0, cap);
+}
+
+// src/core/healthcard.ts
+var AUDIENCES = ["person", "pet", "city"];
+function eligible(s) {
+  const text = s.text;
+  const source = s.source;
+  return s.approved === true && typeof text === "string" && text.trim().length > 0 && typeof source === "string" && source.trim().length > 0 && AUDIENCES.includes(String(s.audience));
+}
+function pickIndex(seed, audience, count) {
+  const digest = sha256Bytes(`${seed}:${audience}`);
+  let value = 0n;
+  for (let i = 0; i < 8; i++) value = value << 8n | BigInt(digest[i]);
+  return Number(value % BigInt(count));
+}
+function pickActions(sentences, seed) {
+  const chosen = {};
+  for (const audience of AUDIENCES) {
+    const pool = sentences.filter((s) => eligible(s) && s.audience === audience).sort((a, b) => compareStrings(String(a.id ?? ""), String(b.id ?? "")) || compareStrings(String(a.text), String(b.text)));
+    if (pool.length === 0) return null;
+    const pick = pool[pickIndex(seed, audience, pool.length)];
+    chosen[audience] = [String(pick.text).trim(), String(pick.source).trim()];
+  }
+  return {
+    person: chosen.person[0],
+    pet: chosen.pet[0],
+    city: chosen.city[0],
+    sources: [chosen.person[1], chosen.pet[1], chosen.city[1]]
+  };
+}
+
+// src/core/regions.ts
+var CREEKS = content_default.creeks;
+function creekBySlug(slug, creeks = CREEKS) {
+  for (const c of creeks) if (c.slug === slug) return c;
+  return null;
+}
+function reachOf(creek, slug) {
+  for (const r of creek.reaches) if (r.slug === slug) return r;
+  return null;
+}
+function inBox(box, lat, lon) {
+  if (box === null) return false;
+  const [south, west, north, east] = box;
+  return south <= lat && lat <= north && west <= lon && lon <= east;
+}
+function creekBbox(creek) {
+  const boxes = creek.reaches.map((r) => r.bbox).filter((b) => b !== null);
+  if (boxes.length === 0) return null;
+  return [
+    Math.min(...boxes.map((b) => b[0])),
+    Math.min(...boxes.map((b) => b[1])),
+    Math.max(...boxes.map((b) => b[2])),
+    Math.max(...boxes.map((b) => b[3]))
+  ];
+}
+function reachesBelow(reach, creek) {
+  const out = [];
+  const seen = /* @__PURE__ */ new Set([reach.slug]);
+  let current = reach;
+  while (current.flows_into !== null) {
+    const next = reachOf(creek, current.flows_into);
+    if (next === null) throw new Error(`creek ${creek.slug}: reach ${current.flows_into} does not exist`);
+    if (seen.has(next.slug)) throw new Error(`creek ${creek.slug}: reaches flow in a circle at ${next.slug}`);
+    seen.add(next.slug);
+    out.push(next);
+    current = next;
+  }
+  return out;
+}
+var named = (text, name) => text.toLowerCase().includes(name.toLowerCase());
+function reachByName(spot, creek) {
+  for (const reach of creek.reaches) {
+    if (named(spot.reach_name, reach.name) || named(spot.spot_name, reach.name)) return reach;
+  }
+  return null;
+}
+function placeSpot(spot, creeks = CREEKS) {
+  const lat = spot.latitude;
+  const lon = spot.longitude;
+  if (lat !== null && lon !== null) {
+    if (!spot.coarse) {
+      for (const creek of creeks) for (const reach of creek.reaches) if (inBox(reach.bbox, lat, lon)) return { creek, reach };
+    }
+    for (const creek of creeks) if (inBox(creekBbox(creek), lat, lon)) return { creek, reach: reachByName(spot, creek) };
+  }
+  for (const creek of creeks) {
+    if (named(spot.creek_name, creek.name) || named(spot.spot_name, creek.name)) return { creek, reach: reachByName(spot, creek) };
+  }
+  return null;
+}
+
+// test/golden.test.ts
+var here = dirname(fileURLToPath(import.meta.url));
+var root = join(here, "..", "..");
+var golden = (name) => JSON.parse(readFileSync(join(root, "worker", "golden", `${name}.json`), "utf8"));
+function canonical(value) {
+  return JSON.stringify(value, (_k, v) => {
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      return Object.fromEntries(Object.keys(v).sort().map((k) => [k, v[k]]));
+    }
+    return v;
+  });
+}
+function same(actual, expected, name) {
+  assert.equal(canonical(actual), canonical(expected), name);
+}
+test("helpers: sha256, Python rounding, fhir_id", () => {
+  const doc = golden("helpers");
+  for (const c of doc.sha256) same(sha256Hex(c.input.text), c.expected, `sha256 ${c.name}`);
+  for (const c of doc.round) same(pyRound(c.input.value, c.input.digits), c.expected, `round ${c.name}`);
+  for (const c of doc.fhir_id) same(fhirId(...c.input.parts), c.expected, `fhir_id ${c.name}`);
+});
+test("followups: the selector, over the repository's own table and form", () => {
+  const doc = golden("followups");
+  for (const c of doc.cases) {
+    const chosen = selectFollowups(c.input.answers, c.input.site, c.input.observer, [], content_default.followups, content_default.form_items, c.input.checker_enabled);
+    same(chosen, c.expected, c.name);
+  }
+});
+test("labels: k of 4, the date, the expired sentence", () => {
+  const doc = golden("labels");
+  for (const c of doc.cases) {
+    same(observerLabel(c.input.score, c.input.feature_name, c.input.today, c.input.locale), c.expected, c.name);
+  }
+});
+test("healthcard: approved sentences only, the same pick for the same seed", () => {
+  const doc = golden("healthcard");
+  for (const c of doc.cases) same(pickActions(c.input.sentences, c.input.seed), c.expected, c.name);
+});
+test("act: findings, needs, pipes worth testing, and both pin guards", () => {
+  const doc = golden("act");
+  for (const c of doc.findings_from_visits) same(findingsFromVisits(c.input.visits, c.input.finding_key_for), c.expected, c.name);
+  for (const c of doc.needs_from_findings) same(needsFromFindings(c.input.findings, c.input.sentences), c.expected, c.name);
+  for (const c of doc.pipes_worth_testing) same(pipesWorthTesting(c.input.visits, c.input.today), c.expected, c.name);
+  for (const c of doc.looks_like_a_test_name) same(looksLikeATestName(c.input.name), c.expected, c.name);
+  for (const c of doc.metres_between) {
+    const d = metresBetween(c.input.lat1, c.input.lon1, c.input.lat2, c.input.lon2);
+    assert.ok(Math.abs(d - c.expected) < 2e-3, `${c.name}: ${d} vs ${c.expected}`);
+  }
+  for (const c of doc.nearest_spot) {
+    const found = nearestSpot(c.input.latitude, c.input.longitude, c.input.spots, c.input.within);
+    if (c.expected === null) assert.equal(found, null, c.name);
+    else {
+      assert.ok(found, c.name);
+      assert.equal(found.spot.spot_id, c.expected.spot_id, c.name);
+      assert.ok(Math.abs(found.metres - c.expected.metres) < 2e-3, `${c.name}: ${found.metres} vs ${c.expected.metres}`);
+    }
+  }
+});
+test("regions: placement on a creek and a reach, and the reaches below", () => {
+  const doc = golden("regions");
+  for (const c of doc.place_spot) {
+    const p = placeSpot(c.input.spot);
+    const got = p === null ? null : { creek_slug: p.creek.slug, reach_slug: p.reach ? p.reach.slug : null };
+    same(got, c.expected, c.name);
+  }
+  for (const c of doc.reaches_below) {
+    const creek = creekBySlug(c.input.creek_slug);
+    const reach = reachOf(creek, c.input.reach_slug);
+    same(reachesBelow(reach, creek).map((r) => r.slug), c.expected, c.name);
+  }
+});
+test("fhir_emit: the same Bundle as Python, and it passes the structural check", () => {
+  const doc = golden("fhir_emit");
+  const outDir = join(root, "fhir", "build", "instances");
+  mkdirSync(outDir, { recursive: true });
+  for (const c of doc.cases) {
+    const bundle = emitVisit(c.input.visit, c.input.test_sitting, c.input.emitted_at);
+    same(bundle, c.expected, c.name);
+    assert.deepEqual(checkBundle(bundle), [], `${c.name}: structural check`);
+    const file = `ts-${String(bundle.id)}.json`;
+    writeFileSync(join(outDir, file), JSON.stringify(bundle, null, 2) + "\n");
+  }
+  const broken = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at);
+  const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance");
+  prov.resource.target.push({ reference: "Observation/nowhere" });
+  assert.ok(checkBundle(broken).some((p) => p.includes("does not resolve")));
+});

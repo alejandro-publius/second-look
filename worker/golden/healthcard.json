@@ -1,0 +1,432 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "city": "Reconnect the floodplain where the channel was dug out.",
+        "person": "Wash your hands after touching the water.",
+        "pet": "Keep dogs on a lead near outfalls.",
+        "sources": [
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet"
+        ]
+      },
+      "input": {
+        "seed": "spot-1",
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Wash your hands after touching the water."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p2",
+            "source": "Bay Area guidance",
+            "text": "Keep out of the water after heavy rain."
+          },
+          {
+            "approved": true,
+            "audience": "pet",
+            "id": "pet1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Keep dogs on a lead near outfalls."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Replant the margins with native trees."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c2",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Fix the sewer connections that run in dry weather."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Reconnect the floodplain where the channel was dug out."
+          }
+        ]
+      },
+      "name": "seed spot-1"
+    },
+    {
+      "expected": {
+        "city": "Fix the sewer connections that run in dry weather.",
+        "person": "Wash your hands after touching the water.",
+        "pet": "Keep dogs on a lead near outfalls.",
+        "sources": [
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet"
+        ]
+      },
+      "input": {
+        "seed": "spot-2",
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Wash your hands after touching the water."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p2",
+            "source": "Bay Area guidance",
+            "text": "Keep out of the water after heavy rain."
+          },
+          {
+            "approved": true,
+            "audience": "pet",
+            "id": "pet1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Keep dogs on a lead near outfalls."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Replant the margins with native trees."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c2",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Fix the sewer connections that run in dry weather."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Reconnect the floodplain where the channel was dug out."
+          }
+        ]
+      },
+      "name": "seed spot-2"
+    },
+    {
+      "expected": {
+        "city": "Reconnect the floodplain where the channel was dug out.",
+        "person": "Keep out of the water after heavy rain.",
+        "pet": "Keep dogs on a lead near outfalls.",
+        "sources": [
+          "Bay Area guidance",
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet"
+        ]
+      },
+      "input": {
+        "seed": "codornices-lower-2",
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Wash your hands after touching the water."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p2",
+            "source": "Bay Area guidance",
+            "text": "Keep out of the water after heavy rain."
+          },
+          {
+            "approved": true,
+            "audience": "pet",
+            "id": "pet1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Keep dogs on a lead near outfalls."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Replant the margins with native trees."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c2",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Fix the sewer connections that run in dry weather."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Reconnect the floodplain where the channel was dug out."
+          }
+        ]
+      },
+      "name": "seed codornices-lower-2"
+    },
+    {
+      "expected": {
+        "city": "Replant the margins with native trees.",
+        "person": "Wash your hands after touching the water.",
+        "pet": "Keep dogs on a lead near outfalls.",
+        "sources": [
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet"
+        ]
+      },
+      "input": {
+        "seed": "a",
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Wash your hands after touching the water."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p2",
+            "source": "Bay Area guidance",
+            "text": "Keep out of the water after heavy rain."
+          },
+          {
+            "approved": true,
+            "audience": "pet",
+            "id": "pet1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Keep dogs on a lead near outfalls."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Replant the margins with native trees."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c2",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Fix the sewer connections that run in dry weather."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Reconnect the floodplain where the channel was dug out."
+          }
+        ]
+      },
+      "name": "seed a"
+    },
+    {
+      "expected": {
+        "city": "Replant the margins with native trees.",
+        "person": "Keep out of the water after heavy rain.",
+        "pet": "Keep dogs on a lead near outfalls.",
+        "sources": [
+          "Bay Area guidance",
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet"
+        ]
+      },
+      "input": {
+        "seed": "zz-top-9",
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Wash your hands after touching the water."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p2",
+            "source": "Bay Area guidance",
+            "text": "Keep out of the water after heavy rain."
+          },
+          {
+            "approved": true,
+            "audience": "pet",
+            "id": "pet1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Keep dogs on a lead near outfalls."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Replant the margins with native trees."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c2",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Fix the sewer connections that run in dry weather."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Reconnect the floodplain where the channel was dug out."
+          }
+        ]
+      },
+      "name": "seed zz-top-9"
+    },
+    {
+      "expected": {
+        "city": "Reconnect the floodplain where the channel was dug out.",
+        "person": "Wash your hands after touching the water.",
+        "pet": "Keep dogs on a lead near outfalls.",
+        "sources": [
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet",
+          "OneAquaHealth indicator factsheet"
+        ]
+      },
+      "input": {
+        "seed": "spot-1",
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Wash your hands after touching the water."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p2",
+            "source": "Bay Area guidance",
+            "text": "Keep out of the water after heavy rain."
+          },
+          {
+            "approved": true,
+            "audience": "pet",
+            "id": "pet1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Keep dogs on a lead near outfalls."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Replant the margins with native trees."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c2",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Fix the sewer connections that run in dry weather."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Reconnect the floodplain where the channel was dug out."
+          },
+          {
+            "approved": false,
+            "audience": "city",
+            "id": "c4",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Not yet checked."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "  "
+          }
+        ]
+      },
+      "name": "unapproved and blank sentences are skipped"
+    },
+    {
+      "expected": null,
+      "input": {
+        "seed": "spot-1",
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Wash your hands after touching the water."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "p2",
+            "source": "Bay Area guidance",
+            "text": "Keep out of the water after heavy rain."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c1",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Replant the margins with native trees."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c2",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Fix the sewer connections that run in dry weather."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "c3",
+            "source": "OneAquaHealth indicator factsheet",
+            "text": "Reconnect the floodplain where the channel was dug out."
+          }
+        ]
+      },
+      "name": "no pet sentence, no card"
+    },
+    {
+      "expected": null,
+      "input": {
+        "seed": "spot-1",
+        "sentences": []
+      },
+      "name": "the repository's own list today"
+    }
+  ],
+  "function": "core.healthcard.pick_actions",
+  "generated_by": "evals/golden_vectors.py"
+}

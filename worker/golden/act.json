@@ -1,0 +1,1705 @@
+{
+  "findings_from_visits": [
+    {
+      "expected": [],
+      "input": {
+        "finding_key_for": null,
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v1"
+          },
+          {
+            "answered_at": "2026-09-23T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 6,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v2"
+          },
+          {
+            "answered_at": "2026-09-23T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 9,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "bobtoken23456789",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v3"
+          }
+        ]
+      },
+      "name": "one person twice and another once"
+    },
+    {
+      "expected": [
+        {
+          "feature": "artificial_bank",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-22",
+          "observers": [
+            "davetoken234567"
+          ],
+          "passed_observers": [],
+          "spot_id": "codornices-lower-2",
+          "visit_ids": [
+            "v6"
+          ]
+        },
+        {
+          "feature": "artificial_bank",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-22",
+          "observers": [
+            "alicetoken23456",
+            "caroltoken2345"
+          ],
+          "passed_observers": [
+            "alicetoken23456"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v4",
+            "v5"
+          ]
+        },
+        {
+          "feature": "barriers",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-22",
+          "observers": [
+            "alicetoken23456"
+          ],
+          "passed_observers": [],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "pipe_running",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-22",
+          "observers": [
+            "alicetoken23456"
+          ],
+          "passed_observers": [
+            "alicetoken23456"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v4"
+          ]
+        }
+      ],
+      "input": {
+        "finding_key_for": {
+          "bank_type": "artificial_bank",
+          "draining_pipes": "pipe_running",
+          "invasive_species": "invasive_plant",
+          "invasive_which": "invasive_plant",
+          "sewage_discharge": "pipe_running"
+        },
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "bank_type": "present",
+              "barriers": "present",
+              "draining_pipes": "present",
+              "invasive_species": "present"
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v4"
+          },
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "bank_type": "present",
+              "draining_pipes": "absent"
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "caroltoken2345",
+              "scores": [
+                {
+                  "correct": 2,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 2,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v5"
+          },
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "bank_type": "present"
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "davetoken234567",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": true,
+              "creek_id": "codornices-creek",
+              "creek_name": "Codornices Creek",
+              "latitude": 37.88123,
+              "longitude": -122.29987,
+              "reach_id": "codornices-lower",
+              "reach_name": "Codornices Creek, lower reach",
+              "spot_id": "codornices-lower-2",
+              "spot_name": "Codornices Creek, lower reach, spot 2"
+            },
+            "visit_id": "v6"
+          }
+        ]
+      },
+      "name": "form item keys map to features, coarse spot apart"
+    },
+    {
+      "expected": [],
+      "input": {
+        "finding_key_for": {
+          "bank_type": "artificial_bank",
+          "draining_pipes": "pipe_running",
+          "invasive_species": "invasive_plant",
+          "invasive_which": "invasive_plant",
+          "sewage_discharge": "pipe_running"
+        },
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "bank_type": "cant_tell",
+              "draining_pipes": "absent"
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v13"
+          }
+        ]
+      },
+      "name": "absent and cant tell are not findings"
+    }
+  ],
+  "function": "core.act",
+  "generated_by": "evals/golden_vectors.py",
+  "looks_like_a_test_name": [
+    {
+      "expected": true,
+      "input": {
+        "name": "test spot"
+      },
+      "name": "test spot"
+    },
+    {
+      "expected": false,
+      "input": {
+        "name": "Strawberry Creek at the footbridge"
+      },
+      "name": "Strawberry Creek at the footbridge"
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": "asdf"
+      },
+      "name": "asdf"
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": "123"
+      },
+      "name": "123"
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": "..."
+      },
+      "name": "..."
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": ""
+      },
+      "name": ""
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": "Testing 1 2 3"
+      },
+      "name": "Testing 1 2 3"
+    },
+    {
+      "expected": false,
+      "input": {
+        "name": "Codornices Creek"
+      },
+      "name": "Codornices Creek"
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": "DEMO"
+      },
+      "name": "DEMO"
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": "Foo Bar Creek"
+      },
+      "name": "Foo Bar Creek"
+    },
+    {
+      "expected": true,
+      "input": {
+        "name": "The Test Creek trail"
+      },
+      "name": "The Test Creek trail"
+    },
+    {
+      "expected": false,
+      "input": {
+        "name": "Rio Tinto"
+      },
+      "name": "Rio Tinto"
+    }
+  ],
+  "metres_between": [
+    {
+      "expected": 3776.349,
+      "input": {
+        "lat1": 37.8719,
+        "lat2": 37.88123,
+        "lon1": -122.2585,
+        "lon2": -122.29987
+      },
+      "name": "campus to codornices"
+    },
+    {
+      "expected": 0.0,
+      "input": {
+        "lat1": 37.8719,
+        "lat2": 37.8719,
+        "lon1": -122.2585,
+        "lon2": -122.2585
+      },
+      "name": "same point"
+    }
+  ],
+  "nearest_spot": [
+    {
+      "expected": {
+        "metres": 2.391,
+        "spot_id": "spot-near"
+      },
+      "input": {
+        "latitude": 37.8731,
+        "longitude": -122.2604,
+        "spots": [
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.89,
+            "longitude": -122.28,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-far",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.87312,
+            "longitude": -122.26041,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-near",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": null,
+            "longitude": null,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-none",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.8719,
+            "longitude": -122.2585,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-1",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          }
+        ],
+        "within": 30.0
+      },
+      "name": "a few metres away"
+    },
+    {
+      "expected": null,
+      "input": {
+        "latitude": 37.8719,
+        "longitude": -122.27,
+        "spots": [
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.89,
+            "longitude": -122.28,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-far",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.87312,
+            "longitude": -122.26041,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-near",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": null,
+            "longitude": null,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-none",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.8719,
+            "longitude": -122.2585,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-1",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          }
+        ],
+        "within": 30.0
+      },
+      "name": "a kilometre away"
+    },
+    {
+      "expected": {
+        "metres": 0.0,
+        "spot_id": "spot-1"
+      },
+      "input": {
+        "latitude": 37.8719,
+        "longitude": -122.2585,
+        "spots": [
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.89,
+            "longitude": -122.28,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-far",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.87312,
+            "longitude": -122.26041,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-near",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": null,
+            "longitude": null,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-none",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.8719,
+            "longitude": -122.2585,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-1",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          }
+        ],
+        "within": 30.0
+      },
+      "name": "on the spot"
+    },
+    {
+      "expected": {
+        "metres": 852.623,
+        "spot_id": "spot-near"
+      },
+      "input": {
+        "latitude": 37.8719,
+        "longitude": -122.27,
+        "spots": [
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.89,
+            "longitude": -122.28,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-far",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.87312,
+            "longitude": -122.26041,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-near",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": null,
+            "longitude": null,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-none",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          },
+          {
+            "coarse": false,
+            "creek_id": "strawberry-creek",
+            "creek_name": "Strawberry Creek",
+            "latitude": 37.8719,
+            "longitude": -122.2585,
+            "reach_id": "campus-reach",
+            "reach_name": "Strawberry Creek, campus reach",
+            "spot_id": "spot-1",
+            "spot_name": "Strawberry Creek, campus reach, spot 1"
+          }
+        ],
+        "within": 3000.0
+      },
+      "name": "wide net"
+    }
+  ],
+  "needs_from_findings": [
+    {
+      "expected": [
+        {
+          "because": [
+            "pipe_running"
+          ],
+          "sentence_id": "city_fix_sewers",
+          "source": "Policy Brief page 9",
+          "text": "Find and fix leaking sewers.",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "because": [
+            "artificial_bank"
+          ],
+          "sentence_id": "city_replant_margins",
+          "source": "Policy Brief page 9",
+          "text": "Replant both margins.",
+          "visit_ids": [
+            "v6",
+            "v4",
+            "v5"
+          ]
+        }
+      ],
+      "input": {
+        "findings": [
+          {
+            "feature": "artificial_bank",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "davetoken234567"
+            ],
+            "passed_observers": [],
+            "spot_id": "codornices-lower-2",
+            "visit_ids": [
+              "v6"
+            ]
+          },
+          {
+            "feature": "artificial_bank",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456",
+              "caroltoken2345"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4",
+              "v5"
+            ]
+          },
+          {
+            "feature": "barriers",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          },
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          }
+        ],
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "city_fix_sewers",
+            "source": "Policy Brief page 9",
+            "text": "Find and fix leaking sewers."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "city_replant_margins",
+            "source": "Policy Brief page 9",
+            "text": "Replant both margins."
+          },
+          {
+            "approved": false,
+            "audience": "city",
+            "id": "city_remove_barriers",
+            "source": "Policy Brief page 9",
+            "text": "Remove barriers."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "person_wash",
+            "source": "Factsheet",
+            "text": "Wash your hands."
+          }
+        ]
+      },
+      "name": "approved city sentences only"
+    },
+    {
+      "expected": [],
+      "input": {
+        "findings": [
+          {
+            "feature": "artificial_bank",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "davetoken234567"
+            ],
+            "passed_observers": [],
+            "spot_id": "codornices-lower-2",
+            "visit_ids": [
+              "v6"
+            ]
+          },
+          {
+            "feature": "artificial_bank",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456",
+              "caroltoken2345"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4",
+              "v5"
+            ]
+          },
+          {
+            "feature": "barriers",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          },
+          {
+            "feature": "pipe_running",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          }
+        ],
+        "sentences": [
+          {
+            "approved": false,
+            "audience": "city",
+            "id": "city_fix_sewers",
+            "source": "Policy Brief page 9",
+            "text": "Find and fix leaking sewers."
+          },
+          {
+            "approved": false,
+            "audience": "city",
+            "id": "city_replant_margins",
+            "source": "Policy Brief page 9",
+            "text": "Replant both margins."
+          },
+          {
+            "approved": false,
+            "audience": "city",
+            "id": "city_remove_barriers",
+            "source": "Policy Brief page 9",
+            "text": "Remove barriers."
+          },
+          {
+            "approved": false,
+            "audience": "person",
+            "id": "person_wash",
+            "source": "Factsheet",
+            "text": "Wash your hands."
+          }
+        ]
+      },
+      "name": "nothing approved"
+    }
+  ],
+  "pipes_worth_testing": [
+    {
+      "expected": [
+        {
+          "dry_days": [
+            5,
+            6,
+            9
+          ],
+          "last_seen": "2026-09-23",
+          "observers": [
+            "alicetoken23456",
+            "bobtoken23456789"
+          ],
+          "spot_id": "spot-1",
+          "spot_name": "Strawberry Creek, campus reach, spot 1",
+          "visit_ids": [
+            "v1",
+            "v2",
+            "v3"
+          ]
+        }
+      ],
+      "input": {
+        "today": "2026-09-25",
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v1"
+          },
+          {
+            "answered_at": "2026-09-23T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 6,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v2"
+          },
+          {
+            "answered_at": "2026-09-23T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 9,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "bobtoken23456789",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v3"
+          }
+        ]
+      },
+      "name": "two people who passed"
+    },
+    {
+      "expected": [],
+      "input": {
+        "today": "2026-09-25",
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 2,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v7"
+          },
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "bobtoken23456789",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 3,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v8"
+          }
+        ]
+      },
+      "name": "one did not pass"
+    },
+    {
+      "expected": [],
+      "input": {
+        "today": "2026-09-25",
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "no",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v9"
+          },
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "bobtoken23456789",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v10"
+          }
+        ]
+      },
+      "name": "one said nothing came out"
+    },
+    {
+      "expected": [],
+      "input": {
+        "today": "2026-09-25",
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-05-01",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v11"
+          },
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present"
+            },
+            "checks": [
+              {
+                "answer": "yes",
+                "asked": true,
+                "detail": {
+                  "days": 5,
+                  "kind": "yesno"
+                },
+                "question_text": "It has not rained. Is anything coming out of that pipe?",
+                "rule_id": "dry_pipe"
+              }
+            ],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "bobtoken23456789",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v12"
+          }
+        ]
+      },
+      "name": "an expired score does not count"
+    }
+  ]
+}
