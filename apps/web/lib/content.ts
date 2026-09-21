@@ -58,6 +58,10 @@ export interface Photo {
   feature: string | null;
   placeholder: boolean;
   alt: string;
+  /** CC BY and CC BY-SA ask us to name the author wherever the photo appears. See /credits. */
+  author: string;
+  license: string;
+  source_url: string;
   width: number;
   height: number;
 }
@@ -142,4 +146,9 @@ export function glossaryFor(term: string | null | undefined): string | undefined
   if (!term) return undefined;
   const hit = content.glossary.find((g) => g.term.toLowerCase() === term.toLowerCase());
   return hit?.plain;
+}
+
+/** Every photo a visitor can see, in id order, for the credits page. */
+export function shownPhotos(): Photo[] {
+  return Object.values(content.photos).sort((a, b) => a.id.localeCompare(b.id));
 }

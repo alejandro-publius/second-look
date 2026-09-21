@@ -44,7 +44,7 @@ test("no CSP violations are reported on the main screens", async ({ page }) => {
     if (m.text().includes("Content Security Policy")) violations.push(m.text());
   });
   await mockApi(page);
-  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/poster", "/share/13"]) {
+  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/poster", "/share/13", "/judges", "/credits"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
   }
@@ -53,9 +53,27 @@ test("no CSP violations are reported on the main screens", async ({ page }) => {
 
 test("every screen shows real strings, none missing from the locale", async ({ page }) => {
   await mockApi(page);
-  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/quick?spot=example", "/poster", "/offline", "/share/13"]) {
+  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/quick?spot=example", "/poster", "/offline", "/share/13", "/judges", "/credits"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("body")).not.toContainText("[missing:");
   }
+});
+
+test("every photograph a visitor can see is named on the credits page", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/credits");
+  await expect(page.getByRole("heading", { name: "Photo credits" })).toBeVisible();
+
+  // Today every photo is a placeholder, so the page says so rather than showing an empty card.
+  await expect(page.getByText("No photographs are loaded yet.")).toBeVisible();
+  await expect(page.getByText("Placeholder blocks are not photographs.")).toBeVisible();
+
+  // The judges' door and About both reach it. The participant's door deliberately does not.
+  await page.goto("/judges");
+  await expect(page.getByRole("link", { name: "Photo credits" })).toBeVisible();
+  await page.goto("/about");
+  await expect(page.getByRole("link", { name: "Photo credits" })).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: "Photo credits" })).toHaveCount(0);
 });

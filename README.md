@@ -137,7 +137,7 @@ FAIR: findable through a Library entry in their sandbox and a public repository;
 
 ## Data and photo rights
 
-Code is MIT (`LICENSE`). Our own photos and copy are CC BY 4.0. Every image has a row in `photos/manifest.csv` with its source and licence; no AI-generated images anywhere; no faces, house numbers or plates. The usability test is anonymous and the creek check is pseudonymous; `docs/DATA_HANDLING.md` says what is stored and what the hosts log on their own. Third-party dependencies and licences: `docs/THIRD_PARTY.md`.
+Code is MIT (`LICENSE`). Our own photos and copy are CC BY 4.0. A photograph from somewhere else keeps its own licence: we take CC0, public domain, and CC BY or CC BY-SA at 2.0, 3.0 or 4.0, recorded at the exact version and never rounded up. Every image has a row in `photos/manifest.csv` with its source, author and licence, and every photograph a visitor can see is named with its author on `/credits`, which is what CC BY asks for. The web build refuses to run if a photograph that needs an author does not have one. No AI-generated images anywhere; no faces, house numbers or plates. The usability test is anonymous and the creek check is pseudonymous; `docs/DATA_HANDLING.md` says what is stored and what the hosts log on their own. Third-party dependencies and licences: `docs/THIRD_PARTY.md`.
 
 ## How this was built
 

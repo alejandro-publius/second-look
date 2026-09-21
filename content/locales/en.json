@@ -308,5 +308,12 @@
   "judges.how": "How we know it works",
   "judges.repo": "The code",
   "nav.judges": "For judges",
-  "consent.hosts": "Cloudflare, which serves this site, keeps its own short-lived connection records, which include internet addresses. We do not."
+  "consent.hosts": "Cloudflare, which serves this site, keeps its own short-lived connection records, which include internet addresses. We do not.",
+  "credits.title": "Photo credits",
+  "credits.intro": "Every photograph a visitor can see, with the person who took it and the licence it is under. Our own photographs and copy are CC BY 4.0. A photograph from somewhere else keeps its own licence, named here.",
+  "credits.placeholder_note": "Placeholder blocks are not photographs. They are grey boxes standing in until the real ones are picked, and they are listed so the count matches.",
+  "credits.by": "by {author}",
+  "credits.source": "Source",
+  "credits.none": "No photographs are loaded yet.",
+  "nav.credits": "Photo credits"
 }

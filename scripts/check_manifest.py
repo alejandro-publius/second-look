@@ -7,6 +7,8 @@ import hashlib
 import sys
 from pathlib import Path
 
+from core import content_loader
+
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 REQUIRED_COLUMNS = [
@@ -29,14 +31,8 @@ REQUIRED_COLUMNS = [
     "label_evidence",
 ]
 CAL_IPC = "cal-ipc.org"
-LICENSE_ALLOWLIST = {
-    "CC0-1.0",
-    "CC-BY-4.0",
-    "CC-BY-SA-4.0",
-    "public-domain",
-    "own-CC-BY-4.0",
-    "placeholder",
-}
+# One source of truth: core/content_loader.py. A second copy drifted once already.
+LICENSE_ALLOWLIST = content_loader.LICENSE_ALLOWLIST
 
 
 def sha256_of(path: Path) -> str:

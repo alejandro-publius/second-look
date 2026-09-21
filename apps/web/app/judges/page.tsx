@@ -15,6 +15,7 @@ const DOORS: { href: string; label: string; note?: string }[] = [
   { href: "/spot?id=example", label: "judges.record" },
   { href: "/two", label: "judges.two" },
   { href: "/how-we-know", label: "judges.how" },
+  { href: "/credits", label: "nav.credits" },
 ];
 
 export default function JudgesPage() {

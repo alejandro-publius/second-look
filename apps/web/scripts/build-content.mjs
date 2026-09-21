@@ -227,11 +227,24 @@ function main() {
       // Alt text never gives away a test answer. Placeholders say what they are; a real photo gets a
       // neutral scene line unless the manifest grows an `alt` column.
       alt: isPlaceholder ? locale["photo.placeholder_alt"] : row.alt || locale["photo.creek_alt"],
+      // CC BY and CC BY-SA ask us to name the author wherever the photo appears, so the credit
+      // travels with the photo into the browser and /credits lists every one of them.
+      author: row.author || "",
+      license: row.license || "",
+      source_url: row.source_url || "",
       // width and height keep layout stable while the image loads
       width: 1200,
       height: 900,
     };
     copyList.push({ src, file });
+  }
+
+  // Fail the build rather than publish a CC BY photo with nobody's name on it.
+  const unattributed = Object.values(photos).filter(
+    (p) => p.license.startsWith("CC-BY") && !p.author.trim(),
+  );
+  if (unattributed.length) {
+    fail(`these photos need an author for their licence: ${unattributed.map((p) => `${p.id} (${p.license})`).join(", ")}`);
   }
 
   const strippedItems = testItems.map(({ id, feature, photo_id }) => {

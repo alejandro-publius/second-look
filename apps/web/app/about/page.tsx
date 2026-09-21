@@ -19,7 +19,8 @@ export default function AboutPage() {
         </Link>
       </p>
       <nav className="site-footer" aria-label={t("nav.more")}>
-        <Link href="/privacy">{t("nav.privacy")}</Link> <Link href="/how-we-know">{t("nav.how_we_know")}</Link>
+        <Link href="/privacy">{t("nav.privacy")}</Link> <Link href="/how-we-know">{t("nav.how_we_know")}</Link>{" "}
+        <Link href="/credits">{t("nav.credits")}</Link>
       </nav>
     </article>
   );

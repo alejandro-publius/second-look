@@ -1,8 +1,12 @@
 """Fetch one chosen open photo, run it through the normal ingest, and record its evidence.
 
 Run: uv run python scripts/fetch_open_photo.py \
-        https://commons.wikimedia.org/wiki/File:Guadalupe_River_concrete_channel.jpg \
+        https://commons.wikimedia.org/wiki/File:Kanggaokeng_Creek_20150430a.jpg \
         --feature artificial_bank --role test
+
+     uv run python scripts/fetch_open_photo.py \
+        https://www.inaturalist.org/observations/75908450 \
+        --feature invasive_plant --role lesson
 
 Takes a Wikimedia Commons file page or an iNaturalist observation page, asks that API for the
 author, the licence and the source's own words, downloads the one image, and hands it to

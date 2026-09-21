@@ -17,14 +17,23 @@ import yaml
 
 from core.records import FEATURES, ITEMS_PER_FEATURE
 
+# Every licence here is one we may show with attribution. The version matters and is recorded as
+# given, never rounded to 4.0: Wikimedia and iNaturalist carry a lot of 2.0 and 3.0, and refusing
+# those halved the pool of usable creek photos for no gain to anyone.
 LICENSE_ALLOWLIST = {
     "CC0-1.0",
+    "CC-BY-2.0",
+    "CC-BY-3.0",
     "CC-BY-4.0",
+    "CC-BY-SA-2.0",
+    "CC-BY-SA-3.0",
     "CC-BY-SA-4.0",
     "public-domain",
     "own-CC-BY-4.0",
     "placeholder",
 }
+# The licences that ask us to name the author wherever the photo appears. /credits does that.
+NEEDS_ATTRIBUTION = {lic for lic in LICENSE_ALLOWLIST if lic.startswith(("CC-BY", "own-CC-BY"))}
 REAL_LICENSES = LICENSE_ALLOWLIST - {"placeholder"}
 ROLES = {"warmup", "lesson", "practice", "test", "benchmark"}
 TEST_SIZE = 16
