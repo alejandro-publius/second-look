@@ -81,6 +81,7 @@ def build() -> dict[str, Any]:
         "sentences": list(loaded.sentences),
         "locale": {k: v for k, v in loaded.locale.items() if k.startswith(LOCALE_PREFIXES)},
         "creeks": creeks,
+        "region_plants": sorted(content.region_plant_names()),
         # The validator verdict is not copied here: worker/src/index.ts imports
         # results/fhir_validation.json itself, so there is one file and no stale copy.
         "fhir": {

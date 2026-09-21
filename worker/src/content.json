@@ -808,6 +808,7 @@
     "test.no": "No",
     "test.yes": "Yes"
   },
+  "region_plants": [],
   "rules": {
     "features_in_order": [
       "artificial_bank",

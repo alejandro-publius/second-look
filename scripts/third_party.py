@@ -142,13 +142,15 @@ def build(root: Path) -> str:
     py = python_packages(root / "uv.lock")
     web_lock = root / "apps" / "web" / "package-lock.json"
     web = npm_packages(web_lock) if web_lock.exists() else []
+    worker_lock = root / "worker" / "package-lock.json"
+    worker = npm_packages(worker_lock) if worker_lock.exists() else []
     today = datetime.now(UTC).strftime("%Y-%m-%d")
     out = [
         "# Third party dependencies",
         "",
-        f"Generated on {today} by `uv run python scripts/third_party.py` from `uv.lock` and "
-        "`apps/web/package-lock.json`. Do not edit by hand; rerun the script. Our own code is "
-        "MIT; our photos and copy are CC BY 4.0 (README).",
+        f"Generated on {today} by `uv run python scripts/third_party.py` from `uv.lock`, "
+        "`apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun "
+        "the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).",
         "",
         SERVICES.rstrip(),
         "",
@@ -170,11 +172,22 @@ def build(root: Path) -> str:
         "|---|---|---|---|",
     ]
     out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in web]
-    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
-    unknown_web = sum(1 for _, _, lic, _ in web if lic == NOT_STATED)
     out += [
         "",
-        f"Licenses not found for {unknown_py} Python and {unknown_web} web packages; "
+        f"## Worker packages ({len(worker)}, from worker/package-lock.json)",
+        "",
+        "All dev: the toolchain that type checks, tests and runs the Worker locally. The deployed "
+        "Worker bundles only our own code and worker/src/content.json.",
+        "",
+        "| Package | Version | License | dev |",
+        "|---|---|---|---|",
+    ]
+    out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in worker]
+    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
+    unknown_web = sum(1 for _, _, lic, _ in web + worker if lic == NOT_STATED)
+    out += [
+        "",
+        f"Licenses not found for {unknown_py} Python and {unknown_web} web and worker packages; "
         "check those by hand before the repo goes public.",
         "",
     ]

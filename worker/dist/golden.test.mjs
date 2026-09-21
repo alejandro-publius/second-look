@@ -816,6 +816,7 @@ var content_default = {
     "test.no": "No",
     "test.yes": "Yes"
   },
+  region_plants: [],
   rules: {
     features_in_order: [
       "artificial_bank",
@@ -1025,6 +1026,67 @@ function observerLabel(score, featureName, today, locale) {
     return { text: fill(locale[KEY_EXPIRED], params), expired: true, passed: null };
   }
   return { text: fill(locale[KEY_SCORE], params), expired: false, passed: score.correct >= HUMAN_PASS_MIN };
+}
+
+// src/core/regions.ts
+var CREEKS = content_default.creeks;
+function creekBySlug(slug, creeks = CREEKS) {
+  for (const c of creeks) if (c.slug === slug) return c;
+  return null;
+}
+function reachOf(creek, slug) {
+  for (const r of creek.reaches) if (r.slug === slug) return r;
+  return null;
+}
+function inBox(box, lat, lon) {
+  if (box === null) return false;
+  const [south, west, north, east] = box;
+  return south <= lat && lat <= north && west <= lon && lon <= east;
+}
+function creekBbox(creek) {
+  const boxes = creek.reaches.map((r) => r.bbox).filter((b) => b !== null);
+  if (boxes.length === 0) return null;
+  return [
+    Math.min(...boxes.map((b) => b[0])),
+    Math.min(...boxes.map((b) => b[1])),
+    Math.max(...boxes.map((b) => b[2])),
+    Math.max(...boxes.map((b) => b[3]))
+  ];
+}
+function reachesBelow(reach, creek) {
+  const out = [];
+  const seen = /* @__PURE__ */ new Set([reach.slug]);
+  let current = reach;
+  while (current.flows_into !== null) {
+    const next = reachOf(creek, current.flows_into);
+    if (next === null) throw new Error(`creek ${creek.slug}: reach ${current.flows_into} does not exist`);
+    if (seen.has(next.slug)) throw new Error(`creek ${creek.slug}: reaches flow in a circle at ${next.slug}`);
+    seen.add(next.slug);
+    out.push(next);
+    current = next;
+  }
+  return out;
+}
+var named = (text, name) => text.toLowerCase().includes(name.toLowerCase());
+function reachByName(spot, creek) {
+  for (const reach of creek.reaches) {
+    if (named(spot.reach_name, reach.name) || named(spot.spot_name, reach.name)) return reach;
+  }
+  return null;
+}
+function placeSpot(spot, creeks = CREEKS) {
+  const lat = spot.latitude;
+  const lon = spot.longitude;
+  if (lat !== null && lon !== null) {
+    if (!spot.coarse) {
+      for (const creek of creeks) for (const reach of creek.reaches) if (inBox(reach.bbox, lat, lon)) return { creek, reach };
+    }
+    for (const creek of creeks) if (inBox(creekBbox(creek), lat, lon)) return { creek, reach: reachByName(spot, creek) };
+  }
+  for (const creek of creeks) {
+    if (named(spot.creek_name, creek.name) || named(spot.spot_name, creek.name)) return { creek, reach: reachByName(spot, creek) };
+  }
+  return null;
 }
 
 // src/core/act.ts
@@ -1619,15 +1681,15 @@ function emitVisit(visit, testSitting, emittedAt, items = FORM_ITEMS) {
     if (obs !== null) observations.push(obs);
   }
   const prov = provenance(visit, observations, pid, String(visitQr.id), testQr ? String(testQr.id) : null, emittedAt);
-  const resources = [organization(), device(visit.software_version), creek, reach, spot, person];
-  if (testQr) resources.push(testQr);
-  resources.push(visitQr, ...observations, prov);
+  const resources2 = [organization(), device(visit.software_version), creek, reach, spot, person];
+  if (testQr) resources2.push(testQr);
+  resources2.push(visitQr, ...observations, prov);
   return {
     resourceType: "Bundle",
     id: fhirId("sl-visit", visit.visit_id),
     type: "collection",
     timestamp: instant(emittedAt),
-    entry: resources.map(entry)
+    entry: resources2.map(entry)
   };
 }
 function checkBundle(bundle) {
@@ -1680,11 +1742,205 @@ function checkBundle(bundle) {
   return problems;
 }
 
+// src/core/fhir_referral.ts
+var OAH_SPECIMEN_PROFILE = "http://hl7.eu/fhir/ig/oah/StructureDefinition/specimen-oah";
+var OBSERVATION_CATEGORY_SYSTEM = "http://terminology.hl7.org/CodeSystem/observation-category";
+var SNOMED_SYSTEM2 = "http://snomed.info/sct";
+var UCUM_SYSTEM2 = "http://unitsofmeasure.org";
+var ID_SYSTEM_REFERRAL = `${FHIR_BASE}/referral`;
+var ID_SYSTEM_EXAMPLE = `${FHIR_BASE}/example`;
+var EXAMPLE_TAG_CODE = "example";
+var EXAMPLE_WORD = "EXAMPLE";
+var EXAMPLE_LAB_ID = "sl-example-lab";
+var EXAMPLE_LAB_ROLE_ID = "sl-example-lab-role";
+var SPECIMEN_TYPE_CODE = "11713004";
+var SPECIMEN_TYPE_DISPLAY = "Water";
+var SAMPLE_ML = 500;
+var PIPE_ITEMS = content_default.rules.pipe_items;
+var UCUM_DISPLAYS2 = content_default.fhir.ucum_displays;
+var EXAMPLE_PANEL = [
+  ["lab-enterobacteriaceae-share", "quantity", 1.8, "%"],
+  ["lab-hf183", "coded", "absent", null],
+  ["lab-ecoli-cfu", "quantity", 120, "[CFU]/dL"]
+];
+var ReferralError = class extends Error {
+};
+var ref2 = (type, id) => ({ reference: `${type}/${id}` });
+var identifier2 = (system, value) => ({ system, value });
+var concept2 = (c, text) => text ? { coding: [c], text } : { coding: [c] };
+var narrative2 = (text) => ({ status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"><p>${escapeXml(text)}</p></div>` });
+var entry2 = (r) => ({ fullUrl: `${FHIR_BASE}/${r.resourceType}/${r.id}`, resource: r });
+var quantity2 = (value, unit) => ({ value, unit: UCUM_DISPLAYS2[unit] ?? unit, system: UCUM_SYSTEM2, code: unit });
+function exampleTag() {
+  return slCoding(EXAMPLE_TAG_CODE);
+}
+function isExample(resource) {
+  const tags = resource.meta?.tag ?? [];
+  return tags.some((t) => t.system === SL_SYSTEM && t.code === EXAMPLE_TAG_CODE);
+}
+function resources(bundle, type) {
+  return (bundle.entry ?? []).map((e) => e.resource).filter((r) => r && r.resourceType === type);
+}
+function identifierValue(resource) {
+  let ident = resource.identifier;
+  if (Array.isArray(ident)) ident = ident[0] ?? {};
+  return ident && typeof ident === "object" ? String(ident.value ?? "") : "";
+}
+function valueCode(observation2) {
+  const value = observation2.valueCodeableConcept;
+  const codings = value?.coding ?? [];
+  return codings.length ? String(codings[0].code) : null;
+}
+function pipeObservations(bundle) {
+  return resources(bundle, "Observation").filter((obs) => {
+    const ident = identifierValue(obs);
+    return PIPE_ITEMS.some((item) => ident.endsWith(`-${item}`)) && valueCode(obs) === "present";
+  });
+}
+function dedupe(list) {
+  const seen = /* @__PURE__ */ new Set();
+  const out = [];
+  for (const r of list) {
+    const key = `${r.resourceType}/${r.id}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(structuredClone(r));
+    }
+  }
+  return out;
+}
+function referralBundle(pipe, bundles, emittedAt) {
+  let shared = [];
+  const people = [];
+  const responses = [];
+  const reasons = [];
+  for (const visitId of pipe.visit_ids) {
+    const bundle = bundles[visitId];
+    if (!bundle) continue;
+    const found = pipeObservations(bundle);
+    if (found.length === 0) continue;
+    if (shared.length === 0) shared = [...resources(bundle, "Organization"), ...resources(bundle, "Location")];
+    people.push(...resources(bundle, "Practitioner"));
+    const visitQrId = fhirId("sl-qr-visit", visitId);
+    responses.push(...resources(bundle, "QuestionnaireResponse").filter((qr) => qr.id === visitQrId));
+    reasons.push(...found);
+  }
+  if (reasons.length === 0) throw new ReferralError(`pipe ${pipe.spot_id}: no stored pipe Observation to refer to`);
+  const spotLocationId = fhirId("sl-loc", pipe.spot_id);
+  if (!shared.some((loc) => loc.id === spotLocationId)) throw new ReferralError(`pipe ${pipe.spot_id}: the spot Location is not in the stored record`);
+  const words = `Referral to test the water coming out of the pipe at ${pipe.spot_name}. Reported running after dry weather by ${pipe.observers.length} people who both passed the pipe feature, last on ${pipe.last_seen}.`;
+  const serviceRequest = {
+    resourceType: "ServiceRequest",
+    id: fhirId("sl-referral", pipe.spot_id),
+    text: narrative2(words),
+    identifier: [identifier2(ID_SYSTEM_REFERRAL, pipe.spot_id)],
+    status: "active",
+    intent: "proposal",
+    priority: "routine",
+    code: concept2(slCoding("test-pipe-outflow")),
+    subject: ref2("Location", spotLocationId),
+    authoredOn: instant(emittedAt),
+    requester: ref2("Organization", ORG_ID),
+    reasonReference: reasons.map((o) => ref2("Observation", String(o.id)))
+  };
+  const all = [...dedupe([...shared, ...people, ...responses, ...reasons]), serviceRequest];
+  return { resourceType: "Bundle", id: fhirId("sl-referral-bundle", pipe.spot_id), type: "collection", timestamp: instant(emittedAt), entry: all.map(entry2) };
+}
+function exampleMeta(profile) {
+  const meta = { tag: [exampleTag()] };
+  if (profile) meta.profile = [profile];
+  return meta;
+}
+function exampleLab() {
+  return {
+    resourceType: "Organization",
+    id: EXAMPLE_LAB_ID,
+    meta: exampleMeta(),
+    text: narrative2(`${EXAMPLE_WORD}. A made up laboratory, standing in for a real one.`),
+    identifier: [identifier2(ID_SYSTEM_EXAMPLE, "example-lab")],
+    name: "Example laboratory (not a real laboratory)",
+    active: true
+  };
+}
+function exampleLabRole() {
+  return {
+    resourceType: "PractitionerRole",
+    id: EXAMPLE_LAB_ROLE_ID,
+    meta: exampleMeta(),
+    text: narrative2(`${EXAMPLE_WORD}. The sampling role at the made up laboratory. Their Specimen profile asks for a PractitionerRole as the collector.`),
+    identifier: [identifier2(ID_SYSTEM_EXAMPLE, "example-lab-role")],
+    active: true,
+    organization: ref2("Organization", EXAMPLE_LAB_ID)
+  };
+}
+function exampleSpecimen(spotId, spotLocationId, requestId, collectedAt) {
+  return {
+    resourceType: "Specimen",
+    id: fhirId("sl-example-specimen", spotId),
+    meta: exampleMeta(OAH_SPECIMEN_PROFILE),
+    text: narrative2(`${EXAMPLE_WORD}. A water sample taken at the pipe, ${SAMPLE_ML} mL, for the referral. No sample has been taken.`),
+    identifier: [identifier2(ID_SYSTEM_EXAMPLE, `specimen-${spotId}`)],
+    status: "available",
+    type: concept2({ system: SNOMED_SYSTEM2, code: SPECIMEN_TYPE_CODE, display: SPECIMEN_TYPE_DISPLAY }),
+    subject: ref2("Location", spotLocationId),
+    request: [ref2("ServiceRequest", requestId)],
+    collection: { collector: ref2("PractitionerRole", EXAMPLE_LAB_ROLE_ID), collectedDateTime: instant(collectedAt), quantity: quantity2(SAMPLE_ML, "mL") }
+  };
+}
+function gFormat(value) {
+  return String(Number(value.toPrecision(6)));
+}
+function exampleObservation(spotId, spotName, spotLocationId, requestId, specimenId, code, kind, value, unit, reportedAt) {
+  const display = String(slCoding(code).display);
+  const out = {
+    resourceType: "Observation",
+    id: fhirId("sl-example-obs", spotId, code),
+    meta: exampleMeta(OAH_OBSERVATION_PROFILE),
+    identifier: [identifier2(ID_SYSTEM_EXAMPLE, `obs-${spotId}-${code}`)],
+    basedOn: [ref2("ServiceRequest", requestId)],
+    status: "final",
+    category: [concept2({ system: OBSERVATION_CATEGORY_SYSTEM, code: "laboratory", display: "Laboratory" })],
+    code: concept2(slCoding(code)),
+    subject: ref2("Location", spotLocationId),
+    effectiveDateTime: instant(reportedAt),
+    performer: [ref2("PractitionerRole", EXAMPLE_LAB_ROLE_ID)],
+    specimen: ref2("Specimen", specimenId)
+  };
+  let shown;
+  if (kind === "quantity") {
+    if (unit === null || typeof value !== "number") throw new ReferralError(`example ${code}: a quantity needs a number and a UCUM unit`);
+    const q = quantity2(value, unit);
+    out.valueQuantity = q;
+    shown = `${gFormat(value)} ${q.unit}`;
+  } else {
+    if (typeof value !== "string") throw new ReferralError(`example ${code}: a coded value needs a code`);
+    out.valueCodeableConcept = concept2(oahCoding(value));
+    shown = value;
+  }
+  out.text = narrative2(`${EXAMPLE_WORD}. ${display} at ${spotName}: ${shown}. A made up number showing the shape of a laboratory result coming back to the same record.`);
+  return out;
+}
+function exampleLabResult(referral, collectedAt, reportedAt) {
+  const requests = resources(referral, "ServiceRequest");
+  if (requests.length !== 1) throw new ReferralError("a referral Bundle holds exactly one ServiceRequest");
+  const request = requests[0];
+  const spotId = identifierValue(request);
+  const spotLocationId = String(request.subject.reference).split("/", 2)[1];
+  const spotName = String(resources(referral, "Location").find((loc) => loc.id === spotLocationId)?.name ?? spotId);
+  const specimen = exampleSpecimen(spotId, spotLocationId, String(request.id), collectedAt);
+  const panel = EXAMPLE_PANEL.map(
+    ([code, kind, value, unit]) => exampleObservation(spotId, spotName, spotLocationId, String(request.id), String(specimen.id), code, kind, value, unit, reportedAt)
+  );
+  const entries = (referral.entry ?? []).map((e) => structuredClone(e));
+  for (const r of [exampleLab(), exampleLabRole(), specimen, ...panel]) entries.push(entry2(r));
+  return { resourceType: "Bundle", id: fhirId("sl-example-result", spotId), meta: exampleMeta(), type: "collection", timestamp: instant(reportedAt), entry: entries };
+}
+
 // src/core/followups.ts
 var DEFAULT_MAX_QUESTIONS = 2;
 var LOW_SCORE_MAX_CORRECT = content_default.rules.low_score_max_correct;
 var FEATURES3 = content_default.rules.features_in_order;
-var PIPE_ITEMS = content_default.rules.pipe_items;
+var PIPE_ITEMS2 = content_default.rules.pipe_items;
 var RATING_ISSUE_ITEMS = content_default.rules.rating_issue_items;
 var PRESENT = "present";
 var ABSENT = "absent";
@@ -1711,7 +1967,7 @@ function issueLabel(item, itemId, value) {
 function dryPipe(rule, answers, site) {
   if (site.rain !== "dry") return null;
   if (site.dry_days === null || site.dry_days === void 0 || site.dry_days < 1) return null;
-  if (!PIPE_ITEMS.some((item) => answers[item] === PRESENT)) return null;
+  if (!PIPE_ITEMS2.some((item) => answers[item] === PRESENT)) return null;
   return {
     rule_id: "dry_pipe",
     kind: "yesno",
@@ -1831,67 +2087,6 @@ function pickActions(sentences, seed) {
   };
 }
 
-// src/core/regions.ts
-var CREEKS = content_default.creeks;
-function creekBySlug(slug, creeks = CREEKS) {
-  for (const c of creeks) if (c.slug === slug) return c;
-  return null;
-}
-function reachOf(creek, slug) {
-  for (const r of creek.reaches) if (r.slug === slug) return r;
-  return null;
-}
-function inBox(box, lat, lon) {
-  if (box === null) return false;
-  const [south, west, north, east] = box;
-  return south <= lat && lat <= north && west <= lon && lon <= east;
-}
-function creekBbox(creek) {
-  const boxes = creek.reaches.map((r) => r.bbox).filter((b) => b !== null);
-  if (boxes.length === 0) return null;
-  return [
-    Math.min(...boxes.map((b) => b[0])),
-    Math.min(...boxes.map((b) => b[1])),
-    Math.max(...boxes.map((b) => b[2])),
-    Math.max(...boxes.map((b) => b[3]))
-  ];
-}
-function reachesBelow(reach, creek) {
-  const out = [];
-  const seen = /* @__PURE__ */ new Set([reach.slug]);
-  let current = reach;
-  while (current.flows_into !== null) {
-    const next = reachOf(creek, current.flows_into);
-    if (next === null) throw new Error(`creek ${creek.slug}: reach ${current.flows_into} does not exist`);
-    if (seen.has(next.slug)) throw new Error(`creek ${creek.slug}: reaches flow in a circle at ${next.slug}`);
-    seen.add(next.slug);
-    out.push(next);
-    current = next;
-  }
-  return out;
-}
-var named = (text, name) => text.toLowerCase().includes(name.toLowerCase());
-function reachByName(spot, creek) {
-  for (const reach of creek.reaches) {
-    if (named(spot.reach_name, reach.name) || named(spot.spot_name, reach.name)) return reach;
-  }
-  return null;
-}
-function placeSpot(spot, creeks = CREEKS) {
-  const lat = spot.latitude;
-  const lon = spot.longitude;
-  if (lat !== null && lon !== null) {
-    if (!spot.coarse) {
-      for (const creek of creeks) for (const reach of creek.reaches) if (inBox(reach.bbox, lat, lon)) return { creek, reach };
-    }
-    for (const creek of creeks) if (inBox(creekBbox(creek), lat, lon)) return { creek, reach: reachByName(spot, creek) };
-  }
-  for (const creek of creeks) {
-    if (named(spot.creek_name, creek.name) || named(spot.spot_name, creek.name)) return { creek, reach: reachByName(spot, creek) };
-  }
-  return null;
-}
-
 // test/golden.test.ts
 var here = dirname(fileURLToPath(import.meta.url));
 var root = join(here, "..", "..");
@@ -1978,4 +2173,18 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance");
   prov.resource.target.push({ reference: "Observation/nowhere" });
   assert.ok(checkBundle(broken).some((p) => p.includes("does not resolve")));
+});
+test("fhir_referral: the ServiceRequest and the example result, the same as Python", () => {
+  const doc = golden("fhir_emit");
+  const [referral, example] = doc.referral;
+  const made = referralBundle(referral.input.pipe, referral.input.bundles, referral.input.emitted_at);
+  same(made, referral.expected, referral.name);
+  assert.equal(isExample(made), false, "a referral is real");
+  const result = exampleLabResult(example.input.referral, example.input.collected_at, example.input.reported_at);
+  same(result, example.expected, example.name);
+  assert.equal(isExample(result), true, "the way back is an example, and says so");
+  const outDir = join(root, "fhir", "build", "instances");
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(join(outDir, `ts-${String(made.id)}.json`), JSON.stringify(made, null, 2) + "\n");
+  writeFileSync(join(outDir, `ts-${String(result.id)}.json`), JSON.stringify(result, null, 2) + "\n");
 });

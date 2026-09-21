@@ -27,6 +27,7 @@ from typing import Any
 from core import act, followups, healthcard, labels, regions
 from core.content_loader import load_content
 from core.fhir_emit import check_bundle, emit_visit, fhir_id
+from core.fhir_referral import example_lab_result, referral_bundle
 from core.records import (
     FEATURES,
     CheckResult,
@@ -610,8 +611,41 @@ def fhir_vectors() -> dict[str, Any]:
             bundle,
         )
 
+    # The referral and the way back, from two people who passed and saw the pipe running.
+    pipe_visits = [
+        visit("visit-0002", "alicetoken23456", day=22, dry_days=5),
+        visit("visit-0003", "bobtoken23456789", day=23, dry_days=9),
+    ]
+    pipe = act.pipes_worth_testing(pipe_visits, TODAY)[0]
+    stored = {
+        v.visit_id: emit_visit(v, test_sitting=None, emitted_at=EMITTED_AT) for v in pipe_visits
+    }
+    referred_at = datetime(2026, 9, 25, 9, 0, tzinfo=UTC)
+    referral = referral_bundle(pipe, stored, emitted_at=referred_at)
+    example = example_lab_result(
+        referral,
+        collected_at=datetime(2026, 9, 26, 10, 30, tzinfo=UTC),
+        reported_at=datetime(2026, 9, 29, 15, 0, tzinfo=UTC),
+    )
+    referral_cases = [
+        case(
+            "referral for the pipe two people who passed saw running",
+            {"pipe": dump(pipe), "bundles": stored, "emitted_at": "2026-09-25T09:00:00Z"},
+            referral,
+        ),
+        case(
+            "the example result pointing back at that referral",
+            {
+                "referral": referral,
+                "collected_at": "2026-09-26T10:30:00Z",
+                "reported_at": "2026-09-29T15:00:00Z",
+            },
+            example,
+        ),
+    ]
     return {
         "function": "core.fhir_emit.emit_visit",
+        "referral": referral_cases,
         "cases": [
             run(
                 "the golden strawberry creek visit with its sitting",

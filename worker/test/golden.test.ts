@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import CONTENT from "../src/content.json";
 import { findingsFromVisits, looksLikeATestName, metresBetween, nearestSpot, needsFromFindings, pipesWorthTesting } from "../src/core/act";
 import { checkBundle, emitVisit, fhirId } from "../src/core/fhir_emit";
+import { exampleLabResult, isExample, referralBundle } from "../src/core/fhir_referral";
 import { selectFollowups } from "../src/core/followups";
 import { pickActions } from "../src/core/healthcard";
 import { observerLabel } from "../src/core/labels";
@@ -114,4 +115,19 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance")!;
   (prov.resource.target as { reference: string }[]).push({ reference: "Observation/nowhere" });
   assert.ok(checkBundle(broken as never).some((p) => p.includes("does not resolve")));
+});
+
+test("fhir_referral: the ServiceRequest and the example result, the same as Python", () => {
+  const doc = golden("fhir_emit");
+  const [referral, example] = doc.referral;
+  const made = referralBundle(referral.input.pipe, referral.input.bundles, referral.input.emitted_at);
+  same(made, referral.expected, referral.name);
+  assert.equal(isExample(made), false, "a referral is real");
+  const result = exampleLabResult(example.input.referral, example.input.collected_at, example.input.reported_at);
+  same(result, example.expected, example.name);
+  assert.equal(isExample(result), true, "the way back is an example, and says so");
+  const outDir = join(root, "fhir", "build", "instances");
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(join(outDir, `ts-${String(made.id)}.json`), JSON.stringify(made, null, 2) + "\n");
+  writeFileSync(join(outDir, `ts-${String(result.id)}.json`), JSON.stringify(result, null, 2) + "\n");
 });

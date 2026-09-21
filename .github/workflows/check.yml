@@ -34,3 +34,6 @@ jobs:
       - run: cd apps/web && npm ci
       - run: cd worker && npm ci
       - run: make check
+      # The Worker end to end under wrangler dev with a local D1 and KV, rain from a stub, no
+      # login and no network beyond this runner (Update 10 answer A3).
+      - run: cd worker && npm run e2e

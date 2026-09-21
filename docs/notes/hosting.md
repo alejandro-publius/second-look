@@ -93,9 +93,24 @@ R2 was not used, because it asks for a card. Creek check photos go to KV after d
 - The export is token gated live: no token returns 404, the right token returns a 2,600 byte zip
   holding `sessions.csv` and `responses.csv` in the contract's schema.
 
+## The judge facing endpoints on the Worker (Update 10 answer A3)
+
+Built on the `depth` branch, not yet deployed. `worker/src/check.ts`, `city.ts`, `uploads.ts`
+and `two.ts` port `apps/api/check.py`, `city.py` and `fhir_routes.py`; the pure parts under
+`worker/src/core/` are ports of `core/` proved equal to Python by the golden vectors in
+`worker/golden/` (`make worker-check`). Storage is D1 (`spot`, `visit`, `check_result`,
+`fhir_bundle`, `upload`, `sandbox_cache` in `worker/schema.sql`) and KV for photo bytes with a
+30 day expiry. `make worker-e2e` runs the whole thing under `wrangler dev` with a local D1 and
+KV, rain from a stub, and drives every route: 9 sections, green on 2026-09-21.
+
+To deploy it from `main` at merge time: `cd worker && npx wrangler d1 execute second-look
+--remote --file schema.sql` (the new tables are `CREATE TABLE IF NOT EXISTS`), then
+`npx wrangler deploy`. Until then the depth preview's `/api/*` reaches the production Worker,
+which answers the study routes and 404s the rest.
+
 ## What is not done
 
 - The rate limit. See docs/DATA_HANDLING.md: it is deliberately absent rather than built on an
   address.
-- The judge-facing endpoints on the Worker.
-- Photo upload to KV. The binding exists and is empty.
+- Deploying the judge facing endpoints: they are built and proved locally, and production
+  deploys come from `main` only.

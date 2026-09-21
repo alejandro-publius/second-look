@@ -21,7 +21,7 @@ Two branches, two jobs.
 
 ## What is done on `depth`
 
-- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 44 built, 3 parked, 6 missing.
+- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 45 built, 3 parked, 6 missing.
 - `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
   guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
 - `GET /api/city/{creek_id}` and `/city?creek=`: the analyst's view. No number without its
@@ -85,18 +85,24 @@ Two branches, two jobs.
   `fhir/build/instances/` where `make fhir-validate` checks them with the HL7 validator. The
   ports read their tables from `worker/src/content.json`, which Python writes; both files have
   a `--check` that fails `make check` when stale. Nothing on the Worker serves them yet.
+- **Answer A3, second half: the judge facing endpoints on the Worker.** `worker/src/check.ts`,
+  `city.ts`, `uploads.ts`, `two.ts` and the routes in `index.ts` port the Python API over D1
+  and KV: the creek check with its follow ups and rainfall, the record with its FHIR and the
+  observer's sitting inside, `/api/city`, `/api/creeks`, the referral and the example, the two
+  observer screen, uploads with metadata cut out and a 30 day KV expiry. `make worker-e2e`
+  runs it all under `wrangler dev` with a local D1 and KV and a rain stub: 9 sections green.
+  Not deployed: production deploys come from `main`; `docs/notes/hosting.md` says how.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Answer A3, second half: the judge facing endpoints on the Worker over D1 and KV, in the
-   brief's order: the creek check with its follow ups and rainfall lookup, the record with View
-   as FHIR, `/city`, the two observer screen. The pure parts are ported and proved; this is the
-   storage and the routes. Prove it locally with `wrangler dev`; deploying the Worker is a
-   production deploy and stays with `main`.
-2. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+1. Nothing from Update 10B is left. Tiers 1 and 2 and answers A1, A2 and A3 are done on this
+   branch. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+2. At merge time: append the two pending audit lines (`docs/notes/sandbox_library.md`), apply
+   `worker/schema.sql` to the remote D1 and deploy the Worker (`docs/notes/hosting.md`), and
+   deploy `main` with `apps/web/wrangler.jsonc` so production gets the same origin API. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
 
@@ -127,6 +133,10 @@ Two branches, two jobs.
   `uv run python scripts/build_worker_content.py` and `uv run python evals/golden_vectors.py`.
 - Python's `round()` rounds an exact tie to even; `toFixed` rounds it up. `pyround.ts` matches
   Python, and a coordinate stored by the Worker must go through it or the two records differ.
+- The local Workers runtime lags the edge: `wrangler dev` refuses the production compatibility
+  date, so the e2e passes `--compatibility-date 2026-08-18` (or `E2E_COMPAT_DATE`). Production
+  keeps its date in `worker/wrangler.jsonc`.
+- D1 rows written in the same second sort by their random ids; "latest" means `ORDER BY rowid`.
 - A Pages wrangler file becomes the project's source of truth for the environment it is deployed
   to. `--branch depth` sets previews only; a `main` deploy with the file would set production, so
   merge it knowingly. `/api/share/*` must stay excluded in `_routes.json` or the share cards 404.

@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -23,6 +23,12 @@ worker-check:
 	$(PY) scripts/build_worker_content.py --check
 	$(PY) evals/golden_vectors.py --check
 	cd worker && npm run typecheck --silent && npm test --silent
+
+# The Worker end to end: wrangler dev with a local D1 and KV, the schema and the arms applied,
+# rain answered by a stub on this machine, every judge facing route driven over HTTP. About a
+# minute, so it is its own target and a CI step rather than part of make check.
+worker-e2e:
+	cd worker && npm run e2e
 
 lint:
 	uv run ruff check .

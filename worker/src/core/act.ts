@@ -2,7 +2,8 @@
 // and the two pin guards. Pure. Every number carries the visit ids it was counted from.
 
 import CONTENT from "../content.json";
-import { HUMAN_PASS_MIN } from "./labels";
+import { HUMAN_PASS_MIN, shortDate } from "./labels";
+import { reachesBelow, type Creek, type Reach } from "./regions";
 import { compareStrings, dayOf, daysBetween, scoreFor, type Spot, type VisitRecord } from "./types";
 
 const FEATURES: readonly string[] = CONTENT.rules.features_in_order;
@@ -172,4 +173,52 @@ export function looksLikeATestName(name: string): boolean {
   if (words.length === 0) return true;
   if (words.some((w) => TEST_NAME_WORDS.has(w))) return true;
   return !/\p{L}/u.test(name);
+}
+
+export interface DownstreamNote {
+  reach_slug: string;
+  reach_name: string;
+  from_reach_slug: string;
+  from_reach_name: string;
+  feature: string;
+  line: string;
+  observers: number;
+  visit_ids: string[];
+}
+
+/** One plain line for each reach below a finding: who reported and when, nothing about what the
+ *  water will do to anybody. core.act.downstream_note. */
+export function downstreamNote(finding: Finding, featureName: string, reachSlugs: string[]): Record<string, string> {
+  const n = finding.observers.length;
+  const people = n === 1 ? "one person" : `${n} people`;
+  const line = `Upstream of here, ${people} reported ${featureName} on ${shortDate(finding.last_seen)}.`;
+  return Object.fromEntries(reachSlugs.map((slug) => [slug, line]));
+}
+
+/** core.act.notes_below: the note for every reach below every finding on this creek. A finding
+ *  on an unknown reach gives no note; a reach with no flows_into gives none either. */
+export function notesBelow(findings: Finding[], reachOfSpot: Record<string, Reach | null | undefined>, creek: Creek, labels: Record<string, string>): DownstreamNote[] {
+  const out: DownstreamNote[] = [];
+  for (const f of findings) {
+    const reach = reachOfSpot[f.spot_id];
+    if (!reach) continue;
+    if (!creek.reaches.some((r) => r.slug === reach.slug)) continue;
+    const below = reachesBelow(reach, creek);
+    if (below.length === 0) continue;
+    const label = labels[f.feature] ?? f.feature.replace(/_/g, " ");
+    const lines = downstreamNote(f, label, below.map((r) => r.slug));
+    for (const r of below) {
+      out.push({
+        reach_slug: r.slug,
+        reach_name: r.name,
+        from_reach_slug: reach.slug,
+        from_reach_name: reach.name,
+        feature: f.feature,
+        line: lines[r.slug],
+        observers: f.observers.length,
+        visit_ids: f.visit_ids,
+      });
+    }
+  }
+  return out;
 }

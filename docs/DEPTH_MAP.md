@@ -31,7 +31,7 @@ scale 15.
 | Question wording taken from the app's public text | built for 2 of 4 | `docs/notes/app_strings.md` | `scripts/preflight.py` | Impact | ecologist, standards |
 | 20 second return check | built | `apps/web/components/QuickCheck.tsx` | `apps/web/tests/record.spec.ts` | UX | outreach |
 | Offline queue at the creek | built | `apps/web/lib/offline.ts` | `apps/web/tests/check.spec.ts` | Feasibility | outreach |
-| Photo upload, EXIF stripped, private, 30 day delete | built (Python only) | `apps/api/routes_check.py` | `apps/api/tests/test_upload.py` | Technical | digital health |
+| Photo upload, EXIF stripped, private, 30 day delete | built, Python and Worker (KV with a 30 day expiry) | `apps/api/routes_check.py`, `worker/src/uploads.ts` | `apps/api/tests/test_upload.py`, `worker/test/e2e.mjs` | Technical | digital health |
 | Coarse location unless the person places the pin | built | `apps/web/components/LocationStep.tsx` | `apps/web/tests/check.spec.ts` | Technical | digital health |
 
 ## VERIFY
@@ -53,7 +53,7 @@ scale 15.
 | HL7 validator, their guide at b907cf0, terminology on | built, 0 errors | `scripts/fhir_validate.py` | `docs/notes/p2_validator_run.md` | Technical | standards |
 | Observer score travels with every observation | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Innovation | standards, digital health |
 | Provenance links an Observation to both responses | built | `core/fhir_emit.py` | `core/tests/test_fhir_emit.py` | Technical | standards |
-| Our own read only FHIR endpoint, plus `/api/creeks` and a local export | built (Python only) | `apps/api/fhir_routes.py`, `scripts/export_records.py` | `apps/api/tests/test_fhir_routes.py`, `apps/mcp/tests/test_server.py` | Technical | agents |
+| Our own read only FHIR endpoint, plus `/api/creeks` and a local export | built, Python and Worker | `apps/api/fhir_routes.py`, `worker/src/index.ts`, `scripts/export_records.py` | `apps/api/tests/test_fhir_routes.py`, `apps/mcp/tests/test_server.py`, `worker/test/e2e.mjs` | Technical | agents |
 | Sandbox mirror, conditional creates, ledger | built, the worked visit mirrored 2026-09-21 | `scripts/repush_sandbox.py` | `apps/api/tests/test_fhir_store.py` | Technical | standards |
 | Library entry in their sandbox, the FAIR pattern | built, Library/466 live since 2026-09-21 | `core/fhir_library.py`, `scripts/repush_sandbox.py` | `core/tests/test_fhir_library.py`, `scripts/tests/test_repush_sandbox.py` | Impact | standards |
 | Hash chained audit log | built | `scripts/audit_log.py` | `scripts/verify_audit.py` | Technical | data tools |
@@ -78,6 +78,7 @@ scale 15.
 | Feature | Status | Main file | Test | Rubric line | Judge who cares |
 |---|---|---|---|---|---|
 | Live site and API on Cloudflare, no card | built | `worker/src/index.ts` | `docs/notes/hosting.md` | Feasibility | data tools |
+| Judge facing endpoints on the Worker, proved by golden vectors and an end to end run | built on depth, not deployed | `worker/src/check.ts`, `worker/src/city.ts` | `worker/test/golden.test.ts`, `worker/test/e2e.mjs` | Technical | data tools |
 | API behind `/api/*` on the Pages origin, `connect-src 'self'` | built on the depth preview | `apps/web/wrangler.jsonc`, `apps/web/functions/` | `apps/web/tests/pages-proxy.spec.ts` | Technical | data tools |
 | Launch gate and judges gate, split | built | `scripts/preflight.py` | `scripts/tests/test_preflight.py` | Feasibility | data tools |
 | Daily backup, manual runs only until the secrets exist | parked (Update 10 A2) | `.github/workflows/backup.yml` | `scripts/tests/test_preflight.py` | Feasibility | data tools |
@@ -94,7 +95,7 @@ scale 15.
 
 | Status | Count |
 |---|---|
-| built | 44 |
+| built | 45 |
 | parked | 3 |
 | missing | 6 |
 
