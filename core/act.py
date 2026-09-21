@@ -26,6 +26,7 @@ from pydantic import Field
 
 from core.labels import HUMAN_PASS_MIN
 from core.records import Frozen, Spot, VisitRecord
+from core.regions import Creek, Reach, reaches_below
 
 # The four measures OneAquaHealth's own decision tool returns, and which finding points at each.
 # Source for every sentence is in content/approved_sentences.yaml; this only says which finding
@@ -333,3 +334,55 @@ def downstream_note(
     when = f"{finding.last_seen:%b %-d}"
     line = f"Upstream of here, {people} reported {feature_name} on {when}."
     return {reach: line for reach in reaches_below}
+
+
+class DownstreamNote(Frozen):
+    """One plain line on one reach below a finding, with the visits it was counted from."""
+
+    reach_slug: str
+    reach_name: str
+    from_reach_slug: str
+    from_reach_name: str
+    feature: str
+    line: str
+    observers: int
+    visit_ids: tuple[str, ...]
+
+
+def notes_below(
+    findings: Sequence[Finding],
+    reach_of: Mapping[str, Reach | None],
+    creek: Creek,
+    labels: Mapping[str, str],
+) -> list[DownstreamNote]:
+    """The downstream note for every reach below every finding on this creek.
+
+    `reach_of` says which reach a spot sits on, or None when the reach is unknown (a coarse pin).
+    A finding on an unknown reach gives no note, and a reach with no `flows_into` gives none
+    either: the note appears only where the store knows what flows into what (Update 10B).
+    `labels` gives the plain words for a finding key, such as "built banks".
+    """
+    out: list[DownstreamNote] = []
+    for f in findings:
+        reach = reach_of.get(f.spot_id)
+        if reach is None or reach.creek_slug != creek.slug:
+            continue
+        below = reaches_below(reach, creek)
+        if not below:
+            continue
+        label = labels.get(f.feature, f.feature.replace("_", " "))
+        lines = downstream_note(f, label, [r.slug for r in below])
+        for r in below:
+            out.append(
+                DownstreamNote(
+                    reach_slug=r.slug,
+                    reach_name=r.name,
+                    from_reach_slug=reach.slug,
+                    from_reach_name=reach.name,
+                    feature=f.feature,
+                    line=lines[r.slug],
+                    observers=f.n_observers,
+                    visit_ids=f.visit_ids,
+                )
+            )
+    return out

@@ -27,14 +27,18 @@ def a_visit(client, *, token: str | None, spot: dict, answers: dict, dry_answer:
     if token:
         body["contributor_token"] = token
     draft = client.post("/api/check/draft", json=body).json()
-    return client.post(
+    # Answer the dry pipe question only when it was asked: a quiet visit is asked nothing.
+    asked = {f["rule_id"] for f in draft["followups"]}
+    done = client.post(
         "/api/check/finalize",
         json={
             "draft_id": draft["draft_id"],
-            "followup_answers": {"dry_pipe": dry_answer},
+            "followup_answers": {"dry_pipe": dry_answer} if "dry_pipe" in asked else {},
             "final_rating": "good",
         },
-    ).json()
+    )
+    assert done.status_code == 200, done.text
+    return done.json()
 
 
 def test_an_unknown_creek_is_404(client):
@@ -283,3 +287,134 @@ def test_a_pipe_not_on_the_list_has_no_referral(client, monkeypatch):
     assert "not on the list" in r.json()["detail"]
     assert client.get(f"/api/fhir/referral/{made['spot_id']}/example-result").status_code == 404
     assert client.get("/api/fhir/referral/spot-nowhere").status_code == 404
+
+
+# The downstream note (Update 10B tier 1 item 4) ---------------------------------------------------
+
+# Faculty Glade, a precise pin on the South Fork through the central campus.
+SOUTH_FORK_PIN = {
+    "new": {
+        "name": "Faculty Glade bridge",
+        "latitude": 37.8716,
+        "longitude": -122.256,
+        "coarse": False,
+    }
+}
+# Strawberry Creek Park, where the creek comes back into daylight, three reaches below.
+PARK_PIN = {
+    "new": {
+        "name": "Daylighted reach in the park",
+        "latitude": 37.8666,
+        "longitude": -122.2885,
+        "coarse": False,
+    }
+}
+QUIET_ANSWERS = {**GOOD_ANSWERS, "bank_type": "absent", "draining_pipes": "absent"}
+REACHES_IN_ORDER = [
+    "south-fork-canyon",
+    "south-fork-campus",
+    "north-fork-campus",
+    "campus-west",
+    "downtown-culvert",
+    "strawberry-creek-park",
+    "west-culvert",
+]
+
+
+def test_the_slug_link_shows_the_creek_with_its_reaches_before_anyone_has_checked_it(client):
+    view = client.get("/api/city/strawberry-creek").json()
+    assert view["creek_slug"] == "strawberry-creek" and view["creek_name"] == "Strawberry Creek"
+    assert view["visits"] == 0 and view["spots"] == 0 and view["findings"] == []
+    assert [r["slug"] for r in view["reaches"]] == REACHES_IN_ORDER
+    assert view["reaches"][0]["flows_into"] == "south-fork-campus"
+    assert view["reaches"][0]["flows_into_name"] == "South Fork, central campus"
+    assert view["reaches"][-1]["flows_into"] is None
+    assert view["downstream_notes"] == []
+
+
+def test_a_finding_on_a_reach_adds_one_line_to_every_reach_below_it(client, monkeypatch):
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    upstream = a_visit(client, token=None, spot=SOUTH_FORK_PIN, answers=GOOD_ANSWERS)
+    downstream = a_visit(client, token=None, spot=PARK_PIN, answers=QUIET_ANSWERS)
+
+    view = client.get("/api/city/strawberry-creek").json()
+    assert view["visits"] == 2 and view["spots"] == 2 and view["unplaced_spots"] == 0
+    by_slug = {r["slug"]: r for r in view["reaches"]}
+    assert by_slug["south-fork-campus"]["spots"] == 1
+    assert by_slug["strawberry-creek-park"]["spots"] == 1
+
+    # Two findings (built banks, pipes) on the South Fork, four reaches below it: eight lines.
+    notes = view["downstream_notes"]
+    assert len(notes) == 8
+    assert {n["from_reach_slug"] for n in notes} == {"south-fork-campus"}
+    assert [n["reach_slug"] for n in notes if n["feature"] == "artificial_bank"] == [
+        "campus-west",
+        "downtown-culvert",
+        "strawberry-creek-park",
+        "west-culvert",
+    ]
+    bank = next(n for n in notes if n["feature"] == "artificial_bank")
+    assert bank["line"] == "Upstream of here, one person reported built banks on Sep 25."
+    assert bank["visit_ids"] == [upstream["visit_id"]], "every line carries its evidence"
+    assert bank["fhir"] == [f"/api/fhir/Bundle/{upstream['visit_id']}"]
+    # Nothing is above the South Fork's canyon reach, and nothing was reported on it.
+    assert by_slug["south-fork-canyon"]["notes"] == []
+    assert len(by_slug["strawberry-creek-park"]["notes"]) == 2
+
+    # The park spot's own record carries the two lines from upstream; the upstream spot's does not.
+    park = client.get(f"/api/spot/{downstream['spot_id']}").json()
+    assert park["place"]["reach_slug"] == "strawberry-creek-park"
+    assert sorted(n["feature"] for n in park["downstream_notes"]) == [
+        "artificial_bank",
+        "pipe_running",
+    ]
+    assert all(n["reach_slug"] == "strawberry-creek-park" for n in park["downstream_notes"])
+    glade = client.get(f"/api/spot/{upstream['spot_id']}").json()
+    assert glade["place"]["reach_slug"] == "south-fork-campus"
+    assert glade["downstream_notes"] == []
+
+
+def test_the_generated_creek_id_and_the_slug_show_the_same_creek(client, monkeypatch):
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    made = a_visit(client, token=None, spot=SOUTH_FORK_PIN, answers=GOOD_ANSWERS)
+    by_id = client.get(f"/api/city/{creek_of(client, made['spot_id'])}").json()
+    by_slug = client.get("/api/city/strawberry-creek").json()
+    assert by_id["creek_slug"] == "strawberry-creek"
+    assert by_id["creek_name"] == by_slug["creek_name"] == "Strawberry Creek"
+    assert by_id["visits"] == by_slug["visits"] == 1
+    assert by_id["downstream_notes"] == by_slug["downstream_notes"]
+    # A creek the pack does not know still works by its stored id, with no reaches to speak of.
+    far = {
+        "new": {
+            "name": "Codornices Creek",
+            "latitude": 37.89,
+            "longitude": -122.28,
+            "coarse": False,
+        }
+    }
+    other = a_visit(client, token=None, spot=far, answers=GOOD_ANSWERS)
+    view = client.get(f"/api/city/{creek_of(client, other['spot_id'])}").json()
+    assert view["creek_slug"] is None and view["reaches"] == [] and view["visits"] == 1
+
+
+def test_a_coarse_pin_counts_on_the_creek_but_neither_gives_nor_gets_a_note(client, monkeypatch):
+    """A coarse pin is rounded to about a kilometre, so no box a few hundred metres across can
+    say which reach it is on. It counts in the numbers and stays out of the notes."""
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    made = a_visit(client, token=None, spot=NEW_SPOT, answers=GOOD_ANSWERS)
+    view = client.get("/api/city/strawberry-creek").json()
+    assert view["visits"] == 1 and view["spots"] == 1
+    assert view["unplaced_spots"] == 1
+    assert view["downstream_notes"] == []
+    assert all(r["spots"] == 0 for r in view["reaches"])
+    record = client.get(f"/api/spot/{made['spot_id']}").json()
+    assert record["place"] == {
+        "creek_slug": "strawberry-creek",
+        "creek_name": "Strawberry Creek",
+        "reach_slug": None,
+        "reach_name": None,
+    }
+    assert record["downstream_notes"] == []

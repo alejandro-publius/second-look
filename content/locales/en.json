@@ -341,5 +341,14 @@
   "city.example_measure": "Measure",
   "city.example_value": "Value",
   "city.example_fhir": "Example as FHIR",
-  "city.example_loading": "Loading the example"
+  "city.example_loading": "Loading the example",
+  "city.reaches_title": "Reaches, from the hills to the Bay",
+  "city.reaches_note": "Which reach flows into which is filled in by hand for this creek. A line appears below a reach only when somebody reported something upstream of it.",
+  "city.flows_into": "Flows into {name}",
+  "city.flows_end": "The last reach",
+  "city.reach_counts": "{visits} visits at {spots} spots",
+  "city.reach_quiet": "Nothing reported upstream.",
+  "city.unplaced": "{n} spots sit on this creek but on no reach, because their pin is coarse. They count above and get no line here.",
+  "spot.upstream_title": "Upstream of here",
+  "spot.city_link": "The whole creek"
 }

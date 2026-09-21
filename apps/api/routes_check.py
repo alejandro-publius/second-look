@@ -28,7 +28,11 @@ def finalize(body: check.FinalizeBody, db: DB, now: Now) -> dict[str, Any]:
 
 @router.get("/spot/{spot_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])
 def spot(spot_id: str, db: DB, now: Now) -> dict[str, Any]:
-    return check.spot_view(db, spot_id, today=now.date())
+    view = check.spot_view(db, spot_id, today=now.date())
+    # Where this spot sits in the region pack, and what people reported upstream of it.
+    view["place"] = city_mod.place_for_spot(db, spot_id)
+    view["downstream_notes"] = city_mod.notes_for_spot(db, spot_id, today=now.date())
+    return view
 
 
 @router.get("/city/{creek_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])

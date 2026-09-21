@@ -20,7 +20,7 @@ Two branches, two jobs.
 
 ## What is done on `depth`
 
-- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 39 built, 5 parked, 9 missing.
+- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 40 built, 4 parked, 9 missing.
 - `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
   guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
 - `GET /api/city/{creek_id}` and `/city?creek=`: the analyst's view. No number without its
@@ -35,25 +35,29 @@ Two branches, two jobs.
   same ServiceRequest and Location. Every laboratory resource is tagged `example` and says EXAMPLE;
   `/city` shows it behind a button with a badge and a notice. Both shapes are golden files in
   `fhir/golden/` and pass the HL7 validator with 0 errors. `docs/REAL_VS_SYNTHETIC.md` lists them.
+- **The downstream note** (`core/regions.py`, Update 10B answer 1). The region pack lists
+  Strawberry Creek's seven reaches by hand, hills first, each with `flows_into` and an approximate
+  box. A stored spot keeps its generated ids; `core/regions.py` places it on a creek and a reach at
+  read time, so `/city?creek=strawberry-creek` works and a fix to the pack fixes every old spot. A
+  finding on a reach adds one line to every reach below it, with the visit ids behind it, on
+  `/city` and on the downstream spots' own records. A coarse pin is placed on the creek only, so it
+  counts and neither gives nor gets a line. `/api/city/strawberry-creek` answers before anyone has
+  checked the creek, with the reaches and zero visits.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Tier 1 item 4: the downstream note. The region pack gains creeks and reaches with a
-   `flows_into` field, filled by hand for Strawberry Creek; each creek has a readable slug so the
-   link reads `/city?creek=strawberry-creek`; the store keeps its generated ids. The note appears
-   only where `flows_into` is set.
-2. Tier 2 item 1: mirror the sample record to the sandbox and register a Library entry there,
+1. Tier 2 item 1: mirror the sample record to the sandbox and register a Library entry there,
    with evidence and a screenshot path saved at once.
-3. Tier 2 item 2: the MCP server, read only, local over stdio, five tools, contract tests, a
+2. Tier 2 item 2: the MCP server, read only, local over stdio, five tools, contract tests, a
    transcript in `examples/mcp/`.
-4. Tier 2 item 3: `make new-city`, run once for Heraklion. Record the two durations.
-5. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
-6. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
+3. Tier 2 item 3: `make new-city`, run once for Heraklion. Record the two durations.
+4. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
+5. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
    on the Worker, proved by golden vectors the Python writes and the TypeScript reproduces.
-7. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+6. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
 
@@ -68,3 +72,7 @@ Two branches, two jobs.
 - The API test store folder is shared by every test in the process. Count files as a delta.
 - New codes go in two places or the emitter test goes red on purpose: `SL_DISPLAYS` in
   `core/fhir_emit.py` and `fhir/fsh/codesystem-second-look.fsh`.
+- A visit whose answers ask no follow-up gets no `dry_pipe` question, and `finalize` refuses an
+  answer to a question it never asked. Test helpers answer only what the draft asked.
+- The region pack's boxes are approximate and hand filled. A wrong box misplaces a precise pin
+  onto the wrong reach; the fix is in `content/regions/california-bay-area.yaml`, nowhere else.

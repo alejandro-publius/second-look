@@ -14,9 +14,11 @@ from core.act import (
     metres_between,
     nearest_spot,
     needs_from_findings,
+    notes_below,
     pipes_worth_testing,
 )
 from core.records import CheckResult, FeatureScore, Observer, Spot, VisitRecord
+from core.regions import Creek, Reach
 
 TODAY = date(2026, 9, 24)
 # A contributor token is at least eight characters, so these look like the real thing.
@@ -285,3 +287,52 @@ def test_one_person_reads_as_one_person() -> None:
         last_seen=date(2026, 9, 22),
     )
     assert "one person reported" in downstream_note(finding, "a pipe running", ["lower"])["lower"]
+
+
+# Notes below a finding, over a creek from the region pack --------------------------------------
+
+
+def creek_of_three(*, joined: bool) -> Creek:
+    """Top flows into middle flows into bottom, or nothing flows anywhere."""
+    top = Reach(slug="top", name="Top", creek_slug="c", flows_into="middle" if joined else None)
+    middle = Reach(
+        slug="middle", name="Middle", creek_slug="c", flows_into="bottom" if joined else None
+    )
+    bottom = Reach(slug="bottom", name="Bottom", creek_slug="c", flows_into=None)
+    return Creek(slug="c", name="Creek", reaches=(top, middle, bottom))
+
+
+def test_a_finding_on_the_top_reach_notes_every_reach_below_it() -> None:
+    creek = creek_of_three(joined=True)
+    findings = findings_from_visits([visit("v1", ALICE, day=22), visit("v2", BOB, day=23)])
+    notes = notes_below(
+        findings, {SPOT.spot_id: creek.reach("top")}, creek, {"pipe_running": "a pipe running"}
+    )
+    assert [(n.reach_slug, n.from_reach_slug) for n in notes] == [
+        ("middle", "top"),
+        ("bottom", "top"),
+    ]
+    assert notes[0].line == "Upstream of here, 2 people reported a pipe running on Sep 23."
+    assert notes[0].visit_ids == ("v1", "v2"), "every note carries its evidence"
+    assert notes[0].observers == 2
+
+
+def test_the_note_appears_only_where_flows_into_is_set() -> None:
+    """Update 10B answer 1. Cut the flows_into fields and every note disappears."""
+    apart = creek_of_three(joined=False)
+    findings = findings_from_visits([visit("v1", ALICE)])
+    assert notes_below(findings, {SPOT.spot_id: apart.reach("top")}, apart, {}) == []
+    # And the bottom reach of a joined creek has nothing below it.
+    joined = creek_of_three(joined=True)
+    assert notes_below(findings, {SPOT.spot_id: joined.reach("bottom")}, joined, {}) == []
+
+
+def test_a_finding_on_an_unknown_reach_gives_no_note() -> None:
+    """A coarse pin sits on the creek and on no reach, so nothing below it can be named."""
+    creek = creek_of_three(joined=True)
+    findings = findings_from_visits([visit("v1", ALICE)])
+    assert notes_below(findings, {SPOT.spot_id: None}, creek, {}) == []
+    assert notes_below(findings, {}, creek, {}) == []
+    # A reach of some other creek is not this creek's business.
+    other = Reach(slug="x", name="X", creek_slug="elsewhere", flows_into=None)
+    assert notes_below(findings, {SPOT.spot_id: other}, creek, {}) == []

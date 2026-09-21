@@ -180,6 +180,33 @@ export function CityView({ creekId }: { creekId: string }) {
         </div>
       )}
 
+      {view.reaches.length > 0 ? (
+        <>
+          <h2>{t("city.reaches_title")}</h2>
+          <p className="small muted">{t("city.reaches_note")}</p>
+          <ol className="timeline">
+            {view.reaches.map((r) => (
+              <li key={r.slug}>
+                <h3>{r.name}</h3>
+                <p className="small muted tabular">
+                  {r.flows_into_name ? t("city.flows_into", { name: r.flows_into_name }) : t("city.flows_end")}. {t("city.reach_counts", { visits: r.visits, spots: r.spots })}.
+                </p>
+                {r.notes.length === 0 ? (
+                  <p className="small muted">{t("city.reach_quiet")}</p>
+                ) : (
+                  <div className="card">
+                    {r.notes.map((n) => (
+                      <Row key={`${n.from_reach_slug}:${n.feature}`} label={n.line} value={n.from_reach_name} end={evidence(n.fhir)} />
+                    ))}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+          {view.unplaced_spots > 0 ? <p className="small muted">{t("city.unplaced", { n: view.unplaced_spots })}</p> : null}
+        </>
+      ) : null}
+
       <h2>{t("city.findings_title")}</h2>
       {view.findings.length === 0 ? (
         <p className="muted">{t("city.none")}</p>

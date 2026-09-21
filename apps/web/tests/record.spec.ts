@@ -7,7 +7,11 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   const calls = await mockApi(page);
   await page.goto("/spot?id=example");
   await expect(page.getByRole("heading", { name: "Footbridge below the library" })).toBeVisible();
-  await expect(page.getByText("Campus reach, Strawberry Creek")).toBeVisible();
+  await expect(page.getByText("Below the forks, west campus, Strawberry Creek")).toBeVisible();
+  await expect(page.getByRole("link", { name: "The whole creek" })).toHaveAttribute("href", "/city?creek=strawberry-creek");
+  // What people reported upstream, with the records one tap away.
+  await expect(page.getByRole("heading", { name: "Upstream of here" })).toBeVisible();
+  await expect(page.getByText("Upstream of here, 2 people reported pipes and sewage signs on Sep 23.")).toBeVisible();
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
   await expect(page.getByText("2 of 4 on Pipes and sewage signs, tested Sep 23")).toBeVisible();
   await expect(page.getByText("Score expired.")).toBeVisible();
@@ -102,6 +106,13 @@ test("/city shows two lists decided by code, and no number without its records",
   await expect(page.getByText("test spot")).toBeVisible();
   await expect(page.getByText("Nothing is deleted.")).toBeVisible();
 
+  // The reaches, hills first, and the one line that landed below the finding.
+  await expect(page.getByRole("heading", { name: "Reaches, from the hills to the Bay" })).toBeVisible();
+  await expect(page.getByText("Flows into Below the forks, west campus. 5 visits at 1 spots.")).toBeVisible();
+  await expect(page.getByText("Upstream of here, 2 people reported pipes and sewage signs on Sep 23.")).toBeVisible();
+  await expect(page.getByText("Nothing reported upstream.")).toHaveCount(1);
+  await expect(page.getByText("1 spots sit on this creek but on no reach")).toBeVisible();
+
   // The referral is one tap away, and the example result says what it is before it says anything else.
   await expect(page.getByRole("link", { name: "Referral as FHIR" })).toHaveAttribute("href", "/api/fhir/referral/example");
   await expect(page.getByText("Example", { exact: true })).toHaveCount(0);
@@ -122,4 +133,12 @@ test("/city with no creek says so rather than showing an empty page", async ({ p
   await mockApi(page);
   await page.goto("/city");
   await expect(page.getByText("Nobody has checked this creek yet.")).toBeVisible();
+});
+
+test("the judges' door links the creek by its readable slug", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  await page.getByRole("link", { name: "For a city" }).click();
+  await expect(page).toHaveURL(/\/city\?creek=strawberry-creek$/);
+  await expect(page.getByRole("heading", { name: "What this creek needs", level: 1 })).toBeVisible();
 });

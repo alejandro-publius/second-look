@@ -236,8 +236,12 @@ def test_spot_view_shows_answers_beside_the_observer_label(client, monkeypatch):
         "spot_id"
     ]
     view = client.get(f"/api/spot/{spot_id}").json()
-    assert set(view) == {"spot", "visits", "health_card"}
+    assert set(view) == {"spot", "visits", "health_card", "place", "downstream_notes"}
     assert view["spot"]["spot_id"] == spot_id and view["spot"]["coarse"] is True
+    # A coarse pin near the campus sits on Strawberry Creek, on no reach, and gets no note.
+    assert view["place"]["creek_slug"] == "strawberry-creek"
+    assert view["place"]["reach_slug"] is None
+    assert view["downstream_notes"] == []
     assert view["health_card"] is None  # no approved sentence yet, so nothing is shown
     assert len(view["visits"]) == 1
     visit = view["visits"][0]

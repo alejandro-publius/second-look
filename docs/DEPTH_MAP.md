@@ -69,7 +69,7 @@ scale 15.
 | Measures from the decision tool, approved sentences only | built, empty until a sentence is approved | `core/act.py` | `core/tests/test_act.py` | Impact | ecologist |
 | ServiceRequest referral for a pipe worth testing | built | `core/fhir_referral.py` | `core/tests/test_fhir_referral.py`, `apps/api/tests/test_city.py` | Impact | standards, digital health |
 | A laboratory result returning to the same record | built, as a tagged example | `core/fhir_referral.py` | `core/tests/test_fhir_referral.py` | Impact | digital health |
-| Downstream note on reaches below a finding | parked (pure function, nothing calls it) | `core/act.py` | `core/tests/test_act.py` | Innovation | ecologist |
+| Downstream note on reaches below a finding | built | `core/regions.py`, `core/act.py`, `apps/api/city.py` | `core/tests/test_regions.py`, `apps/api/tests/test_city.py` | Innovation | ecologist |
 | MCP server over our records, read only, local | **missing** | none | none | Innovation | agents |
 | `make new-city`, the follower city recipe | **missing** | none | none | **Feasibility (15)** | outreach |
 
@@ -94,11 +94,11 @@ scale 15.
 
 | Status | Count |
 |---|---|
-| built | 39 |
-| parked | 5 |
+| built | 40 |
+| parked | 4 |
 | missing | 9 |
 
-Counted again on 2026-09-21 after Update 10 tier 1 items 1 to 3. The remaining missing rows are
+Counted again on 2026-09-21 after Update 10 tier 1 (all four items). The remaining missing rows are
 the agents and integration line (the MCP server, the Library entry, `make new-city`) and the
 documentation and gates of tier 3 and tier 4. What a city does with the record now exists; what an
 agent can fetch does not yet.

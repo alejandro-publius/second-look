@@ -62,7 +62,29 @@ export const exampleCity = {
   ],
   flagged_spots: [{ spot_id: "t1", spot_name: "test spot", why: "the name reads like a test" }],
   measures_waiting_for_approval: true,
+  creek_slug: "strawberry-creek",
+  unplaced_spots: 1,
+  downstream_notes: [],
+  reaches: [],
 };
+
+const exampleNote = {
+  reach_slug: "campus-west",
+  reach_name: "Below the forks, west campus",
+  from_reach_slug: "south-fork-campus",
+  from_reach_name: "South Fork, central campus",
+  feature: "pipe_running",
+  feature_name: "Pipes and sewage signs",
+  line: "Upstream of here, 2 people reported pipes and sewage signs on Sep 23.",
+  observers: 2,
+  visit_ids: ["v1", "v2"],
+  fhir: ["/api/fhir/Bundle/v1", "/api/fhir/Bundle/v2"],
+};
+exampleCity.downstream_notes = [exampleNote];
+exampleCity.reaches = [
+  { slug: "south-fork-campus", name: "South Fork, central campus", flows_into: "campus-west", flows_into_name: "Below the forks, west campus", spots: 1, visits: 5, notes: [] },
+  { slug: "campus-west", name: "Below the forks, west campus", flows_into: null, flows_into_name: null, spots: 0, visits: 0, notes: [exampleNote] },
+];
 
 const SL = "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look";
 const exampleTag = { system: SL, code: "example", display: "Example, not a real result" };
@@ -151,6 +173,8 @@ export const exampleSpot = {
     },
   ],
   health_card: null,
+  place: { creek_slug: "strawberry-creek", creek_name: "Strawberry Creek", reach_slug: "campus-west", reach_name: "Below the forks, west campus" },
+  downstream_notes: [exampleNote],
 };
 
 export const exampleObservation = (performer, method, note) => ({
@@ -285,7 +309,7 @@ export async function mockApi(page, options = {}) {
     if (path.startsWith("/api/fhir/referral/")) return json({ detail: "No referral: this pipe is not on the list." }, 404);
     if (path.startsWith("/api/city/")) {
       const creek = decodeURIComponent(path.slice("/api/city/".length));
-      if (creek !== "example") return json({ detail: "not found" }, 404);
+      if (creek !== "example" && creek !== "strawberry-creek") return json({ detail: "not found" }, 404);
       return json(exampleCity);
     }
     if (path === "/api/fhir/validation") return json(exampleValidation);

@@ -4,3 +4,43 @@ name: "California, San Francisco Bay Area"
 approved: false
 invasive_plants: []
 source: "Cal-IPC inventory (to be checked by Rachel)"
+
+# Creeks and their reaches (Update 10B answer 1). Each creek has a readable slug, so the analyst's
+# link reads /city?creek=strawberry-creek; the store keeps its own generated ids and this list is
+# joined to them at read time by core/regions.py. `flows_into` names the reach below; the
+# downstream note appears only where it is set. `bbox` is [south, west, north, east] in degrees,
+# hand filled from public maps and approximate: a precise pin is placed by the first box that holds
+# it, a coarse pin is placed on the creek only. Reaches are listed from the hills to the Bay.
+creeks:
+  - slug: strawberry-creek
+    name: Strawberry Creek
+    source: "Hand filled 2026-09-21 from public maps of the UC Berkeley campus and the City of Berkeley. Boxes are approximate."
+    reaches:
+      - slug: south-fork-canyon
+        name: South Fork, Strawberry Canyon
+        flows_into: south-fork-campus
+        bbox: [37.8690, -122.2530, 37.8780, -122.2350]
+      - slug: south-fork-campus
+        name: South Fork, central campus
+        flows_into: campus-west
+        bbox: [37.8695, -122.2645, 37.8730, -122.2530]
+      - slug: north-fork-campus
+        name: North Fork, campus
+        flows_into: campus-west
+        bbox: [37.8731, -122.2645, 37.8775, -122.2530]
+      - slug: campus-west
+        name: Below the forks, west campus
+        flows_into: downtown-culvert
+        bbox: [37.8700, -122.2670, 37.8735, -122.2645]
+      - slug: downtown-culvert
+        name: Downtown culvert
+        flows_into: strawberry-creek-park
+        bbox: [37.8660, -122.2860, 37.8740, -122.2670]
+      - slug: strawberry-creek-park
+        name: Strawberry Creek Park
+        flows_into: west-culvert
+        bbox: [37.8655, -122.2905, 37.8690, -122.2860]
+      - slug: west-culvert
+        name: West Berkeley culvert, to the Bay
+        flows_into: null
+        bbox: [37.8600, -122.3200, 37.8720, -122.2905]

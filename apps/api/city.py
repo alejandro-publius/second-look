@@ -21,16 +21,19 @@ from apps.api.check import NotFound, observer_from_token, spot_from_row
 from apps.api.db import as_utc
 from apps.api.models import CheckResultRow, ObserverRow, SpotRow, VisitRow
 from core.act import (
+    DownstreamNote,
     Finding,
     PipeCase,
     findings_from_visits,
     looks_like_a_test_name,
     needs_from_findings,
+    notes_below,
     pipes_worth_testing,
 )
 from core.fhir_emit import FhirEmitError
 from core.fhir_referral import example_lab_result, referral_bundle
 from core.records import CheckResult, Observer, VisitRecord
+from core.regions import Creek, Placement, creek_by_slug, creeks_from_regions, place_spot
 
 # The example laboratory result is dated relative to the referral, so a judge reading it sees a
 # plausible sequence: referred today, sampled the next day, reported three days after that.
@@ -114,11 +117,90 @@ def _finding_view(f: Finding, spot_names: dict[str, str], feature_names: dict[st
     }
 
 
-def city_view(db: Session, creek_id: str, *, today: date) -> dict[str, Any]:
-    """One creek: its spots, its findings, what it needs and which pipes are worth testing."""
-    spots = list(db.exec(select(SpotRow).where(SpotRow.creek_id == creek_id)).all())
-    if not spots:
-        raise NotFound("We have no record for that creek yet.")
+def creeks() -> list[Creek]:
+    """The creeks and reaches of every region pack, checked by the content loader at startup."""
+    return creeks_from_regions(content.get_content().regions)
+
+
+def placements_for(spots: list[SpotRow], known: list[Creek]) -> dict[str, Placement]:
+    """Which creek and reach each stored spot sits on, computed at read time (core/regions.py)."""
+    out: dict[str, Placement] = {}
+    for row in spots:
+        placed = place_spot(spot_from_row(row), known)
+        if placed is not None:
+            out[row.spot_id] = placed
+    return out
+
+
+def place_for_spot(db: Session, spot_id: str) -> dict[str, Any] | None:
+    """The readable creek and reach behind a spot, for the record page. None when unplaced."""
+    row = db.get(SpotRow, spot_id)
+    if row is None:
+        raise NotFound("We do not know that spot.")
+    placed = place_spot(spot_from_row(row), creeks())
+    if placed is None:
+        return None
+    return {
+        "creek_slug": placed.creek.slug,
+        "creek_name": placed.creek.name,
+        "reach_slug": placed.reach.slug if placed.reach else None,
+        "reach_name": placed.reach.name if placed.reach else None,
+    }
+
+
+def _note_labels(loaded: Any) -> dict[str, str]:
+    """Plain words for a finding key inside the downstream line: "built banks", "a sewage
+    discharge". A feature's name from features.yaml with its first letter lowered, a form item's
+    short_label, else the id with spaces."""
+    labels: dict[str, str] = {}
+    for item in loaded.form.get("items", []):
+        short = item.get("short_label")
+        labels[item["id"]] = str(short) if short else str(item["id"]).replace("_", " ")
+    for f in loaded.features:
+        name = str(f.get("name", f["id"]))
+        labels[f["id"]] = name[:1].lower() + name[1:]
+    return labels
+
+
+def _note_view(n: DownstreamNote, feature_names: dict[str, str]) -> dict[str, Any]:
+    return {
+        "reach_slug": n.reach_slug,
+        "reach_name": n.reach_name,
+        "from_reach_slug": n.from_reach_slug,
+        "from_reach_name": n.from_reach_name,
+        "feature": n.feature,
+        "feature_name": feature_names.get(n.feature, n.feature),
+        "line": n.line,
+        "observers": n.observers,
+        "visit_ids": list(n.visit_ids),
+        "fhir": [f"/api/fhir/Bundle/{v}" for v in n.visit_ids],
+    }
+
+
+def city_view(db: Session, creek_ref: str, *, today: date) -> dict[str, Any]:
+    """One creek: its spots, its findings, what it needs, which pipes are worth testing, and the
+    downstream note on every reach below a finding.
+
+    `creek_ref` is a readable slug from the region pack (`strawberry-creek`) or a generated creek
+    id from the store. The slug is the link a person sees; the store keeps its own ids and the two
+    are joined here at read time (Update 10B answer 2).
+    """
+    known = creeks()
+    creek = creek_by_slug(creek_ref, known)
+    all_spots = list(db.exec(select(SpotRow)).all())
+    placements = placements_for(all_spots, known)
+    if creek is not None:
+        spots = [
+            s
+            for s in all_spots
+            if s.spot_id in placements and placements[s.spot_id].creek.slug == creek.slug
+        ]
+    else:
+        spots = [s for s in all_spots if s.creek_id == creek_ref]
+        if not spots:
+            raise NotFound("We have no record for that creek yet.")
+        placed_on = {placements[s.spot_id].creek.slug for s in spots if s.spot_id in placements}
+        creek = creek_by_slug(placed_on.pop(), known) if len(placed_on) == 1 else None
 
     # A pin that reads like someone trying the form out is kept out of the numbers and listed
     # separately for a person to look at. It is never deleted.
@@ -142,9 +224,45 @@ def city_view(db: Session, creek_id: str, *, today: date) -> dict[str, Any]:
     needs = needs_from_findings(findings, loaded.sentences)
     pipes = pipes_worth_testing(visits, today)
 
+    notes: list[DownstreamNote] = []
+    reaches: list[dict[str, Any]] = []
+    unplaced = 0
+    if creek is not None:
+        reach_of = {s.spot_id: placements[s.spot_id].reach for s in real if s.spot_id in placements}
+        notes = notes_below(findings, reach_of, creek, _note_labels(loaded))
+        visits_at: dict[str, int] = {}
+        for v in visits:
+            visits_at[v.spot.spot_id] = visits_at.get(v.spot.spot_id, 0) + 1
+        for reach in creek.reaches:
+            here = [s for s in real if reach_of.get(s.spot_id) is reach]
+            reaches.append(
+                {
+                    "slug": reach.slug,
+                    "name": reach.name,
+                    "flows_into": reach.flows_into,
+                    "flows_into_name": (
+                        creek.reach(reach.flows_into).name  # type: ignore[union-attr]
+                        if reach.flows_into
+                        else None
+                    ),
+                    "spots": len(here),
+                    "visits": sum(visits_at.get(s.spot_id, 0) for s in here),
+                    "notes": [
+                        _note_view(n, feature_names) for n in notes if n.reach_slug == reach.slug
+                    ],
+                }
+            )
+        unplaced = sum(1 for s in real if reach_of.get(s.spot_id) is None)
+
+    if creek is not None:
+        creek_name = creek.name
+    else:
+        creek_name = real[0].creek_name if real else creek_ref
+
     return {
-        "creek_id": creek_id,
-        "creek_name": real[0].creek_name if real else creek_id,
+        "creek_id": creek_ref,
+        "creek_slug": creek.slug if creek else None,
+        "creek_name": creek_name,
         "visits": len(visits),
         "spots": len(real),
         "findings": [_finding_view(f, spot_names, feature_names) for f in findings],
@@ -183,14 +301,41 @@ def city_view(db: Session, creek_id: str, *, today: date) -> dict[str, Any]:
         # Said out loud, because an empty list of measures has two very different meanings.
         "measures_waiting_for_approval": not loaded.sentences
         or all(s.get("approved") is not True for s in loaded.sentences),
+        # The reaches from the region pack, hills first, each with the notes on it (Update 10B).
+        "reaches": reaches,
+        "downstream_notes": [_note_view(n, feature_names) for n in notes],
+        # Spots on this creek whose reach is unknown, mostly coarse pins. They count above and
+        # neither give nor get a downstream note.
+        "unplaced_spots": unplaced,
     }
 
 
+def notes_for_spot(db: Session, spot_id: str, *, today: date) -> list[dict[str, Any]]:
+    """The downstream notes that land on this spot's reach: what people reported upstream."""
+    place = place_for_spot(db, spot_id)
+    if place is None or place["reach_slug"] is None:
+        return []
+    view = city_view(db, place["creek_slug"], today=today)
+    return [n for n in view["downstream_notes"] if n["reach_slug"] == place["reach_slug"]]
+
+
 def _real_spots_on_the_creek_of(db: Session, spot_id: str) -> list[SpotRow]:
+    """Every spot on the same creek as this one, by region pack placement when the spot has one
+    and by the stored creek id otherwise, minus the pins that read like tests."""
     spot = db.get(SpotRow, spot_id)
     if spot is None:
         raise NotFound("We do not know that spot.")
-    spots = list(db.exec(select(SpotRow).where(SpotRow.creek_id == spot.creek_id)).all())
+    all_spots = list(db.exec(select(SpotRow)).all())
+    placements = placements_for(all_spots, creeks())
+    mine = placements.get(spot_id)
+    if mine is not None:
+        spots = [
+            s
+            for s in all_spots
+            if s.spot_id in placements and placements[s.spot_id].creek.slug == mine.creek.slug
+        ]
+    else:
+        spots = [s for s in all_spots if s.creek_id == spot.creek_id]
     return [s for s in spots if not looks_like_a_test_name(s.spot_name)]
 
 

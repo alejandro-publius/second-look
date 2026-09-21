@@ -62,12 +62,38 @@ export function SpotRecord({ spotId }: { spotId: string }) {
 
   const { spot, visits, health_card } = record;
   const title = spot.spot_name || spotId;
-  const place = [spot.reach_name, spot.creek_name].filter(Boolean).join(", ");
+  const placed = record.place ?? null;
+  const notes = record.downstream_notes ?? [];
+  // The region pack's readable names when the spot sits on a known creek, else the stored ones.
+  const place = placed ? [placed.reach_name, placed.creek_name].filter(Boolean).join(", ") : [spot.reach_name, spot.creek_name].filter(Boolean).join(", ");
 
   return (
     <div className="stack">
       <FocusHeading>{title}</FocusHeading>
-      {place ? <p className="muted">{place}</p> : null}
+      {place ? (
+        <p className="muted">
+          {place}
+          {placed ? (
+            <>
+              {". "}
+              <Link href={`/city?creek=${encodeURIComponent(placed.creek_slug)}`}>{t("spot.city_link")}</Link>
+            </>
+          ) : null}
+        </p>
+      ) : null}
+      {notes.length > 0 ? (
+        <section className="card stack" aria-labelledby="upstream-title">
+          <h2 id="upstream-title">{t("spot.upstream_title")}</h2>
+          {notes.map((n) => (
+            <p key={`${n.from_reach_slug}:${n.feature}`} className="small">
+              {n.line}{" "}
+              <a href={n.fhir[0]} rel="noreferrer">
+                {t("city.evidence")}
+              </a>
+            </p>
+          ))}
+        </section>
+      ) : null}
       <div className="btn-row">
         <Link className="btn" href={`/quick?spot=${encodeURIComponent(spot.spot_id ?? spotId)}`}>
           {t("spot.quick_link")}

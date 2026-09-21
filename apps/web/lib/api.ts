@@ -169,6 +169,8 @@ export interface SpotRecordOut {
   spot: SpotOut;
   visits: VisitOut[];
   health_card: HealthCardOut | null;
+  place?: SpotPlace | null;
+  downstream_notes?: DownstreamNote[];
 }
 
 export interface FhirValidationOut {
@@ -238,8 +240,35 @@ export interface FhirResource {
   [k: string]: unknown;
 }
 
+/** One plain line on a reach below a finding, with the visits it was counted from. */
+export interface DownstreamNote {
+  reach_slug: string;
+  reach_name: string;
+  from_reach_slug: string;
+  from_reach_name: string;
+  feature: string;
+  feature_name: string;
+  line: string;
+  observers: number;
+  visit_ids: string[];
+  fhir: string[];
+}
+
+/** A reach from the region pack, hills first, with the notes that land on it. */
+export interface CityReach {
+  slug: string;
+  name: string;
+  flows_into: string | null;
+  flows_into_name: string | null;
+  spots: number;
+  visits: number;
+  notes: DownstreamNote[];
+}
+
 export interface CityOut {
   creek_id: string;
+  /** The readable slug from the region pack, or null for a creek the pack does not know. */
+  creek_slug: string | null;
   creek_name: string;
   visits: number;
   spots: number;
@@ -248,6 +277,17 @@ export interface CityOut {
   pipes_worth_testing: CityPipe[];
   flagged_spots: { spot_id: string; spot_name: string; why: string }[];
   measures_waiting_for_approval: boolean;
+  reaches: CityReach[];
+  downstream_notes: DownstreamNote[];
+  unplaced_spots: number;
+}
+
+/** Where a spot sits in the region pack. reach_* are null for a coarse pin. */
+export interface SpotPlace {
+  creek_slug: string;
+  creek_name: string;
+  reach_slug: string | null;
+  reach_name: string | null;
 }
 
 export interface TwoOut {

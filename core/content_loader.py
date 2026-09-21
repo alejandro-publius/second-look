@@ -16,6 +16,7 @@ from typing import Any
 import yaml
 
 from core.records import FEATURES, ITEMS_PER_FEATURE
+from core.regions import RegionError, creeks_from_regions
 
 # Every licence here is one we may show with attribution. The version matters and is recorded as
 # given, never rounded to 4.0: Wikimedia and iNaturalist carry a lot of 2.0 and 3.0, and refusing
@@ -246,6 +247,10 @@ def load_content(root: Path | str = ".", *, strict: bool = True) -> Content:
         for key in ("id", "audience", "text", "source", "approved"):
             if key not in s:
                 problems.append(f"sentence {s.get('id')} lacks {key}")
+    try:
+        creeks_from_regions(regions)
+    except RegionError as exc:
+        problems.append(str(exc))
     _check_disjoint(photos, problems)
     _check_test_items(test_items, photos, problems)
 
