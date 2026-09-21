@@ -32,6 +32,9 @@ jobs:
           key: fhir-${{ hashFiles('fhir/ig.lock') }}
       - run: uv sync --frozen
       - run: cd apps/web && npm ci
+      # design-check drives the built app in Chromium to measure tap targets, so the runner
+      # needs the browser Playwright pins, not only the package.
+      - run: cd apps/web && npx playwright install --with-deps chromium
       - run: cd worker && npm ci
       - run: make check
       # The Worker end to end under wrangler dev with a local D1 and KV, rain from a stub, no
