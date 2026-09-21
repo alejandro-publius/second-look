@@ -48,7 +48,7 @@ audit-verify:
 	$(PY) scripts/verify_audit.py
 
 e2e:
-	cd $(WEB) && npx playwright test
+	cd $(WEB) && npm run build --silent && npx playwright test
 
 smoke:
 	$(PY) scripts/smoke.py
