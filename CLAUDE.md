@@ -13,7 +13,7 @@ Start every session by reading PLAN.md, then only the brief section the session 
 7. The usability test is anonymous: no names, emails, IPs, free text, third-party scripts or fingerprinting. docs/DATA_HANDLING.md says what the host logs.
 8. Field use is pseudonymous: random contributor token, EXIF stripped, uploads private and deleted after 30 days, coarse location unless the user places the pin.
 9. No calls to api.enora-oah.eu or the Resilience Map API until Alex says permission arrived. Never commit their raw data.
-10. The sandbox is a mirror of our store: conditional creates, meta.tag on everything, delete only ledger ids, never delete by search, never $expunge. Read-only GETs allowed from Session E at one per second, 50 per session.
+10. The sandbox is a mirror of our store: conditional creates, meta.tag on everything, delete only ledger ids, never delete by search, never $expunge. One exception: a conditional update is allowed on our own Library entry only, matched by our own identifier, because that match can only ever hit our resource. Read-only GETs allowed from Session E at one per second, 50 per session.
 11. FHIR R4 4.0.1. IG pinned to hl7-eu/oah b907cf0 in fhir/ig.lock. Package built by SUSHI 3.20.1. Every emitted resource validated in CI.
 12. Every number in README or docs comes from evals/ through results/. scripts/verify_claims.py runs in CI. Never hand-edit a number.
 13. docs/analysis_plan.md is tagged prereg-v1 before the first participant. Analysis refuses real data before the lock, 2026-09-28T01:00:00Z. Changes go in docs/deviations.md.
