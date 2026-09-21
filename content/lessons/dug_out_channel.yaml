@@ -12,14 +12,16 @@ contrast_pairs:
     assume_caption: "Bends, gravel and changing width look untidy. This is how a stream shapes itself when nobody stops it."
     actual_caption: "Straight from edge to edge, both banks at one even slope, the same width all along. A machine cut this."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the straight line" }
+      - { x: 0.28, y: 0.56, label: "Bank cut at one angle", approved: false }
+      - { x: 0.5, y: 0.37, label: "Straight, same width throughout", approved: false }
   # Pair B. Assume: Hanshaeger Bach, a meander. Actual: Herringer Bach, a straightened course.
   - assume_photo_id: ph-channel-08
     actual_photo_id: ph-channel-07
     assume_caption: "The brook swings left and right across its meadow. Nobody set that line. Left alone."
-    actual_caption: "A straightened course running arrow straight between trimmed banks. Dug out, even with grass growing on top."
+    actual_caption: "A cut channel between banks trimmed to one even slope, holding the same width all along. Dug out."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the even banks" }
+      - { x: 0.52, y: 0.74, label: "Trimmed bank, one angle", approved: false }
+      - { x: 0.6, y: 0.53, label: "Same width all along", approved: false }
 practice:
   # A small canalised stream at Butler's Hill: straight, narrow, even.
   photo_id: ph-channel-09
@@ -27,4 +29,5 @@ practice:
   feedback_correct: "Right. Straight, narrow and the same width all along. Dug out."
   feedback_wrong: "Follow the line of the water. It runs straight and keeps one width the whole way. Dug out."
 practice_marks:
-  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the even width" }
+  - { x: 0.6, y: 0.6, label: "Straight, narrow, same width", approved: false }
+  - { x: 0.73, y: 0.76, label: "Even cut bank", approved: false }

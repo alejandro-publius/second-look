@@ -140,7 +140,7 @@ def test_the_practice_photo_writes_to_practice_marks(server: str, repo: Path) ->
     assert marks_in(repo, PRACTICE) == [
         {"x": 0.1, "y": 0.9, "label": "the pipe", "approved": False}
     ]
-    assert marks_in(repo, PAIR)[0]["label"].startswith("PLACEHOLDER"), "the pair is untouched"
+    assert marks_in(repo, PAIR)[0]["label"] == "Concrete wall, not soil", "the pair is untouched"
 
 
 def test_an_existing_approved_mark_is_preserved(server: str, repo: Path) -> None:
@@ -210,9 +210,9 @@ def test_the_write_keeps_the_comments_and_the_rest_of_the_file(repo: Path) -> No
 def test_the_tool_says_so_when_a_write_would_drop_a_comment(repo: Path) -> None:
     path = label_photos.lesson_path(repo, LESSON)
     text = path.read_text().replace(
-        '      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the built edge" }',
+        '      - { x: 0.72, y: 0.45, label: "Concrete wall, not soil", approved: false }',
         "      # Rachel: keep this one on the far bank\n"
-        '      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the built edge" }',
+        '      - { x: 0.72, y: 0.45, label: "Concrete wall, not soil", approved: false }',
         1,
     )
     path.write_text(text)
@@ -241,7 +241,7 @@ def test_the_page_shows_one_photo_with_its_marks_and_the_word_limit(server: str)
     assert "Place marks: artificial_bank" in page
     assert f"src='/photo/{PAIR_PHOTO}'" in page
     assert "contrast pair 1 marks" in page
-    assert "PLACEHOLDER: the built edge" in page
+    assert "Concrete wall, not soil" in page
     assert '"max_words": 5' in page
     assert "ph-bank-07" not in page.split("Photos:")[0], "one photo at a time"
     _, other = get(server + f"/?photo={PRACTICE_PHOTO}")
@@ -262,11 +262,11 @@ def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo: 
     check = marks_check(repo)
     assert check.owner == "HUMAN" and not check.passed
     assert (
-        'lesson artificial_bank pair 1: mark "PLACEHOLDER: the built edge" '
+        'lesson artificial_bank pair 1: mark "Concrete wall, not soil" '
         "is not approved yet" in check.reasons
     )
     assert any("practice" in r for r in check.reasons)
-    assert len(check.reasons) == 12, "three marks in each of the four lessons"
+    assert len(check.reasons) == 24, "two marks on each of the twelve lesson photos"
 
     for path in sorted((repo / "content" / "lessons").glob("*.yaml")):
         doc = label_photos.load_lesson(path)
@@ -288,7 +288,7 @@ def test_the_printed_line_names_the_lesson_and_the_label(
 ) -> None:
     preflight.report([marks_check(repo)])
     out = capsys.readouterr().out
-    assert 'HUMAN  marks_approved: lesson artificial_bank pair 1: mark "PLACEHOLDER' in out
+    assert 'HUMAN  marks_approved: lesson artificial_bank pair 1: mark "Concrete' in out
 
 
 def test_marks_mode_needs_no_name(repo: Path) -> None:

@@ -1,35 +1,39 @@
-# Lesson for pipe_running. Photo ids are the real photos fetched on 2026-09-21 (Update 11b).
-# The test item asks only whether a pipe or an outfall is visible, because flow and pollution
-# cannot be judged from a photo (Update 11b step 5). So the pairs teach spotting one, obvious
-# and hidden, and the rule of thumb carries the three dry days rule for the field.
+# Lesson for pipe_running. Photo ids are the real photos fetched on 2026-09-21 (Update 11b, 11C).
+# The test item asks only whether a pipe or drain outlet is visible, because flow and pollution
+# cannot be judged from a photo (Update 11b step 5). So the pairs teach spotting one, and the
+# rule of thumb carries the three dry days rule, which is for the field and not for a photo.
 # Source: US EPA Illicit Discharge Detection and Elimination manual, which says dry weather flow
 # means testing is needed. The wording is always "worth testing", never a verdict.
-# Captions are written from what each source page says about its own photo. approved stays
-# false until Alex approves.
+# Pairs set by Update 11C: an obvious outfall beside a stream with none, then a hidden outfall
+# beside a bend with none. Captions are written from what each source page says about its photo.
+# approved stays false until Alex approves.
 feature: pipe_running
 approved: false
 rule_of_thumb: "A pipe still running after three dry days is worth testing."
 source: "https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf"
 contrast_pairs:
-  # Pair A. Assume: Lyme Brook, a large obvious outfall. Actual: Bierley, a headwall in the leaves.
-  - assume_photo_id: ph-pipe-05
+  # Pair A. Assume: Dziki Stream at Karpacz, a rocky forest stream. Actual: Lyme Brook, a large outfall.
+  - assume_photo_id: ph-pipe-10
+    actual_photo_id: ph-pipe-05
+    assume_caption: "A rocky forest stream over mossy boulders. Follow both banks down to the water. Nothing empties into this one."
+    actual_caption: "A wide concrete mouth low on the bank. That is an outfall, and this one is hard to miss."
+    marks:
+      - { x: 0.58, y: 0.5, label: "Grilled outfall mouth", approved: false }
+      - { x: 0.56, y: 0.61, label: "Concrete headwall in bank", approved: false }
+  # Pair B. Assume: the Train at Grez-Doiceau, a meander in nettles. Actual: Bierley, a hidden headwall.
+  - assume_photo_id: ph-pipe-11
     actual_photo_id: ph-pipe-06
-    assume_caption: "This is what people picture: a big concrete mouth you cannot miss."
-    actual_caption: "The same thing, half hidden in the leaves. Most outfalls look like this. Scan the bank at water level."
+    assume_caption: "A bend with nettles crowding both banks. Plenty to hide a pipe, and there is no pipe here."
+    actual_caption: "Two low headwalls in the grass. Most outfalls look like these, not like the first one. Scan at water level."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the hidden headwall" }
-  # Pair B. Assume: Wrea Brook, a brick headwall. Actual: Rock Creek combined sewer pipes, stained.
-  - assume_photo_id: ph-pipe-08
-    actual_photo_id: ph-pipe-07
-    assume_caption: "An old brick headwall on a small brook. Brick and stone count too, not only plastic pipe."
-    actual_caption: "Two pipes in a steel wall with an orange stain below them. Note the stain in your check."
-    marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the stain" }
+      - { x: 0.4, y: 0.66, label: "Outfall under the grass", approved: false }
+      - { x: 0.66, y: 0.54, label: "Second outfall in vegetation", approved: false }
 practice:
   # Outfall into Riffa Beck: a small headwall on a grassy bank.
   photo_id: ph-pipe-09
   gold: present
   feedback_correct: "Right. A small headwall low on the bank. Easy to walk past."
-  feedback_wrong: "Look low on the far bank, at water level. That small concrete mouth is an outfall."
+  feedback_wrong: "Look low on the far bank, at water level. That small concrete mouth is a drain outlet."
 practice_marks:
-  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the outfall" }
+  - { x: 0.235, y: 0.5, label: "Concrete headwall on bank", approved: false }
+  - { x: 0.245, y: 0.565, label: "The outlet opening", approved: false }

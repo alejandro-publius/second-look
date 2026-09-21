@@ -1,4 +1,6 @@
-# Region pack. Species names appear on screen only on a photo Rachel has verified, with a source.
+# Region pack. A species may be named on screen when two things hold, and any team member can
+# check them: the photo carries a research grade iNaturalist identification, and the species has a
+# page on the Cal-IPC Inventory. The name shown is Cal-IPC's common name (Update 11C item 2).
 region: california-bay-area
 name: "California, San Francisco Bay Area"
 approved: false

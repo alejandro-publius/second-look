@@ -41,9 +41,12 @@ def test_current_repo_fails_only_for_known_reasons() -> None:
     failed = {c.name: c for c in checks if not c.passed}
     human = {n for n, c in failed.items() if c.owner == "HUMAN"}
     build = {n for n, c in failed.items() if c.owner == "BUILD"}
-    assert {"human_inputs", "key_frozen", "key_agreement", "prereg_tag", "contact_email"} <= human
+    # contact_email passes now that the consent email is real (Update 11C).
+    assert {"human_inputs", "key_frozen", "key_agreement", "prereg_tag"} <= human
+    assert "contact_email" not in human, "no PLACEHOLDER left in content/locales/en.json"
     assert "marks_approved" in human, "the design pass marks are still waiting for Rachel"
-    assert "plan_wording" in human, "TODO-TEAM wording in the plan"
+    # plan_wording passes now: the four question wordings are frozen in the plan (Update 11C).
+    assert "plan_wording" not in human, "no TODO-TEAM left in docs/analysis_plan.md"
     reasons = [r for c in checks for r in c.reasons]
     # The real photos are in as of Update 11b, so no role is on a gray placeholder any more.
     assert not any("placeholder photo in role" in r for r in reasons)

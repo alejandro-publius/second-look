@@ -6,7 +6,9 @@
 #   High: severe ecological impacts on physical processes, plant and animal communities, and vegetation structure.
 #   Moderate: substantial and apparent, but generally not severe, ecological impacts.
 #   Limited: invasive, but impacts minor statewide, or not enough information for a higher score.
-# The Inventory has no regulatory authority. A species name appears on a screen only on a photo Rachel has verified.
+# The Inventory has no regulatory authority. A species may be named on screen when the photo carries a
+# research grade iNaturalist identification and the species has a Cal-IPC page. Any team member can check
+# both. The name shown is Cal-IPC's common name (Update 11C item 2).
 region: california-bay-area
 name: "California, San Francisco Bay Area"
 approved: false

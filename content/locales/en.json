@@ -9,7 +9,7 @@
   "consent.what": "This is a usability test of a training tool. It takes about four minutes. It is anonymous. You must be 18 or older. You can quit at any time.",
   "consent.stored": "We store: a random session id, which group you were in, your answers, how long each screen took, a hashed random browser token, your device type and the version of this text. Nothing else.",
   "consent.not_advice": "Nothing here is health advice.",
-  "consent.contact": "Questions: PLACEHOLDER contact email (Alex supplies it).",
+  "consent.contact": "Questions: alejandro-publius@berkeley.edu",
   "consent.check_consent": "I understand and agree to take part.",
   "consent.check_age": "I am 18 or older.",
   "consent.start": "I agree, start",
