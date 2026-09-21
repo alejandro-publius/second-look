@@ -350,5 +350,7 @@
   "city.reach_quiet": "Nothing reported upstream.",
   "city.unplaced": "{n} spots sit on this creek but on no reach, because their pin is coarse. They count above and get no line here.",
   "spot.upstream_title": "Upstream of here",
-  "spot.city_link": "The whole creek"
+  "spot.city_link": "The whole creek",
+  "city.needs_source": "These are OneAquaHealth's own restoration measures, from the",
+  "city.needs_source_link": "OneAquaHealth Policy Brief (2026), page 9"
 }

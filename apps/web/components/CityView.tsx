@@ -150,6 +150,13 @@ export function CityView({ creekId }: { creekId: string }) {
       <p className="small muted tabular">{t("city.visits", { n: view.visits, spots: view.spots })}</p>
 
       <h2>{t("city.needs_title")}</h2>
+      <p className="small muted">
+        {t("city.needs_source")}{" "}
+        <a href="https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf" rel="noreferrer">
+          {t("city.needs_source_link")}
+        </a>
+        .
+      </p>
       {view.needs.length === 0 ? (
         <div className="notice notice-warn">
           <Icon name="info" />

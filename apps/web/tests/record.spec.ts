@@ -101,6 +101,11 @@ test("/city shows two lists decided by code, and no number without its records",
   await expect(page.getByText("Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water.")).toBeVisible();
   await expect(page.getByText("Replant both margins with native trees and shrubs, and stop cutting them back.")).toBeVisible();
   await expect(page.getByText("No measure is shown yet.")).toHaveCount(0);
+  await expect(page.getByText("These are OneAquaHealth's own restoration measures, from the")).toBeVisible();
+  await expect(page.getByRole("link", { name: "OneAquaHealth Policy Brief (2026), page 9" })).toHaveAttribute(
+    "href",
+    "https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+  );
 
   // A pipe two people who passed saw running in dry weather, with its records one tap away.
   await expect(page.getByText("Footbridge below the library").first()).toBeVisible();
