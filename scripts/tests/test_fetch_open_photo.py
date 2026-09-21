@@ -116,11 +116,24 @@ def test_a_licence_we_may_not_use_is_refused(repo: Path) -> None:
 
 @respx.mock
 def test_a_licence_version_the_manifest_cannot_record_is_refused(repo: Path) -> None:
-    mock_commons("cc-by-sa-3.0")
+    """CC BY 1.0 is real and open, but the allowlist has no entry, so we refuse rather than
+    write it down as a version it is not."""
+    mock_commons("cc-by-1.0")
     with pytest.raises(FetchError) as caught:
         run(COMMONS_URL, repo)
-    assert "CC BY-SA 3.0" in str(caught.value)
+    assert "CC BY 1.0" in str(caught.value)
     assert rows(repo) == []
+
+
+@respx.mock
+def test_an_older_version_we_do_allow_is_written_down_as_that_version(repo: Path) -> None:
+    """Update 09 follow up: refusing 2.0 and 3.0 halved the pool for no gain to anyone."""
+    mock_commons("cc-by-sa-3.0")
+    run(COMMONS_URL, repo)
+    written = rows(repo)
+    assert len(written) == 1
+    assert written[0]["license"] == "CC-BY-SA-3.0"
+    assert written[0]["author"]
 
 
 @respx.mock

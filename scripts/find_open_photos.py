@@ -32,6 +32,7 @@ from typing import Any
 import httpx
 import yaml
 
+from core import content_loader
 from core.records import FEATURES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,10 +55,10 @@ TARGET = 40
 
 # Licence codes we may use. Anything else, including any NC or ND licence and any unclear claim,
 # is dropped rather than guessed at (hard rule 6).
+# Built from the one allowlist in core/content_loader.py, so widening it there widens the pool
+# here in the same commit. Keys are the tidy lowercase code this file parses out of a source.
 MANIFEST_LICENCES = {
-    "cc0-1.0": "CC0-1.0",
-    "cc-by-4.0": "CC-BY-4.0",
-    "cc-by-sa-4.0": "CC-BY-SA-4.0",
+    code.lower(): code for code in content_loader.REAL_LICENSES if code.startswith(("CC0", "CC-BY"))
 }
 COMMONS_LICENCE_RE = re.compile(
     r"^(cc0(?:-1\.0)?|cc-by(?:-sa)?-\d(?:\.\d)?)(?:-(?:migrated|[a-z]{2}))?$"

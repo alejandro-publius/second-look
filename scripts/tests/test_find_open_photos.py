@@ -241,11 +241,22 @@ def test_the_rate_limit_is_used_on_every_request() -> None:
     assert calls == ["wait", "wait"]
 
 
-def test_licence_codes_map_to_the_manifest_only_when_the_version_matches() -> None:
-    by_sa_4 = licence_from_commons("cc-by-sa-4.0")
-    by_sa_3 = licence_from_commons("cc-by-sa-3.0")
-    assert by_sa_4 is not None and by_sa_4.manifest == "CC-BY-SA-4.0"
-    assert by_sa_3 is not None and by_sa_3.manifest == ""
+def test_licence_codes_map_to_the_manifest_at_the_exact_version() -> None:
+    """The allowlist takes CC BY and CC BY-SA at 2.0, 3.0 and 4.0, each recorded as given."""
+    for code, expected in (
+        ("cc-by-sa-4.0", "CC-BY-SA-4.0"),
+        ("cc-by-sa-3.0", "CC-BY-SA-3.0"),
+        ("cc-by-sa-2.0", "CC-BY-SA-2.0"),
+        ("cc-by-4.0", "CC-BY-4.0"),
+        ("cc-by-3.0", "CC-BY-3.0"),
+        ("cc-by-2.0", "CC-BY-2.0"),
+    ):
+        got = licence_from_commons(code)
+        assert got is not None and got.manifest == expected, code
+    # A version older than 2.0 is still refused rather than rounded up to one we do allow.
+    by_1 = licence_from_commons("cc-by-1.0")
+    assert by_1 is not None and by_1.manifest == ""
+    # Non commercial is not an open licence for our purposes, and neither is a bare "pd" tag.
     assert licence_from_commons("cc-by-nc-4.0") is None
     assert licence_from_commons("pd") is None
     assert licence_from_inat("cc0") == Licence("cc0-1.0", "CC0 1.0", "CC0-1.0", "cc0")
