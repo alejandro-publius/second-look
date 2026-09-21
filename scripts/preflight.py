@@ -199,17 +199,26 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
                 claims.reasons.append(f"claim value drifted: {rel}#{pointer} is {value}")
     checks += [claims, results_real]
 
-    # 11. The audit log verifies and holds the key_frozen entry.
-    audit = Check("audit_log", "BUILD")
+    # 11. The audit log exists, verifies, and holds the key_frozen entry.
+    # An empty or missing log is a human step, not our bug: the first entry is written by
+    # scripts/freeze_key.py, which a person runs once the real labels are in.
     log_path = root / "audit" / "log.jsonl"
-    try:
-        audit_log.verify(log_path)
-    except audit_log.AuditError as e:
-        audit.reasons.append(f"audit log broken: {e}")
+    audit = Check("audit_log", "HUMAN" if not log_path.exists() else "BUILD")
+    if not log_path.exists():
+        audit.reasons.append(
+            "no audit log yet: nobody has run scripts/freeze_key.py, so nothing is recorded"
+        )
     else:
-        kinds = {e["kind"] for e in audit_log._entries(log_path)}
-        if key_record is not None and "key_frozen" not in kinds:
-            audit.reasons.append("results/key_hash.json exists but the audit log has no key_frozen")
+        try:
+            audit_log.verify(log_path)
+        except audit_log.AuditError as e:
+            audit.reasons.append(f"audit log broken: {e}")
+        else:
+            kinds = {e["kind"] for e in audit_log._entries(log_path)}
+            if key_record is not None and "key_frozen" not in kinds:
+                audit.reasons.append(
+                    "results/key_hash.json exists but the audit log has no key_frozen"
+                )
     checks.append(audit)
 
     # 12. The consent screen carries the hidden bot-trap field.

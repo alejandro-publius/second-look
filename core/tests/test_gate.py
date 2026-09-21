@@ -20,8 +20,10 @@ from core.records import FEATURES, CheckResult, FeatureScore, Observer, Spot
 MODEL = "fake-vision-1"
 OTHER_MODEL = "other-model"
 PASS_TABLE: dict[str, Any] = {
-    "real": False,
-    "synthetic": True,
+    # A real sweep. Rule 4: only a model that earned its pass may speak, and only a real run
+    # can earn one, so a synthetic table licenses nothing (test_synthetic_table_licenses_nothing).
+    "real": True,
+    "synthetic": False,
     "generated_at_utc": "2026-09-20T00:00:00Z",
     "models": {
         MODEL: {
@@ -136,13 +138,15 @@ def test_unknown_feature_is_dropped() -> None:
 
 @pytest.mark.parametrize("passed", ["true", 1, "yes", None, [True]])
 def test_passed_must_be_exactly_true(passed: object) -> None:
-    table = {"models": {MODEL: {"artificial_bank": {"passed": passed}}}}
+    table = {"real": True, "models": {MODEL: {"artificial_bank": {"passed": passed}}}}
     flags, reasons = parse([good()], table=table)
     assert flags == []
     assert "not passed" in reasons[0]
 
 
-@pytest.mark.parametrize("table", [None, [], "models", {"models": []}, {"models": {MODEL: []}}])
+@pytest.mark.parametrize(
+    "table", [None, [], "models", {"models": []}, {"real": True, "models": {MODEL: []}}]
+)
 def test_garbage_pass_table_means_unknown_model(table: object) -> None:
     flags, reasons = parse([good()], table=table)
     assert flags == []
@@ -416,3 +420,30 @@ def test_fuzz_model_output_never_reaches_answers_or_labels(
         assert checker_enabled and flags
         assert checker[0].params["note"] in {f.note for f in flags}
     assert record.answers == dict(answers)
+
+
+def test_synthetic_table_licenses_nothing() -> None:
+    """A fake sweep proves nothing about a model, so no flag may come from one."""
+    synthetic = {**PASS_TABLE, "real": False, "synthetic": True}
+    flags, reasons = parse(
+        {"feature": "artificial_bank", "confidence": 0.9, "note": "a concrete edge"},
+        table=synthetic,
+    )
+    assert flags == []
+    assert reasons and "unknown model" in reasons[0]
+
+
+def test_note_with_markup_or_a_direction_control_is_dropped() -> None:
+    """Model text reaches a person. Angle brackets and direction controls never do."""
+    markup, reasons = parse(
+        {"feature": "artificial_bank", "confidence": 0.5, "note": "<script>alert(1)</script> edge"}
+    )
+    assert markup == [] and "angle brackets" in reasons[0]
+    flipped, reasons2 = parse(
+        {
+            "feature": "artificial_bank",
+            "confidence": 0.5,
+            "note": "concrete " + chr(0x202E) + "edge",
+        }
+    )
+    assert flipped == [] and "direction" in reasons2[0]

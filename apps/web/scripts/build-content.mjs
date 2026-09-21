@@ -287,6 +287,12 @@ function main() {
   };
   writeFileSync(join(webRoot, "public", "precache.json"), JSON.stringify(precache, null, 2) + "\n");
 
+  // Stamp the service worker cache name with the content hash so a content swap really lands.
+  const swPath = join(webRoot, "public", "sw.js");
+  const sw = readFileSync(swPath, "utf8");
+  const stamped = sw.replace(/const VERSION = "[^"]*";/, `const VERSION = "sl-${content_hash}";`);
+  if (stamped !== sw) writeFileSync(swPath, stamped);
+
   const size = statSync(join(outDir, "content.json")).size;
   console.log(`build-content: content_hash ${content_hash}, consent ${consent_version}, ${copyList.length} photos copied, content.json ${size} bytes`);
 }

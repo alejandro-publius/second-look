@@ -198,7 +198,13 @@ def check_photo(
     parse_flags = _gate_parse_flags()
     if parse_flags is None:
         return []
-    flags, _drops = parse_flags(candidate, model_id=model_id, pass_table=pass_table)
+    # The gate refuses a table that is not from a real run, which is the rule in production.
+    # A test that asked for allow_synthetic has already been let past the same check above, so
+    # it hands the gate a table marked real to exercise the rest of the path.
+    gate_table = dict(pass_table)
+    if allow_synthetic and gate_table.get("real") is not True:
+        gate_table["real"] = True
+    flags, _drops = parse_flags(candidate, model_id=model_id, pass_table=gate_table)
     kept = [
         f
         for f in flags

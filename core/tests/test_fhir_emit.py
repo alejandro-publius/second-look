@@ -20,6 +20,7 @@ from core.fhir_emit import (
     SL_SYSTEM,
     UCUM_SYSTEM,
     FhirEmitError,
+    _practitioner_id,
     check_bundle,
     code_for_answer,
     emit_visit,
@@ -228,7 +229,7 @@ def test_practitioner_is_pseudonymous_with_a_dated_qualification(golden_bundle: 
     (practitioner,) = resources(golden_bundle, "Practitioner")
     assert "name" not in practitioner
     assert practitioner["identifier"] == [
-        {"system": f"{FHIR_BASE}/contributor-token", "value": "ct_7f3a9c2e"}
+        {"system": f"{FHIR_BASE}/contributor-token", "value": _practitioner_id("ct_7f3a9c2e")}
     ]
     (qualification,) = practitioner["qualification"]
     assert qualification["code"]["coding"][0] == {
@@ -559,7 +560,7 @@ def test_transaction_is_conditional_creates_with_our_tag(golden_bundle: dict) ->
     # identifiers drive the conditional creates, Provenance through its first target
     requests = {e["request"]["url"]: e["request"]["ifNoneExist"] for e in tx["entry"]}
     assert requests["Practitioner"] == (
-        f"Practitioner?identifier={FHIR_BASE}/contributor-token|ct_7f3a9c2e"
+        f"Practitioner?identifier={FHIR_BASE}/contributor-token|" + _practitioner_id("ct_7f3a9c2e")
     )
     assert requests["Provenance"].startswith(
         f"Provenance?target:Observation.identifier={FHIR_BASE}/observation|"
@@ -606,3 +607,11 @@ def test_check_bundle_reports_missing_narrative(golden_bundle: dict) -> None:
     broken = json.loads(json.dumps(golden_bundle))
     del resources(broken, "Device")[0]["text"]
     assert any("no narrative" in p for p in check_bundle(broken))
+
+
+def test_the_contributor_token_itself_never_appears_in_the_record(golden_bundle: dict) -> None:
+    """The token is what a person uses to attach their score, so the public record holds only a
+    one way hash of it. Anyone who reads the record must not be able to become that person."""
+    text = json.dumps(golden_bundle)
+    assert "ct_7f3a9c2e" not in text
+    assert _practitioner_id("ct_7f3a9c2e") in text

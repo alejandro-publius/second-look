@@ -52,8 +52,9 @@ export interface CompleteResponse {
 }
 
 export interface DemoAnswerResponse {
+  // Whether the judge was right, and nothing else. The gold label stays on the server:
+  // sixteen of these replies would be the whole answer key for the live test.
   correct: boolean;
-  gold: "present" | "absent";
 }
 
 export type SpotRef = { spot_id: string } | { new: { name: string; latitude: number; longitude: number; coarse: boolean } };

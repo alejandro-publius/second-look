@@ -81,7 +81,9 @@ def demo_answer(body: DemoBody) -> dict[str, Any]:
     gold = content.gold_for(body.item_id)
     if gold is None:
         raise HTTPException(status_code=404, detail="We do not know that test item.")
-    return {"correct": is_correct(body.answer, gold), "gold": gold}
+    # Only whether they were right. The gold label itself never leaves the server: sixteen of
+    # these requests would be the whole answer key for the live test.
+    return {"correct": is_correct(body.answer, gold)}
 
 
 @router.get("/content/hash", dependencies=[Depends(rate_limited(READ_LIMIT))])

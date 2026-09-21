@@ -1,6 +1,6 @@
 # SYNTHETIC results, not from people (real_gain scenario)
 
-Stamp: SYNTHETIC. Generated 2026-09-21T00:05:52Z by evals/usability_analysis.py.
+Stamp: SYNTHETIC. Generated 2026-09-21T01:12:45Z by evals/usability_analysis.py.
 
 ## Primary estimate (plan item 6)
 

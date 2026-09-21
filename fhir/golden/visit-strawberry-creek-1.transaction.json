@@ -229,7 +229,7 @@
     {
       "fullUrl": "urn:uuid:c5f27240-a5bf-533f-a10c-a83c277e3182",
       "request": {
-        "ifNoneExist": "Practitioner?identifier=https://github.com/alejandro-publius/second-look/fhir/contributor-token|ct_7f3a9c2e",
+        "ifNoneExist": "Practitioner?identifier=https://github.com/alejandro-publius/second-look/fhir/contributor-token|sl-practitioner-20d03d930b1b",
         "method": "POST",
         "url": "Practitioner"
       },
@@ -238,7 +238,7 @@
         "identifier": [
           {
             "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
-            "value": "ct_7f3a9c2e"
+            "value": "sl-practitioner-20d03d930b1b"
           }
         ],
         "meta": {

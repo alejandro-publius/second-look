@@ -19,7 +19,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--path", type=Path, default=audit_log.LOG)
     parser.add_argument("--expect-last", default=None, help="hash posted at freeze")
     parser.add_argument("--allow-test-kind", action="store_true", help="tests only")
+    parser.add_argument(
+        "--allow-missing",
+        action="store_true",
+        help="a missing log is fine, before the first entry",
+    )
     args = parser.parse_args(argv)
+    if not args.path.exists() and not args.allow_missing:
+        print(
+            f"audit-log: BROKEN: no log at {args.path}. Nothing has been recorded, so this check "
+            "proves nothing. Pass --allow-missing before the first entry is written."
+        )
+        return 1
     try:
         length = audit_log.verify(args.path, allow_test_kind=args.allow_test_kind)
     except audit_log.AuditError as e:

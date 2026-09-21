@@ -180,7 +180,7 @@
         "identifier": [
           {
             "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
-            "value": "ct_7f3a9c2e"
+            "value": "sl-practitioner-20d03d930b1b"
           }
         ],
         "qualification": [

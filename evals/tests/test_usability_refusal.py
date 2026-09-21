@@ -7,6 +7,7 @@ project repository.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -52,10 +53,27 @@ def make_repo(root: Path, *, tag: bool) -> Path:
     return repo
 
 
-def run_script(*args: str) -> subprocess.CompletedProcess[str]:
+def run_script(*args: str, test_clock: bool = True) -> subprocess.CompletedProcess[str]:
+    """The pretend clock and pretend repo are test only, so tests say so in the environment."""
+    env = dict(os.environ)
+    if test_clock:
+        env["SECOND_LOOK_TEST_CLOCK"] = "1"
+    else:
+        env.pop("SECOND_LOOK_TEST_CLOCK", None)
     return subprocess.run(
-        [sys.executable, str(SCRIPT), *args], cwd=ROOT, capture_output=True, text=True, check=False
+        [sys.executable, str(SCRIPT), *args],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=env,
     )
+
+
+def test_pretend_clock_is_refused_without_the_test_environment() -> None:
+    done = run_script("--now", AFTER_LOCK, "--repo", str(ROOT), test_clock=False)
+    assert done.returncode == 2
+    assert "for tests" in done.stdout
 
 
 @pytest.fixture(scope="module")

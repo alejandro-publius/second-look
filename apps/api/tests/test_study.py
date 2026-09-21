@@ -23,6 +23,12 @@ from core.lock import DATA_LOCK_UTC
 NOW = datetime(2026, 9, 23, 12, 0, tzinfo=UTC)
 
 
+def visitor(n: int) -> dict:
+    """A session body from a browser of its own: one browser keeps one arm, so a test that
+    wants twelve randomized visitors needs twelve tokens."""
+    return dict(SESSION_BODY, client_token_hash=f"{n:064x}")
+
+
 def must(value):
     assert value is not None
     return value
@@ -103,7 +109,7 @@ def test_hidden_field_marks_the_session_but_the_response_is_identical(client):
 
 
 def test_assignment_follows_the_stored_seed_in_blocks_of_four(client):
-    arms = [client.post("/api/test/session", json=SESSION_BODY).json()["arm"] for _ in range(12)]
+    arms = [client.post("/api/test/session", json=visitor(i)).json()["arm"] for i in range(12)]
     with Session(engine) as db:
         counter = must(db.get(RandomizationCounter, 1))
         rows = db.exec(select(StudySession)).all()
@@ -128,8 +134,8 @@ def test_take_position_never_hands_out_the_same_slot_twice_under_threads(client)
 
 
 def test_simultaneous_sessions_keep_every_complete_block_balanced(client):
-    def create(_: int) -> str:
-        r = client.post("/api/test/session", json=SESSION_BODY)
+    def create(n: int) -> str:
+        r = client.post("/api/test/session", json=visitor(n))
         assert r.status_code == 200, r.text
         return r.json()["session_id"]
 
@@ -339,8 +345,9 @@ def test_demo_answer_stores_nothing(client):
         counter_before = must(db.get(RandomizationCounter, 1)).next_position
     right = client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"}).json()
     wrong = client.post("/api/demo/answer", json={"item_id": "t03", "answer": "yes"}).json()
-    assert right == {"correct": True, "gold": "present"}
-    assert wrong == {"correct": False, "gold": "absent"}
+    # Only whether they were right: sixteen of these would be the whole answer key.
+    assert right == {"correct": True}
+    assert wrong == {"correct": False}
     assert (
         client.post("/api/demo/answer", json={"item_id": "t99", "answer": "yes"}).status_code == 404
     )
@@ -385,3 +392,13 @@ def test_at_and_after_lock_sessions_are_marked_post_lock_and_still_answered(clie
     assert client.get("/api/test/counts").json()["post_lock"] == 3
     files = _read_zip(client.get("/api/test/export?token=test-export-token-1234567890").content)
     assert all(row["post_lock"] == "1" for row in files["sessions.csv"])
+
+
+def test_one_browser_keeps_one_arm_however_often_it_reloads(client):
+    """Reloading must not let anyone shop for the trained arm: that would wreck the
+    randomization the analysis plan pre-registered."""
+    first = client.post("/api/test/session", json=visitor(99)).json()
+    again = [client.post("/api/test/session", json=visitor(99)).json()["arm"] for _ in range(8)]
+    assert set(again) == {first["arm"]}
+    other = client.post("/api/test/session", json=visitor(100)).json()
+    assert other["session_id"] != first["session_id"]

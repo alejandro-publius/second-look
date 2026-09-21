@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -888,6 +889,9 @@ def run(
     return result
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -913,8 +917,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--permutations", type=int, default=N_PERM)
     args = parser.parse_args(argv)
 
-    now = parse_utc(args.now) if args.now else now_utc()
-    repo = args.repo if args.repo is not None else RESULTS_DIR.parent
+    test_clock = os.environ.get("SECOND_LOOK_TEST_CLOCK") == "1"
+    if (args.now or args.repo is not None) and not (args.synthetic or test_clock):
+        print(
+            "The --now and --repo options are for tests. A real run reads the real clock and "
+            "this repository. Set SECOND_LOOK_TEST_CLOCK=1 if you are writing a test."
+        )
+        return 2
+    now = parse_utc(args.now) if (args.now and (args.synthetic or test_clock)) else now_utc()
+    repo = args.repo if (args.repo is not None and (args.synthetic or test_clock)) else REPO_ROOT
     launch = parse_utc(args.launch_utc) if args.launch_utc else None
 
     if args.synthetic:

@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from PIL import Image, UnidentifiedImageError
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlmodel import Session, select
 
 from apps.api import content, core_calls
@@ -52,6 +52,26 @@ class NotFound(Exception):
 
 class NewSpot(BaseModel):
     name: str = Field(min_length=1, max_length=80)
+
+    @field_validator("name", "creek_name", "reach_name")
+    @classmethod
+    def _plain_place_name(cls, v: str | None) -> str | None:
+        """A place name only: letters, numbers, spaces and . , ' - ( ) / and no digits run
+        longer than four. The name is published in the record and copied into the FHIR
+        narrative, so a street address or a person's details must not fit through here."""
+        if v is None:
+            return v
+        v = " ".join(v.split())
+        if not v:
+            raise ValueError("A name is needed.")
+        if not re.fullmatch(r"[A-Za-z0-9 .,'()/-]+", v):
+            raise ValueError("Use letters, numbers, spaces and . , ' - ( ) / only.")
+        if re.search(r"\d{5,}", v):
+            raise ValueError("That looks like an address or a code, not a place name.")
+        if "@" in v:
+            raise ValueError("A place name cannot hold an email address.")
+        return v
+
     latitude: float | None = Field(default=None, ge=-90, le=90)
     longitude: float | None = Field(default=None, ge=-180, le=180)
     coarse: bool = True

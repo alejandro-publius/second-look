@@ -131,8 +131,8 @@ export async function mockApi(page, options = {}) {
       return json(out);
     }
     if (path === "/api/demo/answer") {
-      const gold = goldFor(body.item_id);
-      return json({ correct: isCorrect(body.answer, gold), gold });
+      // The real API answers with correct only: the gold label never leaves the server.
+      return json({ correct: isCorrect(body.answer, goldFor(body.item_id)) });
     }
     if (path === "/api/upload") return json({ photo_id: "ph-upload-" + calls.length, token: "uploadtoken" });
     if (path === "/api/check/draft") return json({ draft_id: "d1", followups });

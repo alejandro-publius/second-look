@@ -81,8 +81,13 @@ def _candidates(raw: object) -> tuple[list[object], list[str]]:
 
 
 def _passed_features(pass_table: object, model_id: object) -> set[str] | None:
-    """Features the model passed, or None when the model or the table is unknown."""
+    """Features the model passed, or None when it may not speak at all.
+
+    A pass table from the fake client licenses nothing: rule 4 says a model earns its flags.
+    """
     if not isinstance(pass_table, Mapping) or not isinstance(model_id, str):
+        return None
+    if pass_table.get("real") is not True:
         return None
     models = pass_table.get("models")
     if not isinstance(models, Mapping):
@@ -96,6 +101,24 @@ def _passed_features(pass_table: object, model_id: object) -> set[str] | None:
         if isinstance(cell, Mapping) and cell.get("passed") is True:
             passed.add(feature)
     return passed
+
+
+BIDI_CONTROLS = "".join(
+    chr(c)
+    for c in (
+        0x200E,
+        0x200F,
+        0x202A,
+        0x202B,
+        0x202C,
+        0x202D,
+        0x202E,
+        0x2066,
+        0x2067,
+        0x2068,
+        0x2069,
+    )
+)
 
 
 def _is_number(value: object) -> bool:
@@ -112,6 +135,10 @@ def _read_note(value: object) -> tuple[str | None, str | None]:
         return None, f"note too long: {len(note)} characters, {NOTE_MAX_CHARS} at most"
     if any(ch.isspace() and ch != " " for ch in note) or any(ord(ch) < 32 for ch in note):
         return None, "note has line breaks or control characters"
+    if any(ch in note for ch in BIDI_CONTROLS):
+        return None, "note has text direction controls"
+    if any(ch in note for ch in "<>"):
+        return None, "note has angle brackets"
     return note, None
 
 

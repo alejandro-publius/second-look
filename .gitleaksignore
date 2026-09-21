@@ -1,0 +1,24 @@
+# Secret scanning: values that are fake by construction, each named and explained.
+# gitleaks reads this file from the repo root. Findings live in old commits and history is
+# never rewritten (hard rule 15), so they are listed by fingerprint rather than edited away.
+# Nothing here is a real credential. A real key would not be on this list and would fail the
+# submission gate, which is the point.
+
+# core/tests/test_fhir_emit.py line 121: a made up pseudonymous volunteer token in a test fixture
+00ffea4793fb71d72f5450e6dc17bc536c3b582e:core/tests/test_fhir_emit.py:generic-api-key:121
+# apps/api/tests/conftest.py line 37: a test browser token, sixty four zeros or a counted hex string
+93cd1d1062345b2dda5ca9262c7c1fe2f34160bf:apps/api/tests/conftest.py:generic-api-key:37
+# apps/api/study.py line 32: the alphabet a token is drawn from, not a token
+93cd1d1062345b2dda5ca9262c7c1fe2f34160bf:apps/api/study.py:generic-api-key:32
+# apps/api/tests/test_study.py line 81: the test QA header value, set by the test conftest
+93cd1d1062345b2dda5ca9262c7c1fe2f34160bf:apps/api/tests/test_study.py:generic-api-key:81
+# apps/api/tests/test_study.py line 271: the test QA header value, set by the test conftest
+93cd1d1062345b2dda5ca9262c7c1fe2f34160bf:apps/api/tests/test_study.py:generic-api-key:271
+# scripts/tests/test_freeze_and_wipe.py line 143: a made up pseudonymous volunteer token in a test fixture
+498f8bf854cbe1b6ed6bdef201a87c889755c745:scripts/tests/test_freeze_and_wipe.py:generic-api-key:143
+# core/tests/test_followups.py line 33: a made up pseudonymous volunteer token in a test fixture
+c73ab6ab06c77ee2bc2d2548857bf9e40abbbefc:core/tests/test_followups.py:generic-api-key:33
+# core/tests/test_gate.py line 265: a made up pseudonymous volunteer token in a test fixture
+c73ab6ab06c77ee2bc2d2548857bf9e40abbbefc:core/tests/test_gate.py:generic-api-key:265
+# core/tests/test_gate.py line 351: a made up pseudonymous volunteer token in a test fixture
+c73ab6ab06c77ee2bc2d2548857bf9e40abbbefc:core/tests/test_gate.py:generic-api-key:351

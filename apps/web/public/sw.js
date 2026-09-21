@@ -6,7 +6,9 @@
  * - On a "sync" event or a "flush" message it asks open pages to send the offline queue
  *   (the queue lives in IndexedDB and the page code owns the send logic).
  */
-const VERSION = "sl-v1";
+// The cache name carries the content hash, so new photos and new copy replace the placeholders
+// on the next visit instead of hiding behind a stale cache. build-content.mjs rewrites this line.
+const VERSION = "sl-1e8e17b7f3df8903";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 

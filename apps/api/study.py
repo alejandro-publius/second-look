@@ -152,8 +152,19 @@ def take_position(db: Session) -> tuple[int, str]:
 
 
 def create_session(db: Session, body: SessionBody, *, now: datetime, is_test: bool) -> StudySession:
-    position, seed = take_position(db)
-    arm, block_id = arm_for_position(seed, position, k=len(ARMS))
+    token_hash = sha256_hex(body.client_token_hash)[:32]
+    earlier = db.exec(
+        select(StudySession)
+        .where(StudySession.client_token_hash == token_hash)
+        .order_by(StudySession.started_at)  # type: ignore[arg-type]
+    ).first()
+    if earlier is not None and not is_test:
+        # This browser already has an arm. Reloading must not let anyone shop for the other one.
+        position, seed = take_position(db)
+        arm, block_id = earlier.arm, earlier.block_id
+    else:
+        position, seed = take_position(db)
+        arm, block_id = arm_for_position(seed, position, k=len(ARMS))
     session_id = secrets.token_hex(16)
     order = content.test_item_ids()
     random.Random(f"{seed}|order|{session_id}").shuffle(order)
@@ -167,7 +178,7 @@ def create_session(db: Session, body: SessionBody, *, now: datetime, is_test: bo
         build_hash=body.build_hash[:64],
         consent_at=now,
         started_at=now,
-        client_token_hash=sha256_hex(body.client_token_hash)[:32],
+        client_token_hash=token_hash,
         ua_class=coerce_ua(body.ua_class),
         is_test=is_test,
         source_label=coerce_source(body.source_label),

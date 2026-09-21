@@ -340,7 +340,8 @@ def _practitioner(visit: VisitRecord, tested_on: date | None) -> dict[str, Any]:
         "resourceType": "Practitioner",
         "id": _practitioner_id(token),
         "text": _narrative(words),
-        "identifier": [_identifier(ID_SYSTEM_CONTRIBUTOR, token)],
+        # The token itself is a credential: the public record carries only a hash of it.
+        "identifier": [_identifier(ID_SYSTEM_CONTRIBUTOR, _practitioner_id(token))],
         "active": True,
     }
     if qualification:
