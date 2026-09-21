@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: help dev check lint types test web-build manifest-check dash-check verify-claims fhir-validate e2e smoke preflight submit-check poster deploy audit-verify
+.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check verify-claims fhir-validate e2e smoke preflight submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -37,6 +37,9 @@ dash-check:
 
 verify-claims:
 	$(PY) scripts/verify_claims.py --synthetic
+
+render-readme:
+	$(PY) scripts/render_readme.py
 
 fhir-validate:
 	$(PY) scripts/fhir_validate.py
