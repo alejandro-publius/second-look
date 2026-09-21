@@ -315,5 +315,12 @@
   "credits.by": "by {author}",
   "credits.source": "Source",
   "credits.none": "No photographs are loaded yet.",
-  "nav.credits": "Photo credits"
+  "nav.credits": "Photo credits",
+  "poster.credit": "Photos: {left}. {right}.",
+  "credits.photo_line": "{author}, {license}",
+  "warmup.reveal_title": "Those two creeks again",
+  "warmup.reveal_left": "Left: a mown park and a creek running in a concrete channel. Tidy, and built.",
+  "warmup.reveal_right": "Right: the brook bends, the outer bank is worn away, and fallen wood lies in the water. Messy, and closer to how a stream shapes itself.",
+  "warmup.reveal_point": "The one on the right is in a more natural state. Tidy is not the same as natural.",
+  "warmup.reveal_limit": "Neither photo can tell you whether the water is safe. That takes testing."
 }

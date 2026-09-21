@@ -410,7 +410,10 @@ def test_main_fake_writes_the_contract_files(tmp_path: Path, capsys: Any) -> Non
     doc = json.loads(sweeps[0].read_text())
     assert len(doc["answers"]) == 3 * 16 * 3 and doc["stamp"] == "SYNTHETIC"
     assert doc["settings"]["resize_long_side_px"] == 1092
-    assert doc["settings"]["image_sizes_sent"] == [[1092, 819]]
+    # Real photos come in several shapes, so the sizes differ. What must hold for every one of
+    # them is the long side the plan promises: 1092 px.
+    sizes = doc["settings"]["image_sizes_sent"]
+    assert sizes and all(max(s) == 1092 for s in sizes), sizes
     assert len((tmp_path / "cost_log_fake.jsonl").read_text().splitlines()) == 144
 
 

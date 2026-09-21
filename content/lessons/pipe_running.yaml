@@ -1,30 +1,35 @@
-# PLACEHOLDER lesson for pipe_running. Rachel owns the wording. approved stays false until she approves it.
-# Drafts to start from: content/drafts/lessons/pipe_running.yaml (W7). Screens hold 25 words at most.
+# Lesson for pipe_running. Photo ids are the real photos fetched on 2026-09-21 (Update 11b).
+# The test item asks only whether a pipe or an outfall is visible, because flow and pollution
+# cannot be judged from a photo (Update 11b step 5). So the pairs teach spotting one, obvious
+# and hidden, and the rule of thumb carries the three dry days rule for the field.
+# Source: US EPA Illicit Discharge Detection and Elimination manual, which says dry weather flow
+# means testing is needed. The wording is always "worth testing", never a verdict.
+# Captions are written from what each source page says about its own photo. approved stays
+# false until Alex approves.
 feature: pipe_running
 approved: false
-rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
-source: ""
+rule_of_thumb: "A pipe still running after three dry days is worth testing."
+source: "https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf"
 contrast_pairs:
-  - assume_photo_id: ph-lesson-pipe_running-a1
-    actual_photo_id: ph-lesson-pipe_running-a2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+  # Pair A. Assume: Lyme Brook, a large obvious outfall. Actual: Bierley, a headwall in the leaves.
+  - assume_photo_id: ph-pipe-05
+    actual_photo_id: ph-pipe-06
+    assume_caption: "This is what people picture: a big concrete mouth you cannot miss."
+    actual_caption: "The same thing, half hidden in the leaves. Most outfalls look like this. Scan the bank at water level."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the pipe mouth 1" }
-  - assume_photo_id: ph-lesson-pipe_running-b1
-    actual_photo_id: ph-lesson-pipe_running-b2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the hidden headwall" }
+  # Pair B. Assume: Wrea Brook, a brick headwall. Actual: Rock Creek combined sewer pipes, stained.
+  - assume_photo_id: ph-pipe-08
+    actual_photo_id: ph-pipe-07
+    assume_caption: "An old brick headwall on a small brook. Brick and stone count too, not only plastic pipe."
+    actual_caption: "Two pipes in a steel wall with an orange stain below them. Note the stain in your check."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the pipe mouth 2" }
+      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the stain" }
 practice:
-  photo_id: ph-practice-pipe_running
+  # Outfall into Riffa Beck: a small headwall on a grassy bank.
+  photo_id: ph-pipe-09
   gold: present
-  feedback_correct: "PLACEHOLDER feedback that names the cue."
-  feedback_wrong: "PLACEHOLDER feedback that names the cue."
+  feedback_correct: "Right. A small headwall low on the bank. Easy to walk past."
+  feedback_wrong: "Look low on the far bank, at water level. That small concrete mouth is an outfall."
 practice_marks:
-  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the pipe mouth" }
+  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the outfall" }

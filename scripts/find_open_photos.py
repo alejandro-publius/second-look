@@ -64,6 +64,13 @@ MANIFEST_LICENCES = {
 COMMONS_LICENCE_RE = re.compile(
     r"^(cc0(?:-1\.0)?|cc-by(?:-sa)?-\d(?:\.\d)?)(?:-(?:migrated|[a-z]{2}))?$"
 )
+# Commons marks a public domain file License=pd and Copyrighted=False. The manifest allowlist has
+# had public-domain in it all along; only this parser could not read it, so half a dozen usable
+# photos, among them US government work, were refused for no reason anyone chose (Update 11b).
+# Both signals are required: a pd claim on its own, with the file still marked copyrighted, is the
+# kind of unclear claim hard rule 6 says to drop.
+PUBLIC_DOMAIN = "public-domain"
+COMMONS_PD_RE = re.compile(r"^(pd|cc-pd-mark)(?:-.*)?$")
 # iNaturalist licence codes carry no version because the site applies version 4.0 of each licence.
 INAT_LICENCES = {"cc0": "cc0-1.0", "cc-by": "cc-by-4.0", "cc-by-sa": "cc-by-sa-4.0"}
 
@@ -329,9 +336,18 @@ def licence_label(code: str) -> str:
     return f"{name} {parts[-1]}"
 
 
-def licence_from_commons(raw: str) -> Licence | None:
-    """None means the claim is not one of CC0, CC BY or CC BY-SA, so we drop the photo."""
+def licence_from_commons(raw: str, copyrighted: str = "") -> Licence | None:
+    """None means the claim is not CC0, CC BY, CC BY-SA or public domain, so we drop the photo.
+
+    copyrighted is the page's own Copyrighted field. A public domain claim is only taken when the
+    page also says the file is not copyrighted.
+    """
     value = SPACE_RE.sub("", (raw or "").strip().lower())
+    if COMMONS_PD_RE.match(value):
+        if SPACE_RE.sub("", (copyrighted or "").strip().lower()) != "false":
+            return None
+        manifest = PUBLIC_DOMAIN if PUBLIC_DOMAIN in content_loader.REAL_LICENSES else ""
+        return Licence(PUBLIC_DOMAIN, "Public domain", manifest, value)
     match = COMMONS_LICENCE_RE.match(value)
     if match is None:
         return None
@@ -347,8 +363,14 @@ def licence_from_inat(code: str | None) -> Licence | None:
 
 
 def plain_text(value: str, limit: int = 400) -> str:
-    """Source captions arrive as HTML. Flatten to one line so a card and a CSV cell stay sane."""
+    """Source captions arrive as HTML. Flatten to one line so a card and a CSV cell stay sane.
+
+    En and em dashes become plain hyphens. Hard rule 18 bans them anywhere in the repo, and a
+    source we quote, a Commons category for instance, is free to use them. A hyphen keeps the
+    quote readable and keeps the rule true without anyone editing a manifest cell by hand.
+    """
     text = html.unescape(TAG_RE.sub(" ", value or ""))
+    text = text.replace("\u2013", "-").replace("\u2014", "-")
     text = SPACE_RE.sub(" ", text).strip()
     return text[: limit - 3] + "..." if len(text) > limit else text
 
@@ -404,7 +426,10 @@ def commons_candidates(payload: dict[str, Any], search: Search, feature: str) ->
         def field(name: str, meta: dict[str, Any] = meta, limit: int = 400) -> str:
             return plain_text(str((meta.get(name) or {}).get("value", "")), limit)
 
-        licence = licence_from_commons(str((meta.get("License") or {}).get("value", "")))
+        licence = licence_from_commons(
+            str((meta.get("License") or {}).get("value", "")),
+            str((meta.get("Copyrighted") or {}).get("value", "")),
+        )
         if licence is None:
             continue
         title = str(page.get("title", ""))
@@ -413,7 +438,7 @@ def commons_candidates(payload: dict[str, Any], search: Search, feature: str) ->
         author = field("Artist", limit=160) or field("Attribution", limit=160)
         if not author:
             # No named author. Under CC BY and CC BY-SA we could not credit anyone, so drop it.
-            if licence.code != "cc0-1.0":
+            if licence.code not in {"cc0-1.0", PUBLIC_DOMAIN}:
                 continue
             uploader = str(info.get("user", "")).strip()
             if not uploader:
@@ -634,7 +659,9 @@ def collect(
 # contrast pairs (4 photos) plus one practice photo; the warm-up is one pair.
 PICK_TARGETS = {
     "warmup": {"warmup": 2},
-    "_feature": {"test": 4, "lesson": 4, "practice": 1},
+    # spare has no target: it is the stand-in used when a fetch fails on the day (Update 11b
+    # step 3), so any number of them is fine and none of them is missing.
+    "_feature": {"test": 4, "lesson": 4, "practice": 1, "spare": 0},
 }
 
 
@@ -700,6 +727,7 @@ def pick_script(feature: str) -> str:
     rows().forEach(function (r) {{ got[r.role] = (got[r.role] || 0) + 1; }});
     var bits = Object.keys(TARGETS).map(function (role) {{
       var n = got[role] || 0, want = TARGETS[role];
+      if (!want) return '<span>' + role + ' ' + n + '</span>';
       var cls = n === want ? 'full' : (n > want ? 'over' : '');
       return '<span class="' + cls + '">' + role + ' ' + n + ' of ' + want + '</span>';
     }});

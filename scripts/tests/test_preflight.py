@@ -45,7 +45,9 @@ def test_current_repo_fails_only_for_known_reasons() -> None:
     assert "marks_approved" in human, "the design pass marks are still waiting for Rachel"
     assert "plan_wording" in human, "TODO-TEAM wording in the plan"
     reasons = [r for c in checks for r in c.reasons]
-    assert any("placeholder photo in role test" in r for r in reasons)
+    # The real photos are in as of Update 11b, so no role is on a gray placeholder any more.
+    assert not any("placeholder photo in role" in r for r in reasons)
+    assert any("no second label for test photo" in r for r in reasons)
     assert any("prereg-v1 tag missing" in r for r in reasons)
     # BUILD failures today can only come from other workstreams' half-finished files.
     others = {"hidden_field", "model_pass_table_exists", "content_loads", "verify_claims"}

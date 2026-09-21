@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FocusHeading } from "@/components/FocusHeading";
 import { Row } from "@/components/ui/Row";
-import { shownPhotos } from "@/lib/content";
+import { licenseUrl, shownPhotos } from "@/lib/content";
 import { t } from "@/lib/t";
 
 export const metadata: Metadata = { title: `${t("credits.title")}: ${t("app.name")}` };
@@ -24,7 +24,15 @@ export default function CreditsPage() {
             <Row
               key={p.id}
               label={p.author ? t("credits.by", { author: p.author }) : p.id}
-              value={p.license}
+              value={
+                licenseUrl(p.license) ? (
+                  <a href={licenseUrl(p.license)} rel="license noreferrer">
+                    {p.license}
+                  </a>
+                ) : (
+                  p.license
+                )
+              }
               end={
                 p.source_url ? (
                   <a href={p.source_url} rel="noreferrer nofollow">

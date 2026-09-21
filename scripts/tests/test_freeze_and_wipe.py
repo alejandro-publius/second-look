@@ -51,13 +51,13 @@ def test_key_hash_is_order_free_and_changes_with_gold() -> None:
     assert len(freeze_key.key_hash(a)) == 64
 
 
-def test_freeze_refuses_placeholders_and_writes_nothing(
+def test_freeze_refuses_an_unlabelled_key_and_writes_nothing(
     root: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     assert freeze_key.main(["--root", str(root)]) == 1
     out = capsys.readouterr().out
     assert "refused, nothing written" in out
-    assert "is a placeholder" in out and "has no second label" in out
+    assert "has no second label" in out
     assert not (root / "results" / "key_hash.json").exists()
     assert not (root / "audit" / "log.jsonl").exists()
 

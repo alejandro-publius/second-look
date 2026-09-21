@@ -5,10 +5,38 @@ import { Button } from "./ui/Button";
 import { Icon } from "./ui/Icon";
 import { Gauge } from "./ui/Gauge";
 import { Row } from "./ui/Row";
+import { PhotoFrame } from "./ui/PhotoFrame";
 import type { FeatureScoreOut } from "@/lib/api";
-import { featureById } from "@/lib/content";
+import { content, featureById } from "@/lib/content";
 import { siteUrl } from "@/lib/session";
 import { t } from "@/lib/t";
+
+/**
+ * The answer to the question on the poster, shown here and not on the landing page. Before the
+ * test it would be a small lesson handed to both arms, which would shrink the gap the study
+ * measures. It says one creek is in a more natural state, and says plainly that a photo cannot
+ * tell anyone whether the water is safe.
+ */
+function WarmupReveal() {
+  const [left, right] = content.warmup;
+  return (
+    <div className="card stack" aria-labelledby="warmup-reveal">
+      <h2 id="warmup-reveal" className="small">{t("warmup.reveal_title")}</h2>
+      <div className="pair">
+        <div>
+          <PhotoFrame id={left.photo_id} />
+          <p className="small">{t("warmup.reveal_left")}</p>
+        </div>
+        <div>
+          <PhotoFrame id={right.photo_id} />
+          <p className="small">{t("warmup.reveal_right")}</p>
+        </div>
+      </div>
+      <p>{t("warmup.reveal_point")}</p>
+      <p className="small muted">{t("warmup.reveal_limit")}</p>
+    </div>
+  );
+}
 
 /**
  * One gauge per feature, the same object as the progress bar in the test. Then the sentence that
@@ -53,6 +81,7 @@ export function ScoreScreen({ scores, correctTotal, token, children }: { scores:
           return <Row key={s.feature} label={name} end={<Gauge size="mark" value={s.correct} total={s.total} />} />;
         })}
       </div>
+      <WarmupReveal />
       <p>{t("end.score_for")}</p>
       <p>{t("end.last_line")}</p>
       {/* eslint-disable-next-line @next/next/no-img-element */}

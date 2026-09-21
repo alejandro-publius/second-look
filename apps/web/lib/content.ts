@@ -149,6 +149,23 @@ export function glossaryFor(term: string | null | undefined): string | undefined
 }
 
 /** Every photo a visitor can see, in id order, for the credits page. */
+// Every CC licence asks that the licence itself be named and linked wherever the photo appears.
+// The manifest records the exact version, so the deed link follows from it with no guessing.
+const LICENSE_URLS: Record<string, string> = {
+  "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "CC-BY-2.0": "https://creativecommons.org/licenses/by/2.0/",
+  "CC-BY-3.0": "https://creativecommons.org/licenses/by/3.0/",
+  "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "own-CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "CC-BY-SA-2.0": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "CC-BY-SA-3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+};
+
+export function licenseUrl(license: string): string | undefined {
+  return LICENSE_URLS[license];
+}
+
 export function shownPhotos(): Photo[] {
   return Object.values(content.photos).sort((a, b) => a.id.localeCompare(b.id));
 }
