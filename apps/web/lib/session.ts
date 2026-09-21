@@ -7,6 +7,7 @@ const SRC_KEY = "sl_src";
 const CONTRIB_KEY = "sl_contributor_token";
 const SPOTS_KEY = "sl_saved_spots";
 const GUESS_KEY = "sl_landing_guess";
+const OPEN_KEY = "sl_open_session";
 
 export const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other"] as const;
 
@@ -173,5 +174,41 @@ export function takeLandingGuess(): string | null {
     return v;
   } catch {
     return null;
+  }
+}
+
+/**
+ * The open sitting. A reload asks the server where it was, so only the id and the lesson card
+ * live here. Cleared when the person finishes, so the end screen is not shown forever.
+ */
+export interface OpenSession {
+  session_id: string;
+  lesson_index?: number;
+}
+
+export function setOpenSession(open: OpenSession): void {
+  try {
+    localStorage.setItem(OPEN_KEY, JSON.stringify(open));
+  } catch {
+    // storage blocked: a reload starts again, which is the behaviour we had before
+  }
+}
+
+export function getOpenSession(): OpenSession | null {
+  try {
+    const raw = localStorage.getItem(OPEN_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw) as OpenSession;
+    return v && typeof v.session_id === "string" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearOpenSession(): void {
+  try {
+    localStorage.removeItem(OPEN_KEY);
+  } catch {
+    // nothing to do
   }
 }

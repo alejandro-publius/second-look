@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnswerButtons } from "./AnswerButtons";
 import { FocusHeading } from "./FocusHeading";
 import { findTerm, Glossary, GlossaryAside } from "./Glossary";
@@ -12,19 +12,28 @@ import type { TestAnswer } from "@/lib/api";
 import { featureById, glossaryFor, photoById, testItemById } from "@/lib/content";
 import { t } from "@/lib/t";
 
+const KEYBOARD_QUERY = "(hover: hover) and (pointer: fine)";
+
 export interface ItemAnswerResult {
   feedback?: string;
   tone?: "ok" | "warn";
 }
 
-type OnAnswer = (itemId: string, answer: TestAnswer, rtMs: number, position: number) => Promise<ItemAnswerResult | void> | void;
+/** How the person got to the confirmed answer. Description only; the answer is what is scored. */
+export interface AnswerTrail {
+  first_choice: TestAnswer;
+  t_first_ms: number;
+  n_changes: number;
+}
+
+type OnAnswer = (itemId: string, answer: TestAnswer, rtMs: number, position: number, trail: AnswerTrail) => Promise<ItemAnswerResult | void> | void;
 
 /**
  * The 16 photos, one question each, Yes / No / Can't tell. In the study no feedback is shown and
  * the flow moves on at once. In judge mode onAnswer returns feedback to show before moving on.
  */
-export function TestItems({ order, onAnswer, onDone, withFeedback = false }: { order: string[]; onAnswer: OnAnswer; onDone: () => void; withFeedback?: boolean; titleKey?: string }) {
-  const [index, setIndex] = useState(0);
+export function TestItems({ order, onAnswer, onDone, withFeedback = false, startIndex = 0 }: { order: string[]; onAnswer: OnAnswer; onDone: () => void; withFeedback?: boolean; startIndex?: number; titleKey?: string }) {
+  const [index, setIndex] = useState(startIndex);
   const itemId = order[index];
   if (!itemId) return <Nothing />;
   const last = index + 1 >= order.length;
@@ -38,7 +47,6 @@ export function TestItems({ order, onAnswer, onDone, withFeedback = false }: { o
         itemId={itemId}
         nextItemId={order[index + 1]}
         position={index + 1}
-        total={order.length}
         withFeedback={withFeedback}
         onAnswer={onAnswer}
         last={last}
@@ -69,7 +77,6 @@ function ItemScreen({
   itemId,
   nextItemId,
   position,
-  total,
   withFeedback,
   onAnswer,
   last,
@@ -78,22 +85,33 @@ function ItemScreen({
   itemId: string;
   nextItemId?: string;
   position: number;
-  total: number;
   withFeedback: boolean;
   onAnswer: OnAnswer;
   last: boolean;
   onAdvance: () => void;
 }) {
   const [busy, setBusy] = useState(false);
-  const [keyboard, setKeyboard] = useState(false);
+  // Only tell a person about Y, N and C if they have a keyboard to press them on.
+  const keyboard = useSyncExternalStore(
+    (notify) => {
+      const m = window.matchMedia(KEYBOARD_QUERY);
+      m.addEventListener("change", notify);
+      return () => m.removeEventListener("change", notify);
+    },
+    () => window.matchMedia(KEYBOARD_QUERY).matches,
+    () => false,
+  );
   const [feedback, setFeedback] = useState<ItemAnswerResult | null>(null);
+  // Select then Next. Nothing here is on a clock, so a mis-tap can be changed until Next.
+  const [selected, setSelected] = useState<TestAnswer | null>(null);
   const shownAt = useRef(0);
   const answered = useRef(false);
+  const firstChoice = useRef<TestAnswer | null>(null);
+  const tFirst = useRef(0);
+  const changes = useRef(0);
 
   useEffect(() => {
     shownAt.current = performance.now();
-    // Only tell a person about Y, N and C if they have a keyboard to press them on.
-    setKeyboard(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
   }, []);
 
   const item = testItemById(itemId);
@@ -105,12 +123,20 @@ function ItemScreen({
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const el = document.activeElement;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.closest?.("[role='dialog']"))) return;
+      if (answered.current) return;
+      if (e.key === "Enter") {
+        const next = document.querySelector<HTMLButtonElement>("[data-confirm]");
+        if (next && !next.disabled && document.activeElement?.getAttribute("data-confirm") === null) {
+          e.preventDefault();
+          next.click();
+        }
+        return;
+      }
       const map: Record<string, TestAnswer> = { y: "yes", n: "no", c: "cant_tell" };
       const a = map[e.key.toLowerCase()];
-      if (!a || answered.current) return;
+      if (!a) return;
       e.preventDefault();
-      const btn = document.querySelector<HTMLButtonElement>(`[data-answer="${a}"]`);
-      btn?.click();
+      document.querySelector<HTMLButtonElement>(`[data-answer="${a}"]`)?.click();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -125,16 +151,31 @@ function ItemScreen({
     );
   }
 
-  async function answer(a: TestAnswer) {
+  /** A tap selects. Nothing is sent and nothing is locked until Next. */
+  function choose(a: TestAnswer) {
     if (busy || answered.current) return;
+    if (firstChoice.current === null) {
+      firstChoice.current = a;
+      tFirst.current = Math.round(performance.now() - shownAt.current);
+    } else if (a !== selected) {
+      changes.current += 1;
+    }
+    setSelected(a);
+  }
+
+  async function confirm() {
+    if (busy || answered.current || selected === null) return;
     const rt = Math.round(performance.now() - shownAt.current);
     answered.current = true;
     setBusy(true);
     try {
-      const result = await onAnswer(itemId, a, rt, position);
+      const result = await onAnswer(itemId, selected, rt, position, {
+        first_choice: firstChoice.current ?? selected,
+        t_first_ms: tFirst.current,
+        n_changes: changes.current,
+      });
       if (withFeedback && result && result.feedback) {
         setFeedback(result);
-        answered.current = false;
       } else onAdvance();
     } finally {
       setBusy(false);
@@ -167,7 +208,7 @@ function ItemScreen({
         </div>
       ) : (
         <>
-          <AnswerButtons onAnswer={answer} disabled={busy} />
+          <AnswerButtons onAnswer={choose} selected={selected} disabled={busy} onConfirm={confirm} />
           {keyboard ? <p className="small muted">{t("test.keys_hint")}</p> : null}
         </>
       )}

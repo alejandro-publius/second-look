@@ -168,6 +168,45 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 - Every vision model fails every feature: the checker ships with zero flags and the README says where AI should stay quiet.
 - The Devpost form refuses a one-person team: add Rachel as a teammate before Sep 28.
 
+## Decision points
+
+From docs/updates/UPDATE_03.md, recovered on 2026-09-21. The current state of each kill test is
+in docs/KILL_TESTS.md.
+
+- **Launch decision, Tuesday Sep 22 at 22:00 PDT.** Go if P1 passed, K3 and K4 passed for at
+  least three features, and `make preflight` is green. Otherwise do not launch a test we cannot
+  stand behind. Take F1 and keep building the record. **P1 has not passed as written**: the
+  skeleton runs on docker compose, not on a real host, because no Vercel or Fly account exists
+  yet. That is the single thing most likely to stop the launch.
+- **Reach check, Thursday Sep 24 at 22:00 PDT.** Fewer than 20 completed sessions means the
+  headline switches to F1 now, while collection continues to data lock. The switch is a change of
+  emphasis in the README and the video, never a change to the analysis plan.
+- **Spend checks.** API spend above 150 dollars by Sep 23 or 350 dollars by Sep 26 means routine
+  sessions drop to the cheaper model and nothing tagged COULD is built. If Alex reports his weekly
+  usage limit above 90 percent before it resets, stop COULD and SHOULD work and ask him whether to
+  move this terminal to API billing on the capped workspace.
+- **Freeze, Saturday Sep 26 at night.** Whatever is not green is cut from the story, not patched
+  on Sunday.
+
+## Fallbacks
+
+- **F1. The lesson shows no clear effect, or too few people came.** The headline becomes: the
+  score travels with every observation, AI took the same test, and a citizen record sits validated
+  in their own format. The test is reported exactly as it came out, small and honest. Track 3
+  still holds if the model run shipped. Nothing already built is wasted.
+- **F2. Their profiles reject a citizen record, or the sandbox refuses writes.** The headline
+  becomes the lesson and the test on strangers, entered in Track 1. The FHIR work ships as plain
+  valid R4 plus docs/ig_gap_report.md. **Not in force:** P2 passed with terminology on and K6
+  passed, both recorded in docs/KILL_TESTS.md.
+- **F3. A feature cannot be photographed or labelled reliably.** Three features, 12 items, written
+  into the plan before the tag.
+- **F4. The models ace the early photos.** The checker is described as a second pair of eyes that
+  earned its place on the same test. The person still goes to the creek, because a model cannot
+  smell the water, see the pipe behind the bush, or know that it has not rained. If the models
+  fail everything, the README says where AI should stay quiet, which is also an answer the track
+  asked for.
+- **F5. The hook pair is too easy.** One photo and "what is wrong with this creek?".
+
 ## Proposed changes to the brief, awaiting the planner
 
 Each with the reason in a line. Items 1, 2, 4, 5, 6 and 9 are already reflected in the decisions above because Session A cannot be built without choosing; the planner can reverse any of them.

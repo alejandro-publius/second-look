@@ -66,6 +66,9 @@ class StudySession(SQLModel, table=True):
     post_lock: bool = False
     prior_experience: str | None = Field(default=None, max_length=8)
     warmup_choice: str | None = Field(default=None, max_length=16)
+    # How many answers the browser says it took that never reached us, after it tried to resend.
+    # Above zero means the sitting is incomplete; see docs/analysis_plan.md exclusions.
+    unsent_count: int = 0
 
 
 class ItemResponse(SQLModel, table=True):
@@ -76,9 +79,14 @@ class ItemResponse(SQLModel, table=True):
 
     session_id: str = Field(primary_key=True, max_length=32, foreign_key="session.id")
     item_id: str = Field(primary_key=True, max_length=16)
+    # `answer` is the confirmed choice, the one that is scored. In docs/analysis_plan.md it is
+    # called final_choice, and rt_ms is called t_confirm_ms. The three below are description only.
     answer: str = Field(max_length=16)
     rt_ms: int
     position: int
+    first_choice: str | None = Field(default=None, max_length=16)
+    t_first_ms: int | None = None
+    n_changes: int = 0
     received_at: datetime = Field(sa_column=_tz_column())
 
 

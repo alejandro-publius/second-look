@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from scripts import audit_log, freeze_key, merge_labels, preflight
+from scripts import audit_log, freeze_key, label_photos, merge_labels, preflight
 from scripts.ingest_photos import MANIFEST_COLUMNS
 
 REPO = Path(__file__).parents[2]
@@ -42,6 +42,7 @@ def test_current_repo_fails_only_for_known_reasons() -> None:
     human = {n for n, c in failed.items() if c.owner == "HUMAN"}
     build = {n for n, c in failed.items() if c.owner == "BUILD"}
     assert {"human_inputs", "key_frozen", "key_agreement", "prereg_tag", "contact_email"} <= human
+    assert "marks_approved" in human, "the design pass marks are still waiting for Rachel"
     assert "plan_wording" in human, "TODO-RACHEL wording in the plan"
     reasons = [r for c in checks for r in c.reasons]
     assert any("placeholder photo in role test" in r for r in reasons)
@@ -73,6 +74,8 @@ def green_root(tmp_path: Path) -> Path:
     for lesson in (root / "content" / "lessons").glob("*.yaml"):
         doc = yaml.safe_load(lesson.read_text())
         doc["approved"] = True
+        for _, mark in label_photos.iter_marks(doc):
+            mark["approved"] = True  # green means Rachel has been through every mark
         lesson.write_text(yaml.safe_dump(doc))
     locale_path = root / "content" / "locales" / "en.json"
     locale = json.loads(locale_path.read_text())

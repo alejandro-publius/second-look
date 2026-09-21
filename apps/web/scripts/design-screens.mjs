@@ -55,7 +55,10 @@ async function walk(page, to) {
   }
   await page.getByText("Photo 1 of 16").waitFor();
   if (to === "item") return;
-  for (let i = 1; i <= 16; i++) await click(page, "Yes");
+  for (let i = 1; i <= 16; i++) {
+    await click(page, "Yes");
+    await page.locator("[data-confirm]").click();
+  }
   await page.getByRole("heading", { name: "Almost done" }).waitFor();
   await click(page, "See my score");
   await page.getByRole("heading", { name: "Your score" }).waitFor();

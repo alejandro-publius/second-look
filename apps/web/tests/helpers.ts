@@ -27,11 +27,17 @@ export async function finishLesson(page: Page) {
   }
 }
 
-/** Answers all 16 items with the given pattern. */
+/** Chooses an answer on the current item and confirms it with Next. */
+export async function answerItem(page: Page, choice: "Yes" | "No" | "Can't tell") {
+  await page.getByRole("button", { name: choice, exact: true }).click();
+  await page.locator("[data-confirm]").click();
+}
+
+/** Answers all 16 items with the given pattern, select then Next each time. */
 export async function answerAllItems(page: Page, pick: (i: number) => "Yes" | "No" | "Can't tell", withFeedback = false) {
   for (let i = 1; i <= 16; i++) {
     await expect(page.getByText(`Photo ${i} of 16`)).toBeVisible();
-    await page.getByRole("button", { name: pick(i), exact: true }).click();
+    await answerItem(page, pick(i));
     if (withFeedback) {
       await expect(page.getByRole("status")).toBeVisible();
       await page.getByRole("button", { name: i === 16 ? "Finish" : "Next photo", exact: true }).click();

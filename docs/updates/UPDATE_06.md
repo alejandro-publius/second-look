@@ -85,7 +85,7 @@ Every screen has four states designed, not only the happy one: loading (a skelet
 
 - WCAG 2.2 AA. Visible focus rings in `--ink`. A logical focus order. Landmarks. Labels above inputs, never placeholder text as a label. Layout holds at 200 percent zoom. Do one VoiceOver pass on the test flow and write what it announced in `docs/reviews/VOICEOVER.md`.
 - A photo test cannot be fully accessible to someone who cannot see the photos. Say so plainly on `/about`, and make sure everything around the photos works with a screen reader.
-- Budgets on a throttled 4G profile: the landing page's largest paint under 2.5 seconds, layout shift under 0.05, landing JavaScript under 90 KB compressed. Photos served as AVIF or WebP at several widths, with a tiny blurred preview made at ingest.
+- Budgets on a throttled 4G profile with a 4x slower CPU: the landing page's largest paint under 2.5 seconds, layout shift under 0.05, and no more than 25 KB compressed of OUR code on the landing route, measured as the chunks the landing loads that Next's own not found page does not. The framework baseline has its own ceiling, because a client import can land in a shared chunk every page loads. The landing page renders fully with the API asleep. Photos served as AVIF or WebP at several widths, with a tiny blurred preview made at ingest. **Superseded by docs/updates/UPDATE_07.md section 1: the flat 90 KB total is gone, because the App Router floor alone is above it and the front door is not being rebuilt nine days out.** The check is `make budget`.
 
 ## 6. Banned, and checked by machine
 

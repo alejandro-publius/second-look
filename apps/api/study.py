@@ -51,6 +51,7 @@ SESSIONS_COLUMNS = [
     "client_token_hash",
     "prior_experience",
     "warmup_choice",
+    "unsent_count",
 ]
 RESPONSES_COLUMNS = [
     "session_id",
@@ -61,6 +62,13 @@ RESPONSES_COLUMNS = [
     "correct",
     "rt_ms",
     "position",
+    # Update 07 section 1.3. answer is the confirmed choice and rt_ms is the time to confirm, so
+    # they are repeated here under the names the analysis plan uses. The rest is description only.
+    "first_choice",
+    "final_choice",
+    "t_first_ms",
+    "t_confirm_ms",
+    "n_changes",
 ]
 
 
@@ -76,11 +84,17 @@ class SessionBody(BaseModel):
 
 
 class ResponseBody(BaseModel):
+    """`answer` is the confirmed choice, the one that is scored. The rest describes how the person
+    got there: what they picked first, when, and how many times they changed it before Next."""
+
     session_id: str = Field(min_length=1, max_length=32)
     item_id: str = Field(min_length=1, max_length=16)
     answer: TestAnswer
     rt_ms: int = Field(ge=0, le=3_600_000)
     position: int = Field(ge=0, le=63)
+    first_choice: TestAnswer | None = None
+    t_first_ms: int | None = Field(default=None, ge=0, le=3_600_000)
+    n_changes: int = Field(default=0, ge=0, le=999)
 
 
 class LessonDoneBody(BaseModel):
@@ -89,9 +103,15 @@ class LessonDoneBody(BaseModel):
 
 
 class CompleteBody(BaseModel):
+    """`answered_count` is how many items the browser says the person answered. If we hold fewer,
+    we reply with the ids we are missing and complete nothing, so the browser can send them again
+    from its own copy. `final` says the browser has tried and cannot close the gap."""
+
     session_id: str = Field(min_length=1, max_length=32)
     prior_experience: Literal["yes", "no"] | None = None
     keep_score: bool = False
+    answered_count: int = Field(default=0, ge=0, le=64)
+    final: bool = False
 
 
 class NotFound(Exception):
@@ -215,6 +235,9 @@ def record_response(db: Session, body: ResponseBody, *, now: datetime) -> None:
                 answer=body.answer,
                 rt_ms=body.rt_ms,
                 position=body.position,
+                first_choice=body.first_choice,
+                t_first_ms=body.t_first_ms,
+                n_changes=body.n_changes,
                 received_at=now,
             )
         )
@@ -238,8 +261,26 @@ def record_lesson(db: Session, body: LessonDoneBody) -> None:
     db.commit()
 
 
+def missing_items(db: Session, row: StudySession) -> list[str]:
+    """The item ids in this sitting's order that we hold no answer for."""
+    held = {
+        r.item_id
+        for r in db.exec(select(ItemResponse).where(ItemResponse.session_id == row.id)).all()
+    }
+    return [item_id for item_id in json.loads(row.item_order) if item_id not in held]
+
+
 def complete_session(db: Session, body: CompleteBody, *, now: datetime) -> dict[str, Any]:
+    """The end screen does not appear until we hold every answer. If the browser says it took
+    more answers than we hold, we name the ones we are missing and complete nothing, so it can
+    send them again. Responses are idempotent, so a resend is safe. Only a browser that has
+    tried and failed sends `final`, and then the gap is recorded as unsent_count."""
     row = _get_session(db, body.session_id)
+    gap = missing_items(db, row)
+    if gap and not body.final and row.completed_at is None:
+        held = len(json.loads(row.item_order)) - len(gap)
+        if body.answered_count > held:
+            return {"need_resend": gap, "stored_count": held}
     answers = {
         r.item_id: r.answer
         for r in db.exec(select(ItemResponse).where(ItemResponse.session_id == row.id)).all()
@@ -248,6 +289,7 @@ def complete_session(db: Session, body: CompleteBody, *, now: datetime) -> dict[
     if row.completed_at is None:
         row.completed_at = now
         row.prior_experience = body.prior_experience
+        row.unsent_count = max(0, body.answered_count - len(answers))
         db.add(row)
     result: dict[str, Any] = {
         "scores": [{"feature": s.feature, "correct": s.correct, "total": s.total} for s in scores],
@@ -357,6 +399,7 @@ def export_zip(db: Session) -> bytes:
                 s.client_token_hash,
                 s.prior_experience or "",
                 s.warmup_choice or "",
+                s.unsent_count,
             ]
         )
 
@@ -369,7 +412,21 @@ def export_zip(db: Session) -> bytes:
         answer: TestAnswer = r.answer  # type: ignore[assignment]
         correct = _flag(gold is not None and is_correct(answer, gold))
         writer.writerow(
-            [r.session_id, r.item_id, feature, gold or "", r.answer, correct, r.rt_ms, r.position]
+            [
+                r.session_id,
+                r.item_id,
+                feature,
+                gold or "",
+                r.answer,
+                correct,
+                r.rt_ms,
+                r.position,
+                r.first_choice or "",
+                r.answer,
+                "" if r.t_first_ms is None else r.t_first_ms,
+                r.rt_ms,
+                r.n_changes,
+            ]
         )
 
     buffer = io.BytesIO()
@@ -377,3 +434,38 @@ def export_zip(db: Session) -> bytes:
         zf.writestr("sessions.csv", sessions_csv.getvalue())
         zf.writestr("responses.csv", responses_csv.getvalue())
     return buffer.getvalue()
+
+
+def resume_state(db: Session, session_id: str, *, now: datetime) -> dict[str, Any]:
+    """What a reloading browser needs: the same arm, the same item order, what we already hold,
+    and the score if the sitting is already finished. Creates nothing and changes nothing, so a
+    reload can never make a second session row or mint a second contributor token."""
+    row = _get_session(db, session_id)
+    answered = [
+        r.item_id
+        for r in db.exec(
+            select(ItemResponse)
+            .where(ItemResponse.session_id == row.id)
+            .order_by(ItemResponse.position)  # type: ignore[arg-type]
+        ).all()
+    ]
+    state: dict[str, Any] = {
+        "session_id": row.id,
+        "arm": row.arm,
+        "item_order": json.loads(row.item_order),
+        "lesson_first": row.arm == "trained",
+        "lesson_done": bool(row.lesson_seconds),
+        "answered": answered,
+        "completed": row.completed_at is not None,
+    }
+    if row.completed_at is not None:
+        answers = {
+            r.item_id: r.answer
+            for r in db.exec(select(ItemResponse).where(ItemResponse.session_id == row.id)).all()
+        }
+        scores = score_sitting(answers, content.get_content().test_items, now.date())  # type: ignore[arg-type]
+        state["scores"] = [
+            {"feature": s.feature, "correct": s.correct, "total": s.total} for s in scores
+        ]
+        state["correct_total"] = sum(s.correct for s in scores)
+    return state

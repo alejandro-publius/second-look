@@ -25,4 +25,4 @@ code. Thirty lines at most. Add a line only when it will still matter next week.
   `npm run start` by hand, set NEXT_PUBLIC_API_ORIGIN to it, or Playwright will reuse your server
   and every mocked call will miss. That failure looks like the app being broken.
 - No call ever goes to api.enora-oah.eu until Alex says permission arrived.
-- ANTHROPIC_API_KEY never goes in a shell where Claude Code runs. No paid model call has run yet.
+- ANTHROPIC_API_KEY lives in `.env` in this repo on this Mac. It is never exported in the shell that starts `claude`, and `.env` is never committed. No paid model call has run yet.

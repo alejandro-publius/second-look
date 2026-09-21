@@ -31,7 +31,10 @@ test("keyboard only: consent, warm-up and one test item, never landing on the hi
   await tabTo((el) => el.tag === "BUTTON" && el.text === "This creek, on the left");
   await page.keyboard.press("Enter");
   await expect(page.getByText("Photo 1 of 16")).toBeVisible();
+  // Select then confirm: the first Enter picks Yes, the second confirms it and moves on.
   await tabTo((el) => el.tag === "BUTTON" && el.text === "Yes");
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("Photo 1 of 16")).toBeVisible();
   await page.keyboard.press("Enter");
   await expect(page.getByText("Photo 2 of 16")).toBeVisible();
 

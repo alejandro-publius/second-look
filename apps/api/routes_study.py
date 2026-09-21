@@ -55,6 +55,12 @@ def complete(body: study.CompleteBody, db: DB, now: Now) -> dict[str, Any]:
     return study.complete_session(db, body, now=now)
 
 
+@router.get("/test/resume", dependencies=[Depends(rate_limited(STUDY_LIMIT))])
+def resume(session_id: str, db: DB, now: Now) -> dict[str, Any]:
+    """A reload asks where it was. Read only: it never makes a session and never mints a token."""
+    return study.resume_state(db, session_id, now=now)
+
+
 @router.get("/test/counts", dependencies=[Depends(rate_limited(READ_LIMIT))])
 def counts(db: DB) -> dict[str, Any]:
     return study.counts(db)

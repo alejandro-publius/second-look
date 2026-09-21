@@ -28,7 +28,7 @@ Read CLAUDE.md, then PLAN.md, then only the brief section a session names.
 1. Rachel's photos land. `uv run python scripts/ingest_photos.py <folder> <labels.csv>` then `uv run python scripts/check_manifest.py`.
 2. Both label blind. `uv run python scripts/label_photos.py --name rachel` and `--name alex`, then `uv run python scripts/merge_labels.py --apply`, which must print kappa per feature and no disagreements.
 3. Freeze and register. `uv run python scripts/freeze_key.py`, then tag: `git tag prereg-v1 && git push origin prereg-v1`, then `uv run python scripts/preflight.py` must print 0 failed.
-4. The real model run, on a machine where Claude Code is not running. Check the three model ids and prices first, flip the two confirmed flags, put the key in .env, then `uv run python evals/model_sweep.py --real`.
+4. The real model run, on this Mac. The key goes in `.env` in this repo; it does not need a second machine. The only rule is that Alex never exports it in the shell that starts `claude`. Check the three model ids and prices first, flip the two confirmed flags, put the key in `.env`, then `uv run python evals/model_sweep.py --real`.
 5. Deploy and launch. `fly auth login`, `vercel login`, `make deploy`, then post the link. After the lock on 2026-09-28T01:00:00Z, `uv run python evals/usability_analysis.py`, `make render-readme`, `make submit-check`.
 
 ## Traps

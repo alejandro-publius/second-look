@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check design-check verify-claims fhir-validate e2e smoke preflight submit-check poster deploy audit-verify
+.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -63,6 +63,11 @@ preflight:
 
 submit-check:
 	$(PY) scripts/submit_check.py
+
+# The landing budgets from UPDATE_06 section 5 as Update 07 moved them. Needs the built app
+# running on 3100, so it is not inside make check.
+budget:
+	cd $(WEB) && node scripts/budget.mjs
 
 poster:
 	cd $(WEB) && npm run poster

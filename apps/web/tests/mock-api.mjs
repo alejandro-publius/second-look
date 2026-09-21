@@ -87,6 +87,19 @@ export async function mockApi(page, options = {}) {
       { rule_id: "rating_check", question_text: "You rated this stream Good, but you also reported built banks. Do you want to keep your rating?", kind: "keep_rating" },
     ];
   const responses = new Map();
+  // Enough session state for a reload to resume, the way the real API does.
+  const sessions = new Map();
+  let sessionCount = 0;
+
+  const scoresFor = (sid) => {
+    const scores = FEATURES.map((f) => ({ feature: f, correct: 0, total: 4 }));
+    for (const [key, answer] of responses) {
+      const [owner, item] = key.split(":");
+      if (owner !== sid) continue;
+      if (isCorrect(answer, goldFor(item))) scores[FEATURES.indexOf(featureFor(item))].correct += 1;
+    }
+    return scores;
+  };
 
   const handle = async (route) => {
     const req = route.request();
@@ -113,7 +126,22 @@ export async function mockApi(page, options = {}) {
     if (path === "/api/test/session") {
       const lessonFirst = options.lessonFirst ?? true;
       const order = ITEM_IDS.slice().reverse();
-      return json({ session_id: "s-" + calls.length, arm: lessonFirst ? "trained" : "untrained", item_order: order, lesson_first: lessonFirst });
+      sessionCount += 1;
+      const made = { session_id: "s-" + sessionCount, arm: lessonFirst ? "trained" : "untrained", item_order: order, lesson_first: lessonFirst };
+      sessions.set(made.session_id, { ...made, lesson_done: false, completed: false });
+      return json(made);
+    }
+    if (path === "/api/test/resume") {
+      const sid = url.searchParams.get("session_id");
+      const s = sessions.get(sid);
+      if (!s) return json({ detail: "not found" }, 404);
+      const answered = s.item_order.filter((i) => responses.has(`${sid}:${i}`));
+      const out = { session_id: sid, arm: s.arm, item_order: s.item_order, lesson_first: s.lesson_first, lesson_done: s.lesson_done, answered, completed: s.completed };
+      if (s.completed) {
+        out.scores = scoresFor(sid);
+        out.correct_total = out.scores.reduce((n, x) => n + x.correct, 0);
+      }
+      return json(out);
     }
     if (path === "/api/test/response") {
       const key = `${body.session_id}:${body.item_id}`;
@@ -122,16 +150,23 @@ export async function mockApi(page, options = {}) {
       responses.set(key, body.answer);
       return json({ ok: true });
     }
-    if (path === "/api/test/lesson-done") return json({ ok: true });
+    if (path === "/api/test/lesson-done") {
+      const s = sessions.get(body.session_id);
+      if (s) s.lesson_done = true;
+      return json({ ok: true });
+    }
     if (path === "/api/test/complete") {
-      const scores = FEATURES.map((f) => ({ feature: f, correct: 0, total: 4 }));
-      for (const [key, answer] of responses) {
-        const [sid, item] = key.split(":");
-        if (sid !== body.session_id) continue;
-        if (isCorrect(answer, goldFor(item))) scores[FEATURES.indexOf(featureFor(item))].correct += 1;
+      const s = sessions.get(body.session_id);
+      const order = s ? s.item_order : ITEM_IDS;
+      const held = order.filter((i) => responses.has(`${body.session_id}:${i}`));
+      const gap = order.filter((i) => !responses.has(`${body.session_id}:${i}`));
+      // The end screen waits until we hold every answer. Same shape as the real API.
+      if (gap.length > 0 && !body.final && !(s && s.completed) && (body.answered_count ?? 0) > held.length) {
+        return json({ need_resend: gap, stored_count: held.length });
       }
-      const correct_total = scores.reduce((n, s) => n + s.correct, 0);
-      const out = { scores, correct_total };
+      if (s) s.completed = true;
+      const scores = scoresFor(body.session_id);
+      const out = { scores, correct_total: scores.reduce((n, x) => n + x.correct, 0) };
       if (body.keep_score) out.contributor_token = "MOCKTOKEN1234567";
       return json(out);
     }

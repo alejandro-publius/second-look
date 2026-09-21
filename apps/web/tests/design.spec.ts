@@ -66,7 +66,10 @@ test("tap targets: consent, test item, lesson card and the end screen", async ({
   await expect(page.getByText("Photo 1 of 16")).toBeVisible();
   await tapTargets(page, "test item");
 
-  for (let i = 1; i <= 16; i++) await page.getByRole("button", { name: "Yes", exact: true }).click();
+  for (let i = 1; i <= 16; i++) {
+    await page.getByRole("button", { name: "Yes", exact: true }).click();
+    await page.locator("[data-confirm]").click();
+  }
   await expect(page.getByRole("heading", { name: "Almost done" })).toBeVisible();
   await page.getByRole("button", { name: "See my score" }).click();
   await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();

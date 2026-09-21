@@ -1,26 +1,38 @@
 # Kill tests
 
-Tests whose failure would sink the project. Each gets a result line with a date and a pointer to
-the evidence. Only a person or the integrator marks a result; workstreams add rows as pending.
+Tests whose failure would sink the project, from docs/updates/UPDATE_03.md, which reached this
+terminal on 2026-09-21 inside Update 07 section 5. It replaces the inferred K1 to K5 rows that
+stood here before; those were guesses and the real list is different.
 
-The original numbering K1 to K5 came from Update 03, which was never pasted into this terminal
-(docs/DECISIONS.md, 2026-09-20). K6 came from Update 04 by name. The K1 to K5 rows below are
-inferred from the master brief and Update 02 and 04: the five things the plan cannot survive
-without. When Update 03 arrives, check its wording against these and fix the rows, not the code.
+How to log a result: Alex types one line into the terminal, the session writes it into the
+Result column with the UTC date and a pointer to the evidence, marks pass or fail **by the
+written pass line**, and applies the written consequence. A fail is never softened, and a PASS is
+never written without the evidence file existing.
 
-| Id | Test | Result | Evidence |
+| Id | What it tests | How | Pass line | Fail line | What we do on fail | Owner | Due | Status | Result |
+|---|---|---|---|---|---|---|---|---|---|
+| P1 | A walking skeleton on the real host | One static page, one API route that writes a row to the production database, one row read back, deployed on the recommended host. Report the URL, cold start time to first screen, and what the host logs about visitors. Box 60 minutes | Works over HTTPS on a phone and the first screen paints in under 3 seconds cold | It does not | Pick another host now, before any screens exist | Alex, then this terminal | Tue Sep 22 22:00 PDT | **NOT DONE as written** | 2026-09-20: proved on docker compose only, not on the real host. `uv run python scripts/smoke.py` printed `landing 200 in 89 ms, api health ok, db rows 3 then 4`. No Vercel or Fly account exists yet, so there is no URL, no cold start figure and no report of what the host logs. The launch decision depends on this |
+| P2 | Will their profiles accept a citizen record with an observer score | Build their guide from b907cf0 with SUSHI 3.20.1, write the smallest instance set that carries the idea, run the HL7 validator jar with their package loaded, report every error and warning word for word. Box 90 minutes | Zero errors on our instances, or only errors we can fix on our side without inventing extensions | Their profile itself rejects a citizen record: a required element we cannot honestly fill, a required binding our codes cannot meet, or a performer type we cannot be | Stop. Do not work around it. Write docs/ig_gap_report.md and take F2 | This terminal | done | **PASS** | 2026-09-21: full validator 6.10.4 with terminology ON against https://tx.fhir.org. 3 files, 0 errors, 23 warnings. Only two warning texts: 14 dom-6 narrative best practice and 9 Location.type extensible binding misses. Nothing needed an invented extension. Evidence: docs/notes/p2_validator_run.md |
+| P3 | How do the models do on early photos | Once at least 8 labelled photos sit in `photos/probe/`, ask each of the three models the feature question once per photo through the normal API. Box 30 minutes and 1 dollar | A probe, so no pass line: it reports accuracy per feature and the notes | n/a | n/a. It only tells us which way F4 leans | Alex drops photos, then this terminal | before Wed Sep 23 | pending | No probe photos and no ANTHROPIC_API_KEY in `.env`. Never reported as the pre-specified test; probe photos are `role=probe` in the manifest |
+| K1 | The opening hook | Send the two warm-up candidate photos to at least 10 people who do not study ecology and ask which creek is healthier. No hints. 10 minutes | At most 6 of 10 pick the healthy one | 8 or more get it right | The pair is too easy: find a harder pair. If three pairs fail, the hook becomes one photo and "what is wrong with this creek?" (F5) | Alex | today | pending | |
+| K2 | The premise, roughly | 8 photos, one present and one absent per feature, in a free form tool. 6 to 10 friends. Every second person reads a one-page lesson first. 1 to 2 hours. These friends never take the real test | People without the lesson average between 40 and 80 percent | Above 85 percent, or lesson readers no better at all, or a question confused people | Above 85 percent: get harder photos. No gain or confusion: rewrite that lesson or question before its screens are built. With this few people only a gross failure shows; it is a smoke alarm, not a result | Alex | today | pending | |
+| K3 | Can each feature be photographed clearly | Today's creek trip. Try for 2 clear present and 2 clear absent per feature | All four features | A feature with no clear photos by Monday night | Fill from openly licensed photos or drop it. Dropping one means 12 test items, 4 per feature, written into the plan before the tag (F3) | Alex | Mon Sep 21 night | pending | |
+| K4 | Can two people agree on the labels | Monday. Rachel and Alex label 12 candidate photos blind, 3 per feature, with `scripts/label_photos.py`. 30 minutes | They agree on at least 10 of 12, and on at least 2 of 3 in every feature | They do not | A feature where they split is kept only with obvious cases, or dropped. The dug-out channel is the likeliest to fail: even trained surveyors find it hard to call | Rachel and Alex | Mon Sep 21 | pending | |
+| K5 | Is the idea already taken | Today. Alex opens the OneAquaHealth Community training materials and watches their ten-minute AI image model video. 25 minutes | They do not test volunteers, and their model does not already flag our four features in the app | Either is already there | They already test volunteers: the headline moves to the score travelling with the data and AI taking the same test. Their model already flags these features: our checker uses theirs as one more observer on the same test, if it can be reached, and says so | Alex | today | pending | |
+| K6 | Can we write to their sandbox | `scripts/sandbox_write_test.sh`. 2 minutes | HTTP 201 | 401 or 403 | F2's display path: our own read-only endpoint, the validator output, the proposal page | This terminal | done | **PASS** | 2026-09-20 21:37Z: one tagged Location, create 201 (id 451), read 200, delete 200, read after delete 410. Evidence: docs/notes/sandbox_write_test.txt, fhir/sandbox_ledger.jsonl |
+| K7 | Rachel's hours | One message today: can she deliver photos and blind labels by Tuesday noon | Yes | No | Alex shoots today, openly licensed photos fill the gaps, Rachel only labels and checks copy, about 2 hours | Alex | today | pending | |
+| K8 | Can we reach enough strangers | Post the K1 question as a poll in two or three group chats. Count replies after 24 hours | 25 or more replies | Fewer | Before Wednesday add posters, class announcements and creek groups, or accept that the result will be a description, not a test | Alex | Mon Sep 22 | pending | |
+| K9 | Does a stranger get it | Say the one sentence to three people outside tech and ask them to say back what it does. 5 minutes | All three can | Any cannot | Rewrite the sentence until they can. The README and the video open with the version that passed | Alex | today | pending | |
+
+## Build gates we set ourselves
+
+Not from Update 03. These were numbered K7 to K10 here before, which collided with the real list,
+so they are renamed. They are machine gates, not kill tests: a red one blocks a commit, it does
+not sink the project.
+
+| Id | Gate | Status | Evidence |
 |---|---|---|---|
-| K1 (inferred) | The HL7 validator accepts our record against their profiles at hl7-eu/oah b907cf0 (P2) | PASS 2026-09-20: 0 errors, 15 warnings, terminology checks off | results/fhir_validation.json, docs/fhir_mapping.md, docs/BUILD_LOG.md Phase 1 |
-| K2 (inferred) | The compose stack serves web, API and Postgres and a row is written and read back (P1) | PASS 2026-09-20: landing 200 in 131 ms, api health ok, db rows 1 then 2 | docs/BUILD_LOG.md Phase 1, scripts/smoke.py |
-| K3 (inferred) | Real photos and two blind labels arrive in time: 16 test photos with kappa written, key frozen, no ambiguous test photo | pending, Rachel by Tue Sep 22 noon, Alex's second labels the same day | results/key_agreement.json, results/key_hash.json, audit/log.jsonl (key_frozen) |
-| K4 (inferred) | Enough strangers: at least 20 completed sessions per arm by data lock 2026-09-28T01:00:00Z, else the result is reported as a description only | pending, recruiting from Wed Sep 23 | GET /api/test/counts, results/usability_<stamp>.json |
-| K5 (inferred) | A real vision model takes the same 16 item test through the batch API and the pass table says real true (P3) | pending, needs ANTHROPIC_API_KEY in .env and probe photos; fake client only until then | results/model_pass_table.json, results/cost_log.jsonl, audit/log.jsonl (model_pass_table) |
-| K6 | The shared sandbox accepts one tagged Location by conditional create, returns it, and deletes it by id | PASS 2026-09-20 21:37Z: create 201 (id 451), read 200, delete 200, read after delete 410 | docs/notes/sandbox_write_test.txt, fhir/sandbox_ledger.jsonl |
-| K7 | The gate holds: for any model output, stored answers equal the human answers and every label is a function of human answers alone (Hypothesis fuzz test) | pending W5; the test must be red when the gate is broken on purpose | core/tests/test_gate*.py |
-| K8 | No client address reaches our server log during a full session, and no request leaves our origin (Playwright network log) | pending W1 and W4; run against the compose stack in Phase 3 | apps/api/tests, apps/web/tests, make e2e |
-| K9 | `make preflight` fails only for human reasons on the placeholder build, and passes on the fully faked green fixture | PASS 2026-09-20: scripts/tests/test_preflight.py green; live run below | scripts/preflight.py, this session's report |
-| K10 | The analysis refuses real data before lock and refuses to run without the prereg-v1 tag | pending W2; try it on purpose in Phase 4 | evals/usability_analysis.py, evals/tests |
-
-How to log a result: replace "pending" with PASS or FAIL, the UTC date, and one line of what
-was seen, then point at the file that proves it. Never edit a PASS into the row without the
-evidence file existing.
+| G1 | The gate holds: for any model output, stored answers equal the human answers and every label is a function of human answers alone | PASS, and red when the gate is broken on purpose | core/tests/test_gate*.py |
+| G2 | No client address reaches our server log during a full session, and no request leaves our origin | PASS | apps/api/tests/test_privacy.py, apps/web/tests, `make e2e` |
+| G3 | `make preflight` fails only for human reasons on the placeholder build, and passes on the fully faked green fixture | PASS 2026-09-20 | scripts/preflight.py, scripts/tests/test_preflight.py |
+| G4 | The analysis refuses real data before lock and refuses to run without the prereg-v1 tag | PASS | evals/usability_analysis.py, evals/tests |

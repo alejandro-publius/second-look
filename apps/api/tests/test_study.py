@@ -336,6 +336,137 @@ def test_export_holds_no_identifier_columns(client):
             )
 
 
+# Resume and the gap at complete (Update 07 sections 1.2, 1.3 and 2.1) --------------------------
+
+
+def test_resume_returns_the_same_arm_the_same_order_and_what_we_hold(client):
+    created = client.post("/api/test/session", json=SESSION_BODY).json()
+    sid = created["session_id"]
+    for position, item_id in enumerate(created["item_order"][:7]):
+        assert _response(client, sid, item_id, "yes", position).status_code == 200
+    state = client.get("/api/test/resume", params={"session_id": sid}).json()
+    assert state["arm"] == created["arm"]
+    assert state["item_order"] == created["item_order"]
+    assert state["lesson_first"] == created["lesson_first"]
+    assert state["answered"] == created["item_order"][:7]
+    assert state["completed"] is False
+    # The next unanswered item is item 8, which is where a reload picks the sitting back up.
+    nxt = [i for i in state["item_order"] if i not in state["answered"]][0]
+    assert nxt == created["item_order"][7]
+
+
+def test_resume_creates_no_session_row_and_mints_no_token(client):
+    freeze_now(NOW)
+    done = full_session(client, keep_score=True)
+    sessions_before = _count(StudySession)
+    tokens_before = _count(ObserverRow)
+    state = client.get("/api/test/resume", params={"session_id": done["session_id"]}).json()
+    assert state["completed"] is True
+    assert state["correct_total"] == done["correct_total"]
+    assert state["scores"] == done["scores"]
+    assert "contributor_token" not in state
+    assert _count(StudySession) == sessions_before
+    assert _count(ObserverRow) == tokens_before
+
+
+def test_resume_of_an_unknown_session_is_404(client):
+    assert client.get("/api/test/resume", params={"session_id": "nope"}).status_code == 404
+
+
+def test_resume_during_the_lesson_keeps_the_trained_arm(client):
+    created = client.post("/api/test/session", json=SESSION_BODY).json()
+    sid = created["session_id"]
+    state = client.get("/api/test/resume", params={"session_id": sid}).json()
+    assert state["lesson_done"] is False
+    client.post("/api/test/lesson-done", json={"session_id": sid, "lesson_seconds": {"a": 1.0}})
+    after = client.get("/api/test/resume", params={"session_id": sid}).json()
+    assert after["lesson_done"] is True
+    assert after["arm"] == created["arm"]
+    assert after["item_order"] == created["item_order"]
+
+
+def test_complete_names_the_answers_it_does_not_hold_and_scores_nothing_yet(client):
+    created = client.post("/api/test/session", json=SESSION_BODY).json()
+    sid = created["session_id"]
+    for position, item_id in enumerate(created["item_order"][:15]):
+        assert _response(client, sid, item_id, "yes", position).status_code == 200
+    missed = created["item_order"][15]
+    first = client.post(
+        "/api/test/complete", json={"session_id": sid, "keep_score": False, "answered_count": 16}
+    ).json()
+    assert first["need_resend"] == [missed]
+    assert first["stored_count"] == 15
+    assert "scores" not in first
+    with Session(engine) as db:
+        assert must(db.get(StudySession, sid)).completed_at is None
+    # The browser sends the one we are missing from its own copy, then asks again.
+    assert _response(client, sid, missed, "yes", 15).status_code == 200
+    second = client.post(
+        "/api/test/complete", json={"session_id": sid, "keep_score": False, "answered_count": 16}
+    ).json()
+    assert second["correct_total"] == 8
+    with Session(engine) as db:
+        assert must(db.get(StudySession, sid)).unsent_count == 0
+
+
+def test_a_gap_that_cannot_be_closed_is_recorded_as_unsent(client):
+    created = client.post("/api/test/session", json=SESSION_BODY).json()
+    sid = created["session_id"]
+    for position, item_id in enumerate(created["item_order"][:14]):
+        assert _response(client, sid, item_id, "yes", position).status_code == 200
+    done = client.post(
+        "/api/test/complete",
+        json={"session_id": sid, "keep_score": False, "answered_count": 16, "final": True},
+    ).json()
+    assert "need_resend" not in done
+    with Session(engine) as db:
+        assert must(db.get(StudySession, sid)).unsent_count == 2
+
+
+def test_a_browser_that_answered_everything_is_never_asked_to_resend(client):
+    freeze_now(NOW)
+    created = client.post("/api/test/session", json=SESSION_BODY).json()
+    sid = created["session_id"]
+    for position, item_id in enumerate(created["item_order"]):
+        assert _response(client, sid, item_id, "yes", position).status_code == 200
+    done = client.post(
+        "/api/test/complete", json={"session_id": sid, "keep_score": False, "answered_count": 16}
+    ).json()
+    assert "need_resend" not in done
+    assert done["correct_total"] == 8
+
+
+def test_the_confirmed_answer_is_scored_and_the_trail_is_stored(client):
+    created = client.post("/api/test/session", json=SESSION_BODY).json()
+    sid = created["session_id"]
+    first = created["item_order"][0]
+    r = client.post(
+        "/api/test/response",
+        json={
+            "session_id": sid,
+            "item_id": first,
+            "answer": "no",
+            "rt_ms": 4200,
+            "position": 0,
+            "first_choice": "yes",
+            "t_first_ms": 1100,
+            "n_changes": 2,
+        },
+    )
+    assert r.status_code == 200
+    with Session(engine) as db:
+        row = must(db.get(ItemResponse, (sid, first)))
+    assert row.answer == "no"
+    assert row.first_choice == "yes"
+    assert row.t_first_ms == 1100
+    assert row.n_changes == 2
+    files = _read_zip(client.get("/api/test/export?token=test-export-token-1234567890").content)
+    line = files["responses.csv"][0]
+    assert line["final_choice"] == "no" and line["first_choice"] == "yes"
+    assert line["t_confirm_ms"] == "4200" and line["t_first_ms"] == "1100"
+    assert line["n_changes"] == "2"
+
+
 # Demo -------------------------------------------------------------------------------------------
 
 

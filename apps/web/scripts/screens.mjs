@@ -47,13 +47,17 @@ for (let f = 1; f < 4; f++) {
   await click("Next photo");
   await click("Next photo");
   await click("Yes");
-  await click(f === 3 ? "Finish" : "Next");
+  await click(f === 3 ? "Finish" : "Next photo");
 }
 await page.getByText("Photo 1 of 16").waitFor();
 await shot("test-item");
-await page.getByRole("button", { name: "What counts as" }).click();
+await page.locator(".glossary-btn").first().click();
 await shot("test-item-glossary");
-for (let i = 0; i < 16; i++) await click(i % 2 ? "No" : "Yes");
+// Select then Next on every item (Update 07 section 1.3).
+for (let i = 0; i < 16; i++) {
+  await click(i % 2 ? "No" : "Yes");
+  await page.locator("[data-confirm]").click();
+}
 await page.getByRole("heading", { name: "Almost done" }).waitFor();
 await shot("before-score");
 await page.getByLabel(/Keep my score/).check();

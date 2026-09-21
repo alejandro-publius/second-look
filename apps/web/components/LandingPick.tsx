@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { ButtonLink } from "./ui/Button";
 
 /**
@@ -20,12 +20,12 @@ export interface PickSide {
 
 export function LandingPick({ sides, guessKept, cta, pairLabel }: { sides: [PickSide, PickSide]; guessKept: string; cta: string; pairLabel: string }) {
   const [picked, setPicked] = useState<string | null>(null);
-  const [href, setHref] = useState("/t");
-
-  useEffect(() => {
-    const src = new URLSearchParams(window.location.search).get("src");
-    if (src) setHref(`/t?src=${encodeURIComponent(src)}`);
-  }, []);
+  const src = useSyncExternalStore(
+    () => () => undefined,
+    () => new URLSearchParams(window.location.search).get("src") ?? "",
+    () => "",
+  );
+  const href = src ? `/t?src=${encodeURIComponent(src)}` : "/t";
 
   function pick(id: string) {
     setPicked(id);

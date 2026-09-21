@@ -24,7 +24,7 @@ from typing import Any, Literal
 
 from core.content_loader import load_content, placeholder_report
 from core.records import FEATURES
-from scripts import audit_log, freeze_key
+from scripts import audit_log, freeze_key, label_photos
 from scripts.verify_claims import CLAIM_RE, resolve_pointer
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,22 +68,39 @@ def _last_line(text: str) -> str:
     return lines[-1] if lines else "(no output)"
 
 
+def unapproved_marks(lessons: dict[str, Any]) -> list[str]:
+    """One line per mark still waiting for Rachel, naming the lesson and the label."""
+    out: list[str] = []
+    for fid, lesson in sorted(lessons.items()):
+        for where, mark in label_photos.iter_marks(lesson):
+            if mark.get("approved") is not True:
+                label = str(mark.get("label") or "(no label)")
+                out.append(f'lesson {fid} {where}: mark "{label}" is not approved by Rachel yet')
+    return out
+
+
 def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
     root = root.resolve()
     run = runner or default_runner(root)
     checks: list[Check] = []
 
-    # 1. The loader passes, and 2. every human input the loader knows about is present.
+    # 1. The loader passes, 2. every human input the loader knows about is present, and
+    # 2b. Rachel has approved every mark on a lesson photo. Alex places the marks with
+    # scripts/label_photos.py --marks, which always writes approved: false, so this check is
+    # what waits for her yes.
     content_loads = Check("content_loads", "BUILD")
     human_inputs = Check("human_inputs", "HUMAN")
+    marks_approved = Check("marks_approved", "HUMAN")
     try:
         content = load_content(root, strict=False)
         content_loads.reasons = list(content.problems)
         human_inputs.reasons = placeholder_report(content)
+        marks_approved.reasons = unapproved_marks(content.lessons)
     except Exception as e:  # a missing or unreadable content file
         content_loads.reasons = [f"content did not load: {e}"]
         human_inputs.reasons = ["content did not load, so human inputs cannot be checked"]
-    checks += [content_loads, human_inputs]
+        marks_approved.reasons = ["content did not load, so marks cannot be checked"]
+    checks += [content_loads, human_inputs, marks_approved]
 
     # 3. The analysis plan carries no TODO wording.
     plan_wording = Check("plan_wording", "HUMAN")

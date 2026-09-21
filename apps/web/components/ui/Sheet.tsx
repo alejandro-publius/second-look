@@ -50,7 +50,6 @@ export function Sheet({ title, onClose, children }: { title: string; onClose: ()
   return (
     // The scrim is a plain backdrop. Closing is offered by the button and by Escape, so this
     // click handler is a convenience and not the only way out.
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <div className="sheet-scrim" onClick={(e) => e.target === e.currentTarget && onClose()} onKeyDown={onKeyDown}>
       <div className="sheet-panel" ref={panel} role="dialog" aria-modal="true" aria-label={title}>
         <div className="sheet-head">

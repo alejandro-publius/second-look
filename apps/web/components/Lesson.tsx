@@ -19,7 +19,7 @@ type Screen = { id: string; feature: FeatureId; kind: "rule" | "pair2" | "practi
  * photo are revealed on a tap so the person looks before being told. Seconds per screen go to
  * onDone.
  */
-export function Lesson({ features, onDone }: { features: FeatureId[]; onDone: (seconds: Record<string, number>) => void; titleKey?: string }) {
+export function Lesson({ features, onDone, startIndex = 0, onIndex }: { features: FeatureId[]; onDone: (seconds: Record<string, number>) => void; startIndex?: number; onIndex?: (index: number) => void; titleKey?: string }) {
   const screens = useMemo<Screen[]>(() => {
     const out: Screen[] = [];
     for (const f of features) {
@@ -31,12 +31,15 @@ export function Lesson({ features, onDone }: { features: FeatureId[]; onDone: (s
     return out;
   }, [features]);
 
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(startIndex);
   const seconds = useRef<Record<string, number>>({});
   const shownAt = useRef(0);
 
   useEffect(() => {
     shownAt.current = performance.now();
+    onIndex?.(index);
+    // onIndex only records where we are, so it is not a dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   const screen = screens[index];

@@ -28,15 +28,24 @@ export interface SessionResponse {
 export interface ResponseRequest {
   session_id: string;
   item_id: string;
+  /** The confirmed choice, the one that is scored. Called final_choice in the analysis plan. */
   answer: TestAnswer;
+  /** Time from the photo appearing to pressing Next. Called t_confirm_ms in the analysis plan. */
   rt_ms: number;
   position: number;
+  first_choice?: TestAnswer;
+  t_first_ms?: number;
+  n_changes?: number;
 }
 
 export interface CompleteRequest {
   session_id: string;
   prior_experience: "yes" | "no" | null;
   keep_score: boolean;
+  /** How many items this browser answered. The server replies with any it does not hold. */
+  answered_count: number;
+  /** True once the browser has resent what it could and still cannot close the gap. */
+  final?: boolean;
 }
 
 export interface FeatureScoreOut {
@@ -46,9 +55,25 @@ export interface FeatureScoreOut {
 }
 
 export interface CompleteResponse {
-  scores: FeatureScoreOut[];
-  correct_total: number;
+  scores?: FeatureScoreOut[];
+  correct_total?: number;
   contributor_token?: string;
+  /** Item ids the server does not hold. The browser sends them again from its own copy. */
+  need_resend?: string[];
+  stored_count?: number;
+}
+
+/** Where a reloading browser was. Read only on the server: it creates nothing. */
+export interface ResumeResponse {
+  session_id: string;
+  arm: Arm;
+  item_order: string[];
+  lesson_first: boolean;
+  lesson_done: boolean;
+  answered: string[];
+  completed: boolean;
+  scores?: FeatureScoreOut[];
+  correct_total?: number;
 }
 
 export interface DemoAnswerResponse {
@@ -242,6 +267,9 @@ export const api = {
   },
   complete(body: CompleteRequest) {
     return request<CompleteResponse>("POST", "/api/test/complete", body, 2);
+  },
+  resume(session_id: string) {
+    return request<ResumeResponse>("GET", `/api/test/resume?session_id=${encodeURIComponent(session_id)}`, undefined, 2);
   },
   demoAnswer(item_id: string, answer: TestAnswer) {
     return request<DemoAnswerResponse>("POST", "/api/demo/answer", { item_id, answer }, 1);

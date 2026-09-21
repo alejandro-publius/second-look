@@ -33,6 +33,7 @@ test("a judge who passes every feature gets no lesson", async ({ page }) => {
     const src = await page.locator("img.photo-large").getAttribute("src");
     const itemId = "t" + src!.match(/ph-test-(\d\d)/)![1];
     await page.getByRole("button", { name: goldFor(itemId) === "present" ? "Yes" : "No", exact: true }).click();
+    await page.locator("[data-confirm]").click();
     await expect(page.getByRole("status")).toContainText("Right.");
     await page.getByRole("button", { name: i === 16 ? "Finish" : "Next photo", exact: true }).click();
   }
@@ -47,6 +48,7 @@ test("?script=1 fixes the item order for the screen recording", async ({ page })
     await page.getByRole("button", { name: "Start judge mode" }).click();
     for (let i = 1; i <= 3; i++) {
       await page.getByRole("button", { name: "Yes", exact: true }).click();
+      await page.locator("[data-confirm]").click();
       await page.getByRole("button", { name: "Next photo", exact: true }).click();
     }
     await page.unrouteAll({ behavior: "ignoreErrors" });
