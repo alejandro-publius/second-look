@@ -262,7 +262,7 @@ def human_kwargs(
     return {
         "visit_id": "visit-1",
         "spot": SPOT,
-        "observer": observer or Observer(contributor_token="tok-12345678"),
+        "observer": observer or Observer(contributor_token="ct-test-observer-01"),
         "answered_at": NOW,
         "answers": answers if answers is not None else {"bank_type": "present"},
         "first_rating": "good",
@@ -348,7 +348,7 @@ pass_tables = st.just(PASS_TABLE) | json_values
 
 def observer_from(score_map: dict[str, int | None]) -> Observer:
     return Observer(
-        contributor_token="tok-12345678",
+        contributor_token="ct-test-observer-01",
         scores=tuple(
             FeatureScore(feature=f, correct=c, tested_on=date(2026, 9, 21))  # type: ignore[arg-type]
             for f, c in score_map.items()

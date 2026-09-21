@@ -1,0 +1,172 @@
+"""Build docs/THIRD_PARTY.md from uv.lock and apps/web/package-lock.json (hard rule 1).
+
+Run: uv run python scripts/third_party.py
+Python licenses come from the installed package metadata (importlib.metadata); web licenses from
+the lockfile or each installed package's package.json. Where neither says, the table says so.
+The external services section is written here too, so the file is always whole.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import tomllib
+from datetime import UTC, datetime
+from importlib import metadata
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+NOT_STATED = "not stated in package metadata"
+
+SERVICES = """## External services
+
+- Open-Meteo (https://open-meteo.com): rainfall lookups for the dry pipe rule in `core/rainfall.py`.
+  Attribution shown wherever a rainfall figure appears: "Weather data by Open-Meteo.com, CC BY 4.0".
+  Terms: https://open-meteo.com/en/terms (non-commercial use, fair rate limits, attribution).
+  On any failure the app says "unknown" and skips the question; it never guesses.
+- OneAquaHealth FHIR sandbox (https://sandbox.hl7europe.eu/oneaquahealth/fhir): read-only GETs at
+  one per second with a user agent that names this repo, and a tagged mirror of our own records
+  when `SANDBOX_MIRROR_ENABLED` is true. Conditional creates only, deletes by ledger id only.
+- hl7-eu/oah implementation guide, commit b907cf0, built from source in CI with SUSHI 3.20.1 and
+  validated with the HL7 validator. That repo has no LICENSE file, so nothing from it is
+  redistributed here; `fhir/ig.lock` records the commit and the package sha256.
+- Vercel (web) and Fly.io (API) host the app. What they log on their own is written in
+  docs/DATA_HANDLING.md.
+"""
+
+
+def python_license(name: str) -> str:
+    try:
+        meta = metadata.metadata(name)
+    except metadata.PackageNotFoundError:
+        return "not installed here"
+    expr = meta.get("License-Expression")
+    if expr:
+        return str(expr).strip()
+    lic = (meta.get("License") or "").strip()
+    if lic and lic.upper() != "UNKNOWN" and len(lic) <= 60 and "\n" not in lic:
+        return lic
+    for c in meta.get_all("Classifier") or []:
+        if c.startswith("License :: OSI Approved :: "):
+            return c.split(" :: ")[-1].removesuffix(" License")
+        if c.startswith("License :: "):
+            return c.split(" :: ")[-1]
+    return NOT_STATED
+
+
+def python_packages(lock_path: Path) -> list[tuple[str, str, str]]:
+    doc = tomllib.loads(lock_path.read_text(encoding="utf-8"))
+    rows: list[tuple[str, str, str]] = []
+    for pkg in doc.get("package", []):
+        source = pkg.get("source", {})
+        if "editable" in source or "virtual" in source:
+            continue  # this project itself
+        name, version = str(pkg["name"]), str(pkg.get("version", ""))
+        rows.append((name, version, python_license(name)))
+    return sorted(rows, key=lambda r: r[0].lower())
+
+
+def npm_name(path: str) -> str:
+    return path.rsplit("node_modules/", 1)[-1]
+
+
+def npm_license(entry: dict[str, Any], installed: Path) -> str:
+    lic = entry.get("license")
+    if isinstance(lic, str) and lic:
+        return lic
+    pkg_json = installed / "package.json"
+    if pkg_json.exists():
+        try:
+            data = json.loads(pkg_json.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return NOT_STATED
+        lic = data.get("license")
+        if isinstance(lic, str) and lic:
+            return lic
+        if isinstance(lic, dict) and lic.get("type"):
+            return str(lic["type"])
+        licenses = data.get("licenses")
+        if isinstance(licenses, list) and licenses:
+            return " OR ".join(str(x.get("type", "")) for x in licenses if isinstance(x, dict))
+    return NOT_STATED
+
+
+def npm_packages(lock_path: Path) -> list[tuple[str, str, str, bool]]:
+    doc = json.loads(lock_path.read_text(encoding="utf-8"))
+    web = lock_path.parent
+    rows: list[tuple[str, str, str, bool]] = []
+    for path, entry in doc.get("packages", {}).items():
+        if not path:
+            continue  # the app itself
+        rows.append(
+            (
+                npm_name(path),
+                str(entry.get("version", "")),
+                npm_license(entry, web / path),
+                bool(entry.get("dev", False)),
+            )
+        )
+    rows.sort(key=lambda r: (r[0].lower(), r[1]))
+    return rows
+
+
+def build(root: Path) -> str:
+    py = python_packages(root / "uv.lock")
+    web_lock = root / "apps" / "web" / "package-lock.json"
+    web = npm_packages(web_lock) if web_lock.exists() else []
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
+    out = [
+        "# Third party dependencies",
+        "",
+        f"Generated on {today} by `uv run python scripts/third_party.py` from `uv.lock` and "
+        "`apps/web/package-lock.json`. Do not edit by hand; rerun the script. Our own code is "
+        "MIT; our photos and copy are CC BY 4.0 (README).",
+        "",
+        SERVICES.rstrip(),
+        "",
+        f"## Python packages ({len(py)}, from uv.lock)",
+        "",
+        "| Package | Version | License |",
+        "|---|---|---|",
+    ]
+    out += [f"| {n} | {v} | {lic} |" for n, v, lic in py]
+    out += [
+        "",
+        f"## Web packages ({len(web)}, from apps/web/package-lock.json)",
+        "",
+        "dev = only used to build or test, not shipped to a browser.",
+        "",
+        "| Package | Version | License | dev |",
+        "|---|---|---|---|",
+    ]
+    out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in web]
+    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
+    unknown_web = sum(1 for _, _, lic, _ in web if lic == NOT_STATED)
+    out += [
+        "",
+        f"Licenses not found for {unknown_py} Python and {unknown_web} web packages; "
+        "check those by hand before the repo goes public.",
+        "",
+    ]
+    return "\n".join(out)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
+    parser.add_argument("--out", type=Path, default=None, help="default docs/THIRD_PARTY.md")
+    args = parser.parse_args(argv)
+    root = args.root.resolve()
+    text = build(root)
+    out = args.out or (root / "docs" / "THIRD_PARTY.md")
+    out.write_text(text, encoding="utf-8")
+    py = text.count("\n| ") - text.count("| Package |") - text.count("|---|")
+    shown = out.relative_to(root) if out.is_relative_to(root) else out
+    print(f"third-party: wrote {shown} with {py} package rows")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

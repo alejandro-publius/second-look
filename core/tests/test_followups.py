@@ -30,7 +30,7 @@ Answers = dict[str, str | float | list[str]]
 
 def observer(**correct: int) -> Observer:
     return Observer(
-        contributor_token="tok-12345678",
+        contributor_token="ct-test-observer-01",
         scores=tuple(
             FeatureScore(feature=f, correct=c, tested_on=date(2026, 9, 21))  # type: ignore[arg-type]
             for f, c in correct.items()
