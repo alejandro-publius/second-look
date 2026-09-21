@@ -18,7 +18,9 @@ up the top item and it will be the most useful hour available.
 4. **Freeze the question wording.** Use the official app's own wording where the app asks about
    the feature, and our own for the dug-out channel.
 5. **Approve the lesson copy and the health sentences.** Each needs a source you have opened.
-   Nothing may state a risk for a specific site. See `docs/notes/zenodo.md` if it exists.
+   Nothing may state a risk for a specific site. `docs/notes/zenodo.md` has the definitions from
+   the project's own Field Sampling Protocols and Key Indicators factsheets, quoted with page
+   numbers, so checking a sentence against its source takes minutes.
 6. **Prune the plant list** to what actually grows here, from the Cal-IPC inventory, with links.
 
 Everything below this line is the older pack, kept because the shot list and the blind labelling

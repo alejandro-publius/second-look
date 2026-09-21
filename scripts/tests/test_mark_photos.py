@@ -7,6 +7,7 @@ Every test works on a copy of content/ and photos/, never on the real lesson fil
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import threading
 from collections.abc import Iterator
@@ -72,6 +73,17 @@ def save(url: str, photo_id: str, marks: list[dict[str, Any]]) -> tuple[int, str
         return int(getattr(e, "code", 0)), getattr(e, "read", lambda: b"")().decode()
 
 
+def approve(url: str, photo_id: str, who: str) -> tuple[int, str]:
+    data = urlencode({"photo_id": photo_id, "who": who}).encode()
+    req = Request(url + "/approve", data=data, method="POST")  # noqa: S310
+    req.add_header("Content-Type", "application/x-www-form-urlencoded")
+    try:
+        with urlopen(req, timeout=5) as r:  # noqa: S310
+            return int(r.status), r.read().decode()
+    except Exception as e:  # HTTPError carries the status and the message we sent back
+        return int(getattr(e, "code", 0)), getattr(e, "read", lambda: b"")().decode()
+
+
 def lesson_doc(repo: Path, feature: str = LESSON) -> dict[str, Any]:
     return label_photos.load_lesson(label_photos.lesson_path(repo, feature))
 
@@ -115,7 +127,7 @@ def test_a_six_word_label_never_reaches_the_lesson_file(server: str, repo: Path)
 
 def test_a_written_mark_carries_approved_false(server: str, repo: Path) -> None:
     status, body = save(server, PAIR_PHOTO, [{"x": 0.25, "y": 0.75, "label": "the built edge"}])
-    assert status == 200 and "1 wait for Rachel" in body
+    assert status == 200 and "1 wait for someone to approve" in body
     marks = marks_in(repo, PAIR)
     assert marks == [{"x": 0.25, "y": 0.75, "label": "the built edge", "approved": False}]
     text = label_photos.lesson_path(repo, LESSON).read_text()
@@ -150,7 +162,7 @@ def test_an_existing_approved_mark_is_preserved(server: str, repo: Path) -> None
             {"x": 0.8, "y": 0.2, "label": "the new mark"},
         ],
     )
-    assert status == 200 and "1 wait for Rachel" in body
+    assert status == 200 and "1 wait for someone to approve" in body
     assert marks_in(repo, PAIR) == [
         approved,
         {"x": 0.8, "y": 0.2, "label": "the new mark", "approved": False},
@@ -284,3 +296,29 @@ def test_marks_mode_needs_no_name(repo: Path) -> None:
         label_photos.main(["--root", str(repo)])  # neither --name nor --marks
     targets = label_photos.load_mark_targets(repo)
     assert len(targets) == 12, "four lessons, two pairs and one practice photo each"
+
+
+def test_approving_stamps_who_and_when_and_a_change_undoes_it(server: str, repo: Path) -> None:
+    """Update 09 sections 1 and 4.2: any team member approves, and the stamp is the record."""
+    save(server, PAIR_PHOTO, [{"x": 0.25, "y": 0.75, "label": "the built edge"}])
+    status, body = approve(server, PAIR_PHOTO, "alex")
+    assert status == 200, body
+    assert "signed alex" in body
+    marks = marks_in(repo, PAIR)
+    assert marks[0]["approved"] is True
+    assert marks[0]["approved_by"] == "alex"
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", marks[0]["approved_at"])
+
+    # Moving the mark is new work, so the approval and its stamp go away again.
+    save(server, PAIR_PHOTO, [{"x": 0.30, "y": 0.75, "label": "the built edge"}])
+    moved = marks_in(repo, PAIR)
+    assert moved[0]["approved"] is False
+    assert "approved_by" not in moved[0]
+
+
+def test_approving_without_a_name_is_refused(server: str, repo: Path) -> None:
+    save(server, PAIR_PHOTO, [{"x": 0.25, "y": 0.75, "label": "the built edge"}])
+    status, body = approve(server, PAIR_PHOTO, "   ")
+    assert status == 400
+    assert "say who is approving" in body
+    assert marks_in(repo, PAIR)[0]["approved"] is False

@@ -9,8 +9,9 @@ shows another labeller's file, and never shows the manifest's gold_label, notes 
 Marking: uv run python scripts/label_photos.py --marks
 The page shows one lesson photo at a time. Alex clicks where a mark goes and types a label of
 five words or fewer. Saving writes the x and y fractions and the label into the lesson YAML, into
-that pair's marks or into practice_marks. Every mark written here carries approved: false,
-because only Rachel approves a mark, and preflight blocks launch while one is unapproved.
+that pair's marks or into practice_marks. Every mark written here carries approved: false.
+Any team member approves it on the review page, which stamps who and when, and preflight blocks
+launch while one is unapproved. Moving or renaming a mark takes the approval away again.
 """
 
 from __future__ import annotations
@@ -335,12 +336,37 @@ def _mark_key(mark: dict[str, Any]) -> tuple[float, float, str]:
 
 
 def merge_approved(old: list[dict[str, Any]], new: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """A mark that has not moved and has the same label keeps the approval Rachel gave it.
+    """A mark that has not moved and has the same label keeps the approval it was given.
 
-    Anything moved, renamed or added is new work, so it goes back to approved: false.
+    Anything moved, renamed or added is new work, so it goes back to approved: false and loses
+    the stamp. Update 09 section 4.2: changing a mark resets that photo's approval.
     """
-    kept = {_mark_key(m): m.get("approved") is True for m in old}
-    return [{**m, "approved": kept.get(_mark_key(m), False)} for m in new]
+    kept = {_mark_key(m): m for m in old if m.get("approved") is True}
+    out: list[dict[str, Any]] = []
+    for m in new:
+        was = kept.get(_mark_key(m))
+        if was is None:
+            out.append({**m, "approved": False})
+        else:
+            carried = {k: was[k] for k in ("approved_by", "approved_at") if was.get(k)}
+            out.append({**m, "approved": True, **carried})
+    return out
+
+
+def approve_marks(path: Path, target: MarkTarget, who: str) -> list[dict[str, Any]]:
+    """Says yes to every mark on one lesson photo, stamped with who and when.
+
+    Any team member can approve (Update 09 section 1), so the stamp is the record of which one.
+    """
+    who = who.strip().lower()
+    if not who:
+        raise MarkError("say who is approving: a first name, lowercase")
+    stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    marks = read_marks(load_lesson(path), target)
+    if not marks:
+        raise MarkError("that photo has no marks to approve yet")
+    approved = [{**m, "approved": True, "approved_by": who, "approved_at": stamp} for m in marks]
+    return write_marks(path, target, approved, keep_approval=True)
 
 
 def _indent(line: str) -> int:
@@ -402,11 +428,18 @@ def _num(value: float) -> str:
 
 def _mark_line(indent: int, mark: dict[str, Any]) -> str:
     label = json.dumps(str(mark["label"]), ensure_ascii=False)
-    approved = "true" if mark.get("approved") is True else "false"
-    return (
+    approved = mark.get("approved") is True
+    line = (
         f"{' ' * indent}- {{ x: {_num(mark['x'])}, y: {_num(mark['y'])}, "
-        f"label: {label}, approved: {approved} }}"
+        f"label: {label}, approved: {'true' if approved else 'false'}"
     )
+    # The stamp says which team member said yes and when. It only exists on an approved mark,
+    # so a mark that is moved later loses the stamp along with the approval.
+    if approved and mark.get("approved_by"):
+        who = json.dumps(str(mark["approved_by"]), ensure_ascii=False)
+        when = json.dumps(str(mark.get("approved_at", "")), ensure_ascii=False)
+        line += f", approved_by: {who}, approved_at: {when}"
+    return line + " }"
 
 
 def _splice(
@@ -469,15 +502,21 @@ def write_marks(
     target: MarkTarget,
     marks: list[dict[str, Any]],
     say: Callable[[str], None] = print,
+    *,
+    keep_approval: bool = False,
 ) -> list[dict[str, Any]]:
     """Put marks into the lesson file and return what landed there.
 
     The file is only written once the new text parses and says exactly what it should say,
-    so a bad write cannot leave Rachel with a broken lesson.
+    so a bad write cannot leave anyone with a broken lesson.
+
+    `keep_approval` is for the approve button alone, which is the one caller that is allowed to
+    write approved: true. Every other write goes through merge_approved, so a mark that moved or
+    was renamed loses its approval.
     """
     text = path.read_text(encoding="utf-8")
     before = load_lesson(path)
-    merged = merge_approved(read_marks(before, target), marks)
+    merged = marks if keep_approval else merge_approved(read_marks(before, target), marks)
     new_text, dropped = plan_write(text, target, merged)
     for line in dropped:
         say(f"warning: this write drops a comment from {path.name}: {line.strip()}")
@@ -606,6 +645,21 @@ MARKS_SCRIPT = """
     }).catch(function (err) { say(String(err), true); });
   });
 
+  document.getElementById('approve').addEventListener('click', function () {
+    var who = document.getElementById('who').value.trim();
+    if (!who) { say('Type your first name, so the approval says who gave it.', true); return; }
+    fetch('/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ photo_id: state.photo_id, who: who })
+    }).then(function (r) {
+      return r.text().then(function (b) {
+        say(b, r.status !== 200);
+        if (r.status === 200) { location.reload(); }
+      });
+    }).catch(function (err) { say(String(err), true); });
+  });
+
   draw();
 })();
 """
@@ -655,6 +709,11 @@ def render_marks(
         "<input id='label' maxlength='80' disabled></p>",
         "<p><button id='add' disabled>Add mark</button>",
         "<button id='save'>Save to the lesson file</button></p>",
+        # Update 09 section 4.2: one review page, the photo with its marks on it, and Approve.
+        # Any team member can say yes, and the stamp records which one.
+        "<p>Happy with every mark on this photo? "
+        "<label>Your first name <input id='who' size='10' autocomplete='off'></label> ",
+        "<button id='approve'>Approve this photo</button></p>",
         f"<p id='msg' role='status' class='muted'>{html.escape(note)}</p>",
         "<ol id='list'></ol>",
         f"<p class='muted'>Photos: {links}</p>",
@@ -708,7 +767,26 @@ def make_marks_server(root: Path, port: int = 0) -> ThreadingHTTPServer:
             self._send(HTTPStatus.NOT_FOUND, b"not found", "text/plain")
 
         def do_POST(self) -> None:  # noqa: N802
-            if urlparse(self.path).path != "/marks":
+            path = urlparse(self.path).path
+            if path == "/approve":
+                length = int(self.headers.get("Content-Length") or 0)
+                form = parse_qs(self.rfile.read(length).decode("utf-8"))
+                target = by_photo.get(form.get("photo_id", [""])[0])
+                if target is None:
+                    self._send(HTTPStatus.BAD_REQUEST, b"unknown lesson photo", "text/plain")
+                    return
+                try:
+                    landed = approve_marks(
+                        lesson_path(root, target.feature), target, form.get("who", [""])[0]
+                    )
+                except (MarkError, OSError) as e:
+                    self._send(HTTPStatus.BAD_REQUEST, str(e).encode("utf-8"), "text/plain")
+                    return
+                who = landed[0].get("approved_by", "")
+                body = f"Approved {len(landed)} marks on {target.photo_id}, signed {who}."
+                self._send(HTTPStatus.OK, body.encode("utf-8"), "text/plain")
+                return
+            if path != "/marks":
                 self._send(HTTPStatus.NOT_FOUND, b"not found", "text/plain")
                 return
             length = int(self.headers.get("Content-Length") or 0)
@@ -726,7 +804,7 @@ def make_marks_server(root: Path, port: int = 0) -> ThreadingHTTPServer:
             waiting = sum(1 for m in landed if m.get("approved") is not True)
             body = (
                 f"Saved {len(landed)} marks to content/lessons/{target.feature}.yaml "
-                f"under {target.where}. {waiting} wait for Rachel to approve them."
+                f"under {target.where}. {waiting} wait for someone to approve them."
             )
             self._send(HTTPStatus.OK, body.encode("utf-8"), "text/plain")
 
