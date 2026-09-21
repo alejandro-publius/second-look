@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -59,6 +59,13 @@ export-records:
 
 mcp:
 	$(PY) -m apps.mcp.server --export data/export
+
+# A follower city in one command (Update 10 tier 2 item 3): a region pack stub, the nested
+# Locations in FSH inside their guide, a poster and the five step checklist. No claims are made.
+#   make new-city NAME=Heraklion COUNTRY=Greece LAT=35.3387 LON=25.1442
+new-city:
+	@test -n "$(NAME)" || { echo "make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>"; exit 1; }
+	$(PY) scripts/new_city.py --name "$(NAME)" --country "$(COUNTRY)" --lat $(LAT) --lon $(LON)
 
 e2e:
 	cd $(WEB) && npm run build --silent && npx playwright test

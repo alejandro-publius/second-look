@@ -1,11 +1,12 @@
 {
-  "ran_at_utc": "2026-09-21T07:07:49+00:00",
+  "ran_at_utc": "2026-09-21T07:13:55+00:00",
   "validator_version": "6.10.4",
   "ig_commit": "b907cf0",
   "fhir_version": "4.0.1",
   "terminology_checks_ran": false,
   "terminology_server": "n/a",
   "files": [
+    "fhir/build/ig/fsh-generated/resources/Bundle-sl-city-heraklion-bundle.json",
     "fhir/build/ig/fsh-generated/resources/Bundle-sl-visit-1-bundle.json",
     "fhir/golden/example-lab-result-strawberry-creek-1.json",
     "fhir/golden/library-second-look.json",
@@ -14,8 +15,13 @@
     "fhir/golden/visit-strawberry-creek-1.transaction.json"
   ],
   "errors": 0,
-  "warnings": 20,
+  "warnings": 24,
   "by_file": {
+    "Bundle-sl-city-heraklion-bundle.json": {
+      "error": 0,
+      "warning": 4,
+      "information": 4
+    },
     "Bundle-sl-visit-1-bundle.json": {
       "error": 0,
       "warning": 15,
@@ -48,6 +54,30 @@
     }
   },
   "messages": [
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
+      "location": "Bundle.entry[0].resource/*Location/sl-city-heraklion*/",
+      "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
+      "location": "Bundle.entry[1].resource/*Location/sl-city-heraklion-creek-1*/",
+      "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-city-heraklion-creek-1-reach-1*/",
+      "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-city-heraklion-creek-1-reach-1-spot-1*/",
+      "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
     {
       "file": "Bundle-sl-visit-1-bundle.json",
       "severity": "warning",

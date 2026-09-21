@@ -1,0 +1,28 @@
+# Region pack for Heraklion, Greece. A stub: every list below is empty until a local
+# checker fills it. Species names appear on screen only on a photo a named person has verified,
+# with a source.
+region: heraklion
+name: "Heraklion, Greece"
+approved: false
+invasive_plants: []
+source: "to be filled by a local checker, from the regional invasive species inventory"
+
+# Creeks and their reaches. Each creek has a readable slug, so the analyst's link reads
+# /city?creek=<slug>. `flows_into` names the reach below; the downstream note appears only where it
+# is set. `bbox` is [south, west, north, east] in degrees, approximate, from public maps.
+# One creek with two reaches would look like this:
+#
+# creeks:
+#   - slug: example-creek
+#     name: Example Creek
+#     source: "Hand filled <date> from public maps. Boxes are approximate."
+#     reaches:
+#       - slug: upper
+#         name: Upper reach
+#         flows_into: lower
+#         bbox: [0, 1, 2, 3]
+#       - slug: lower
+#         name: Lower reach
+#         flows_into: null
+#         bbox: [0, 1, 2, 3]
+creeks: []

@@ -16,6 +16,7 @@ from core.regions import (
     creeks_from_regions,
     place_spot,
     reaches_below,
+    slugify,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -144,3 +145,12 @@ def test_a_bbox_is_four_numbers_south_west_north_east() -> None:
     assert ok[0].bbox() == (37.0, -122.0, 38.0, -121.0)
     assert Creek(slug="empty", name="Empty").bbox() is None
     assert not Reach(slug="r", name="R", creek_slug="empty").contains(37.5, -121.5)
+
+
+def test_slugify_makes_a_readable_link_id() -> None:
+    assert slugify("Heraklion") == "heraklion"
+    assert slugify("  Strawberry Creek ") == "strawberry-creek"
+    assert slugify("Heraklion, Crete (GR)") == "heraklion-crete-gr"
+    assert slugify("Codornices Creek 2") == "codornices-creek-2"
+    with pytest.raises(RegionError, match="no letters"):
+        slugify("...")

@@ -78,6 +78,20 @@ class Placement(Frozen):
     reach: Reach | None = None
 
 
+def slugify(name: str) -> str:
+    """ "Heraklion, Crete" becomes "heraklion-crete": lower case letters, digits and hyphens."""
+    out: list[str] = []
+    for ch in name.strip().lower():
+        if ch.isalnum() and ch.isascii():
+            out.append(ch)
+        elif out and out[-1] != "-":
+            out.append("-")
+    slug = "".join(out).strip("-")
+    if not slug:
+        raise RegionError(f"{name!r} leaves no letters or digits for a slug")
+    return slug
+
+
 def _slug_ok(slug: object) -> bool:
     return (
         isinstance(slug, str)

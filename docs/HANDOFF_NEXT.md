@@ -20,7 +20,7 @@ Two branches, two jobs.
 
 ## What is done on `depth`
 
-- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 42 built, 4 parked, 7 missing.
+- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 43 built, 4 parked, 6 missing.
 - `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
   guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
 - `GET /api/city/{creek_id}` and `/city?creek=`: the analyst's view. No number without its
@@ -59,17 +59,22 @@ Two branches, two jobs.
   the per feature score is structured in FHIR and `get_observer_score` reads it from the record.
   Eight contract tests, including one real run over stdio. `examples/mcp/README.md` has the
   Claude config; `examples/mcp/transcript.md` is one real session from a throwaway database.
+- **`make new-city`** (`scripts/new_city.py`, Update 10 tier 2 item 3). A name and coordinates
+  give a region pack stub, four nested Locations in FSH under their profile in a Bundle the
+  validator checks, a poster with the city's name and two empty photo slots, and the five step
+  checklist. Run once for Heraklion as a dry example in English with no claims:
+  `docs/cities/heraklion/`. `docs/cities/TIMES.md` records 0.1 seconds for Heraklion and, from
+  git, 3 hours 21 minutes for the same four things by hand in Berkeley.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Tier 2 item 3: `make new-city`, run once for Heraklion. Record the two durations.
-2. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
-3. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
+1. Tier 2 item 4: finish `docs/ig_proposal.md`; the FSH keeps building at the pinned commit.
+2. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
    on the Worker, proved by golden vectors the Python writes and the TypeScript reproduces.
-4. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
+3. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
 

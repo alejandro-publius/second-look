@@ -71,7 +71,7 @@ scale 15.
 | A laboratory result returning to the same record | built, as a tagged example | `core/fhir_referral.py` | `core/tests/test_fhir_referral.py` | Impact | digital health |
 | Downstream note on reaches below a finding | built | `core/regions.py`, `core/act.py`, `apps/api/city.py` | `core/tests/test_regions.py`, `apps/api/tests/test_city.py` | Innovation | ecologist |
 | MCP server over our records, read only, local | built | `apps/mcp/server.py`, `apps/mcp/source.py` | `apps/mcp/tests/test_server.py` | Innovation | agents |
-| `make new-city`, the follower city recipe | **missing** | none | none | **Feasibility (15)** | outreach |
+| `make new-city`, the follower city recipe | built, run once for Heraklion | `scripts/new_city.py`, `docs/cities/` | `scripts/tests/test_new_city.py` | **Feasibility (15)** | outreach |
 
 ## The build, the docs and the gates
 
@@ -94,9 +94,9 @@ scale 15.
 
 | Status | Count |
 |---|---|
-| built | 42 |
+| built | 43 |
 | parked | 4 |
-| missing | 7 |
+| missing | 6 |
 
 Counted again on 2026-09-21 after Update 10 tier 1 (all four items). The remaining missing rows are
 the agents and integration line (the MCP server, the Library entry, `make new-city`) and the
