@@ -206,9 +206,8 @@ def save_visit_bundle(visit: VisitRecord) -> Path | None:
 def _audit_record_written(visit: VisitRecord, path: Path) -> None:
     """One hash chained audit line per stored record (Update 02 section 6). Never raises."""
     try:
-        from scripts.audit_log import append
-
         from apps.api.settings import settings
+        from scripts.audit_log import append
 
         append(
             "record_written",
