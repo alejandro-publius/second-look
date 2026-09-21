@@ -55,7 +55,7 @@ test("/quick/example posts the fixed enums", async ({ page }) => {
   await page.goto("/quick/example");
   await expect(page.getByRole("heading", { name: "20 second check" })).toBeVisible();
   await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByRole("alert")).toContainText("Pick a colour");
+  await expect(page.getByRole("alert").filter({ hasText: "Pick a colour" })).toBeVisible();
   await page.getByRole("button", { name: "Muddy" }).click();
   await page.getByRole("button", { name: "Bad smell" }).click();
   await page.getByRole("button", { name: "Yes", exact: true }).click();

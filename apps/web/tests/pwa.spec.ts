@@ -21,8 +21,9 @@ test.describe("with service workers allowed", () => {
   test.use({ serviceWorkers: "allow" });
 
   test("the service worker installs and precaches the lesson screens and photos", async ({ page, context }) => {
+    const swEvent = context.waitForEvent("serviceworker", { timeout: 30_000 });
     await page.goto("/");
-    const worker = await context.waitForEvent("serviceworker", { timeout: 30_000 });
+    const worker = await swEvent;
     expect(worker.url()).toBe("http://127.0.0.1:3100/sw.js");
     await page.evaluate(() => navigator.serviceWorker.ready);
     await expect

@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: {
     command: "npm run build && npm run start",
     url: "http://127.0.0.1:3100/",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 240_000,
     env: {
       NEXT_PUBLIC_API_ORIGIN: API_ORIGIN,

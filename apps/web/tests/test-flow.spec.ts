@@ -99,6 +99,8 @@ test("untrained arm: test first, then the lesson offered as a thank you", async 
 
 test("a response that fails is retried and the score still arrives", async ({ page }) => {
   let failures = 0;
+  // Registered after the mock so it is matched first: the first two responses fail with 503.
+  const calls = await mockApi(page, { lessonFirst: false });
   await page.route("**/api/test/response", async (route) => {
     if (failures < 2) {
       failures += 1;
@@ -107,7 +109,6 @@ test("a response that fails is retried and the score still arrives", async ({ pa
     }
     await route.fallback();
   });
-  const calls = await mockApi(page, { lessonFirst: false });
   await page.goto("/t");
   await passConsent(page);
   await pickWarmup(page);

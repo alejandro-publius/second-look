@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
+import { assertOnlyOurOrigins, goldFor, mockApi, watchRequests } from "./mock-api.mjs";
 import { answerAllItems, BASE } from "./helpers";
 
 test("judge mode gives feedback, stores nothing, and teaches only what was missed", async ({ page }) => {
@@ -25,8 +25,15 @@ test("a judge who passes every feature gets no lesson", async ({ page }) => {
   await mockApi(page);
   await page.goto("/demo");
   await page.getByRole("button", { name: "Start" }).click();
-  // Answer by the mock's own key: the order is t16..t01, so position i shows item 17 - i.
-  await answerAllItems(page, (i) => (((17 - i - 1) % 4) < 2 ? "Yes" : "No"), true);
+  // The order is random, so read which photo is on screen and answer by the mock's own key.
+  for (let i = 1; i <= 16; i++) {
+    await expect(page.getByText(`Photo ${i} of 16`)).toBeVisible();
+    const src = await page.locator("img.photo-large").getAttribute("src");
+    const itemId = "t" + src!.match(/ph-test-(\d\d)/)![1];
+    await page.getByRole("button", { name: goldFor(itemId) === "present" ? "Yes" : "No", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Right.");
+    await page.getByRole("button", { name: i === 16 ? "Finish" : "Next", exact: true }).click();
+  }
   await expect(page.getByText("You passed every feature. No lesson needed.")).toBeVisible();
 });
 

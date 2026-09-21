@@ -18,6 +18,7 @@ let n = 0;
 async function shot(name) {
   n += 1;
   const path = join(out, `${String(n).padStart(2, "0")}-${name}.png`);
+  await page.waitForFunction(() => Array.from(document.images).every((i) => i.complete)).catch(() => undefined);
   await page.screenshot({ path, fullPage: true });
   console.log(`screens: ${path}`);
 }

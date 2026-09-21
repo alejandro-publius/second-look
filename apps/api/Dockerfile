@@ -8,6 +8,9 @@ COPY core ./core
 COPY content ./content
 COPY photos ./photos
 COPY scripts ./scripts
+COPY results ./results
+COPY fhir/golden ./fhir/golden
+COPY fhir/ig.lock ./fhir/ig.lock
 RUN mkdir -p /app/data
 ENV PATH="/app/.venv/bin:$PATH" PYTHONPATH=/app
 EXPOSE 8000
