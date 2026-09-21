@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -97,3 +97,13 @@ poster:
 
 deploy:
 	bash scripts/deploy.sh
+
+# The depth branch's own preview on Cloudflare Pages (Update 10 rule B and answer A1). The export
+# is built with an empty API origin, so the browser talks to one origin and the API is reached
+# through /api/* by the Pages Function and the service binding in apps/web/wrangler.jsonc. This
+# never touches production: production deploys come from main only.
+PREVIEW_URL := https://depth.second-look-79t.pages.dev
+deploy-preview:
+	cd $(WEB) && NEXT_PUBLIC_API_ORIGIN="" NEXT_PUBLIC_SITE_URL=$(PREVIEW_URL) NEXT_PUBLIC_BUILD_HASH=$$(git rev-parse --short HEAD) npm run export
+	cd $(WEB) && npx wrangler pages deploy out --project-name second-look --branch depth --commit-dirty=true
+	@echo "preview at $(PREVIEW_URL); check with: curl -sI $(PREVIEW_URL)/health"

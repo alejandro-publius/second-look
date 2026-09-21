@@ -1,0 +1,12 @@
+{
+  // The Pages project that serves the static export in out/ (Update 10 answer A1). This file is
+  // the project's configuration once it is deployed with it: the API Worker is bound as a service,
+  // and functions/api/[[path]].js hands every /api/* and /health request to it. The browser then
+  // talks to one origin only, so the policy can say connect-src 'self' and networks that block
+  // workers.dev do not matter. A preview deploy (--branch depth) sets this for previews only;
+  // production takes it when main deploys with this file.
+  "name": "second-look",
+  "pages_build_output_dir": "out",
+  "compatibility_date": "2026-09-20",
+  "services": [{ "binding": "API", "service": "second-look-api" }]
+}

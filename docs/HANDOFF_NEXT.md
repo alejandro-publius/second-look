@@ -15,12 +15,13 @@ Two branches, two jobs.
 | Thing | Where |
 |---|---|
 | Site | https://second-look-79t.pages.dev (from `main`) |
+| Preview of `depth` | https://depth.second-look-79t.pages.dev, API on the same origin, `make deploy-preview` |
 | API | https://second-look-api.thealexschroeder.workers.dev |
 | Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
 
 ## What is done on `depth`
 
-- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 43 built, 4 parked, 6 missing.
+- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 44 built, 3 parked, 6 missing.
 - `core/act.py`: findings from visits, what a creek needs, pipes worth testing, the duplicate pin
   guard, the test pin guard, the downstream note. Pure, 21 tests, every guard mutation tested.
 - `GET /api/city/{creek_id}` and `/city?creek=`: the analyst's view. No number without its
@@ -71,14 +72,20 @@ Two branches, two jobs.
   PractitionerRole, which made us invent a role for a laboratory. It lists the referral, the
   example result and the Library beside the visit, carries the current validator line (7 files,
   0 errors), and asks for six additions. Its FSH builds inside their guide at b907cf0 in CI.
+- **Answer A1, the API behind the Pages origin.** `apps/web/wrangler.jsonc` binds the Worker as
+  a service; `apps/web/functions/` hands `/api/*` and `/health` to it; `public/_routes.json`
+  keeps the static share cards out of the Function. Built with an empty API origin the policy
+  says `connect-src 'self'`. Live on the depth preview, verified with curl; production is
+  untouched until `main` deploys with the file. `make deploy-preview` is the one command.
 - The backup workflow is manual only until the two GitHub secrets exist (Update 10 answer A2).
 - `scripts/tests/fixtures/labels_*.csv` are committed. They were untracked, so `make check` was
   green only on the machine that happened to have them.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Answer A1: the API behind `/api/*` on the Pages origin. Answer A3: the judge facing endpoints
-   on the Worker, proved by golden vectors the Python writes and the TypeScript reproduces.
+1. Answer A3: the judge facing endpoints on the Worker, proved by golden vectors the Python
+   writes and the TypeScript reproduces, in the brief's order: the creek check with its follow
+   ups and rainfall lookup, the record with View as FHIR, `/city`, the two observer screen.
 2. Then stop. Tier 3 waits for its own session after data lock; tier 4 waits for the freeze.
 
 ## Traps
@@ -105,5 +112,10 @@ Two branches, two jobs.
   read. `mcp.client.Client(server)` connects in memory for tests.
 - pytest fixtures are per folder. `apps/mcp/tests/conftest.py` imports the API's `client`
   fixture so the MCP tests can make real records.
+- A Pages wrangler file becomes the project's source of truth for the environment it is deployed
+  to. `--branch depth` sets previews only; a `main` deploy with the file would set production, so
+  merge it knowingly. `/api/share/*` must stay excluded in `_routes.json` or the share cards 404.
+- Playwright specs run as CommonJS: no `import.meta`; use `__dirname` and a dynamic import of a
+  file URL to load an ES module under test.
 - The region pack's boxes are approximate and hand filled. A wrong box misplaces a precise pin
   onto the wrong reach; the fix is in `content/regions/california-bay-area.yaml`, nowhere else.

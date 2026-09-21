@@ -1,7 +1,15 @@
 // The one client for the W1 API. Shapes mirror docs/CONTRACTS.md exactly. Nothing else in the app
 // calls fetch against the API origin.
 
+// Empty means the API is served under /api/* on this same origin (Update 10 A1): every fetch is
+// then a relative path and the policy says connect-src 'self'.
 export const API_ORIGIN = (process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:8000").replace(/\/$/, "");
+
+/** An absolute URL for a path a person may copy, such as a curl line. */
+export function absoluteApiUrl(path: string): string {
+  if (API_ORIGIN) return `${API_ORIGIN}${path}`;
+  return typeof window === "undefined" ? path : `${window.location.origin}${path}`;
+}
 
 export type TestAnswer = "yes" | "no" | "cant_tell";
 export type Arm = "untrained" | "trained";
@@ -393,7 +401,7 @@ export const api = {
     return request<Record<string, unknown>>("GET", `/api/spot/${encodeURIComponent(spot_id)}/fhir`);
   },
   spotFhirUrl(spot_id: string) {
-    return `${API_ORIGIN}/api/spot/${encodeURIComponent(spot_id)}/fhir`;
+    return absoluteApiUrl(`/api/spot/${encodeURIComponent(spot_id)}/fhir`);
   },
   fhirValidation() {
     return request<FhirValidationOut>("GET", "/api/fhir/validation");
@@ -406,7 +414,7 @@ export const api = {
     return request<FhirBundle>("GET", path);
   },
   fhirUrl(path: string) {
-    return `${API_ORIGIN}${path}`;
+    return absoluteApiUrl(path);
   },
   two() {
     return request<TwoOut>("GET", "/api/two");

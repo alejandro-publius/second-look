@@ -52,11 +52,25 @@ promises the assignment can be replayed. So `scripts/seed_arms.py` writes the al
 sequence into an `arm_slot` table and the Worker only takes the next slot.
 `core.allocator.replay` still checks every stored assignment.
 
+## One origin: the API behind /api/* on the Pages site (Update 10 answer A1)
+
+On the `depth` preview the browser talks to one origin only. `apps/web/wrangler.jsonc` is the
+Pages project's configuration and binds the API Worker as a service named `API`;
+`apps/web/functions/api/[[path]].js` and `functions/health.js` hand every `/api/*` and `/health`
+request to it unchanged; `apps/web/public/_routes.json` sends only those paths to the Function
+and keeps `/api/share/*`, the static share cards, out of it. The export is built with
+`NEXT_PUBLIC_API_ORIGIN=""`, so every fetch is a relative path and the policy says
+`connect-src 'self'`. `make deploy-preview` does all of it for the `depth` branch. Verified on
+2026-09-21 at https://depth.second-look-79t.pages.dev: `/health` and `/api/test/counts` answer
+from the Worker, `/api/share/13` is still an SVG file, the CSP header reads `connect-src 'self'`.
+Production keeps its dashboard configuration until `main` deploys with this file.
+
 ## What is live
 
 | Thing | Where |
 |---|---|
-| Site | https://second-look-79t.pages.dev |
+| Site | https://second-look-79t.pages.dev (production, from `main`) |
+| Preview of `depth` | https://depth.second-look-79t.pages.dev (API on the same origin) |
 | API | https://second-look-api.thealexschroeder.workers.dev |
 | Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
 | Photo store | Workers KV `PHOTOS`, id `221e06ab5b54434ab5b4322712128ef3` |

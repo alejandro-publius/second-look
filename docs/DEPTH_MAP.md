@@ -78,7 +78,7 @@ scale 15.
 | Feature | Status | Main file | Test | Rubric line | Judge who cares |
 |---|---|---|---|---|---|
 | Live site and API on Cloudflare, no card | built | `worker/src/index.ts` | `docs/notes/hosting.md` | Feasibility | data tools |
-| API on a second origin, so CORS is needed | parked (Update 10 A1 moves it) | `worker/wrangler.jsonc` | none | Technical | data tools |
+| API behind `/api/*` on the Pages origin, `connect-src 'self'` | built on the depth preview | `apps/web/wrangler.jsonc`, `apps/web/functions/` | `apps/web/tests/pages-proxy.spec.ts` | Technical | data tools |
 | Launch gate and judges gate, split | built | `scripts/preflight.py` | `scripts/tests/test_preflight.py` | Feasibility | data tools |
 | Daily backup, manual runs only until the secrets exist | parked (Update 10 A2) | `.github/workflows/backup.yml` | `scripts/tests/test_preflight.py` | Feasibility | data tools |
 | Pre registered analysis plan, refuses before lock | built, not tagged | `evals/usability_analysis.py` | `evals/tests/` | Technical | data tools |
@@ -94,8 +94,8 @@ scale 15.
 
 | Status | Count |
 |---|---|
-| built | 43 |
-| parked | 4 |
+| built | 44 |
+| parked | 3 |
 | missing | 6 |
 
 Counted again on 2026-09-21 after Update 10 tier 1 (all four items). The remaining missing rows are
