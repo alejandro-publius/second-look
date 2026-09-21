@@ -20,11 +20,22 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const PERSIST = join(worker, ".wrangler", "e2e-state");
 const CONTENT = JSON.parse(readFileSync(join(worker, "src", "content.json"), "utf8"));
 
+// Wrangler never gets a terminal here: no metrics prompt, no update check, no stdin to wait on,
+// and a hard time limit so a hang in CI fails with its output instead of eating the job.
+const WRANGLER_ENV = { ...process.env, CI: "true", WRANGLER_SEND_METRICS: "false", NO_UPDATE_NOTIFIER: "1", FORCE_COLOR: "0" };
+
 function wrangler(args, opts = {}) {
-  const result = spawnSync("npx", ["wrangler", ...args], { cwd: worker, encoding: "utf8", ...opts });
-  if (result.status !== 0) {
-    console.error(result.stdout, result.stderr);
-    throw new Error(`wrangler ${args.join(" ")} failed`);
+  const result = spawnSync("npx", ["wrangler", ...args], {
+    cwd: worker,
+    encoding: "utf8",
+    env: WRANGLER_ENV,
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 180_000,
+    ...opts,
+  });
+  if (result.status !== 0 || result.error) {
+    console.error(result.stdout, result.stderr, result.error?.message ?? "");
+    throw new Error(`wrangler ${args.join(" ")} failed${result.error ? ` (${result.error.code})` : ""}`);
   }
   return result.stdout;
 }
@@ -151,13 +162,16 @@ try {
       "--var", `QA_KEY:${QA_KEY}`, "--var", `RAIN_URL:http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
       "--var", "SANDBOX_BASE_URL:http://127.0.0.1:9/fhir", "--show-interactive-dev-session=false",
     ],
-    { cwd: worker, stdio: ["ignore", "pipe", "pipe"] },
+    { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV },
   );
   let devLog = "";
   dev.stdout.on("data", (d) => (devLog += d));
   dev.stderr.on("data", (d) => (devLog += d));
+  dev.on("exit", (code) => {
+    if (code !== null && code !== 0) console.error(`wrangler dev exited with ${code}\n${devLog}`);
+  });
   try {
-    await waitFor(`${BASE}/health`, 60_000);
+    await waitFor(`${BASE}/health`, 120_000);
   } catch (err) {
     console.error(devLog);
     throw err;
