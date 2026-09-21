@@ -21,11 +21,15 @@ const PERSIST = join(worker, ".wrangler", "e2e-state");
 const CONTENT = JSON.parse(readFileSync(join(worker, "src", "content.json"), "utf8"));
 
 // Wrangler never gets a terminal here: no metrics prompt, no update check, no stdin to wait on,
-// and a hard time limit so a hang in CI fails with its output instead of eating the job.
+// and a hard time limit so a hang in CI fails with its output instead of eating the job. The
+// real CLI script is run directly with this Node, not through npx and the bin launcher, which
+// each spawn another process that a kill would leave behind holding the job's output pipes.
 const WRANGLER_ENV = { ...process.env, CI: "true", WRANGLER_SEND_METRICS: "false", NO_UPDATE_NOTIFIER: "1", FORCE_COLOR: "0" };
+const WRANGLER_CLI = join(worker, "node_modules", "wrangler", "wrangler-dist", "cli.js");
+const wranglerArgs = (args) => ["--no-warnings", WRANGLER_CLI, ...args];
 
 function wrangler(args, opts = {}) {
-  const result = spawnSync("npx", ["wrangler", ...args], {
+  const result = spawnSync(process.execPath, wranglerArgs(args), {
     cwd: worker,
     encoding: "utf8",
     env: WRANGLER_ENV,
@@ -39,6 +43,18 @@ function wrangler(args, opts = {}) {
   }
   return result.stdout;
 }
+
+// Whatever happens, this process ends: a stuck request cannot hold the CI job open.
+const watchdog = setTimeout(() => {
+  console.error(`worker e2e: watchdog fired at step "${step}"`);
+  process.exit(3);
+}, 10 * 60_000);
+watchdog.unref();
+let step = "start";
+const at = (name) => {
+  step = name;
+  console.log(`worker e2e: ${name}`);
+};
 
 // A dry week, every hour zero, so the dry pipe question is asked and asks about 5 or more days.
 function rainPayload() {
@@ -142,6 +158,7 @@ let dev = null;
 let rain = null;
 try {
   // 1. Fresh local state: schema, arms, the counter row.
+  at("apply schema and arms");
   spawnSync("rm", ["-rf", PERSIST]);
   wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--file", "schema.sql"]);
   wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--file", "arms.sql"]);
@@ -153,15 +170,16 @@ try {
     res.end(JSON.stringify(rainPayload()));
   });
   await new Promise((r) => rain.listen(RAIN_PORT, "127.0.0.1", r));
+  at("start wrangler dev");
   dev = spawn(
-    "npx",
-    [
-      "wrangler", "dev", "--local", "--port", String(PORT), "--persist-to", PERSIST,
+    process.execPath,
+    wranglerArgs([
+      "dev", "--local", "--port", String(PORT), "--persist-to", PERSIST,
       // The local runtime binary lags the edge; the date only has to be one this binary knows.
       "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
       "--var", `QA_KEY:${QA_KEY}`, "--var", `RAIN_URL:http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
       "--var", "SANDBOX_BASE_URL:http://127.0.0.1:9/fhir", "--show-interactive-dev-session=false",
-    ],
+    ]),
     { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV },
   );
   let devLog = "";
@@ -178,6 +196,7 @@ try {
   }
 
   // 3. Two people who passed, one pipe, one quiet visit downstream.
+  at("sessions and visits");
   const alice = await passingSession();
   const bob = await passingSession();
   const first = await visit(alice, GLADE, GOOD_ANSWERS);
@@ -192,6 +211,7 @@ try {
   assert.ok(near.data.nearby_spot.metres <= 30);
 
   // 4. The record: labels beside answers, the place, the FHIR with the sitting inside.
+  at("the record");
   const record = await api("GET", `/api/spot/${first.spot_id}`);
   assert.equal(record.status, 200);
   assert.equal(record.data.visits.length, 2);
@@ -219,6 +239,7 @@ try {
   assert.equal(validation.data.ig_commit, "b907cf0");
 
   // 5. The city: every number with its ids, the pipe with its referral, the notes below.
+  at("the city");
   const city = await api("GET", "/api/city/strawberry-creek");
   assert.equal(city.status, 200, JSON.stringify(city.data));
   assert.equal(city.data.visits, 3);
@@ -246,6 +267,7 @@ try {
   assert.equal((await api("GET", "/api/city/example")).status, 404);
 
   // 6. The referral and the way back.
+  at("the referral");
   const referral = await api("GET", pipe.referral);
   assert.equal(referral.status, 200, JSON.stringify(referral.data));
   const request = referral.data.entry.map((e) => e.resource).find((r) => r.resourceType === "ServiceRequest");
@@ -258,6 +280,7 @@ try {
   assert.equal((await api("GET", `/api/fhir/referral/${quiet.spot_id}`)).status, 404, "a quiet spot has no referral");
 
   // 7. The quick check, and a photo with its metadata cut out.
+  at("quick check and upload");
   const q = await api("POST", `/api/quick/${first.spot_id}`, { colour: "muddy", smell: "bad", pipe_running: "present" });
   assert.equal(q.status, 200);
   const form = new FormData();
@@ -278,12 +301,14 @@ try {
   assert.equal((await fetch(`${BASE}/api/upload`, { method: "POST", body: bad })).status, 422);
 
   // 8. Two observers: theirs is down here, ours stands alone and the screen is told.
+  at("two observers");
   const pair = await api("GET", "/api/two");
   assert.equal(pair.status, 200);
   assert.equal(pair.data.theirs_status, "down");
   assert.equal(pair.data.ours.resourceType, "Observation");
 
   // 9. Bad input is a plain 422 or 404, never a 500.
+  at("bad input");
   assert.equal((await api("POST", "/api/check/draft", { spot: GLADE, answers: { nothing: "x" }, first_rating: "good", photo_ids: [] })).status, 422);
   assert.equal((await api("POST", "/api/check/draft", { spot: { new: { name: "a@b", latitude: 1, longitude: 1, coarse: true } }, answers: {}, first_rating: null, photo_ids: [] })).status, 422);
   assert.equal((await api("POST", "/api/check/finalize", { draft_id: "visit-nowhere", followup_answers: {}, final_rating: "good" })).status, 404);
@@ -291,6 +316,19 @@ try {
 
   console.log("worker e2e: 9 sections passed against wrangler dev on port", PORT);
 } finally {
-  if (dev) dev.kill("SIGTERM");
   if (rain) rain.close();
+  if (dev) {
+    dev.kill("SIGTERM");
+    await new Promise((resolve) => {
+      const hard = setTimeout(() => {
+        dev.kill("SIGKILL");
+        resolve();
+      }, 5000);
+      dev.on("exit", () => {
+        clearTimeout(hard);
+        resolve();
+      });
+    });
+  }
+  clearTimeout(watchdog);
 }
