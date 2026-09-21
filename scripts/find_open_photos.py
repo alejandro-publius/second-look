@@ -633,7 +633,11 @@ def sheet_html(feature: str, candidates: list[Candidate], ran_at: datetime) -> s
     sides: dict[str, list[Candidate]] = {}
     for c in candidates:
         sides.setdefault(c.side, []).append(c)
+    # A photo we can record today comes first, so a person does not scroll past ones fetch refuses.
+    for items in sides.values():
+        items.sort(key=lambda c: not c.licence.manifest)
     counts = ", ".join(f"{side} {len(items)}" for side, items in sides.items())
+    ready = sum(1 for c in candidates if c.licence.manifest)
     parts: list[str] = [
         "<!doctype html>",
         '<html lang="en"><head><meta charset="utf-8">',
@@ -651,6 +655,8 @@ def sheet_html(feature: str, candidates: list[Candidate], ran_at: datetime) -> s
         f"<h1>Candidates for {e(feature)}</h1>",
         f"<p>{len(candidates)} candidates ({e(counts)}), "
         f"searched {e(ran_at.strftime('%Y-%m-%d %H:%M UTC'))}.</p>",
+        f"<p>{ready} of them are ready to fetch today. The rest are under a licence version the "
+        "manifest has no entry for, so fetch refuses them until someone widens the allowlist.</p>",
         "<p>Local sheet. Nothing here is in the repo and nothing here is deployed. Thumbnails load "
         "from the source, so this page needs the internet. Every photo below claims CC0, CC BY or "
         "CC BY-SA, and every iNaturalist record below is research grade. You pick, you label. "
