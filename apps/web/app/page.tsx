@@ -16,12 +16,11 @@ export default function Home() {
         <h1>{t("landing.hook")}</h1>
         <LandingPick
           pairLabel={t("landing.pair_label")}
-          thisOne={t("landing.pick_this")}
           guessKept={t("landing.guess_kept")}
           cta={t("landing.cta")}
           sides={[
-            { id: left.id, photo: <Photo id={left.photo_id} priority />, pickLabel: t("warmup.pick_left") },
-            { id: right.id, photo: <Photo id={right.photo_id} priority />, pickLabel: t("warmup.pick_right") },
+            { id: left.id, photo: <Photo id={left.photo_id} priority />, pickLabel: t("landing.pick_left") },
+            { id: right.id, photo: <Photo id={right.photo_id} priority />, pickLabel: t("landing.pick_right") },
           ]}
         />
       </section>
@@ -29,8 +28,9 @@ export default function Home() {
       <p>{t("landing.first_line")}</p>
       <p className="small muted">{t("app.one_sentence")}</p>
       <nav className="site-footer" aria-label={t("nav.more")}>
-        <Link href="/demo">{t("nav.demo")}</Link> <Link href="/check">{t("nav.check")}</Link>{" "}
-        <Link href="/how-we-know">{t("nav.how_we_know")}</Link> <Link href="/two">{t("nav.two")}</Link>
+        <Link href="/demo">{t("nav.demo")}</Link> <Link href="/how-we-know">{t("nav.how_we_know")}</Link>{" "}
+        <Link href="/check">{t("nav.check")}</Link> <Link href="/two">{t("nav.two")}</Link>{" "}
+        <Link href="/privacy">{t("nav.privacy")}</Link>
       </nav>
       <LandingClient />
     </div>

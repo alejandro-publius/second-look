@@ -32,10 +32,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {t("nav.skip")}
         </a>
         <header className="site-header">
-          <Link href="/">{t("app.name")}</Link>
+          <Link href="/" translate="no">
+            {t("app.name")}
+          </Link>
           <nav className="site-nav" aria-label={t("nav.label")}>
             <Link href="/about">{t("nav.about")}</Link>
-            <Link href="/privacy">{t("nav.privacy")}</Link>
           </nav>
         </header>
         <main id="main" tabIndex={-1}>

@@ -47,13 +47,13 @@ const contentFiles = [...walk(join(repo, "content"), [".yaml", ".json"])];
 
 // 1. Dashes, emoji, middle dot as a separator, an arrow in a label.
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{1F000}-\u{1F2FF}]/u;
-const ARROW = /[←-⇿⟰-⟿⬀-⯿]|->(?=["'\s<])/;
+const ARROW = /[\u2190-\u21FF\u27F0-\u27FF\u2B00-\u2BFF]|->(?=["'\s<])/;
 for (const f of [...code, ...contentFiles]) {
   lines(f).forEach((l, i) => {
-    if (l.includes("—")) fail(f, i + 1, "em dash");
-    if (l.includes("–")) fail(f, i + 1, "en dash");
+    if (l.includes("\u2014")) fail(f, i + 1, "em dash");
+    if (l.includes("\u2013")) fail(f, i + 1, "en dash");
     if (EMOJI.test(l)) fail(f, i + 1, "emoji");
-    if (/\s·\s/.test(l)) fail(f, i + 1, "middle dot used as a separator");
+    if (/\s\u00B7\s/.test(l)) fail(f, i + 1, "middle dot used as a separator");
     if (ARROW.test(l) && !/aria-|eslint|\/\//.test(l)) fail(f, i + 1, "arrow in a label");
   });
 }
@@ -90,14 +90,16 @@ for (const f of [...code, join(web, "package.json")]) {
   });
 }
 
-// 5. Raw colour, gradient, glow, pixel radius outside tokens.css.
-for (const f of [...cssFiles, ...tsxFiles]) {
+// 5. Raw colour, gradient, glow, raw size outside tokens.css. Every source kind, not just CSS.
+const tsFiles = code.filter((f) => f.endsWith(".ts"));
+for (const f of [...cssFiles, ...tsxFiles, ...tsFiles]) {
   if (f === TOKENS || f === THEME) continue;
   lines(f).forEach((l, i) => {
     if (/#[0-9a-fA-F]{3}\b|#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{8}\b/.test(l)) fail(f, i + 1, "raw hex colour outside tokens.css");
     if (/\b(rgb|rgba|hsl|hsla)\(/.test(l)) fail(f, i + 1, "raw colour function outside tokens.css");
     if (/(linear|radial|conic)-gradient/.test(l)) fail(f, i + 1, "gradient");
     if (/border-radius:\s*[^;]*\d+(px|rem|em)/.test(l)) fail(f, i + 1, "raw radius, use var(--radius)");
+    if (/\b(font-size|stroke-width|outline-width|border-width|letter-spacing|text-decoration-thickness)\s*:\s*[^;]*\b\d/.test(l)) fail(f, i + 1, "raw size, use a token");
     if (/text-shadow|drop-shadow|filter:\s*blur/.test(l)) fail(f, i + 1, "glow");
     if (/box-shadow:/.test(l) && !/inset/.test(l) && !/var\(--shadow/.test(l)) fail(f, i + 1, "glow or untokenised shadow");
   });
@@ -109,9 +111,20 @@ for (const f of [...cssFiles, ...tsxFiles]) {
   const theme = readFileSync(THEME, "utf8");
   const light = tok.match(/--bg:\s*(#[0-9a-fA-F]{6});/);
   const dark = tok.slice(tok.indexOf("prefers-color-scheme: dark")).match(/--bg:\s*(#[0-9a-fA-F]{6});/);
-  const printInk = tok.match(/--print-ink:\s*(#[0-9a-fA-F]{6});/);
-  const printPaper = tok.match(/--print-paper:\s*(#[0-9a-fA-F]{6});/);
-  for (const [name, want] of [["THEME_LIGHT", light?.[1]], ["THEME_DARK", dark?.[1]], ["PRINT_INK", printInk?.[1]], ["PRINT_PAPER", printPaper?.[1]]]) {
+  const lightBlock = tok.slice(0, tok.indexOf("prefers-color-scheme: dark"));
+  const one = (name) => lightBlock.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6});`))?.[1];
+  const mirrors = [
+    ["THEME_LIGHT", light?.[1]],
+    ["THEME_DARK", dark?.[1]],
+    ["PRINT_INK", one("--print-ink")],
+    ["PRINT_PAPER", one("--print-paper")],
+    ["CARD_SURFACE", one("--surface")],
+    ["CARD_INK", one("--ink")],
+    ["CARD_INK_SOFT", one("--ink-soft")],
+    ["CARD_FLAG", one("--flag")],
+    ["CARD_LINE", one("--line-strong")],
+  ];
+  for (const [name, want] of mirrors) {
     const got = theme.match(new RegExp(`${name} = "(#[0-9a-fA-F]{6})"`))?.[1];
     if (!want || got?.toLowerCase() !== want.toLowerCase()) fails.push(`apps/web/app/theme.ts:1 ${name} is ${got} but tokens.css says ${want}`);
   }
@@ -154,6 +167,8 @@ function tokenSet(text) {
     ["--bad", "--bad-bg", 4.5],
     ["--line-strong", "--surface", 3],
     ["--line-strong", "--bg", 3],
+    // A filled gauge block against an empty one. The gauge is the one graphic that carries meaning.
+    ["--flag", "--surface", 3],
   ];
   for (const [scheme, set] of [["light", light], ["dark", dark]]) {
     for (const [fg, bg, min] of PAIRS) {

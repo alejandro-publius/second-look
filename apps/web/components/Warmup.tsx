@@ -20,7 +20,7 @@ export function Warmup({ onChoice }: { onChoice: (warmupId: string) => void }) {
         {[left, right].map((w, i) => (
           <div key={w.id}>
             <PhotoFrame id={w.photo_id} priority />
-            <Button block kind="secondary" onClick={() => onChoice(w.id)} aria-label={t(i === 0 ? "warmup.pick_left" : "warmup.pick_right")}>
+            <Button block kind="secondary" onClick={() => onChoice(w.id)}>
               {t(i === 0 ? "warmup.left" : "warmup.right")}
             </Button>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "./ui/Button";
+import { Icon } from "./ui/Icon";
 import { Gauge } from "./ui/Gauge";
 import { Row } from "./ui/Row";
 import type { FeatureScoreOut } from "@/lib/api";
@@ -14,7 +15,7 @@ import { t } from "@/lib/t";
  * says what the score is for, then the share card. No confetti. Never per-photo answers.
  */
 export function ScoreScreen({ scores, correctTotal, token, children }: { scores: FeatureScoreOut[]; correctTotal: number; token?: string; children?: React.ReactNode }) {
-  const [copied, setCopied] = useState<"none" | "share" | "token">("none");
+  const [copied, setCopied] = useState<"none" | "share" | "token" | "failed">("none");
   const total = scores.reduce((n, s) => n + s.total, 0) || 16;
   const shareText = t("end.share", { correct: correctTotal, total });
   const shareUrl = `${siteUrl()}/share/${correctTotal}?src=friends`;
@@ -39,7 +40,7 @@ export function ScoreScreen({ scores, correctTotal, token, children }: { scores:
       setCopied(what);
       window.setTimeout(() => setCopied("none"), 2500);
     } catch {
-      setCopied("none");
+      setCopied("failed");
     }
   }
 
@@ -64,10 +65,16 @@ export function ScoreScreen({ scores, correctTotal, token, children }: { scores:
       {token ? (
         <section className="card stack" aria-labelledby="token-title">
           <h2 id="token-title">{t("end.token_title")}</h2>
-          <p className="token" data-testid="contributor-token">
+          <p className="token" data-testid="contributor-token" translate="no">
             {token}
           </p>
           <p className="small">{t("end.token_note")}</p>
+          {copied === "failed" ? (
+            <div className="notice notice-warn" role="status">
+              <Icon name="warning" />
+              <p>{t("end.copy_failed")}</p>
+            </div>
+          ) : null}
           <Button kind="secondary" block onClick={() => copy(token, "token")}>
             {copied === "token" ? t("end.copied") : t("end.copy_token")}
           </Button>

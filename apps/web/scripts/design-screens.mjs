@@ -24,12 +24,17 @@ async function open(colorScheme = "light", viewport = PHONE) {
 
 async function shot(page, name) {
   await page.waitForFunction(() => Array.from(document.images).every((i) => i.complete)).catch(() => undefined);
+  // Move the pointer off the last thing clicked, or one choice ships looking different from the
+  // other two, in a study whose point is that the three answers carry equal weight.
+  await page.mouse.move(0, 0);
   const path = join(out, `${name}.png`);
-  await page.screenshot({ path });
+  await page.screenshot({ path, animations: "disabled" });
   console.log(`design-screens: ${path}`);
 }
 
 const click = (page, name, exact = true) => page.getByRole("button", { name, exact }).click();
+// The pick button contains the photograph, so its accessible name starts with the image alt text.
+const pick = (page) => page.getByRole("button", { name: "This creek, on the left" }).click();
 
 // Walks consent to the screen asked for. lessonFirst is on, so the lesson comes before the test.
 async function walk(page, to) {
@@ -39,7 +44,7 @@ async function walk(page, to) {
   await page.getByLabel("I understand and agree to take part.").check();
   await page.getByLabel("I am 18 or older.").check();
   await click(page, "I agree, start");
-  await click(page, "Pick the left creek");
+  await pick(page);
   await page.locator(".gauge-count").first().waitFor();
   if (to === "lesson") return;
   for (let f = 0; f < 4; f++) {
@@ -61,7 +66,7 @@ async function walk(page, to) {
   const page = await open();
   await page.goto(`${base}/?src=poster`);
   await shot(page, "01-landing");
-  await click(page, "Pick the left creek");
+  await pick(page);
   await shot(page, "02-landing-guess");
   await page.close();
 }

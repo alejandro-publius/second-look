@@ -12,7 +12,7 @@ export async function passConsent(page: Page) {
 }
 
 export async function pickWarmup(page: Page) {
-  await page.getByRole("button", { name: "Pick the left creek" }).click();
+  await page.getByRole("button", { name: "This creek, on the left" }).click();
 }
 
 /** Walks the whole lesson: rule, second pair, practice for each of four features. */

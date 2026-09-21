@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FocusHeading } from "./FocusHeading";
-import { Button } from "./ui/Button";
+import { Button, ButtonLink } from "./ui/Button";
 import { Icon } from "./ui/Icon";
 import { t } from "@/lib/t";
 
@@ -29,6 +29,12 @@ export function Consent({ onStart }: { onStart: (hiddenField: string) => void })
 
   return (
     <form className="stack" onSubmit={submit} noValidate>
+      <p className="small">
+        <ButtonLink href="/" kind="quiet">
+          <Icon name="caret-left" size={20} />
+          {t("nav.back")}
+        </ButtonLink>
+      </p>
       <FocusHeading>{t("consent.title")}</FocusHeading>
       <p>{t("consent.what")}</p>
       <p>{t("consent.stored")}</p>

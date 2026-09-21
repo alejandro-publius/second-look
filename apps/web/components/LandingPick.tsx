@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { ButtonLink } from "./ui/Button";
 
 /**
  * The opening question. The two photographs are the control, not decoration: tapping one is the
@@ -14,10 +14,11 @@ import Link from "next/link";
 export interface PickSide {
   id: string;
   photo: React.ReactNode;
+  /** The visible label. It also has to be the accessible name, so speech control can say it. */
   pickLabel: string;
 }
 
-export function LandingPick({ sides, thisOne, guessKept, cta, pairLabel }: { sides: [PickSide, PickSide]; thisOne: string; guessKept: string; cta: string; pairLabel: string }) {
+export function LandingPick({ sides, guessKept, cta, pairLabel }: { sides: [PickSide, PickSide]; guessKept: string; cta: string; pairLabel: string }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [href, setHref] = useState("/t");
 
@@ -39,20 +40,18 @@ export function LandingPick({ sides, thisOne, guessKept, cta, pairLabel }: { sid
     <>
       <div className="pair" role="group" aria-label={pairLabel}>
         {sides.map((s) => (
-          <button key={s.id} type="button" className="landing-pick" aria-pressed={picked === s.id} onClick={() => pick(s.id)} aria-label={s.pickLabel}>
+          <button key={s.id} type="button" className="landing-pick" aria-pressed={picked === s.id} onClick={() => pick(s.id)}>
             {s.photo}
-            <span className="pick-label">{thisOne}</span>
+            <span className="pick-label">{s.pickLabel}</span>
           </button>
         ))}
       </div>
-      {picked ? (
-        <p className="landing-answer small muted" role="status">
-          {guessKept}
-        </p>
-      ) : null}
-      <Link href={href} className="btn btn-block" id="cta">
+      <p className="landing-answer small muted" role="status">
+        {picked ? guessKept : null}
+      </p>
+      <ButtonLink href={href} block>
         {cta}
-      </Link>
+      </ButtonLink>
     </>
   );
 }

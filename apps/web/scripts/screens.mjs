@@ -33,7 +33,7 @@ await page.getByLabel("I understand and agree to take part.").check();
 await page.getByLabel("I am 18 or older.").check();
 await click("I agree, start");
 await shot("warmup");
-await click("Pick the left creek");
+await click("This creek, on the left");
 await page.locator(".gauge-count").first().waitFor();
 await shot("lesson-rule");
 await click("Next photo");

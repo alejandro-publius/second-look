@@ -28,7 +28,7 @@ test("keyboard only: consent, warm-up and one test item, never landing on the hi
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: "Which creek is healthier?" })).toBeVisible();
   // The heading takes focus, so the next Tab lands on the first photo's button.
-  await tabTo((el) => el.tag === "BUTTON" && el.text === "This one");
+  await tabTo((el) => el.tag === "BUTTON" && el.text === "This creek, on the left");
   await page.keyboard.press("Enter");
   await expect(page.getByText("Photo 1 of 16")).toBeVisible();
   await tabTo((el) => el.tag === "BUTTON" && el.text === "Yes");

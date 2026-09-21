@@ -58,6 +58,12 @@ export function DemoFlow({ scripted }: { scripted: boolean }) {
               </span>
             </p>
           ) : null}
+          <div className="card" role="group" aria-label={t("end.per_feature_label")}>
+            {FEATURE_IDS.map((f) => {
+              const feature = featureById(f);
+              return <Row key={f} label={feature?.name ?? f} value={feature?.plain} />;
+            })}
+          </div>
           <div className="actions">
             <Button block onClick={() => setStage({ name: "test" })}>
               {t("demo.start")}

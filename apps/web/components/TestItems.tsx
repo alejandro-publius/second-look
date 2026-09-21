@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnswerButtons } from "./AnswerButtons";
 import { FocusHeading } from "./FocusHeading";
 import { findTerm, Glossary, GlossaryAside } from "./Glossary";
-import { Button } from "./ui/Button";
+import { Button, ButtonLink } from "./ui/Button";
 import { Gauge } from "./ui/Gauge";
 import { Icon } from "./ui/Icon";
 import { PhotoFrame } from "./ui/PhotoFrame";
@@ -26,20 +26,42 @@ type OnAnswer = (itemId: string, answer: TestAnswer, rtMs: number, position: num
 export function TestItems({ order, onAnswer, onDone, withFeedback = false }: { order: string[]; onAnswer: OnAnswer; onDone: () => void; withFeedback?: boolean; titleKey?: string }) {
   const [index, setIndex] = useState(0);
   const itemId = order[index];
-  if (!itemId) return null;
+  if (!itemId) return <Nothing />;
   const last = index + 1 >= order.length;
   return (
-    <ItemScreen
-      key={itemId}
-      itemId={itemId}
-      nextItemId={order[index + 1]}
-      position={index + 1}
-      total={order.length}
-      withFeedback={withFeedback}
-      onAnswer={onAnswer}
-      last={last}
-      onAdvance={() => (last ? onDone() : setIndex(index + 1))}
-    />
+    <div className="stack">
+      {/* The gauge sits outside the keyed screen below, so the live region is the same node from
+          item to item and a screen reader actually hears the count change. */}
+      <Gauge value={index + 1} total={order.length} countText={t("test.progress", { n: index + 1, total: order.length })} live />
+      <ItemScreen
+        key={itemId}
+        itemId={itemId}
+        nextItemId={order[index + 1]}
+        position={index + 1}
+        total={order.length}
+        withFeedback={withFeedback}
+        onAnswer={onAnswer}
+        last={last}
+        onAdvance={() => (last ? onDone() : setIndex(index + 1))}
+      />
+    </div>
+  );
+}
+
+/** Nothing to show: say what happened and offer the way back, never a blank page. */
+export function Nothing() {
+  return (
+    <div className="stack">
+      <div className="notice notice-warn" role="status">
+        <Icon name="info" />
+        <p>{t("error.nothing_here")}</p>
+      </div>
+      <div className="actions">
+        <ButtonLink href="/" block kind="secondary">
+          {t("error.start_over")}
+        </ButtonLink>
+      </div>
+    </div>
   );
 }
 
@@ -63,12 +85,15 @@ function ItemScreen({
   onAdvance: () => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const [keyboard, setKeyboard] = useState(false);
   const [feedback, setFeedback] = useState<ItemAnswerResult | null>(null);
   const shownAt = useRef(0);
   const answered = useRef(false);
 
   useEffect(() => {
     shownAt.current = performance.now();
+    // Only tell a person about Y, N and C if they have a keyboard to press them on.
+    setKeyboard(window.matchMedia("(hover: hover) and (pointer: fine)").matches);
   }, []);
 
   const item = testItemById(itemId);
@@ -123,7 +148,6 @@ function ItemScreen({
     <div className="stack">
       {/* The next photo is fetched while this one is being answered. */}
       {nextPhoto ? <link rel="preload" as="image" href={nextPhoto.url} /> : null}
-      <Gauge value={position} total={total} countText={t("test.progress", { n: position, total })} live />
       <PhotoFrame id={item.photo_id} large priority enlargeable />
       <FocusHeading>
         <Glossary text={feature.question} term={feature.glossary_term} definition={definition} />
@@ -144,7 +168,7 @@ function ItemScreen({
       ) : (
         <>
           <AnswerButtons onAnswer={answer} disabled={busy} />
-          <p className="small muted">{t("test.keys_hint")}</p>
+          {keyboard ? <p className="small muted">{t("test.keys_hint")}</p> : null}
         </>
       )}
     </div>

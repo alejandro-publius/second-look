@@ -7,6 +7,7 @@ import { Button } from "./ui/Button";
 import { Gauge } from "./ui/Gauge";
 import { Icon } from "./ui/Icon";
 import { PhotoFrame } from "./ui/PhotoFrame";
+import { Nothing } from "./TestItems";
 import type { TestAnswer } from "@/lib/api";
 import { featureById, lessonFor, type ContrastPair, type FeatureId, type Lesson as LessonContent } from "@/lib/content";
 import { t } from "@/lib/t";
@@ -39,10 +40,10 @@ export function Lesson({ features, onDone }: { features: FeatureId[]; onDone: (s
   }, [index]);
 
   const screen = screens[index];
-  if (!screen) return null;
+  if (!screen) return <Nothing />;
   const feature = featureById(screen.feature);
   const lesson = lessonFor(screen.feature);
-  if (!feature || !lesson) return null;
+  if (!feature || !lesson) return <Nothing />;
 
   function next() {
     const s = screens[index];
@@ -57,15 +58,24 @@ export function Lesson({ features, onDone }: { features: FeatureId[]; onDone: (s
 
   return (
     <div className="stack" key={screen.id}>
-      <Gauge value={featureNo} total={features.length} countText={feature.name} srText={t("gauge.lesson_label", { value: featureNo, total: features.length })} live />
-      {!lesson.approved ? (
-        <span className="badge badge-warn">
-          <Icon name="warning" size={16} />
-          {t("lesson.draft_badge")}
-        </span>
+      {index > 0 ? (
+        <p className="small">
+          <button type="button" className="btn btn-quiet" onClick={() => setIndex(index - 1)}>
+            <Icon name="caret-left" size={20} />
+            {t("nav.back")}
+          </button>
+        </p>
       ) : null}
+      {/* The count says which job the gauge is doing here: how far through the lesson, not a score. */}
+      <Gauge value={featureNo} total={features.length} countText={t("gauge.lesson_count", { feature: feature.name, value: featureNo, total: features.length })} live />
       {/* The rule of thumb is the heading of the card, not a callout underneath it. */}
       <FocusHeading>{lesson.rule_of_thumb}</FocusHeading>
+      {!lesson.approved ? (
+        <div className="notice notice-warn">
+          <Icon name="warning" />
+          <p>{t("lesson.draft_badge")}</p>
+        </div>
+      ) : null}
       {screen.kind === "practice" ? (
         <PracticeScreen lesson={lesson} question={feature.question} onNext={next} last={last} />
       ) : (
@@ -86,7 +96,7 @@ export function Lesson({ features, onDone }: { features: FeatureId[]; onDone: (s
 function Pair({ pair }: { pair: ContrastPair | undefined }) {
   if (!pair) return null;
   return (
-    <div className="pair">
+    <div className="pair lesson-pair">
       <PhotoFrame
         id={pair.assume_photo_id}
         priority

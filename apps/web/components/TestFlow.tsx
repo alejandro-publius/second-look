@@ -31,7 +31,7 @@ type Stage =
 export function TestFlow() {
   const [stage, setStage] = useState<Stage>({ name: "consent" });
   const pending = useRef<Promise<void>[]>([]);
-  const failed = useRef(0);
+  const [failed, setFailed] = useState(0);
   const [prior, setPrior] = useState<"yes" | "no" | null>(null);
   const [keep, setKeep] = useState(false);
 
@@ -64,9 +64,13 @@ export function TestFlow() {
 
   function onAnswer(session: SessionResponse) {
     return (itemId: string, answer: TestAnswer, rtMs: number, position: number) => {
-      const p = api.sendResponse({ session_id: session.session_id, item_id: itemId, answer, rt_ms: rtMs, position }).catch(() => {
-        failed.current += 1;
-      });
+      const p = api
+        .sendResponse({ session_id: session.session_id, item_id: itemId, answer, rt_ms: rtMs, position })
+        // One retry, then say so on the screen. A silent hole in the data is worse than a slow screen.
+        .catch(() => api.sendResponse({ session_id: session.session_id, item_id: itemId, answer, rt_ms: rtMs, position }))
+        .catch(() => {
+          setFailed((n) => n + 1);
+        });
       pending.current.push(p);
     };
   }
@@ -110,7 +114,17 @@ export function TestFlow() {
         />
       );
     case "test":
-      return <TestItems order={stage.session.item_order} onAnswer={onAnswer(stage.session)} onDone={() => setStage({ name: "before_score", session: stage.session })} />;
+      return (
+        <>
+          {failed > 0 ? (
+            <div className="notice notice-warn" role="status">
+              <Icon name="wifi-slash" />
+              <p>{t("test.some_unsent")}</p>
+            </div>
+          ) : null}
+          <TestItems order={stage.session.item_order} onAnswer={onAnswer(stage.session)} onDone={() => setStage({ name: "before_score", session: stage.session })} />
+        </>
+      );
     case "before_score":
       return (
         <form

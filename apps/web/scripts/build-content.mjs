@@ -141,8 +141,9 @@ function pngChunk(type, data) {
 }
 
 function iconPng(size) {
-  const bg = [0x1f, 0x3a, 0x2e];
-  const fg = [0xfb, 0xfa, 0xf6];
+  // --ink and --bg from apps/web/styles/tokens.css. design-check keeps them honest.
+  const bg = [0x14, 0x21, 0x1e];
+  const fg = [0xf4, 0xf6, 0xf5];
   const raw = Buffer.alloc((size * 3 + 1) * size);
   const cx = size / 2;
   const cy = size / 2;

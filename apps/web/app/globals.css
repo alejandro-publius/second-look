@@ -71,9 +71,16 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid var(--ink);
+  outline: var(--outline) solid var(--ink);
   outline-offset: 2px;
   border-radius: var(--s1);
+}
+
+/* A heading takes focus when a screen appears, so a screen reader follows it. That is not a
+   pointer or keyboard focus and it must not draw a box round the first thing a person reads. */
+h1[tabindex="-1"]:focus-visible,
+h2[tabindex="-1"]:focus-visible {
+  outline: none;
 }
 
 .icon {
@@ -140,7 +147,17 @@ main {
   width: 100%;
   max-width: 40rem;
   margin: 0 auto;
-  padding: var(--s4) var(--s4) calc(var(--s8) + env(safe-area-inset-bottom));
+  padding: var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+main > .stack,
+main > form.stack,
+main > .landing-hero {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .site-footer {
@@ -192,8 +209,17 @@ main {
   border-color: var(--flag-press);
 }
 
-.btn:active {
+.btn:active,
+.choice:active,
+.landing-pick:active {
   transform: scale(0.99);
+}
+
+.choice:active,
+.landing-pick:active,
+.sheet-close:active,
+.glossary-btn:active {
+  background: var(--surface-sunk);
 }
 
 .btn:disabled,
@@ -244,12 +270,16 @@ main {
 
 /* The primary action sits in thumb reach at the bottom of the flow. */
 .actions {
-  position: sticky;
-  bottom: 0;
   display: grid;
   gap: var(--s2);
   padding: var(--s3) 0 calc(var(--s3) + env(safe-area-inset-bottom));
   background: var(--bg);
+}
+
+/* Two classes, so this beats `.stack > * + *` whatever the source order. Sticky can only hold an
+   element up against the bottom edge; it can never push one down into thumb reach. */
+.stack > .actions {
+  margin-top: auto;
 }
 
 .stack > * + * {
@@ -275,6 +305,13 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s3);
+}
+
+/* The lesson pair is evidence. On a phone a photograph you can read beats two you cannot. */
+@media (max-width: 599px) {
+  .lesson-pair {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pair figure {
@@ -325,13 +362,13 @@ figcaption {
 .mark-dot {
   fill: var(--flag);
   stroke: var(--ink);
-  stroke-width: 2;
+  stroke-width: var(--border);
 }
 
 .mark-num {
   fill: var(--on-flag);
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: var(--mark-num-size);
   font-weight: 700;
 }
 
@@ -393,7 +430,8 @@ figcaption {
 .gauge-block {
   flex: 1 1 0;
   height: var(--gauge-height);
-  background: var(--surface-sunk);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line-strong);
 }
 
 .gauge-block.is-full {
@@ -420,14 +458,13 @@ figcaption {
 }
 
 .gauge-hollow .gauge-block.is-full {
-  background: var(--surface-sunk);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line-strong);
+  background: var(--surface);
 }
 
 /* Row: a label, a value, and an optional gauge at the right. */
 .row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--s3);
   padding: var(--s3) 0;
@@ -441,6 +478,7 @@ figcaption {
 .row-label {
   min-width: 0;
   font-weight: 700;
+  text-wrap: balance;
 }
 
 .row-value {
@@ -453,6 +491,7 @@ figcaption {
   display: flex;
   align-items: center;
   gap: var(--s2);
+  padding-top: var(--s1);
 }
 
 /* Bottom sheet. */
@@ -766,7 +805,7 @@ input[type="range"] {
   min-height: var(--tap);
   color: var(--ink);
   text-decoration: underline dotted;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: var(--border);
   text-underline-offset: 0.2em;
   cursor: pointer;
   text-align: left;
@@ -795,7 +834,7 @@ input[type="range"] {
 }
 
 .timeline > li {
-  border-left: 3px solid var(--line);
+  border-left: var(--outline) solid var(--line);
   padding: 0 0 var(--s4) var(--s4);
   margin: 0;
   position: relative;
@@ -847,7 +886,7 @@ pre.code {
 .token {
   font-family: var(--font-mono);
   font-size: var(--text-h3);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--token-tracking);
   padding: var(--s3) var(--s4);
   background: var(--surface);
   border: var(--border) dashed var(--flag);
@@ -862,12 +901,22 @@ pre.code {
   min-height: calc(100dvh - var(--s8) - var(--s7));
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--s4);
 }
 
+/* The photographs keep a sane crop: a stretched frame would cut a creek in half. All the slack
+   is collected in one place, above the button, so nothing floats in the middle of the screen. */
+.landing-top .pair {
+  flex: 0 0 auto;
+}
+
 .landing-top .photo {
-  aspect-ratio: 3 / 4;
+  aspect-ratio: var(--landing-photo-ratio);
+}
+
+.landing-top > .btn {
+  margin-top: auto;
 }
 
 .landing-hero h1 {
@@ -901,8 +950,10 @@ pre.code {
   font-weight: 700;
 }
 
+/* The answer line is always in the layout, so tapping a photograph never moves it. */
 .landing-answer {
-  opacity: 1;
+  min-height: var(--s6);
+  margin: 0;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -945,6 +996,17 @@ pre.code {
   }
 }
 
+/* A laptop is only good for one thing here: two creek photographs big enough to compare. */
+@media (min-width: 900px) {
+  body:has(.landing-hero) main {
+    max-width: 64rem;
+  }
+
+  .landing-top .photo {
+    aspect-ratio: 4 / 3;
+  }
+}
+
 /* Poster: print sizes. Real black on real white is correct on paper. */
 .poster {
   background: var(--print-paper);
@@ -960,7 +1022,7 @@ pre.code {
 }
 
 .poster h1 {
-  font-size: 3rem;
+  font-size: var(--text-poster);
   margin: 0;
 }
 

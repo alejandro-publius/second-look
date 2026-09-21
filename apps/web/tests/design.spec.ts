@@ -35,7 +35,7 @@ test("tap targets: landing and judge mode", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Which creek is healthier?" })).toBeVisible();
   await tapTargets(page, "/");
-  await page.getByRole("button", { name: "Pick the left creek" }).click();
+  await page.getByRole("button", { name: "This creek, on the left" }).click();
   await tapTargets(page, "/ after the guess");
   await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Judge mode" })).toBeVisible();
@@ -51,7 +51,7 @@ test("tap targets: consent, test item, lesson card and the end screen", async ({
   await page.getByLabel("I understand and agree to take part.").check();
   await page.getByLabel("I am 18 or older.").check();
   await page.getByRole("button", { name: "I agree, start" }).click();
-  await page.getByRole("button", { name: "Pick the left creek" }).click();
+  await page.getByRole("button", { name: "This creek, on the left" }).click();
 
   await expect(page.getByText("Built banks")).toBeVisible();
   await tapTargets(page, "lesson card");

@@ -48,6 +48,13 @@
   --radius-pill: 999px;
   --hairline: 1px;
   --border: 2px;
+  --outline: 3px;
+  --mark-num-size: 18px;
+  --token-tracking: 0.08em;
+  /* The landing crop. Two photographs side by side on a 390px phone are about 170px wide, so the
+     height is the only dial. Retune this once Rachel's real creek photographs land. */
+  --landing-photo-ratio: 3 / 4;
+  --text-poster: 3rem;
 
   /* Type */
   --font-body: var(--font-hyperlegible), system-ui, sans-serif;
