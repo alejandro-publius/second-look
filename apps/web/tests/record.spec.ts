@@ -5,7 +5,7 @@ import { BASE } from "./helpers";
 test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR view and curl", async ({ page }) => {
   const urls = watchRequests(page);
   const calls = await mockApi(page);
-  await page.goto("/spot/example");
+  await page.goto("/spot?id=example");
   await expect(page.getByRole("heading", { name: "Footbridge below the library" })).toBeVisible();
   await expect(page.getByText("Campus reach, Strawberry Creek")).toBeVisible();
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
@@ -25,13 +25,13 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText('"resourceType": "Bundle"')).toBeVisible();
   expect(calls.some((c) => c.path === "/api/spot/example/fhir")).toBe(true);
   expect(calls.some((c) => c.path === "/api/fhir/validation")).toBe(true);
-  await expect(page.getByRole("link", { name: "20 second return check" })).toHaveAttribute("href", "/quick/example");
+  await expect(page.getByRole("link", { name: "20 second return check" })).toHaveAttribute("href", "/quick?spot=example");
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
 });
 
 test("/spot/unknown says there is no record", async ({ page }) => {
   await mockApi(page);
-  await page.goto("/spot/unknown");
+  await page.goto("/spot?id=unknown");
   await expect(page.getByText("No record for this spot.")).toBeVisible();
 });
 
@@ -52,7 +52,7 @@ test("/two renders both observers with one card and says plainly when theirs is 
 
 test("/quick/example posts the fixed enums", async ({ page }) => {
   const calls = await mockApi(page);
-  await page.goto("/quick/example");
+  await page.goto("/quick?spot=example");
   await expect(page.getByRole("heading", { name: "20 second check" })).toBeVisible();
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Pick a colour" })).toBeVisible();
@@ -63,7 +63,7 @@ test("/quick/example posts the fixed enums", async ({ page }) => {
   await expect(page.getByText("Saved. Thank you.")).toBeVisible();
   const q = calls.find((c) => c.path === "/api/quick/example")!;
   expect(q.body).toEqual({ colour: "muddy", smell: "bad", pipe_running: "present" });
-  await expect(page.getByRole("link", { name: "See the record" })).toHaveAttribute("href", "/spot/example");
+  await expect(page.getByRole("link", { name: "See the record" })).toHaveAttribute("href", "/spot?id=example");
 });
 
 test("share card route returns an SVG built from the score and rejects bad scores", async ({ request }) => {

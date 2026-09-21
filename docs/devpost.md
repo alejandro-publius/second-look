@@ -18,7 +18,7 @@ OneAquaHealth says citizen data should have the same standing as lab data, under
 
 ## Innovation and practical value
 
-The idea is small and, as far as we know, new for citizen science: measure each volunteer, per feature, and store the measure with the data. Three things follow. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer instead of a blended grade. A follow-up question is chosen by code from the answers, the person's scores, and the weather, two at most, for example "It has not rained here for N days. Is anything coming out of that pipe?" And a group of volunteers can be weighed by what they proved on the other photos of the same feature; the consensus analysis reports whether that beats a plain vote (SYNTHETIC PLACEHOLDER until lock). The lesson is checked on strangers: half get the two minutes, half do not, everyone judges the same 16 photos, and the counting rules were published before anyone took it.
+The idea is small and, as far as we know, new for citizen science: measure each volunteer, per feature, and store the measure with the data. Three things follow. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer instead of a blended grade. A follow-up question is chosen by code from the answers, the person's scores, and the weather, two at most, for example "It has not rained here for N days. Is anything coming out of that pipe?" We do not weight a group's vote by these scores: our own simulation says four photos per feature is too coarse for that, and a plain majority won. The lesson is checked on strangers: half get the two minutes, half do not, everyone judges the same 16 photos, and the counting rules were published before anyone took it.
 
 ## Effective use of data, technology, AI, APIs and standards
 
@@ -34,7 +34,7 @@ The idea is small and, as far as we know, new for citizen science: measure each 
 - `/check`: the guided creek check, one question per screen, with the dry pipe and rating check follow-ups chosen by code.
 - `/spot/[id]`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card.
 - `/two`: one lab Observation from their sandbox and one volunteer Observation of ours in the same viewer.
-- Results table (SYNTHETIC PLACEHOLDER): untrained people, trained people and each model on the same 16 photos, with the number of people. Primary difference with its 95 percent interval: SYNTHETIC PLACEHOLDER. Consensus with and without scores: SYNTHETIC PLACEHOLDER.
+- Results table (SYNTHETIC PLACEHOLDER): untrained people, trained people and each model on the same 16 photos, with the number of people. Primary difference with its 95 percent interval: SYNTHETIC PLACEHOLDER. Leaving out low scorers, exploratory: SYNTHETIC PLACEHOLDER.
 - Video (3 to 5 minutes): VIDEO_URL_PLACEHOLDER. Repository: https://github.com/alejandro-publius/second-look (public on Sep 30).
 
 ## Devpost form fields, mapped to README sections

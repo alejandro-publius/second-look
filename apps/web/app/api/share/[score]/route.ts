@@ -10,6 +10,13 @@ import { content } from "@/lib/content";
 // is named rather than embedded, because an SVG served as an image cannot load one from us; where
 // it is missing the renderer falls back and the card still reads.
 const TOTAL = 16;
+
+// A static export has no server, so every score is written as a file at build time.
+export const dynamic = "force-static";
+
+export function generateStaticParams() {
+  return Array.from({ length: TOTAL + 1 }, (_, i) => ({ score: String(i) }));
+}
 const BLOCK_W = 55;
 const BLOCK_H = 28;
 const GAP = 8;

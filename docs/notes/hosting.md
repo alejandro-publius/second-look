@@ -1,0 +1,87 @@
+# Hosting: what was tried, what won, and why
+
+Update 09 section 2. Vercel and Fly.io are dropped. Nothing here needs a card.
+
+Cloudflare account: `thealexschroeder@gmail.com`, account id `b8a915bd28ade9fec05659028b395865`.
+`npx wrangler whoami` was already logged in, so nothing is waiting on Alex to run a command.
+
+## Web: static export to Cloudflare Pages. This won.
+
+The Next app now builds two ways. The default is still `standalone`, so docker compose, `next
+start` and the whole Playwright suite work exactly as before. `npm run export` sets `NEXT_EXPORT=1`
+and produces a static `out/` for Pages. Four things had to change:
+
+- `/spot/[id]` became `/spot?id=`, and `/quick/[spot]` became `/quick?spot=`. A static export has
+  no server to read a path parameter it cannot know at build time. `components/QueryParam.tsx`
+  reads the query with `useSyncExternalStore`, not `useSearchParams`, because that one forces a
+  Suspense boundary and a client bail out.
+- The share card route and the web app manifest are `dynamic = "force-static"` with
+  `generateStaticParams`, so all seventeen score cards are written as files at build time.
+- `/demo` stopped reading server search params and reads the query in the browser.
+- The security headers moved. `apps/web/security-headers.mjs` is now the single definition, and
+  `scripts/build-headers.mjs` writes `public/_headers` from it for Pages while `next.config.ts`
+  uses it for the server build. A static export gets no headers from Next at all, so without this
+  the strict policy would have silently vanished on deploy. It is verified live below.
+
+Static export cost about 40 minutes, inside its box, so the OpenNext adapter was never needed.
+
+## API: a TypeScript Worker on D1. The Python Worker did not survive the probe.
+
+The brief's first choice was a Python Worker running our FastAPI app and `core/` as they are.
+It fails, for one deep reason and one shallow one.
+
+- **Deep, and decisive: D1 is not a database connection.** FastAPI itself is supported on Python
+  Workers through the ASGI entrypoint, and Cloudflare's own docs say synchronous SQLAlchemy ORMs
+  work. But a D1 binding is `env.DB.prepare(sql).bind(...).run()`. It is not a DBAPI connection
+  and there is no D1 dialect for SQLAlchemy. Our `apps/api/study.py` is SQLModel from top to
+  bottom: `db.exec(select(StudySession)...)`. Making that reach D1 means writing a DBAPI shim over
+  the binding. That is a real piece of work, not a 90 minute one, and it would sit under the one
+  part of the system that must not be wrong.
+- **Shallow, but real: the toolchain.** `pywrangler`, which bundles Python Worker dependencies,
+  requires uv 0.12.3 or newer. This machine has 0.11.28, and this whole repo runs on `uv run`.
+  Upgrading uv nine days from a deadline, to chase a path already blocked above, is a bad trade.
+
+So the brief's stated fallback was taken: `worker/src/index.ts`, a small TypeScript Worker on D1
+carrying the study endpoints. The judge-facing endpoints (`/api/spot`, `/api/two`,
+`/api/fhir/validation`, `/api/check/*`, `/api/upload`) are still only in the Python app and follow
+after launch, which is what the brief allows.
+
+**Randomization is not reimplemented.** `core/allocator.py` uses Python's Mersenne Twister, which
+cannot be ported to JavaScript without risking a different sequence, and the analysis plan
+promises the assignment can be replayed. So `scripts/seed_arms.py` writes the allocator's own
+sequence into an `arm_slot` table and the Worker only takes the next slot.
+`core.allocator.replay` still checks every stored assignment.
+
+## What is live
+
+| Thing | Where |
+|---|---|
+| Site | https://second-look-79t.pages.dev |
+| API | https://second-look-api.thealexschroeder.workers.dev |
+| Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
+| Photo store | Workers KV `PHOTOS`, id `221e06ab5b54434ab5b4322712128ef3` |
+
+R2 was not used, because it asks for a card. Creek check photos go to KV after downsizing.
+
+## P1, measured on the deployed site
+
+- One row written to the production database and read back: `GET /api/skeleton` returns what it
+  wrote plus the row count, out of D1.
+- First screen on a throttled 4G profile with a 4x slower CPU: **load 1428 ms, largest paint
+  760 ms**, against a pass line of 3 seconds. Unthrottled time to first byte was 0.26 s cold and
+  0.14 s warm over three tries.
+- A whole sitting on a 390 by 844 phone viewport against the real API: all 16 answers sent, score
+  screen read "8 of 16 right". The session was marked `is_test` by the `x-qa-key` header, so a
+  live check never lands in the study data. Command: `SITE_URL=... node apps/web/scripts/live-check.mjs`.
+- The headers really are served: `content-security-policy`, `referrer-policy: no-referrer`,
+  `x-frame-options: DENY`, `x-content-type-options: nosniff` and `permissions-policy` all come
+  back from Pages, with `connect-src` naming only our own origin and the Worker.
+- The export is token gated live: no token returns 404, the right token returns a 2,600 byte zip
+  holding `sessions.csv` and `responses.csv` in the contract's schema.
+
+## What is not done
+
+- The rate limit. See docs/DATA_HANDLING.md: it is deliberately absent rather than built on an
+  address.
+- The judge-facing endpoints on the Worker.
+- Photo upload to KV. The binding exists and is empty.

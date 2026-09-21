@@ -246,7 +246,7 @@ export function CheckFlow() {
             {t("check.done_body")}
           </p>
           <p>
-            <Link className="btn btn-block" href={`/spot/${encodeURIComponent(stage.spot_id)}`}>
+            <Link className="btn btn-block" href={`/spot?id=${encodeURIComponent(stage.spot_id)}`}>
               {t("check.done_view")}
             </Link>
           </p>
@@ -264,7 +264,7 @@ export function CheckFlow() {
               </p>
               {stage.spot_id ? (
                 <p>
-                  <Link className="btn btn-block" href={`/spot/${encodeURIComponent(stage.spot_id)}`}>
+                  <Link className="btn btn-block" href={`/spot?id=${encodeURIComponent(stage.spot_id)}`}>
                     {t("check.done_view")}
                   </Link>
                 </p>

@@ -1,4 +1,4 @@
-"""Hypothesis property tests for the exclusions and the vote arithmetic."""
+"""Hypothesis property tests for the exclusions and the group vote."""
 
 from __future__ import annotations
 
@@ -12,14 +12,8 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from core.lock import DATA_LOCK_UTC
-from evals.common import SESSION_COLUMNS, iso_utc
-from evals.consensus import (
-    WEIGHTS,
-    plain_vote_correct,
-    scored_vote_correct,
-    weight_for_correct,
-    weights_from_other_items,
-)
+from evals.common import PLAN_SEED, SESSION_COLUMNS, iso_utc
+from evals.consensus import decide_items, split_items
 from evals.usability_analysis import apply_exclusions, tidy_responses, tidy_sessions
 
 BASE = DATA_LOCK_UTC - timedelta(days=4)
@@ -238,66 +232,61 @@ gold_signs = st.lists(st.sampled_from([-1, 1]), min_size=N_ITEMS_SMALL, max_size
 )
 
 
+# The weighted vote these properties used to cover was removed by Update 09 section 4.4. What
+# replaced it is a plain majority, with a filter that keeps only the people who passed the other
+# half of the items. These are the properties of that.
+
+
 @settings(max_examples=100, deadline=None)
 @given(vote_matrix, gold_signs)
-def test_plain_vote_is_the_sign_of_the_sum_and_zero_is_wrong(
+def test_majority_is_the_sign_of_the_sum_and_a_tie_is_wrong(
     votes: np.ndarray, gold: np.ndarray
 ) -> None:
-    result = plain_vote_correct(votes, gold)
+    everyone_passed = np.ones((1, votes.shape[0]), dtype=bool)
+    out = decide_items(votes[None, :, :], everyone_passed, gold)
     total = votes.sum(axis=0)
     for j in range(N_ITEMS_SMALL):
         if total[j] == 0:
-            assert not result[j]
+            assert not out["everyone_right"][0, j]
         else:
-            assert result[j] == (np.sign(total[j]) == gold[j])
-    flipped = plain_vote_correct(-votes, -gold)
-    assert (flipped == result).all()
-
-
-@settings(max_examples=100, deadline=None)
-@given(vote_matrix, gold_signs, st.floats(min_value=0.01, max_value=5.0, allow_nan=False))
-def test_equal_positive_weights_give_the_plain_result(
-    votes: np.ndarray, gold: np.ndarray, w: float
-) -> None:
-    weights = np.full(votes.shape, w)
-    assert (scored_vote_correct(votes, weights, gold) == plain_vote_correct(votes, gold)).all()
+            assert out["everyone_right"][0, j] == (np.sign(total[j]) == gold[j])
+    # Turning every vote and every gold label upside down cannot change who was right.
+    flipped = decide_items(-votes[None, :, :], everyone_passed, -gold)
+    assert (flipped["everyone_right"] == out["everyone_right"]).all()
 
 
 @settings(max_examples=100, deadline=None)
 @given(vote_matrix, gold_signs)
-def test_negative_weights_are_refused(votes: np.ndarray, gold: np.ndarray) -> None:
-    weights = np.full(votes.shape, -0.1)
-    try:
-        scored_vote_correct(votes, weights, gold)
-    except ValueError:
-        return
-    raise AssertionError("negative weights were accepted")
+def test_when_everyone_passes_the_filter_changes_nothing(
+    votes: np.ndarray, gold: np.ndarray
+) -> None:
+    passed = np.ones((1, votes.shape[0]), dtype=bool)
+    out = decide_items(votes[None, :, :], passed, gold)
+    # A tie still falls back, but when the passers are everyone the fallback is the same vote.
+    assert (out["passers_right"] == out["everyone_right"]).all()
+    assert out["has_passer"].all()
 
 
 @settings(max_examples=100, deadline=None)
-@given(
-    st.lists(st.lists(st.sampled_from([0, 1]), min_size=16, max_size=16), min_size=1, max_size=9)
-)
-def test_weights_from_other_items_are_never_negative_and_come_from_the_table(
-    rows: list[list[int]],
+@given(vote_matrix, gold_signs)
+def test_when_nobody_passes_every_item_falls_back_to_everyone(
+    votes: np.ndarray, gold: np.ndarray
 ) -> None:
-    correct = np.array(rows, dtype=int)
+    passed = np.zeros((1, votes.shape[0]), dtype=bool)
+    out = decide_items(votes[None, :, :], passed, gold)
+    assert not out["has_passer"].any()
+    assert out["fell_back"].all()
+    assert (out["passers_right"] == out["everyone_right"]).all()
+
+
+@settings(max_examples=100, deadline=None)
+@given(st.integers(min_value=0, max_value=3))
+def test_a_split_always_holds_two_items_of_each_feature_in_each_half(shift: int) -> None:
+    rng = np.random.default_rng(PLAN_SEED + shift)
     feature_of_item = np.repeat(np.arange(4), 4)
-    w = weights_from_other_items(correct, feature_of_item)
-    assert w.shape == correct.shape
-    assert (w >= 0).all()
-    assert set(np.round(w, 6).ravel()) <= {round(x, 6) for x in WEIGHTS}
-    # A person right on all four items of a feature has the top weight on each of them.
-    for person in range(correct.shape[0]):
-        for f in range(4):
-            block = slice(4 * f, 4 * f + 4)
-            if correct[person, block].sum() == 4:
-                assert np.allclose(w[person, block], WEIGHTS[3])
-            if correct[person, block].sum() == 0:
-                assert np.allclose(w[person, block], WEIGHTS[0])
-
-
-def test_weight_table_is_monotone_and_starts_at_zero() -> None:
-    values = [weight_for_correct(c) for c in range(4)]
-    assert values[0] == 0.0 and values[1] == 0.0
-    assert values == sorted(values)
+    score, vote = split_items(feature_of_item, rng)
+    assert set(score).isdisjoint(vote)
+    assert sorted([*score, *vote]) == list(range(16))
+    for f in range(4):
+        assert (feature_of_item[score] == f).sum() == 2
+        assert (feature_of_item[vote] == f).sum() == 2

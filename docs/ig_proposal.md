@@ -2,6 +2,29 @@
 
 For the authors of hl7-eu/oah. Written by the Second Look team (Berkeley, a follower city). One page, plain words. Alex opens the pull request; this file is the text behind it.
 
+## What we are actually asking, first
+
+Two gaps, found by building a citizen record against your guide at b907cf0 and running the HL7
+validator over it with terminology checking on. It passes with zero errors, which is the good
+news. These are the two places where passing required a judgement call we would rather you made.
+
+1. **Your guide has no profile for the person, and none for the trail from an answer to whoever
+   gave it.** There is no Practitioner, no QuestionnaireResponse and no Provenance profile at
+   b907cf0. So the part of a citizen record that says who looked, what they were asked, and how
+   good they have been shown to be is outside the guide entirely. Ours validates only because
+   those resources fall back to plain R4.
+2. **We modelled a citizen volunteer as a pseudonymous Practitioner, because
+   `Observation.performer` has no better fit.** The profile puts no type restriction on performer,
+   so a Practitioner is accepted, but calling a volunteer a Practitioner is a stretch and we know
+   it. We give them one qualification, no name, no telecom, no address, no birth date and no
+   gender: only a random contributor token.
+
+**So, plainly: which resource should stand for a citizen observer?** If the answer is
+Practitioner, we would like the guide to say so, so that everyone modelling citizen data lands in
+the same place. If it is RelatedPerson, or Patient, or a Device representing an app account, or
+something you have already discussed, tell us and we will change ours. Our validator output,
+every warning word for word, is in docs/notes/p2_validator_run.md.
+
 ## The problem in one line
 
 Professional surveyors pass a test before their data counts. Citizen observers never have. The guide has a profile for an indicator Observation and a profile for a Location, but no place to say how good the person who made the observation is at seeing that indicator.

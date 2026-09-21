@@ -251,7 +251,7 @@ def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo: 
     assert check.owner == "HUMAN" and not check.passed
     assert (
         'lesson artificial_bank pair 1: mark "PLACEHOLDER: the built edge 1" '
-        "is not approved by Rachel yet" in check.reasons
+        "is not approved yet" in check.reasons
     )
     assert any("practice" in r for r in check.reasons)
     assert len(check.reasons) == 12, "three marks in each of the four lessons"
@@ -276,7 +276,7 @@ def test_the_printed_line_names_the_lesson_and_the_label(
 ) -> None:
     preflight.report([marks_check(repo)])
     out = capsys.readouterr().out
-    assert 'FAIL  HUMAN  marks_approved: lesson artificial_bank pair 1: mark "PLACEHOLDER' in out
+    assert 'HUMAN  marks_approved: lesson artificial_bank pair 1: mark "PLACEHOLDER' in out
 
 
 def test_marks_mode_needs_no_name(repo: Path) -> None:

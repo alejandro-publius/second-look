@@ -1,0 +1,95 @@
+{
+  "content_hash": "934a764fc4eddaf7",
+  "features": [
+    "artificial_bank",
+    "dug_out_channel",
+    "invasive_plant",
+    "pipe_running"
+  ],
+  "test_items": [
+    {
+      "feature": "artificial_bank",
+      "gold": "present",
+      "id": "t01"
+    },
+    {
+      "feature": "artificial_bank",
+      "gold": "present",
+      "id": "t02"
+    },
+    {
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "id": "t03"
+    },
+    {
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "id": "t04"
+    },
+    {
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "id": "t05"
+    },
+    {
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "id": "t06"
+    },
+    {
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "id": "t07"
+    },
+    {
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "id": "t08"
+    },
+    {
+      "feature": "invasive_plant",
+      "gold": "present",
+      "id": "t09"
+    },
+    {
+      "feature": "invasive_plant",
+      "gold": "present",
+      "id": "t10"
+    },
+    {
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "id": "t11"
+    },
+    {
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "id": "t12"
+    },
+    {
+      "feature": "pipe_running",
+      "gold": "present",
+      "id": "t13"
+    },
+    {
+      "feature": "pipe_running",
+      "gold": "present",
+      "id": "t14"
+    },
+    {
+      "feature": "pipe_running",
+      "gold": "absent",
+      "id": "t15"
+    },
+    {
+      "feature": "pipe_running",
+      "gold": "absent",
+      "id": "t16"
+    }
+  ],
+  "warmup_ids": [
+    "w01",
+    "w02"
+  ]
+}

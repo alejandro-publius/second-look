@@ -1,0 +1,12 @@
+{
+  "name": "second-look-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-20",
+  "observability": { "enabled": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "second-look", "database_id": "aff80e0b-6165-4e53-96f5-ff15716221df" }
+  ],
+  "kv_namespaces": [
+    { "binding": "PHOTOS", "id": "221e06ab5b54434ab5b4322712128ef3" }
+  ]
+}

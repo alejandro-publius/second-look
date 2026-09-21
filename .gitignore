@@ -23,3 +23,8 @@ apps/web/.vercel/
 *.pdf
 !docs/**/*.pdf
 labels_*.csv
+
+# Local contact sheets of candidate photos. Never deployed, never committed.
+photos/candidates/
+# Wrangler's local state.
+.wrangler/

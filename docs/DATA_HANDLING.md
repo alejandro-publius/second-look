@@ -54,17 +54,23 @@ more precise than the second.
 
 We do not control the hosting providers' own logs. Plainly:
 
-- Vercel serves the web pages. Its request logs include the client address, the requested
-  path, the user agent and the time, and it keeps them for a limited period set by Vercel
-  (about a day on the free tier at the time of writing). We do not read or export them.
-- Fly.io runs the API behind its proxy. The proxy logs include the client address and the
-  path for a limited period. Our own application log does not repeat the address.
-- GitHub hosts the code and the anonymous response table after publication; it logs
-  downloads in aggregate.
+- Cloudflare Pages serves the web pages and Cloudflare Workers runs the API (Update 09
+  section 2). Cloudflare sits in front of every request, so it sees and keeps its own edge
+  records: the client internet address, the requested path, the user agent, the time, the
+  response code and the country its network works out from the address. On the free plan these
+  are aggregate analytics plus short-lived operational logs; we cannot switch them off and we do
+  not read, export or join them to anything of ours.
+- Cloudflare's Workers observability is on for the API, which keeps recent request traces for a
+  short retention window. Those traces hold the path and the response code. Our own code writes
+  no address into them, and we do not log request bodies.
+- D1 holds the study tables. Workers KV holds creek check photos after downsizing and EXIF
+  stripping. Both sit in the same Cloudflare account.
+- GitHub hosts the code, the daily database backup as a private artifact, and the anonymous
+  response table after publication; it logs downloads in aggregate.
 
-The consent screen says: "The hosting companies keep their own short-lived connection logs,
-which include internet addresses. We do not." That sentence must stay true; if we change
-hosts, change both this file and the consent text.
+The consent screen says: "Cloudflare, which serves this site, keeps its own short-lived
+connection records, which include internet addresses. We do not." That sentence must stay true;
+if we change hosts, change both this file and the consent text.
 
 ## Retention
 
@@ -80,18 +86,33 @@ hosts, change both this file and the consent text.
   Our own FHIR store is the source of truth; the sandbox mirror is a copy we can rebuild.
 - `sandbox_cache`: replaced on each successful fetch; never committed to git.
 
-## The in-memory rate limit
+## The rate limit, and why the deployed API has none
 
-The API limits requests per client address over a short window to slow bots and repeat
-visitors. The counter lives in the process memory only. It is never written to disk, to the
-database or to a log, and it is gone when the process restarts. The hidden form field on the
-consent screen catches simple bots; a session that fills it is still created (so the bot does
-not learn it was caught) and is excluded from analysis.
+The Python API limits requests per client address over a short window. The counter lives in
+process memory only, is never written to disk, to the database or to a log, and is gone when the
+process restarts. That is still true of the compose stack and of local runs.
+
+**The deployed Worker has no rate limit at all, on purpose.** A Worker has no shared process
+memory, so the only ways to count per visitor are to key on the client address (which would mean
+holding an address, even briefly, which rule 7 forbids) or to put a counter in D1 or a Durable
+Object keyed by something that identifies the visitor. Neither can be done cleanly without
+storing what we promised not to store, so we do not do it. What is left:
+
+- The hidden form field on the consent screen catches simple bots. A session that fills it is
+  still created, so the bot does not learn it was caught, and it is excluded from analysis.
+- Sessions completed in under 40 seconds are excluded, which is in the pre-registered plan.
+- One browser keeps one arm, and only the first completed session from a browser token counts.
+- Cloudflare's own edge protection sits in front of everything and is not ours to configure away.
+
+If abuse turns up during the week, the answer is Cloudflare's own rate limiting rules at the
+edge, which never hand an address to our code, and a line in docs/deviations.md.
 
 ## Backups
 
-The raw database is backed up once a day by `scripts/backup_db.sh` to private storage. Nobody
-computes outcomes from a backup. The only code that computes outcomes is
+The raw database is backed up once a day by `.github/workflows/backup.yml`, which runs
+`wrangler d1 export` against the `second-look` database and keeps the dump as a private GitHub
+Actions artifact. The token it uses is scoped to D1 read on this one account and nothing else.
+`scripts/backup_db.sh` still covers the compose stack. Nobody computes outcomes from a backup. The only code that computes outcomes is
 `evals/usability_analysis.py`, which refuses to run before data lock (2026-09-28T01:00:00Z)
 and refuses to run without the `prereg-v1` tag. A restore drill was run once before launch;
 docs/BUILD_LOG.md records it.

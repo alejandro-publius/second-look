@@ -69,7 +69,7 @@ export function SpotRecord({ spotId }: { spotId: string }) {
       <FocusHeading>{title}</FocusHeading>
       {place ? <p className="muted">{place}</p> : null}
       <div className="btn-row">
-        <Link className="btn" href={`/quick/${encodeURIComponent(spot.spot_id ?? spotId)}`}>
+        <Link className="btn" href={`/quick?spot=${encodeURIComponent(spot.spot_id ?? spotId)}`}>
           {t("spot.quick_link")}
         </Link>
         <Link className="btn btn-secondary" href="/check">

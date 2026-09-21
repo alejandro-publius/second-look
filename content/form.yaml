@@ -41,6 +41,9 @@ items:
     verified_against_app: false
     feature: null
     fhir: { code_system: oah, code: morophology }
+  # TODO-TEAM-CONFIRM: laid stone counts as a built bank. The River Habitat Survey treats it as
+  # reinforcement. We keep the app's three bank types and call none of them natural, and no laid
+  # stone photo goes in the test set because the app gives it a category of its own.
   - id: bank_type
     section: what_you_see
     type: choice

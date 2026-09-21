@@ -73,7 +73,7 @@ export function QuickCheck({ spotId }: { spotId: string }) {
           {state === "done" ? t("quick.done") : t("check.saved_offline")}
         </p>
         <p>
-          <Link className="btn btn-block" href={`/spot/${encodeURIComponent(spotId)}`}>
+          <Link className="btn btn-block" href={`/spot?id=${encodeURIComponent(spotId)}`}>
             {t("quick.view_record")}
           </Link>
         </p>

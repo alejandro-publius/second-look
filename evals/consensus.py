@@ -1,10 +1,11 @@
-"""Consensus with and without scores: docs/analysis_plan.md item 11, word for word.
+"""Does leaving out low scorers change what a group gets right? docs/analysis_plan.md item 11.
 
-For group sizes 3, 5 and 7 we draw 2,000 random groups of completed sessions inside each arm,
-without replacement inside a group, seed 20260920. Plain vote: Yes +1, No -1, Can't tell 0, the
-sign of the sum is the answer. Scored vote: each vote is multiplied by a weight from the other
-three items of the same feature: with c of those correct, p = (c + 0.5) / 4 and the weight is
-max(0, ln(p / (1 - p))). A sum of exactly zero is a wrong answer for both methods.
+Exploratory, run after lock, reported as description only. The 16 items are split at random into
+two halves with two items of each feature in each half (seed 20260920, 200 splits). A person
+passes a half with 6 or more of its 8 items correct. For random groups of 5 within an arm (2,000
+draws) the group answers each item of the other half by plain majority, once using everyone and
+once using only the people who passed the first half. When nobody passed, or the passers tie, the
+group falls back to everyone. We report the share of items each version gets right.
 
 Usage: uv run python evals/consensus.py --synthetic [--scenario skill_spread]
 """
@@ -12,7 +13,6 @@ Usage: uv run python evals/consensus.py --synthetic [--scenario skill_spread]
 from __future__ import annotations
 
 import argparse
-import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -29,6 +29,7 @@ from evals.common import (  # noqa: E402
     ARMS,
     EXPORT_DIR,
     ITEMS_PER_FEATURE,
+    N_ITEMS,
     PLAN_SEED,
     RESULTS_DIR,
     SYNTHETIC_DIR,
@@ -42,61 +43,72 @@ from evals.common import (  # noqa: E402
 from evals.usability_analysis import apply_exclusions, load_export, refusal_reason  # noqa: E402
 
 SCRIPT = "evals/consensus.py"
-GROUP_SIZES = (3, 5, 7)
+GROUP_SIZE = 5
 N_DRAWS = 2_000
+N_SPLITS = 200
+HALF_ITEMS = N_ITEMS // 2
+PASS_MARK = 6
 DEFAULT_SCENARIO = "skill_spread"
 VOTE_VALUE = {"yes": 1, "no": -1, "cant_tell": 0}
 GOLD_SIGN = {"present": 1, "absent": -1}
 ARM_COLOURS = {"untrained": "#2a78d6", "trained": "#eb6834"}
-METHOD_STYLE = {"plain": ("-", "o"), "scored": ("--", "s")}
+VERSIONS = ("everyone", "passers_only")
+VERSION_LABEL = {"everyone": "everyone votes", "passers_only": "only the people who passed"}
 
 
-def weight_for_correct(c: int, others: int = ITEMS_PER_FEATURE - 1) -> float:
-    """The plan's weight: p = (c + 0.5) / 4, weight = max(0, ln(p / (1 - p))). Never negative."""
-    if c < 0 or c > others:
-        raise ValueError(f"c must be between 0 and {others}, got {c}")
-    p = (c + 0.5) / (others + 1)
-    return max(0.0, math.log(p / (1.0 - p)))
+def split_items(
+    feature_of_item: np.ndarray, rng: np.random.Generator
+) -> tuple[np.ndarray, np.ndarray]:
+    """One random split: half the items of each feature score a person, the other half are voted on.
+
+    Returns the score half and the vote half as sorted item indexes.
+    """
+    score: list[int] = []
+    vote: list[int] = []
+    for feature in range(int(feature_of_item.max()) + 1):
+        idx = np.flatnonzero(feature_of_item == feature)
+        if len(idx) % 2 != 0:
+            raise ValueError(f"feature {feature} has {len(idx)} items, which does not halve evenly")
+        shuffled = rng.permutation(idx)
+        cut = len(idx) // 2
+        score.extend(int(i) for i in shuffled[:cut])
+        vote.extend(int(i) for i in shuffled[cut:])
+    return np.sort(np.array(score, dtype=int)), np.sort(np.array(vote, dtype=int))
 
 
-WEIGHTS = tuple(weight_for_correct(c) for c in range(ITEMS_PER_FEATURE))
+def draw_groups(n_people: int, size: int, n_draws: int, rng: np.random.Generator) -> np.ndarray:
+    """n_draws rows of `size` people, distinct inside a row."""
+    if n_people < size:
+        raise ValueError(f"need {size} people for a group, got {n_people}")
+    return np.argsort(rng.random((n_draws, n_people)), axis=1)[:, :size]
 
 
-TIE_TOLERANCE = 1e-9
+def decide_items(
+    votes: np.ndarray, passed: np.ndarray, gold_sign: np.ndarray
+) -> dict[str, np.ndarray]:
+    """Plain majority twice over: everyone, then only the passers with a fallback to everyone.
 
-
-def plain_vote_correct(votes: np.ndarray, gold_sign: np.ndarray) -> np.ndarray:
-    """votes: (..., people, items) in {-1, 0, 1}. Returns (..., items) bools. Zero sum is wrong."""
-    total = votes.sum(axis=-2)
-    return np.sign(total) == gold_sign
-
-
-def scored_vote_correct(
-    votes: np.ndarray, weights: np.ndarray, gold_sign: np.ndarray
-) -> np.ndarray:
-    """Weighted version of plain_vote_correct. weights must be non-negative and the same shape."""
-    if np.any(weights < 0):
-        raise ValueError("weights must never be negative")
-    total = (votes * weights).sum(axis=-2)
-    # A tie counts as a wrong answer (analysis plan item 11). Adding floats in a different order
-    # leaves a speck instead of a clean zero, which would read as a decisive vote, so snap it.
-    total = np.where(np.abs(total) < TIE_TOLERANCE, 0.0, total)
-    return np.sign(total) == gold_sign
-
-
-def weights_from_other_items(correct: np.ndarray, feature_of_item: np.ndarray) -> np.ndarray:
-    """correct: (people, items) 0/1. Weight for each item from the other items of its feature."""
-    n_features = int(feature_of_item.max()) + 1
-    per_feature = np.stack(
-        [correct[:, feature_of_item == f].sum(axis=1) for f in range(n_features)], axis=1
-    )
-    others = per_feature[:, feature_of_item] - correct
-    table = np.asarray(WEIGHTS)
-    return table[others.astype(int)]
+    votes: (draws, people, items) in {-1, 0, 1}. passed: (draws, people) bool.
+    A sum of exactly zero is a tie. For the passers it sends that item back to everyone. For
+    everyone it stays a wrong answer, because the group did not decide.
+    """
+    if votes.ndim != 3:
+        raise ValueError(f"votes must be (draws, people, items), got shape {votes.shape}")
+    everyone_total = votes.sum(axis=1)
+    passer_total = (votes * passed[:, :, None]).sum(axis=1)
+    has_passer = passed.any(axis=1)
+    use_passers = has_passer[:, None] & (passer_total != 0)
+    passer_answer = np.where(use_passers, passer_total, everyone_total)
+    return {
+        "everyone_right": np.sign(everyone_total) == gold_sign,
+        "passers_right": np.sign(passer_answer) == gold_sign,
+        "fell_back": ~use_passers,
+        "has_passer": has_passer,
+    }
 
 
 def build_matrices(kept: pd.DataFrame, responses: pd.DataFrame) -> dict[str, dict[str, np.ndarray]]:
-    """Per arm: votes (people by 16), correct (people by 16), weights (people by 16)."""
+    """Per arm: votes (people by 16) and correct (people by 16), plus the gold and feature maps."""
     items = load_test_items()
     item_ids = [row["id"] for row in items]
     features = sorted({row["feature"] for row in items})
@@ -115,44 +127,69 @@ def build_matrices(kept: pd.DataFrame, responses: pd.DataFrame) -> dict[str, dic
             .reindex(columns=item_ids, fill_value=0)
         )
         votes = vote_table.to_numpy(dtype=int)
-        correct = (votes == gold_sign[None, :]).astype(int)
         out[arm] = {
             "votes": votes,
-            "correct": correct,
-            "weights": weights_from_other_items(correct, feature_of_item),
+            "correct": (votes == gold_sign[None, :]).astype(int),
             "gold_sign": gold_sign,
+            "feature_of_item": feature_of_item,
         }
     return out
 
 
-def draw_groups(n_people: int, size: int, n_draws: int, rng: np.random.Generator) -> np.ndarray:
-    """n_draws rows of `size` distinct indices each."""
-    return np.stack([rng.choice(n_people, size=size, replace=False) for _ in range(n_draws)])
-
-
 def consensus_for_arm(
-    mats: dict[str, np.ndarray], *, sizes: tuple[int, ...], n_draws: int, rng: np.random.Generator
+    mats: dict[str, np.ndarray],
+    *,
+    n_splits: int = N_SPLITS,
+    n_draws: int = N_DRAWS,
+    group_size: int = GROUP_SIZE,
+    pass_mark: int = PASS_MARK,
+    rng: np.random.Generator,
 ) -> dict[str, Any]:
-    votes, weights, gold_sign = mats["votes"], mats["weights"], mats["gold_sign"]
-    n_people = votes.shape[0]
-    out: dict[str, Any] = {"n_people": int(n_people), "by_size": {}}
-    for size in sizes:
-        if n_people < size:
-            out["by_size"][str(size)] = {
-                "skipped": f"only {n_people} completed sessions, need {size}"
-            }
-            continue
-        groups = draw_groups(n_people, size, n_draws, rng)
-        v = votes[groups]  # (draws, size, items)
-        w = weights[groups]
-        plain = plain_vote_correct(v, gold_sign).mean(axis=1)
-        scored = scored_vote_correct(v, w, gold_sign).mean(axis=1)
-        out["by_size"][str(size)] = {
-            "draws": int(n_draws),
-            "plain": _summary(plain),
-            "scored": _summary(scored),
-            "scored_minus_plain_mean": round(float(scored.mean() - plain.mean()), 4),
+    """Run every split for one arm and pool the per-draw shares."""
+    votes, correct = mats["votes"], mats["correct"]
+    gold_sign, feature_of_item = mats["gold_sign"], mats["feature_of_item"]
+    n_people = int(votes.shape[0])
+    out: dict[str, Any] = {"n_people": n_people, "group_size": group_size, "pass_mark": pass_mark}
+    if n_people < group_size:
+        out["skipped"] = f"only {n_people} completed sessions, need {group_size}"
+        return out
+    everyone_shares: list[np.ndarray] = []
+    passer_shares: list[np.ndarray] = []
+    fell_back = 0
+    no_passer = 0
+    total_items = 0
+    total_groups = 0
+    people_passing = 0
+    people_seen = 0
+    for _ in range(n_splits):
+        score_half, vote_half = split_items(feature_of_item, rng)
+        passed_person = correct[:, score_half].sum(axis=1) >= pass_mark
+        people_passing += int(passed_person.sum())
+        people_seen += n_people
+        groups = draw_groups(n_people, group_size, n_draws, rng)
+        v = votes[:, vote_half][groups]
+        p = passed_person[groups]
+        decided = decide_items(v, p, gold_sign[vote_half])
+        everyone_shares.append(decided["everyone_right"].mean(axis=1))
+        passer_shares.append(decided["passers_right"].mean(axis=1))
+        fell_back += int(decided["fell_back"].sum())
+        total_items += int(decided["fell_back"].size)
+        no_passer += int((~decided["has_passer"]).sum())
+        total_groups += int(decided["has_passer"].size)
+    everyone = np.concatenate(everyone_shares)
+    passers = np.concatenate(passer_shares)
+    out.update(
+        {
+            "splits": n_splits,
+            "draws_per_split": n_draws,
+            "everyone": _summary(everyone),
+            "passers_only": _summary(passers),
+            "passers_minus_everyone_mean": round(float(passers.mean() - everyone.mean()), 4),
+            "share_of_people_passing_a_half": round(people_passing / people_seen, 4),
+            "share_of_groups_with_no_passer": round(no_passer / total_groups, 4),
+            "share_of_items_sent_back_to_everyone": round(fell_back / total_items, 4),
         }
+    )
     return out
 
 
@@ -170,37 +207,46 @@ def run_consensus(
     sessions: pd.DataFrame,
     responses: pd.DataFrame,
     *,
-    sizes: tuple[int, ...] = GROUP_SIZES,
+    n_splits: int = N_SPLITS,
     n_draws: int = N_DRAWS,
+    group_size: int = GROUP_SIZE,
     seed: int = PLAN_SEED,
 ) -> dict[str, Any]:
     excl = apply_exclusions(sessions, responses)
     mats = build_matrices(excl.kept, responses)
     rng = np.random.default_rng(seed)
     arms = {
-        arm: consensus_for_arm(mats[arm], sizes=sizes, n_draws=n_draws, rng=rng) for arm in ARMS
+        arm: consensus_for_arm(
+            mats[arm], n_splits=n_splits, n_draws=n_draws, group_size=group_size, rng=rng
+        )
+        for arm in ARMS
     }
     summary: dict[str, float | None] = {}
     for arm in ARMS:
-        for size in sizes:
-            row = arms[arm]["by_size"][str(size)]
-            for method in ("plain", "scored"):
-                key = f"{arm}_{method}_size{size}"
-                summary[key] = (
-                    None if "skipped" in row else round(row[method]["mean_share_right"] * 100, 1)
-                )
-            summary[f"{arm}_scored_minus_plain_size{size}"] = (
-                None if "skipped" in row else round(row["scored_minus_plain_mean"] * 100, 1)
+        row = arms[arm]
+        skipped = "skipped" in row
+        for version in VERSIONS:
+            summary[f"{arm}_{version}"] = (
+                None if skipped else round(row[version]["mean_share_right"] * 100, 1)
             )
+        summary[f"{arm}_passers_minus_everyone"] = (
+            None if skipped else round(row["passers_minus_everyone_mean"] * 100, 1)
+        )
     return {
         "summary": summary,
         "plan": {
             "item": "docs/analysis_plan.md item 11",
-            "group_sizes": list(sizes),
-            "draws_per_arm_and_size": n_draws,
+            "splits": n_splits,
+            "items_per_half": HALF_ITEMS,
+            "items_per_feature_per_half": ITEMS_PER_FEATURE // 2,
+            "pass_mark_of_8": PASS_MARK,
+            "group_size": group_size,
+            "draws_per_split": n_draws,
             "seed": seed,
-            "weights_by_correct_of_other_three": [round(w, 4) for w in WEIGHTS],
-            "tie_rule": "a sum of exactly zero counts as wrong for both methods",
+            "fallback_rule": (
+                "when nobody in the group passed, or the passers tie, the group falls back "
+                "to everyone; a tie among everyone stays a wrong answer"
+            ),
         },
         "arms": arms,
     }
@@ -208,40 +254,42 @@ def run_consensus(
 
 def draw_chart(result: dict[str, Any], path: Path, *, synthetic: bool, title_extra: str) -> str:
     fig, ax = plt.subplots(figsize=(8, 4.8), dpi=120)
-    sizes = [int(s) for s in result["plan"]["group_sizes"]]
-    for arm in ARMS:
-        by_size = result["arms"][arm]["by_size"]
-        for method, (style, marker) in METHOD_STYLE.items():
-            xs = [s for s in sizes if "skipped" not in by_size[str(s)]]
-            if not xs:
+    width = 0.32
+    for offset, version in zip((-width / 2, width / 2), VERSIONS, strict=True):
+        xs: list[float] = []
+        means: list[float] = []
+        lows: list[float] = []
+        highs: list[float] = []
+        colours: list[str] = []
+        for i, arm in enumerate(ARMS):
+            row = result["arms"][arm]
+            if "skipped" in row:
                 continue
-            means = [by_size[str(s)][method]["mean_share_right"] for s in xs]
-            lows = [by_size[str(s)][method]["p2_5"] for s in xs]
-            highs = [by_size[str(s)][method]["p97_5"] for s in xs]
-            colour = ARM_COLOURS[arm]
-            ax.fill_between(
-                xs,
-                lows,
-                highs,
-                color=colour,
-                alpha=0.10 if method == "plain" else 0.07,
-                linewidth=0,
-            )
-            ax.plot(
-                xs,
-                means,
-                style,
-                color=colour,
-                marker=marker,
-                markersize=6,
-                linewidth=2,
-                label=f"{arm}, {method} vote",
-            )
-    ax.set_xticks(sizes)
-    ax.set_xlabel("people in the group")
-    ax.set_ylabel("share of the 16 items the group gets right")
+            xs.append(i + offset)
+            means.append(row[version]["mean_share_right"])
+            lows.append(row[version]["mean_share_right"] - row[version]["p2_5"])
+            highs.append(row[version]["p97_5"] - row[version]["mean_share_right"])
+            colours.append("#9aa0a6" if version == "everyone" else ARM_COLOURS[arm])
+        if not xs:
+            continue
+        ax.bar(
+            xs,
+            means,
+            width=width,
+            color=colours,
+            yerr=[lows, highs],
+            capsize=4,
+            ecolor="#4a4a48",
+            label=VERSION_LABEL[version],
+        )
+    ax.set_xticks(range(len(ARMS)))
+    ax.set_xticklabels(list(ARMS))
+    ax.set_ylabel("share of the 8 voted items the group gets right")
     ax.set_ylim(0, 1)
-    title = chart_title(f"group answers with and without scores{title_extra}", synthetic=synthetic)
+    title = chart_title(
+        f"groups of {result['plan']['group_size']}, with and without the low scorers{title_extra}",
+        synthetic=synthetic,
+    )
     ax.set_title(title, loc="left", fontsize=12)
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", color="#e5e5e2", linewidth=0.8)
@@ -250,7 +298,7 @@ def draw_chart(result: dict[str, Any], path: Path, *, synthetic: bool, title_ext
         frameon=False,
         loc="lower right",
         fontsize=9,
-        title="bands: 2.5 to 97.5 percentile over draws",
+        title="bars: 2.5 to 97.5 percentile over draws",
         title_fontsize=8,
     )
     if synthetic:
@@ -286,6 +334,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--now", default=None)
     parser.add_argument("--repo", type=Path, default=None)
     parser.add_argument("--draws", type=int, default=N_DRAWS)
+    parser.add_argument("--splits", type=int, default=N_SPLITS)
     args = parser.parse_args(argv)
 
     now = parse_utc(args.now) if args.now else now_utc()
@@ -322,7 +371,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.synthetic:
         result["scenario"] = scenario
     result["input"] = str(input_dir)
-    result.update(run_consensus(sessions, responses, n_draws=args.draws))
+    result.update(run_consensus(sessions, responses, n_splits=args.splits, n_draws=args.draws))
     title_extra = f" ({scenario} scenario)" if scenario else ""
     png = args.out_dir / f"consensus_{stamp_name}.png"
     result["chart_title"] = draw_chart(
@@ -333,16 +382,15 @@ def main(argv: list[str] | None = None) -> int:
 
     label = f"{result['stamp']} {scenario}" if scenario else result["stamp"]
     for arm in ARMS:
-        parts = []
-        for size in GROUP_SIZES:
-            row = result["arms"][arm]["by_size"][str(size)]
-            if "skipped" in row:
-                parts.append(f"size {size} skipped")
-            else:
-                plain = row["plain"]["mean_share_right"]
-                scored = row["scored"]["mean_share_right"]
-                parts.append(f"size {size}: plain {plain:.3f}, scored {scored:.3f}")
-        print(f"{label} {arm}: " + "; ".join(parts))
+        row = result["arms"][arm]
+        if "skipped" in row:
+            print(f"{label} {arm}: {row['skipped']}")
+            continue
+        print(
+            f"{label} {arm}: everyone {row['everyone']['mean_share_right']:.3f}, "
+            f"passers only {row['passers_only']['mean_share_right']:.3f}, "
+            f"difference {row['passers_minus_everyone_mean']:+.3f}"
+        )
     print(f"wrote {json_path} and {png}")
     return 0
 

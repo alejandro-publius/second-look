@@ -293,5 +293,20 @@
   "gauge.lesson_count": "{feature}, part {value} of {total}",
   "test.confirm": "Next photo",
   "test.pick_first": "Choose an answer first.",
-  "test.resuming": "Picking up where you left off…"
+  "test.resuming": "Picking up where you left off…",
+  "demo.shut_title": "Judge mode opens on Sep 28",
+  "demo.shut_body": "Judge mode gives feedback on the same sixteen photos the study uses, so it would hand out the answer key while the study is running. It opens when the data locks, on Sunday Sep 27 at 18:00 PDT.",
+  "demo.shut_meanwhile": "Until then, everything else is open.",
+  "judges.title": "For judges",
+  "judges.intro": "Every part of Second Look, in the order that makes the point. Nothing here is stored except a creek check you choose to send.",
+  "judges.take_test": "Take the two minute test",
+  "judges.take_test_note": "The same test a volunteer takes. It is the study, so your answers count as a session.",
+  "judges.demo": "Judge mode, feedback after every answer",
+  "judges.check": "Check a creek",
+  "judges.record": "A sample record, with View as FHIR",
+  "judges.two": "The same creek beside a laboratory result",
+  "judges.how": "How we know it works",
+  "judges.repo": "The code",
+  "nav.judges": "For judges",
+  "consent.hosts": "Cloudflare, which serves this site, keeps its own short-lived connection records, which include internet addresses. We do not."
 }

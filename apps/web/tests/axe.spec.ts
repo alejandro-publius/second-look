@@ -46,9 +46,9 @@ test("axe: check first screen and the location screen", async ({ page }) => {
 
 test("axe: spot record", async ({ page }) => {
   await mockApi(page);
-  await page.goto("/spot/example");
+  await page.goto("/spot?id=example");
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
-  await noSeriousViolations(page, "/spot/example");
+  await noSeriousViolations(page, "/spot?id=example");
 });
 
 test("axe: two observers", async ({ page }) => {

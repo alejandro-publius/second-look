@@ -44,7 +44,7 @@ test("no CSP violations are reported on the main screens", async ({ page }) => {
     if (m.text().includes("Content Security Policy")) violations.push(m.text());
   });
   await mockApi(page);
-  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot/example", "/poster", "/share/13"]) {
+  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/poster", "/share/13"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
   }
@@ -53,7 +53,7 @@ test("no CSP violations are reported on the main screens", async ({ page }) => {
 
 test("every screen shows real strings, none missing from the locale", async ({ page }) => {
   await mockApi(page);
-  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot/example", "/quick/example", "/poster", "/offline", "/share/13"]) {
+  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/quick?spot=example", "/poster", "/offline", "/share/13"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("body")).not.toContainText("[missing:");

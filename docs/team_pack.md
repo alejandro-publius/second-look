@@ -1,4 +1,28 @@
-# Rachel's pack (one page)
+# Team pack: what helps most, in order
+
+One person can launch this. Nothing waits on a named person any more (docs/updates/UPDATE_09.md
+section 1). Any team member can approve wording, lesson copy, marks, plant lists and sentences,
+and every approval stamps who and when. This list is ordered so that whoever has an hour can pick
+up the top item and it will be the most useful hour available.
+
+1. **Pick photos.** `photos/candidates/<feature>.html` are local contact sheets of openly licensed
+   candidates. Pick the good ones, then run `uv run python scripts/fetch_open_photo.py <url>
+   --feature <id> --role <role>` for each. This unblocks everything below.
+2. **Label them.** `uv run python scripts/label_photos.py --name <you>`. The first person to label
+   a photo sets its gold label. A second labeller is welcome and optional: if every test photo has
+   two labels by the tag we report Cohen's kappa, and if not we say plainly that one person set
+   the key.
+3. **Place and approve the marks.** `uv run python scripts/label_photos.py --marks` shows a lesson
+   photo, you click where a mark goes and type a label of five words or fewer. Every mark starts
+   unapproved and preflight lists it until someone says yes.
+4. **Freeze the question wording.** Use the official app's own wording where the app asks about
+   the feature, and our own for the dug-out channel.
+5. **Approve the lesson copy and the health sentences.** Each needs a source you have opened.
+   Nothing may state a risk for a specific site. See `docs/notes/zenodo.md` if it exists.
+6. **Prune the plant list** to what actually grows here, from the Cal-IPC inventory, with links.
+
+Everything below this line is the older pack, kept because the shot list and the blind labelling
+notes are still exactly right.
 
 DRAFT, written 2026-09-20 by Claude Code for Alex to hand to Rachel. Plain words on purpose.
 

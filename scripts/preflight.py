@@ -28,7 +28,7 @@ from scripts import audit_log, freeze_key, label_photos
 from scripts.verify_claims import CLAIM_RE, resolve_pointer
 
 ROOT = Path(__file__).resolve().parents[1]
-Owner = Literal["HUMAN", "BUILD"]
+Owner = Literal["HUMAN", "BUILD", "NOTE"]
 Runner = Callable[[list[str]], tuple[int, str]]
 WEB_SKIP = {"node_modules", ".next", "out", "playwright-report", "test-results"}
 WEB_SUFFIXES = {".tsx", ".ts", ".jsx", ".js", ".html"}
@@ -36,9 +36,13 @@ WEB_SUFFIXES = {".tsx", ".ts", ".jsx", ".js", ".html"}
 
 @dataclass
 class Check:
+    """`clears` says what would clear this check, so the report groups by the work and not by a
+    person (Update 09 section 1). A NOTE is printed and never counted: nothing waits on it."""
+
     name: str
     owner: Owner
     reasons: list[str] = field(default_factory=list)
+    clears: str = "our build"
 
     @property
     def passed(self) -> bool:
@@ -69,14 +73,28 @@ def _last_line(text: str) -> str:
 
 
 def unapproved_marks(lessons: dict[str, Any]) -> list[str]:
-    """One line per mark still waiting for Rachel, naming the lesson and the label."""
+    """One line per mark still waiting for a yes, naming the lesson and the label. Any team
+    member can approve a mark; the approval stamps who and when."""
     out: list[str] = []
     for fid, lesson in sorted(lessons.items()):
         for where, mark in label_photos.iter_marks(lesson):
             if mark.get("approved") is not True:
                 label = str(mark.get("label") or "(no label)")
-                out.append(f'lesson {fid} {where}: mark "{label}" is not approved by Rachel yet')
+                out.append(f'lesson {fid} {where}: mark "{label}" is not approved yet')
     return out
+
+
+# A missing second label no longer blocks launch (Update 09 section 1). The first team member to
+# label a photo sets the gold label; a second is welcome and optional. If every test photo has
+# two by the tag we report Cohen's kappa, and if not the plan and the README say so plainly.
+SECOND_LABEL_RE = re.compile(r"^no second label for ")
+
+
+def split_second_labels(reasons: list[str]) -> tuple[list[str], list[str]]:
+    """Returns (things that still block, notes about a missing second label)."""
+    notes = [r for r in reasons if SECOND_LABEL_RE.match(r)]
+    blocking = [r for r in reasons if not SECOND_LABEL_RE.match(r)]
+    return blocking, notes
 
 
 def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
@@ -89,18 +107,20 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
     # scripts/label_photos.py --marks, which always writes approved: false, so this check is
     # what waits for her yes.
     content_loads = Check("content_loads", "BUILD")
-    human_inputs = Check("human_inputs", "HUMAN")
-    marks_approved = Check("marks_approved", "HUMAN")
+    human_inputs = Check("human_inputs", "HUMAN", clears="real photos and frozen wording")
+    second_labels = Check("second_labels", "NOTE", clears="a second labeller, optional")
+    marks_approved = Check("marks_approved", "HUMAN", clears="team approval")
     try:
         content = load_content(root, strict=False)
         content_loads.reasons = list(content.problems)
-        human_inputs.reasons = placeholder_report(content)
+        blocking, notes = split_second_labels(placeholder_report(content))
+        human_inputs.reasons, second_labels.reasons = blocking, notes
         marks_approved.reasons = unapproved_marks(content.lessons)
     except Exception as e:  # a missing or unreadable content file
         content_loads.reasons = [f"content did not load: {e}"]
         human_inputs.reasons = ["content did not load, so human inputs cannot be checked"]
         marks_approved.reasons = ["content did not load, so marks cannot be checked"]
-    checks += [content_loads, human_inputs, marks_approved]
+    checks += [content_loads, human_inputs, second_labels, marks_approved]
 
     # 3. The analysis plan carries no TODO wording.
     plan_wording = Check("plan_wording", "HUMAN")
@@ -281,17 +301,29 @@ def run_checks(root: Path, *, runner: Runner | None = None) -> list[Check]:
 
 
 def report(checks: list[Check]) -> tuple[int, int]:
-    failed = human = 0
+    """Grouped by what clears it, not by who owes it: any team member can pick up any group."""
+    failed = human = notes = 0
+    passed = [c.name for c in checks if c.passed]
+    groups: dict[str, list[Check]] = {}
     for c in checks:
-        if c.passed:
-            print(f"PASS  {'':5}  {c.name}")
-            continue
-        for reason in c.reasons:
-            print(f"FAIL  {c.owner:5}  {c.name}: {reason}")
-            failed += 1
-            human += c.owner == "HUMAN"
-    n_failed = sum(1 for c in checks if not c.passed)
-    print(f"checks: {len(checks)} run, {len(checks) - n_failed} passed, {n_failed} failed")
+        if not c.passed:
+            groups.setdefault(c.clears, []).append(c)
+
+    if passed:
+        print(f"PASS   {len(passed)} checks: {', '.join(sorted(passed))}")
+    for clears in sorted(groups):
+        lines = sum(len(c.reasons) for c in groups[clears])
+        print(f"\nCLEARED BY: {clears}  ({lines} lines)")
+        for c in groups[clears]:
+            for reason in c.reasons:
+                print(f"  {c.owner:5}  {c.name}: {reason}")
+                if c.owner == "NOTE":
+                    notes += 1
+                else:
+                    failed += 1
+                    human += c.owner == "HUMAN"
+    n_failed = sum(1 for c in checks if not c.passed and c.owner != "NOTE")
+    print(f"\nchecks: {len(checks)} run, {len(passed)} passed, {n_failed} failed, {notes} notes")
     print(f"preflight: {failed} failed, of which {human} need a human")
     return failed, human
 

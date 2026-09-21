@@ -65,7 +65,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 
 ## Innovation and practical value
 
-Measure each volunteer, per feature, and store the measure with the data. Three things follow. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer, never a blended grade or a probability. Follow-up questions are chosen by code from the answers, the person's scores and the weather, two at most: "It has not rained here for N days. Is anything coming out of that pipe?" And a group of volunteers can be weighed by what each proved on the other photos of the same feature; the consensus analysis in the plan reports whether that beats a plain vote, whatever it shows. This is our answer to the citizen science challenge the track names, and we check it on strangers rather than assert it.
+Measure each volunteer, per feature, and store the measure with the data. Three things follow. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer, never a blended grade or a probability. Follow-up questions are chosen by code from the answers, the person's scores and the weather, two at most: "It has not rained here for N days. Is anything coming out of that pipe?" We do not weight a group's vote by these scores: our own simulation says four photos per feature is too coarse for that, and a plain majority won. This is our answer to the citizen science challenge the track names, and we check it on strangers rather than assert it.
 
 ## Effective use of data, technology, AI, APIs and standards
 
@@ -152,5 +152,7 @@ Claude Code wrote most of the code and text in this repository, from briefs writ
 - The dry pipe rule depends on Open-Meteo. When rainfall or location is unknown the question is skipped rather than guessed.
 - The sandbox is shared and allows deletes; our store is the source of truth and the mirror can be rebuilt from the ledger.
 - The form items are marked unverified until Alex checks them against screenshots of the official app. The app has no smell item; our quick check may ask about smell.
+- Four photos per feature is a coarse measure. It is enough to show a person what to practise and to flag an answer worth a second look. It is too coarse to weight votes with, and our own simulation says so. The score sharpens each time a person retakes the test on new photos.
+- Every photo comes from one season or from open collections, so a creek in another month or another place may not look like these.
 - The checker is off by default and speaks only on passed features. It may end up with nothing to say, and the table above will show that.
 - English only. A Spanish locale ships only if a fluent person checks every string.

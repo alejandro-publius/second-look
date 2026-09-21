@@ -1,10 +1,15 @@
 import { expect, test } from "@playwright/test";
+
+// Update 09 section 4.5: /demo gives feedback on the same sixteen photos the study uses, so it
+// stays shut until the data lock. These tests move the browser clock past it.
+const AFTER_LOCK = new Date("2026-09-29T00:00:00Z");
 import { assertOnlyOurOrigins, goldFor, mockApi, watchRequests } from "./mock-api.mjs";
 import { answerAllItems, BASE } from "./helpers";
 
 test("judge mode gives feedback, stores nothing, and teaches only what was missed", async ({ page }) => {
   const urls = watchRequests(page);
   const calls = await mockApi(page);
+  await page.clock.install({ time: AFTER_LOCK });
   await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Judge mode" })).toBeVisible();
   await expect(page.getByText("Nothing here is stored.")).toBeVisible();
@@ -25,6 +30,7 @@ test("judge mode gives feedback, stores nothing, and teaches only what was misse
 
 test("a judge who passes every feature gets no lesson", async ({ page }) => {
   await mockApi(page);
+  await page.clock.install({ time: AFTER_LOCK });
   await page.goto("/demo");
   await page.getByRole("button", { name: "Start judge mode" }).click();
   // The order is random, so read which photo is on screen and answer by the mock's own key.
@@ -43,6 +49,7 @@ test("a judge who passes every feature gets no lesson", async ({ page }) => {
 test("?script=1 fixes the item order for the screen recording", async ({ page }) => {
   const order = async () => {
     const calls = await mockApi(page);
+    await page.clock.install({ time: AFTER_LOCK });
     await page.goto("/demo?script=1");
     await expect(page.getByText("Scripted order for the screen recording.")).toBeVisible();
     await page.getByRole("button", { name: "Start judge mode" }).click();
@@ -58,4 +65,19 @@ test("?script=1 fixes the item order for the screen recording", async ({ page })
   const b = await order();
   expect(a).toHaveLength(3);
   expect(a).toEqual(b);
+});
+
+test("judge mode is shut before the lock and open after it", async ({ page }) => {
+  await mockApi(page);
+  await page.clock.install({ time: new Date("2026-09-24T12:00:00Z") });
+  await page.goto("/demo");
+  await expect(page.getByRole("heading", { name: "Judge mode opens on Sep 28" })).toBeVisible();
+  // Shut means shut: no photo is fetched and no start button exists.
+  await expect(page.locator("img.photo, img.photo-large")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Start judge mode" })).toHaveCount(0);
+
+  await page.clock.install({ time: new Date("2026-09-29T00:00:00Z") });
+  await page.goto("/demo");
+  await expect(page.getByRole("heading", { name: "Judge mode" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start judge mode" })).toBeVisible();
 });

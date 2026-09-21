@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { LandingClient } from "@/components/LandingClient";
 import { LandingPick } from "@/components/LandingPick";
 import { Photo } from "@/components/Photo";
@@ -27,11 +26,6 @@ export default function Home() {
       <p className="muted small">{t("landing.no_camera")}</p>
       <p>{t("landing.first_line")}</p>
       <p className="small muted">{t("app.one_sentence")}</p>
-      <nav className="site-footer" aria-label={t("nav.more")}>
-        <Link href="/demo">{t("nav.demo")}</Link> <Link href="/how-we-know">{t("nav.how_we_know")}</Link>{" "}
-        <Link href="/check">{t("nav.check")}</Link> <Link href="/two">{t("nav.two")}</Link>{" "}
-        <Link href="/privacy">{t("nav.privacy")}</Link>
-      </nav>
       <LandingClient />
     </div>
   );

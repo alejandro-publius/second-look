@@ -39,6 +39,7 @@ export function Consent({ onStart }: { onStart: (hiddenField: string) => void })
       <p>{t("consent.what")}</p>
       <p>{t("consent.stored")}</p>
       <p>{t("consent.not_advice")}</p>
+      <p>{t("consent.hosts")}</p>
       <p className="small muted">{t("consent.contact")}</p>
       <div className="hp" aria-hidden="true">
         <label htmlFor="website">{t("consent.website_label")}</label>

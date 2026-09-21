@@ -43,7 +43,7 @@ def test_current_repo_fails_only_for_known_reasons() -> None:
     build = {n for n, c in failed.items() if c.owner == "BUILD"}
     assert {"human_inputs", "key_frozen", "key_agreement", "prereg_tag", "contact_email"} <= human
     assert "marks_approved" in human, "the design pass marks are still waiting for Rachel"
-    assert "plan_wording" in human, "TODO-RACHEL wording in the plan"
+    assert "plan_wording" in human, "TODO-TEAM wording in the plan"
     reasons = [r for c in checks for r in c.reasons]
     assert any("placeholder photo in role test" in r for r in reasons)
     assert any("prereg-v1 tag missing" in r for r in reasons)
@@ -123,7 +123,7 @@ def green_root(tmp_path: Path) -> Path:
     (root / "apps" / "web" / "app" / "t" / "consent.tsx").write_text(
         '<input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />'
     )
-    plan = (REPO / "docs" / "analysis_plan.md").read_text().replace("TODO-RACHEL", "frozen wording")
+    plan = (REPO / "docs" / "analysis_plan.md").read_text().replace("TODO-TEAM", "frozen wording")
     (root / "docs" / "analysis_plan.md").write_text(plan)
     git = ["git", "-C", str(root), "-c", "user.name=t", "-c", "user.email=t@example.org"]
     subprocess.run([*git, "init", "-q"], check=True)
@@ -195,16 +195,25 @@ def test_green_root_guards_fire_when_broken(tmp_path: Path) -> None:
     assert broken == {"analysis_tests", "lock_tests"}
 
 
-def test_report_counts_reasons_and_marks_owner(capsys: pytest.CaptureFixture[str]) -> None:
+def test_report_groups_by_what_clears_it_and_counts_reasons(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Update 09 section 1: grouped by the work, not by who owes it, and a NOTE never blocks."""
     checks = [
-        preflight.Check("a", "HUMAN", ["one", "two"]),
+        preflight.Check("a", "HUMAN", ["one", "two"], clears="real photos"),
         preflight.Check("b", "BUILD", ["three"]),
         preflight.Check("c", "BUILD"),
+        preflight.Check("d", "NOTE", ["four"], clears="a second labeller, optional"),
     ]
     assert preflight.report(checks) == (3, 2)
     out = capsys.readouterr().out
-    assert "FAIL  HUMAN  a: one" in out and "FAIL  BUILD  b: three" in out and "PASS" in out
-    assert "checks: 3 run, 1 passed, 2 failed" in out
+    assert "CLEARED BY: real photos  (2 lines)" in out
+    assert "CLEARED BY: our build  (1 lines)" in out
+    assert "CLEARED BY: a second labeller, optional  (1 lines)" in out
+    assert "HUMAN  a: one" in out and "BUILD  b: three" in out and "NOTE   d: four" in out
+    assert "PASS   1 checks: c" in out
+    # Two checks failed and one is a note. The note is never counted as a failure.
+    assert "checks: 4 run, 1 passed, 2 failed, 1 notes" in out
     assert out.strip().endswith("preflight: 3 failed, of which 2 need a human")
 
 

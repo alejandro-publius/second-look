@@ -1,4 +1,7 @@
 import type { MetadataRoute } from "next";
+
+// A static export writes this file at build time.
+export const dynamic = "force-static";
 import { THEME_LIGHT } from "./theme";
 import { t } from "@/lib/t";
 
