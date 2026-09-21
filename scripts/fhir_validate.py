@@ -1,9 +1,9 @@
 """Run the pinned HL7 validator over our emitted FHIR instances (hard rule 11).
 
-Inputs: every *.json under fhir/build/instances (written by the emitter's tests) plus the
-example Bundle SUSHI builds from fhir/fsh. Profiles come from the guide built at the pinned
-commit by scripts/fhir_build.sh. Output: results/fhir_validation.json with error and warning
-counts per file and whether terminology checks ran. Exit 1 on any error.
+Inputs: the emitter's golden files under fhir/golden, every *.json under fhir/build/instances
+(written by tests) and the example Bundle SUSHI builds from fhir/fsh. Profiles come from the
+guide built at the pinned commit by scripts/fhir_build.sh. Output: results/fhir_validation.json
+with error and warning counts per file and whether terminology checks ran. Exit 1 on any error.
 
 Flags: --no-build skips the guide build. --tx <url> uses a terminology server (default n/a,
 recorded in the results file, Update 02 section 11.4).
@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 JAR = ROOT / "fhir" / "tools" / "validator_cli.jar"
 IG_RESOURCES = ROOT / "fhir" / "build" / "ig" / "fsh-generated" / "resources"
 INSTANCES = ROOT / "fhir" / "build" / "instances"
+GOLDEN = ROOT / "fhir" / "golden"
 RESULTS = ROOT / "results" / "fhir_validation.json"
 LOCK = ROOT / "fhir" / "ig.lock"
 
@@ -63,6 +64,8 @@ def our_files() -> list[Path]:
     files: list[Path] = []
     if IG_RESOURCES.exists():
         files += sorted(IG_RESOURCES.glob("Bundle-sl-*.json"))
+    if GOLDEN.exists():
+        files += sorted(GOLDEN.glob("*.json"))
     if INSTANCES.exists():
         files += sorted(INSTANCES.glob("*.json"))
     return files

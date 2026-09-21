@@ -55,7 +55,7 @@ filterwarnings = ["ignore::DeprecationWarning"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ["fhir/ig-src", "apps/web", "results", "photos"]
+extend-exclude = ["fhir/ig-src", "apps/web", "results", "photos", "docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "W"]

@@ -27,7 +27,11 @@ services:
         condition: service_healthy
   web:
     build:
-      context: apps/web
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_ORIGIN: http://localhost:8000
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
     environment:
       NEXT_PUBLIC_API_ORIGIN: http://localhost:8000
     ports:

@@ -3,18 +3,32 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "predev": "node scripts/build-content.mjs",
+    "dev": "next dev -p 3100",
+    "prebuild": "node scripts/build-content.mjs",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start -p 3100",
+    "prelint": "node scripts/build-content.mjs",
+    "lint": "eslint",
+    "test": "playwright test",
+    "poster": "node scripts/poster.mjs",
+    "lighthouse": "node scripts/lighthouse.mjs",
+    "screens": "node scripts/screens.mjs",
+    "dash-check": "node scripts/check-dashes.mjs"
   },
   "dependencies": {
+    "js-yaml": "^5.4.2",
     "next": "16.3.5",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
