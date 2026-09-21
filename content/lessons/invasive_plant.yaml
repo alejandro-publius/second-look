@@ -5,10 +5,26 @@ approved: false
 rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
 source: ""
 contrast_pairs:
-  - { assume_photo_id: ph-lesson-invasive_plant-a1, actual_photo_id: ph-lesson-invasive_plant-a2, assume_caption: "PLACEHOLDER what people assume", actual_caption: "PLACEHOLDER what is there" }
-  - { assume_photo_id: ph-lesson-invasive_plant-b1, actual_photo_id: ph-lesson-invasive_plant-b2, assume_caption: "PLACEHOLDER what people assume", actual_caption: "PLACEHOLDER what is there" }
+  - assume_photo_id: ph-lesson-invasive_plant-a1
+    actual_photo_id: ph-lesson-invasive_plant-a2
+    assume_caption: "PLACEHOLDER what people assume"
+    actual_caption: "PLACEHOLDER what is there"
+    # Marks sit on the actual photo. x and y are fractions of the width and height,
+    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+    marks:
+      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the invasive stand 1" }
+  - assume_photo_id: ph-lesson-invasive_plant-b1
+    actual_photo_id: ph-lesson-invasive_plant-b2
+    assume_caption: "PLACEHOLDER what people assume"
+    actual_caption: "PLACEHOLDER what is there"
+    # Marks sit on the actual photo. x and y are fractions of the width and height,
+    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+    marks:
+      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the invasive stand 2" }
 practice:
   photo_id: ph-practice-invasive_plant
   gold: present
   feedback_correct: "PLACEHOLDER feedback that names the cue."
   feedback_wrong: "PLACEHOLDER feedback that names the cue."
+practice_marks:
+  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the invasive stand" }

@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "./ui/Button";
+import { Gauge } from "./ui/Gauge";
+import { Row } from "./ui/Row";
 import type { FeatureScoreOut } from "@/lib/api";
 import { featureById } from "@/lib/content";
 import { siteUrl } from "@/lib/session";
 import { t } from "@/lib/t";
 
-/** Per-feature score, the share card and, once, the contributor token. Never per-photo answers. */
+/**
+ * One gauge per feature, the same object as the progress bar in the test. Then the sentence that
+ * says what the score is for, then the share card. No confetti. Never per-photo answers.
+ */
 export function ScoreScreen({ scores, correctTotal, token, children }: { scores: FeatureScoreOut[]; correctTotal: number; token?: string; children?: React.ReactNode }) {
   const [copied, setCopied] = useState<"none" | "share" | "token">("none");
   const total = scores.reduce((n, s) => n + s.total, 0) || 16;
@@ -39,21 +45,21 @@ export function ScoreScreen({ scores, correctTotal, token, children }: { scores:
 
   return (
     <div className="stack">
-      <p className="card">
-        <strong>{t("end.total", { correct: correctTotal, total })}</strong>
-      </p>
-      <ul className="stack" aria-label={t("end.per_feature_label")}>
-        {scores.map((s) => (
-          <li key={s.feature}>{t("end.per_feature", { correct: s.correct, total: s.total, feature: featureById(s.feature)?.name ?? s.feature })}</li>
-        ))}
-      </ul>
+      <Gauge value={correctTotal} total={total} countText={t("end.total", { correct: correctTotal, total })} />
+      <div className="card" aria-label={t("end.per_feature_label")} role="group">
+        {scores.map((s) => {
+          const name = featureById(s.feature)?.name ?? s.feature;
+          return <Row key={s.feature} label={name} end={<Gauge size="mark" value={s.correct} total={s.total} />} />;
+        })}
+      </div>
+      <p>{t("end.score_for")}</p>
       <p>{t("end.last_line")}</p>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="share-card" src={cardUrl} alt={t("end.share_card_alt", { correct: correctTotal, total })} width={1200} height={630} />
-      <div className="btn-row">
-        <button type="button" className="btn" onClick={share}>
+      <div className="actions">
+        <Button block onClick={share}>
           {copied === "share" ? t("end.copied") : t("end.share_button")}
-        </button>
+        </Button>
       </div>
       {token ? (
         <section className="card stack" aria-labelledby="token-title">
@@ -62,11 +68,9 @@ export function ScoreScreen({ scores, correctTotal, token, children }: { scores:
             {token}
           </p>
           <p className="small">{t("end.token_note")}</p>
-          <div className="btn-row">
-            <button type="button" className="btn btn-secondary" onClick={() => copy(token, "token")}>
-              {copied === "token" ? t("end.copied") : t("end.copy_token")}
-            </button>
-          </div>
+          <Button kind="secondary" block onClick={() => copy(token, "token")}>
+            {copied === "token" ? t("end.copied") : t("end.copy_token")}
+          </Button>
         </section>
       ) : null}
       {children}

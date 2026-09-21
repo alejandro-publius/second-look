@@ -6,6 +6,7 @@ const TOKEN_KEY = "sl_client_token";
 const SRC_KEY = "sl_src";
 const CONTRIB_KEY = "sl_contributor_token";
 const SPOTS_KEY = "sl_saved_spots";
+const GUESS_KEY = "sl_landing_guess";
 
 export const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other"] as const;
 
@@ -151,4 +152,26 @@ export function shuffle<T>(items: T[], seed?: string): T[] {
     [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
+}
+
+/**
+ * The landing page question. The choice is kept in this browser only; TestFlow sends it as the
+ * warm-up answer after the person has consented, never before. docs/analysis_plan.md says so too.
+ */
+export function setLandingGuess(warmupId: string): void {
+  try {
+    sessionStorage.setItem(GUESS_KEY, warmupId);
+  } catch {
+    // storage blocked: the person answers the warm-up screen instead
+  }
+}
+
+export function takeLandingGuess(): string | null {
+  try {
+    const v = sessionStorage.getItem(GUESS_KEY);
+    if (v) sessionStorage.removeItem(GUESS_KEY);
+    return v;
+  } catch {
+    return null;
+  }
 }

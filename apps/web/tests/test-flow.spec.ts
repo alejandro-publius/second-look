@@ -31,7 +31,8 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async 
   expect(session.client_token_hash).toMatch(/^[0-9a-f]{64}$/);
   expect(session.source_label).toBe("other");
 
-  await expect(page.getByRole("heading", { name: /Four things people miss/ })).toBeVisible();
+  // The rule of thumb is the heading of the lesson card; the feature name rides on the gauge.
+  await expect(page.locator(".gauge-count", { hasText: "Built banks" })).toBeVisible();
   await expect(page.getByText("Draft wording, not yet approved")).toBeVisible();
   await finishLesson(page);
   await expect.poll(() => calls.filter((c) => c.path === "/api/test/lesson-done").length).toBe(1);
@@ -41,8 +42,11 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async 
   // Items in the server's order (the mock reverses t01..t16). No feedback words ever appear.
   await expect(page.getByText("Photo 1 of 16")).toBeVisible();
   await expect(page.getByRole("button", { name: "Can't tell" })).toBeVisible();
-  await page.getByRole("button", { name: "What counts as" }).click();
-  await expect(page.getByRole("note")).toBeVisible();
+  // The technical word in the question opens the bottom sheet with one plain sentence.
+  await page.locator(".glossary-btn").first().click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("button", { name: "Close" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await answerAllItems(page, (i) => (i % 3 === 0 ? "Can't tell" : i % 2 ? "Yes" : "No"));
   const responses = calls.filter((c) => c.path === "/api/test/response");
   expect(responses).toHaveLength(16);
@@ -63,7 +67,9 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async 
   const complete = calls.find((c) => c.path === "/api/test/complete")!;
   expect(complete.body).toMatchObject({ prior_experience: "yes", keep_score: true });
   await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();
-  await expect(page.getByText(/of 4 on Built banks/)).toBeVisible();
+  const byFeature = page.getByRole("group", { name: "Score by feature" });
+  await expect(byFeature.getByText("Built banks", { exact: true })).toBeVisible();
+  await expect(byFeature.getByText(/^\d of 4$/).first()).toBeVisible();
   await expect(page.getByText("One visit is a snapshot. Repeated visits make a story.")).toBeVisible();
   await expect(page.getByTestId("contributor-token")).toHaveText("MOCKTOKEN1234567");
   await expect(page.locator("img.share-card")).toHaveAttribute("src", /\/api\/share\/\d+/);

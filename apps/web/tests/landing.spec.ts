@@ -8,7 +8,7 @@ test("landing paints without the API and wakes it afterwards", async ({ page }) 
   const calls = await mockApi(page, { offline });
   await page.goto("/?src=poster");
   await expect(page.getByRole("heading", { name: "Which creek is healthier?" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Take the two-minute test" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Find out in two minutes" })).toBeVisible();
   await expect(page.getByText("No camera needed.")).toBeVisible();
   await expect(page.getByText("This trains your eyes for the visit.")).toBeVisible();
   const imgs = page.getByRole("group", { name: "Two creek photos" }).locator("img");
@@ -16,7 +16,7 @@ test("landing paints without the API and wakes it afterwards", async ({ page }) 
   await expect(imgs.first()).toHaveAttribute("alt", "gray placeholder block, not a photo");
   await expect.poll(() => calls.filter((c) => c.path === "/health").length).toBeGreaterThan(0);
   expect(await page.evaluate(() => sessionStorage.getItem("sl_src"))).toBe("poster");
-  await expect(page.getByRole("link", { name: "Take the two-minute test" })).toHaveAttribute("href", "/t?src=poster");
+  await expect(page.getByRole("link", { name: "Find out in two minutes" })).toHaveAttribute("href", "/t?src=poster");
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
 });
 

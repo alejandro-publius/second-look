@@ -4,6 +4,10 @@ import { useMemo, useState } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { Lesson } from "./Lesson";
 import { TestItems, type ItemAnswerResult } from "./TestItems";
+import { Button } from "./ui/Button";
+import { Gauge } from "./ui/Gauge";
+import { Icon } from "./ui/Icon";
+import { Row } from "./ui/Row";
 import { api, type TestAnswer } from "@/lib/api";
 import { content, featureById, FEATURE_IDS, type FeatureId } from "@/lib/content";
 import { shuffle } from "@/lib/session";
@@ -46,26 +50,45 @@ export function DemoFlow({ scripted }: { scripted: boolean }) {
         <div className="stack">
           <FocusHeading>{t("demo.title")}</FocusHeading>
           <p>{t("demo.intro")}</p>
-          {scripted ? <p className="badge badge-warn">{t("demo.script_note")}</p> : null}
-          <button type="button" className="btn btn-block" onClick={() => setStage({ name: "test" })}>
-            {t("demo.start")}
-          </button>
+          {scripted ? (
+            <p>
+              <span className="badge badge-warn">
+                <Icon name="warning" size={16} />
+                {t("demo.script_note")}
+              </span>
+            </p>
+          ) : null}
+          <div className="actions">
+            <Button block onClick={() => setStage({ name: "test" })}>
+              {t("demo.start")}
+            </Button>
+          </div>
         </div>
       );
     case "test":
-      return <TestItems order={order} onAnswer={onAnswer} onDone={() => setStage({ name: "result" })} withFeedback titleKey="demo.title" />;
+      return <TestItems order={order} onAnswer={onAnswer} onDone={() => setStage({ name: "result" })} withFeedback />;
     case "result":
       return (
         <div className="stack">
           <FocusHeading>{t("demo.result_title")}</FocusHeading>
-          {failures > 0 ? <p className="notice notice-warn">{t("demo.feedback_unavailable")}</p> : null}
-          <ul>
-            {FEATURE_IDS.map((f) => (
-              <li key={f}>{t("end.per_feature", { correct: correctBy[f] ?? 0, total: 4, feature: featureById(f)?.name ?? f })}</li>
-            ))}
-          </ul>
+          {failures > 0 ? (
+            <div className="notice notice-warn" role="status">
+              <Icon name="warning" />
+              <p>{t("demo.feedback_unavailable")}</p>
+            </div>
+          ) : null}
+          <div className="card" role="group" aria-label={t("end.per_feature_label")}>
+            {FEATURE_IDS.map((f) => {
+              const name = featureById(f)?.name ?? f;
+              const got = correctBy[f] ?? 0;
+              return <Row key={f} label={name} end={<Gauge size="mark" value={got} total={4} />} />;
+            })}
+          </div>
           {missed.length === 0 ? (
-            <p className="notice notice-ok">{t("demo.missed_none")}</p>
+            <div className="notice notice-ok">
+              <Icon name="check-circle" />
+              <p>{t("demo.missed_none")}</p>
+            </div>
           ) : (
             <>
               <p>{t("demo.missed_intro")}</p>
@@ -74,16 +97,18 @@ export function DemoFlow({ scripted }: { scripted: boolean }) {
                   <li key={f}>{featureById(f)?.name}</li>
                 ))}
               </ul>
-              <button type="button" className="btn btn-block" onClick={() => setStage({ name: "lesson" })}>
-                {t("demo.lesson_start")}
-              </button>
+              <div className="actions">
+                <Button block onClick={() => setStage({ name: "lesson" })}>
+                  {t("demo.lesson_start")}
+                </Button>
+              </div>
             </>
           )}
           <p className="small muted">{t("demo.nothing_stored")}</p>
         </div>
       );
     case "lesson":
-      return <Lesson features={missed} onDone={() => setStage({ name: "done" })} titleKey="demo.lesson_title" />;
+      return <Lesson features={missed} onDone={() => setStage({ name: "done" })} />;
     case "done":
       return (
         <div className="stack">

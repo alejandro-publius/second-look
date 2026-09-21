@@ -7,9 +7,12 @@ import { Lesson } from "./Lesson";
 import { ScoreScreen } from "./ScoreScreen";
 import { TestItems } from "./TestItems";
 import { Warmup } from "./Warmup";
+import { Button } from "./ui/Button";
+import { Icon } from "./ui/Icon";
+import { Skeleton } from "./ui/Skeleton";
 import { api, type CompleteResponse, type SessionResponse, type TestAnswer } from "@/lib/api";
 import { content, FEATURE_IDS, testItemById } from "@/lib/content";
-import { buildHash, captureSource, clientTokenHash, setContributorToken, sourceLabel, uaClass } from "@/lib/session";
+import { buildHash, captureSource, clientTokenHash, setContributorToken, sourceLabel, takeLandingGuess, uaClass } from "@/lib/session";
 import { t } from "@/lib/t";
 
 type Stage =
@@ -82,15 +85,19 @@ export function TestFlow() {
 
   switch (stage.name) {
     case "consent":
-      return <Consent onStart={(hidden) => setStage({ name: "warmup", hidden })} />;
+      return (
+        <Consent
+          onStart={(hidden) => {
+            const guess = takeLandingGuess();
+            if (guess) void assign(hidden, guess);
+            else setStage({ name: "warmup", hidden });
+          }}
+        />
+      );
     case "warmup":
       return <Warmup onChoice={(choice) => void assign(stage.hidden, choice)} />;
     case "assigning":
-      return (
-        <p role="status" className="muted">
-          {t("test.assigning")}
-        </p>
-      );
+      return <Skeleton label={t("test.assigning")} />;
     case "lesson":
       return (
         <Lesson
@@ -134,17 +141,15 @@ export function TestFlow() {
               <span className="small muted">{t("end.keep_score_note")}</span>
             </span>
           </label>
-          <button type="submit" className="btn btn-block">
-            {t("end.see_score")}
-          </button>
+          <div className="actions">
+            <Button type="submit" block>
+              {t("end.see_score")}
+            </Button>
+          </div>
         </form>
       );
     case "completing":
-      return (
-        <p role="status" className="muted">
-          {t("end.scoring")}
-        </p>
-      );
+      return <Skeleton label={t("end.scoring")} lines={3} photo={false} />;
     case "score": {
       const untrained = !stage.session.lesson_first;
       return (
@@ -156,19 +161,17 @@ export function TestFlow() {
                 <h2>{t("end.lesson_offer_title")}</h2>
                 <p>{t("end.lesson_offer")}</p>
                 <div className="btn-row">
-                  <button type="button" className="btn" onClick={() => setStage({ name: "lesson", session: stage.session, after: "done" })}>
-                    {t("end.lesson_start")}
-                  </button>
-                  <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "done" })}>
+                  <Button onClick={() => setStage({ name: "lesson", session: stage.session, after: "done" })}>{t("end.lesson_start")}</Button>
+                  <Button kind="secondary" onClick={() => setStage({ name: "done" })}>
                     {t("end.lesson_skip")}
-                  </button>
+                  </Button>
                 </div>
               </section>
             ) : (
               <div className="btn-row">
-                <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "done" })}>
+                <Button kind="secondary" onClick={() => setStage({ name: "done" })}>
                   {t("end.finish")}
-                </button>
+                </Button>
               </div>
             )}
           </ScoreScreen>
@@ -186,12 +189,15 @@ export function TestFlow() {
     case "error":
       return (
         <div className="stack">
-          <p className="notice notice-bad" role="alert">
-            {stage.message}
-          </p>
-          <button type="button" className="btn" onClick={stage.retry}>
-            {t("error.retry")}
-          </button>
+          <div className="notice notice-bad" role="alert">
+            <Icon name="warning-circle" />
+            <p>{stage.message}</p>
+          </div>
+          <div className="actions">
+            <Button block onClick={stage.retry}>
+              {t("error.retry")}
+            </Button>
+          </div>
         </div>
       );
   }

@@ -14,9 +14,15 @@
     "poster": "node scripts/poster.mjs",
     "lighthouse": "node scripts/lighthouse.mjs",
     "screens": "node scripts/screens.mjs",
-    "dash-check": "node scripts/check-dashes.mjs"
+    "dash-check": "node scripts/check-dashes.mjs",
+    "icons": "node scripts/build-icons.mjs",
+    "design-check": "node scripts/design-check.mjs",
+    "design-screens": "node scripts/design-screens.mjs",
+    "budget": "node scripts/budget.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource/atkinson-hyperlegible-mono": "^5.3.0",
     "js-yaml": "^5.4.2",
     "next": "16.3.5",
     "qrcode": "^1.5.4",
@@ -25,6 +31,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@phosphor-icons/core": "^2.1.1",
     "@playwright/test": "^1.63.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20",

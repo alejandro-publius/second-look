@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import QRCode from "qrcode";
+import { PRINT_INK, PRINT_PAPER } from "../theme";
 import { Photo } from "@/components/Photo";
 import { content } from "@/lib/content";
 import { siteUrl } from "@/lib/session";
@@ -11,7 +12,7 @@ export const metadata: Metadata = { title: `${t("poster.title")}: ${t("app.name"
 // is fetched from anywhere. It points at the site with ?src=poster. No answer is printed.
 export default async function PosterPage() {
   const url = `${siteUrl()}/?src=poster`;
-  const svg = await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 1, color: { dark: "#000000", light: "#ffffff" } });
+  const svg = await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 1, color: { dark: PRINT_INK, light: PRINT_PAPER } });
   const [left, right] = content.warmup;
   return (
     <div className="poster">

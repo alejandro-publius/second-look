@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { FocusHeading } from "./FocusHeading";
+import { Button } from "./ui/Button";
+import { Icon } from "./ui/Icon";
 import { t } from "@/lib/t";
 
 /**
  * Consent: the what, what is stored, not advice, contact. Two required checkboxes. The `website`
- * text input is the bot trap: off screen, out of the tab order, sent as hidden_field.
+ * text input is the bot trap: off screen, out of the tab order, hidden from screen readers, sent
+ * as hidden_field.
  */
 export function Consent({ onStart }: { onStart: (hiddenField: string) => void }) {
   const [agree, setAgree] = useState(false);
@@ -44,13 +47,16 @@ export function Consent({ onStart }: { onStart: (hiddenField: string) => void })
         <span>{t("consent.check_age")}</span>
       </label>
       {error ? (
-        <p className="notice notice-warn" role="alert">
-          {error}
-        </p>
+        <div className="notice notice-warn" role="alert">
+          <Icon name="warning" />
+          <p>{error}</p>
+        </div>
       ) : null}
-      <button type="submit" className="btn btn-block">
-        {t("consent.start")}
-      </button>
+      <div className="actions">
+        <Button type="submit" block>
+          {t("consent.start")}
+        </Button>
+      </div>
     </form>
   );
 }

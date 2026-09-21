@@ -7,7 +7,7 @@ export async function passConsent(page: Page) {
   await expect(page.getByRole("heading", { name: "Before you start" })).toBeVisible();
   await page.getByLabel("I understand and agree to take part.").check();
   await page.getByLabel("I am 18 or older.").check();
-  await page.getByRole("button", { name: "Start" }).click();
+  await page.getByRole("button", { name: "I agree, start" }).click();
   await expect(page.getByRole("heading", { name: "Which creek is healthier?" })).toBeVisible();
 }
 
@@ -18,12 +18,12 @@ export async function pickWarmup(page: Page) {
 /** Walks the whole lesson: rule, second pair, practice for each of four features. */
 export async function finishLesson(page: Page) {
   for (let f = 0; f < 4; f++) {
-    await page.getByRole("button", { name: "Next", exact: true }).click();
-    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.getByRole("button", { name: "Next photo", exact: true }).click();
+    await page.getByRole("button", { name: "Next photo", exact: true }).click();
     await expect(page.getByText("Try one.")).toBeVisible();
     await page.getByRole("button", { name: "Yes", exact: true }).click();
     await expect(page.getByRole("status")).toBeVisible();
-    await page.getByRole("button", { name: f === 3 ? "Finish" : "Next", exact: true }).click();
+    await page.getByRole("button", { name: f === 3 ? "Finish" : "Next photo", exact: true }).click();
   }
 }
 
@@ -34,7 +34,7 @@ export async function answerAllItems(page: Page, pick: (i: number) => "Yes" | "N
     await page.getByRole("button", { name: pick(i), exact: true }).click();
     if (withFeedback) {
       await expect(page.getByRole("status")).toBeVisible();
-      await page.getByRole("button", { name: i === 16 ? "Finish" : "Next", exact: true }).click();
+      await page.getByRole("button", { name: i === 16 ? "Finish" : "Next photo", exact: true }).click();
     }
   }
 }

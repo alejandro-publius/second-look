@@ -1,20 +1,9 @@
-:root {
-  --ink: #14211b;
-  --muted: #465850;
-  --paper: #fbfaf6;
-  --card: #ffffff;
-  --line: #cfd6d1;
-  --accent: #1f3a2e;
-  --accent-ink: #ffffff;
-  --focus: #0b5fff;
-  --warn-bg: #fff4d6;
-  --warn-ink: #5a3d00;
-  --ok-bg: #e3f2e8;
-  --ok-ink: #123d26;
-  --bad-bg: #fbe4e1;
-  --bad-ink: #6b1b12;
-  color-scheme: light;
-}
+@import "../styles/tokens.css";
+
+/*
+ * Every value here comes from tokens.css. scripts/design-check.mjs fails the build on a raw hex
+ * colour, a pixel radius, a gradient or a glow anywhere outside that file.
+ */
 
 * {
   box-sizing: border-box;
@@ -24,12 +13,13 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 18px;
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -50,75 +40,99 @@ h1,
 h2,
 h3,
 p {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--s3);
   overflow-wrap: anywhere;
+  max-width: var(--measure);
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--leading-heading);
+  text-wrap: balance;
+  font-weight: 700;
 }
 
 h1 {
-  font-size: 1.6rem;
-  line-height: 1.25;
+  font-size: var(--text-h2);
 }
 
 h2 {
-  font-size: 1.25rem;
-  line-height: 1.3;
+  font-size: var(--text-h3);
 }
 
 h3 {
-  font-size: 1.05rem;
+  font-size: var(--text-body);
 }
 
 a {
-  color: var(--accent);
+  color: var(--ink);
   text-underline-offset: 0.15em;
 }
 
 :focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 3px solid var(--ink);
   outline-offset: 2px;
+  border-radius: var(--s1);
+}
+
+.icon {
+  flex: none;
+  vertical-align: middle;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 .skip {
   position: absolute;
-  left: 0.5rem;
-  top: -4rem;
-  background: var(--card);
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--ink);
+  left: var(--s2);
+  top: calc(var(--s8) * -1);
+  background: var(--surface);
+  padding: var(--s2) var(--s4);
+  border: var(--border) solid var(--ink);
+  border-radius: var(--radius);
   z-index: 10;
 }
 
 .skip:focus {
-  top: 0.5rem;
+  top: var(--s2);
 }
 
 .site-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1rem;
-  border-bottom: 1px solid var(--line);
-  background: var(--card);
+  padding: var(--s2) var(--s4);
+  border-bottom: var(--hairline) solid var(--line);
+  background: var(--surface);
 }
 
 .site-header a {
   text-decoration: none;
   font-weight: 700;
   color: var(--ink);
-  min-height: 44px;
+  min-height: var(--tap);
   display: inline-flex;
   align-items: center;
 }
 
 .site-nav {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--s2);
 }
 
 .site-nav a {
   font-weight: 400;
-  padding: 0 0.5rem;
-  font-size: 0.95rem;
+  padding: 0 var(--s2);
+  font-size: var(--text-small);
+  text-decoration: underline;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 main {
@@ -126,14 +140,14 @@ main {
   width: 100%;
   max-width: 40rem;
   margin: 0 auto;
-  padding: 1rem 1rem 6rem;
+  padding: var(--s4) var(--s4) calc(var(--s8) + env(safe-area-inset-bottom));
 }
 
 .site-footer {
-  border-top: 1px solid var(--line);
-  padding: 1rem;
-  font-size: 0.9rem;
-  color: var(--muted);
+  border-top: var(--hairline) solid var(--line);
+  padding: var(--s4);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
   text-align: center;
 }
 
@@ -141,49 +155,76 @@ main {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5rem 1rem;
-  margin-top: 0.5rem;
+  gap: var(--s2) var(--s4);
+  margin-top: var(--s2);
 }
 
-/* Buttons: at least 44 px tall, wide enough for a thumb. */
+/* The landing page uses <nav class="site-footer"> directly, so match links either way. */
+.site-footer a,
+.site-footer nav a {
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--s1);
+}
+
+/* Buttons. One accent: primary is the flag, and its text is always the ink. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  min-width: 44px;
-  padding: 0.6rem 1.1rem;
-  border-radius: 10px;
-  border: 2px solid var(--accent);
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 600;
+  gap: var(--s2);
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: var(--s3) var(--s5);
+  border-radius: var(--radius);
+  border: var(--border) solid var(--flag);
+  background: var(--flag);
+  color: var(--on-flag);
+  font-weight: 700;
   text-decoration: none;
   cursor: pointer;
   touch-action: manipulation;
 }
 
 .btn:hover {
-  filter: brightness(1.1);
+  background: var(--flag-press);
+  border-color: var(--flag-press);
+}
+
+.btn:active {
+  transform: scale(0.99);
 }
 
 .btn:disabled,
 .btn[aria-disabled="true"] {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background: var(--card);
+  background: var(--surface);
   color: var(--ink);
+  border-color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-sunk);
   border-color: var(--ink);
 }
 
 .btn-quiet {
   background: transparent;
-  color: var(--accent);
+  color: var(--ink);
   border-color: transparent;
   text-decoration: underline;
+  font-weight: 400;
+  padding: var(--s2);
+}
+
+.btn-quiet:hover {
+  background: var(--surface-sunk);
+  border-color: transparent;
 }
 
 .btn-block {
@@ -192,52 +233,48 @@ main {
 
 .btn-row {
   display: flex;
-  gap: 0.6rem;
+  gap: var(--s3);
   flex-wrap: wrap;
-  margin-top: 0.75rem;
+  margin-top: var(--s3);
 }
 
 .btn-row > .btn {
   flex: 1 1 8rem;
 }
 
-.answer-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.6rem;
+/* The primary action sits in thumb reach at the bottom of the flow. */
+.actions {
   position: sticky;
   bottom: 0;
-  padding: 0.75rem 0 1rem;
-  background: var(--paper);
-}
-
-.answer-row .btn {
-  min-height: 56px;
+  display: grid;
+  gap: var(--s2);
+  padding: var(--s3) 0 calc(var(--s3) + env(safe-area-inset-bottom));
+  background: var(--bg);
 }
 
 .stack > * + * {
-  margin-top: 0.75rem;
+  margin-top: var(--s3);
 }
 
 .card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 1rem;
+  background: var(--surface);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--s4);
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--ink-soft);
 }
 
 .small {
-  font-size: 0.9rem;
+  font-size: var(--text-small);
 }
 
 .pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+  gap: var(--s3);
 }
 
 .pair figure {
@@ -246,9 +283,9 @@ main {
 
 .pair figcaption,
 figcaption {
-  font-size: 0.9rem;
-  color: var(--muted);
-  margin-top: 0.3rem;
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  margin-top: var(--s1);
 }
 
 .photo {
@@ -257,122 +294,417 @@ figcaption {
   height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 10px;
-  background: #d9d9d9;
-  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-sunk);
+  border: var(--hairline) solid var(--line);
 }
 
 .photo-large {
-  max-height: 55dvh;
+  max-height: 46dvh;
+}
+
+/* PhotoFrame: the photograph plus an optional numbered mark layer. */
+.photoframe {
+  position: relative;
+  margin: 0;
+}
+
+.photoframe-stage {
+  position: relative;
+  display: block;
+}
+
+.photoframe-marks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mark-dot {
+  fill: var(--flag);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.mark-num {
+  fill: var(--on-flag);
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.photoframe-tools {
+  display: flex;
+  gap: var(--s2);
+  margin-top: var(--s2);
+  flex-wrap: wrap;
+}
+
+.mark-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--s2) 0 0;
+  display: grid;
+  gap: var(--s1);
+}
+
+.mark-list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+  font-size: var(--text-small);
+}
+
+.mark-list .n {
+  min-width: var(--s5);
+  height: var(--s5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--flag);
+  color: var(--on-flag);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+/*
+ * The staff gauge. A surveyor's measuring stick: square ends, one block per item, a heavier tick
+ * every fifth block. It is the progress bar in the test and the score mark on a record.
+ */
+.gauge {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.gauge-blocks {
+  display: flex;
+  gap: var(--gauge-gap);
+  flex: 1 1 auto;
+  border: var(--hairline) solid var(--line-strong);
+  padding: var(--gauge-gap);
+  background: var(--surface);
+}
+
+.gauge-block {
+  flex: 1 1 0;
+  height: var(--gauge-height);
+  background: var(--surface-sunk);
+}
+
+.gauge-block.is-full {
+  background: var(--flag);
+}
+
+.gauge-block.is-fifth {
+  box-shadow: inset 0 calc(var(--s1) * -1) 0 var(--ink);
+}
+
+.gauge-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gauge-mark .gauge-blocks {
+  flex: 0 0 auto;
+  width: var(--s8);
+}
+
+.gauge-mark .gauge-block {
+  height: var(--gauge-mark-height);
+}
+
+.gauge-hollow .gauge-block.is-full {
+  background: var(--surface-sunk);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line-strong);
+}
+
+/* Row: a label, a value, and an optional gauge at the right. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s3) 0;
+  border-bottom: var(--hairline) solid var(--line);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row-label {
+  min-width: 0;
+  font-weight: 700;
+}
+
+.row-value {
+  color: var(--ink-soft);
+  font-size: var(--text-small);
+}
+
+.row-end {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+/* Bottom sheet. */
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 45%, transparent);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 20;
+}
+
+.sheet-panel {
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+  max-width: 40rem;
+  max-height: 85dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+  padding: var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-sheet);
+}
+
+.sheet-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.sheet-head h2 {
+  margin: 0;
+}
+
+.sheet-close {
+  flex: none;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: var(--border) solid transparent;
+  border-radius: var(--radius);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.sheet-close:hover {
+  background: var(--surface-sunk);
+}
+
+/* Choice list: one thing per page, equal weight, fixed order, no dead zone. */
+.choice-list {
+  display: grid;
+  gap: var(--s2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  min-height: var(--tap-large);
+  padding: var(--s3) var(--s4);
+  border: var(--border) solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.choice:hover {
+  background: var(--surface-sunk);
+  border-color: var(--ink);
+}
+
+.choice[aria-pressed="true"],
+.choice:has(input:checked) {
+  border-color: var(--flag);
+  box-shadow: inset 0 0 0 var(--border) var(--flag);
+}
+
+.choice input {
+  width: var(--s5);
+  height: var(--s5);
+  flex: none;
+  accent-color: var(--flag);
+}
+
+.choice:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Skeletons: the shape of what is coming, never a spinner. */
+.skeleton {
+  background: var(--surface-sunk);
+  border-radius: var(--radius);
+  min-height: var(--s7);
+}
+
+.skeleton-photo {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+}
+
+.skeleton-line {
+  height: var(--s5);
+  min-height: 0;
+  max-width: var(--measure);
 }
 
 progress {
   width: 100%;
-  height: 10px;
-  accent-color: var(--accent);
+  height: var(--s3);
+  accent-color: var(--flag);
 }
 
 .badge {
-  display: inline-block;
-  padding: 0.1rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  padding: var(--s1) var(--s3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-small);
+  font-weight: 700;
+  border: var(--hairline) solid transparent;
 }
 
 .badge-warn {
   background: var(--warn-bg);
-  color: var(--warn-ink);
-  border-color: #e0c27a;
+  color: var(--warn);
+  border-color: var(--warn);
 }
 
 .badge-ok {
   background: var(--ok-bg);
-  color: var(--ok-ink);
+  color: var(--ok);
+  border-color: var(--ok);
 }
 
 .badge-bad {
   background: var(--bad-bg);
-  color: var(--bad-ink);
+  color: var(--bad);
+  border-color: var(--bad);
 }
 
+/* State always carries an icon and words, never colour alone. */
 .notice {
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--card);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--radius);
+  border: var(--hairline) solid var(--line);
+  background: var(--surface);
+}
+
+.notice > p,
+.notice > div {
+  margin: 0;
 }
 
 .notice-warn {
   background: var(--warn-bg);
-  color: var(--warn-ink);
-  border-color: #e0c27a;
+  color: var(--warn);
+  border-color: var(--warn);
 }
 
 .notice-ok {
   background: var(--ok-bg);
-  color: var(--ok-ink);
+  color: var(--ok);
+  border-color: var(--ok);
 }
 
 .notice-bad {
   background: var(--bad-bg);
-  color: var(--bad-ink);
+  color: var(--bad);
+  border-color: var(--bad);
 }
 
 /* Form controls */
 .field {
   display: block;
-  margin: 0.5rem 0;
+  margin: var(--s2) 0;
 }
 
 .field-label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 0.3rem;
+  font-weight: 700;
+  margin-bottom: var(--s1);
 }
 
 .check {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.6rem 0;
-  min-height: 44px;
+  gap: var(--s3);
+  padding: var(--s3);
+  min-height: var(--tap);
+  border: var(--border) solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
   cursor: pointer;
 }
 
+.check:has(input:checked) {
+  border-color: var(--flag);
+}
+
 .check input {
-  width: 28px;
-  height: 28px;
-  margin: 0.1rem 0 0;
+  width: var(--s5);
+  height: var(--s5);
+  margin: 0;
   flex: none;
-  accent-color: var(--accent);
+  accent-color: var(--flag);
 }
 
 .text-input {
   width: 100%;
-  min-height: 48px;
-  padding: 0.5rem 0.75rem;
-  border: 2px solid var(--ink);
-  border-radius: 10px;
-  background: var(--card);
+  min-height: var(--tap);
+  padding: var(--s2) var(--s3);
+  border: var(--border) solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
 .option-list {
   display: grid;
-  gap: 0.5rem;
-  margin: 0.5rem 0;
+  gap: var(--s2);
+  margin: var(--s2) 0;
 }
 
 .option {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  min-height: 52px;
-  padding: 0.6rem 0.9rem;
-  border: 2px solid var(--line);
-  border-radius: 10px;
-  background: var(--card);
+  gap: var(--s3);
+  min-height: var(--tap-large);
+  padding: var(--s3) var(--s4);
+  border: var(--border) solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
   text-align: left;
   cursor: pointer;
   width: 100%;
@@ -380,29 +712,29 @@ progress {
 
 .option[aria-pressed="true"],
 .option:has(input:checked) {
-  border-color: var(--accent);
-  background: var(--ok-bg);
+  border-color: var(--flag);
+  box-shadow: inset 0 0 0 var(--border) var(--flag);
 }
 
 .option input {
-  width: 26px;
-  height: 26px;
+  width: var(--s5);
+  height: var(--s5);
   flex: none;
-  accent-color: var(--accent);
+  accent-color: var(--flag);
 }
 
 .range-row {
   display: grid;
   grid-template-columns: 6rem 1fr 2rem;
   align-items: center;
-  gap: 0.6rem;
-  min-height: 44px;
+  gap: var(--s3);
+  min-height: var(--tap);
 }
 
 input[type="range"] {
   width: 100%;
-  min-height: 44px;
-  accent-color: var(--accent);
+  min-height: var(--tap);
+  accent-color: var(--flag);
 }
 
 /* The bot trap: a text input people cannot see. Not in the tab order either. */
@@ -430,22 +762,30 @@ input[type="range"] {
 .glossary-btn {
   background: none;
   border: 0;
-  padding: 0.5rem 0;
-  min-height: 44px;
-  color: var(--accent);
+  padding: var(--s2) 0;
+  min-height: var(--tap);
+  color: var(--ink);
   text-decoration: underline dotted;
+  text-decoration-thickness: 2px;
   text-underline-offset: 0.2em;
   cursor: pointer;
   text-align: left;
 }
 
+.glossary-inline {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  font: inherit;
+}
+
 .glossary-note {
   display: block;
-  margin: 0.25rem 0 0.75rem;
-  padding: 0.6rem 0.9rem;
-  background: var(--card);
-  border-left: 4px solid var(--accent);
-  font-size: 0.95rem;
+  margin: var(--s1) 0 var(--s3);
+  padding: var(--s3) var(--s4);
+  background: var(--surface);
+  border-left: var(--s1) solid var(--flag);
+  font-size: var(--text-small);
 }
 
 .timeline {
@@ -456,7 +796,7 @@ input[type="range"] {
 
 .timeline > li {
   border-left: 3px solid var(--line);
-  padding: 0 0 1rem 1rem;
+  padding: 0 0 var(--s4) var(--s4);
   margin: 0;
   position: relative;
 }
@@ -465,32 +805,33 @@ input[type="range"] {
   content: "";
   position: absolute;
   left: -8px;
-  top: 0.4rem;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--accent);
+  top: var(--s2);
+  width: var(--s3);
+  height: var(--s3);
+  border-radius: var(--radius-pill);
+  background: var(--flag);
 }
 
 .answer-line {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.15rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--line);
+  gap: var(--s1);
+  padding: var(--s2) 0;
+  border-bottom: var(--hairline) solid var(--line);
 }
 
 .answer-line .observer {
-  font-size: 0.9rem;
-  color: var(--muted);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
 }
 
 pre.code {
   overflow: auto;
-  background: #f0f2f0;
-  padding: 0.75rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  background: var(--surface-sunk);
+  font-family: var(--font-mono);
+  padding: var(--s3);
+  border-radius: var(--radius);
+  font-size: var(--text-small);
   max-height: 60dvh;
   white-space: pre-wrap;
   word-break: break-all;
@@ -499,53 +840,122 @@ pre.code {
 .share-card {
   width: 100%;
   height: auto;
-  border-radius: 12px;
-  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  border: var(--hairline) solid var(--line);
 }
 
 .token {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 1.3rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-h3);
   letter-spacing: 0.08em;
-  padding: 0.6rem 0.9rem;
-  background: var(--card);
-  border: 2px dashed var(--accent);
-  border-radius: 10px;
+  padding: var(--s3) var(--s4);
+  background: var(--surface);
+  border: var(--border) dashed var(--flag);
+  border-radius: var(--radius);
   display: inline-block;
   overflow-wrap: anywhere;
 }
 
-.landing-hero {
+/* Landing: the two photographs are the control, not decoration. Above the fold there is the
+   question, the two photographs and one button, and nothing else. */
+.landing-top {
+  min-height: calc(100dvh - var(--s8) - var(--s7));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+
+.landing-top .photo {
+  aspect-ratio: 3 / 4;
+}
+
+.landing-hero h1 {
+  font-size: var(--text-h1);
+  max-width: none;
+}
+
+.landing-pick {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: var(--border) solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
   text-align: center;
 }
 
-.landing-hero .pair {
-  margin: 1rem 0;
+.landing-pick:hover {
+  border-color: var(--line-strong);
+}
+
+.landing-pick[aria-pressed="true"] {
+  border-color: var(--flag);
+}
+
+.landing-pick .pick-label {
+  display: block;
+  padding: var(--s2);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+
+.landing-answer {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn,
+  .choice,
+  .landing-pick {
+    transition:
+      background-color var(--motion-fast) var(--ease),
+      transform var(--motion-fast) var(--ease),
+      border-color var(--motion-fast) var(--ease);
+  }
+
+  .sheet-panel {
+    animation: sheet-up var(--motion-sheet) var(--ease);
+  }
+
+  /* The one orchestrated moment in the product: the answer to the opening question. */
+  .landing-answer {
+    animation: answer-in var(--motion-sheet) var(--ease);
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(var(--s6));
+    opacity: 0;
+  }
+}
+
+@keyframes answer-in {
+  from {
+    transform: translateY(var(--s3));
+    opacity: 0;
+  }
 }
 
 @media (min-width: 600px) {
   h1 {
-    font-size: 2rem;
+    font-size: var(--text-h1);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .btn {
-    transition: filter 120ms ease;
-  }
-}
-
-/* Poster: print sizes. The page sets the @page size through a class on <html> or a data attribute. */
+/* Poster: print sizes. Real black on real white is correct on paper. */
 .poster {
-  background: #fff;
-  color: #000;
+  background: var(--print-paper);
+  color: var(--print-ink);
   width: 100%;
   min-height: 100dvh;
-  padding: 2rem;
+  padding: var(--s6);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.2rem;
+  gap: var(--s5);
   text-align: center;
 }
 
@@ -557,7 +967,7 @@ pre.code {
 .poster .pair {
   width: 100%;
   max-width: 44rem;
-  gap: 1rem;
+  gap: var(--s4);
 }
 
 .poster .qr {
@@ -566,13 +976,13 @@ pre.code {
 }
 
 .poster .scan {
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: var(--text-h3);
+  font-weight: 700;
 }
 
 .poster .url {
-  font-size: 1.1rem;
-  color: #333;
+  font-size: var(--text-body);
+  color: var(--print-ink);
 }
 
 @media print {

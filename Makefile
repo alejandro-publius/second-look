@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check verify-claims fhir-validate e2e smoke preflight submit-check poster deploy audit-verify
+.PHONY: render-readme help dev check lint types test web-build manifest-check dash-check design-check verify-claims fhir-validate e2e smoke preflight submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -13,7 +13,7 @@ dev:
 	@echo "API on :8000, web on :3000. Stop with Ctrl-C."
 	@bash -c 'trap "kill 0" EXIT; $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
 
-check: lint types test manifest-check dash-check verify-claims fhir-validate web-build
+check: lint types test manifest-check dash-check verify-claims fhir-validate web-build design-check
 	@echo "CHECK GREEN"
 
 lint:
@@ -34,6 +34,11 @@ manifest-check:
 
 dash-check:
 	$(PY) scripts/check_dashes.py
+
+# The look and feel gate from docs/updates/UPDATE_06.md section 6. Runs after web-build because
+# the tap target measurement drives the built app on the phone viewport.
+design-check:
+	cd $(WEB) && node scripts/design-check.mjs
 
 verify-claims:
 	$(PY) scripts/verify_claims.py --synthetic

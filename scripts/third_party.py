@@ -36,6 +36,30 @@ SERVICES = """## External services
   docs/DATA_HANDLING.md.
 """
 
+REFERENCES = """## Design references
+
+Read during the design pass (docs/updates/UPDATE_06.md). Nothing is copied from either: no brand
+colour, name, logo or font was taken. They informed structure and restraint only.
+
+- Vercel Web Interface Guidelines, MIT
+  (https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md).
+  `apps/web` was audited against every rule in it; the findings are in
+  docs/reviews/DESIGN_REVIEW_01.md.
+- VoltAgent awesome-design-md, MIT (https://github.com/VoltAgent/awesome-design-md). The Airbnb
+  file for how a product lets photographs lead, the Wise file for how forms stay clear. Structure
+  of docs/design/DESIGN.md borrows their shape: one read, tokens, components, do and do not.
+
+## Fonts and icons
+
+- Atkinson Hyperlegible Next and Atkinson Hyperlegible Mono, Braille Institute, SIL Open Font
+  License 1.1, through the `@fontsource-variable/atkinson-hyperlegible-next` and
+  `@fontsource/atkinson-hyperlegible-mono` packages. Self hosted through `next/font/local`, so no
+  request leaves our origin and `font-src 'self'` stays as it is.
+- Phosphor Icons, MIT, through `@phosphor-icons/core` (a devDependency). Regular weight only.
+  `apps/web/scripts/build-icons.mjs` generates `components/ui/Icon.tsx` from its SVG assets, so
+  there is no icon runtime in the bundle and no second icon family can appear.
+"""
+
 
 def python_license(name: str) -> str:
     try:
@@ -125,6 +149,8 @@ def build(root: Path) -> str:
         "MIT; our photos and copy are CC BY 4.0 (README).",
         "",
         SERVICES.rstrip(),
+        "",
+        REFERENCES.rstrip(),
         "",
         f"## Python packages ({len(py)}, from uv.lock)",
         "",

@@ -1,0 +1,102 @@
+/*
+ * Second Look tokens. The only file in apps/web allowed to hold a raw colour, radius or duration.
+ * scripts/design-check.mjs fails the build if one appears anywhere else.
+ * Palette source: survey gear, not a nature app. Overcast paper, deep ink, survey flag orange.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces and text */
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --surface-sunk: #eceff0;
+  --ink: #14211e;
+  --ink-soft: #4b5b57;
+  --line: #d5dcd9;
+  --line-strong: #7e8b87;
+
+  /* The one accent. Text on it is always --ink. White on it is banned. */
+  --flag: #f26b1d;
+  --flag-press: #d85a11;
+  --on-flag: #14211e;
+
+  /* State. Never used alone: always an icon and words as well. */
+  --ok: #1f7a4d;
+  --warn: #9a4a06;
+  --bad: #b42318;
+  --ok-bg: #e7f3ec;
+  --warn-bg: #fbeee0;
+  --bad-bg: #fbe9e7;
+
+  /* Print only, for the poster. Real black on real white is correct on paper. */
+  --print-ink: #000000;
+  --print-paper: #ffffff;
+
+  /* Space: a 4px grid */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  /* Shape: one radius everywhere. The gauge is the only square thing. */
+  --radius: 12px;
+  --radius-pill: 999px;
+  --hairline: 1px;
+  --border: 2px;
+
+  /* Type */
+  --font-body: var(--font-hyperlegible), system-ui, sans-serif;
+  --font-mono: var(--font-hyperlegible-mono), ui-monospace, monospace;
+  --text-body: 18px;
+  --text-small: 15px;
+  --text-h3: 24px;
+  --text-h2: 30px;
+  --text-h1: 38px;
+  --leading-body: 1.5;
+  --leading-heading: 1.2;
+  --measure: 65ch;
+
+  /* Controls */
+  --tap: 48px;
+  --tap-large: 56px;
+
+  /* Motion. Transform and opacity only. */
+  --motion-fast: 150ms;
+  --motion-sheet: 200ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Elevation: tinted with the ink colour, never a neutral grey drop */
+  --shadow-sheet: 0 -2px 24px color-mix(in srgb, var(--ink) 18%, transparent);
+
+  /* The staff gauge */
+  --gauge-height: 14px;
+  --gauge-mark-height: 10px;
+  --gauge-gap: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0f1715;
+    --surface: #16211e;
+    --surface-sunk: #1d2a26;
+    --ink: #e8eeeb;
+    --ink-soft: #a9b8b3;
+    --line: #2a3733;
+    --line-strong: #7b8b86;
+    --flag: #ff8a3d;
+    --flag-press: #e8762c;
+    --on-flag: #14211e;
+    --ok: #6cc394;
+    --warn: #e3a869;
+    --bad: #f0928a;
+    --ok-bg: #133122;
+    --warn-bg: #33230f;
+    --bad-bg: #351b19;
+  }
+}

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { hyperlegible, hyperlegibleMono } from "./fonts";
+import { THEME_DARK, THEME_LIGHT } from "./theme";
 import { t } from "@/lib/t";
 import { SwRegister } from "@/components/SwRegister";
 
@@ -15,12 +17,16 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1f3a2e",
+  // Matches the page background in both schemes, so the phone chrome does not fight the page.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_LIGHT },
+    { media: "(prefers-color-scheme: dark)", color: THEME_DARK },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${hyperlegible.variable} ${hyperlegibleMono.variable}`}>
       <body>
         <a className="skip" href="#main">
           {t("nav.skip")}

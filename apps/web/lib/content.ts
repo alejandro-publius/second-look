@@ -62,11 +62,19 @@ export interface Photo {
   height: number;
 }
 
+export interface Mark {
+  x: number;
+  y: number;
+  label: string;
+}
+
 export interface ContrastPair {
   assume_photo_id: string;
   actual_photo_id: string;
   assume_caption: string;
   actual_caption: string;
+  /** Marks sit on the actual photo. Fractions of width and height, 0,0 top left. */
+  marks?: Mark[];
 }
 
 export interface Lesson {
@@ -75,6 +83,7 @@ export interface Lesson {
   rule_of_thumb: string;
   source: string;
   contrast_pairs: ContrastPair[];
+  practice_marks?: Mark[];
   practice: {
     photo_id: string;
     gold: "present" | "absent";

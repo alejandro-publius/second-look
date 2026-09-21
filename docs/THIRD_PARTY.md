@@ -1,6 +1,6 @@
 # Third party dependencies
 
-Generated on 2026-09-20 by `uv run python scripts/third_party.py` from `uv.lock` and `apps/web/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
+Generated on 2026-09-21 by `uv run python scripts/third_party.py` from `uv.lock` and `apps/web/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
 
 ## External services
 
@@ -16,6 +16,29 @@ Generated on 2026-09-20 by `uv run python scripts/third_party.py` from `uv.lock`
   redistributed here; `fhir/ig.lock` records the commit and the package sha256.
 - Vercel (web) and Fly.io (API) host the app. What they log on their own is written in
   docs/DATA_HANDLING.md.
+
+## Design references
+
+Read during the design pass (docs/updates/UPDATE_06.md). Nothing is copied from either: no brand
+colour, name, logo or font was taken. They informed structure and restraint only.
+
+- Vercel Web Interface Guidelines, MIT
+  (https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md).
+  `apps/web` was audited against every rule in it; the findings are in
+  docs/reviews/DESIGN_REVIEW_01.md.
+- VoltAgent awesome-design-md, MIT (https://github.com/VoltAgent/awesome-design-md). The Airbnb
+  file for how a product lets photographs lead, the Wise file for how forms stay clear. Structure
+  of docs/design/DESIGN.md borrows their shape: one read, tokens, components, do and do not.
+
+## Fonts and icons
+
+- Atkinson Hyperlegible Next and Atkinson Hyperlegible Mono, Braille Institute, SIL Open Font
+  License 1.1, through the `@fontsource-variable/atkinson-hyperlegible-next` and
+  `@fontsource/atkinson-hyperlegible-mono` packages. Self hosted through `next/font/local`, so no
+  request leaves our origin and `font-src 'self'` stays as it is.
+- Phosphor Icons, MIT, through `@phosphor-icons/core` (a devDependency). Regular weight only.
+  `apps/web/scripts/build-icons.mjs` generates `components/ui/Icon.tsx` from its SVG assets, so
+  there is no icon runtime in the bundle and no second icon family can appear.
 
 ## Python packages (74, from uv.lock)
 
@@ -96,7 +119,7 @@ Generated on 2026-09-20 by `uv run python scripts/third_party.py` from `uv.lock`
 | watchfiles | 1.2.0 | MIT |
 | websockets | 17.1 | BSD-3-Clause |
 
-## Web packages (435, from apps/web/package-lock.json)
+## Web packages (438, from apps/web/package-lock.json)
 
 dev = only used to build or test, not shipped to a browser.
 
@@ -133,6 +156,8 @@ dev = only used to build or test, not shipped to a browser.
 | @eslint/js | 9.39.5 | MIT | yes |
 | @eslint/object-schema | 2.1.7 | Apache-2.0 | yes |
 | @eslint/plugin-kit | 0.4.1 | Apache-2.0 | yes |
+| @fontsource-variable/atkinson-hyperlegible-next | 5.3.0 | OFL-1.1 |  |
+| @fontsource/atkinson-hyperlegible-mono | 5.3.0 | OFL-1.1 |  |
 | @humanfs/core | 0.19.2 | Apache-2.0 | yes |
 | @humanfs/node | 0.16.8 | Apache-2.0 | yes |
 | @humanfs/types | 0.15.0 | Apache-2.0 | yes |
@@ -185,6 +210,7 @@ dev = only used to build or test, not shipped to a browser.
 | @nodelib/fs.stat | 2.0.5 | MIT | yes |
 | @nodelib/fs.walk | 1.2.8 | MIT | yes |
 | @nolyfill/is-core-module | 1.0.39 | MIT | yes |
+| @phosphor-icons/core | 2.1.1 | MIT | yes |
 | @playwright/test | 1.63.0 | Apache-2.0 |  |
 | @rtsao/scc | 1.1.0 | MIT | yes |
 | @swc/helpers | 0.5.23 | Apache-2.0 |  |

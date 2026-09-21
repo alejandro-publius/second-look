@@ -4,6 +4,11 @@
 
 export const API_ORIGIN = "http://127.0.0.1:8100";
 
+// NEXT_PUBLIC_API_ORIGIN is inlined at build time, so a build made without it bakes the default
+// from lib/api.ts instead. Mock both, or a test run against such a build silently talks to
+// nothing and every screen after consent shows the network error.
+export const BUILT_IN_DEFAULT = "http://localhost:8000";
+
 const ITEM_IDS = Array.from({ length: 16 }, (_, i) => `t${String(i + 1).padStart(2, "0")}`);
 const FEATURES = ["artificial_bank", "dug_out_channel", "invasive_plant", "pipe_running"];
 
@@ -83,7 +88,7 @@ export async function mockApi(page, options = {}) {
     ];
   const responses = new Map();
 
-  await page.route(`${API_ORIGIN}/**`, async (route) => {
+  const handle = async (route) => {
     const req = route.request();
     const url = new URL(req.url());
     const path = url.pathname;
@@ -158,7 +163,10 @@ export async function mockApi(page, options = {}) {
     if (path.startsWith("/api/quick/")) return json({ ok: true, visit_id: "q1" });
     if (path === "/api/test/counts") return json({ by_arm: { untrained: { randomized: 0, completed: 0 }, trained: { randomized: 0, completed: 0 } }, by_source: {}, post_lock: 0 });
     return json({ detail: "unknown route in mock" }, 404);
-  });
+  };
+
+  await page.route(`${API_ORIGIN}/**`, handle);
+  await page.route(`${BUILT_IN_DEFAULT}/**`, handle);
   return calls;
 }
 
@@ -170,6 +178,7 @@ export function watchRequests(page) {
 }
 
 export function assertOnlyOurOrigins(urls, baseURL) {
-  const bad = urls.filter((u) => !(u.startsWith(baseURL) || u.startsWith(API_ORIGIN) || u.startsWith("data:") || u.startsWith("blob:")));
+  const ours = [baseURL, API_ORIGIN, BUILT_IN_DEFAULT, "data:", "blob:"];
+  const bad = urls.filter((u) => !ours.some((o) => u.startsWith(o)));
   return bad;
 }

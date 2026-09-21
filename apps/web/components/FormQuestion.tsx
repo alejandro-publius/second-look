@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Glossary } from "./Glossary";
+import { GlossaryAside } from "./Glossary";
 import type { AnswerValue } from "@/lib/api";
 import { content, featureById, glossaryFor, type FormItem } from "@/lib/content";
 import { t } from "@/lib/t";
@@ -23,7 +23,7 @@ function GlossaryLinks({ item }: { item: FormItem }) {
   return (
     <div>
       {hits.map((h) => (
-        <Glossary key={h.term} term={h.term} definition={h.plain} />
+        <GlossaryAside key={h.term} term={h.term} definition={h.plain} />
       ))}
     </div>
   );
