@@ -26,7 +26,7 @@ Read this before touching anything. It is the one place where folder ownership, 
 | W6 AI | `evals/model_sweep.py`, `evals/benchmark.py`, `evals/agreement.py`, `evals/ablation.py`, `evals/fixtures/`, `evals/tests/test_model_*.py`, `evals/tests/test_benchmark*.py`, `core/checker.py`, `core/tests/test_checker*.py`, `results/model_pass_table.json`, `results/cost_log.jsonl` | `core/gate.py` (W5), `content/test_items.yaml` |
 | W7 Tools and docs | `scripts/` (except `scripts/repush_sandbox.py`, `scripts/fhir_build.sh`, `scripts/fhir_validate.py`, `scripts/check_*.py`, `scripts/verify_claims.py`, `scripts/make_placeholders.py`, `scripts/smoke.py`, `scripts/deploy.sh`, `scripts/sandbox_write_test.sh`), `audit/`, `docs/` (except `docs/MASTER_BRIEF.md`, `docs/updates/`, `docs/CONTRACTS.md`, `docs/fhir_mapping.md`, `docs/ig_proposal.md`, `docs/BUILD_LOG.md`, `docs/DECISIONS.md`), `content/drafts/`, `README.md` | everything |
 
-The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`, `content/*.yaml` (not drafts), `content/locales/en.json` (W4 may add keys; say which in the report), `photos/`, `pyproject.toml`, `Makefile`, `.github/`, `docker-compose.yml`, `fly.toml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `docs/CONTRACTS.md`, `docs/BUILD_LOG.md`, `docs/DECISIONS.md`.
+The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`, `content/*.yaml` (not drafts), `content/locales/en.json` (W4 may add keys; say which in the report), `photos/`, `pyproject.toml`, `Makefile`, `.github/`, `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `docs/CONTRACTS.md`, `docs/BUILD_LOG.md`, `docs/DECISIONS.md`.
 
 ## Shared shapes (already written, import them)
 

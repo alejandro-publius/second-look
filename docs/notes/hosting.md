@@ -1,6 +1,6 @@
 # Hosting: what was tried, what won, and why
 
-Update 09 section 2. Vercel and Fly.io are dropped. Nothing here needs a card.
+Update 09 section 2. Hosting is Cloudflare only: Pages for the web, a Worker with D1 and KV for the API. Nothing here needs a card.
 
 Cloudflare account: `thealexschroeder@gmail.com`, account id `b8a915bd28ade9fec05659028b395865`.
 `npx wrangler whoami` was already logged in, so nothing is waiting on Alex to run a command.

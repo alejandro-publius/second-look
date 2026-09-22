@@ -4,7 +4,7 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 
 Second Look spends two minutes teaching and testing a volunteer on the creek damage people usually miss, then saves their score with every observation they make, so a city knows how much to trust it.
 
-**Take the two-minute test yourself. No camera needed.** Demo: DEMO_URL_PLACEHOLDER (not deployed yet; `make deploy` publishes it).
+**Take the two-minute test yourself. No camera needed.** https://second-look-79t.pages.dev
 
 Which creek is healthier?
 
@@ -125,7 +125,7 @@ OneAquaHealth calls a city that adopts the method a follower city and gives a fi
 4. Collect and validate. Every visit becomes Observations under their indicator profile with Provenance back to the observer's score, validated in CI before it is stored or mirrored.
 5. Publish and repeat. Records to the sandbox with a tag and a ledger, a Library entry for the data set, return visits through the quick check, so one snapshot becomes a story.
 
-Cost through Oct 15: one small API machine and a static site, under 5 dollars. Integration with existing systems is by their own profiles, so a city that already reads OneAquaHealth records reads ours.
+Cost through Oct 15: nothing. Cloudflare Pages serves the site and a Worker with D1 and KV serves the API, on the free plan, with no card. Integration with existing systems is by their own profiles, so a city that already reads OneAquaHealth records reads ours.
 
 ## One Digital Health and FAIR
 
