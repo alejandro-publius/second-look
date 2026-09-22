@@ -33,3 +33,11 @@ labels_*.csv
 photos/candidates/
 # Wrangler's local state.
 .wrangler/
+# Video files are never committed (Update 14). Walk clips are cut from the cache outside the
+# repository by scripts/build_walks.py at build time.
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.ogv
+apps/web/public/walks/

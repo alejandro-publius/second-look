@@ -12,11 +12,16 @@ What it does to each video, in order:
 1. Samples one frame every --every seconds with ffmpeg.
 2. Drops a frame that looks like one we already kept, by a difference hash (dHash) inside
    --hash-distance bits. Neighbouring seconds of a slow pan are the same picture.
-3. Drops a frame with a person in it, or with something that reads like a licence plate or a
-   house number, using OpenCV's own Haar cascades and a small high contrast rectangle test.
-   This is a screen, not a promise: it keeps at most a frame that nobody has looked at yet, so
-   the people frames never reach the pool by accident. Anything it is unsure about is dropped.
+3. Drops a frame through two local screens, either of which is enough. Apple's Vision
+   framework (macOS, through pyobjc) finds people, faces and any line of text it can read, which
+   covers title cards, captions, watermarks, plates and house numbers; its scene labels drop a
+   frame with no water in view, and a near uniform frame is dropped as blank. OpenCV's Haar
+   cascades, HOG people detector and a plate shaped rectangle test run second. This is a screen,
+   not a promise, and a person looks at every kept frame before a commit.
 4. Keeps at most --per-video frames, spread across the video rather than bunched at the front.
+5. A video that keeps fewer than MIN_KEPT_PER_VIDEO frames is not mostly footage of water and
+   banks, which Update 14 section 3 item 3 asks for. Its frames are thrown away and its link is
+   written to videos/failed_videos.json, which scripts/pick_videos.py reads to pick again.
 
 Run: uv run python scripts/make_frames.py            do it
      uv run python scripts/make_frames.py --dry-run  say what it would do and write nothing
@@ -72,6 +77,113 @@ PHOTO_COLUMNS = [
     "notes",
     "label_evidence",
 ]
+
+
+FAILURES = VIDEOS / "failed_videos.json"
+MIN_KEPT_PER_VIDEO = 6
+# Scene labels from Vision's classifier that mean water is in view, and the confidence it needs.
+# Small creeks often come back as wetland rather than water, so wetland counts.
+WATER_LABELS = frozenset(
+    {
+        "water",
+        "liquid",
+        "water_body",
+        "waterways",
+        "river",
+        "creek",
+        "stream",
+        "wetland",
+        "waterfall",
+        "canal",
+        "pond",
+        "puddle",
+        "rapids",
+    }
+)
+WATER_MIN = 0.2
+BLANK_STD = 12.0
+
+
+def vision_verdict(
+    people: int, faces: int, text_lines: list[str], labels: dict[str, float], grey_std: float
+) -> str | None:
+    """Why a frame is dropped, from what Vision saw, or None to keep it. Pure, so it is tested."""
+    if people or faces:
+        return f"person: vision found {people} people and {faces} faces"
+    if text_lines:
+        shown = "; ".join(text_lines)[:60]
+        return f"text on screen (a title, caption, watermark, plate or number): {shown}"
+    if grey_std < BLANK_STD:
+        return "blank: a near uniform frame, such as a fade or a title background"
+    water = max((v for k, v in labels.items() if k in WATER_LABELS), default=0.0)
+    if water < WATER_MIN:
+        return f"no water in view: the best water label scored {water:.2f}"
+    return None
+
+
+class VisionScreen:
+    """Apple's Vision framework, on this Mac, with nothing sent anywhere."""
+
+    def __init__(self) -> None:
+        try:
+            import Vision  # type: ignore[import-not-found]
+            from Foundation import NSURL  # type: ignore[import-not-found]
+        except ImportError as e:
+            raise FrameError(
+                "Vision is not importable. Frames are cut on macOS with pyobjc-framework-Vision "
+                "(uv sync installs it there); nothing else in the build needs it"
+            ) from e
+        self.vision = Vision
+        self.nsurl = NSURL
+
+    def look(self, path: Path) -> tuple[int, int, list[str], dict[str, float]]:
+        v = self.vision
+        handler = v.VNImageRequestHandler.alloc().initWithURL_options_(
+            self.nsurl.fileURLWithPath_(str(path)), None
+        )
+        humans = v.VNDetectHumanRectanglesRequest.alloc().init()
+        humans.setUpperBodyOnly_(False)
+        faces = v.VNDetectFaceRectanglesRequest.alloc().init()
+        text = v.VNRecognizeTextRequest.alloc().init()
+        text.setRecognitionLevel_(0)  # accurate
+        text.setUsesLanguageCorrection_(False)
+        classify = v.VNClassifyImageRequest.alloc().init()
+        ok, _error = handler.performRequests_error_([humans, faces, text, classify], None)
+        if not ok:
+            raise FrameError(f"Vision could not read {path}")
+        people = sum(1 for o in (humans.results() or []) if o.confidence() >= 0.3)
+        face_count = len(faces.results() or [])
+        lines = []
+        for o in text.results() or []:
+            best = o.topCandidates_(1)
+            if best and best[0].confidence() >= 0.3:
+                lines.append(str(best[0].string()))
+        labels = {
+            str(o.identifier()): float(o.confidence())
+            for o in (classify.results() or [])
+            if o.confidence() >= 0.05
+        }
+        return people, face_count, lines, labels
+
+    def reason_to_drop(self, path: Path) -> str | None:
+        with Image.open(path) as image:
+            grey_std = float(np.asarray(image.convert("L"), dtype=np.float32).std())
+        people, faces, lines, labels = self.look(path)
+        return vision_verdict(people, faces, lines, labels, grey_std)
+
+
+class Screens:
+    """Vision first, then OpenCV. Either one is enough to drop a frame."""
+
+    def __init__(self, *screens: Any) -> None:
+        self.screens = screens
+
+    def reason_to_drop(self, path: Path) -> str | None:
+        for screen in self.screens:
+            reason = screen.reason_to_drop(path)
+            if reason is not None:
+                return str(reason)
+        return None
 
 
 class FrameError(Exception):
@@ -189,11 +301,19 @@ def grab_frame(video: Path, at_s: float, into: Path) -> Path | None:
 class PeopleAndPlates:
     """A local screen for people, licence plates and house numbers. It errs on the side of no.
 
-    OpenCV ships Haar cascades for faces, upper bodies and whole bodies. They miss things, so
-    the plate and number test is a second, cruder pass: a small bright rectangle with a lot of
-    dark edges inside it is the shape a plate or a door number makes, and a frame with one is
-    dropped whether or not it really is one. We would rather lose a good frame than show a
-    stranger's car.
+    Three passes, any one of which drops the frame:
+
+    1. OpenCV's Haar cascades for faces, profiles, upper bodies and whole bodies.
+    2. OpenCV's HOG people detector, which catches a whole person walking where a cascade
+       trained on a front-facing head does not.
+    3. A plate and number test, which is cruder on purpose: a small bright rectangle with a lot
+       of dark marks inside it is the shape a licence plate or a door number makes, and a frame
+       with one is dropped whether or not it really is one.
+
+    Nothing here is a promise that a frame has no person in it. It is a screen that keeps the
+    obvious cases out of a pool nobody has looked at yet. We would rather lose a good frame
+    than show a stranger's car. This needs OpenCV 4.x: version 5 dropped the cascades and the
+    HOG detector from the Python wheel, so `pyproject.toml` pins it below 5.
     """
 
     def __init__(self) -> None:
@@ -216,7 +336,12 @@ class PeopleAndPlates:
             if not cascade.empty():
                 self.cascades.append((name, cascade))
         if not self.cascades:
-            raise FrameError("OpenCV has no Haar cascades on this machine; cannot screen frames")
+            raise FrameError(
+                "OpenCV has no Haar cascades here, so frames cannot be screened for people. "
+                "Version 5 dropped them; install opencv-python-headless 4.x"
+            )
+        self.hog = cv2.HOGDescriptor()  # type: ignore[attr-defined]
+        self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())  # type: ignore[attr-defined]
 
     def reason_to_drop(self, path: Path) -> str | None:
         cv2 = self.cv2
@@ -224,15 +349,20 @@ class PeopleAndPlates:
         if image is None:
             return "unreadable"
         grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        grey = cv2.equalizeHist(grey)
+        flat = cv2.equalizeHist(grey)
         for name, cascade in self.cascades:
             found = cascade.detectMultiScale(
-                grey, scaleFactor=1.08, minNeighbors=6, minSize=(28, 28)
+                flat, scaleFactor=1.08, minNeighbors=6, minSize=(28, 28)
             )
             if len(found) > 0:
                 return f"person: {name.replace('haarcascade_', '').replace('.xml', '')}"
+        people, _weights = self.hog.detectMultiScale(
+            grey, winStride=(8, 8), padding=(8, 8), scale=1.05
+        )
+        if len(people) > 0:
+            return "person: hog people detector"
         if self._plate_like(grey):
-            return "plate or number: a small bright rectangle with dense dark edges"
+            return "plate or number: a small bright rectangle with dense dark marks"
         return None
 
     def _plate_like(self, grey: Any) -> bool:
@@ -275,8 +405,8 @@ def resize_and_save(src: Path, dest: Path) -> tuple[str, int, int]:
             image = image.resize(
                 (round(width * scale), round(height * scale)), Image.Resampling.LANCZOS
             )
-        clean = Image.new("RGB", image.size)
-        clean.putdata(list(image.getdata()))
+        # A new image built from the pixels only, so no EXIF, ICC or comment block survives.
+        clean = Image.frombytes("RGB", image.size, image.tobytes())
         dest.parent.mkdir(parents=True, exist_ok=True)
         clean.save(dest, "JPEG", quality=JPEG_QUALITY, optimize=True)
         out_w, out_h = clean.size
@@ -331,7 +461,7 @@ def process_video(
     every_s: float,
     per_video: int,
     hash_distance: int,
-    screen: PeopleAndPlates,
+    screen: Any,
     dry_run: bool,
 ) -> tuple[VideoResult, list[dict[str, str]]]:
     result = VideoResult(video_id=video.id)
@@ -407,7 +537,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     try:
         videos = read_videos(MANIFEST)
-        screen = PeopleAndPlates()
+        screen = Screens(VisionScreen(), PeopleAndPlates())
     except FrameError as e:
         print(f"frames: refused: {e}")
         return 1
@@ -418,7 +548,13 @@ def main(argv: list[str] | None = None) -> int:
 
     all_rows: list[dict[str, str]] = []
     results: list[VideoResult] = []
+    failures: dict[str, str] = (
+        json.loads(FAILURES.read_text(encoding="utf-8")) if FAILURES.exists() else {}
+    )
     for video in videos:
+        if video.source_url in failures:
+            print(f"  {video.id}: skipped, already failed: {failures[video.source_url][:80]}")
+            continue
         try:
             result, rows = process_video(
                 video,
@@ -433,6 +569,15 @@ def main(argv: list[str] | None = None) -> int:
             print(f"frames: refused: {e}")
             return 1
         results.append(result)
+        if len(result.kept) < MIN_KEPT_PER_VIDEO:
+            failures[video.source_url] = (
+                f"only {len(result.kept)} of {result.sampled} sampled frames show water with no "
+                f"person or text, under {MIN_KEPT_PER_VIDEO}, so it is not mostly water and banks"
+            )
+            for row in rows:
+                (FRAMES_DIR / Path(row["file"]).name).unlink(missing_ok=True)
+            print(f"  {video.id}: sampled {result.sampled}, kept {len(result.kept)}: FAILED")
+            continue
         all_rows.extend(rows)
         print(f"  {video.id}: sampled {result.sampled}, kept {len(result.kept)}")
 
@@ -441,6 +586,7 @@ def main(argv: list[str] | None = None) -> int:
         "frames_kept": len(all_rows),
         "labelled": sum(1 for r in all_rows if r["gold_label"]),
         "unlabelled": sum(1 for r in all_rows if not r["gold_label"]),
+        "failed_videos": sum(1 for r in results if len(r.kept) < MIN_KEPT_PER_VIDEO),
         "per_video": [
             {
                 "video_id": r.video_id,
@@ -455,15 +601,19 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({k: v for k, v in report.items() if k != "per_video"}, indent=2))
         print("frames: dry run, nothing written")
         return 0
+    FAILURES.write_text(
+        json.dumps(failures, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8"
+    )
     merge_photo_manifest(all_rows)
     (VIDEOS / "frames.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     dropped_people = sum(
-        1 for r in results for d in r.dropped if d.reason.startswith(("person", "plate"))
+        1 for r in results for d in r.dropped if d.reason.startswith(("person", "plate", "text"))
     )
     print(
         f"frames: {len(all_rows)} frames from {len(videos)} videos "
         f"({report['labelled']} labelled, {report['unlabelled']} unlabelled); "
-        f"{dropped_people} dropped for a person or a plate; "
+        f"{dropped_people} dropped for a person, a plate or text; "
+        f"{report['failed_videos']} videos failed and are in videos/failed_videos.json; "
         f"rows merged into photos/manifest.csv; videos/frames.json written"
     )
     return 0

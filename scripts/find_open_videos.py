@@ -55,7 +55,7 @@ MIN_SECONDS = 1.0
 MIN_DURATION = 60
 MAX_DURATION = 1200
 MIN_HEIGHT = 720
-TARGET = 40
+TARGET = 100  # Update 14 aimed at 40; Update 15 widens it twice, see docs/DECISIONS.md
 PER_QUERY = 2  # candidates kept per query per source
 YOUTUBE_LOOKUPS = 3  # metadata lookups per query, the only slow step
 COMMONS_ROWS = 40  # search results asked for per Commons query
@@ -74,13 +74,46 @@ COMMONS_PD_RE = re.compile(r"^(pd|cc-pd-mark)(?:-.*)?$")
 YOUTUBE_CC = "creative commons attribution"
 CLOSED_WORDS = ("sharealike", "share alike", "noncommercial", "non-commercial", "noderiv", "-sa-")
 
+# Words in a title that say the video is music, a reading or a talk, not footage of water. The
+# check reads the title only, because a description often credits the background music.
+NOT_FOOTAGE_WORDS = (
+    "karaoke",
+    "lyrics",
+    "audiobook",
+    "sonata",
+    "symphony",
+    "orchestra",
+    "ensemble",
+    "piano",
+    "guitar",
+    "violin",
+    "flute",
+    "choir",
+    "hymn",
+    "pista",
+    "remix",
+    "healing music",
+    "music video",
+    "live stream",
+    "livestream",
+    "jet stream",
+    "interview",
+    "podcast",
+    "webinar",
+    "press conference",
+)
+# A claim of CC BY-SA, NC or ND in the words themselves. When that disagrees with the licence the
+# site prints, the two claims cannot both be right, so we drop the video rather than pick one.
+CLOSED_CLAIM_RE = re.compile(
+    r"cc[ -]?by[ -]?(sa|nc|nd)|share ?alike|non[ -]?commercial|no ?deriv|wikipedia\.org"
+)
+
 TAG_RE = re.compile(r"<[^>]+>")
 SPACE_RE = re.compile(r"\s+")
 # Emoji and the other picture characters, dropped from anything we quote, because hard rule 18
 # keeps them out of every file in the repo and a source title is free to use them.
 EMOJI_RE = re.compile(
-    "[←-⇿⌀-⏿☀-➿⬀-⯿️‍"
-    "\U0001f000-\U0001faff]"
+    "[\u2190-\u21ff\u2300-\u23ff\u2600-\u27bf\u2b00-\u2bff\ufe0f\u200d\U0001f000-\U0001faff]"
 )
 
 # Words that say the water is a creek rather than a lake, a canal or a harbour. A title or a
@@ -95,7 +128,6 @@ CREEK_WORDS = (
     "river walk",
     "riverwalk",
     "urban river",
-    "river restoration",
     "arroyo",
     "quebrada",
     "riachuelo",
@@ -105,7 +137,7 @@ CREEK_WORDS = (
     "stadtbach",
     "dorfbach",
     "wildbach",
-    "renaturierung",
+    "bachbett",
     "torrente",
     "ruscello",
     "fosso",
@@ -114,20 +146,13 @@ CREEK_WORDS = (
     "ribeiro",
     "beek",
     "stadsbeek",
-    "back",
-    "baeck",
-    "elv",
-    "puro",
-    "oja",
+    "b\u00e4ck",
     "strumien",
+    "strumyk",
     "potok",
     "patak",
-    "poток",
-    "ruchei",
-    "rucheek",
     "arroio",
     "nullah",
-    "kali",
 )
 # The same words where the language writes no spaces, so a word boundary cannot be looked for.
 CREEK_SIGNS = ("小川", "小溪", "溪流", "渓流", "河川", "하천", "개울", "실개천")
@@ -230,7 +255,21 @@ COUNTRY_WORDS: dict[str, tuple[str, ...]] = {
     "Belgium": ("belgium", "brussels", "antwerp", "ghent", "leuven"),
     "Spain": ("spain", "espana", "catalonia", "barcelona", "madrid", "valencia", "bilbao"),
     "Portugal": ("portugal", "lisbon", "lisboa", "porto"),
-    "Italy": ("italy", "italia", "rome", "roma", "milan", "milano", "turin", "florence", "naples"),
+    "Italy": (
+        "italy",
+        "italia",
+        "rome",
+        "roma",
+        "milan",
+        "milano",
+        "turin",
+        "florence",
+        "naples",
+        "friuli",
+        "tuscany",
+        "sicily",
+    ),
+    "United Arab Emirates": ("united arab emirates", "dubai", "abu dhabi", "sharjah"),
     "Greece": ("greece", "athens", "thessaloniki"),
     "Croatia": ("croatia", "zagreb"),
     "Slovenia": ("slovenia", "ljubljana"),
@@ -254,7 +293,7 @@ COUNTRY_WORDS: dict[str, tuple[str, ...]] = {
     "Turkey": ("turkey", "turkiye", "istanbul", "ankara", "eskisehir"),
     "Israel": ("israel", "tel aviv", "jerusalem"),
     "Japan": ("japan", "tokyo", "osaka", "kyoto", "日本", "東京"),
-    "South Korea": ("south korea", "seoul", "busan", "한국", "서울"),
+    "South Korea": ("south korea", "korea", "seoul", "busan", "gimhae", "한국", "서울"),
     "China": ("china", "shanghai", "beijing", "shenzhen", "chengdu"),
     "Taiwan": ("taiwan", "taipei"),
     "Hong Kong": ("hong kong",),
@@ -281,6 +320,7 @@ COUNTRY_WORDS: dict[str, tuple[str, ...]] = {
     "Bangladesh": ("bangladesh", "dhaka"),
     "Australia": (
         "australia",
+        "western australia",
         "sydney",
         "melbourne",
         "brisbane",
@@ -426,6 +466,16 @@ SEARCHES: list[Search] = [
     # Commons keeps its video files in categories, and a category is itself a statement about
     # what is in the shot, so these earn their second.
     *_commons(
+        "creek water flowing",
+        "stream water flowing",
+        "brook water",
+        "creek drone",
+        "creek fish habitat",
+        "river walk promenade city",
+        "quebrada",
+        "arroyo agua rio",
+        "ручей вода",
+        "小川 水",
         'incategory:"Videos of rivers"',
         'incategory:"Videos of streams"',
         'incategory:"Videos of brooks"',
@@ -434,6 +484,45 @@ SEARCHES: list[Search] = [
         "stream bank",
         "riverwalk",
         "river restoration",
+    ),
+    # One query per country, so the search reaches past the English speaking internet. Sorted by
+    # nothing in particular; the spread of what comes back is sorted out at the end.
+    *_both(
+        "creek walk Canada",
+        "creek walk Australia country",
+        "stream walk New Zealand",
+        "brook walk England",
+        "burn walk Scotland",
+        "stream walk Ireland",
+        "urban stream walk Germany",
+        "stream walk France",
+        "stream walk Italy",
+        "stream walk Spain",
+        "stream walk Portugal",
+        "stream walk Sweden",
+        "stream walk Norway",
+        "stream walk Poland",
+        "stream walk Czechia",
+        "stream walk Romania",
+        "stream walk Turkey",
+        "urban river walk India",
+        "urban stream walk Japan",
+        "urban stream walk Korea",
+        "urban stream walk Taiwan",
+        "urban river walk Philippines",
+        "urban river walk Indonesia",
+        "urban river walk Vietnam",
+        "urban river walk Malaysia",
+        "urban river walk Singapore",
+        "creek walk South Africa city",
+        "urban river walk Kenya",
+        "urban river walk Nigeria",
+        "urban river walk Brazil",
+        "arroyo urbano Mexico",
+        "quebrada urbana Chile",
+        "arroyo urbano Argentina",
+        "urban stream walk Israel",
+        "urban river walk Dubai",
     ),
     # Phrasings that suit spoken titles, so they only go to YouTube.
     *_youtube(
@@ -447,6 +536,33 @@ SEARCHES: list[Search] = [
         "outfall pipe into river",
         "gabion stream bank repair",
     ),
+    # Update 15: phrasings whose descriptions tend to name what is on screen, so a video can
+    # carry a label from its own words. One or two per feature, including plants that do not
+    # belong, which the first list never asked for.
+    *_both(
+        "concrete lined creek walk",
+        "Los Angeles River concrete channel walk",
+        "channelized stream",
+        "riprap stream bank",
+        "stream bank retaining wall",
+        "storm drain outfall creek",
+        "japanese knotweed river bank",
+        "himalayan balsam stream",
+        "invasive plants creek bank",
+    ),
+    # Update 15, second widening: after the frame screen, vlogs, news and walking tours almost
+    # never pass (people, captions, watermarks). Ambient footage filmed to be looked at, with no
+    # one talking, is mostly water and banks, which is the footage Update 14 asks for.
+    *_both(
+        "creek sounds 4k",
+        "babbling brook ambience",
+        "stream sounds nature no music",
+        "forest creek ambience",
+        "mountain stream sounds",
+        "creek walk no talking",
+        "urban stream ambience",
+        "brook sounds relaxing",
+    ),
 ]
 
 
@@ -457,7 +573,7 @@ def plain_text(value: str, limit: int = 400) -> str:
     both anywhere in the repo, and a source we quote is free to use them.
     """
     text = html.unescape(TAG_RE.sub(" ", value or ""))
-    text = text.replace("–", "-").replace("—", "-").replace("−", "-")
+    text = text.replace("\u2013", "-").replace("\u2014", "-").replace("\u2212", "-")
     text = EMOJI_RE.sub("", text)
     text = SPACE_RE.sub(" ", text).strip()
     return text[: limit - 3] + "..." if len(text) > limit else text
@@ -478,7 +594,7 @@ def licence_from_commons(raw: str, short_name: str = "", copyrighted: str = "") 
     """
     value = SPACE_RE.sub("", (raw or "").strip().lower())
     shown = plain_text(short_name, 80) or value
-    if any(word in value for word in CLOSED_WORDS) or "-sa-" in f"-{value}-":
+    if any(word in f"-{value}-" for word in CLOSED_WORDS):
         return None
     if COMMONS_PD_RE.match(value):
         if SPACE_RE.sub("", (copyrighted or "").strip().lower()) != "false":
@@ -498,6 +614,14 @@ def licence_from_youtube(raw: str | None) -> Licence | None:
     if YOUTUBE_CC not in low or any(word in low for word in CLOSED_WORDS):
         return None
     return Licence("cc-by-3.0", "CC BY 3.0", value, True)
+
+
+def looks_like_footage(title: str, words: str) -> bool:
+    """False when the title says music or a reading, or when the words claim a licence we refuse."""
+    low = title.lower()
+    if any(word in low for word in NOT_FOOTAGE_WORDS):
+        return False
+    return CLOSED_CLAIM_RE.search(f"{title} {words}".lower()) is None
 
 
 def creek_word(*parts: str) -> str:
@@ -569,8 +693,10 @@ def commons_candidates(payload: dict[str, Any], term: str) -> list[Candidate]:
             continue
         words = field("ImageDescription", limit=300) or field("ObjectName", limit=300)
         categories = field("Categories", limit=300).replace("|", ", ")
-        match = creek_word(title, words, categories)
-        if not match:
+        # The creek word has to be in the title or the description. A category is neither, so
+        # categories are read only for the country and for the two gates below.
+        match = creek_word(title, words)
+        if not match or not looks_like_footage(title, f"{words} {categories}"):
             continue
         author = field("Artist", limit=160) or field("Attribution", limit=160)
         if not author:
@@ -684,7 +810,7 @@ def youtube_candidate(payload: dict[str, Any], term: str) -> Candidate | None:
     if not in_range(duration, height):
         return None
     match = creek_word(title, words)
-    if not match:
+    if not match or not looks_like_footage(title, words):
         return None
     author = plain_text(str(payload.get("uploader") or payload.get("channel") or ""), 160)
     video_id = str(payload.get("id") or "")
@@ -753,9 +879,7 @@ def collect(
                 payload = commons_search(client, commons_limit, search.term, COMMONS_ROWS)
                 fresh = commons_candidates(payload, search.term)
             else:
-                fresh = youtube_candidates(
-                    youtube_limit, search.term, YOUTUBE_ROWS, lookups, seen
-                )
+                fresh = youtube_candidates(youtube_limit, search.term, YOUTUBE_ROWS, lookups, seen)
         except (httpx.HTTPError, ValueError, OSError) as e:
             problems.append(f"{search.source} search {search.term!r} failed: {e}")
             continue
@@ -801,7 +925,8 @@ PICK_SCRIPT = """<script>
     document.querySelectorAll('.take').forEach(function (box) {
       if (!box.checked) return;
       var pick = box.closest('.pick');
-      out.push(box.dataset.row + ',' + JSON.stringify(pick.querySelector('.notes').value.trim()));
+      var note = pick.querySelector('.notes').value.trim().replace(/"/g, '""');
+      out.push(box.dataset.row + ',"' + note + '"');
     });
     return out;
   }
@@ -833,11 +958,17 @@ PICK_SCRIPT = """<script>
 </script>"""
 
 
+def csv_cell(value: object) -> str:
+    """One CSV cell, quoted the way a spreadsheet expects, so a comma in a name is safe."""
+    text = str(value).replace('"', '""')
+    return f'"{text}"'
+
+
 def pick_control(c: Candidate) -> str:
     """A checkbox and a notes box. The picks file is built in the browser and goes nowhere else."""
     e = html.escape
     row = ",".join(
-        json.dumps(str(value))
+        csv_cell(value)
         for value in (
             c.id,
             c.url,
@@ -959,7 +1090,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
 
-    searches = [s for s in SEARCHES if args.source in (s.source, "both")]
+    searches = [s for s in SEARCHES if args.source in ("both", s.source)]
     commons_limit = RateLimit()
     youtube_limit = RateLimit()
     with httpx.Client(headers={"User-Agent": USER_AGENT}, follow_redirects=True) as client:
@@ -975,13 +1106,15 @@ def main(argv: list[str] | None = None) -> int:
     countries = sorted({c.country for c in candidates if c.country})
     split = ", ".join(f"{k} {v}" for k, v in sorted(sources.items()))
     dropped = len(found) - len(candidates)
+    left_out = f", {dropped} left out to keep the spread" if dropped else ""
     print(
         f"find-open-videos: {len(candidates)} candidates ({split}), "
-        f"{len(countries)} named countries, {len(found)} passed every filter"
-        f"{f', {dropped} left out to keep the spread' if dropped else ''}"
+        f"{len(countries)} named countries, {len(found)} passed every filter{left_out}"
     )
-    print(f"find-open-videos: rows at {data.relative_to(args.root)}, "
-          f"sheet at {sheet.relative_to(args.root)}")
+    print(
+        f"find-open-videos: rows at {data.relative_to(args.root)}, "
+        f"sheet at {sheet.relative_to(args.root)}"
+    )
     empty = [key for key, n in tally.items() if n == 0]
     if empty:
         print(f"find-open-videos: {len(empty)} queries found nothing useful:")
