@@ -10,7 +10,7 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 |---|---|---|---|
 | The two minute test flow, its randomization and its scoring | real | code and tests; nothing is faked in the flow | `apps/web`, `worker/src/index.ts`, `core/allocator.py`, `core/scoring.py` |
 | The photographs in the test | synthetic placeholders until Alex's picks land on `main` | every row in the manifest is `license: placeholder` | `photos/manifest.csv` |
-| Study results in the README | synthetic | the table is headed SYNTHETIC and every value points at `results/usability_synthetic.json` | `README.md`, `scripts/verify_claims.py` |
+| Study results in the README | none yet | the results section shows no table until the model run; the synthetic dry runs stay in `results/` with SYNTHETIC on every file and none of their numbers appears in the README | `README.md`, `scripts/verify_claims.py` |
 | The model pass table | synthetic | `"real": false` in the file; the checker refuses to flag on it | `results/model_pass_table.json`, `core/checker.py` |
 | A creek check, its follow-ups and its record | real once a person files one | stored visit, FHIR Bundle in the store, audit line | `apps/api/check.py`, `data/fhir_store/` |
 | The golden Strawberry Creek visit Bundle | example, hand shaped from a worked visit | it is in `fhir/golden/` and not in the store | `fhir/golden/visit-strawberry-creek-1.json` |

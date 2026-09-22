@@ -6,52 +6,16 @@ Second Look spends two minutes teaching and testing a volunteer on the creek dam
 
 **Take the two-minute test yourself. No camera needed.** https://second-look-79t.pages.dev
 
-Which creek is healthier?
-
-![Gray placeholder for the first warm-up photo: a creek seen from its bank](photos/placeholders/ph-warmup-01.jpg) ![Gray placeholder for the second warm-up photo: a creek seen from its bank](photos/placeholders/ph-warmup-02.jpg)
+The landing page opens with two creek photos and one question: which creek is healthier? The photographs land with the picks on `main`; this branch shows none rather than a stand in.
 
 ## Results
 
-> **SYNTHETIC. No real person has taken this test yet.** Every value in the table below is a placeholder produced from synthetic sessions by `evals/make_synthetic_sessions.py` and `evals/usability_analysis.py --synthetic`, and every model value comes from the fake client. After data lock (2026-09-28T01:00:00Z) the table is regenerated from `results/` and `scripts/verify_claims.py` checks each value in CI. Nothing here is typed by hand. The `{{claim:...}}` tokens are filled by `scripts/render_readme.py` from the pointers in the comments.
+Results arrive with the model run. Two things will stand here, and nothing is typed by hand:
 
-<!-- claim: results/usability_synthetic.json#/primary/untrained_mean = 62.1 -->
-<!-- claim: results/usability_synthetic.json#/primary/trained_mean = 68.9 -->
-<!-- claim: results/usability_synthetic.json#/primary/difference = 6.8 -->
-<!-- claim: results/usability_synthetic.json#/primary/ci_low = 0.1 -->
-<!-- claim: results/usability_synthetic.json#/primary/ci_high = 13.4 -->
-<!-- claim: results/usability_synthetic.json#/counts/completed_untrained = 42 -->
-<!-- claim: results/usability_synthetic.json#/counts/completed_trained = 42 -->
-<!-- claim: results/model_pass_table.json#/models/claude-haiku-4-5-20251001/artificial_bank/passed = False -->
-<!-- claim: results/model_pass_table.json#/models/claude-haiku-4-5-20251001/dug_out_channel/passed = False -->
-<!-- claim: results/model_pass_table.json#/models/claude-haiku-4-5-20251001/invasive_plant/passed = False -->
-<!-- claim: results/model_pass_table.json#/models/claude-haiku-4-5-20251001/pipe_running/passed = False -->
-<!-- claim: results/model_pass_table.json#/models/claude-sonnet-5/artificial_bank/passed = True -->
-<!-- claim: results/model_pass_table.json#/models/claude-sonnet-5/dug_out_channel/passed = False -->
-<!-- claim: results/model_pass_table.json#/models/claude-sonnet-5/invasive_plant/passed = False -->
-<!-- claim: results/model_pass_table.json#/models/claude-sonnet-5/pipe_running/passed = True -->
-<!-- claim: results/model_pass_table.json#/models/claude-opus-5/artificial_bank/passed = True -->
-<!-- claim: results/model_pass_table.json#/models/claude-opus-5/dug_out_channel/passed = True -->
-<!-- claim: results/model_pass_table.json#/models/claude-opus-5/invasive_plant/passed = False -->
-<!-- claim: results/model_pass_table.json#/models/claude-opus-5/pipe_running/passed = True -->
+- The test on strangers: mean share correct for the trained arm and the untrained arm, the difference, and its 95 percent bootstrap interval from the plan tagged before the first participant. If the interval covers zero the lesson showed no effect and this line will say so.
+- Where a model may speak: for each of the three models and each of the four features, whether it passed, which is all four items right in at least two of three runs. Only a passed feature may ever produce a flag.
 
-SYNTHETIC. The same 16 photos, four per feature, two present and two absent.
-
-| Observer | Mean share correct | People |
-|---|---|---|
-| Untrained people (test first, lesson offered after) | <!--v:results/usability_synthetic.json#/primary/untrained_mean-->62.1<!--/v--> | <!--v:results/usability_synthetic.json#/counts/completed_untrained-->42<!--/v--> |
-| Trained people (two-minute lesson, then test) | <!--v:results/usability_synthetic.json#/primary/trained_mean-->68.9<!--/v--> | <!--v:results/usability_synthetic.json#/counts/completed_trained-->42<!--/v--> |
-
-Trained minus untrained: <!--v:results/usability_synthetic.json#/primary/difference-->6.8<!--/v--> (95 percent bootstrap interval <!--v:results/usability_synthetic.json#/primary/ci_low-->0.1<!--/v--> to <!--v:results/usability_synthetic.json#/primary/ci_high-->13.4<!--/v-->), from the plan published before the first participant. If the interval covers zero, the lesson did not show an effect and this line says so.
-
-SYNTHETIC. Where a model may speak. A model passes a feature only if it gets all four items right in at least two of three runs. Only a passed feature may ever produce a flag.
-
-| Model | Built banks | Dug-out channel | Plants that do not belong | Pipes |
-|---|---|---|---|---|
-| claude-haiku-4-5-20251001 | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/artificial_bank/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/dug_out_channel/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/invasive_plant/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/pipe_running/passed-->did not pass<!--/v--> |
-| claude-sonnet-5 | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/artificial_bank/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/dug_out_channel/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/invasive_plant/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/pipe_running/passed-->passed<!--/v--> |
-| claude-opus-5 | <!--v:results/model_pass_table.json#/models/claude-opus-5/artificial_bank/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-opus-5/dug_out_channel/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-opus-5/invasive_plant/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-opus-5/pipe_running/passed-->passed<!--/v--> |
-
-The models' share correct per feature, with Wilson intervals, and the three test items with the largest gap between trained people and the best model (chosen by script) are added here from `results/` at lock. 16 items is a small set; we say so wherever these numbers appear.
+After the run, `evals/` write `results/`, `scripts/render_readme.py` fills this section from those files, and `scripts/verify_claims.py` checks every number against them in CI. Until then this section shows no table at all. The synthetic dry runs that proved the analysis code are in `results/` with the word SYNTHETIC on every file, and none of their numbers appears here.
 
 ## The problem
 
@@ -79,22 +43,26 @@ Measure each volunteer, per feature, and store the measure with the data. Three 
 - `/t`: consent, warm-up pair, server-side assignment in permuted blocks of four, the lesson for the trained arm, 16 items with Yes, No and Can't tell, the score per feature, the share card.
 - `/demo`: judge mode with feedback after each answer, and the lessons only for what you missed. Stores nothing. `/demo?script=1` replays one fixed path for the video.
 - `/check`: the guided creek check, one question per screen, with follow-ups chosen by `core/followups.py`.
-- `/spot/[id]`: the record, each answer beside the observer's score, "only people who passed this feature", View as FHIR with the validation badge and a curl line, the health card.
+- `/spot?id=`: the record, each answer beside the observer's score, "only people who passed this feature", what people reported upstream, View as FHIR with the validation badge and a curl line, the health card.
+- `/city?creek=strawberry-creek`: the analyst's view. What people reported, what the creek needs in OneAquaHealth's own measures, which pipes are worth testing with a FHIR referral and an example of a result coming back, the reaches from the hills to the Bay with the downstream note. Every number opens the records behind it.
 - `/two`: one lab Observation read from their sandbox and one volunteer Observation of ours in the same viewer.
-- `/quick/[spot]`: the 20 second return check. `/poster`: the recruiting poster in Letter and A4. `/how-we-know`, `/about`, `/privacy`.
+- `/quick?spot=`: the 20 second return check. `/judges`: every door in the order that makes the point. `/poster`: the recruiting poster in Letter and A4. `/how-we-know`, `/about`, `/privacy`.
+- A read only MCP server over our own records for any software agent, five tools, every answer with the resource ids behind it: `examples/mcp/README.md`.
 
 ## Try it
 
-Demo: DEMO_URL_PLACEHOLDER. No camera needed; the test runs on sample photos on any phone or laptop. Locally: `make dev`, then open http://localhost:3000. A record as FHIR: `curl -H "Accept: application/fhir+json" API_URL_PLACEHOLDER/api/spot/SPOT_ID_PLACEHOLDER/fhir`.
+The test: https://second-look-79t.pages.dev on any phone or laptop, no camera needed. Judges start at https://second-look-79t.pages.dev/judges. Locally: `make dev`, then open http://localhost:3100.
+
+Our data set as OneAquaHealth registers one, live on their sandbox: `curl -H "Accept: application/fhir+json" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466`. The worked visit record it points at, validated against their guide: `fhir/golden/visit-strawberry-creek-1.json`. An agent: `uv run python -m apps.mcp.server --export data/export` after `make export-records`.
 
 ## How we know it works
 
-- The analysis plan, `docs/analysis_plan.md`, is tagged `prereg-v1` before the first participant. Tag: PREREG_TAG_PLACEHOLDER. Plan SHA-256: PLAN_SHA256_PLACEHOLDER. Audit log hash at freeze: FREEZE_HASH_PLACEHOLDER.
+- The analysis plan, `docs/analysis_plan.md`, is tagged `prereg-v1` before the first participant. The tag, the plan's SHA-256 and the audit log's hash at freeze are posted publicly on the day and written into this section by `scripts/render_readme.py` from `results/`, so they can be checked against the post.
 - Two arms, randomized 1 to 1 in permuted blocks of four, server side. Trained: lesson then test. Untrained: test, then the lesson as a thank you. One confirmatory test: the difference in mean accuracy, percentile bootstrap with 10,000 resamples and a two-sided permutation test, seed 20260920. Exclusions were fixed in advance and each one's count is reported in `results/`.
-- Participant flow: completed sessions per arm are in the table above; randomized and started counts, the exclusion counts and the count by source are in `results/usability_<stamp>.json`.
+- Participant flow: completed sessions per arm, randomized and started counts, the exclusion counts and the count by source are in `results/usability_<stamp>.json` after the run, and the completed counts stand in the results section.
 - Below 20 completed sessions per arm the result is descriptive and the first screen says so.
-- Deviations from the tagged plan: `docs/deviations.md`, count DEVIATION_COUNT_PLACEHOLDER.
-- Gold labels were set blind by Rachel from written definitions and labelled independently by Alex; Cohen's kappa per feature is in `results/key_agreement.json`; the key hash is in `results/key_hash.json`.
+- Deviations from the tagged plan: every one is in `docs/deviations.md`, with its date and reason.
+- Gold labels are set blind from written definitions through `scripts/label_photos.py`, which never shows one labeller the other's file. With two labellers, Cohen's kappa per feature goes in `results/key_agreement.json` and every disagreement is settled before the key freezes; with one, the plan and this section say so. The key hash is in `results/key_hash.json` from the freeze.
 
 ## Architecture
 
@@ -108,11 +76,11 @@ transformation  core/ pure functions: scoring, followups (2 at most, no model ca
 validation      content loader (every photo has a manifest row, lesson and test photos disjoint), HL7 validator + IG b907cf0
     |           in CI, verify_claims over this README, hash-chained audit log, tests for every hard rule
     |
-aggregation     our store (SQLite locally, Postgres in production) is the source of truth; evals/ write results/,
+aggregation     our store (SQLite locally, Cloudflare D1 in production) is the source of truth; evals/ write results/,
     |           including the usability analysis, the model sweep and the consensus analysis
     |
-publication     /spot/[id] and /spot/[id]/fhir (read-only FHIR JSON), the tagged mirror in the OneAquaHealth sandbox
-                with a ledger, a Library entry pointing at this repository, this README
+publication     /spot?id= and /api/fhir/Bundle/{visit} (read-only FHIR JSON), /city, the MCP server, the tagged mirror
+                in the OneAquaHealth sandbox with a ledger, the Library entry there pointing at this repository, this README
 ```
 
 ## Feasibility: Berkeley as a follower city
@@ -147,12 +115,11 @@ Claude Code wrote most of the code and text in this repository, from briefs writ
 
 - 16 items is a small test. The per-feature model results in particular have wide intervals, and the pass rule is strict on purpose.
 - The sample is whoever opens a link in one week in Berkeley. Below 20 completed sessions per arm the result is a description, not a claim.
-- Photos come from three East Bay creeks in September. The lesson may not transfer to other regions or seasons; the plant list is regional by design.
+- Photos are from East Bay creeks in one season and from open collections. The lesson may not transfer to other regions or seasons; the plant list is regional by design.
 - People see the photo at phone size; models receive it resized to 1092 px on the long side.
 - The dry pipe rule depends on Open-Meteo. When rainfall or location is unknown the question is skipped rather than guessed.
 - The sandbox is shared and allows deletes; our store is the source of truth and the mirror can be rebuilt from the ledger.
 - The form items are marked unverified until Alex checks them against screenshots of the official app. The app has no smell item; our quick check may ask about smell.
 - Four photos per feature is a coarse measure. It is enough to show a person what to practise and to flag an answer worth a second look. It is too coarse to weight votes with, and our own simulation says so. The score sharpens each time a person retakes the test on new photos.
-- Every photo comes from one season or from open collections, so a creek in another month or another place may not look like these.
-- The checker is off by default and speaks only on passed features. It may end up with nothing to say, and the table above will show that.
+- The checker is off by default and speaks only on passed features. It may end up with nothing to say, and the results section will show that.
 - English only. A Spanish locale ships only if a fluent person checks every string.
