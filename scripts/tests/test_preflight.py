@@ -43,7 +43,9 @@ def test_current_repo_fails_only_for_known_reasons() -> None:
     build = {n for n, c in failed.items() if c.owner == "BUILD"}
     assert {"human_inputs", "key_frozen", "key_agreement", "prereg_tag", "contact_email"} <= human
     assert "marks_approved" in human, "the design pass marks are still waiting for Rachel"
-    assert "plan_wording" in human, "TODO-TEAM wording in the plan"
+    # The plan was tagged on main on 2026-09-21 and depth took that text verbatim, so the
+    # four question wordings are frozen here too and plan_wording passes (Update 14).
+    assert "plan_wording" not in failed, "the plan on depth is the tagged text"
     reasons = [r for c in checks for r in c.reasons]
     assert any("placeholder photo in role test" in r for r in reasons)
     assert any("prereg-v1 tag missing" in r for r in reasons)

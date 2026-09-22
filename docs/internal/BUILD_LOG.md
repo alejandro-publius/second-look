@@ -43,3 +43,10 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: the review defeated the data lock with two test flags, harvested the whole answer key from judge mode in sixteen requests, and found a free text spot name published into the FHIR narrative. None of that was visible from inside the workstreams that wrote it.
 - Decisions: one browser keeps one arm; the record carries a hash of the contributor token, never the token; a pass table from the fake client licenses nothing anywhere.
 - Next: Rachel's photos, blind labels, merge, freeze the key, tag prereg-v1, then preflight must print 0 failed.
+
+## Update 14 phases 1 and 2, launch and cleanup, 2026-09-22 05:45Z
+- What: main carries the dropped study in the plan before the tag, is tagged prereg-v1 and pushed, with the plan_tagged audit entry and docs/notes/plan_hash.md. The API Worker is deployed. On depth the Update 13 cleanup was verified done (14 approved sentences, the policy brief source, the morophology line, Cloudflare only, docs/internal), the stale analysis plan was replaced by the tagged one, and every promise of a recruited result left README.md and PLAN.md.
+- Proof: `make preflight-launch` prints 17 run, 15 passed, 0 failed, 17 notes. `make audit-verify` prints 3 entries, chain intact, last hash 3d3cbb4d. `git show prereg-v1 --stat`.
+- Surprises: the live Pages build predates the consent contact email, so the deployed smoke test fails on it; the web deploy that fixes it, and emptying the live D1 table, are both outside what this terminal may do on its own.
+- Decisions: Update 14 lives under docs/internal/updates; no key means the fake client everywhere; depth takes main's tagged plan verbatim.
+- Next: phase 3, the AI on the 16-photo test and on open creek footage.

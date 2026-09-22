@@ -59,7 +59,7 @@ Proving command: `uv run pytest -q evals/tests/test_consensus.py scripts/tests` 
 
 ### Session B, Mon Sep 21, about 4 hours. MUST except the poster's A4 size.
 
-Goal: the brief section 6 flow as a Next.js PWA, deployed, with the recruiting tools.
+Goal: the brief section 6 flow as a Next.js PWA, deployed, with the poster and the share card.
 
 Build: static landing that paints at once and wakes the API in the background; consent with version stamp and the hidden bot-trap field; warm-up; assignment call; lesson cards with progress and per-screen seconds; 16-item test with Yes, No, Can't tell and glossary tooltips; end screen with per-feature score, the prior-experience question and a share card whose preview image is rendered on the server from the score alone; `?src=` carried into the coarse source label; `/demo` with per-answer feedback, a summary of missed features and only those lessons, never stored; `/health`. Poster: HTML to PDF with Playwright, Letter and A4, two warm-up photos, the question, "Scan to find out. Two minutes. Anonymous.", QR to `?src=poster`, no answer printed.
 
@@ -147,7 +147,6 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 | Bay Area invasive list checked against the Cal-IPC inventory | Rachel | Tue Sep 22 12:00 | Tue Sep 22 19:00 |
 | Independent second labels through scripts/label_photos.py | Alex | Tue Sep 22 evening | Tue Sep 22 22:00 |
 | Approved health and ecology sentences after the indicator factsheets | Rachel | Fri Sep 25 | Sat Sep 26 12:00 |
-| Recruiting through chats, servers, posters where allowed, creek groups | Alex | Wed Sep 23 08:00 | continuous until Sun Sep 27 18:00 |
 | One creek visitor on camera taking the test, with a signed release | Both | Sun Sep 27 | Mon Sep 28 15:00 |
 | Permission from ENORA for their site list or the Resilience Map API | Alex | optional | never required |
 
@@ -163,7 +162,7 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 ## Risks
 
 - Photos arrive late: the launch slips one day per day late. The lock does not move, so the sample shrinks.
-- Recruiting falls short: below 20 completed sessions per arm the result is descriptive and the first screen says so.
+- Nobody is recruited (Update 14 section 0). Any sessions that arrive are reported as a description with their count. Fallback F1 is the standing plan, not a fallback.
 - Another team wipes the sandbox: repush from our store; the ledger makes it a one-command fix; the sandbox part of the video is recorded the day it first works.
 - Every vision model fails every feature: the checker ships with zero flags and the README says where AI should stay quiet.
 - The Devpost form refuses a one-person team: add Rachel as a teammate before Sep 28.
@@ -179,9 +178,10 @@ in docs/internal/KILL_TESTS.md.
   skeleton runs on docker compose, not on a real host, because no hosting account existed
   yet. That is the single thing most likely to stop the launch. (Since Update 09 it runs on
   Cloudflare and P1 passed there; see docs/internal/KILL_TESTS.md.)
-- **Reach check, Thursday Sep 24 at 22:00 PDT.** Fewer than 20 completed sessions means the
-  headline switches to F1 now, while collection continues to data lock. The switch is a change of
-  emphasis in the README and the video, never a change to the analysis plan.
+- **Reach check: decided on Sep 21, not on Sep 24.** Nobody is recruited, so the headline is F1
+  from here: the full loop, the AI on the same 16 photos and on open creek footage, and a citizen
+  record validated in their own format. Whatever sessions arrive are reported as a description
+  with their count. The analysis plan is unchanged; only the emphasis is (Update 14 section 0).
 - **Spend checks.** API spend above 150 dollars by Sep 23 or 350 dollars by Sep 26 means routine
   sessions drop to the cheaper model and nothing tagged COULD is built. If Alex reports his weekly
   usage limit above 90 percent before it resets, stop COULD and SHOULD work and ask him whether to

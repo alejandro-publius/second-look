@@ -12,8 +12,9 @@ The landing page opens with two creek photos and one question: which creek is he
 
 Results arrive with the model run. Two things will stand here, and nothing is typed by hand:
 
-- The test on strangers: mean share correct for the trained arm and the untrained arm, the difference, and its 95 percent bootstrap interval from the plan tagged before the first participant. If the interval covers zero the lesson showed no effect and this line will say so.
-- Where a model may speak: for each of the three models and each of the four features, whether it passed, which is all four items right in at least two of three runs. Only a passed feature may ever produce a flag.
+- The AI on the same 16 photos that a person takes, and on frames pulled from open creek footage from several countries: accuracy per feature with its interval, and which features a model passed. Only a passed feature may ever produce a flag.
+- Where a model may speak: for each of the three models and each of the four features, whether it passed, which is all four items right in at least two of three runs.
+- Nobody is being recruited for the two-minute test. It stays live as the volunteer's own calibration step and for judges. If sessions arrive through the public link they are reported here as a description with their count, and nothing in this project depends on them.
 
 After the run, `evals/` write `results/`, `scripts/render_readme.py` fills this section from those files, and `scripts/verify_claims.py` checks every number against them in CI. Until then this section shows no table at all. The synthetic dry runs that proved the analysis code are in `results/` with the word SYNTHETIC on every file, and none of their numbers appears here.
 
@@ -46,7 +47,7 @@ Measure each volunteer, per feature, and store the measure with the data. Three 
 - `/spot?id=`: the record, each answer beside the observer's score, "only people who passed this feature", what people reported upstream, View as FHIR with the validation badge and a curl line, the health card.
 - `/city?creek=strawberry-creek`: the analyst's view. What people reported, what the creek needs in OneAquaHealth's own measures, which pipes are worth testing with a FHIR referral and an example of a result coming back, the reaches from the hills to the Bay with the downstream note. Every number opens the records behind it.
 - `/two`: one lab Observation read from their sandbox and one volunteer Observation of ours in the same viewer.
-- `/quick?spot=`: the 20 second return check. `/judges`: every door in the order that makes the point. `/poster`: the recruiting poster in Letter and A4. `/how-we-know`, `/about`, `/privacy`.
+- `/quick?spot=`: the 20 second return check. `/judges`: every door in the order that makes the point. `/poster`: the poster in Letter and A4. `/how-we-know`, `/about`, `/privacy`.
 - A read only MCP server over our own records for any software agent, five tools, every answer with the resource ids behind it: `examples/mcp/README.md`.
 
 ## Try it
@@ -60,7 +61,7 @@ Our data set as OneAquaHealth registers one, live on their sandbox: `curl -H "Ac
 - The analysis plan, `docs/analysis_plan.md`, is tagged `prereg-v1` before the first participant. The tag, the plan's SHA-256 and the audit log's hash at freeze are posted publicly on the day and written into this section by `scripts/render_readme.py` from `results/`, so they can be checked against the post.
 - Two arms, randomized 1 to 1 in permuted blocks of four, server side. Trained: lesson then test. Untrained: test, then the lesson as a thank you. One confirmatory test: the difference in mean accuracy, percentile bootstrap with 10,000 resamples and a two-sided permutation test, seed 20260920. Exclusions were fixed in advance and each one's count is reported in `results/`.
 - Participant flow: completed sessions per arm, randomized and started counts, the exclusion counts and the count by source are in `results/usability_<stamp>.json` after the run, and the completed counts stand in the results section.
-- Below 20 completed sessions per arm the result is descriptive and the first screen says so.
+- Nobody is recruited, so the arms are reported as a description with their count whatever arrives. The plan said the confirmatory claim needs 20 completed sessions per arm; it was tagged before that was decided and it stands, unmet, on the record.
 - Deviations from the tagged plan: every one is in `docs/deviations.md`, with its date and reason.
 - Gold labels are set blind from written definitions through `scripts/label_photos.py`, which never shows one labeller the other's file. With two labellers, Cohen's kappa per feature goes in `results/key_agreement.json` and every disagreement is settled before the key freezes; with one, the plan and this section say so. The key hash is in `results/key_hash.json` from the freeze.
 
@@ -114,7 +115,7 @@ Claude Code wrote most of the code and text in this repository, from briefs writ
 ## Known weaknesses
 
 - 16 items is a small test. The per-feature model results in particular have wide intervals, and the pass rule is strict on purpose.
-- The sample is whoever opens a link in one week in Berkeley. Below 20 completed sessions per arm the result is a description, not a claim.
+- There is no recruited study. Whoever opens the link is whoever opens the link, and any arm numbers are a description, not a claim.
 - Photos are from East Bay creeks in one season and from open collections. The lesson may not transfer to other regions or seasons; the plant list is regional by design.
 - People see the photo at phone size; models receive it resized to 1092 px on the long side.
 - The dry pipe rule depends on Open-Meteo. When rainfall or location is unknown the question is skipped rather than guessed.
