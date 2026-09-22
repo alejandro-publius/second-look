@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -111,6 +111,11 @@ preflight-judges:
 
 submit-check:
 	$(PY) scripts/submit_check.py
+
+# UPDATE_14 section 8 item 2. Prints the steps and changes nothing; Alex runs
+# 'bash scripts/go_public.sh --run' on main on Sep 30.
+go-public:
+	bash scripts/go_public.sh
 
 # The one command for a judge: no key, no network, five lines out. Tests, FHIR validation,
 # the web build and the design gate, the audit chain, and a scan for secrets.
