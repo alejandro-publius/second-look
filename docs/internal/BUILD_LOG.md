@@ -50,3 +50,10 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: the live Pages build predates the consent contact email, so the deployed smoke test fails on it; the web deploy that fixes it, and emptying the live D1 table, are both outside what this terminal may do on its own.
 - Decisions: Update 14 lives under docs/internal/updates; no key means the fake client everywhere; depth takes main's tagged plan verbatim.
 - Next: phase 3, the AI on the 16-photo test and on open creek footage.
+
+## Update 14 phases 3 to 8, cloud takeover by prompt 18, 2026-09-22 21:50Z
+- What: CI green on main and depth (PRs #2, #3); `make go-public` prints the Sep 30 steps and changes nothing; docs/JUDGE_SCORECARD.md and docs/ACCEPTANCE.md; `apps/web/scripts/record-clips.mjs` and docs/video/SHOTLIST.md. The kits (voice script, teleprompter, creek plan, Devpost paste, judge questions, upstream) are on `finish`.
+- Proof: `make go-public` lists 15 live files that point at docs/internal; `make submit-check` fails only on video_link and repo_public; a trial `node apps/web/scripts/record-clips.mjs` wrote six clips.
+- Surprises: evals/models.yaml and evals/pricing.yaml still say unconfirmed although docs/notes/model_ids.md records the check on 2026-09-21, so the paid run refuses until someone flips them. That is Alex's call, left for him.
+- Decisions: no key and no Mac here, so no paid run, no footage download, no deploy, no merge into main. Those are commands in the status issue.
+- Next: Alex flips the two flags and runs `uv run python evals/model_sweep.py --real`; then the footage search, /walk, the merge and deploy in the hosting.md order, on the Mac.
