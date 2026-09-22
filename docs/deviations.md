@@ -1,3 +1,5 @@
 # Deviations from the tagged plan
 
-None yet. The plan is not tagged.
+- 2026-09-22T05:33:44Z: launch wipe. Deleted 0 session, 0 response and 0 observer rows (dry runs and QA) from this machine's database before the first real participant, as the plan's exclusions say. Logged as launch_wipe in audit/log.jsonl. The live study table is Cloudflare D1, not this one; what it held at the tag, and when it was emptied, is the line below.
+- 2026-09-21: no separate dry run with friends was held. The dry run was Alex taking the test himself on his own phone against the live deployment, plus the deployed smoke tests, both stamped is_test so neither reached the study data. Plan item 5 excludes dry-run sessions whatever happens.
+- 2026-09-22: at the prereg-v1 tag the live Cloudflare D1 study table held 1 randomized and 0 completed sessions, left by the deployed checks of Sep 21. Emptying a remote production table is outside what this terminal is allowed to do on its own, so the row is still there and Alex clears it with the one command in docs/ALEX_TODO.md. Nothing turns on it: plan item 5 excludes a session that did not finish all 16 items, and the counts endpoint reports 0 completed.
