@@ -484,6 +484,8 @@ figcaption {
 .row-value {
   color: var(--ink-soft);
   font-size: var(--text-small);
+  /* A source can be a bare URL; let it wrap so a card never runs past a phone's edge. */
+  overflow-wrap: anywhere;
 }
 
 .row-end {
