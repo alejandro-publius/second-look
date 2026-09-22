@@ -1,0 +1,17 @@
+photo_id,feature,label,labelled_at_utc
+ph-test-01,artificial_bank,present,2026-09-22T14:00:00Z
+ph-test-02,artificial_bank,absent,2026-09-22T14:00:10Z
+ph-test-03,artificial_bank,absent,2026-09-22T14:00:20Z
+ph-test-04,artificial_bank,absent,2026-09-22T14:00:30Z
+ph-test-05,dug_out_channel,present,2026-09-22T14:00:40Z
+ph-test-06,dug_out_channel,present,2026-09-22T14:00:50Z
+ph-test-07,dug_out_channel,absent,2026-09-22T14:01:00Z
+ph-test-08,dug_out_channel,absent,2026-09-22T14:01:10Z
+ph-test-09,invasive_plant,present,2026-09-22T14:01:20Z
+ph-test-10,invasive_plant,ambiguous,2026-09-22T14:01:30Z
+ph-test-11,invasive_plant,absent,2026-09-22T14:01:40Z
+ph-test-12,invasive_plant,absent,2026-09-22T14:01:50Z
+ph-test-13,pipe_running,present,2026-09-22T14:02:00Z
+ph-test-14,pipe_running,present,2026-09-22T14:02:10Z
+ph-test-15,pipe_running,present,2026-09-22T14:02:20Z
+ph-test-16,pipe_running,absent,2026-09-22T14:02:30Z
