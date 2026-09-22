@@ -16,7 +16,9 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: |
+            apps/web/package-lock.json
+            worker/package-lock.json
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -30,4 +32,15 @@ jobs:
           key: fhir-${{ hashFiles('fhir/ig.lock') }}
       - run: uv sync --frozen
       - run: cd apps/web && npm ci
+      # design-check drives the built app in Chromium to measure tap targets, so the runner
+      # needs the browser Playwright pins, not only the package.
+      - run: cd apps/web && npx playwright install --with-deps chromium
+      - run: cd worker && npm ci
       - run: make check
+      # The Worker end to end under wrangler dev with a local D1 and KV, rain from a stub, no
+      # login and no network beyond this runner (Update 10 answer A3). Wrangler 4.135 needs
+      # Node 22; the web build above keeps its Node 20 pin (PLAN.md), so the switch comes last.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: cd worker && npm run e2e
