@@ -1,8 +1,8 @@
 # CLAUDE.md: Second Look
 
-Start every session by reading PLAN.md, then only the brief section the session names. Precedence: newest file in docs/updates/ wins over docs/MASTER_BRIEF.md, which wins over PLAN.md unless docs/DECISIONS.md records the change. End every session and every decision point with the report block from docs/updates/UPDATE_02.md section 1 and nothing after it.
+Start every session by reading PLAN.md, then only the brief section the session names. Precedence: newest file in docs/internal/updates/ wins over docs/internal/MASTER_BRIEF.md, which wins over PLAN.md unless docs/DECISIONS.md records the change. End every session and every decision point with the report block from docs/internal/updates/UPDATE_02.md section 1 and nothing after it.
 
-## Hard rules, one line each (full text: docs/MASTER_BRIEF.md section 4 and docs/updates/)
+## Hard rules, one line each (full text: docs/internal/MASTER_BRIEF.md section 4 and docs/internal/updates/)
 
 1. New code only, written in this repo inside Sep 16 to 30. Never copy from Alex's earlier projects. Dependencies and licenses in docs/THIRD_PARTY.md.
 2. The model never decides. Model output becomes Flag objects through core/gate.py or is rejected. A flag can only make one follow-up question eligible. Gate changes ship with a test in the same commit.
@@ -32,7 +32,7 @@ apps/web/   Next.js PWA          apps/api/  FastAPI          core/     pure func
 content/    lessons, items, form, followups, glossary, approved sentences, regions/, locales/
 photos/     manifest.csv + images    evals/    every reported number    results/  eval outputs, failures included
 scripts/    verify_claims, preflight, freeze_key, wipe_for_launch, repush_sandbox, ingest/label/merge photos, verify_audit
-fhir/       ig.lock, FSH, sandbox_ledger.jsonl, postman/    audit/    log.jsonl    docs/    brief, updates/, plan, notes/
+fhir/       ig.lock, FSH, sandbox_ledger.jsonl, postman/    audit/    log.jsonl    docs/    product docs, notes/; docs/internal/ holds the brief, updates/, reports/
 ```
 
 ## Commands

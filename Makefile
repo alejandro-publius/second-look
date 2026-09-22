@@ -49,7 +49,7 @@ manifest-check:
 dash-check:
 	$(PY) scripts/check_dashes.py
 
-# The look and feel gate from docs/updates/UPDATE_06.md section 6. Runs after web-build because
+# The look and feel gate from docs/internal/updates/UPDATE_06.md section 6. Runs after web-build because
 # the tap target measurement drives the built app on the phone viewport.
 design-check:
 	cd $(WEB) && node scripts/design-check.mjs

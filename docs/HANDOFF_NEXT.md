@@ -21,7 +21,7 @@ Two branches, two jobs.
 
 ## What is done on `depth`
 
-- `docs/DEPTH_MAP.md`: every feature, read out of the repo. 45 built, 3 parked, 6 missing.
+- `docs/internal/DEPTH_MAP.md`: every feature, read out of the repo. 45 built, 3 parked, 6 missing.
 - **Update 10C.** Draft pull request #1, "Depth: do not merge before data lock", exists so CI
   runs on every push to `depth`; it stays a draft. The merge order after data lock is written in
   `docs/notes/hosting.md` (Worker first, phone tests, then the Pages file, phone tests again).

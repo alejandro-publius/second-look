@@ -11,7 +11,7 @@ Read this before touching anything. It is the one place where folder ownership, 
 5. Python: `uv run pytest <your folder> -q`, `uv run ruff check <your folder>`, `uv run ruff format <your folder>`, `uv run mypy <your folder>`. All four must be clean before you report. Line length is 100. Use `Annotated[Session, Depends(get_session)]`, never `= Depends()` defaults (ruff B008).
 6. Web: `cd apps/web && npm run lint && npm run build`. Playwright tests under `apps/web/tests/`.
 7. Every proving command you claim must have been run by you. Paste its key line in your report.
-8. Report format: the block from `docs/updates/UPDATE_02.md` section 1. Nothing after it.
+8. Report format: the block from `docs/internal/updates/UPDATE_02.md` section 1. Nothing after it.
 9. Plain words everywhere a person will read them, reading age about 12. Never the words "seamless", "robust", "leverage", "cutting-edge", "empower", "unlock", "first-of-its-kind", "real number".
 
 ## Folder ownership
@@ -24,9 +24,9 @@ Read this before touching anything. It is the one place where folder ownership, 
 | W4 Web | `apps/web/` | `content/`, `photos/`, this file |
 | W5 Core | `core/gate.py`, `core/followups.py`, `core/rainfall.py`, `core/labels.py`, `core/healthcard.py`, `core/tests/` (except W1, W3 and W6 test files) | `content/`, `core/records.py`, `core/content_loader.py` |
 | W6 AI | `evals/model_sweep.py`, `evals/benchmark.py`, `evals/agreement.py`, `evals/ablation.py`, `evals/fixtures/`, `evals/tests/test_model_*.py`, `evals/tests/test_benchmark*.py`, `core/checker.py`, `core/tests/test_checker*.py`, `results/model_pass_table.json`, `results/cost_log.jsonl` | `core/gate.py` (W5), `content/test_items.yaml` |
-| W7 Tools and docs | `scripts/` (except `scripts/repush_sandbox.py`, `scripts/fhir_build.sh`, `scripts/fhir_validate.py`, `scripts/check_*.py`, `scripts/verify_claims.py`, `scripts/make_placeholders.py`, `scripts/smoke.py`, `scripts/deploy.sh`, `scripts/sandbox_write_test.sh`), `audit/`, `docs/` (except `docs/MASTER_BRIEF.md`, `docs/updates/`, `docs/CONTRACTS.md`, `docs/fhir_mapping.md`, `docs/ig_proposal.md`, `docs/BUILD_LOG.md`, `docs/DECISIONS.md`), `content/drafts/`, `README.md` | everything |
+| W7 Tools and docs | `scripts/` (except `scripts/repush_sandbox.py`, `scripts/fhir_build.sh`, `scripts/fhir_validate.py`, `scripts/check_*.py`, `scripts/verify_claims.py`, `scripts/make_placeholders.py`, `scripts/smoke.py`, `scripts/deploy.sh`, `scripts/sandbox_write_test.sh`), `audit/`, `docs/` (except `docs/internal/MASTER_BRIEF.md`, `docs/internal/updates/`, `docs/CONTRACTS.md`, `docs/fhir_mapping.md`, `docs/ig_proposal.md`, `docs/internal/BUILD_LOG.md`, `docs/DECISIONS.md`), `content/drafts/`, `README.md` | everything |
 
-The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`, `content/*.yaml` (not drafts), `content/locales/en.json` (W4 may add keys; say which in the report), `photos/`, `pyproject.toml`, `Makefile`, `.github/`, `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `docs/CONTRACTS.md`, `docs/BUILD_LOG.md`, `docs/DECISIONS.md`.
+The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`, `content/*.yaml` (not drafts), `content/locales/en.json` (W4 may add keys; say which in the report), `photos/`, `pyproject.toml`, `Makefile`, `.github/`, `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `docs/CONTRACTS.md`, `docs/internal/BUILD_LOG.md`, `docs/DECISIONS.md`.
 
 ## Shared shapes (already written, import them)
 

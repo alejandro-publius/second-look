@@ -6,7 +6,7 @@ days pass: prices and ids move.
 **Checked 2026-09-21** against https://platform.claude.com/docs/en/about-claude/pricing (the
 older docs.claude.com path now redirects there).
 
-The three models docs/MASTER_BRIEF.md names for the test run, cheapest first:
+The three models docs/internal/MASTER_BRIEF.md names for the test run, cheapest first:
 
 | Model | Id used in our config | Input per MTok | Output per MTok | Batch input | Batch output |
 |---|---|---|---|---|---|

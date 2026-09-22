@@ -115,7 +115,7 @@ Actions artifact. The token it uses is scoped to D1 read on this one account and
 `scripts/backup_db.sh` still covers the compose stack. Nobody computes outcomes from a backup. The only code that computes outcomes is
 `evals/usability_analysis.py`, which refuses to run before data lock (2026-09-28T01:00:00Z)
 and refuses to run without the `prereg-v1` tag. A restore drill was run once before launch;
-docs/BUILD_LOG.md records it.
+docs/internal/BUILD_LOG.md records it.
 
 ## The audit log
 

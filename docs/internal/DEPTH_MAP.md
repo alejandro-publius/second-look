@@ -9,7 +9,7 @@ scale 15.
 
 ## TRAIN
 
-| Feature | Status | Main file | Test | Rubric line | Judge who cares |
+| Feature | Status | Main file | Test | Rubric line | Who it serves |
 |---|---|---|---|---|---|
 | Two minute photo test, 16 items, select then Next | built | `apps/web/components/TestItems.tsx` | `apps/web/tests/test-flow.spec.ts` | UX, Innovation | outreach, ecologist |
 | Permuted block randomization, replayable from a seed | built | `core/allocator.py` | `core/tests/test_allocator.py` | Technical | data tools |
@@ -25,7 +25,7 @@ scale 15.
 
 ## CHECK
 
-| Feature | Status | Main file | Test | Rubric line | Judge who cares |
+| Feature | Status | Main file | Test | Rubric line | Who it serves |
 |---|---|---|---|---|---|
 | Guided creek check in the app's own questions | built | `apps/web/components/CheckFlow.tsx` | `apps/web/tests/check.spec.ts` | Impact, UX | ecologist |
 | Question wording taken from the app's public text | built for 2 of 4 | `docs/notes/app_strings.md` | `scripts/preflight.py` | Impact | ecologist, standards |
@@ -36,7 +36,7 @@ scale 15.
 
 ## VERIFY
 
-| Feature | Status | Main file | Test | Rubric line | Judge who cares |
+| Feature | Status | Main file | Test | Rubric line | Who it serves |
 |---|---|---|---|---|---|
 | Follow up selector, pure, at most two questions, in Python and in TypeScript | built, proved equal by golden vectors | `core/followups.py`, `worker/src/core/followups.ts` | `core/tests/test_followups.py`, `worker/test/golden.test.ts` | Innovation | data tools |
 | The gate: model output becomes a Flag or is rejected | built | `core/gate.py` | `core/tests/test_gate.py` | Innovation, Technical | digital health |
@@ -47,7 +47,7 @@ scale 15.
 
 ## RECORD
 
-| Feature | Status | Main file | Test | Rubric line | Judge who cares |
+| Feature | Status | Main file | Test | Rubric line | Who it serves |
 |---|---|---|---|---|---|
 | FHIR emitter on their Location and Observation profiles, in Python and in TypeScript | built, the two proved equal by golden vectors | `core/fhir_emit.py`, `worker/src/core/fhir_emit.ts` | `core/tests/test_fhir_emit.py`, `worker/test/golden.test.ts` | Technical | standards |
 | HL7 validator, their guide at b907cf0, terminology on | built, 0 errors | `scripts/fhir_validate.py` | `docs/notes/p2_validator_run.md` | Technical | standards |
@@ -60,7 +60,7 @@ scale 15.
 
 ## ACT
 
-| Feature | Status | Main file | Test | Rubric line | Judge who cares |
+| Feature | Status | Main file | Test | Rubric line | Who it serves |
 |---|---|---|---|---|---|
 | Health card for the person and the pet | built | `core/healthcard.py` | `core/tests/test_healthcard.py` | Impact | digital health |
 | The record: a spot's timeline with scores beside answers | built | `apps/web/components/SpotRecord.tsx` | `apps/web/tests/record.spec.ts` | Impact | ecologist |
@@ -75,7 +75,7 @@ scale 15.
 
 ## The build, the docs and the gates
 
-| Feature | Status | Main file | Test | Rubric line | Judge who cares |
+| Feature | Status | Main file | Test | Rubric line | Who it serves |
 |---|---|---|---|---|---|
 | Live site and API on Cloudflare, no card | built | `worker/src/index.ts` | `docs/notes/hosting.md` | Feasibility | data tools |
 | Judge facing endpoints on the Worker, proved by golden vectors and an end to end run | built on depth, not deployed | `worker/src/check.ts`, `worker/src/city.ts` | `worker/test/golden.test.ts`, `worker/test/e2e.mjs` | Technical | data tools |

@@ -1,6 +1,6 @@
 # Third party dependencies
 
-Generated on 2026-09-21 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
+Generated on 2026-09-22 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
 
 ## External services
 
@@ -21,13 +21,13 @@ Generated on 2026-09-21 by `uv run python scripts/third_party.py` from `uv.lock`
 
 ## Design references
 
-Read during the design pass (docs/updates/UPDATE_06.md). Nothing is copied from either: no brand
-colour, name, logo or font was taken. They informed structure and restraint only.
+Read during the design pass (docs/internal/updates/UPDATE_06.md). Nothing is copied from either:
+no brand colour, name, logo or font was taken. They informed structure and restraint only.
 
 - Vercel Web Interface Guidelines, MIT
   (https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md).
   `apps/web` was audited against every rule in it; the findings are in
-  docs/reviews/DESIGN_REVIEW_01.md.
+  docs/internal/reviews/DESIGN_REVIEW_01.md.
 - VoltAgent awesome-design-md, MIT (https://github.com/VoltAgent/awesome-design-md). The Airbnb
   file for how a product lets photographs lead, the Wise file for how forms stay clear. Structure
   of docs/design/DESIGN.md borrows their shape: one read, tokens, components, do and do not.
