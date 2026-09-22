@@ -114,12 +114,19 @@ export interface Content {
   features: Feature[];
   form: { version: number; sections: FormSection[]; items: FormItem[] };
   test_items: TestItem[];
-  warmup: { id: string; photo_id: string }[];
+  warmup: WarmupItem[];
   glossary: GlossaryTerm[];
   regions: Record<string, Region>;
   lessons: Record<string, Lesson>;
   locale: Record<string, string>;
   photos: Record<string, Photo>;
+}
+
+export interface WarmupItem {
+  id: string;
+  photo_id: string;
+  /** True on the creek in the more natural state. Exactly one of the pair carries it. */
+  more_natural: boolean;
 }
 
 export const content = raw as unknown as Content;
@@ -149,6 +156,28 @@ export function glossaryFor(term: string | null | undefined): string | undefined
 }
 
 /** Every photo a visitor can see, in id order, for the credits page. */
+// Every CC licence asks that the licence itself be named and linked wherever the photo appears.
+// The manifest records the exact version, so the deed link follows from it with no guessing.
+const LICENSE_URLS: Record<string, string> = {
+  "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "CC-BY-2.0": "https://creativecommons.org/licenses/by/2.0/",
+  "CC-BY-3.0": "https://creativecommons.org/licenses/by/3.0/",
+  "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "own-CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "CC-BY-SA-2.0": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "CC-BY-SA-3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+};
+
+/** The creek in the more natural state, whichever side of the pair it was shown on. */
+export function moreNatural(pair: WarmupItem[]): WarmupItem | undefined {
+  return pair.find((w) => w.more_natural);
+}
+
+export function licenseUrl(license: string): string | undefined {
+  return LICENSE_URLS[license];
+}
+
 export function shownPhotos(): Photo[] {
   return Object.values(content.photos).sort((a, b) => a.id.localeCompare(b.id));
 }

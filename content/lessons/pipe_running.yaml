@@ -1,30 +1,44 @@
-# PLACEHOLDER lesson for pipe_running. Rachel owns the wording. approved stays false until she approves it.
-# Drafts to start from: content/drafts/lessons/pipe_running.yaml (W7). Screens hold 25 words at most.
+# Lesson for pipe_running. Photo ids are the real photos fetched on 2026-09-21 (Update 11b, 11C).
+# The test item asks only whether a pipe or drain outlet is visible, because flow and pollution
+# cannot be judged from a photo (Update 11b step 5). So the pairs teach spotting one, and the
+# rule of thumb carries the three dry days rule, which is for the field and not for a photo.
+# Source: US EPA Illicit Discharge Detection and Elimination manual, which says dry weather flow
+# means testing is needed. The wording is always "worth testing", never a verdict.
+# Pairs set by Update 11C: an obvious outfall beside a stream with none, then a hidden outfall
+# beside a bend with none. Captions are written from what each source page says about its photo.
+# approved stays false until Alex approves.
 feature: pipe_running
-approved: false
-rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
-source: ""
+approved: true
+approved_by: "Alex Velazquez"
+approved_on: "2026-09-21"
+# Rules of thumb, captions and practice feedback approved in Update 11C on three
+# conditions, all met: 11 words, a source fetched on the day, no health claim. The marks
+# on this lesson were approved in Update 11D and carry their own stamp.
+rule_of_thumb: "A pipe still running after three dry days is worth testing."
+source: "https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf"
 contrast_pairs:
-  - assume_photo_id: ph-lesson-pipe_running-a1
-    actual_photo_id: ph-lesson-pipe_running-a2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+  # Pair A. Assume: Dziki Stream at Karpacz, a rocky forest stream. Actual: Lyme Brook, a large outfall.
+  - assume_photo_id: ph-pipe-10
+    actual_photo_id: ph-pipe-05
+    assume_caption: "A rocky forest stream over mossy boulders. Follow both banks down to the water. Nothing empties into this one."
+    actual_caption: "A wide concrete mouth low on the bank. That is an outfall, and this one is hard to miss."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the pipe mouth 1" }
-  - assume_photo_id: ph-lesson-pipe_running-b1
-    actual_photo_id: ph-lesson-pipe_running-b2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+      - { x: 0.58, y: 0.5, label: "Grilled outfall mouth", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.56, y: 0.61, label: "Concrete headwall in bank", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  # Pair B. Assume: the Train at Grez-Doiceau, a meander in nettles. Actual: Bierley, a hidden headwall.
+  - assume_photo_id: ph-pipe-11
+    actual_photo_id: ph-pipe-06
+    assume_caption: "A bend with nettles crowding both banks. Plenty to hide a pipe, and there is no pipe here."
+    actual_caption: "Two low headwalls in the grass. Most outfalls look like these, not like the first one. Scan at water level."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the pipe mouth 2" }
+      - { x: 0.4, y: 0.66, label: "Outfall under the grass", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.66, y: 0.54, label: "Second outfall in vegetation", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
 practice:
-  photo_id: ph-practice-pipe_running
+  # Outfall into Riffa Beck: a small headwall on a grassy bank.
+  photo_id: ph-pipe-09
   gold: present
-  feedback_correct: "PLACEHOLDER feedback that names the cue."
-  feedback_wrong: "PLACEHOLDER feedback that names the cue."
+  feedback_correct: "Right. A small headwall low on the bank. Easy to walk past."
+  feedback_wrong: "Look low on the far bank, at water level. That small concrete mouth is a drain outlet."
 practice_marks:
-  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the pipe mouth" }
+  - { x: 0.235, y: 0.5, label: "Concrete headwall on bank", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  - { x: 0.245, y: 0.565, label: "The outlet opening", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }

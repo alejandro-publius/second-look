@@ -79,8 +79,14 @@ def mock_inat(**observation: Any) -> None:
     )
 
 
-def run(url: str, repo: Path, feature: str = "artificial_bank", role: str = "test") -> Any:
-    return fetch(url, feature, role, root=repo, limiter=RateLimit(0.0))
+def run(
+    url: str,
+    repo: Path,
+    feature: str = "artificial_bank",
+    role: str = "test",
+    gold_label: str = "",
+) -> Any:
+    return fetch(url, feature, role, gold_label=gold_label, root=repo, limiter=RateLimit(0.0))
 
 
 @respx.mock
@@ -193,7 +199,9 @@ def test_a_place_name_stays_coarse() -> None:
 @respx.mock
 def test_the_manifest_check_knows_the_new_column(repo: Path) -> None:
     mock_commons("cc-by-4.0")
-    run(COMMONS_URL, repo)
+    # A lesson role, because the mocked page sits in the Commons category Riprap and laid stone
+    # is not allowed in the test role.
+    run(COMMONS_URL, repo, role="lesson")
     assert check_manifest.main(repo) == 0
 
     # Same row, evidence wiped: a photo from a source has to say what backs its label.
@@ -227,3 +235,66 @@ def test_a_plant_row_without_a_cal_ipc_link_fails_the_manifest_check(repo: Path)
 
 def test_every_row_in_the_repo_manifest_is_still_valid() -> None:
     assert check_manifest.main() == 0
+
+
+@respx.mock
+def test_the_label_chosen_while_picking_becomes_the_first_gold_label(repo: Path) -> None:
+    """Update 11 section 5: the picker's label is the first gold label, not a guess by code."""
+    mock_commons("cc-by-4.0")
+    row = run(COMMONS_URL, repo, role="lesson", gold_label="present")
+    assert row["gold_label"] == "present"
+    assert check_manifest.main(repo) == 0
+
+
+@respx.mock
+def test_a_label_the_manifest_cannot_hold_is_refused_before_anything_downloads(repo: Path) -> None:
+    mock_commons("cc-by-4.0")
+    with pytest.raises(FetchError) as caught:
+        run(COMMONS_URL, repo, gold_label="damaged_but_tidy")
+    assert "gold_label" in str(caught.value)
+    assert rows(repo) == []
+
+
+@respx.mock
+def test_a_native_look_alike_labelled_absent_needs_no_cal_ipc_link(repo: Path) -> None:
+    """A plant photo labelled absent says no listed species is in it, so there is no profile page
+    to point at. Demanding one ruled out every native look-alike the test needs."""
+    mock_inat(taxon="Rubus ursinus")
+    row = run(INAT_URL, repo, feature="invasive_plant", gold_label="absent")
+    assert row["gold_label"] == "absent"
+    assert "Rubus ursinus" in row["label_evidence"]
+    assert "cal-ipc.org" not in row["label_evidence"]
+    assert check_manifest.main(repo) == 0, "and the manifest check does not ask for one either"
+
+
+@respx.mock
+def test_a_plant_labelled_present_still_needs_the_cal_ipc_link(repo: Path) -> None:
+    mock_inat(taxon="Rubus ursinus")
+    with pytest.raises(FetchError) as caught:
+        run(INAT_URL, repo, feature="invasive_plant", gold_label="present")
+    assert "Cal-IPC" in str(caught.value)
+    assert rows(repo) == []
+
+
+@respx.mock
+def test_a_public_domain_photo_is_fetched_and_recorded_as_public_domain(repo: Path) -> None:
+    mock_commons("pd", artist="Environmental Protection Agency", copyrighted="False")
+    row = run(COMMONS_URL, repo, role="lesson", gold_label="present")
+    assert row["license"] == "public-domain"
+    assert row["author"] == "Environmental Protection Agency"
+    assert check_manifest.main(repo) == 0
+
+
+@respx.mock
+def test_laid_stone_in_the_test_role_fails_the_manifest_check(repo: Path) -> None:
+    """The app gives laid stone a bank type of its own, so a test item has no one right answer."""
+    mock_commons("cc-by-4.0", description="Gabion baskets holding the bank of a city creek")
+    run(COMMONS_URL, repo, role="test", gold_label="present")
+    assert check_manifest.main(repo) == 1
+
+
+@respx.mock
+def test_laid_stone_is_allowed_in_a_lesson_where_the_caption_can_say_so(repo: Path) -> None:
+    mock_commons("cc-by-4.0", description="Gabion baskets holding the bank of a city creek")
+    run(COMMONS_URL, repo, role="lesson", gold_label="present")
+    assert check_manifest.main(repo) == 0

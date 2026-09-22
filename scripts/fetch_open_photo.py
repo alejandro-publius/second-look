@@ -14,11 +14,13 @@ scripts/ingest_photos.py. Ingest does the resizing, the EXIF stripping and the m
 there is only ever one ingest path. The row carries author, licence, source_url and
 label_evidence.
 
-It refuses, and writes nothing, when the licence is not CC0, CC BY or CC BY-SA, when the licence
-version has no entry in the manifest allowlist, when an iNaturalist record is not research grade,
-or when a plant is not on the Cal-IPC Inventory. Refusing beats guessing (hard rule 6).
+It refuses, and writes nothing, when the licence is not CC0, CC BY, CC BY-SA or public domain,
+when the licence version has no entry in the manifest allowlist, when an iNaturalist record is not
+research grade, or when a plant it is told is present is not on the Cal-IPC Inventory. Refusing
+beats guessing (hard rule 6).
 
-It never sets a label. gold_label stays empty until a person labels the photo.
+It guesses no label. gold_label is empty unless --gold-label passes on the label the person chose
+while picking, which Update 11 section 5 makes the first gold label.
 """
 
 from __future__ import annotations
@@ -48,7 +50,7 @@ from scripts.find_open_photos import (
     inat_candidates,
     plain_text,
 )
-from scripts.ingest_photos import IngestError, ingest
+from scripts.ingest_photos import GOLD_VALUES, IngestError, ingest
 
 COMMONS_PAGE_RE = re.compile(r"commons\.wikimedia\.org/wiki/(File:.+)$", re.IGNORECASE)
 COMMONS_UPLOAD_RE = re.compile(r"upload\.wikimedia\.org/wikipedia/commons/(?:thumb/)?.+?/([^/]+)$")
@@ -176,14 +178,20 @@ def fetch(
     location: str = "",
     notes: str = "",
     extra_evidence: str = "",
+    gold_label: str = "",
     root: Path = ROOT,
     client: httpx.Client | None = None,
     limiter: RateLimit | None = None,
 ) -> dict[str, str]:
     """Download one photo, return the manifest row ingest wrote.
 
+    gold_label is the label the person chose while picking. Update 11 section 5 makes that the
+    first gold label. Left empty, the row waits for scripts/label_photos.py as before.
+
     Raises FetchError or IngestError, and then nothing has been written.
     """
+    if gold_label not in GOLD_VALUES:
+        raise FetchError(f"gold_label {gold_label!r} must be one of {sorted(GOLD_VALUES)}")
     limiter = limiter or RateLimit()
     cal_ipc = cal_ipc_index(root)
     owned = client is None
@@ -207,9 +215,14 @@ def fetch(
                 "manifest allowlist has no entry for. Pick a CC0, CC BY 4.0 or CC BY-SA 4.0 photo."
             )
         evidence = candidate.evidence
-        if feature == "invasive_plant" and "cal-ipc.org" not in evidence:
+        # The Cal-IPC link is what makes "an invasive plant is here" more than our opinion, so a
+        # present plant photo cannot ship without one. A photo labelled absent is the opposite
+        # claim: no listed species is in it, so there is no profile page to point at, and
+        # demanding one would rule out every native look-alike the test needs (Update 11b step 6).
+        needs_cal_ipc = feature == "invasive_plant" and gold_label != "absent"
+        if needs_cal_ipc and "cal-ipc.org" not in evidence:
             evidence += cal_ipc_evidence(f"{candidate.title} {candidate.words}", cal_ipc)
-        if feature == "invasive_plant" and "cal-ipc.org" not in evidence:
+        if needs_cal_ipc and "cal-ipc.org" not in evidence:
             raise FetchError(
                 f"{candidate.page_url}: a plant photo needs a species that is on the Cal-IPC "
                 "Inventory, and the source does not name one. Leave it out."
@@ -225,7 +238,7 @@ def fetch(
                 "role": role,
                 # The warm-up pair belongs to no feature, so the manifest keeps that cell empty.
                 "feature": "" if feature == "warmup" else feature,
-                "gold_label": "",  # a person labels, never this script
+                "gold_label": gold_label,  # the person's pick, never this script's guess
                 "scene_id": scene or source_id,
                 "capture_date": capture_date(candidate),
                 "coarse_location": location or coarse_place(candidate.place),
@@ -262,6 +275,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--location", default="", help="coarse location, town or county")
     parser.add_argument("--notes", default="", help="a note for the manifest row")
     parser.add_argument("--evidence", default="", help="anything else the source supports")
+    parser.add_argument(
+        "--gold-label",
+        default="",
+        choices=sorted(GOLD_VALUES),
+        help="the label the person chose while picking; empty leaves it for label_photos.py",
+    )
     parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     try:
@@ -274,6 +293,7 @@ def main(argv: list[str] | None = None) -> int:
             location=args.location,
             notes=args.notes,
             extra_evidence=args.evidence,
+            gold_label=args.gold_label,
             root=args.root,
         )
     except (FetchError, IngestError) as e:
@@ -288,7 +308,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  licence:  {row['license']}")
     print(f"  source:   {row['source_url']}")
     print(f"  evidence: {row['label_evidence']}")
-    print("  gold_label is empty on purpose. A person labels it with scripts/label_photos.py.")
+    if row["gold_label"]:
+        print(f"  label:    {row['gold_label']}, the one the person chose while picking")
+    else:
+        print("  gold_label is empty on purpose. A person labels it with scripts/label_photos.py.")
     return 0
 
 

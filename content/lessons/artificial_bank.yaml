@@ -1,30 +1,41 @@
-# PLACEHOLDER lesson for artificial_bank. Rachel owns the wording. approved stays false until she approves it.
-# Drafts to start from: content/drafts/lessons/artificial_bank.yaml (W7). Screens hold 25 words at most.
+# Lesson for artificial_bank. Photo ids are the real photos fetched on 2026-09-21 (Update 11b).
+# Captions are written from what each source page says about its own photo, so Alex checks them
+# against the picture before approving. approved stays false until he does.
+# Cue source: River Habitat Survey manual 2003 (2022 reprint), Section E, "Reinforced bank (RI)".
+# The app's own option reads "Artificial (concrete or stones with concrete)", so the lesson
+# centres on concrete. No laid stone photo is in the test set: the app gives it its own category.
 feature: artificial_bank
-approved: false
-rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
-source: ""
+approved: true
+approved_by: "Alex Velazquez"
+approved_on: "2026-09-21"
+# Rules of thumb, captions and practice feedback approved in Update 11C on three
+# conditions, all met: 11 words, a source fetched on the day, no health claim. The marks
+# on this lesson were approved in Update 11D and carry their own stamp.
+rule_of_thumb: "Under the plants, look for concrete or stones set in concrete."
+source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
 contrast_pairs:
-  - assume_photo_id: ph-lesson-artificial_bank-a1
-    actual_photo_id: ph-lesson-artificial_bank-a2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+  # Pair A. Assume: Afon Annell, an eroded earth bank. Actual: Bell Creek, a concrete channel.
+  - assume_photo_id: ph-bank-06
+    actual_photo_id: ph-bank-05
+    assume_caption: "Bare soil, roots and a slumped edge look like damage. This is a natural bank doing its job."
+    actual_caption: "Straight grey walls run down both sides. That is concrete, not soil. A built bank."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the built edge 1" }
-  - assume_photo_id: ph-lesson-artificial_bank-b1
-    actual_photo_id: ph-lesson-artificial_bank-b2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+      - { x: 0.72, y: 0.45, label: "Concrete wall, not soil", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.2, y: 0.27, label: "Same wall, far side", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  # Pair B. Assume: Whiteknowe Head Burn, raw but natural. Actual: Hale and Permanente confluence, dry concrete.
+  - assume_photo_id: ph-bank-08
+    actual_photo_id: ph-bank-07
+    assume_caption: "A raw cut bank above a small burn. Nothing was built here. The stream is moving its own earth."
+    actual_caption: "No water on the day, but the sides are still smooth grey concrete. Built banks stay built when a creek is dry."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the built edge 2" }
+      - { x: 0.51, y: 0.56, label: "Concrete wall between channels", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.86, y: 0.6, label: "Smooth concrete, no soil", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
 practice:
-  photo_id: ph-practice-artificial_bank
+  # Iron Bark Creek, Wallsend: a concrete low flow channel in a mown reserve.
+  photo_id: ph-bank-09
   gold: present
-  feedback_correct: "PLACEHOLDER feedback that names the cue."
-  feedback_wrong: "PLACEHOLDER feedback that names the cue."
+  feedback_correct: "Right. The flat grey strip the water runs in is concrete. A built bank."
+  feedback_wrong: "Look at the middle of the grass. That flat grey strip the water runs in is concrete. Built."
 practice_marks:
-  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the built edge" }
+  - { x: 0.2, y: 0.52, label: "Sloped concrete bank", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  - { x: 0.83, y: 0.52, label: "Concrete on both sides", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }

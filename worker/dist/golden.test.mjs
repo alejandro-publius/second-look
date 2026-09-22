@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "a1215bc54f546b42",
+  content_hash: "c0a05667182dc57d",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -105,7 +105,7 @@ var content_default = {
       id: "dug_out_channel",
       name: "Dug-out channel",
       plain: "a channel that was deepened or straightened",
-      question: "Does this channel look dug out or straightened?"
+      question: "Has this channel been straightened or dug out?"
     },
     {
       id: "invasive_plant",
@@ -115,9 +115,9 @@ var content_default = {
     },
     {
       id: "pipe_running",
-      name: "Pipes and sewage signs",
-      plain: "pipes with something coming out, and sewage signs",
-      question: "Are there pipes draining polluted water into the stream?"
+      name: "Pipes and drain outlets",
+      plain: "pipes and drain outlets that empty into the creek",
+      question: "Can you see a pipe or drain outlet that empties into this creek?"
     }
   ],
   features: [

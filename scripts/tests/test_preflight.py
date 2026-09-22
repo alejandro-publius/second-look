@@ -6,6 +6,7 @@ import csv
 import json
 import shutil
 import subprocess
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -41,13 +42,23 @@ def test_current_repo_fails_only_for_known_reasons() -> None:
     failed = {c.name: c for c in checks if not c.passed}
     human = {n for n, c in failed.items() if c.owner == "HUMAN"}
     build = {n for n, c in failed.items() if c.owner == "BUILD"}
-    assert {"human_inputs", "key_frozen", "key_agreement", "prereg_tag", "contact_email"} <= human
-    assert "marks_approved" in human, "the design pass marks are still waiting for Rachel"
-    # The plan was tagged on main on 2026-09-21 and depth took that text verbatim, so the
-    # four question wordings are frozen here too and plan_wording passes (Update 14).
-    assert "plan_wording" not in failed, "the plan on depth is the tagged text"
+    # contact_email passes now that the consent email is real (Update 11C).
+    # Everything a person owed has landed except the tag, which Alex makes himself (Update 11D).
+    assert "prereg_tag" in human
+    assert {
+        "human_inputs",
+        "key_frozen",
+        "key_agreement",
+        "contact_email",
+        "marks_approved",
+    } & human == set()
+    assert "marks_approved" not in human, "all 24 marks approved in Update 11D"
+    # plan_wording passes now: the four question wordings are frozen in the plan (Update 11C).
+    assert "plan_wording" not in human, "no TODO-TEAM left in docs/analysis_plan.md"
     reasons = [r for c in checks for r in c.reasons]
-    assert any("placeholder photo in role test" in r for r in reasons)
+    # The real photos are in as of Update 11b, so no role is on a gray placeholder any more.
+    assert not any("placeholder photo in role" in r for r in reasons)
+    assert any("no second label for test photo" in r for r in reasons)
     assert any("prereg-v1 tag missing" in r for r in reasons)
     # BUILD failures today can only come from other workstreams' half-finished files.
     others = {"hidden_field", "model_pass_table_exists", "content_loads", "verify_claims"}
@@ -62,11 +73,19 @@ def green_root(tmp_path: Path) -> Path:
     (root / "results").mkdir()
     (root / "apps" / "web" / "app" / "t").mkdir(parents=True)
 
-    # Update 11 section 6 puts backups in the launch gate, so a green repo has a drill on record.
+    # Update 11 section 6 puts backups in the launch gate, so a green repo has a drill on record
+    # and a fresh backup receipt. The receipt lives outside the repo, so point it somewhere
+    # harmless: no test may depend on whether this machine ran a real backup today.
     (root / ".github" / "workflows").mkdir(parents=True)
     (root / ".github" / "workflows" / "backup.yml").write_text("name: backup", encoding="utf-8")
     (root / "results" / "backup_drill.json").write_text(
-        json.dumps({"restored_rows_match": True}), encoding="utf-8"
+        json.dumps({"restored": True}), encoding="utf-8"
+    )
+    backups = root / "backups"
+    backups.mkdir()
+    (backups / "last_backup.json").write_text(
+        json.dumps({"generated_at_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")}),
+        encoding="utf-8",
     )
 
     features_path = root / "content" / "features.yaml"
@@ -294,7 +313,10 @@ def test_backups_block_the_launch_until_a_drill_has_run(tmp_path: Path) -> None:
     drill = root / "results" / "backup_drill.json"
 
     def backups() -> preflight.Check:
-        return {c.name: c for c in preflight.run_checks(root, runner=ok_runner)}["backups"]
+        return {
+            c.name: c
+            for c in preflight.run_checks(root, runner=ok_runner, backup_dir=root / "backups")
+        }["backups"]
 
     assert backups().gate == "launch", "a lost database would sink the study, so it gates launch"
     assert backups().passed, "the green fixture records a drill"
@@ -303,17 +325,36 @@ def test_backups_block_the_launch_until_a_drill_has_run(tmp_path: Path) -> None:
     drill.unlink()
     blocked = backups()
     assert not blocked.passed
-    assert "GitHub secrets" in blocked.reasons[0]
+    assert "make restore-drill" in blocked.reasons[0]
 
     # A drill that ran and did not match is worse than none, so it must not pass either.
-    drill.write_text(json.dumps({"restored_rows_match": False}), encoding="utf-8")
+    drill.write_text(json.dumps({"restored": False}), encoding="utf-8")
     mismatch = backups()
     assert not mismatch.passed
     assert "did not match" in mismatch.reasons[0]
 
-    # And a workflow that is not there at all is named plainly.
-    drill.write_text(json.dumps({"restored_rows_match": True}), encoding="utf-8")
-    (root / ".github" / "workflows" / "backup.yml").unlink()
+    # A drill on record but no backup for days is not a backup. The GitHub workflow stays on
+    # manual, so its file being there proves nothing and is no longer part of this check
+    # (Update 11D item 4).
+    drill.write_text(json.dumps({"restored": True}), encoding="utf-8")
+    receipt = root / "backups" / "last_backup.json"
+    stale = datetime.now(UTC) - timedelta(hours=27)
+    receipt.write_text(
+        json.dumps({"generated_at_utc": stale.strftime("%Y-%m-%dT%H:%M:%SZ")}), encoding="utf-8"
+    )
+    old_backup = backups()
+    assert not old_backup.passed
+    assert "27 hours old" in old_backup.reasons[0]
+
+    # Just inside the window, because a Mac asleep at 21:00 catches up at wake.
+    fresh = datetime.now(UTC) - timedelta(hours=25)
+    receipt.write_text(
+        json.dumps({"generated_at_utc": fresh.strftime("%Y-%m-%dT%H:%M:%SZ")}), encoding="utf-8"
+    )
+    assert backups().passed, "26 hours of slack covers a missed 21:00 run"
+
+    # And no backup at all is named plainly.
+    receipt.unlink()
     gone = backups()
     assert not gone.passed
-    assert "backup.yml" in gone.reasons[0]
+    assert "no backup receipt" in gone.reasons[0]

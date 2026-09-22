@@ -10,6 +10,16 @@ export function absoluteApiUrl(path: string): string {
   if (API_ORIGIN) return `${API_ORIGIN}${path}`;
   return typeof window === "undefined" ? path : `${window.location.origin}${path}`;
 }
+/**
+ * Set only on the dry-run build. It makes the server stamp every session this build starts as
+ * is_test, so three friends trying the thing out never land in the study (Update 11D item 5).
+ * The launch build leaves it empty, and then no session is ever marked from the browser.
+ *
+ * It is in the client bundle on purpose: the only thing this key can do is take a session out of
+ * the analysis. It cannot read anyone's answers, which needs EXPORT_TOKEN and never leaves the
+ * server.
+ */
+export const QA_KEY = process.env.NEXT_PUBLIC_QA_KEY ?? "";
 
 export type TestAnswer = "yes" | "no" | "cant_tell";
 export type Arm = "untrained" | "trained";
@@ -328,13 +338,20 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function qaHeaders(body: unknown): Record<string, string> | undefined {
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers["content-type"] = "application/json";
+  if (QA_KEY) headers["x-qa-key"] = QA_KEY;
+  return Object.keys(headers).length ? headers : undefined;
+}
+
 async function request<T>(method: string, path: string, body?: unknown, retries = 0): Promise<T> {
   let attempt = 0;
   for (;;) {
     try {
       const res = await fetch(`${API_ORIGIN}${path}`, {
         method,
-        headers: body === undefined ? undefined : { "content-type": "application/json" },
+        headers: qaHeaders(body),
         body: body === undefined ? undefined : JSON.stringify(body),
         credentials: "omit",
         cache: "no-store",

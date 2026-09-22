@@ -31,6 +31,24 @@ REQUIRED_COLUMNS = [
     "label_evidence",
 ]
 CAL_IPC = "cal-ipc.org"
+# Laid stone keeps out of the test set. The official app gives it a bank type of its own, the
+# River Habitat Survey calls it reinforcement, and content/form.yaml calls none of the three
+# natural, so a laid stone photo has no single right answer to mark. It is fine in a lesson,
+# where the caption can say so. These are the words a source uses for it.
+LAID_STONE = (
+    "riprap",
+    "rip-rap",
+    "rip rap",
+    "gabion",
+    "laid stone",
+    "laid stones",
+    "stone pitching",
+    "pitched stone",
+    "rock armour",
+    "rock armor",
+    "dry stone",
+    "drystone",
+)
 # One source of truth: core/content_loader.py. A second copy drifted once already.
 LICENSE_ALLOWLIST = content_loader.LICENSE_ALLOWLIST
 
@@ -77,8 +95,16 @@ def main(root: Path = ROOT) -> int:
         # label: a research grade identification, a caption, a category (Update 09 section 1).
         if row["source_url"].strip() and row["license"] != "placeholder" and not evidence:
             problems.append(f"label_evidence is empty on a photo from a source: photos/{rel}")
-        # For a plant, the species has to be on the Cal-IPC inventory, with the link.
-        if row["feature"] == "invasive_plant" and evidence and CAL_IPC not in evidence:
+        # For a plant we say is there, the species has to be on the Cal-IPC inventory, with the
+        # link. A plant photo labelled absent says no listed species is in it, so there is no
+        # profile page to point at and none is asked for (Update 11b step 6).
+        if row["role"] == "test":
+            words = f"{row.get('notes', '')} {evidence}".lower()
+            found = sorted({w for w in LAID_STONE if w in words})
+            if found:
+                problems.append(f"laid stone named on a test photo: photos/{rel} ({found})")
+        plant_present = row["feature"] == "invasive_plant" and row["gold_label"] != "absent"
+        if plant_present and evidence and CAL_IPC not in evidence:
             problems.append(f"label_evidence has no Cal-IPC link: photos/{rel}")
     for rel in by_file:
         if not (root / "photos" / rel).exists():

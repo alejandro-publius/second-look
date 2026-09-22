@@ -162,6 +162,32 @@ def _check_disjoint(photos: dict[str, Photo], problems: list[str]) -> None:
                 )
 
 
+def _check_warmup(
+    warmup: list[dict[str, Any]], photos: dict[str, Photo], problems: list[str]
+) -> None:
+    """The pair, and which of the two is the creek in the more natural state.
+
+    The reveal on the end screen badges that photo wherever it sits, so exactly one of the pair
+    has to carry the flag. Position is not the answer: on a phone the two stack, and the order
+    may be shuffled (Update 11D item 1).
+    """
+    if len(warmup) != 2:
+        problems.append(f"warm-up has {len(warmup)} photos, needs 2")
+    for item in warmup:
+        photo_id = item.get("photo_id")
+        if photo_id not in photos:
+            problems.append(f"warm-up item {item.get('id')} points at unknown photo {photo_id}")
+        elif photos[photo_id].role != "warmup":
+            problems.append(
+                f"warm-up item {item.get('id')} points at a {photos[photo_id].role} photo"
+            )
+        if not isinstance(item.get("more_natural"), bool):
+            problems.append(f"warm-up item {item.get('id')} needs more_natural true or false")
+    natural = [i for i in warmup if i.get("more_natural") is True]
+    if len(natural) != 1:
+        problems.append(f"{len(natural)} warm-up photos marked more_natural, needs exactly 1")
+
+
 def _check_test_items(
     items: list[dict[str, Any]], photos: dict[str, Photo], problems: list[str]
 ) -> None:
@@ -210,7 +236,9 @@ def load_content(root: Path | str = ".", *, strict: bool = True) -> Content:
     c = root / "content"
     features = _yaml(c / "features.yaml").get("features", [])
     form = _yaml(c / "form.yaml")
-    test_items = _yaml(c / "test_items.yaml").get("items", [])
+    items_doc = _yaml(c / "test_items.yaml")
+    test_items = items_doc.get("items", [])
+    warmup_items = items_doc.get("warmup", [])
     followups = _yaml(c / "followups.yaml")
     sentences = _yaml(c / "approved_sentences.yaml").get("sentences", [])
     locale = json.loads((c / "locales" / "en.json").read_text(encoding="utf-8"))
@@ -253,6 +281,7 @@ def load_content(root: Path | str = ".", *, strict: bool = True) -> Content:
         problems.append(str(exc))
     _check_disjoint(photos, problems)
     _check_test_items(test_items, photos, problems)
+    _check_warmup(warmup_items, photos, problems)
 
     content = Content(
         root=root,

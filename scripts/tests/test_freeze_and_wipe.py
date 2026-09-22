@@ -51,13 +51,13 @@ def test_key_hash_is_order_free_and_changes_with_gold() -> None:
     assert len(freeze_key.key_hash(a)) == 64
 
 
-def test_freeze_refuses_placeholders_and_writes_nothing(
+def test_freeze_refuses_an_unlabelled_key_and_writes_nothing(
     root: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     assert freeze_key.main(["--root", str(root)]) == 1
     out = capsys.readouterr().out
     assert "refused, nothing written" in out
-    assert "is a placeholder" in out and "has no second label" in out
+    assert "has no second label" in out
     assert not (root / "results" / "key_hash.json").exists()
     assert not (root / "audit" / "log.jsonl").exists()
 
@@ -199,3 +199,38 @@ def test_wipe_cli_refuses_while_w1_tables_are_missing_or_phrase_wrong(
     out = capsys.readouterr().out
     assert code == 1 and "refused" in out
     assert not (tmp_path / "docs" / "deviations.md").exists()
+
+
+def test_one_labeller_freezes_the_key_and_says_so(
+    root: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A key one person set is real. It is a weakness to name, not a reason to stop."""
+    assert freeze_key.main(["--root", str(root), "--one-labeller"]) == 0
+    out = capsys.readouterr().out
+    assert "one labeller, so no agreement figure is reported" in out
+    record = json.loads((root / "results" / "key_hash.json").read_text())
+    assert record["labellers"] == 1
+    assert record["agreement_reported"] is False
+    assert record["placeholders"] is False, "one labeller is not the same as a placeholder"
+    assert record["synthetic"] is False
+    assert "one_labeller_note" in record
+    line = json.loads((root / "audit" / "log.jsonl").read_text().splitlines()[-1])
+    assert line["kind"] == "key_frozen"
+
+
+def test_one_labeller_does_not_wave_through_a_placeholder(
+    root: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    set_manifest(root, license="placeholder")
+    assert freeze_key.main(["--root", str(root), "--one-labeller"]) == 1
+    out = capsys.readouterr().out
+    assert "is a placeholder" in out
+    assert not (root / "results" / "key_hash.json").exists()
+
+
+def test_the_refusal_names_the_one_labeller_flag(
+    root: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert freeze_key.main(["--root", str(root)]) == 1
+    out = capsys.readouterr().out
+    assert "--one-labeller" in out, "the way out is printed, not guessed at"

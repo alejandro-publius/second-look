@@ -6,7 +6,9 @@
 #   High: severe ecological impacts on physical processes, plant and animal communities, and vegetation structure.
 #   Moderate: substantial and apparent, but generally not severe, ecological impacts.
 #   Limited: invasive, but impacts minor statewide, or not enough information for a higher score.
-# The Inventory has no regulatory authority. A species name appears on a screen only on a photo Rachel has verified.
+# The Inventory has no regulatory authority. A species may be named on screen when the photo carries a
+# research grade iNaturalist identification and the species has a Cal-IPC page. Any team member can check
+# both. The name shown is Cal-IPC's common name (Update 11C item 2).
 region: california-bay-area
 name: "California, San Francisco Bay Area"
 approved: false
@@ -37,6 +39,11 @@ invasive_plants:
     cal_ipc_rating: "High"
     source: "https://www.cal-ipc.org/plants/profile/rubus-armeniacus-profile/"
     note: "Profile: coast ranges, Central Valley, Sierra Nevada. No riparian note on the profile; common on Bay Area creek banks in our experience, for Rachel to confirm."
+  - common_name: "French broom"
+    latin_name: "Genista monspessulana"
+    cal_ipc_rating: "High"
+    source: "https://www.cal-ipc.org/plants/profile/genista-monspessulana-profile/"
+    note: "Profile: forms dense stands, raises fire hazard, seed is long lived. Checked 2026-09-21 for Update 11b."
   - common_name: "Periwinkle"
     latin_name: "Vinca major"
     cal_ipc_rating: "Moderate"

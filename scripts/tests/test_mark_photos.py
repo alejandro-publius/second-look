@@ -24,8 +24,8 @@ from scripts.label_photos import MarkError, MarkTarget
 
 REPO = Path(__file__).parents[2]
 LESSON = "artificial_bank"
-PAIR_PHOTO = "ph-lesson-artificial_bank-a2"
-PRACTICE_PHOTO = "ph-practice-artificial_bank"
+PAIR_PHOTO = "ph-bank-05"
+PRACTICE_PHOTO = "ph-bank-09"
 PAIR = MarkTarget(LESSON, PAIR_PHOTO, "pair", 0)
 PRACTICE = MarkTarget(LESSON, PRACTICE_PHOTO, "practice", -1)
 
@@ -92,6 +92,17 @@ def marks_in(repo: Path, target: MarkTarget) -> list[dict[str, Any]]:
     return label_photos.read_marks(lesson_doc(repo, target.feature), target)
 
 
+def unapprove_every_mark(root: Path) -> None:
+    """Strip the approvals from a copy of the lessons. The real ones were approved in Update 11D,
+    so a test that wants the blocking path has to put the repo back into that state itself."""
+    for path in sorted((root / "content" / "lessons").glob("*.yaml")):
+        doc = label_photos.load_lesson(path)
+        for _, mark in label_photos.iter_marks(doc):
+            for key in ("approved", "approved_by", "approved_at"):
+                mark.pop(key, None)
+        path.write_text(yaml.safe_dump(doc), encoding="utf-8")
+
+
 def marks_check(root: Path) -> preflight.Check:
     checks = {c.name: c for c in preflight.run_checks(root, runner=ok_runner)}
     return checks["marks_approved"]
@@ -101,8 +112,8 @@ def test_the_targets_are_the_actual_photos_and_the_practice_photo(repo: Path) ->
     targets = label_photos.load_mark_targets(repo)
     ours = [t for t in targets if t.feature == LESSON]
     assert [t.photo_id for t in ours] == [
-        "ph-lesson-artificial_bank-a2",
-        "ph-lesson-artificial_bank-b2",
+        "ph-bank-05",
+        "ph-bank-07",
         PRACTICE_PHOTO,
     ], "marks sit on the actual photo of a pair, never on the assume photo"
     assert ours[0].where == "contrast pair 1 marks" and ours[-1].where == "practice_marks"
@@ -140,7 +151,7 @@ def test_the_practice_photo_writes_to_practice_marks(server: str, repo: Path) ->
     assert marks_in(repo, PRACTICE) == [
         {"x": 0.1, "y": 0.9, "label": "the pipe", "approved": False}
     ]
-    assert marks_in(repo, PAIR)[0]["label"].startswith("PLACEHOLDER"), "the pair is untouched"
+    assert marks_in(repo, PAIR)[0]["label"] == "Concrete wall, not soil", "the pair is untouched"
 
 
 def test_an_existing_approved_mark_is_preserved(server: str, repo: Path) -> None:
@@ -209,13 +220,11 @@ def test_the_write_keeps_the_comments_and_the_rest_of_the_file(repo: Path) -> No
 
 def test_the_tool_says_so_when_a_write_would_drop_a_comment(repo: Path) -> None:
     path = label_photos.lesson_path(repo, LESSON)
-    text = path.read_text().replace(
-        '      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the built edge 1" }',
-        "      # Rachel: keep this one on the far bank\n"
-        '      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the built edge 1" }',
-        1,
-    )
-    path.write_text(text)
+    # Put a comment above the first mark, whatever that mark happens to say today.
+    lines = path.read_text().splitlines()
+    first = next(i for i, line in enumerate(lines) if line.lstrip().startswith("- { x:"))
+    lines.insert(first, "      # Rachel: keep this one on the far bank")
+    path.write_text("\n".join(lines) + "\n")
     said: list[str] = []
     label_photos.write_marks(
         path, PAIR, [{"x": 0.3, "y": 0.3, "label": "the built edge"}], say=said.append
@@ -241,9 +250,9 @@ def test_the_page_shows_one_photo_with_its_marks_and_the_word_limit(server: str)
     assert "Place marks: artificial_bank" in page
     assert f"src='/photo/{PAIR_PHOTO}'" in page
     assert "contrast pair 1 marks" in page
-    assert "PLACEHOLDER: the built edge 1" in page
+    assert "Concrete wall, not soil" in page
     assert '"max_words": 5' in page
-    assert "ph-lesson-artificial_bank-b2" not in page.split("Photos:")[0], "one photo at a time"
+    assert "ph-bank-07" not in page.split("Photos:")[0], "one photo at a time"
     _, other = get(server + f"/?photo={PRACTICE_PHOTO}")
     assert "practice_marks" in other.decode()
 
@@ -251,29 +260,31 @@ def test_the_page_shows_one_photo_with_its_marks_and_the_word_limit(server: str)
 def test_the_photo_route_serves_only_lesson_photos(server: str) -> None:
     status, body = get(server + f"/photo/{PAIR_PHOTO}")
     assert status == 200 and body[:2] == b"\xff\xd8"
-    for path in ("/photo/ph-test-01", "/photo/ph-lesson-artificial_bank-a1", "/photo/nope"):
+    for path in ("/photo/ph-bank-01", "/photo/ph-bank-06", "/photo/nope"):
         with pytest.raises(Exception) as caught:
             get(server + path)
         assert getattr(caught.value, "code", 0) == 404
-    assert save(server, "ph-test-01", [])[0] == 400
+    assert save(server, "ph-bank-01", [])[0] == 400
 
 
 def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo: Path) -> None:
+    assert marks_check(repo).passed, "the real lessons ship approved (Update 11D)"
+    unapprove_every_mark(repo)
     check = marks_check(repo)
     assert check.owner == "HUMAN" and not check.passed
     assert (
-        'lesson artificial_bank pair 1: mark "PLACEHOLDER: the built edge 1" '
+        'lesson artificial_bank pair 1: mark "Concrete wall, not soil" '
         "is not approved yet" in check.reasons
     )
     assert any("practice" in r for r in check.reasons)
-    assert len(check.reasons) == 12, "three marks in each of the four lessons"
+    assert len(check.reasons) == 24, "two marks on each of the twelve lesson photos"
 
     for path in sorted((repo / "content" / "lessons").glob("*.yaml")):
         doc = label_photos.load_lesson(path)
         for _, mark in label_photos.iter_marks(doc):
             mark["approved"] = True
         path.write_text(yaml.safe_dump(doc), encoding="utf-8")
-    assert marks_check(repo).passed, "Rachel approved every mark, so the gate opens"
+    assert marks_check(repo).passed, "every mark approved, so the gate opens"
 
     doc = label_photos.load_lesson(label_photos.lesson_path(repo, LESSON))
     doc["practice_marks"][0]["approved"] = False
@@ -286,9 +297,10 @@ def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo: 
 def test_the_printed_line_names_the_lesson_and_the_label(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    unapprove_every_mark(repo)
     preflight.report([marks_check(repo)])
     out = capsys.readouterr().out
-    assert 'HUMAN  marks_approved: lesson artificial_bank pair 1: mark "PLACEHOLDER' in out
+    assert 'HUMAN  marks_approved: lesson artificial_bank pair 1: mark "Concrete' in out
 
 
 def test_marks_mode_needs_no_name(repo: Path) -> None:

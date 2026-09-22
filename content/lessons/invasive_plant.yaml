@@ -1,30 +1,42 @@
-# PLACEHOLDER lesson for invasive_plant. Rachel owns the wording. approved stays false until she approves it.
-# Drafts to start from: content/drafts/lessons/invasive_plant.yaml (W7). Screens hold 25 words at most.
+# Lesson for invasive_plant. Photo ids are the real photos fetched on 2026-09-21 (Update 11b).
+# Every species named here is a research grade identification on iNaturalist, and every plant
+# called invasive is on the Cal-IPC Inventory with its profile link in photos/manifest.csv.
+# Captions are written from those identifications. approved stays false until Alex approves.
+# An ecologist's likely objection: some native plants also grow in single stands. The rule
+# therefore sends people to the regional list, never to a verdict of their own.
 feature: invasive_plant
-approved: false
-rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
-source: ""
+approved: true
+approved_by: "Alex Velazquez"
+approved_on: "2026-09-21"
+# Rules of thumb, captions and practice feedback approved in Update 11C on three
+# conditions, all met: 11 words, a source fetched on the day, no health claim. The marks
+# on this lesson were approved in Update 11D and carry their own stamp.
+rule_of_thumb: "One pretty plant smothering the whole bank? Check the regional list."
+source: "https://www.cal-ipc.org/plants/inventory/"
 contrast_pairs:
-  - assume_photo_id: ph-lesson-invasive_plant-a1
-    actual_photo_id: ph-lesson-invasive_plant-a2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+  # Pair A. Assume: Rubus ursinus, the native blackberry. Actual: Rubus armeniacus, Himalayan
+  # blackberry on the Cal-IPC Inventory. Common names on screen are Cal-IPC's (Update 11C item 2).
+  - assume_photo_id: ph-plant-06
+    actual_photo_id: ph-plant-05
+    assume_caption: "Trailing blackberry, a native. Its leaves come in threes and the plant stays thin. Nothing to report."
+    actual_caption: "Himalayan blackberry. Five big leaflets around one stalk, and hooked prickles down the cane. It is on the list."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the invasive stand 1" }
-  - assume_photo_id: ph-lesson-invasive_plant-b1
-    actual_photo_id: ph-lesson-invasive_plant-b2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+      - { x: 0.42, y: 0.5, label: "Five leaflets, one stalk", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.56, y: 0.44, label: "Hooked prickles on cane", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  # Pair B. Assume: Erythranthe guttata, a showy native. Actual: Genista monspessulana, on the list.
+  - assume_photo_id: ph-plant-08
+    actual_photo_id: ph-plant-07
+    assume_caption: "Seep monkeyflower, showy yellow and native here. Pretty is not the cue. The list is."
+    actual_caption: "French broom, also showy yellow. Pea flowers crowd the stems and the small leaves come in threes. On the list."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the invasive stand 2" }
+      - { x: 0.58, y: 0.28, label: "Yellow pea flowers crowded", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.4, y: 0.53, label: "Leaves in threes", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
 practice:
-  photo_id: ph-practice-invasive_plant
+  # Hedera helix, common ivy, as ground cover. Cal-IPC rating High.
+  photo_id: ph-plant-09
   gold: present
-  feedback_correct: "PLACEHOLDER feedback that names the cue."
-  feedback_wrong: "PLACEHOLDER feedback that names the cue."
+  feedback_correct: "Right. English ivy spreading over the ground and the leaf litter. It is on the list."
+  feedback_wrong: "Look for the lobed leaf with pale veins, spreading over everything. That is English ivy, on the list."
 practice_marks:
-  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the invasive stand" }
+  - { x: 0.44, y: 0.55, label: "Lobed leaf, pale veins", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  - { x: 0.7, y: 0.22, label: "Ivy spreading over litter", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }

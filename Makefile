@@ -106,6 +106,15 @@ submit-check:
 budget:
 	cd $(WEB) && node scripts/budget.mjs
 
+backup:
+	bash scripts/backup_d1.sh
+
+restore-drill:
+	bash scripts/restore_drill_d1.sh
+
+backup-install:
+	bash scripts/install_backup_job.sh
+
 poster:
 	cd $(WEB) && npm run poster
 

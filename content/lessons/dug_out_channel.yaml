@@ -1,30 +1,38 @@
-# PLACEHOLDER lesson for dug_out_channel. Rachel owns the wording. approved stays false until she approves it.
-# Drafts to start from: content/drafts/lessons/dug_out_channel.yaml (W7). Screens hold 25 words at most.
+# Lesson for dug_out_channel. Photo ids are the real photos fetched on 2026-09-21 (Update 11b).
+# Captions are written from what each source page says about its own photo, so Alex checks them
+# against the picture before approving. approved stays false until he does.
 feature: dug_out_channel
-approved: false
-rule_of_thumb: "PLACEHOLDER: one rule of thumb, 12 words or fewer, with a source."
-source: ""
+approved: true
+approved_by: "Alex Velazquez"
+approved_on: "2026-09-21"
+# Rules of thumb, captions and practice feedback approved in Update 11C on three
+# conditions, all met: 11 words, a source fetched on the day, no health claim. The marks
+# on this lesson were approved in Update 11D and carry their own stamp.
+rule_of_thumb: "Straight, even banks, same width, flat water: someone dug this channel."
+source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
 contrast_pairs:
-  - assume_photo_id: ph-lesson-dug_out_channel-a1
-    actual_photo_id: ph-lesson-dug_out_channel-a2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+  # Pair A. Assume: the Aufsess, a meandering reach. Actual: Misteguay Creek, a straight cut channel.
+  - assume_photo_id: ph-channel-06
+    actual_photo_id: ph-channel-05
+    assume_caption: "Bends, gravel and changing width look untidy. This is how a stream shapes itself when nobody stops it."
+    actual_caption: "Straight from edge to edge, both banks at one even slope, the same width all along. A machine cut this."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the straight cut 1" }
-  - assume_photo_id: ph-lesson-dug_out_channel-b1
-    actual_photo_id: ph-lesson-dug_out_channel-b2
-    assume_caption: "PLACEHOLDER what people assume"
-    actual_caption: "PLACEHOLDER what is there"
-    # Marks sit on the actual photo. x and y are fractions of the width and height,
-    # 0,0 top left. The label is five words or fewer. Rachel places these, no code needed.
+      - { x: 0.28, y: 0.56, label: "Bank cut at one angle", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.5, y: 0.37, label: "Straight, same width throughout", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  # Pair B. Assume: Hanshaeger Bach, a meander. Actual: Herringer Bach, a straightened course.
+  - assume_photo_id: ph-channel-08
+    actual_photo_id: ph-channel-07
+    assume_caption: "The brook swings left and right across its meadow. Nobody set that line. Left alone."
+    actual_caption: "A cut channel between banks trimmed to one even slope, holding the same width all along. Dug out."
     marks:
-      - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the straight cut 2" }
+      - { x: 0.52, y: 0.74, label: "Trimmed bank, one angle", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+      - { x: 0.6, y: 0.53, label: "Same width all along", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
 practice:
-  photo_id: ph-practice-dug_out_channel
+  # A small canalised stream at Butler's Hill: straight, narrow, even.
+  photo_id: ph-channel-09
   gold: present
-  feedback_correct: "PLACEHOLDER feedback that names the cue."
-  feedback_wrong: "PLACEHOLDER feedback that names the cue."
+  feedback_correct: "Right. Straight, narrow and the same width all along. Dug out."
+  feedback_wrong: "Follow the line of the water. It runs straight and keeps one width the whole way. Dug out."
 practice_marks:
-  - { x: 0.5, y: 0.5, label: "PLACEHOLDER: the straight cut" }
+  - { x: 0.6, y: 0.6, label: "Straight, narrow, same width", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }
+  - { x: 0.73, y: 0.76, label: "Even cut bank", approved: true, approved_by: "alex velazquez", approved_at: "2026-09-21T19:35:27Z" }

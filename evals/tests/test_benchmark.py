@@ -112,7 +112,9 @@ def test_benchmark_main_synthetic_writes_a_stamped_file(tmp_path: Path, capsys: 
     assert len(files) == 1
     doc = json.loads(files[0].read_text())
     assert doc["synthetic"] is True and doc["stamp"] == "SYNTHETIC" and doc["real"] is False
-    assert doc["pool"]["n_photos"] == 16 and doc["pool"]["skipped_unlabelled"] == 2
+    # Every test photo carries the label chosen at picking now, so nothing is skipped for want
+    # of one. It was 2 while the manifest held unlabelled gray placeholders.
+    assert doc["pool"]["n_photos"] == 16 and doc["pool"]["skipped_unlabelled"] == 0
     assert set(doc["models"]) == set(MODEL_IDS)
     for cells in doc["models"].values():
         for f in (*FEATURES, "all"):

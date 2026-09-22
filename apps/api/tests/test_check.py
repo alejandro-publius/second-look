@@ -115,7 +115,7 @@ def test_followup_selection_is_the_core_function_and_feature_names_come_from_con
     assert seen["checker"] is False
     low, flag = body["followups"]
     assert low["kind"] == "photo"
-    assert "1 of 4 on Pipes and sewage signs" in low["question_text"]
+    assert "1 of 4 on Pipes and drain outlets" in low["question_text"]
     assert flag["kind"] == "yesno" and "a built edge" in flag["question_text"]
 
 

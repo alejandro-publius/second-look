@@ -1,22 +1,31 @@
 # The 16 test items: 4 per feature, 2 present and 2 absent. Photo ids point at photos/manifest.csv.
-# Gold labels are Rachel's, blind, from written definitions. These rows point at placeholders until then.
+# Gold labels are the ones chosen at picking (Update 11 section 5.1). A second labeller, if there
+# is one, goes in the manifest's labeller_2 column through scripts/merge_labels.py.
 items:
-  - { id: t01, feature: artificial_bank, photo_id: ph-test-01, gold: present }
-  - { id: t02, feature: artificial_bank, photo_id: ph-test-02, gold: present }
-  - { id: t03, feature: artificial_bank, photo_id: ph-test-03, gold: absent }
-  - { id: t04, feature: artificial_bank, photo_id: ph-test-04, gold: absent }
-  - { id: t05, feature: dug_out_channel, photo_id: ph-test-05, gold: present }
-  - { id: t06, feature: dug_out_channel, photo_id: ph-test-06, gold: present }
-  - { id: t07, feature: dug_out_channel, photo_id: ph-test-07, gold: absent }
-  - { id: t08, feature: dug_out_channel, photo_id: ph-test-08, gold: absent }
-  - { id: t09, feature: invasive_plant, photo_id: ph-test-09, gold: present }
-  - { id: t10, feature: invasive_plant, photo_id: ph-test-10, gold: present }
-  - { id: t11, feature: invasive_plant, photo_id: ph-test-11, gold: absent }
-  - { id: t12, feature: invasive_plant, photo_id: ph-test-12, gold: absent }
-  - { id: t13, feature: pipe_running, photo_id: ph-test-13, gold: present }
-  - { id: t14, feature: pipe_running, photo_id: ph-test-14, gold: present }
-  - { id: t15, feature: pipe_running, photo_id: ph-test-15, gold: absent }
-  - { id: t16, feature: pipe_running, photo_id: ph-test-16, gold: absent }
+  - { id: t01, feature: artificial_bank, photo_id: ph-bank-01, gold: present }
+  - { id: t02, feature: artificial_bank, photo_id: ph-bank-02, gold: present }
+  - { id: t03, feature: artificial_bank, photo_id: ph-bank-03, gold: absent }
+  - { id: t04, feature: artificial_bank, photo_id: ph-bank-04, gold: absent }
+  - { id: t05, feature: dug_out_channel, photo_id: ph-channel-01, gold: present }
+  - { id: t06, feature: dug_out_channel, photo_id: ph-channel-02, gold: present }
+  - { id: t07, feature: dug_out_channel, photo_id: ph-channel-03, gold: absent }
+  - { id: t08, feature: dug_out_channel, photo_id: ph-channel-04, gold: absent }
+  - { id: t09, feature: invasive_plant, photo_id: ph-plant-01, gold: present }
+  - { id: t10, feature: invasive_plant, photo_id: ph-plant-02, gold: present }
+  - { id: t11, feature: invasive_plant, photo_id: ph-plant-03, gold: absent }
+  - { id: t12, feature: invasive_plant, photo_id: ph-plant-04, gold: absent }
+  - { id: t13, feature: pipe_running, photo_id: ph-pipe-01, gold: present }
+  - { id: t14, feature: pipe_running, photo_id: ph-pipe-02, gold: present }
+  - { id: t15, feature: pipe_running, photo_id: ph-pipe-03, gold: absent }
+  - { id: t16, feature: pipe_running, photo_id: ph-pipe-04, gold: absent }
+# The warm-up reveal is shown on the end screen, after the test, never on the landing page.
+# Showing it before the test would hand both arms a small lesson and shrink the very gap the
+# study measures (Update 11b step 7). The claim is that one creek is in a more natural state,
+# which is what the photos show. It makes no claim about health.
+warmup_reveal_source: "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1093961/RHS-manual-2003_2022-reprint-LIT-1758.pdf"
+# more_natural marks the creek in the more natural state. The reveal badges that photo wherever
+# it sits, because on a phone the two stack and the order may be shuffled (Update 11D item 1).
+# Exactly one of the pair carries it, and core/content_loader.py refuses the file otherwise.
 warmup:
-  - { id: w01, photo_id: ph-warmup-01, description: "tidy, pretty, damaged creek (placeholder)" }
-  - { id: w02, photo_id: ph-warmup-02, description: "messy, healthy creek (placeholder)" }
+  - { id: w01, photo_id: ph-warmup-03, more_natural: false, description: "Norman Creek, a mown park and a concrete channel" }
+  - { id: w02, photo_id: ph-warmup-04, more_natural: true, description: "Nurton Brook, a meander with fallen wood and an eroding bank" }

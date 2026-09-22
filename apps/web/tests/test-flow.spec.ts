@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { content } from "../lib/content";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { answerAllItems, BASE, finishLesson, passConsent, pickWarmup } from "./helpers";
 
@@ -71,6 +72,15 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async 
   await expect(byFeature.getByText("Built banks", { exact: true })).toBeVisible();
   await expect(byFeature.getByText(/^\d of 4$/).first()).toBeVisible();
   await expect(page.getByText("One visit is a snapshot. Repeated visits make a story.")).toBeVisible();
+
+  // The warm-up reveal. The badge sits on the photograph itself, never on a position, because on
+  // a phone the two stack and the order they were shown in may be shuffled (Update 11D item 1).
+  const natural = content.warmup.find((w) => w.more_natural)!;
+  const tidier = content.warmup.find((w) => !w.more_natural)!;
+  await expect(page.getByTestId("reveal-natural").locator("img")).toHaveAttribute("src", new RegExp(`${natural.photo_id}\\.`));
+  await expect(page.getByTestId("reveal-modified").locator("img")).toHaveAttribute("src", new RegExp(`${tidier.photo_id}\\.`));
+  await expect(page.getByText("The messier creek is in a more natural state. Tidy is not the same as natural.")).toBeVisible();
+  await expect(page.getByText("Neither photo can tell you whether the water is safe. That takes testing.")).toBeVisible();
   await expect(page.getByTestId("contributor-token")).toHaveText("MOCKTOKEN1234567");
   await expect(page.locator("img.share-card")).toHaveAttribute("src", /\/api\/share\/\d+/);
   expect(await page.evaluate(() => localStorage.getItem("sl_contributor_token"))).toBe("MOCKTOKEN1234567");

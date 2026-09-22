@@ -1,0 +1,13 @@
+{
+  "generated_at_utc": "2026-09-21T19:41:52Z",
+  "script": "scripts/freeze_key.py",
+  "synthetic": false,
+  "key_sha256": "3ba8176d3ac3a613eb77a79e78d20a8be1cf9e84c06be533205658ade698257b",
+  "n_items": 16,
+  "placeholders": false,
+  "labellers": 1,
+  "agreement_reported": false,
+  "hash_of": "sha256 of the JSON list of sorted [item_id, gold] pairs",
+  "one_labeller_note": "One person set every gold label. No second independent label exists, so no Cohen's kappa is reported. Named in docs/analysis_plan.md and under Known weaknesses.",
+  "audit_hash": "b04d63ec158466f4aa4d2e7083016be68b347f2e4a37c701f5452fb44383e02a"
+}

@@ -1,26 +1,33 @@
 # The four features a volunteer is tested on. Data, so Rachel can edit without touching code.
-# wording_status: draft until Rachel freezes the question wording in docs/analysis_plan.md.
-# verified_against_app: true only after Alex checks his screenshots of the official app.
+# wording_status: frozen means the wording is the one written into docs/analysis_plan.md and
+# approved by the named person on the named date. Changing one after the tag is a deviation.
+# verified_against_app: true only where the app's own text backs it, see docs/notes/app_strings.md.
 features:
   - id: artificial_bank
     name: Built banks
     plain: concrete walls and other built banks
     question: "Are the banks artificial, such as concrete or stones set in concrete?"
-    wording_source: app_public_text
-    wording_status: draft
+    # Derived from the app's bank_type option "Artificial (concrete or stones with concrete)".
+    # The app offers options there, not a question, so the wording is ours in their words.
+    wording_source: app_option_text
+    wording_status: frozen
+    approved_by: "Alex Velazquez"
+    approved_on: "2026-09-21"
     app_item: bank_type
-    verified_against_app: false
+    verified_against_app: true  # option text checked 2026-09-20, docs/notes/app_strings.md
     oah_category: morophology
     fhir_code: artificial-bank
     glossary_term: artificial bank
   - id: dug_out_channel
     name: Dug-out channel
     plain: a channel that was deepened or straightened
-    question: "Does this channel look dug out or straightened?"
+    question: "Has this channel been straightened or dug out?"
     wording_source: own
-    wording_status: draft
+    wording_status: frozen
+    approved_by: "Alex Velazquez"
+    approved_on: "2026-09-21"
     app_item: null
-    verified_against_app: false
+    verified_against_app: false  # the app has no matching item
     oah_category: morophology
     fhir_code: dug-out-channel
     glossary_term: dug-out channel
@@ -29,20 +36,27 @@ features:
     plain: pretty plants that do not belong here
     question: "Do you see any non-native or invasive plant species?"
     wording_source: app_public_text
-    wording_status: draft
+    wording_status: frozen
+    approved_by: "Alex Velazquez"
+    approved_on: "2026-09-21"
     app_item: invasive_species
     verified_against_app: true  # app text quoted word for word, checked 2026-09-20
     oah_category: invasiveOrganisms
     fhir_code: invasive-plant
     glossary_term: invasive plant
   - id: pipe_running
-    name: Pipes and sewage signs
-    plain: pipes with something coming out, and sewage signs
-    question: "Are there pipes draining polluted water into the stream?"
-    wording_source: app_public_text
-    wording_status: draft
-    app_item: draining_pipes
-    verified_against_app: true  # app text quoted word for word, checked 2026-09-20
+    name: Pipes and drain outlets
+    plain: pipes and drain outlets that empty into the creek
+    question: "Can you see a pipe or drain outlet that empties into this creek?"
+    # Ours, not the app's. The app asks "Are there pipes draining polluted water into the
+    # stream?", and a photo cannot show flow or pollution, so that question has no honest gold
+    # label. The creek check form keeps the app's wording in content/form.yaml (Update 11b step 5).
+    wording_source: own
+    wording_status: frozen
+    approved_by: "Alex Velazquez"
+    approved_on: "2026-09-21"
+    app_item: null
+    verified_against_app: false  # our question, so there is nothing to verify
     oah_category: hydrology
     fhir_code: pipe-running
     glossary_term: outfall

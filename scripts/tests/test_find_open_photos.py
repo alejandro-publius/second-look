@@ -44,6 +44,7 @@ def commons_page(
     licence: str,
     artist: str = "Jo Rivers",
     description: str = "Concrete lined channel on a city creek",
+    copyrighted: str = "True",
 ) -> dict[str, Any]:
     under = name.replace(" ", "_")
     artist_html = f'<a href="/wiki/User:Jo" class="x">{artist}</a>' if artist else ""
@@ -62,6 +63,7 @@ def commons_page(
                     "Artist": {"value": artist_html},
                     "ImageDescription": {"value": f'<div class="description">{description}</div>'},
                     "Categories": {"value": "Riprap|Creeks of California"},
+                    "Copyrighted": {"value": copyrighted},
                 },
             }
         ],
@@ -256,9 +258,16 @@ def test_licence_codes_map_to_the_manifest_at_the_exact_version() -> None:
     # A version older than 2.0 is still refused rather than rounded up to one we do allow.
     by_1 = licence_from_commons("cc-by-1.0")
     assert by_1 is not None and by_1.manifest == ""
-    # Non commercial is not an open licence for our purposes, and neither is a bare "pd" tag.
+    # Non commercial is not an open licence for our purposes.
     assert licence_from_commons("cc-by-nc-4.0") is None
+    # A public domain tag counts only when the page also says the file is not copyrighted. On its
+    # own it is an unclear claim, and hard rule 6 says drop those.
     assert licence_from_commons("pd") is None
+    assert licence_from_commons("pd", "True") is None
+    pd = licence_from_commons("pd", "False")
+    assert pd is not None and pd.manifest == "public-domain" and pd.label == "Public domain"
+    old_pd = licence_from_commons("pd-old-100", "False")
+    assert old_pd is not None and old_pd.manifest == "public-domain"
     assert licence_from_inat("cc0") == Licence("cc0-1.0", "CC0 1.0", "CC0-1.0", "cc0")
     assert licence_from_inat("cc-by-nc") is None
     assert licence_from_inat(None) is None
@@ -292,9 +301,11 @@ def test_the_sheet_lets_a_person_pick_and_build_the_picks_file() -> None:
     assert html.count('class="take"') == len(got)
     assert 'class="role"' in html and 'class="scene"' in html
     # A feature sheet offers the three roles the test flow uses, with their targets.
-    for role in ("test", "lesson", "practice"):
+    for role in ("test", "lesson", "practice", "spare"):
         assert f'<option value="{role}">' in html
     assert '"test": 4' in html and '"lesson": 4' in html and '"practice": 1' in html
+    # A spare has no target: it stands in when a fetch fails, so any number of them is right.
+    assert '"spare": 0' in html
     # It builds the file itself, in the browser, so nothing leaves the machine.
     assert "picks-' + FEATURE + '.csv" in html
     assert "url,feature,role,side,scene,notes" in html
@@ -335,3 +346,40 @@ def test_a_candidate_fetch_would_refuse_gets_no_pick_control() -> None:
     assert html.count('class="take"') == len(got)
     # The helper is what the sheet relies on, so check it directly too.
     assert pick_control("artificial_bank", refused) == ""
+
+
+@respx.mock
+def test_a_public_domain_file_is_kept_when_the_page_says_it_is_not_copyrighted() -> None:
+    """US government work and released work are open. Only this parser ever refused them."""
+    kept = search_commons(
+        commons_payload(commons_page("Runoff.jpg", "pd", artist="EPA", copyrighted="False"))
+    )
+    assert len(kept) == 1
+    assert kept[0].licence.manifest == "public-domain"
+    assert kept[0].author == "EPA"
+    # Same tag, but the page still calls the file copyrighted: refused.
+    assert (
+        search_commons(
+            commons_payload(commons_page("Runoff.jpg", "pd", artist="EPA", copyrighted="True"))
+        )
+        == []
+    )
+
+
+@respx.mock
+def test_a_public_domain_file_with_no_named_author_falls_back_to_the_uploader() -> None:
+    """Nobody has to be credited under public domain, so a missing Artist is no reason to drop."""
+    kept = search_commons(
+        commons_payload(commons_page("Creek.jpg", "pd", artist="", copyrighted="False"))
+    )
+    assert len(kept) == 1
+    assert kept[0].author == "Wikimedia Commons user SomeUploader"
+
+
+def test_a_dash_a_source_used_never_reaches_a_tracked_file() -> None:
+    """Hard rule 18 bans en and em dashes in the repo. Commons category names use them."""
+    from scripts.find_open_photos import plain_text
+
+    got = plain_text("Africa Wiki Challenge \u2013 Water for Life")
+    assert got == "Africa Wiki Challenge - Water for Life"
+    assert plain_text("a \u2014 b") == "a - b"
