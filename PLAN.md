@@ -139,7 +139,7 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 | Five lines on their AI image model video to docs/notes/their_image_model.md | Alex | today | Sun Sep 27 |
 | API workspace spend limit and alert set | Alex | today | Tue Sep 22 19:00 |
 | Consent contact email | Alex | Mon Sep 21 | Mon Sep 21 18:00 |
-| Vercel account and Fly.io account with a payment method | Alex | Mon Sep 21 | Mon Sep 21 18:00 |
+| Cloudflare account, logged in through wrangler, no card needed | Alex | done Sep 20 | done |
 | ANTHROPIC_API_KEY with a few dollars of credit, in .env only | Alex | Tue Sep 22 | Tue Sep 22 19:00 |
 | About 40 photos per the shot list, originals kept, spot and date noted | Rachel | Tue Sep 22 12:00 | Tue Sep 22 19:00 |
 | Gold labels for the 16 test photos, blind, through scripts/label_photos.py | Rachel | with the photos | Tue Sep 22 21:00 |
