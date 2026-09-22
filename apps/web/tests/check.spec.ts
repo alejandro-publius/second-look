@@ -70,7 +70,10 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   expect(draft.body.answers.water_height_m).toBe(0.3);
   expect(draft.body.answers.habitats).toEqual(["riffles"]);
   expect(draft.body.answers.invasive_which).toEqual(["cant_tell"]);
-  expect(draft.body.answers.feelings).toMatchObject({ joy: 4 });
+  // The shape the API validates (SLIDER_RE in worker/src/check.ts and apps/api/check.py). It was
+  // an object once, which both servers answered with a 400.
+  expect(draft.body.answers.feelings).toContain("joy:4");
+  for (const entry of draft.body.answers.feelings) expect(entry).toMatch(/^(joy|serenity|anger|fear):([0-5]|not_applicable)$/);
   expect(draft.body.answers.natural_debris).toBeUndefined();
   expect(draft.body.photo_ids).toEqual([]);
   expect(draft.body.contributor_token).toBeUndefined();
