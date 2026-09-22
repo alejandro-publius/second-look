@@ -98,12 +98,12 @@ Video: [VIDEO LINK]
 
 ## Users and impact on ecosystem and human health
 
-637 characters
+632 characters
 
 ```text
 Users: volunteers who check creeks, and the city and project staff who read their records.
 
-Ecosystem: the four features people miss (built banks, a dug-out channel, invasive plants, pipes running in dry weather) are the ones that tell a city what a creek needs. Scoring observers per feature means a city can act on the observations it can trust, and send a lab test where two trained people both saw a pipe running in dry weather.
+Ecosystem: the four features people miss (built banks, a dug-out channel, invasive plants, pipes and drain outlets) are the ones that tell a city what a creek needs. Scoring observers per feature means a city can act on the observations it can trust, and send a lab test where two trained people both saw a pipe running in dry weather.
 
 Human and animal health: the health card gives one action for the person, one for the pet and one for the city, each from an approved sentence with its source. It never states a risk for a specific site.
 ```

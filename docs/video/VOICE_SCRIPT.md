@@ -4,14 +4,14 @@ This supersedes the speech column of `docs/video_script.md` (the draft of Sep 20
 
 Rules for the words: plain, one idea per sentence, no number that is not in `results/` or the README. A slot in square brackets like `[SLOT: ...]` is a number that does not exist yet. Read it off the named file on the day you record, or cut the sentence. Never guess it.
 
-Spoken words, slots counted as one word each: 556. Target 520 to 580.
+Spoken words, slots counted as one word each: 555. Target 520 to 580.
 
 | # | Time | Screen | Words |
 |---|---|---|---|
 | 1 | 0:00 | `/` landing: the two creek photos side by side, full screen. Hold 4 seconds before speaking. | Look at these two creeks. Which one is healthier? Take a second. Most people pick the tidy, green one. It has concrete banks and a pretty plant that does not belong there. The plain, messy one is doing better. |
 | 2 | 0:15 | Strawberry Creek B-roll: a concrete bank, then a pipe in the bank. | Volunteers who check creeks make this mistake all the time. OneAquaHealth's project lead told us so. People catch smell, foam and colour. They walk past built banks, a channel that was dug out, and plants that do not belong. |
 | 3 | 0:30 | The River Habitat Survey manual line on screen, from `docs/notes/sources.md`. | Professional river surveyors fixed this long ago. In the UK, a survey only counts if the surveyor passed a test. Volunteers have never had that. So a city cannot tell a careful observer from a hopeful one. |
-| 4 | 0:45 | `/demo?script=1`: consent, then one lesson card with its marks. | Second Look is that test, in two minutes, on a phone. First, a short lesson on the four things people miss. Each card shows a real photo and marks the part that matters. A built bank. A dug-out channel. An invasive plant. A pipe running in dry weather. |
+| 4 | 0:45 | `/demo?script=1`: consent, then one lesson card with its marks. | Second Look is that test, in two minutes, on a phone. First, a short lesson on the four things people miss. Each card shows a real photo and marks the part that matters. A built bank. A dug-out channel. An invasive plant. A pipe or drain outlet. |
 | 5 | 1:05 | `/demo?script=1`: three test items, Yes, No, Can't tell. | Then sixteen photos. For each one you answer yes, no, or can't tell. There are four photos for each of the four features. No camera needed. You can take it right now at the link below, on any phone or laptop. It takes about as long as making a cup of tea. |
 | 6 | 1:25 | The end screen with the score per feature. | At the end you get a score for each feature, like four of four on built banks. Not a grade. Not a probability. Just how many you got right, and the date. |
 | 7 | 1:40 | README results table, AI row by row. | We gave the same sixteen photos to AI models, with the same words, three times each. [SLOT: models that passed at least one feature, from results/model_pass_table.json] passed at least one feature. To pass a feature, a model has to get all four photos right in at least two of three runs. A model may only speak about a feature it passed. |
