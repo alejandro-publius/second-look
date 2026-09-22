@@ -17,6 +17,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 CLAIM_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+)#([\w/.-]+)\s*(?:=\s*([^\s]+))?\s*-->")
+# A number render_readme.py put in the text: <!--v:results/x.json#/a/b-->42<!--/v-->. It is
+# checked too, or a rendered number could drift from results/ with CI still green.
+RENDERED_RE = re.compile(r"<!--v:([\w./-]+)#([\w/.-]+)-->(.*?)<!--/v-->", re.S)
+UNRENDERED_RE = re.compile(r"\{\{claim:[^}]*\}\}")
+
+
+def display(value: object) -> str:
+    """The same text scripts/render_readme.py writes for a value."""
+    if isinstance(value, bool):
+        return "passed" if value else "did not pass"
+    if isinstance(value, float):
+        return f"{value:.1f}"
+    return str(value)
 
 
 def resolve_pointer(doc: object, pointer: str) -> object:
@@ -61,6 +74,29 @@ def main() -> int:
                 f"claim value drifted: {rel}#{pointer} README says {expected}, results say {value}"
             )
         checked += 1
+    for m in RENDERED_RE.finditer(text):
+        rel, pointer, shown = m.group(1), m.group(2), m.group(3)
+        path = ROOT / rel
+        if not path.exists():
+            problems.append(f"rendered number points at missing file: {rel}")
+            continue
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(doc, dict) and doc.get("synthetic") and not args.synthetic:
+            problems.append(f"synthetic results shown without --synthetic: {rel}")
+            continue
+        try:
+            value = resolve_pointer(doc, pointer)
+        except (KeyError, IndexError, ValueError):
+            problems.append(f"rendered pointer not found: {rel}#{pointer}")
+            continue
+        if display(value) != shown:
+            problems.append(
+                f"rendered number drifted: {rel}#{pointer} README shows {shown}, results say "
+                f"{display(value)}; run scripts/render_readme.py"
+            )
+        checked += 1
+    for token in UNRENDERED_RE.findall(text):
+        problems.append(f"unrendered token {token}; run scripts/render_readme.py")
     if problems:
         print("\n".join(problems))
         print(f"verify-claims: {len(problems)} problem(s)")
