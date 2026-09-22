@@ -6,6 +6,17 @@ days pass: prices and ids move.
 **Checked 2026-09-21** against https://platform.claude.com/docs/en/about-claude/pricing (the
 older docs.claude.com path now redirects there).
 
+**Re-confirmed 2026-09-21, this time on the models overview page**
+(https://platform.claude.com/docs/en/about-claude/models/overview), which is where the API ids
+live. All three ids below are exactly what that page's "Claude API ID" row gives, and the prices
+match its pricing row. Two things worth writing down from that page:
+
+- Every current id is a pinned snapshot, dateless ones included. `claude-haiku-4-5-20251001` is
+  the pinned id and `claude-haiku-4-5` is its alias; we keep the pinned one so a rerun in October
+  answers the same question as a run today.
+- Claude Haiku 4.5 retires no sooner than 2026-10-15. That is after the deadline, but anyone
+  rerunning our evals later should expect to swap it.
+
 The three models docs/internal/MASTER_BRIEF.md names for the test run, cheapest first:
 
 | Model | Id used in our config | Input per MTok | Output per MTok | Batch input | Batch output |
@@ -14,9 +25,10 @@ The three models docs/internal/MASTER_BRIEF.md names for the test run, cheapest 
 | Claude Sonnet 5 | `claude-sonnet-5` | $2 | $10 | $1 | $5 |
 | Claude Opus 5 | `claude-opus-5` | $5 | $25 | $2.50 | $12.50 |
 
-The pricing page lists model names, not API ids. The ids above are the ones in our config. Confirm
-them against the models page on the console before the first paid call, which is the one thing
-this file cannot do for you.
+All three are confirmed against the models overview page as of 2026-09-21. Every current model
+takes image input, which is what this run needs. Haiku 4.5 does not support the effort parameter
+and still uses the older thinking shape; we send neither, so the same request body works on all
+three.
 
 ## What this means for our budget
 

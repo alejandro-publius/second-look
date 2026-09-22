@@ -9,7 +9,8 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | Thing | Status | How you can tell | Where |
 |---|---|---|---|
 | The two minute test flow, its randomization and its scoring | real | code and tests; nothing is faked in the flow | `apps/web`, `worker/src/index.ts`, `core/allocator.py`, `core/scoring.py` |
-| The photographs in the test | synthetic placeholders until Alex's picks land on `main` | every row in the manifest is `license: placeholder` | `photos/manifest.csv` |
+| The photographs in the test | real, openly licensed, from several countries | every row in the manifest names its source page, author and licence, and no row says `placeholder` | `photos/manifest.csv` |
+| The frames from open creek footage | real, cut from openly licensed video | role `benchmark` in the manifest, with the source video and the second it was taken at | `photos/benchmark/`, `videos/manifest.csv` |
 | Study results in the README | none yet | the results section shows no table until the model run; the synthetic dry runs stay in `results/` with SYNTHETIC on every file and none of their numbers appears in the README | `README.md`, `scripts/verify_claims.py` |
 | The model pass table | synthetic | `"real": false` in the file; the checker refuses to flag on it | `results/model_pass_table.json`, `core/checker.py` |
 | A creek check, its follow-ups and its record | real once a person files one | stored visit, FHIR Bundle in the store, audit line | `apps/api/check.py`, `data/fhir_store/` |
@@ -23,7 +24,44 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | The consensus and power figures | synthetic | files carry `"synthetic": true` and the SYNTHETIC stamp | `results/` |
 | The Heraklion follower city scaffold | example, dry run in English with no claims | the checklist says so in its first line | `docs/cities/heraklion/` |
 
-Rules this list follows:
+## Where a frame's label comes from, and where it does not
+
+This is the method, written out, because it is the weakest joint in the footage work and hiding
+it would be dishonest.
+
+A frame is cut from a video whose own description we can read. The label for that frame comes
+from the description, and only from the description:
+
+- If the description says the channel is a concrete flood channel, a culvert or a lined channel,
+  every frame from that video is **artificial_bank present**. A concrete flood channel is a built
+  bank. That is the one inference we allow ourselves, and we allow it because the words are the
+  uploader's, not ours.
+- If the description says the reach was straightened, canalised or dug out, the frames are
+  **dug_out_channel present**. If it says the reach is a restored meander or an unmodified natural
+  stream, they are **dug_out_channel absent**.
+- If the description names an outfall, a storm drain or a discharge pipe, the frames are
+  **pipe_running present** in the sense our test uses, which is that a pipe or outfall is visible.
+- We never take an **invasive_plant** label from a description. A species identification needs
+  the plant in front of someone who knows it, and our own rule is that a plant we call invasive
+  must be on the Cal-IPC inventory with a link. A video description cannot meet that.
+- Everything else is **unlabelled**. An unlabelled frame is never scored for accuracy. It is used
+  only to ask whether the three models agree with each other, which is a question that needs no
+  key.
+
+What this method is not:
+
+- It is **not a gold standard**. Nobody stood at that creek with a survey sheet. We never call it
+  one, in the README, in the video, or anywhere else.
+- It is **not transferable between features**. A video labelled for its concrete banks says
+  nothing about the plants on those banks, so those frames stay unlabelled for the plant feature.
+- It is **not a claim about the water**. No frame carries a statement about pollution or health,
+  and `/city` never states a risk for a named site.
+
+A frame's manifest row carries the source video, the second it was taken at, and the sentence
+from the description that supports its label, in `label_evidence`. If the row has no label, the
+same field says the description supported none. Anyone can open the source video and check.
+
+## Rules this list follows
 
 - A synthetic or example thing is never counted in any number a person sees.
 - A synthetic result is never cited without `--synthetic`, and never after data lock.

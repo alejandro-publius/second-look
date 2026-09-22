@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -13,7 +13,7 @@ dev:
 	@echo "API on :8000, web on :3000. Stop with Ctrl-C."
 	@bash -c 'trap "kill 0" EXIT; $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
 
-check: lint types test manifest-check dash-check verify-claims worker-check fhir-validate web-build design-check
+check: lint types test manifest-check dash-check readability diagrams verify-claims worker-check fhir-validate web-build design-check
 	@echo "CHECK GREEN"
 
 # Update 10 answer A3. Python is the reference: it writes worker/src/content.json and the golden
@@ -45,6 +45,17 @@ web-build:
 
 manifest-check:
 	$(PY) scripts/check_manifest.py
+
+# Hard rule 18 as a gate, not an intention: plain words at a reading age of about 12, measured
+# on every string a person can see. The exceptions list is content/readability_exceptions.yaml
+# and it is meant to stay short.
+readability:
+	$(PY) scripts/check_readability.py
+
+# Every Mermaid block in README.md and docs/ parses. A broken diagram renders as nothing on
+# GitHub and nobody notices until a judge opens the page. MERMAID_CLI=1 also renders each one.
+diagrams:
+	$(PY) scripts/check_diagrams.py
 
 dash-check:
 	$(PY) scripts/check_dashes.py
@@ -100,6 +111,11 @@ preflight-judges:
 
 submit-check:
 	$(PY) scripts/submit_check.py
+
+# The one command for a judge: no key, no network, five lines out. Tests, FHIR validation,
+# the web build and the design gate, the audit chain, and a scan for secrets.
+judge-check:
+	$(PY) scripts/judge_check.py
 
 # The landing budgets from UPDATE_06 section 5 as Update 07 moved them. Needs the built app
 # running on 3100, so it is not inside make check.

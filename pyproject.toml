@@ -37,6 +37,8 @@ dev = [
   "pandas-stubs",
   "types-requests",
   "respx>=0.23.1",
+  "yt-dlp>=2026.1.1",
+  "opencv-python-headless>=4.10",
 ]
 
 [build-system]

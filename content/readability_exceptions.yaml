@@ -1,0 +1,13 @@
+# Strings the reading age check leaves alone, with the reason. Keep this list short.
+# A long list means the writing got harder, not that the rule got wrong.
+#
+# Run: uv run python scripts/check_readability.py --worst 20
+exceptions:
+  form.yaml.items[23].options[0].label: >-
+    The official OneAquaHealth Citizen Science App's own option text, word for word. Changing it
+    would break the promise that our creek check mirrors their items, and a person answering both
+    would see two different questions. Not ours to simplify.
+  form.yaml.items[23].options[1].label: >-
+    The same option list. Their words, not ours.
+  form.yaml.items[23].options[2].label: >-
+    The same option list. Their words, not ours.
