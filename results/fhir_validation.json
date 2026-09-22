@@ -1,10 +1,10 @@
 {
-  "ran_at_utc": "2026-09-22T06:00:18+00:00",
+  "ran_at_utc": "2026-09-22T06:06:39+00:00",
   "validator_version": "6.10.4",
   "ig_commit": "b907cf0",
   "fhir_version": "4.0.1",
-  "terminology_checks_ran": false,
-  "terminology_server": "n/a",
+  "terminology_checks_ran": true,
+  "terminology_server": "https://tx.fhir.org",
   "files": [
     "fhir/build/ig/fsh-generated/resources/Bundle-sl-city-heraklion-bundle.json",
     "fhir/build/ig/fsh-generated/resources/Bundle-sl-visit-1-bundle.json",
@@ -20,75 +20,87 @@
     "fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json"
   ],
   "errors": 0,
-  "warnings": 30,
+  "warnings": 52,
   "by_file": {
     "Bundle-sl-city-heraklion-bundle.json": {
       "error": 0,
-      "warning": 4,
-      "information": 4
+      "warning": 8,
+      "information": 0
     },
     "Bundle-sl-visit-1-bundle.json": {
       "error": 0,
-      "warning": 15,
-      "information": 7
+      "warning": 17,
+      "information": 4
     },
     "example-lab-result-strawberry-creek-1.json": {
       "error": 0,
       "warning": 3,
-      "information": 9
+      "information": 5
     },
     "library-second-look.json": {
       "error": 0,
       "warning": 0,
-      "information": 4
+      "information": 1
     },
     "referral-strawberry-creek-1.json": {
       "error": 0,
-      "warning": 0,
-      "information": 5
+      "warning": 3,
+      "information": 2
     },
     "visit-strawberry-creek-1.json": {
       "error": 0,
-      "warning": 1,
-      "information": 6
+      "warning": 3,
+      "information": 3
     },
     "visit-strawberry-creek-1.transaction.json": {
       "error": 0,
-      "warning": 1,
-      "information": 20
+      "warning": 3,
+      "information": 17
     },
     "ts-sl-example-result-spot-1.json": {
       "error": 0,
       "warning": 3,
-      "information": 9
+      "information": 5
     },
     "ts-sl-referral-bundle-spot-1.json": {
       "error": 0,
-      "warning": 0,
-      "information": 5
+      "warning": 3,
+      "information": 2
     },
     "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json": {
       "error": 0,
-      "warning": 1,
-      "information": 8
+      "warning": 3,
+      "information": 5
     },
     "ts-sl-visit-visit-0001.json": {
       "error": 0,
-      "warning": 1,
-      "information": 6
+      "warning": 3,
+      "information": 3
     },
     "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json": {
       "error": 0,
-      "warning": 1,
-      "information": 5
+      "warning": 3,
+      "information": 2
     }
   },
   "messages": [
     {
       "file": "Bundle-sl-city-heraklion-bundle.json",
       "severity": "warning",
+      "location": "Bundle.entry[0].resource/*Location/sl-city-heraklion*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
       "location": "Bundle.entry[0].resource/*Location/sl-city-heraklion*/",
       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
+      "location": "Bundle.entry[1].resource/*Location/sl-city-heraklion-creek-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "Bundle-sl-city-heraklion-bundle.json",
@@ -99,8 +111,20 @@
     {
       "file": "Bundle-sl-city-heraklion-bundle.json",
       "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-city-heraklion-creek-1-reach-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
       "location": "Bundle.entry[2].resource/*Location/sl-city-heraklion-creek-1-reach-1*/",
       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      "file": "Bundle-sl-city-heraklion-bundle.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-city-heraklion-creek-1-reach-1-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "Bundle-sl-city-heraklion-bundle.json",
@@ -123,14 +147,32 @@
     {
       "file": "Bundle-sl-visit-1-bundle.json",
       "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "Bundle-sl-visit-1-bundle.json",
+      "severity": "warning",
       "location": "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/",
       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
     },
     {
       "file": "Bundle-sl-visit-1-bundle.json",
       "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "Bundle-sl-visit-1-bundle.json",
+      "severity": "warning",
       "location": "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/",
       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      "file": "Bundle-sl-visit-1-bundle.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "Bundle-sl-visit-1-bundle.json",
@@ -183,12 +225,6 @@
     {
       "file": "Bundle-sl-visit-1-bundle.json",
       "severity": "warning",
-      "location": "Bundle.entry[12].resource/*Observation/sl-obs-water-height-1*/.value.ofType(Quantity)",
-      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
-    },
-    {
-      "file": "Bundle-sl-visit-1-bundle.json",
-      "severity": "warning",
       "location": "Bundle.entry[12].resource/*Observation/sl-obs-water-height-1*/",
       "text": "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
     },
@@ -201,68 +237,164 @@
     {
       "file": "example-lab-result-strawberry-creek-1.json",
       "severity": "warning",
-      "location": "Bundle.entry[13].resource/*Specimen/sl-example-specimen-spot-1*/.collection.quantity",
-      "text": "Unable to validate code 'mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "example-lab-result-strawberry-creek-1.json",
       "severity": "warning",
-      "location": "Bundle.entry[14].resource/*Observation/sl-example-obs-spot-1-lab-enterobacteriaceae-share*/.value.ofType(Quantity)",
-      "text": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "example-lab-result-strawberry-creek-1.json",
       "severity": "warning",
-      "location": "Bundle.entry[16].resource/*Observation/sl-example-obs-spot-1-lab-ecoli-cfu*/.value.ofType(Quantity)",
-      "text": "Unable to validate code '[CFU]/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "referral-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "referral-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "referral-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "visit-strawberry-creek-1.json",
       "severity": "warning",
-      "location": "Bundle.entry[11].resource/*Observation/sl-obs-visit-0001-water-height-m*/.value.ofType(Quantity)",
-      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "visit-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "visit-strawberry-creek-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "visit-strawberry-creek-1.transaction.json",
       "severity": "warning",
-      "location": "Bundle.entry[11].resource/*Observation/null*/.value.ofType(Quantity)",
-      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[2].resource/*Location/null*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "visit-strawberry-creek-1.transaction.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/null*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "visit-strawberry-creek-1.transaction.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/null*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "ts-sl-example-result-spot-1.json",
       "severity": "warning",
-      "location": "Bundle.entry[13].resource/*Specimen/sl-example-specimen-spot-1*/.collection.quantity",
-      "text": "Unable to validate code 'mL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "ts-sl-example-result-spot-1.json",
       "severity": "warning",
-      "location": "Bundle.entry[14].resource/*Observation/sl-example-obs-spot-1-lab-enterobacteriaceae-share*/.value.ofType(Quantity)",
-      "text": "Unable to validate code '%' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "ts-sl-example-result-spot-1.json",
       "severity": "warning",
-      "location": "Bundle.entry[16].resource/*Observation/sl-example-obs-spot-1-lab-ecoli-cfu*/.value.ofType(Quantity)",
-      "text": "Unable to validate code '[CFU]/dL' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-referral-bundle-spot-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-referral-bundle-spot-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-referral-bundle-spot-1.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
       "severity": "warning",
-      "location": "Bundle.entry[9].resource/*Observation/sl-obs-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f-water-height-m*/.value.ofType(Quantity)",
-      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-codornices-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-codornices-lower*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-codornices-lower-2*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "ts-sl-visit-visit-0001.json",
       "severity": "warning",
-      "location": "Bundle.entry[11].resource/*Observation/sl-obs-visit-0001-water-height-m*/.value.ofType(Quantity)",
-      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-0001.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-0001.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {
       "file": "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
       "severity": "warning",
-      "location": "Bundle.entry[9].resource/*Observation/sl-obs-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-70878bff68b4*/.value.ofType(Quantity)",
-      "text": "Unable to validate code 'm' in system 'http://unitsofmeasure.org' because the validator is running without terminology services"
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-spot-with-spaces---odd-chars*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     }
   ]
 }

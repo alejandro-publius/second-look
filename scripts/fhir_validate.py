@@ -20,6 +20,8 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+import httpx
+
 ROOT = Path(__file__).resolve().parents[1]
 JAR = ROOT / "fhir" / "tools" / "validator_cli.jar"
 IG_RESOURCES = ROOT / "fhir" / "build" / "ig" / "fsh-generated" / "resources"
@@ -96,11 +98,35 @@ def summarise(outcome: dict) -> tuple[dict[str, dict[str, int]], list[dict[str, 
     return by_file, messages
 
 
+DEFAULT_TX = "https://tx.fhir.org"
+
+
+def tx_reachable(url: str, timeout: float = 8.0) -> bool:
+    """Is the terminology server answering? A run that cannot reach it falls back, and says so."""
+    if url == "n/a":
+        return False
+    try:
+        with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+            return client.get(f"{url.rstrip('/')}/metadata").status_code < 500
+    except Exception:
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-build", action="store_true")
-    parser.add_argument("--tx", default="n/a")
+    parser.add_argument(
+        "--tx",
+        default=DEFAULT_TX,
+        help=f"terminology server, or n/a for none (default {DEFAULT_TX})",
+    )
     args = parser.parse_args()
+    # PLAN.md: the run uses terminology checking, and if the server cannot be reached it runs
+    # again with the checks off and the results file says so. A silent pass with the checks off
+    # would let a bad code pass for a good one.
+    if args.tx != "n/a" and not tx_reachable(args.tx):
+        print(f"fhir-validate: {args.tx} is not answering, so terminology checks are off this run")
+        args.tx = "n/a"
     if not args.no_build:
         subprocess.run(["bash", str(ROOT / "scripts" / "fhir_build.sh")], check=True)
     files = our_files()
