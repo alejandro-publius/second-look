@@ -3,6 +3,7 @@
 # and without the prereg-v1 tag. See docs/DATA_HANDLING.md.
 name: backup
 
+# Backups run on the Mac through launchd (scripts/backup_d1.sh), not here.
 # Manual only until the two secrets exist (Update 10 answer A2). A scheduled run without them
 # would fail every morning and teach everyone to ignore a red tick. Put the schedule back the
 # day Alex adds CLOUDFLARE_D1_READ_TOKEN and CLOUDFLARE_ACCOUNT_ID, then run it once and do the

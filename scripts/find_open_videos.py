@@ -79,8 +79,7 @@ SPACE_RE = re.compile(r"\s+")
 # Emoji and the other picture characters, dropped from anything we quote, because hard rule 18
 # keeps them out of every file in the repo and a source title is free to use them.
 EMOJI_RE = re.compile(
-    "[←-⇿⌀-⏿☀-➿⬀-⯿️‍"
-    "\U0001f000-\U0001faff]"
+    "[\u2190-\u21ff\u2300-\u23ff\u2600-\u27bf\u2b00-\u2bff\ufe0f\u200d\U0001f000-\U0001faff]"
 )
 
 # Words that say the water is a creek rather than a lake, a canal or a harbour. A title or a
@@ -457,7 +456,7 @@ def plain_text(value: str, limit: int = 400) -> str:
     both anywhere in the repo, and a source we quote is free to use them.
     """
     text = html.unescape(TAG_RE.sub(" ", value or ""))
-    text = text.replace("–", "-").replace("—", "-").replace("−", "-")
+    text = text.replace("\u2013", "-").replace("\u2014", "-").replace("\u2212", "-")
     text = EMOJI_RE.sub("", text)
     text = SPACE_RE.sub(" ", text).strip()
     return text[: limit - 3] + "..." if len(text) > limit else text
@@ -753,9 +752,7 @@ def collect(
                 payload = commons_search(client, commons_limit, search.term, COMMONS_ROWS)
                 fresh = commons_candidates(payload, search.term)
             else:
-                fresh = youtube_candidates(
-                    youtube_limit, search.term, YOUTUBE_ROWS, lookups, seen
-                )
+                fresh = youtube_candidates(youtube_limit, search.term, YOUTUBE_ROWS, lookups, seen)
         except (httpx.HTTPError, ValueError, OSError) as e:
             problems.append(f"{search.source} search {search.term!r} failed: {e}")
             continue
@@ -980,8 +977,10 @@ def main(argv: list[str] | None = None) -> int:
         f"{len(countries)} named countries, {len(found)} passed every filter"
         f"{f', {dropped} left out to keep the spread' if dropped else ''}"
     )
-    print(f"find-open-videos: rows at {data.relative_to(args.root)}, "
-          f"sheet at {sheet.relative_to(args.root)}")
+    print(
+        f"find-open-videos: rows at {data.relative_to(args.root)}, "
+        f"sheet at {sheet.relative_to(args.root)}"
+    )
     empty = [key for key, n in tally.items() if n == 0]
     if empty:
         print(f"find-open-videos: {len(empty)} queries found nothing useful:")
