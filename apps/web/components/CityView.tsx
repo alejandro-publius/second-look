@@ -9,6 +9,11 @@ import { api, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
 import { t } from "@/lib/t";
 
 /** The laboratory Observations of an example result: the ones that point at a Specimen. */
+// "1 spot", not "1 spots": the key for one, or the key for any other number with {n} filled in.
+function count(n: number, one: string, many: string): string {
+  return n === 1 ? t(one) : t(many, { n });
+}
+
 function panelOf(entries: { resource: FhirResource }[] | undefined): FhirResource[] {
   return (entries ?? []).map((e) => e.resource).filter((r) => r.resourceType === "Observation" && r.specimen !== undefined);
 }
@@ -147,7 +152,7 @@ export function CityView({ creekId }: { creekId: string }) {
     <div className="stack">
       <FocusHeading>{t("city.title")}</FocusHeading>
       <p>{t("city.intro", { creek: view.creek_name })}</p>
-      <p className="small muted tabular">{t("city.visits", { n: view.visits, spots: view.spots })}</p>
+      <p className="small muted tabular">{t("city.visits", { visits: count(view.visits, "city.n_visit", "city.n_visits"), spots: count(view.spots, "city.n_spot", "city.n_spots") })}</p>
 
       <h2>{t("city.needs_title")}</h2>
       <p className="small muted">
@@ -196,7 +201,7 @@ export function CityView({ creekId }: { creekId: string }) {
               <li key={r.slug}>
                 <h3>{r.name}</h3>
                 <p className="small muted tabular">
-                  {r.flows_into_name ? t("city.flows_into", { name: r.flows_into_name }) : t("city.flows_end")}. {t("city.reach_counts", { visits: r.visits, spots: r.spots })}.
+                  {r.flows_into_name ? t("city.flows_into", { name: r.flows_into_name }) : t("city.flows_end")}. {t("city.reach_counts", { visits: count(r.visits, "city.n_visit", "city.n_visits"), spots: count(r.spots, "city.n_spot", "city.n_spots") })}.
                 </p>
                 {r.notes.length === 0 ? (
                   <p className="small muted">{t("city.reach_quiet")}</p>
@@ -210,7 +215,7 @@ export function CityView({ creekId }: { creekId: string }) {
               </li>
             ))}
           </ol>
-          {view.unplaced_spots > 0 ? <p className="small muted">{t("city.unplaced", { n: view.unplaced_spots })}</p> : null}
+          {view.unplaced_spots > 0 ? <p className="small muted">{count(view.unplaced_spots, "city.unplaced_one", "city.unplaced")}</p> : null}
         </>
       ) : null}
 

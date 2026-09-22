@@ -1,12 +1,25 @@
 // Drives the deployed site on a phone viewport against the real API, and measures the first
 // paint on a throttled 4G profile. Sessions are marked is_test by the x-qa-key header, so a
 // live check never lands in the study data. Update 09 section 2, P1.
-import { readFileSync } from "node:fs";
+//
+// The Worker marks a session as a test only when the key matches its secret, and says nothing
+// when it does not. On 2026-09-22 a stale key in /tmp/qa_key.txt let a check sitting land as a
+// real one. So the key now has to be passed on purpose, and the public counts are read before
+// and after: if a non-test session appeared, the run fails and prints the repair.
 import { chromium } from "@playwright/test";
 
 const site = process.env.SITE_URL;
-const qaKey = process.env.QA_KEY ?? readFileSync("/tmp/qa_key.txt", "utf8").trim();
+const api = (process.env.API_URL ?? "https://second-look-api.thealexschroeder.workers.dev").replace(/\/$/, "");
+const qaKey = process.env.QA_KEY;
 if (!site) throw new Error("set SITE_URL");
+if (!qaKey) throw new Error("set QA_KEY to the Worker's QA_KEY secret; without it the sitting would be stored as real");
+
+async function realSessions() {
+  const r = await fetch(`${api}/api/test/counts`);
+  const c = await r.json();
+  return Object.values(c.by_arm).reduce((n, a) => n + a.randomized, 0);
+}
+const before = await realSessions();
 
 const browser = await chromium.launch();
 
@@ -83,3 +96,11 @@ const browser = await chromium.launch();
 }
 
 await browser.close();
+
+const after = await realSessions();
+if (after !== before) {
+  console.error(`live: FAILED. Non-test sessions went from ${before} to ${after}, so QA_KEY did not match the Worker's secret and this sitting was stored as real.`);
+  console.error("live: repair with: cd worker && npx wrangler d1 execute second-look --remote --command \"UPDATE session SET is_test = 1 WHERE is_test = 0 AND started_at >= '<start of this run, UTC>'\"");
+  process.exit(1);
+}
+console.log(`live: non-test sessions unchanged at ${after}, so the sitting was stored as a test`);
