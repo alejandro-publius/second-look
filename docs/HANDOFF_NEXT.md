@@ -21,6 +21,19 @@ Two branches, two jobs.
 
 ## What is done on `depth`
 
+- **Update 13** (2026-09-21). Fourteen sentences are approved in `content/approved_sentences.yaml`
+  with the approver, the date and the source quotes; `/city` shows what the creek needs from
+  OneAquaHealth's own measures and the health card shows one action each for the person, the pet
+  and the city (`docs/screens/10-city-needs.png`, `11-spot-health-card.png`). The source of the
+  city actions is named on `/city` and in the README. The proposal mentions the `morophology`
+  spelling. Hosting is Cloudflare only: `fly.toml` is gone and `scripts/deploy.sh` deploys the
+  Worker and the Pages site from `main` in the merge order. The planning notes live in
+  `docs/internal/` (brief, updates, reports, reviews, kill tests, ledger, build log, depth map,
+  team pack, recruiting messages, day plans); every live path points there; new reports go to
+  `docs/internal/reports/`. The README carries no placeholder, no gray image and no synthetic
+  number: the results section says results arrive with the model run. Tier 3 of Update 10 runs
+  the day UPDATE_12's numbers exist; the real warm-up photographs exist on no branch yet.
+
 - `docs/internal/DEPTH_MAP.md`: every feature, read out of the repo. 45 built, 3 parked, 6 missing.
 - **Update 10C.** Draft pull request #1, "Depth: do not merge before data lock", exists so CI
   runs on every push to `depth`; it stays a draft. The merge order after data lock is written in
@@ -106,7 +119,9 @@ Two branches, two jobs.
 
 ## What is next on `depth`, in order (Update 10B)
 
-1. Nothing from Update 10B or 10C is left. Tiers 1 and 2 and answers A1, A2 and A3 are done on
+1. Tier 3 of Update 10 (the README in the winning shape, the trust tables, the three Mermaid
+   diagrams, `make judge-check`, the scorecard) the day UPDATE_12's numbers exist, per Update 13
+   item 6. Until then the README shows no table. Nothing else from Updates 10B, 10C or 13 is left. Tiers 1 and 2 and answers A1, A2 and A3 are done on
    this branch; the pull request stays a draft. Tier 3 waits for its own session after data lock
    on Sep 27; tier 4 waits for the freeze.
 2. At merge time, after data lock, in the order in `docs/notes/hosting.md`: the D1 tables and
