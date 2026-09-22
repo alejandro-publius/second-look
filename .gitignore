@@ -23,6 +23,11 @@ apps/web/.vercel/
 *.pdf
 !docs/**/*.pdf
 labels_*.csv
+# ...but not the synthetic fixtures the merge tests read. The rule above exists to keep a real
+# blind label file, which is the gold key, out of the repository. These three are made up rows
+# that have never been near a photo, and without them `make check` is green on the machine that
+# happens to have them and red on a fresh clone. It was.
+!scripts/tests/fixtures/labels_*.csv
 
 # Local contact sheets of candidate photos. Never deployed, never committed.
 photos/candidates/
