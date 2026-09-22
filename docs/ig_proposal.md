@@ -27,6 +27,11 @@ news. These are the places where passing required a judgement call we would rath
    city programme is a Practitioner, if anything. There is also no ServiceRequest profile, so the
    request itself, the piece that turns a citizen finding into a sample bottle, is plain R4.
 
+One small thing we found on the way, offered in a friendly spirit: your temporary code system
+spells one code `morophology`. We kept that spelling, because our records have to validate
+against the guide as it is, and they do. You may want to correct it before it spreads to other
+follower cities.
+
 **So, plainly: which resource should stand for a citizen observer?** If the answer is
 Practitioner, we would like the guide to say so, so that everyone modelling citizen data lands in
 the same place. If it is RelatedPerson, or Patient, or a Device representing an app account, or
