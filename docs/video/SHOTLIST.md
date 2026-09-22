@@ -31,12 +31,12 @@ Total: 3:45 (225 seconds).
 ## Notes
 
 - **Numbers.** Every number Alex says is read off the README on the day he records, never from this page. The AI results are not in yet, so the lines say "results arrive with the model run" where a number would go. If the run has happened, he reads the number there instead. Nobody is being recruited. If sessions arrived through the public link, say their count as the README gives it, and nothing more.
-- **Scratch voice.** The voice in the rough cut (`docs/video/rough_cut.mp4`) is macOS `say`, not Alex. It is a scratch track, and its file name has the word `scratch` in it. It is there only to check the timing. Alex replaces it with his own voice, recorded against the rough cut.
+- **Scratch voice.** The voice in the rough cut (`docs/video/rough_cut_scratch_voice.mp4`, built by `make video-rough`, never committed) is macOS `say`, not Alex. It is a scratch track, and its file name has the word `scratch` in it. It is there only to check the timing. Alex replaces it with his own voice, recorded against the rough cut.
 - **Title cards.** The rough cut puts a 3-second title card between beats and burns each line in as a caption. The cards are for checking and are not part of the 3:45.
 - **Grey cards.** Until the creek footage and the person shot exist, the rough cut shows a grey card in the rows at 0:30, 0:40 and 2:10.
 - **Local builds.** Record `/t` and `/check` against a local build, so a recording adds no session and no visit to the live site. Record judge mode (3:30) against a local build with the lock constant overridden in the test environment only. The live `/demo` says "Judge mode opens on Sep 28" until then. `/demo?script=1` gives the same photos in the same order on every take.
 - **Phone screens.** Phone viewport, 30 frames a second, at a human pace with a pause between taps.
-- **Clip size.** A clip goes in `docs/video/clips/` only if it is under 15 MB. A bigger clip stays outside the repo, and its path is listed here.
+- **Clip size.** Clips live in `docs/video/clips/` on this Mac and are never committed, whatever their size: the repository takes no video file (docs/DECISIONS.md, 2026-09-22).
 - **Faces.** Nobody's face without a signed `docs/release_form.md`.
 - **The sandbox.** Anyone can delete records there. Record the rows at 2:54 and 3:04 soon after a re-push. If their sandbox does not answer on the day, `/two` says "Their sandbox did not answer, so only our record is shown." Say that instead of the line at 2:54.
 - **Words.** Say "audit log", never "blockchain". Do not say the official app asks about smell. Never say what comes out of a real pipe: we do not state a risk for a specific site.

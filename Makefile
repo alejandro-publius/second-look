@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -111,6 +111,14 @@ preflight-judges:
 
 submit-check:
 	$(PY) scripts/submit_check.py
+
+# Update 14 section 7. Screen recordings (needs the built app on 3100), then the rough cut with a
+# scratch voice. Nothing either writes is committed: they are video files.
+video-clips:
+	cd $(WEB) && node scripts/record-clips.mjs
+
+video-rough:
+	$(PY) scripts/video_rough.py
 
 # Update 14 section 8 item 2. Says what it would do; with GO=yes, on main on Sep 30, removes the
 # working notes, runs submit-check, and only then makes the repository public.
