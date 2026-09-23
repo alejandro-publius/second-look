@@ -67,6 +67,7 @@ design-check:
 
 verify-claims:
 	$(PY) scripts/verify_claims.py --synthetic
+	$(PY) scripts/verify_claims.py --file docs/devpost.md
 
 render-readme:
 	$(PY) scripts/render_readme.py
