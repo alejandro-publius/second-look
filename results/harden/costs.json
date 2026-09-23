@@ -1,0 +1,10 @@
+{
+ "checked_utc": "2026-09-22T18:27:32Z",
+ "log": "results/cost_log.jsonl",
+ "lines": 48,
+ "real_lines": 0,
+ "not_real_lines_by_purpose": {
+  "benchmark": 48
+ },
+ "groups": []
+}

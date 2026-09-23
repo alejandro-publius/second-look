@@ -37,14 +37,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from scripts import submit_check
+
 ROOT = Path(__file__).resolve().parents[1]
-# Anything that looks like a live credential. The fake values in tests are all shorter than this
-# or are named in .gitleaksignore.
-KEY_SHAPES = (
-    re.compile(r"sk-ant-[A-Za-z0-9_-]{20,}"),
-    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
-    re.compile(r"\bghp_[A-Za-z0-9]{30,}\b"),
-)
+# Anything that looks like a live credential: the shapes submit-check and make secrets use, so a
+# line such as EXPORT_TOKEN=... fails here too. The fake values in tests are all shorter than
+# these, are placeholders the shapes leave out, or are named in .gitleaksignore.
+KEY_SHAPES = tuple(submit_check.SECRET_PATTERNS.values())
 SCAN_SUFFIXES = {
     ".py",
     ".ts",

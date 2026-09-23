@@ -8,7 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # make check runs make secrets, which reads the whole history with gitleaks, and
+      # .gitleaksignore names each finding by the commit that added it, so fetch every commit.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
@@ -30,6 +34,14 @@ jobs:
             ~/.fhir/packages
             fhir/tools
           key: fhir-${{ hashFiles('fhir/ig.lock') }}
+      # gitleaks for make secrets, the release pinned by its published SHA-256.
+      - name: Install gitleaks 8.30.1
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
       - run: uv sync --frozen
       - run: cd apps/web && npm ci
       # design-check drives the built app in Chromium to measure tap targets, so the runner

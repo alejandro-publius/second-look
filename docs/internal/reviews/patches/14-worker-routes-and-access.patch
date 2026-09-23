@@ -1,0 +1,783 @@
+14-worker-routes-and-access: drop /api/skeleton, refuse weak secrets, set the CORS origin, 404 a bad photo id
+
+diff --git a/.gitleaksignore b/.gitleaksignore
+index 4b539fb..4177c80 100644
+--- a/.gitleaksignore
++++ b/.gitleaksignore
+@@ -18,6 +18,11 @@
+ # test. Its commit id is not known before it is made, so this entry has no commit in front:
+ # gitleaks then ignores this rule at this file and line in every commit.
+ apps/api/tests/test_study.py:generic-api-key:383
++# apps/api/tests/conftest.py line 17 and worker/test/e2e.mjs line 19: the fake QA keys the
++# API tests and the Worker end to end set, now 32 characters or more because short secrets are
++# refused. No commit in front, for the same reason as the line above.
++apps/api/tests/conftest.py:generic-api-key:17
++worker/test/e2e.mjs:generic-api-key:19
+ # scripts/tests/test_freeze_and_wipe.py line 143: a made up pseudonymous volunteer token in a test fixture
+ 498f8bf854cbe1b6ed6bdef201a87c889755c745:scripts/tests/test_freeze_and_wipe.py:generic-api-key:143
+ # core/tests/test_followups.py line 33: a made up pseudonymous volunteer token in a test fixture
+diff --git a/apps/api/settings.py b/apps/api/settings.py
+index c0c72ca..6954d5f 100644
+--- a/apps/api/settings.py
++++ b/apps/api/settings.py
+@@ -5,6 +5,8 @@ from __future__ import annotations
+ from pydantic_settings import BaseSettings, SettingsConfigDict
+ 
+ PLACEHOLDER_SECRET = "change-me-long-random"
++MIN_SECRET_LENGTH = 32
++MIN_SECRET_DISTINCT = 8  # "aaaa..." or "abab..." is long but easy to guess
+ 
+ 
+ class Settings(BaseSettings):
+@@ -32,8 +34,13 @@ class Settings(BaseSettings):
+     randomization_seed: str = ""
+ 
+     def secret_is_usable(self, value: str) -> bool:
+-        """A secret left at its placeholder, or too short, is treated as not set at all."""
+-        return value != PLACEHOLDER_SECRET and len(value) >= 16
++        """A secret left at its placeholder, shorter than 32 characters, or made of fewer than 8
++        different characters is treated as not set at all. worker/src/index.ts has the same rule."""
++        return (
++            value != PLACEHOLDER_SECRET
++            and len(value) >= MIN_SECRET_LENGTH
++            and len(set(value)) >= MIN_SECRET_DISTINCT
++        )
+ 
+ 
+ settings = Settings()
+diff --git a/apps/api/tests/conftest.py b/apps/api/tests/conftest.py
+index 3563dc8..64b9303 100644
+--- a/apps/api/tests/conftest.py
++++ b/apps/api/tests/conftest.py
+@@ -12,9 +12,12 @@ from pathlib import Path
+ import pytest
+ 
+ _TMP = Path(tempfile.mkdtemp(prefix="sl-api-tests-"))
++# 32 characters or more, or the API treats them as not set (apps/api/settings.py).
++EXPORT_TOKEN = "test-export-token-1234567890abcdef"
++QA_KEY = "test-qa-key-1234567890abcdefghijk"
+ os.environ["DATABASE_URL"] = f"sqlite:///{_TMP}/test.db"
+-os.environ["EXPORT_TOKEN"] = "test-export-token-1234567890"
+-os.environ["QA_KEY"] = "test-qa-key-1234567890abcd"
++os.environ["EXPORT_TOKEN"] = EXPORT_TOKEN
++os.environ["QA_KEY"] = QA_KEY
+ os.environ["PUBLIC_WEB_ORIGIN"] = "http://web.test"
+ os.environ["UPLOAD_DIR"] = str(_TMP / "uploads")
+ os.environ["FHIR_STORE_DIR"] = str(_TMP / "fhir_store")
+diff --git a/apps/api/tests/test_study.py b/apps/api/tests/test_study.py
+index a7d8fe5..9d47b9a 100644
+--- a/apps/api/tests/test_study.py
++++ b/apps/api/tests/test_study.py
+@@ -16,7 +16,14 @@ from sqlmodel import Session, select
+ from apps.api import study
+ from apps.api.db import engine
+ from apps.api.models import ItemResponse, ObserverRow, RandomizationCounter, StudySession
+-from apps.api.tests.conftest import SESSION_BODY, freeze_now, full_session
++from apps.api.settings import PLACEHOLDER_SECRET, settings
++from apps.api.tests.conftest import (
++    EXPORT_TOKEN,
++    QA_KEY,
++    SESSION_BODY,
++    freeze_now,
++    full_session,
++)
+ from core.allocator import replay
+ from core.lock import DATA_LOCK_UTC
+ 
+@@ -84,7 +91,9 @@ def test_unknown_warmup_choice_is_dropped_not_stored(client):
+ 
+ def test_qa_key_header_marks_a_test_session(client):
+     sid = client.post(
+-        "/api/test/session", json=SESSION_BODY, headers={"X-QA-Key": "test-qa-key-1234567890abcd"}
++        "/api/test/session",
++        json=SESSION_BODY,
++        headers={"X-QA-Key": QA_KEY},
+     ).json()["session_id"]
+     wrong = client.post(
+         "/api/test/session", json=SESSION_BODY, headers={"X-QA-Key": "nope"}
+@@ -94,6 +103,21 @@ def test_qa_key_header_marks_a_test_session(client):
+         assert must(db.get(StudySession, wrong)).is_test is False
+ 
+ 
++# The placeholder .env.example tells people to copy, one letter over and over, and one character
++# short. The Worker refuses the same three (worker/src/index.ts, usableSecret).
++WEAK_SECRETS = (PLACEHOLDER_SECRET, "q" * 40, "0123456789abcdefghijklmnopqrstu")
++
++
++def test_a_weak_qa_key_marks_nothing_as_a_test(client, monkeypatch):
++    for weak in WEAK_SECRETS:
++        monkeypatch.setattr(settings, "qa_key", weak)
++        sid = client.post(
++            "/api/test/session", json=SESSION_BODY, headers={"X-QA-Key": weak}
++        ).json()["session_id"]
++        with Session(engine) as db:
++            assert must(db.get(StudySession, sid)).is_test is False, weak
++
++
+ def test_hidden_field_marks_the_session_but_the_response_is_identical(client):
+     clean = client.post("/api/test/session", json=SESSION_BODY)
+     trapped = client.post("/api/test/session", json=dict(SESSION_BODY, hidden_field="I am a bot"))
+@@ -287,9 +311,7 @@ def test_complete_twice_keeps_the_first_completion_time(client):
+ def test_counts_return_counts_only(client):
+     full_session(client)
+     client.post("/api/test/session", json=dict(SESSION_BODY, source_label="chat"))
+-    client.post(
+-        "/api/test/session", json=SESSION_BODY, headers={"X-QA-Key": "test-qa-key-1234567890abcd"}
+-    )
++    client.post("/api/test/session", json=SESSION_BODY, headers={"X-QA-Key": QA_KEY})
+     body = client.get("/api/test/counts").json()
+     assert set(body) == {"by_arm", "by_source", "post_lock"}
+     assert set(body["by_arm"]) == {"untrained", "trained"}
+@@ -303,7 +325,6 @@ def test_counts_return_counts_only(client):
+ # Export -----------------------------------------------------------------------------------------
+ 
+ 
+-EXPORT_TOKEN = "test-export-token-1234567890"
+ EXPORT_HEADERS = {"Authorization": f"Bearer {EXPORT_TOKEN}"}
+ 
+ 
+@@ -358,6 +379,17 @@ def test_export_token_in_the_url_opens_nothing(client):
+     assert r.headers["content-type"] == "application/zip"
+ 
+ 
++def test_export_stays_shut_under_a_weak_token(client, monkeypatch):
++    """Even the matching token gets 404 when the configured one is weak."""
++    full_session(client)
++    for weak in WEAK_SECRETS:
++        monkeypatch.setattr(settings, "export_token", weak)
++        headers = {"Authorization": f"Bearer {weak}"}
++        assert client.get("/api/test/export", headers=headers).status_code == 404, weak
++    assert settings.secret_is_usable("0123456789abcdefghijklmnopqrstuv"), "32 characters is enough"
++    assert not settings.secret_is_usable("abcdefg" * 5), "7 different characters is not"
++
++
+ def test_export_holds_no_identifier_columns(client):
+     full_session(client)
+     freeze_now(DATA_LOCK_UTC)
+@@ -379,9 +411,7 @@ def test_export_before_the_lock_holds_qa_sessions_only(client):
+     its answers and the correct column would be the outcome one spreadsheet away."""
+     freeze_now(NOW)
+     real = full_session(client, answer="no")
+-    qa = client.post(
+-        "/api/test/session", json=visitor(7), headers={"X-QA-Key": "test-qa-key-1234567890abcd"}
+-    ).json()
++    qa = client.post("/api/test/session", json=visitor(7), headers={"X-QA-Key": QA_KEY}).json()
+     assert _response(client, qa["session_id"], qa["item_order"][0], "yes").status_code == 200
+     freeze_now(DATA_LOCK_UTC - timedelta(seconds=1))
+     before = _export(client)
+diff --git a/docs/CONTRACTS.md b/docs/CONTRACTS.md
+index 245ef5d..8cabd1e 100644
+--- a/docs/CONTRACTS.md
++++ b/docs/CONTRACTS.md
+@@ -48,7 +48,7 @@ The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`
+ 
+ ## W1 API contract (W4 builds against this)
+ 
+-All JSON. Times are UTC ISO strings. CORS allows `PUBLIC_WEB_ORIGIN` only. Responses carry `Content-Security-Policy: default-src 'none'` on the API (it serves data, not pages). Every study endpoint refuses requests after `DATA_LOCK_UTC` by storing `post_lock = true` and still answering, so a late visitor is not shown an error. A preview deploy of the Pages site (`<branch or hash>.<project>.pages.dev`) reaches the same Worker, so its Pages Function refuses `POST /api/test/*` with 403 unless the request carries the `x-qa-key` header.
++All JSON. Times are UTC ISO strings. CORS allows `PUBLIC_WEB_ORIGIN` only; the Worker reads that origin from `ALLOWED_ORIGIN` in `worker/wrangler.jsonc` and, with it unset, sends no CORS header at all, never `*`. Responses carry `Content-Security-Policy: default-src 'none'` on the API (it serves data, not pages). Every study endpoint refuses requests after `DATA_LOCK_UTC` by storing `post_lock = true` and still answering, so a late visitor is not shown an error. A preview deploy of the Pages site (`<branch or hash>.<project>.pages.dev`) reaches the same Worker, so its Pages Function refuses `POST /api/test/*` with 403 unless the request carries the `x-qa-key` header.
+ 
+ - `POST /api/test/session` body `{consent_version, content_hash, build_hash, source_label, hidden_field, client_token_hash, ua_class, warmup_choice}`. `source_label` is coerced to one of `poster, chat, friends, creek_group, other`. `hidden_field` non-empty sets `hidden_field_filled = true` and the session is still created (bots must not learn they were caught). Returns `{session_id, arm, item_order: [item_id...], lesson_first: bool}`. Assignment is permuted blocks of 4 from a stored seed, server side, safe under concurrent requests.
+ - `POST /api/test/response` body `{session_id, item_id, answer: yes|no|cant_tell, rt_ms, position, first_choice?, t_first_ms?, n_changes?}`. Idempotent on `(session_id, item_id)`: a repeat with the same answer returns 200, a repeat with a different answer returns 409 and keeps the first. Returns `{ok: true}`. No correctness in the response. `answer` is the confirmed choice, the one that is scored, and `rt_ms` is the time to confirm; the analysis plan calls them `final_choice` and `t_confirm_ms`. `first_choice`, `t_first_ms` and `n_changes` describe how the person got there and are never scored (Update 07 section 1.3). Both servers check the body the same way: `first_choice` is yes, no or cant_tell, never free text; `rt_ms` and `t_first_ms` are whole milliseconds up to 3,600,000, `position` is 0 to 63 and `n_changes` 0 to 999. Anything else is 422.
+@@ -57,10 +57,11 @@ All JSON. Times are UTC ISO strings. CORS allows `PUBLIC_WEB_ORIGIN` only. Respo
+   - Update 07 section 1.2. `answered_count` is how many items the browser says the person answered. If the server holds fewer and `final` is not set, it completes nothing and returns `{need_resend: [item_id...], stored_count}` instead. The browser sends those ids again from its own copy, which is safe because responses are idempotent, then calls complete again. Only a browser that has tried and still cannot close the gap sends `final: true`, and then the session row carries `unsent_count` above zero. The end screen never appears while the server is missing an answer.
+ - `GET /api/test/resume?session_id=...` returns `{session_id, arm, item_order, lesson_first, lesson_done, answered: [item_id...], completed}` and, for a finished sitting, `scores` and `correct_total`. Read only: it creates no session row and mints no contributor token. A reload uses it to come back to the next unanswered item with the same arm and the same order (Update 07 section 2.1). 404 if the session id is unknown.
+ - `GET /api/test/counts` returns `{by_arm: {untrained: {randomized, completed}, trained: {...}}, by_source: {poster: n, ...}, post_lock: n}` and nothing else.
+-- `GET /api/test/export` with the header `Authorization: Bearer <EXPORT_TOKEN>` returns a zip with `sessions.csv` and `responses.csv` (schema below). Before `DATA_LOCK_UTC` it holds QA sessions (`is_test`) and their answers only: enough to check the pipe, and no real session's arm beside its answers, because before the lock we look at counts per arm only (plan item 7). A missing or wrong token returns 404, and so does a token in the query string: the URL is what request logs keep, so the token never goes there. Token compared in constant time.
++- `GET /api/test/export` with the header `Authorization: Bearer <EXPORT_TOKEN>` returns a zip with `sessions.csv` and `responses.csv` (schema below). Before `DATA_LOCK_UTC` it holds QA sessions (`is_test`) and their answers only: enough to check the pipe, and no real session's arm beside its answers, because before the lock we look at counts per arm only (plan item 7). A missing or wrong token returns 404, and so does a token in the query string: the URL is what request logs keep, so the token never goes there. Token compared in constant time. An `EXPORT_TOKEN` that is the `.env.example` placeholder, shorter than 32 characters or made of fewer than 8 different characters counts as not set, so every request gets 404. `QA_KEY` follows the same rule, and a weak one marks no session as a test.
+ - `POST /api/demo/answer` body `{item_id, answer}` returns `{correct: bool}`. Before `DATA_LOCK_UTC` it returns 403 whatever the browser's clock says: judge mode marks answers on the study's own photos, so sixteen requests would rebuild the key. Stores nothing. Rate limited.
+ - `GET /api/content/hash` returns `{content_hash, build_hash}`.
+ - `GET /health` returns `{status: ok}`.
++- `POST /api/skeleton/ping`: the Python API only, for local runs. Writes one row to `skeleton_ping` and returns `{rows}`. The Worker has no skeleton route.
+ - Creek check (rung 2): `POST /api/check/draft` body `{contributor_token?, spot: {spot_id} | {new: {name, latitude, longitude, coarse}}, answers: {item_id: value}, first_rating, photo_ids: []}` returns `{draft_id, followups: [{rule_id, question_text, kind: yesno|photo|keep_rating}]}` chosen by `core.followups.select_followups`. `POST /api/check/finalize` body `{draft_id, followup_answers: {rule_id: value}, final_rating}` returns `{visit_id, spot_id}`. `GET /api/spot/{spot_id}` returns the record view model: `{spot, visits: [{visit_id, answered_at, answers: [{item_id, text, value, label, feature, observer_label: "4 of 4 on built banks, tested Sep 23" | null, observer_passed: bool | null}], checks: [CheckResult], first_rating, final_rating}], health_card}`. `GET /api/spot/{spot_id}/fhir` returns the FHIR Bundle for the latest visit (W3 route). `POST /api/quick/{spot_id}` body `{contributor_token?, colour, smell, pipe_running, photo_id?}`. `POST /api/upload` multipart image only, real type checked, 8 MB cap, EXIF stripped, returns `{photo_id}`. A file that does not read as a picture is a 422. On the Worker the cap is checked before the body is read (413), and a 429 means the day's or the storage cap for photos is reached; the app then sends the check without that photo. `GET /api/photo/{photo_id}?t=<per-upload token>` serves it back only with the token returned to the uploader. Uploads are deleted after 30 days: on the Worker by the KV expiry and a daily cron that deletes the upload row, and a photo id older than 30 days is refused in a draft or a follow-up; on the Python API by `scripts/cleanup_uploads.py`.
+ - `GET /api/two` returns `{ours: Observation, theirs: Observation | null, theirs_status: ok|cached|down, fetched_at}`. Their Observation comes from the sandbox at one request per second with `User-Agent: second-look (+https://github.com/alejandro-publius/second-look)`, cached in the database, never in git.
+ - Rate limit: in memory, per client address, short window, never written to disk or logs; the salted hash of a quiet address is swept out once its window has passed. Server access logs must not contain client addresses (uvicorn `--no-access-log` for the Python API, Workers invocation logs off in `worker/wrangler.jsonc` for the deployed one, and a log filter in tests).
+diff --git a/docs/notes/hosting.md b/docs/notes/hosting.md
+index 21f27b6..a232d36 100644
+--- a/docs/notes/hosting.md
++++ b/docs/notes/hosting.md
+@@ -77,10 +77,21 @@ Production keeps its dashboard configuration until `main` deploys with this file
+ 
+ R2 was not used, because it asks for a card. Creek check photos go to KV after downsizing.
+ 
++Who may call the Worker. CORS names `https://second-look-79t.pages.dev` only, set as
++`ALLOWED_ORIGIN` in `worker/wrangler.jsonc`; with it unset the Worker sends no CORS header at all,
++never `*`. A local web app against `wrangler dev` needs `--var ALLOWED_ORIGIN:http://localhost:3000`.
++`EXPORT_TOKEN` and `QA_KEY` are Worker secrets, set with `npx wrangler secret put`. Each must be 32
++or more random characters, for example from `openssl rand -hex 24`: the Worker treats the
++`.env.example` placeholder, a shorter value, or one made of fewer than 8 different characters as
++not set, so the export answers 404 and the QA header marks nothing as a test.
++
+ ## P1, measured on the deployed site
+ 
+-- One row written to the production database and read back: `GET /api/skeleton` returns what it
+-  wrote plus the row count, out of D1.
++- One row written to the production database and read back: `GET /api/skeleton` returned what it
++  wrote plus the row count, out of D1. That probe is gone since. It wrote a row on any request,
++  a GET included, and counted the whole table each time, so a loop of requests could use up the
++  day's D1 reads for the whole account. `make smoke` now proves the database answers with reads
++  only.
+ - First screen on a throttled 4G profile with a 4x slower CPU: **load 1428 ms, largest paint
+   760 ms**, against a pass line of 3 seconds. Unthrottled time to first byte was 0.26 s cold and
+   0.14 s warm over three tries.
+@@ -114,7 +125,10 @@ merge, both halves go in one session, in this order, and not the other way round
+ 
+ 1. Apply the new D1 tables. They are additive only, every one is `CREATE TABLE IF NOT EXISTS`:
+    `cd worker && npx wrangler d1 execute second-look --remote --file schema.sql`.
+-2. Deploy the Worker: `cd worker && npx wrangler deploy`. The study routes are unchanged in it.
++2. Check that `EXPORT_TOKEN` and `QA_KEY` meet the rule under "What is live", and rotate them
++   with `npx wrangler secret put` if not. A weak QA key would let the live check in step 3 land
++   in the study data. Then deploy the Worker: `cd worker && npx wrangler deploy`. The study
++   routes answer as before, except that a weak secret now counts as not set.
+ 3. Run the study contract tests and the phone end to end tests against production:
+    `uv run pytest -q apps/api/tests/test_study.py` for the contract, and
+    `SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-check.mjs` on the phone
+diff --git a/scripts/smoke.py b/scripts/smoke.py
+index 983203d..1d94d96 100644
+--- a/scripts/smoke.py
++++ b/scripts/smoke.py
+@@ -1,6 +1,7 @@
+ """Smoke test against a running stack (compose or deployed).
+ 
+-Proves: the static page paints, the API answers, a database row is written and read back.
++Proves: the static page paints, the API answers, the database answers a read. Reads only,
++because it also runs against production, where a write would land in the study database.
+ Set WEB_ORIGIN and API_ORIGIN to point elsewhere."""
+ 
+ from __future__ import annotations
+@@ -29,6 +30,12 @@ def wait(url: str, seconds: int = 90) -> httpx.Response:
+     raise SystemExit(f"smoke: {url} not up after {seconds}s: {last}")
+ 
+ 
++def read(path: str) -> dict:
++    r = httpx.get(f"{API}{path}", timeout=10)
++    assert r.status_code == 200, f"{path} answered {r.status_code}"
++    return r.json()
++
++
+ def main() -> int:
+     t0 = time.time()
+     page = wait(f"{WEB}/")
+@@ -36,10 +43,13 @@ def main() -> int:
+     assert page.status_code == 200 and "Second Look" in page.text, "landing page did not render"
+     health = wait(f"{API}/health")
+     assert health.json() == {"status": "ok"}, "api health failed"
+-    a = httpx.post(f"{API}/api/skeleton/ping", timeout=10).json()["rows"]
+-    b = httpx.post(f"{API}/api/skeleton/ping", timeout=10).json()["rows"]
+-    assert b == a + 1, f"database round trip failed: {a} then {b}"
+-    print(f"smoke: landing 200 in {first_paint_ms} ms, api health ok, db rows {a} then {b}")
++    content = read("/api/content/hash")["content_hash"]
++    # The counts come out of the session table, so an answer means the database answered.
++    counts = read("/api/test/counts")
++    assert set(counts["by_arm"]) == {"untrained", "trained"}, f"database read failed: {counts}"
++    print(
++        f"smoke: landing 200 in {first_paint_ms} ms, api health ok, content {content}, db read ok"
++    )
+     return 0
+ 
+ 
+diff --git a/scripts/tests/test_freeze_and_wipe.py b/scripts/tests/test_freeze_and_wipe.py
+index f389041..b0edd7f 100644
+--- a/scripts/tests/test_freeze_and_wipe.py
++++ b/scripts/tests/test_freeze_and_wipe.py
+@@ -1,4 +1,5 @@
+-"""freeze_key refuses placeholders and logs; wipe needs the phrase and touches study tables only."""
++"""freeze_key refuses placeholders and logs; wipe needs the phrase and touches study tables
++and the probe table only."""
+ 
+ from __future__ import annotations
+ 
+@@ -161,6 +162,18 @@ def test_wipe_deletes_only_study_tables_after_the_phrase(tmp_path: Path) -> None
+     assert counts(engine, metadata) == {"session": 0, "response": 0, "observer": 0, "spot": 1}
+ 
+ 
++def test_wipe_also_empties_the_skeleton_probe_table(tmp_path: Path) -> None:
++    engine, metadata = study_db(tmp_path)
++    probe = Table("skeleton_ping", metadata, Column("id", Integer, primary_key=True))
++    metadata.create_all(engine)  # type: ignore[arg-type]
++    with engine.begin() as conn:  # type: ignore[attr-defined]
++        conn.execute(probe.insert(), [{"id": 1}, {"id": 2}])
++    deleted = wipe_for_launch.wipe(engine, metadata, "wipe the study tables")  # type: ignore[arg-type]
++    assert deleted == {"response": 3, "observer": 1, "session": 2, "skeleton_ping": 2}
++    assert counts(engine, metadata)["skeleton_ping"] == 0
++    assert counts(engine, metadata)["spot"] == 1
++
++
+ def test_wipe_refuses_wrong_phrase_and_missing_tables(tmp_path: Path) -> None:
+     engine, metadata = study_db(tmp_path)
+     with pytest.raises(wipe_for_launch.WipeError, match="did not match"):
+diff --git a/scripts/tests/test_smoke.py b/scripts/tests/test_smoke.py
+new file mode 100644
+index 0000000..d94674b
+--- /dev/null
++++ b/scripts/tests/test_smoke.py
+@@ -0,0 +1,51 @@
++"""The smoke test only reads. It runs against production too, where a write lands in D1."""
++
++from __future__ import annotations
++
++from typing import Any
++
++import httpx
++import pytest
++
++from scripts import smoke
++
++COUNTS = {
++    "by_arm": {
++        "untrained": {"randomized": 0, "completed": 0},
++        "trained": {"randomized": 0, "completed": 0},
++    },
++    "by_source": {},
++    "post_lock": 0,
++}
++READS = {
++    "/": httpx.Response(200, text="<title>Second Look</title>"),
++    "/health": httpx.Response(200, json={"status": "ok"}),
++    "/api/content/hash": httpx.Response(200, json={"content_hash": "934a764fc4ed"}),
++    "/api/test/counts": httpx.Response(200, json=COUNTS),
++}
++
++
++def serve(monkeypatch: pytest.MonkeyPatch, reads: dict[str, httpx.Response]) -> None:
++    def get(url: str, **_: Any) -> httpx.Response:
++        return reads[httpx.URL(url).path]
++
++    def write(*args: Any, **_: Any) -> httpx.Response:
++        raise AssertionError(f"smoke tried to write: {args}")
++
++    monkeypatch.setattr(smoke.httpx, "get", get)
++    for method in ("post", "put", "patch", "delete"):
++        monkeypatch.setattr(smoke.httpx, method, write)
++
++
++def test_smoke_passes_on_reads_alone(
++    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
++) -> None:
++    serve(monkeypatch, READS)
++    assert smoke.main() == 0
++    assert "content 934a764fc4ed, db read ok" in capsys.readouterr().out
++
++
++def test_smoke_fails_when_the_database_read_fails(monkeypatch: pytest.MonkeyPatch) -> None:
++    serve(monkeypatch, dict(READS, **{"/api/test/counts": httpx.Response(500, text="down")}))
++    with pytest.raises(AssertionError, match="/api/test/counts answered 500"):
++        smoke.main()
+diff --git a/scripts/wipe_for_launch.py b/scripts/wipe_for_launch.py
+index 056faac..7f5179b 100644
+--- a/scripts/wipe_for_launch.py
++++ b/scripts/wipe_for_launch.py
+@@ -4,7 +4,8 @@ Run: uv run python scripts/wipe_for_launch.py
+ It asks you to type the phrase "wipe the study tables", deletes every row from the session,
+ response and observer tables through the API's own database module, appends a dated line to
+ docs/deviations.md and a launch_wipe entry to the audit log (master brief section 6 item 10).
+-Nothing else is touched: spots, visits, uploads and the sandbox cache stay.
++It also empties skeleton_ping, the P1 probe's rows, when that table exists. Nothing else is
++touched: spots, visits, uploads and the sandbox cache stay.
+ """
+ 
+ from __future__ import annotations
+@@ -22,6 +23,8 @@ from scripts import audit_log
+ ROOT = Path(__file__).resolve().parents[1]
+ PHRASE = "wipe the study tables"
+ STUDY_TABLES = ("response", "observer", "session")  # children first, for foreign keys
++# Not study data, but nothing else ever empties it, so it goes with the dry runs.
++PROBE_TABLES = ("skeleton_ping",)
+ 
+ 
+ class WipeError(Exception):
+@@ -38,17 +41,18 @@ def find_tables(metadata: MetaData) -> dict[str, Table]:
+ 
+ 
+ def wipe(engine: Engine, metadata: MetaData, confirm: str) -> dict[str, int]:
+-    """Delete every row from the study tables. Returns rows deleted per table."""
++    """Delete every row from the study tables and the probe table. Returns rows deleted per
++    table."""
+     if confirm.strip() != PHRASE:
+         raise WipeError(f"confirmation phrase did not match {PHRASE!r}; nothing wiped")
+     tables = find_tables(metadata)
++    tables.update({t: metadata.tables[t] for t in PROBE_TABLES if t in metadata.tables})
+     counts: dict[str, int] = {}
+     with engine.begin() as conn:
+-        for name in STUDY_TABLES:
+-            table = metadata.tables[name]
++        for name, table in tables.items():
+             counts[name] = int(conn.execute(select(func.count()).select_from(table)).scalar_one())
+-        for name in STUDY_TABLES:
+-            conn.execute(tables[name].delete())
++        for table in tables.values():
++            conn.execute(table.delete())
+     return counts
+ 
+ 
+@@ -87,7 +91,10 @@ def main(argv: list[str] | None = None) -> int:
+         return 1
+     url = engine.url.render_as_string(hide_password=True)
+     print(f"wipe: database {url}")
+-    print("wipe: this deletes every session, response and observer row. It cannot be undone.")
++    print(
++        "wipe: this deletes every session, response and observer row, and the skeleton_ping "
++        "probe rows. It cannot be undone."
++    )
+     phrase = args.confirm if args.confirm is not None else input(f"Type '{PHRASE}' to go on: ")
+     try:
+         counts = wipe(engine, SQLModel.metadata, phrase)
+diff --git a/worker/src/index.ts b/worker/src/index.ts
+index e044d07..3c282f2 100644
+--- a/worker/src/index.ts
++++ b/worker/src/index.ts
+@@ -76,9 +76,25 @@ function shuffled<T>(items: T[]): T[] {
+   return out;
+ }
+ 
++// The value .env.example tells people to copy. A secret nobody changed is no secret.
++const PLACEHOLDER_SECRET = "change-me-long-random";
++const MIN_SECRET_LENGTH = 32;
++const MIN_SECRET_DISTINCT = 8; // "aaaa..." or "abab..." is long but easy to guess
++
++/** A secret that is unset, the placeholder, short, or a few characters over and over counts as
++ *  not set, so the route it guards stays shut. The same rule as apps/api/settings.py. */
++function usableSecret(value: string | undefined): value is string {
++  return (
++    value !== undefined &&
++    value !== PLACEHOLDER_SECRET &&
++    value.length >= MIN_SECRET_LENGTH &&
++    new Set(value).size >= MIN_SECRET_DISTINCT
++  );
++}
++
+ /** Constant time compare, so a wrong token cannot be found one character at a time. */
+ function sameSecret(given: string | null, expected: string | undefined): boolean {
+-  if (!expected || expected.length < 16 || !given || given.length !== expected.length) return false;
++  if (!usableSecret(expected) || !given || given.length !== expected.length) return false;
+   let diff = 0;
+   for (let i = 0; i < expected.length; i++) diff |= given.charCodeAt(i) ^ expected.charCodeAt(i);
+   return diff === 0;
+@@ -94,9 +110,12 @@ function bearerToken(request: Request): string | null {
+ const coerce = (raw: unknown, allowed: string[], fallback: string) =>
+   typeof raw === "string" && allowed.includes(raw) ? raw : fallback;
+ 
++/** CORS for the one web origin in ALLOWED_ORIGIN (worker/wrangler.jsonc). Unset means no
++ *  browser on another origin may call this API, never "*". */
+ function corsHeaders(env: Env): Record<string, string> {
++  if (!env.ALLOWED_ORIGIN) return {};
+   return {
+-    "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN ?? "*",
++    "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN,
+     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+     "Access-Control-Allow-Headers": "content-type, x-qa-key",
+     "Access-Control-Max-Age": "86400",
+@@ -486,15 +505,6 @@ export default {
+ 
+     if (path === "/health") return json(env, { status: "ok" });
+ 
+-    // P1's walking skeleton: one row written to the production database and read back.
+-    if (path === "/api/skeleton") {
+-      const note = `p1 ${nowIso()}`;
+-      await env.DB.prepare("INSERT INTO skeleton_ping (note, created_at) VALUES (?, ?)").bind(note, nowIso()).run();
+-      const back = await env.DB.prepare("SELECT id, note, created_at FROM skeleton_ping ORDER BY id DESC LIMIT 1").first();
+-      const total = await env.DB.prepare("SELECT COUNT(*) AS n FROM skeleton_ping").first<{ n: number }>();
+-      return json(env, { wrote: note, read_back: back, rows: Number(total?.n ?? 0) });
+-    }
+-
+     if (path === "/api/content/hash") return json(env, { content_hash: CONTENT.content_hash, build_hash: "worker" });
+ 
+     // The judge facing endpoints (Update 10 answer A3): the creek check, the record, the city view,
+@@ -505,33 +515,33 @@ export default {
+     try {
+       if (path === "/api/upload" && request.method === "POST") return json(env, await storeUpload(env, request, now));
+       const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
+-      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, decodeURIComponent(photo[1]), url.searchParams.get("t")));
++      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, segment(photo[1]), url.searchParams.get("t")));
+       if (path === "/api/creeks") return json(env, await creeksView(checkEnv));
+       const city = /^\/api\/city\/([^/]+)$/.exec(path);
+-      if (city) return json(env, await cityView(checkEnv, decodeURIComponent(city[1]), todayOf(now)));
++      if (city) return json(env, await cityView(checkEnv, segment(city[1]), todayOf(now)));
+       const spotFhir = /^\/api\/spot\/([^/]+)\/fhir$/.exec(path);
+       if (spotFhir) {
+-        const bundle = await latestBundleForSpot(env.DB, decodeURIComponent(spotFhir[1]));
++        const bundle = await latestBundleForSpot(env.DB, segment(spotFhir[1]));
+         if (bundle === null) return json(env, { detail: "no FHIR record for this spot yet" }, 404);
+         return json(env, bundle);
+       }
+       const spot = /^\/api\/spot\/([^/]+)$/.exec(path);
+       if (spot && request.method === "GET") {
+-        const id = decodeURIComponent(spot[1]);
++        const id = segment(spot[1]);
+         const view = await spotView(checkEnv, id, todayOf(now));
+         return json(env, { ...view, place: await placeForSpot(checkEnv, id), downstream_notes: await notesForSpot(checkEnv, id, todayOf(now)) });
+       }
+       const bundle = /^\/api\/fhir\/Bundle\/([^/]+)$/.exec(path);
+       if (bundle) {
+-        const found = await loadVisitBundle(env.DB, decodeURIComponent(bundle[1]));
++        const found = await loadVisitBundle(env.DB, segment(bundle[1]));
+         if (found === null) return json(env, { detail: "no FHIR record for this visit" }, 404);
+         return json(env, found);
+       }
+       if (path === "/api/fhir/validation") return json(env, VALIDATION);
+       const example = /^\/api\/fhir\/referral\/([^/]+)\/example-result$/.exec(path);
+-      if (example) return json(env, await exampleResultView(checkEnv, decodeURIComponent(example[1]), now));
++      if (example) return json(env, await exampleResultView(checkEnv, segment(example[1]), now));
+       const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
+-      if (referral) return json(env, await referralView(checkEnv, decodeURIComponent(referral[1]), now));
++      if (referral) return json(env, await referralView(checkEnv, segment(referral[1]), now));
+       if (path === "/api/two") return json(env, await two(env, Date.now()));
+     } catch (err) {
+       return errorResponse(env, err);
+@@ -550,7 +560,7 @@ export default {
+       if (path === "/api/check/draft" && request.method === "POST") return json(env, await createDraft(checkEnv, body, now));
+       if (path === "/api/check/finalize" && request.method === "POST") return json(env, await finalize(checkEnv, body, now));
+       const quick = /^\/api\/quick\/([^/]+)$/.exec(path);
+-      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, decodeURIComponent(quick[1]), body, now));
++      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, segment(quick[1]), body, now));
+       if (path === "/api/test/session" && request.method === "POST") {
+         const isTest = sameSecret(request.headers.get("x-qa-key"), env.QA_KEY);
+         return await createSession(env, body, isTest);
+@@ -600,7 +610,17 @@ function errorResponse(env: Env, err: unknown): Response {
+   if (err instanceof NotFound) return json(env, { detail: err.message }, 404);
+   if (err instanceof TooLarge) return json(env, { detail: err.message }, 413);
+   if (err instanceof TooMany) return json(env, { detail: err.message }, 429);
+-  return json(env, { detail: "The server could not take that. Try again in a moment.", error: String(err) }, 500);
++  return json(env, { detail: "The server could not take that. Try again in a moment." }, 500);
++}
++
++/** A path segment, decoded. A broken percent sequence is a link to nothing: 404, not 500. */
++function segment(raw: string): string {
++  try {
++    return decodeURIComponent(raw);
++  } catch (err) {
++    if (err instanceof URIError) throw new NotFound("Not found.");
++    throw err;
++  }
+ }
+ 
+ function withCors(env: Env, response: Response): Response {
+diff --git a/worker/test/e2e.mjs b/worker/test/e2e.mjs
+index 4a75dcb..27cb3bc 100644
+--- a/worker/test/e2e.mjs
++++ b/worker/test/e2e.mjs
+@@ -16,8 +16,13 @@ const worker = join(here, "..");
+ const PORT = Number(process.env.E2E_PORT ?? 8791);
+ const RAIN_PORT = PORT + 1;
+ const SANDBOX_PORT = PORT + 2;
+-const QA_KEY = "e2e-qa-key-0123456789abcdef";
+-const EXPORT_TOKEN = "e2e-export-token-0123456789abcdef";
++const QA_KEY = "e2e-qa-key-0123456789abcdefghijklmn";
++const EXPORT_TOKEN = "e2e-export-token-0123456789abcdefghij";
++// The value .env.example tells people to copy, and a long key that is one letter over and over.
++const PLACEHOLDER = "change-me-long-random";
++const WEAK_QA_KEY = "q".repeat(40);
++// ALLOWED_ORIGIN in wrangler.jsonc, which wrangler dev reads too.
++const WEB_ORIGIN = "https://second-look-79t.pages.dev";
+ const BASE = `http://127.0.0.1:${PORT}`;
+ const PERSIST = join(worker, ".wrangler", "e2e-state");
+ const CONTENT = JSON.parse(readFileSync(join(worker, "src", "content.json"), "utf8"));
+@@ -98,17 +103,21 @@ async function api(method, path, body, headers = {}) {
+   return { status: res.status, data, res };
+ }
+ 
++const sessionBody = () => ({
++  consent_version: "v1",
++  content_hash: CONTENT.content_hash,
++  build_hash: "e2e",
++  source_label: "other",
++  hidden_field: "",
++  client_token_hash: `e2e-${Math.random().toString(16).slice(2)}-0123456789abcdef`,
++  ua_class: "phone",
++  warmup_choice: CONTENT.warmup_ids[0],
++});
++
++const randomizedTotal = (counts) => counts.by_arm.untrained.randomized + counts.by_arm.trained.randomized;
++
+ async function passingSession() {
+-  const created = await api("POST", "/api/test/session", {
+-    consent_version: "v1",
+-    content_hash: CONTENT.content_hash,
+-    build_hash: "e2e",
+-    source_label: "other",
+-    hidden_field: "",
+-    client_token_hash: `e2e-${Math.random().toString(16).slice(2)}-0123456789abcdef`,
+-    ua_class: "phone",
+-    warmup_choice: CONTENT.warmup_ids[0],
+-  }, { "x-qa-key": QA_KEY });
++  const created = await api("POST", "/api/test/session", sessionBody(), { "x-qa-key": QA_KEY });
+   assert.equal(created.status, 200, JSON.stringify(created.data));
+   const gold = Object.fromEntries(CONTENT.test_items.map((i) => [i.id, i.gold]));
+   let position = 0;
+@@ -165,6 +174,47 @@ function jpegWithExif() {
+ const EXPIRED_AT = new Date(Date.now() - 31 * 24 * 3600 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
+ const uploadRows = (where) => JSON.parse(wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--json", "--command", `SELECT COUNT(*) AS n FROM upload WHERE ${where}`]))[0].results[0].n;
+ 
++// wrangler dev on PORT over the shared local state, with this run's variables on top of the ones
++// in wrangler.jsonc.
++async function startDev(vars) {
++  const args = [
++    "dev", "--local", "--port", String(PORT), "--persist-to", PERSIST,
++    // The local runtime binary lags the edge; the date only has to be one this binary knows.
++    "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
++    "--show-interactive-dev-session=false", "--test-scheduled",
++  ];
++  for (const [name, value] of Object.entries(vars)) args.push("--var", `${name}:${value}`);
++  const proc = spawn(process.execPath, wranglerArgs(args), { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV });
++  let devLog = "";
++  proc.stdout.on("data", (d) => (devLog += d));
++  proc.stderr.on("data", (d) => (devLog += d));
++  proc.on("exit", (code) => {
++    if (code !== null && code !== 0 && !proc.stopping) console.error(`wrangler dev exited with ${code}\n${devLog}`);
++  });
++  try {
++    await waitFor(`${BASE}/health`, 120_000);
++  } catch (err) {
++    console.error(devLog);
++    throw err;
++  }
++  return proc;
++}
++
++async function stopDev(proc) {
++  proc.stopping = true;
++  proc.kill("SIGTERM");
++  await new Promise((resolve) => {
++    const hard = setTimeout(() => {
++      proc.kill("SIGKILL");
++      resolve();
++    }, 5000);
++    proc.on("exit", () => {
++      clearTimeout(hard);
++      resolve();
++    });
++  });
++}
++
+ let dev = null;
+ let rain = null;
+ let sandbox = null;
+@@ -193,30 +243,12 @@ try {
+   });
+   await new Promise((r) => sandbox.listen(SANDBOX_PORT, "127.0.0.1", r));
+   at("start wrangler dev");
+-  dev = spawn(
+-    process.execPath,
+-    wranglerArgs([
+-      "dev", "--local", "--port", String(PORT), "--persist-to", PERSIST,
+-      // The local runtime binary lags the edge; the date only has to be one this binary knows.
+-      "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
+-      "--var", `QA_KEY:${QA_KEY}`, "--var", `EXPORT_TOKEN:${EXPORT_TOKEN}`,
+-      "--var", `RAIN_URL:http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
+-      "--var", `SANDBOX_BASE_URL:http://127.0.0.1:${SANDBOX_PORT}/fhir`, "--show-interactive-dev-session=false", "--test-scheduled",
+-    ]),
+-    { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV },
+-  );
+-  let devLog = "";
+-  dev.stdout.on("data", (d) => (devLog += d));
+-  dev.stderr.on("data", (d) => (devLog += d));
+-  dev.on("exit", (code) => {
+-    if (code !== null && code !== 0) console.error(`wrangler dev exited with ${code}\n${devLog}`);
++  dev = await startDev({
++    QA_KEY,
++    EXPORT_TOKEN,
++    RAIN_URL: `http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
++    SANDBOX_BASE_URL: `http://127.0.0.1:${SANDBOX_PORT}/fhir`,
+   });
+-  try {
+-    await waitFor(`${BASE}/health`, 120_000);
+-  } catch (err) {
+-    console.error(devLog);
+-    throw err;
+-  }
+ 
+   // 3. Two people who passed and the export that holds them, one pipe, one quiet visit downstream.
+   at("sessions and visits");
+@@ -390,8 +422,36 @@ try {
+   assert.equal((await api("POST", "/api/check/draft", { spot: { new: { name: "a@b", latitude: 1, longitude: 1, coarse: true } }, answers: {}, first_rating: null, photo_ids: [] })).status, 422);
+   assert.equal((await api("POST", "/api/check/finalize", { draft_id: "visit-nowhere", followup_answers: {}, final_rating: "good" })).status, 404);
+   assert.equal((await api("POST", "/api/check/draft", { contributor_token: "unknowntoken123", spot: GLADE, answers: {}, first_rating: null, photo_ids: [] })).status, 404);
++  // A broken percent sequence in an id is a link to nothing, and the answer shows no error text.
++  for (const [method, path] of [["GET", "/api/photo/%E0%A4?t=x"], ["GET", "/api/spot/%E0%A4"], ["GET", "/api/city/%E0%A4"], ["POST", "/api/quick/%E0%A4"]]) {
++    const broken = await api(method, path, method === "POST" ? {} : undefined);
++    assert.equal(broken.status, 404, `${method} ${path}`);
++    assert.equal(JSON.stringify(broken.data).includes("URIError"), false);
++  }
++
++  // 10. Who may call: the export only with its token, CORS for our web origin only, no skeleton.
++  at("who may call");
++  const bearer = (token) => ({ authorization: `Bearer ${token}` });
++  assert.equal((await fetch(exportUrl, { headers: bearer(`${EXPORT_TOKEN.slice(0, -1)}x`) })).status, 404, "a wrong token of the right length");
++  const zip = await fetch(exportUrl, { headers: bearer(EXPORT_TOKEN) });
++  assert.equal(zip.status, 200);
++  assert.equal(zip.headers.get("content-type"), "application/zip");
++  assert.equal(zip.headers.get("access-control-allow-origin"), WEB_ORIGIN);
++  const zipAgain = new TextDecoder().decode(await zip.arrayBuffer());
++  assert.ok(zipAgain.startsWith("PK") && zipAgain.includes("sessions.csv") && zipAgain.includes("responses.csv"));
++  const cors = await fetch(`${BASE}/api/test/counts`, { headers: { origin: "https://elsewhere.example" } });
++  assert.equal(cors.headers.get("access-control-allow-origin"), WEB_ORIGIN, "our web origin, never *");
++  const preflight = await fetch(`${BASE}/api/test/session`, { method: "OPTIONS", headers: { origin: WEB_ORIGIN, "access-control-request-method": "POST" } });
++  assert.equal(preflight.status, 204);
++  assert.equal(preflight.headers.get("access-control-allow-origin"), WEB_ORIGIN);
++  // P1's probe wrote a row on every request, even a GET. It is gone, whatever the method.
++  for (const method of ["GET", "HEAD", "POST", "PUT", "DELETE"]) {
++    assert.equal((await fetch(`${BASE}/api/skeleton`, { method })).status, 404, `${method} /api/skeleton`);
++  }
++  // Both sittings above sent the QA key, so neither reached the study counts.
++  assert.equal(randomizedTotal((await api("GET", "/api/test/counts")).data), 0);
+ 
+-  // 10. The study routes: judge mode and the export wait for the lock, answers are checked like
++  // 11. The study routes: judge mode and the export wait for the lock, answers are checked like
+   // the Python ResponseBody, and one sitting mints one contributor token at most.
+   at("study routes and the lock");
+   const demo = await api("POST", "/api/demo/answer", { item_id: CONTENT.test_items[0].id, answer: "yes" });
+@@ -442,22 +502,27 @@ try {
+   assert.equal(studyZip.includes(sid), !BEFORE_LOCK, "before the lock the export holds QA sessions only");
+   assert.ok(/,1,[01],0,[0-9a-f]{32},/.test(studyZip), "the QA sessions are there");
+ 
+-  console.log("worker e2e: 10 sections passed against wrangler dev on port", PORT);
++  // 12. Weak secrets count as not set: the placeholder opens no export, a weak QA key marks no test.
++  at("weak secrets");
++  await stopDev(dev);
++  dev = null;
++  dev = await startDev({
++    EXPORT_TOKEN: PLACEHOLDER,
++    QA_KEY: WEAK_QA_KEY,
++    RAIN_URL: `http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
++    SANDBOX_BASE_URL: `http://127.0.0.1:${SANDBOX_PORT}/fhir`,
++  });
++  assert.equal((await fetch(exportUrl, { headers: bearer(PLACEHOLDER) })).status, 404, "the placeholder token");
++  assert.equal((await fetch(exportUrl, { headers: { authorization: "Bearer " } })).status, 404, "an empty token");
++  const countedBefore = randomizedTotal((await api("GET", "/api/test/counts")).data);
++  const weak = await api("POST", "/api/test/session", sessionBody(), { "x-qa-key": WEAK_QA_KEY });
++  assert.equal(weak.status, 200, JSON.stringify(weak.data));
++  assert.equal(randomizedTotal((await api("GET", "/api/test/counts")).data), countedBefore + 1, "a weak QA key is not trusted");
++
++  console.log("worker e2e: 12 sections passed against wrangler dev on port", PORT);
+ } finally {
+   if (rain) rain.close();
+   if (sandbox) sandbox.close();
+-  if (dev) {
+-    dev.kill("SIGTERM");
+-    await new Promise((resolve) => {
+-      const hard = setTimeout(() => {
+-        dev.kill("SIGKILL");
+-        resolve();
+-      }, 5000);
+-      dev.on("exit", () => {
+-        clearTimeout(hard);
+-        resolve();
+-      });
+-    });
+-  }
++  if (dev) await stopDev(dev);
+   clearTimeout(watchdog);
+ }
+diff --git a/worker/wrangler.jsonc b/worker/wrangler.jsonc
+index 5c8cd63..977691a 100644
+--- a/worker/wrangler.jsonc
++++ b/worker/wrangler.jsonc
+@@ -14,6 +14,9 @@
+   },
+   // Daily at 03:17 UTC: deleteExpiredUploads drops upload rows older than 30 days.
+   "triggers": { "crons": ["17 3 * * *"] },
++  // The one web origin a browser may call this API from. EXPORT_TOKEN and QA_KEY are secrets,
++  // set with wrangler secret put and never written here.
++  "vars": { "ALLOWED_ORIGIN": "https://second-look-79t.pages.dev" },
+   "d1_databases": [
+     { "binding": "DB", "database_name": "second-look", "database_id": "aff80e0b-6165-4e53-96f5-ff15716221df" }
+   ],

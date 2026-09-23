@@ -1,0 +1,538 @@
+07-sandbox-throttle-and-ledger: one sandbox GET a second, ledger deletes on the same server only, no foreign notes
+
+diff --git a/apps/api/fhir_routes.py b/apps/api/fhir_routes.py
+index d74a426..4e8f876 100644
+--- a/apps/api/fhir_routes.py
++++ b/apps/api/fhir_routes.py
+@@ -1,8 +1,9 @@
+ """Public read-only FHIR routes: a record as FHIR JSON, the validator verdict, and /api/two.
+ 
+ W1 includes `router` with a guarded import. Nothing here touches W1's tables. Their sandbox is
+-read at most once per second with a User-Agent that names the repo, and what we fetch is cached
+-on disk under data/sandbox_cache (gitignored), never in git (Update 02 section 4).
++read at most once per second and 50 times per process with a User-Agent that names the repo, and
++what we fetch is cached on disk under data/sandbox_cache (gitignored), never in git (Update 02
++section 4). A failed fetch is cached for a minute, so a down sandbox is not asked on every visit.
+ """
+ 
+ from __future__ import annotations
+@@ -10,6 +11,7 @@ from __future__ import annotations
+ import hashlib
+ import json
+ import os
++import threading
+ import time
+ from datetime import UTC, datetime, timedelta
+ from pathlib import Path
+@@ -28,8 +30,10 @@ VALIDATION_RESULTS = ROOT / "results" / "fhir_validation.json"
+ SANDBOX_DEFAULT_BASE = "https://sandbox.hl7europe.eu/oneaquahealth/fhir"
+ SANDBOX_USER_AGENT = f"second-look (+{REPO_URL})"
+ SANDBOX_MIN_INTERVAL_SECONDS = 1.0
++SANDBOX_MAX_REQUESTS = 50
+ SANDBOX_TIMEOUT_SECONDS = 10.0
+ CACHE_LIFETIME = timedelta(hours=1)
++DOWN_LIFETIME = timedelta(minutes=1)
+ # One water chemistry Observation their guide publishes for the Almyros monitoring reach.
+ THEIRS_LOCATION = "Location/Loc-Almyros"
+ THEIRS_CODE = "dissolved-oxygen"
+@@ -37,7 +41,11 @@ THEIRS_CODE = "dissolved-oxygen"
+ router = APIRouter()
+ 
+ _last_request_monotonic: float | None = None
++_requests_sent = 0
+ _sleep = time.sleep
++# FastAPI runs these routes in a thread pool: one lock keeps the slot, one keeps the cache.
++_slot_lock = threading.Lock()
++_theirs_lock = threading.Lock()
+ 
+ 
+ def sandbox_base_url() -> str:
+@@ -61,20 +69,27 @@ def _now() -> datetime:
+     return datetime.now(UTC).replace(microsecond=0)
+ 
+ 
+-def _wait_for_slot() -> None:
+-    """At most one request per second to their sandbox (hard rule 10)."""
+-    global _last_request_monotonic
+-    now = time.monotonic()
+-    if _last_request_monotonic is not None:
+-        remaining = SANDBOX_MIN_INTERVAL_SECONDS - (now - _last_request_monotonic)
+-        if remaining > 0:
+-            _sleep(remaining)
+-    _last_request_monotonic = time.monotonic()
++def _wait_for_slot() -> bool:
++    """At most one request per second, and 50 per process, to their sandbox (hard rule 10).
++    False once the 50 are spent."""
++    global _last_request_monotonic, _requests_sent
++    with _slot_lock:
++        if _requests_sent >= SANDBOX_MAX_REQUESTS:
++            return False
++        now = time.monotonic()
++        if _last_request_monotonic is not None:
++            remaining = SANDBOX_MIN_INTERVAL_SECONDS - (now - _last_request_monotonic)
++            if remaining > 0:
++                _sleep(remaining)
++        _last_request_monotonic = time.monotonic()
++        _requests_sent += 1
++        return True
+ 
+ 
+ def fetch_theirs_live() -> dict[str, Any] | None:
+     """One GET to their sandbox. None when it does not answer with an Observation."""
+-    _wait_for_slot()
++    if not _wait_for_slot():
++        return None
+     try:
+         with httpx.Client(
+             timeout=SANDBOX_TIMEOUT_SECONDS,
+@@ -105,7 +120,8 @@ def _cache_path() -> Path:
+     return cache_dir() / f"theirs-{key}.json"
+ 
+ 
+-def _read_cache() -> tuple[dict[str, Any], datetime] | None:
++def _read_cache() -> tuple[dict[str, Any] | None, datetime] | None:
++    """What we last fetched and when. The observation is None when that fetch failed."""
+     path = _cache_path()
+     if not path.exists():
+         return None
+@@ -117,12 +133,12 @@ def _read_cache() -> tuple[dict[str, Any], datetime] | None:
+         return None
+     if fetched_at.tzinfo is None:
+         fetched_at = fetched_at.replace(tzinfo=UTC)
+-    if not isinstance(observation, dict):
++    if observation is not None and not isinstance(observation, dict):
+         return None
+     return observation, fetched_at
+ 
+ 
+-def _write_cache(observation: dict[str, Any], fetched_at: datetime) -> None:
++def _write_cache(observation: dict[str, Any] | None, fetched_at: datetime) -> None:
+     path = _cache_path()
+     path.parent.mkdir(parents=True, exist_ok=True)
+     path.write_text(
+@@ -132,16 +148,22 @@ def _write_cache(observation: dict[str, Any], fetched_at: datetime) -> None:
+ 
+ 
+ def theirs() -> tuple[dict[str, Any] | None, str, datetime]:
+-    """Their Observation, how we got it (ok, cached, down) and when it was fetched."""
+-    now = _now()
+-    cached = _read_cache()
+-    if cached is not None and now - cached[1] < CACHE_LIFETIME:
+-        return cached[0], "cached", cached[1]
+-    live = fetch_theirs_live()
+-    if live is None:
+-        return None, "down", now
+-    _write_cache(live, now)
+-    return live, "ok", now
++    """Their Observation, how we got it (ok, cached, down) and when it was fetched. Requests
++    that arrive together wait for the first one and read what it cached."""
++    with _theirs_lock:
++        now = _now()
++        cached = _read_cache()
++        if cached is not None:
++            observation, fetched_at = cached
++            if observation is not None and now - fetched_at < CACHE_LIFETIME:
++                return observation, "cached", fetched_at
++            if observation is None and now - fetched_at < DOWN_LIFETIME:
++                return None, "down", fetched_at
++        live = fetch_theirs_live()
++        _write_cache(live, now)
++        if live is None:
++            return None, "down", now
++        return live, "ok", now
+ 
+ 
+ def _observations(bundle: dict[str, Any]) -> list[dict[str, Any]]:
+diff --git a/apps/api/tests/test_fhir_routes.py b/apps/api/tests/test_fhir_routes.py
+index 780666f..eef7340 100644
+--- a/apps/api/tests/test_fhir_routes.py
++++ b/apps/api/tests/test_fhir_routes.py
+@@ -3,6 +3,8 @@
+ from __future__ import annotations
+ 
+ import json
++import time
++from concurrent.futures import ThreadPoolExecutor
+ from datetime import UTC, datetime, timedelta
+ from pathlib import Path
+ 
+@@ -77,6 +79,7 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
+     monkeypatch.setenv("SANDBOX_CACHE_DIR", str(tmp_path / "sandbox_cache"))
+     monkeypatch.setenv("SANDBOX_BASE_URL", SANDBOX)
+     monkeypatch.setattr(fhir_routes, "_last_request_monotonic", None)
++    monkeypatch.setattr(fhir_routes, "_requests_sent", 0)
+     app = FastAPI()
+     app.include_router(fhir_routes.router)
+     return TestClient(app)
+@@ -145,13 +148,37 @@ def test_two_says_down_and_returns_ours_alone(client: TestClient) -> None:
+ 
+ 
+ @respx.mock
+-def test_two_treats_a_server_error_or_empty_search_as_down(client: TestClient) -> None:
++def test_two_treats_a_server_error_or_empty_search_as_down(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    monkeypatch.setattr(fhir_routes, "_sleep", lambda _s: None)
+     route = respx.get(f"{SANDBOX}/Observation").mock(return_value=httpx.Response(503))
+     assert client.get("/api/two").json()["theirs_status"] == "down"
+     route.mock(return_value=httpx.Response(200, json=search_bundle()))
+-    assert client.get("/api/two").json()["theirs_status"] == "down"
++    assert fhir_routes.fetch_theirs_live() is None
+     route.mock(return_value=httpx.Response(200, text="not json"))
+-    assert client.get("/api/two").json()["theirs_status"] == "down"
++    assert fhir_routes.fetch_theirs_live() is None
++    assert route.call_count == 3
++
++
++@respx.mock
++def test_a_down_sandbox_is_asked_again_only_after_a_minute(
++    client: TestClient, tmp_path: Path
++) -> None:
++    route = respx.get(f"{SANDBOX}/Observation").mock(return_value=httpx.Response(503))
++    for _ in range(5):
++        body = client.get("/api/two").json()
++        assert body["theirs_status"] == "down"
++        assert body["theirs"] is None
++    assert route.call_count == 1
++    cache_file = next((tmp_path / "sandbox_cache").glob("theirs-*.json"))
++    old = json.loads(cache_file.read_text())
++    assert old["observation"] is None
++    old["fetched_at"] = (datetime.now(UTC) - timedelta(minutes=2)).isoformat()
++    cache_file.write_text(json.dumps(old))
++    route.mock(return_value=httpx.Response(200, json=search_bundle(their_observation())))
++    assert client.get("/api/two").json()["theirs_status"] == "ok"
++    assert route.call_count == 2
+ 
+ 
+ @respx.mock
+@@ -185,7 +212,31 @@ def test_requests_are_spaced_one_second_apart(
+     respx.get(f"{SANDBOX}/Observation").mock(return_value=httpx.Response(503))
+     waits: list[float] = []
+     monkeypatch.setattr(fhir_routes, "_sleep", waits.append)
+-    client.get("/api/two")
+-    client.get("/api/two")
++    fhir_routes.fetch_theirs_live()
++    fhir_routes.fetch_theirs_live()
+     assert len(waits) == 1
+     assert 0 < waits[0] <= 1.0
++
++
++@respx.mock
++def test_requests_that_arrive_together_send_one(client: TestClient) -> None:
++    def slow_503(_request: httpx.Request) -> httpx.Response:
++        time.sleep(0.2)
++        return httpx.Response(503)
++
++    route = respx.get(f"{SANDBOX}/Observation").mock(side_effect=slow_503)
++    with ThreadPoolExecutor(max_workers=20) as pool:
++        results = list(pool.map(lambda _i: fhir_routes.theirs(), range(20)))
++    assert [status for _obs, status, _at in results] == ["down"] * 20
++    assert route.call_count == 1
++
++
++@respx.mock
++def test_at_most_50_requests_per_process(
++    client: TestClient, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    route = respx.get(f"{SANDBOX}/Observation").mock(return_value=httpx.Response(503))
++    monkeypatch.setattr(fhir_routes, "_sleep", lambda _s: None)
++    for _ in range(60):
++        assert fhir_routes.fetch_theirs_live() is None
++    assert route.call_count == 50
+diff --git a/apps/web/components/RecordCard.tsx b/apps/web/components/RecordCard.tsx
+index 0b8edd5..fc7677e 100644
+--- a/apps/web/components/RecordCard.tsx
++++ b/apps/web/components/RecordCard.tsx
+@@ -41,10 +41,14 @@ function observerScore(o: FhirObservation): string | null {
+   return fromExt ?? notes[0]?.text ?? null;
+ }
+ 
+-/** One shared card for any FHIR Observation: theirs from the lab, ours from a volunteer. */
+-export function RecordCard({ observation, heading }: { observation: FhirObservation; heading: string }) {
++/**
++ * One shared card for any FHIR Observation: theirs from the lab, ours from a volunteer. Only ours
++ * shows an observer score. Theirs comes from a sandbox any team can write to, so its note is free
++ * text we never put on screen under our label (hard rule 5).
++ */
++export function RecordCard({ observation, heading, ours = false }: { observation: FhirObservation; heading: string; ours?: boolean }) {
+   const [showJson, setShowJson] = useState(false);
+-  const score = observerScore(observation);
++  const score = ours ? observerScore(observation) : null;
+   return (
+     <section className="card stack" aria-label={heading}>
+       <h2>{heading}</h2>
+diff --git a/apps/web/components/TwoObservers.tsx b/apps/web/components/TwoObservers.tsx
+index 56b0670..2d9b351 100644
+--- a/apps/web/components/TwoObservers.tsx
++++ b/apps/web/components/TwoObservers.tsx
+@@ -41,7 +41,7 @@ export function TwoObservers() {
+             <p className="small muted">{t("two.cached", { when: data.fetched_at })}</p>
+           ) : null}
+           {data.theirs ? <RecordCard observation={data.theirs} heading={t("two.theirs")} /> : null}
+-          <RecordCard observation={data.ours} heading={t("two.ours")} />
++          <RecordCard observation={data.ours} heading={t("two.ours")} ours />
+         </>
+       ) : null}
+     </div>
+diff --git a/apps/web/tests/mock-api.mjs b/apps/web/tests/mock-api.mjs
+index 699008f..30ca412 100644
+--- a/apps/web/tests/mock-api.mjs
++++ b/apps/web/tests/mock-api.mjs
+@@ -348,7 +348,8 @@ export async function mockApi(page, options = {}) {
+       const status = options.theirsStatus ?? "ok";
+       return json({
+         ours: exampleObservation("Practitioner/sl-practitioner-1", null, "4 of 4 on Built banks, tested Sep 23"),
+-        theirs: status === "down" ? null : exampleObservation("Organization/almyros-lab", "Laboratory analysis", null),
++        // Any team can write to their sandbox, so theirs carries a note we must never show.
++        theirs: status === "down" ? null : exampleObservation("Organization/almyros-lab", "Laboratory analysis", "Oxygen too low, unsafe for swimming"),
+         theirs_status: status,
+         fetched_at: "2026-09-20T20:00:00Z",
+       });
+diff --git a/apps/web/tests/record.spec.ts b/apps/web/tests/record.spec.ts
+index b42ac49..9267492 100644
+--- a/apps/web/tests/record.spec.ts
++++ b/apps/web/tests/record.spec.ts
+@@ -53,6 +53,9 @@ test("/two renders both observers with one card and says plainly when theirs is
+   await expect(page.getByRole("region", { name: "Volunteer (Second Look)" })).toBeVisible();
+   await expect(page.getByText("Laboratory analysis")).toBeVisible();
+   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
++  // Their note is another team's free text: never on screen, never under our "Observer score".
++  await expect(page.getByText("Oxygen too low, unsafe for swimming")).toHaveCount(0);
++  await expect(page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" }).getByText("Observer score")).toHaveCount(0);
+   await page.unrouteAll({ behavior: "ignoreErrors" });
+   await mockApi(page, { theirsStatus: "down" });
+   await page.goto("/two");
+diff --git a/scripts/repush_sandbox.py b/scripts/repush_sandbox.py
+index a445d92..c4c82cf 100644
+--- a/scripts/repush_sandbox.py
++++ b/scripts/repush_sandbox.py
+@@ -388,15 +388,20 @@ def _write_evidence(path: Path, *, base: str, ref: str, action: str, back: httpx
+ 
+ 
+ def delete_ledger_id(ledger_id: str, base: str, *, out: Callable[[str], None] = print) -> int:
+-    """Delete exactly one resource whose id was recorded as created in the ledger."""
++    """Delete exactly one resource whose id the ledger says we created on this same server. The
++    same id on another server belongs to someone else."""
+     base = check_base(base)
+     if "?" in ledger_id or "$" in ledger_id or "/" in ledger_id:
+         raise RepushError("a ledger id is a plain id, not a search or an operation")
+-    rows = read_ledger()
+-    creates = [r for r in rows if r.get("action") == "create" and str(r.get("id")) == ledger_id]
++    rows = [
++        r for r in read_ledger() if str(r.get("id")) == ledger_id and r.get("base", base) == base
++    ]
++    creates = [r for r in rows if r.get("action") == "create"]
+     if not creates:
+-        raise RepushError(f"id {ledger_id} was never created by us according to the ledger")
+-    deleted = [r for r in rows if r.get("action") == "delete" and str(r.get("id")) == ledger_id]
++        raise RepushError(
++            f"id {ledger_id} was never created by us on {base} according to the ledger"
++        )
++    deleted = [r for r in rows if r.get("action") == "delete"]
+     if deleted:
+         raise RepushError(f"id {ledger_id} is already recorded as deleted")
+     row = creates[-1]
+diff --git a/scripts/tests/test_repush_sandbox.py b/scripts/tests/test_repush_sandbox.py
+index 49e4bfb..5c14cad 100644
+--- a/scripts/tests/test_repush_sandbox.py
++++ b/scripts/tests/test_repush_sandbox.py
+@@ -199,6 +199,24 @@ def test_delete_refuses_unknown_ids_searches_and_operations(
+     assert respx.calls.call_count == 0
+ 
+ 
++@respx.mock
++def test_delete_refuses_an_id_created_on_another_server(
++    ledger: Path, monkeypatch: pytest.MonkeyPatch
++) -> None:
++    monkeypatch.setenv("SANDBOX_MIRROR_ENABLED", "true")
++    local = "http://localhost:8085/fhir"
++    row = {"ts_utc": "2026-09-21T00:00:00Z", "action": "create", "resourceType": "Observation"}
++    ledger.write_text(ledger.read_text() + json.dumps(row | {"id": "12", "base": local}) + "\n")
++    before = ledger.read_text()
++    assert rs.main(["--delete-ledger-id", "12", "--base-url", BASE]) == 2
++    assert respx.calls.call_count == 0
++    assert ledger.read_text() == before, "nothing recorded for the other server"
++    route = respx.delete(f"{local}/Observation/12").mock(return_value=httpx.Response(200))
++    assert rs.main(["--delete-ledger-id", "12", "--base-url", local]) == 0
++    assert route.call_count == 1
++    assert json.loads(ledger.read_text().splitlines()[-1])["base"] == local
++
++
+ def test_parse_location() -> None:
+     assert rs._parse_location("Observation/12/_history/1") == ("Observation", "12")
+     assert rs._parse_location("https://x/fhir/Location/451") == ("Location", "451")
+diff --git a/worker/schema.sql b/worker/schema.sql
+index 52331a7..d4dd51d 100644
+--- a/worker/schema.sql
++++ b/worker/schema.sql
+@@ -130,6 +130,9 @@ CREATE TABLE IF NOT EXISTS upload (
+ );
+ 
+ -- What GET /api/two last fetched from the sandbox, so the screen still works when it is down.
++-- status is 'ok' for a record, 'down' for a failed fetch (kept a minute, so nobody asks again),
++-- and 'slot' for the one row 'theirs-slot', whose fetched_at is the last request we sent: at
++-- most one a second (hard rule 10).
+ CREATE TABLE IF NOT EXISTS sandbox_cache (
+   cache_key TEXT PRIMARY KEY,
+   body TEXT NOT NULL,
+diff --git a/worker/src/two.ts b/worker/src/two.ts
+index aca7a98..3cc64f1 100644
+--- a/worker/src/two.ts
++++ b/worker/src/two.ts
+@@ -2,7 +2,8 @@
+ // from their sandbox. A port of apps/api/fhir_routes.py. Their record is fetched with a user agent
+ // that names the repository, kept in D1 for an hour so the screen still works when the sandbox is
+ // down, and never written to git. If the sandbox does not answer, the screen says so and shows
+-// ours alone.
++// ours alone, and nobody asks it again for a minute. Every isolate shares one slot in D1, so the
++// sandbox gets at most one request a second from us (hard rule 10).
+ 
+ import GOLDEN from "../../fhir/golden/visit-strawberry-creek-1.json";
+ import { latestBundle } from "./check";
+@@ -13,6 +14,9 @@ export const SANDBOX_DEFAULT_BASE = "https://sandbox.hl7europe.eu/oneaquahealth/
+ const USER_AGENT = `second-look (+${REPO_URL})`;
+ const TIMEOUT_MS = 10_000;
+ const CACHE_LIFETIME_MS = 3_600_000;
++const DOWN_LIFETIME_MS = 60_000;
++const MIN_INTERVAL_MS = 1_000;
++const SLOT_KEY = "theirs-slot";
+ const THEIRS_LOCATION = "Location/Loc-Almyros";
+ const THEIRS_CODE = "dissolved-oxygen";
+ 
+@@ -65,15 +69,43 @@ async function fetchTheirsLive(env: TwoEnv): Promise<Resource | null> {
+   }
+ }
+ 
++/** Claims this second's one request to their sandbox. One statement both reads and moves the
++ * slot, so two requests that arrive together cannot both win it. */
++async function claimSlot(env: TwoEnv, nowMs: number): Promise<boolean> {
++  const now = new Date(nowMs).toISOString();
++  const free = new Date(nowMs - MIN_INTERVAL_MS).toISOString();
++  const result = await env.DB.prepare(
++    "INSERT INTO sandbox_cache (cache_key, body, status, fetched_at) VALUES (?, '', 'slot', ?) " +
++      "ON CONFLICT (cache_key) DO UPDATE SET fetched_at = excluded.fetched_at WHERE sandbox_cache.fetched_at <= ?",
++  )
++    .bind(SLOT_KEY, now, free)
++    .run();
++  return result.meta.changes === 1;
++}
++
+ export async function theirs(env: TwoEnv, nowMs: number): Promise<{ observation: Resource | null; status: "ok" | "cached" | "down"; fetched_at: string }> {
+   const key = `theirs-${sha256Hex(JSON.stringify(theirsQuery(env))).slice(0, 16)}`;
+-  const cached = await env.DB.prepare("SELECT body, fetched_at FROM sandbox_cache WHERE cache_key = ?").bind(key).first<{ body: string; fetched_at: string }>();
+-  if (cached !== null && nowMs - Date.parse(cached.fetched_at) < CACHE_LIFETIME_MS) {
++  const cached = await env.DB.prepare("SELECT body, status, fetched_at FROM sandbox_cache WHERE cache_key = ?").bind(key).first<{ body: string; status: string; fetched_at: string }>();
++  const age = cached === null ? Infinity : nowMs - Date.parse(cached.fetched_at);
++  if (cached !== null && cached.status === "ok" && age < CACHE_LIFETIME_MS) {
+     return { observation: JSON.parse(cached.body) as Resource, status: "cached", fetched_at: cached.fetched_at };
+   }
++  if (cached !== null && cached.status === "down" && age < DOWN_LIFETIME_MS) {
++    return { observation: null, status: "down", fetched_at: cached.fetched_at };
++  }
+   const nowIso = new Date(nowMs).toISOString().replace(/\.\d{3}Z$/, "Z");
++  if (!(await claimSlot(env, nowMs))) {
++    // Another request has this second's slot: show what we kept, or say theirs is not here.
++    if (cached !== null && cached.status === "ok") {
++      return { observation: JSON.parse(cached.body) as Resource, status: "cached", fetched_at: cached.fetched_at };
++    }
++    return { observation: null, status: "down", fetched_at: nowIso };
++  }
+   const live = await fetchTheirsLive(env);
+-  if (live === null) return { observation: null, status: "down", fetched_at: nowIso };
++  if (live === null) {
++    await env.DB.prepare("INSERT OR REPLACE INTO sandbox_cache (cache_key, body, status, fetched_at) VALUES (?, 'null', 'down', ?)").bind(key, nowIso).run();
++    return { observation: null, status: "down", fetched_at: nowIso };
++  }
+   await env.DB.prepare("INSERT OR REPLACE INTO sandbox_cache (cache_key, body, status, fetched_at) VALUES (?, ?, 'ok', ?)").bind(key, JSON.stringify(live), nowIso).run();
+   return { observation: live, status: "ok", fetched_at: nowIso };
+ }
+diff --git a/worker/test/e2e.mjs b/worker/test/e2e.mjs
+index 993b16e..ecdf79c 100644
+--- a/worker/test/e2e.mjs
++++ b/worker/test/e2e.mjs
+@@ -1,7 +1,7 @@
+ // The Worker end to end, locally: wrangler dev with a local D1 and KV, the schema applied, the
+-// arm sequence seeded, rain answered by a stub on this machine, and every judge facing route
+-// driven over HTTP the way the browser and the MCP server drive it. No network beyond localhost,
+-// except the two observer screen, which is allowed to say the sandbox is down.
++// arm sequence seeded, rain and their sandbox answered by stubs on this machine, and every judge
++// facing route driven over HTTP the way the browser and the MCP server drive it. No network beyond
++// localhost.
+ //
+ //   cd worker && npm run e2e
+ import assert from "node:assert/strict";
+@@ -15,6 +15,7 @@ const here = dirname(fileURLToPath(import.meta.url));
+ const worker = join(here, "..");
+ const PORT = Number(process.env.E2E_PORT ?? 8791);
+ const RAIN_PORT = PORT + 1;
++const SANDBOX_PORT = PORT + 2;
+ const QA_KEY = "e2e-qa-key-0123456789abcdef";
+ const EXPORT_TOKEN = "e2e-export-token-0123456789abcdef";
+ const BASE = `http://127.0.0.1:${PORT}`;
+@@ -164,6 +165,9 @@ const uploadRows = (where) => JSON.parse(wrangler(["d1", "execute", "second-look
+ 
+ let dev = null;
+ let rain = null;
++let sandbox = null;
++// The method of every request their sandbox stub sees, so the test can count them (hard rule 10).
++const sandboxHits = [];
+ try {
+   // 1. Fresh local state: schema, arms, the counter row.
+   at("apply schema and arms");
+@@ -179,6 +183,13 @@ try {
+     res.end(JSON.stringify(rainPayload()));
+   });
+   await new Promise((r) => rain.listen(RAIN_PORT, "127.0.0.1", r));
++  // Their sandbox, down: every request gets a 503.
++  sandbox = createServer((req, res) => {
++    sandboxHits.push(req.method);
++    res.statusCode = 503;
++    res.end();
++  });
++  await new Promise((r) => sandbox.listen(SANDBOX_PORT, "127.0.0.1", r));
+   at("start wrangler dev");
+   dev = spawn(
+     process.execPath,
+@@ -188,7 +199,7 @@ try {
+       "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
+       "--var", `QA_KEY:${QA_KEY}`, "--var", `EXPORT_TOKEN:${EXPORT_TOKEN}`,
+       "--var", `RAIN_URL:http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
+-      "--var", "SANDBOX_BASE_URL:http://127.0.0.1:9/fhir", "--show-interactive-dev-session=false", "--test-scheduled",
++      "--var", `SANDBOX_BASE_URL:http://127.0.0.1:${SANDBOX_PORT}/fhir`, "--show-interactive-dev-session=false", "--test-scheduled",
+     ]),
+     { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV },
+   );
+@@ -342,12 +353,20 @@ try {
+   late.append("file", new Blob([jpegWithExif()], { type: "image/jpeg" }), "photo.jpg");
+   assert.equal((await fetch(`${BASE}/api/upload`, { method: "POST", body: late })).status, 429);
+ 
+-  // 8. Two observers: theirs is down here, ours stands alone and the screen is told.
++  // 8. Two observers: theirs is down here, ours stands alone and the screen is told. Fifty
++  // people at once send their sandbox one request, and nobody asks it again for a minute.
+   at("two observers");
+-  const pair = await api("GET", "/api/two");
+-  assert.equal(pair.status, 200);
+-  assert.equal(pair.data.theirs_status, "down");
+-  assert.equal(pair.data.ours.resourceType, "Observation");
++  const pairs = await Promise.all(Array.from({ length: 50 }, () => api("GET", "/api/two")));
++  for (const pair of pairs) {
++    assert.equal(pair.status, 200);
++    assert.equal(pair.data.theirs_status, "down");
++    assert.equal(pair.data.ours.resourceType, "Observation");
++  }
++  assert.equal(sandboxHits.length, 1, "fifty calls in the same second, one request to their sandbox");
++  assert.equal(sandboxHits[0], "GET");
++  await new Promise((r) => setTimeout(r, 1100));
++  assert.equal((await api("GET", "/api/two")).data.theirs_status, "down");
++  assert.equal(sandboxHits.length, 1, "a down answer is kept for a minute, not asked again");
+ 
+   // 9. Bad input is a plain 422 or 404, never a 500.
+   at("bad input");
+@@ -359,6 +378,7 @@ try {
+   console.log("worker e2e: 9 sections passed against wrangler dev on port", PORT);
+ } finally {
+   if (rain) rain.close();
++  if (sandbox) sandbox.close();
+   if (dev) {
+     dev.kill("SIGTERM");
+     await new Promise((resolve) => {

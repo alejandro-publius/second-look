@@ -1,0 +1,52 @@
+{
+ "checked_utc": "2026-09-23T04:42:03Z",
+ "commit": "5474757",
+ "branch": "HEAD",
+ "setup": {
+  "uv sync --frozen": 0,
+  "npm ci (apps/web)": 0,
+  "npm ci (worker)": 0
+ },
+ "commands": [
+  {
+   "doc": "README.md",
+   "line": 55,
+   "command": "make dev",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 7.6,
+   "detail": "API answered: True; web answered: True. ports 8000 or 3100 are taken by another process on this machine, so the same two servers ran on 8960 and 8961"
+  },
+  {
+   "doc": "README.md",
+   "line": 57,
+   "command": "curl -H \"Accept: application/fhir+json\" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 0.7,
+   "detail": "n every observation. 1 visit records mirrored to this server. The repository holds the code, the FSH and the tests.\",\n  \"copyright\": \"Code MIT. Photos and copy CC BY 4.0. No personal data: observers are known only by a hash of a random token.\",\n  \"author\": [ {\n    \"name\": \"Second Look project, Berkeley, a follower city\"\n  } ],\n  \"content\": [ {\n    \"contentType\": \"text/html\",\n    \"url\": \"https://github.com/alejandro-publius/second-look\",\n    \"title\": \"The repository: code, FSH, the emitter and every test\"\n  }, {\n    \"contentType\": \"application/fhir+json\",\n    \"url\": \"https://github.com/alejandro-publius/second-look/blob/main/fhir/golden/visit-strawberry-creek-1.json\",\n    \"title\": \"One worked visit at Strawberry Creek as a collection Bundle\"\n  }, {\n    \"contentType\": \"application/fhir+json\",\n    \"url\": \"https://second-look-api.thealexschroeder.workers.dev/api/fhir/Bundle\",\n    \"title\": \"Read only endpoint: one Bundle per visit, by visit id\"\n  }, {\n    \"contentType\": \"application/fhir+json\",\n    \"url\": \"Provenance/465\",\n    \"title\": \"Provenance of one mirrored visit on this server\"\n  } ]\n}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n100  2907    0  2907    0     0   4771      0 --:--:-- --:--:-- --:--:--  4765\n"
+  },
+  {
+   "doc": "README.md",
+   "line": 57,
+   "command": "make export-records",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 0.6,
+   "detail": "uv run python scripts/export_records.py --out data/export\nexport-records: 0 creeks, 0 spots, 0 bundles into data/export\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+  },
+  {
+   "doc": "README.md",
+   "line": 57,
+   "command": "uv run python -m apps.mcp.server --export data/export",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 1.1,
+   "detail": "tools: list_creeks, get_creek_record, list_findings, get_observer_score, explain_number"
+  }
+ ]
+}

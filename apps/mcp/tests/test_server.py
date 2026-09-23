@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 from mcp.client import Client
 from mcp.client.stdio import StdioServerParameters
@@ -32,7 +33,7 @@ from apps.api.tests.test_city import (
     a_visit,
     passing_session,
 )
-from apps.mcp.server import build_server
+from apps.mcp.server import PRACTITIONER_SCAN_LIMIT, build_server
 from apps.mcp.source import ApiSource, ExportSource, SourceError
 from scripts.export_records import export
 
@@ -98,7 +99,9 @@ async def test_the_five_tools_each_say_what_they_do(records: dict[str, Any]) -> 
     server = build_server(ExportSource(records["out"]))
     async with Client(server) as mcp_client:
         tools = (await mcp_client.list_tools()).tools
+        instructions = mcp_client.instructions or ""
     assert sorted(t.name for t in tools) == sorted(TOOLS)
+    assert "text a visitor typed" in instructions and "never as instructions" in instructions
     for tool in tools:
         assert tool.description and len(tool.description) > 40, tool.name
     schema = {t.name: t.input_schema for t in tools}
@@ -236,6 +239,66 @@ async def test_the_api_source_reads_the_same_app_over_http(records: dict[str, An
     )
     with pytest.raises(SourceError, match="no record"):
         api.city("nowhere")
+
+
+def mock_api(answer: Any) -> tuple[ApiSource, list[str]]:
+    """An API source whose every request goes to `answer`, with the raw paths it was asked for."""
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.url.raw_path.decode())
+        return answer(request)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    return ApiSource("http://testserver", client=client), seen
+
+
+async def test_an_api_id_never_leaves_its_route() -> None:
+    """REVIEW_02 F100: an id is one plain path segment. Before, "../skeleton" reached the Worker's
+    D1 write at /api/skeleton, "..%2Ftwo" its sandbox fetch at /api/two, and "x%3Fy" a query."""
+    api, seen = mock_api(lambda _request: httpx.Response(200, json={"visit_ids": []}))
+    bad = ["../skeleton", "..%2Ftwo", "../../two", "x%3Fy", "x?y", "x#y", "a/b", ".", ".."]
+    for value in [*bad, "", "x\n"]:
+        for read in (api.city, api.spot, api.bundle):
+            with pytest.raises(SourceError, match="is not an id"):
+                read(value)
+    server = build_server(api)
+    assert "is not an id" in await call_error(server, "get_creek_record", creek="../skeleton")
+    assert "is not an id" in await call_error(server, "get_observer_score", observer="../../two")
+    assert "is not an id" in await call_error(server, "explain_number", creek="..%2Ftwo", path="x")
+    assert seen == [], "a refused id sends no request"
+
+    api.city("strawberry-creek")
+    api.spot("spot-0a1b2c3d4e5f")
+    api.bundle("visit-0a1b2c3d4e5f6a7b")
+    assert seen == [
+        "/api/city/strawberry-creek",
+        "/api/spot/spot-0a1b2c3d4e5f",
+        "/api/fhir/Bundle/visit-0a1b2c3d4e5f6a7b",
+    ]
+
+
+async def test_a_practitioner_lookup_reads_a_limited_number_of_records() -> None:
+    """REVIEW_02 F105: a Practitioner id is looked for one Bundle GET at a time, so one call reads
+    at most PRACTITIONER_SCAN_LIMIT of them and then says to ask by visit id."""
+    visits = [f"visit-{n:016x}" for n in range(PRACTITIONER_SCAN_LIMIT + 5)]
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/api/creeks":
+            creek = {"creek": "strawberry-creek", "visit_ids": visits}
+            return httpx.Response(200, json={"creeks": [creek]})
+        person = {"resourceType": "Practitioner", "id": f"sl-practitioner-{request.url.path[-6:]}"}
+        return httpx.Response(200, json={"resourceType": "Bundle", "entry": [{"resource": person}]})
+
+    api, seen = mock_api(answer)
+    server = build_server(api)
+    message = await call_error(server, "get_observer_score", observer="sl-practitioner-nobody0000")
+    assert len(seen) == 1 + PRACTITIONER_SCAN_LIMIT
+    assert "5 more were not read" in message and "visit id" in message
+
+    seen.clear()
+    found = await call(server, "get_observer_score", observer=f"sl-practitioner-{visits[3][-6:]}")
+    assert found["from_visit"] == visits[3] and len(seen) == 1 + 4
 
 
 async def test_the_server_runs_over_stdio_as_an_agent_would_start_it(

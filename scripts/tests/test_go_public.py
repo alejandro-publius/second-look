@@ -3,7 +3,9 @@ nothing is published unless submit-check fails only on the repo not being public
 
 from __future__ import annotations
 
+import re
 import subprocess
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -27,6 +29,13 @@ def test_a_backticked_path_and_the_bare_folder_are_rewritten() -> None:
     )
 
 
+def test_a_path_inside_a_json_string_is_rewritten() -> None:
+    before = '{"target": "docs/internal/updates/", "detail": "docs/internal"}'
+    assert gp.rewrite(before) == (
+        '{"target": "the team\'s working notes", "detail": "the team\'s working notes"}'
+    )
+
+
 def test_the_readme_line_about_the_folder_goes() -> None:
     line = (
         "docs/        product docs; docs/internal/ holds the working notes, removed before the "
@@ -39,6 +48,16 @@ def test_every_mention_in_the_repository_is_rewritten() -> None:
     for path, _count in gp.mentions():
         text = (ROOT / path).read_text(encoding="utf-8")
         assert "docs/internal" not in gp.rewrite(text), path
+
+
+def test_the_gitleaks_allowlist_keeps_the_real_path() -> None:
+    # History keeps the review patch files after go-public, and gitleaks reads history, so the
+    # allowlist must still match their path: go-public leaves .gitleaks.toml alone.
+    assert gp.GITLEAKS_CONFIG not in dict(gp.mentions())
+    config = tomllib.loads((ROOT / gp.GITLEAKS_CONFIG).read_text(encoding="utf-8"))
+    paths = [p for allow in config["allowlists"] for p in allow["paths"]]
+    patch = "docs/internal/reviews/patches/18-secrets-scan-in-check.patch"
+    assert any(re.search(p, patch) for p in paths)
 
 
 MAKE_ERROR = "make: *** [submit-check] Error 1"

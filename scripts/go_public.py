@@ -29,6 +29,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INTERNAL = "docs/internal"
+GITLEAKS_CONFIG = ".gitleaks.toml"
 PUBLIC_CMD = [
     "gh",
     "repo",
@@ -40,9 +41,11 @@ PUBLIC_CMD = [
 ]
 # The one line in the README that talks about the folder itself goes, rather than being reworded.
 README_LINE = re.compile(r"; docs/internal/ holds the working notes, removed before the repo opens")
+# A mention ends at a space, a stop, a bracket or a double quote; the quote covers JSON strings
+# in results/, such as the link check's targets.
 MENTION = re.compile(
     r"`?docs/internal(?:/(?:(?:updates|reports|reviews|upstream)/)?(?P<name>[A-Za-z0-9_.-]+?)?(?:\.md)?/?)?`?"
-    r"(?=[\s,.;:)]|$)"
+    r"(?=[\s,.;:)\"]|$)"
 )
 ALLOWED_SUBMIT_FAILURES = {"repo_public"}
 SUBMIT_SUMMARY = re.compile(r"^submit-check: (\d+) failed: (.*)$", re.MULTILINE)
@@ -72,7 +75,9 @@ def run(cmd: list[str]) -> tuple[int, str]:
 
 
 def mentions() -> list[tuple[str, int]]:
-    # This script and its test name the folder on purpose, and are the one place that may.
+    # This script and its test name the folder on purpose. So does .gitleaks.toml: gitleaks reads
+    # the whole history, which keeps the folder after this run, so its allowlist for the review
+    # patch files there has to keep the real path.
     code, out = run(
         [
             "git",
@@ -84,6 +89,7 @@ def mentions() -> list[tuple[str, int]]:
             f":!{INTERNAL}",
             ":!scripts/go_public.py",
             ":!scripts/tests/test_go_public.py",
+            f":!{GITLEAKS_CONFIG}",
         ]
     )
     rows = []

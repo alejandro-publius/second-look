@@ -1,0 +1,1394 @@
+03-approved-content-only: only approved, sourced words render; each approval needs a name, a date and an audit log row
+
+diff --git a/README.md b/README.md
+index 7ac5951..5d50490 100644
+--- a/README.md
++++ b/README.md
+@@ -36,7 +36,7 @@ Measure each volunteer, per feature, and store the measure with the data. Three
+ 
+ - Standards: FHIR R4 4.0.1. The OneAquaHealth guide pinned at hl7-eu/oah b907cf0 (`fhir/ig.lock`), built from source with SUSHI 3.20.1, every emitted resource validated in CI with the HL7 validator. Their codes where they exist, ours only for the four features and "can't tell". UCUM units. Locations nest with partOf. Mapping: `docs/fhir_mapping.md`.
+ - APIs and data sources: their FHIR sandbox, read at one request per second and mirrored with conditional creates, `meta.tag` on everything and a ledger of ids; Open-Meteo for the 72 hour rainfall window behind the dry pipe rule; the Cal-IPC Inventory for the Bay Area plant list; public dry-weather screening guidance for the pipe rule; the River Habitat Survey's written cues for the channel and bank lessons.
+-- AI: vision models take the same 16-item test as the people, same wording, three runs. `core/gate.py` turns model output into Flag objects or drops it; a flag for a feature the model did not pass is dropped and logged; a flag can only make one follow-up question eligible. The record builder accepts human answers only. A fuzz test proves that for any model output the stored answers equal the human answers. The only model text a person ever sees is a short note labelled "the checker noticed".
++- AI: vision models take the same 16-item test as the people, same wording, three runs. `core/gate.py` turns model output into Flag objects or drops it; a flag for a feature the model did not pass is dropped and logged; a flag can only make one follow-up question eligible. The record builder accepts human answers only. A fuzz test proves that for any model output the stored answers equal the human answers. The only model text a person ever sees is a short note labelled "the checker noticed". Health and ecology sentences, lessons and regional plant lists show only once approved. Preflight wants a source for each sentence, and a name, a date and a row in the audit log for each approval, so words changed after the yes are caught.
+ - Data: no names, emails, addresses, free text or third-party scripts in the study flow; a random session id and a hashed random browser token; EXIF stripped from uploads, which are deleted after 30 days; a hash-chained audit log (`audit/log.jsonl`, an audit log, not a blockchain).
+ 
+ ## A clear demonstration of what was built
+diff --git a/apps/api/content.py b/apps/api/content.py
+index 2d2239b..85789f5 100644
+--- a/apps/api/content.py
++++ b/apps/api/content.py
+@@ -75,8 +75,12 @@ def feature_name(feature_id: str) -> str:
+ 
+ 
+ def region_plant_names() -> set[str]:
++    """The plants a person may pick as invasive here: only from a region pack someone approved.
++    The Worker's list is built from this too (scripts/build_worker_content.py)."""
+     names: set[str] = set()
+     for region in get_content().regions.values():
++        if region.get("approved") is not True:
++            continue
+         for plant in region.get("invasive_plants", []) or []:
+             if plant.get("common_name"):
+                 names.add(str(plant["common_name"]))
+diff --git a/apps/api/tests/test_check.py b/apps/api/tests/test_check.py
+index 46723e5..1323558 100644
+--- a/apps/api/tests/test_check.py
++++ b/apps/api/tests/test_check.py
+@@ -5,6 +5,7 @@ else runs the real core modules and the real FHIR store into a temp folder."""
+ 
+ from __future__ import annotations
+ 
++import dataclasses
+ import json
+ from datetime import UTC, datetime, timedelta
+ from typing import Any
+@@ -12,7 +13,7 @@ from typing import Any
+ from sqlalchemy import func
+ from sqlmodel import Session, select
+ 
+-from apps.api import core_calls
++from apps.api import content, core_calls
+ from apps.api.db import engine
+ from apps.api.models import CheckResultRow, SpotRow, VisitRow
+ from apps.api.tests.conftest import freeze_now, full_session
+@@ -119,6 +120,21 @@ def test_followup_selection_is_the_core_function_and_feature_names_come_from_con
+     assert flag["kind"] == "yesno" and "a built edge" in flag["question_text"]
+ 
+ 
++def test_only_an_approved_region_pack_offers_its_plants(monkeypatch):
++    """REVIEW_02 F35: a plant list nobody approved must not be offered or accepted."""
++    loaded = content.get_content()
++    ivy = [{"common_name": "English ivy", "latin_name": "Hedera helix"}]
++    weed = [{"common_name": "Test weed", "latin_name": "Testus weedus"}]
++    regions = {
++        "draft": {"approved": False, "invasive_plants": weed},
++        "ready": {"approved": True, "approved_by": "Rachel", "invasive_plants": ivy},
++    }
++    monkeypatch.setattr(
++        content, "get_content", lambda: dataclasses.replace(loaded, regions=regions)
++    )
++    assert content.region_plant_names() == {"English ivy", "Hedera helix"}
++
++
+ def test_draft_refuses_free_text_and_unknown_items(client, monkeypatch):
+     monkeypatch.setattr(core_calls, "rain_status", _unknown)
+     bad = [
+diff --git a/apps/web/components/FormQuestion.tsx b/apps/web/components/FormQuestion.tsx
+index 4498fb9..e9e12d8 100644
+--- a/apps/web/components/FormQuestion.tsx
++++ b/apps/web/components/FormQuestion.tsx
+@@ -38,6 +38,8 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item:
+   function regionOptions(): { id: string; label: string; value: string }[] {
+     const opts: { id: string; label: string; value: string }[] = [];
+     for (const region of Object.values(content.regions)) {
++      // A plant is offered as invasive here only from a region pack someone approved (hard rule 5).
++      if (region.approved !== true) continue;
+       for (const p of region.invasive_plants ?? []) {
+         opts.push({ id: p.latin_name, label: `${p.common_name} (${p.latin_name})`, value: p.latin_name });
+       }
+diff --git a/apps/web/components/Lesson.tsx b/apps/web/components/Lesson.tsx
+index e54184b..c5f6ebe 100644
+--- a/apps/web/components/Lesson.tsx
++++ b/apps/web/components/Lesson.tsx
+@@ -46,7 +46,8 @@ export function Lesson({ features, onDone, startIndex = 0, onIndex }: { features
+   if (!screen) return <Nothing />;
+   const feature = featureById(screen.feature);
+   const lesson = lessonFor(screen.feature);
+-  if (!feature || !lesson) return <Nothing />;
++  // A lesson nobody approved arrives with no words, so there is nothing to teach from (hard rule 5).
++  if (!feature || !lesson || !lesson.approved) return <Nothing />;
+ 
+   function next() {
+     const s = screens[index];
+@@ -73,12 +74,6 @@ export function Lesson({ features, onDone, startIndex = 0, onIndex }: { features
+       <Gauge value={featureNo} total={features.length} countText={t("gauge.lesson_count", { feature: feature.name, value: featureNo, total: features.length })} live />
+       {/* The rule of thumb is the heading of the card, not a callout underneath it. */}
+       <FocusHeading>{lesson.rule_of_thumb}</FocusHeading>
+-      {!lesson.approved ? (
+-        <div className="notice notice-warn">
+-          <Icon name="warning" />
+-          <p>{t("lesson.draft_badge")}</p>
+-        </div>
+-      ) : null}
+       {screen.kind === "practice" ? (
+         <PracticeScreen lesson={lesson} question={feature.question} onNext={next} last={last} />
+       ) : (
+diff --git a/apps/web/components/ScoreScreen.tsx b/apps/web/components/ScoreScreen.tsx
+index 1e3ee59..0bad3e7 100644
+--- a/apps/web/components/ScoreScreen.tsx
++++ b/apps/web/components/ScoreScreen.tsx
+@@ -8,7 +8,7 @@ import { Row } from "./ui/Row";
+ import { PhotoFrame } from "./ui/PhotoFrame";
+ import type { FeatureScoreOut } from "@/lib/api";
+ import type { WarmupItem } from "@/lib/content";
+-import { content, featureById } from "@/lib/content";
++import { content, featureById, sentenceText } from "@/lib/content";
+ import { siteUrl } from "@/lib/session";
+ import { t } from "@/lib/t";
+ 
+@@ -20,8 +20,13 @@ import { t } from "@/lib/t";
+  *
+  * It never says "the one on the right". On a phone the two photographs stack, and the order they
+  * were shown in may be shuffled, so the badge travels with the photograph itself.
++ *
++ * The sentences are picked by id from content/approved_sentences.yaml. One that is missing or not
++ * approved shows nothing, so no unsourced ecology or safety line reaches the screen (hard rule 5).
+  */
+ export function WarmupReveal({ pair = content.warmup }: { pair?: WarmupItem[] }) {
++  const point = sentenceText("reveal_point");
++  const limit = sentenceText("reveal_limit");
+   return (
+     <div className="card stack" aria-labelledby="warmup-reveal">
+       <h2 id="warmup-reveal" className="small">{t("warmup.reveal_title")}</h2>
+@@ -31,13 +36,13 @@ export function WarmupReveal({ pair = content.warmup }: { pair?: WarmupItem[] })
+             <PhotoFrame id={w.photo_id} />
+             <p className="small">
+               <strong>{t(w.more_natural ? "warmup.reveal_badge" : "warmup.reveal_other")}</strong>{" "}
+-              {t(w.more_natural ? "warmup.reveal_natural_note" : "warmup.reveal_modified_note")}
++              {sentenceText(w.more_natural ? "reveal_natural_note" : "reveal_modified_note")}
+             </p>
+           </div>
+         ))}
+       </div>
+-      <p>{t("warmup.reveal_point")}</p>
+-      <p className="small muted">{t("warmup.reveal_limit")}</p>
++      {point ? <p>{point}</p> : null}
++      {limit ? <p className="small muted">{limit}</p> : null}
+     </div>
+   );
+ }
+diff --git a/apps/web/lib/content.ts b/apps/web/lib/content.ts
+index 9b06c96..5f1e04c 100644
+--- a/apps/web/lib/content.ts
++++ b/apps/web/lib/content.ts
+@@ -83,7 +83,7 @@ export interface ContrastPair {
+ 
+ export interface Lesson {
+   feature: FeatureId;
+-  approved: boolean;
++  approved: true;
+   rule_of_thumb: string;
+   source: string;
+   contrast_pairs: ContrastPair[];
+@@ -96,6 +96,20 @@ export interface Lesson {
+   };
+ }
+ 
++/** What scripts/build-content.mjs sends for a lesson that is not approved: no words at all. */
++export interface UnapprovedLesson {
++  feature: FeatureId;
++  approved: false;
++}
++
++/** An approved sentence from content/approved_sentences.yaml. Only approved ones are here. */
++export interface Sentence {
++  id: string;
++  audience: string;
++  text: string;
++  source: string;
++}
++
+ export interface GlossaryTerm {
+   term: string;
+   plain: string;
+@@ -117,7 +131,8 @@ export interface Content {
+   warmup: WarmupItem[];
+   glossary: GlossaryTerm[];
+   regions: Record<string, Region>;
+-  lessons: Record<string, Lesson>;
++  lessons: Record<string, Lesson | UnapprovedLesson>;
++  sentences: Sentence[];
+   locale: Record<string, string>;
+   photos: Record<string, Photo>;
+ }
+@@ -141,10 +156,15 @@ export function photoById(id: string): Photo | undefined {
+   return content.photos[id];
+ }
+ 
+-export function lessonFor(id: string): Lesson | undefined {
++export function lessonFor(id: string): Lesson | UnapprovedLesson | undefined {
+   return content.lessons[id];
+ }
+ 
++/** An approved sentence's words by id, or undefined when it is missing or not approved (hard rule 5). */
++export function sentenceText(id: string): string | undefined {
++  return content.sentences.find((s) => s.id === id)?.text;
++}
++
+ export function testItemById(id: string): TestItem | undefined {
+   return content.test_items.find((i) => i.id === id);
+ }
+diff --git a/apps/web/scripts/build-content.mjs b/apps/web/scripts/build-content.mjs
+index b5b6f17..b5974ac 100644
+--- a/apps/web/scripts/build-content.mjs
++++ b/apps/web/scripts/build-content.mjs
+@@ -2,6 +2,8 @@
+ // writes generated/content.json for the app, copies only manifest-listed images into public/photos/,
+ // and writes public/precache.json for the service worker. Gold labels never reach the browser:
+ // `gold` is stripped from test items and `gold_label` from photos before anything is written.
++// Words nobody approved never reach it either (hard rule 5): only approved sentences, and no text
++// at all for a lesson that is not approved.
+ // Runs as `prebuild` and `predev`. Node 20 or newer; nothing beyond Node 20 APIs.
+ import { createHash } from "node:crypto";
+ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+@@ -180,6 +182,26 @@ function iconPng(size) {
+   ]);
+ }
+ 
++// Hard rule 5: a health or ecology sentence reaches the browser only once approved: true, and only
++// with its source. The app picks one by id, so an id that is missing here shows nothing. The health
++// card and the city measures come from the API, so only the end-screen reveal travels here.
++const BROWSER_AUDIENCES = new Set(["reveal"]);
++
++export function shownSentences(sentences) {
++  const filled = (v) => typeof v === "string" && v.trim() !== "";
++  return sentences
++    .filter((s) => BROWSER_AUDIENCES.has(s.audience) && s.approved === true && filled(s.text) && filled(s.source))
++    .map(({ id, audience, text, source }) => ({ id, audience, text, source }));
++}
++
++// A lesson that is not approved travels as its feature and the flag only: no rule of thumb, no
++// captions, no feedback. The lesson screen shows the nothing-here notice for it.
++export function shownLessons(lessons) {
++  return Object.fromEntries(
++    Object.entries(lessons).map(([fid, lesson]) => [fid, lesson.approved === true ? lesson : { feature: lesson.feature ?? fid, approved: false }]),
++  );
++}
++
+ function main() {
+   for (const p of [contentDir, photosDir, join(contentDir, "locales", "en.json"), join(photosDir, "manifest.csv")]) {
+     if (!existsSync(p)) fail(`missing ${p}`);
+@@ -190,6 +212,7 @@ function main() {
+   const testItems = testItemsFile.items ?? [];
+   const warmup = testItemsFile.warmup ?? [];
+   const followups = readYaml(join(contentDir, "followups.yaml"));
++  const sentences = readYaml(join(contentDir, "approved_sentences.yaml")).sentences ?? [];
+   const locale = JSON.parse(readFileSync(join(contentDir, "locales", "en.json"), "utf8"));
+   const glossary = readYaml(join(contentDir, "glossary.yaml")).terms ?? [];
+   const lessons = {};
+@@ -275,7 +298,8 @@ function main() {
+     followups: { max_questions: followups.max_questions ?? 2 },
+     glossary,
+     regions,
+-    lessons,
++    lessons: shownLessons(lessons),
++    sentences: shownSentences(sentences),
+     locale,
+     photos,
+   };
+@@ -314,4 +338,5 @@ function main() {
+   console.log(`build-content: content_hash ${content_hash}, consent ${consent_version}, ${copyList.length} photos copied, content.json ${size} bytes`);
+ }
+ 
+-main();
++// Run as a script, not when a test imports the helpers above.
++if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+diff --git a/apps/web/tests/deployed-smoke.spec.ts b/apps/web/tests/deployed-smoke.spec.ts
+index d282d36..152249b 100644
+--- a/apps/web/tests/deployed-smoke.spec.ts
++++ b/apps/web/tests/deployed-smoke.spec.ts
+@@ -1,4 +1,5 @@
+ import { expect, test } from "@playwright/test";
++import { content } from "../lib/content";
+ 
+ // One real session against the deployed pair, on a phone viewport. It is skipped unless
+ // DEPLOYED_URL is set, so CI never reaches the network and never writes a row.
+@@ -69,11 +70,10 @@ test("a stranger can finish the whole thing on a phone, and it never lands in th
+   await page.getByRole("button", { name: "See my score" }).click();
+   await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();
+ 
+-  // The warm-up reveal is here, and the badge is on the photograph, not on a side.
++  // The warm-up reveal is here, and the badge is on the photograph, not on a side. Its sentences
++  // show only once approved (hard rule 5), so the check follows the content this build carries.
+   await expect(page.getByTestId("reveal-natural")).toBeVisible();
+-  await expect(
+-    page.getByText("The messier creek is in a more natural state. Tidy is not the same as natural."),
+-  ).toBeVisible();
++  for (const s of content.sentences.filter((x) => x.audience === "reveal")) await expect(page.getByText(s.text)).toBeVisible();
+ 
+   // Nothing reached the study: this build stamps its sessions is_test.
+   const after = await counts(request);
+diff --git a/apps/web/tests/test-flow.spec.ts b/apps/web/tests/test-flow.spec.ts
+index 9d51f37..e14a6e1 100644
+--- a/apps/web/tests/test-flow.spec.ts
++++ b/apps/web/tests/test-flow.spec.ts
+@@ -34,7 +34,8 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async
+ 
+   // The rule of thumb is the heading of the lesson card; the feature name rides on the gauge.
+   await expect(page.locator(".gauge-count", { hasText: "Built banks" })).toBeVisible();
+-  await expect(page.getByText("Draft wording, not yet approved")).toBeVisible();
++  // A lesson that is not approved carries no words at all now, so there is no draft notice.
++  await expect(page.getByText("Draft wording, not yet approved")).toHaveCount(0);
+   await finishLesson(page);
+   await expect.poll(() => calls.filter((c) => c.path === "/api/test/lesson-done").length).toBe(1);
+   const lesson = calls.find((c) => c.path === "/api/test/lesson-done")!.body;
+@@ -79,8 +80,9 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async
+   const tidier = content.warmup.find((w) => !w.more_natural)!;
+   await expect(page.getByTestId("reveal-natural").locator("img")).toHaveAttribute("src", new RegExp(`${natural.photo_id}\\.`));
+   await expect(page.getByTestId("reveal-modified").locator("img")).toHaveAttribute("src", new RegExp(`${tidier.photo_id}\\.`));
+-  await expect(page.getByText("The messier creek is in a more natural state. Tidy is not the same as natural.")).toBeVisible();
+-  await expect(page.getByText("Neither photo can tell you whether the water is safe. That takes testing.")).toBeVisible();
++  // Its sentences come by id from content/approved_sentences.yaml, and only approved ones are in
++  // the built content (hard rule 5). Each of those is on the screen.
++  for (const s of content.sentences.filter((x) => x.audience === "reveal")) await expect(page.getByText(s.text)).toBeVisible();
+   await expect(page.getByTestId("contributor-token")).toHaveText("MOCKTOKEN1234567");
+   await expect(page.locator("img.share-card")).toHaveAttribute("src", /\/api\/share\/\d+/);
+   expect(await page.evaluate(() => localStorage.getItem("sl_contributor_token"))).toBe("MOCKTOKEN1234567");
+diff --git a/apps/web/tests/warmup-reveal.spec.ts b/apps/web/tests/warmup-reveal.spec.ts
+index 8e62a16..42814e7 100644
+--- a/apps/web/tests/warmup-reveal.spec.ts
++++ b/apps/web/tests/warmup-reveal.spec.ts
+@@ -1,9 +1,23 @@
++import { readFileSync } from "node:fs";
++import { join } from "node:path";
++import { pathToFileURL } from "node:url";
+ import { expect, test } from "@playwright/test";
+-import { content, moreNatural, type WarmupItem } from "../lib/content";
++import { load as yamlLoad } from "js-yaml";
++import { content, moreNatural, sentenceText, type WarmupItem } from "../lib/content";
+ 
+ // The reveal answers the poster's question on the end screen, after the test. It must never say
+ // "the one on the right": on a phone the two photographs stack, and the order they were shown in
+ // may be shuffled (Update 11D item 1). These tests pin that down from both ends.
++//
++// Its sentences say something about ecology and water safety, so they live in
++// content/approved_sentences.yaml with a source and reach the screen only once approved
++// (hard rule 5). Playwright runs specs as CommonJS, so the build script is loaded by file URL.
++
++const web = join(__dirname, "..");
++const buildContent = () => import(pathToFileURL(join(web, "scripts", "build-content.mjs")).href);
++type YamlSentence = { id: string; audience: string; text: string; source: string; approved: boolean };
++const yamlSentences = (yamlLoad(readFileSync(join(web, "..", "..", "content", "approved_sentences.yaml"), "utf8")) as { sentences: YamlSentence[] }).sentences;
++const REVEAL_IDS = ["reveal_point", "reveal_limit", "reveal_natural_note", "reveal_modified_note"];
+ 
+ test.describe("the warm-up reveal does not depend on the order", () => {
+   test("exactly one of the pair is the more natural creek, in either order", () => {
+@@ -32,17 +46,65 @@ test.describe("the warm-up reveal does not depend on the order", () => {
+   });
+ 
+   test("no reveal string names a side", () => {
+-    for (const key of [
+-      "warmup.reveal_point",
+-      "warmup.reveal_badge",
+-      "warmup.reveal_other",
+-      "warmup.reveal_natural_note",
+-      "warmup.reveal_modified_note",
+-      "warmup.reveal_limit",
+-    ]) {
++    for (const key of ["warmup.reveal_badge", "warmup.reveal_other"]) {
+       const value = content.locale[key];
+       expect(value, key).toBeTruthy();
+       expect(value.toLowerCase(), key).not.toMatch(/\b(left|right)\b/);
+     }
++    for (const id of REVEAL_IDS) {
++      const value = yamlSentences.find((s) => s.id === id)?.text;
++      expect(value, id).toBeTruthy();
++      expect(value!.toLowerCase(), id).not.toMatch(/\b(left|right)\b/);
++    }
++  });
++});
++
++test.describe("the reveal shows approved, sourced sentences only", () => {
++  test("its words are in the sentences file, not in the locale", () => {
++    for (const id of REVEAL_IDS) {
++      expect(yamlSentences.find((s) => s.id === id)?.audience, id).toBe("reveal");
++      expect(content.locale[`warmup.${id}`], id).toBeUndefined();
++    }
++  });
++
++  test("the build copies a reveal sentence only when it is approved and has a source", async () => {
++    const { shownSentences } = await buildContent();
++    const shown = shownSentences([
++      { id: "reveal_point", audience: "reveal", text: "Approved.", source: "A page", approved: true, approved_by: "Alex" },
++      { id: "reveal_limit", audience: "reveal", text: "Waiting.", source: "A page", approved: false },
++      { id: "reveal_natural_note", audience: "reveal", text: "No source.", source: "", approved: true },
++      { id: "reveal_modified_note", audience: "reveal", text: "Said approved.", source: "A page", approved: "yes" },
++      { id: "person_rinse_hands", audience: "person", text: "The API shows this.", source: "A page", approved: true },
++    ]);
++    expect(shown).toEqual([{ id: "reveal_point", audience: "reveal", text: "Approved.", source: "A page" }]);
++  });
++
++  test("the built content holds exactly the approved reveal sentences, and the screen picks them by id", () => {
++    const approved = yamlSentences.filter((s) => s.audience === "reveal" && s.approved === true && s.source.trim());
++    expect(content.sentences.map((s) => s.id).sort()).toEqual(approved.map((s) => s.id).sort());
++    for (const s of yamlSentences.filter((x) => x.audience === "reveal")) {
++      expect(sentenceText(s.id), s.id).toBe(approved.includes(s) ? s.text : undefined);
++    }
++  });
++});
++
++test.describe("an unapproved lesson carries no words", () => {
++  test("the build sends only its feature and the flag", async () => {
++    const { shownLessons } = await buildContent();
++    const draft = { feature: "pipe_running", approved: false, rule_of_thumb: "Not checked yet.", contrast_pairs: [{ assume_caption: "Draft." }] };
++    const ready = { feature: "artificial_bank", approved: true, approved_by: "Alex", rule_of_thumb: "Checked." };
++    const loose = { feature: "invasive_plant", approved: "true", rule_of_thumb: "Only says approved." };
++    expect(shownLessons({ pipe_running: draft, artificial_bank: ready, invasive_plant: loose })).toEqual({
++      pipe_running: { feature: "pipe_running", approved: false },
++      artificial_bank: ready,
++      invasive_plant: { feature: "invasive_plant", approved: false },
++    });
++  });
++
++  test("no lesson in the built content has a rule of thumb unless it is approved", () => {
++    for (const [fid, lesson] of Object.entries(content.lessons)) {
++      if (lesson.approved !== true) expect(Object.keys(lesson).sort(), fid).toEqual(["approved", "feature"]);
++      else expect(lesson.rule_of_thumb, fid).toBeTruthy();
++    }
+   });
+ });
+diff --git a/content/approved_sentences.yaml b/content/approved_sentences.yaml
+index ac45121..a4017e0 100644
+--- a/content/approved_sentences.yaml
++++ b/content/approved_sentences.yaml
+@@ -7,6 +7,12 @@
+ # 2026-09-21 and the matching sentence is quoted in source_quote; each is approved only because the
+ # quote was found. Rule for every line: plain safe practice, no risk stated for any site. City
+ # actions are OneAquaHealth's own restoration measures, from the Policy Brief (2026), page 9.
++#
++# REVIEW_02 (F85, F05, F95). person_no_swallow was reworded after its draft was approved, so it
++# waits for Alex to approve the new words himself. The four reveal sentences on the end screen of
++# the test moved here from the locale file; they wait for a source and Alex's yes. approved: true
++# counts only with approved_by and approved_on, and the one who approved it then records it:
++# uv run python scripts/audit_log.py approve sentence <id>. A model never sets either.
+ sentences:
+   # City
+   - id: city_replant_margins
+@@ -105,10 +111,8 @@ sentences:
+     text: "Do not swallow creek water, and stay out if you have an open cut or wound."
+     source: "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html"
+     source_quote: "Don't swallow the water. Even if water looks clean, it can still have germs in it that could make you sick. Protect open cuts or wounds. Stay out if you have an open cut or wound (particularly from a surgery or piercing)."
+-    approved: true
+-    approved_by: "Alex Velazquez"
+-    approved_on: "2026-09-21"
+-    note: "Cited page fetched again on 2026-09-21. The draft said keep water out of open cuts; the page says stay out if you have one, so the sentence now says what the page says."
++    approved: false
++    note: "The words changed after the draft was approved: the draft said keep water out of open cuts. Alex has not yet approved the new words, so this is not shown."
+   - id: person_avoid_pipes
+     audience: person
+     text: "Stay out of the water right below a pipe that drains into the creek."
+@@ -127,3 +131,29 @@ sentences:
+     approved_by: "Alex Velazquez"
+     approved_on: "2026-09-21"
+     note: "The PDF was fetched again on 2026-09-21 and both sentences found by text search; they are in source_quote."
++  # Reveal: the end screen of the test, after the last answer (Update 11D item 1). Update 11D set
++  # the words of the first two. None has a source yet, so none is shown.
++  - id: reveal_point
++    audience: reveal
++    text: "The messier creek is in a more natural state. Tidy is not the same as natural."
++    source: ""
++    approved: false
++    note: "Words set in Update 11D. It needs a source and Alex's yes before it is shown."
++  - id: reveal_limit
++    audience: reveal
++    text: "Neither photo can tell you whether the water is safe. That takes testing."
++    source: ""
++    approved: false
++    note: "Words set in Update 11D. It needs a source and Alex's yes before it is shown."
++  - id: reveal_natural_note
++    audience: reveal
++    text: "It bends, the outer bank is worn away, and fallen wood lies in the water."
++    source: ""
++    approved: false
++    note: "Says what the warm-up photo shows. It needs a source and Alex's yes before it is shown."
++  - id: reveal_modified_note
++    audience: reveal
++    text: "A mown park, and the creek runs in a concrete channel."
++    source: ""
++    approved: false
++    note: "Says what the warm-up photo shows. It needs a source and Alex's yes before it is shown."
+diff --git a/content/locales/en.json b/content/locales/en.json
+index b0fb19b..65a893a 100644
+--- a/content/locales/en.json
++++ b/content/locales/en.json
+@@ -34,7 +34,7 @@
+   "demo.title": "Judge mode",
+   "demo.feedback_correct": "Right.",
+   "demo.feedback_wrong": "Not this time.",
+-  "followup.dry_pipe": "It has not rained here for {days} days. Is anything coming out of that pipe? A pipe still running after three dry days is worth testing.",
++  "followup.dry_pipe": "It has not rained here for {days} days. Is anything coming out of that pipe?",
+   "followup.rating_check": "You rated this stream Good, but you also reported {issues}. Do you want to keep your rating?",
+   "followup.checker_flag": "The checker noticed something that may be {note}. Want to look again?",
+   "followup.low_score": "You scored {correct} of 4 on {feature} in the test. Could you take a photo of the {feature} so a reviewer can check?",
+@@ -61,7 +61,6 @@
+   "warmup.intro": "Pick one. There is no feedback on this one.",
+   "test.assigning": "Setting up your test…",
+   "test.answer_group": "Your answer",
+-  "lesson.draft_badge": "Draft wording, not yet approved",
+   "lesson.practice_intro": "Try one. You get feedback on this photo only.",
+   "lesson.practice_right": "Right.",
+   "lesson.practice_wrong": "Not this time.",
+@@ -356,10 +355,6 @@
+   "poster.credit": "Photos: {left}. {right}.",
+   "credits.photo_line": "{author}, {license}",
+   "warmup.reveal_title": "Those two creeks again",
+-  "warmup.reveal_point": "The messier creek is in a more natural state. Tidy is not the same as natural.",
+-  "warmup.reveal_limit": "Neither photo can tell you whether the water is safe. That takes testing.",
+   "warmup.reveal_badge": "The more natural one",
+-  "warmup.reveal_other": "The tidier one",
+-  "warmup.reveal_natural_note": "It bends, the outer bank is worn away, and fallen wood lies in the water.",
+-  "warmup.reveal_modified_note": "A mown park, and the creek runs in a concrete channel."
++  "warmup.reveal_other": "The tidier one"
+ }
+diff --git a/core/content_loader.py b/core/content_loader.py
+index 5db7ca1..95195b0 100644
+--- a/core/content_loader.py
++++ b/core/content_loader.py
+@@ -9,6 +9,7 @@ import csv
+ import hashlib
+ import json
+ from collections import Counter
++from collections.abc import Mapping
+ from dataclasses import dataclass, field
+ from pathlib import Path
+ from typing import Any
+@@ -248,7 +249,8 @@ def load_content(root: Path | str = ".", *, strict: bool = True) -> Content:
+     photos = _load_manifest(root, problems)
+ 
+     feature_ids = [f.get("id") for f in features]
+-    if sorted(feature_ids) != sorted(FEATURES):
++    # str() so a missing or numeric id is reported here rather than crashing the sort.
++    if sorted(str(fid) for fid in feature_ids) != sorted(FEATURES):
+         problems.append(f"features.yaml ids {feature_ids} must be exactly {list(FEATURES)}")
+     for f in features:
+         if not f.get("question"):
+@@ -302,6 +304,64 @@ def load_content(root: Path | str = ".", *, strict: bool = True) -> Content:
+     return content
+ 
+ 
++# The keys that record an approval rather than the words approved. They stay out of the approved
++# text, so a restamp or a new note is not new wording, and a mark's own stamp is not either.
++STAMP_KEYS = frozenset({"approved", "approved_by", "approved_on", "approved_at", "note"})
++
++
++def _filled(value: Any) -> bool:
++    return value is not None and bool(str(value).strip())
++
++
++def stamped(entry: Mapping[str, Any]) -> bool:
++    """approved: true with a name and a date beside it. A bare true is not an approval: anyone,
++    or any model, can type one, so it counts only when it says who and when."""
++    return (
++        entry.get("approved") is True
++        and _filled(entry.get("approved_by"))
++        and (_filled(entry.get("approved_on")) or _filled(entry.get("approved_at")))
++    )
++
++
++def _unstamped(value: Any) -> Any:
++    if isinstance(value, Mapping):
++        return {k: _unstamped(v) for k, v in value.items() if k not in STAMP_KEYS}
++    if isinstance(value, list):
++        return [_unstamped(v) for v in value]
++    return value
++
++
++def approval_text(entry: Mapping[str, Any]) -> str:
++    """The approved words and their source as one canonical string, stamps left out. Its sha256
++    goes into the approval row, so a change to the words after approval no longer matches."""
++    return json.dumps(_unstamped(entry), sort_keys=True, ensure_ascii=False, default=str)
++
++
++def approvals(content: Content) -> list[tuple[str, dict[str, Any]]]:
++    """Every sentence, lesson and region plant list that says approved: true, by item name."""
++    out: list[tuple[str, dict[str, Any]]] = []
++    for s in content.sentences:
++        if s.get("approved") is True:
++            out.append((f"sentence {s.get('id')}", s))
++    for fid, lesson in sorted(content.lessons.items()):
++        if lesson.get("approved") is True:
++            out.append((f"lesson {fid}", lesson))
++    for name, region in sorted(content.regions.items()):
++        if region.get("approved") is True:
++            # Only the plant list is approved: the creeks beside it are map data, not copy.
++            keys = ("approved", "approved_by", "approved_on", "invasive_plants", "source")
++            out.append((f"region {name}", {k: region.get(k) for k in keys}))
++    return out
++
++
++def _approval_problem(what: str, entry: Mapping[str, Any]) -> str | None:
++    if stamped(entry):
++        return None
++    if entry.get("approved") is True:
++        return f"{what} says approved but has no approved_by and approved_on"
++    return f"{what} not approved"
++
++
+ def placeholder_report(content: Content) -> list[str]:
+     """Human inputs still missing. Preflight prints these and fails."""
+     out: list[str] = []
+@@ -319,9 +379,17 @@ def placeholder_report(content: Content) -> list[str]:
+         if not item.get("verified_against_app"):
+             out.append(f"form item {item['id']} not verified against the app")
+     for fid, lesson in content.lessons.items():
+-        if not lesson.get("approved"):
+-            out.append(f"lesson {fid} not approved")
++        if problem := _approval_problem(f"lesson {fid}", lesson):
++            out.append(problem)
+     for s in content.sentences:
+-        if not s.get("approved"):
+-            out.append(f"sentence {s['id']} not approved")
++        if problem := _approval_problem(f"sentence {s['id']}", s):
++            out.append(problem)
++        elif not _filled(s.get("source")):
++            out.append(f"sentence {s['id']} is approved with no source")
++    # A plant list is shown as "invasive here" only once approved, so an empty one owes nothing.
++    for name, region in sorted(content.regions.items()):
++        if region.get("invasive_plants") and (
++            problem := _approval_problem(f"region {name}", region)
++        ):
++            out.append(problem)
+     return out
+diff --git a/core/tests/test_harden_content_loader.py b/core/tests/test_harden_content_loader.py
+index 45c9fb5..6878d5e 100644
+--- a/core/tests/test_harden_content_loader.py
++++ b/core/tests/test_harden_content_loader.py
+@@ -19,8 +19,11 @@ from core.content_loader import (
+     Content,
+     ContentError,
+     Photo,
++    approval_text,
++    approvals,
+     load_content,
+     placeholder_report,
++    stamped,
+ )
+ from core.records import FEATURES
+ 
+@@ -438,11 +441,6 @@ def test_a_broken_region_pack_is_reported_as_a_problem(tree: Path) -> None:
+     ]
+ 
+ 
+-@pytest.mark.xfail(
+-    strict=True,
+-    raises=TypeError,
+-    reason="bug: a feature with no id crashes load_content with TypeError, not a reported problem",
+-)
+ def test_a_feature_with_no_id_is_reported_not_a_crash(tree: Path) -> None:
+     edit_yaml(tree, "features.yaml", lambda doc: doc["features"][0].pop("id"))
+     found = problems(tree)
+@@ -467,6 +465,9 @@ def stub_photo(photo_id: str, *, role: str = "test", licence: str = "CC-BY-4.0")
+     )
+ 
+ 
++STAMP: dict[str, Any] = {"approved": True, "approved_by": "Alex", "approved_on": "2026-09-22"}
++
++
+ def ready(**changes: Any) -> Content:
+     """Content with every human input in place, then the given fields swapped in."""
+     base = Content(
+@@ -482,11 +483,11 @@ def ready(**changes: Any) -> Content:
+         form={"items": [{"id": "bank_type", "verified_against_app": True}]},
+         test_items=[],
+         followups={},
+-        sentences=[{"id": "s1", "approved": True}],
++        sentences=[{"id": "s1", "source": "A page", **STAMP}],
+         locale={},
+         glossary=[],
+         regions={},
+-        lessons={"artificial_bank": {"approved": True}},
++        lessons={"artificial_bank": dict(STAMP)},
+         photos={"ph-1": stub_photo("ph-1")},
+     )
+     return dataclasses.replace(base, **changes)
+@@ -550,8 +551,92 @@ def test_an_unapproved_lesson_is_reported() -> None:
+ 
+ 
+ def test_an_unapproved_sentence_is_reported() -> None:
+-    sentences = [{"id": "s1", "approved": False}, {"id": "s2"}, {"id": "s3", "approved": True}]
++    sentences = [
++        {"id": "s1", "approved": False},
++        {"id": "s2"},
++        {"id": "s3", "source": "A page", **STAMP},
++    ]
+     assert placeholder_report(ready(sentences=sentences)) == [
+         "sentence s1 not approved",
+         "sentence s2 not approved",
+     ]
++
++
++# An approval counts only with a name and a date: a bare approved: true is something anyone, or
++# any model, can type.
++
++
++@pytest.mark.parametrize("dropped", ["approved_by", "approved_on"])
++def test_approved_with_no_name_or_no_date_is_still_owed(dropped: str) -> None:
++    half = {k: v for k, v in STAMP.items() if k != dropped}
++    content = ready(
++        sentences=[{"id": "s1", "source": "A page", **half}],
++        lessons={"artificial_bank": half},
++    )
++    assert placeholder_report(content) == [
++        "lesson artificial_bank says approved but has no approved_by and approved_on",
++        "sentence s1 says approved but has no approved_by and approved_on",
++    ]
++
++
++def test_a_mark_stamp_with_approved_at_counts_and_blank_values_do_not() -> None:
++    assert stamped({"approved": True, "approved_by": "rachel", "approved_at": "2026-09-21T19:35Z"})
++    assert not stamped({"approved": True, "approved_by": "  ", "approved_on": "2026-09-22"})
++    assert not stamped({"approved": "true", "approved_by": "Alex", "approved_on": "2026-09-22"})
++    assert not stamped({"approved": True, "approved_by": "Alex", "approved_on": None})
++
++
++def test_an_approved_sentence_with_no_source_is_reported() -> None:
++    sentences = [{"id": "s1", "source": " ", **STAMP}]
++    assert placeholder_report(ready(sentences=sentences)) == [
++        "sentence s1 is approved with no source"
++    ]
++
++
++def test_a_region_plant_list_needs_an_approval_and_an_empty_one_does_not() -> None:
++    plants = [{"common_name": "English ivy", "latin_name": "Hedera helix"}]
++    regions = {
++        "bay": {"approved": False, "invasive_plants": plants},
++        "crete": {"approved": False, "invasive_plants": []},
++        "loose": {"approved": True, "invasive_plants": plants},
++        "ready": {**STAMP, "invasive_plants": plants},
++    }
++    assert placeholder_report(ready(regions=regions)) == [
++        "region bay not approved",
++        "region loose says approved but has no approved_by and approved_on",
++    ]
++
++
++def test_approvals_name_each_approved_item_and_leave_out_the_rest() -> None:
++    plants = [{"common_name": "English ivy", "latin_name": "Hedera helix"}]
++    content = ready(
++        sentences=[{"id": "s1", "text": "Words.", **STAMP}, {"id": "s2", "approved": False}],
++        lessons={"artificial_bank": dict(STAMP), "pipe_running": {"approved": False}},
++        regions={"bay": {**STAMP, "invasive_plants": plants, "creeks": [{"slug": "a"}]}},
++    )
++    found = approvals(content)
++    assert [item for item, _ in found] == [
++        "sentence s1",
++        "lesson artificial_bank",
++        "region bay",
++    ]
++    # A region's approval covers its plant list, not the map data beside it.
++    assert "creeks" not in found[2][1] and found[2][1]["invasive_plants"] == plants
++
++
++def test_the_approved_text_ignores_stamps_and_notes_but_not_the_words() -> None:
++    words = {"id": "s1", "text": "Do not swallow creek water.", "source": "CDC"}
++    base = approval_text({**words, **STAMP, "note": "checked"})
++    assert base == approval_text({**words, "approved": False, "note": "a new note"})
++    assert base != approval_text({**words, **STAMP, "text": "Do not swallow creek water!"})
++    assert base != approval_text({**words, **STAMP, "source": "Somewhere else"})
++    lesson = {"rule_of_thumb": "R.", "practice_marks": [{"x": 0.5, "label": "A", **STAMP}]}
++    moved = {"rule_of_thumb": "R.", "practice_marks": [{"x": 0.6, "label": "A", **STAMP}]}
++    restamped = {"rule_of_thumb": "R.", "practice_marks": [{"x": 0.5, "label": "A"}]}
++    assert approval_text(lesson) == approval_text(restamped)
++    assert approval_text(lesson) != approval_text(moved)
++
++
++def test_the_repository_has_no_approval_without_a_name_and_a_date() -> None:
++    report = placeholder_report(load_content(ROOT, strict=False))
++    assert not [r for r in report if "says approved but has no" in r or "with no source" in r]
+diff --git a/docs/CONTRACTS.md b/docs/CONTRACTS.md
+index 646367e..678c51f 100644
+--- a/docs/CONTRACTS.md
++++ b/docs/CONTRACTS.md
+@@ -81,7 +81,7 @@ Every file in `results/` is JSON or CSV or PNG, written by a script in `evals/`
+ 
+ ## Audit log (W7 writes the module, everyone appends through it)
+ 
+-`audit/log.jsonl`, one JSON object per line: `{seq, ts_utc, kind, payload_sha256, prev_hash, hash}` where `hash = sha256(f"{seq}|{ts_utc}|{kind}|{payload_sha256}|{prev_hash}")`. Kinds: `plan_tagged, key_frozen, launch_wipe, model_pass_table, data_lock, record_written, sandbox_push`. Module `scripts/audit_log.py` exposes `append(kind: str, payload: dict) -> str` and `verify() -> int` (chain length). `scripts/verify_audit.py` calls verify. Call it an audit log, never a blockchain.
++`audit/log.jsonl`, one JSON object per line: `{seq, ts_utc, kind, payload_sha256, prev_hash, hash}` where `hash = sha256(f"{seq}|{ts_utc}|{kind}|{payload_sha256}|{prev_hash}")`. Kinds: `approval, plan_tagged, key_frozen, launch_wipe, model_pass_table, data_lock, record_written, sandbox_push`. Module `scripts/audit_log.py` exposes `append(kind: str, payload: dict) -> str` and `verify() -> int` (chain length). An `approval` row holds one approved sentence, lesson or region plant list: the item, the sha256 of its words, who and when; the person who approved it writes it with `scripts/audit_log.py approve <kind> <id>`, and preflight wants one for every approval. `scripts/verify_audit.py` calls verify. Call it an audit log, never a blockchain.
+ 
+ ## Environment variables
+ 
+diff --git a/scripts/audit_log.py b/scripts/audit_log.py
+index e14cf24..eba2dd8 100644
+--- a/scripts/audit_log.py
++++ b/scripts/audit_log.py
+@@ -7,21 +7,36 @@ Payloads are not stored here; the caller keeps them (for example results/key_has
+ What verify() catches: a changed field, a removed or added line in the middle, a reordered line.
+ What it cannot catch: cutting lines off the end. That is why the README prints the last hash at
+ freeze and Alex posts it publicly; scripts/verify_audit.py --expect-last compares against it.
++
++An approval row records one approved sentence, lesson or region plant list: the item, the sha256
++of its words and source, who and when. The person who approved writes it, after stamping
++approved_by and approved_on:
++
++    uv run python scripts/audit_log.py approve sentence person_no_swallow
++
++A model session never runs that. Preflight wants one row per approval, for the words as they are
++now, so words changed after approval show up as needing a new yes.
+ """
+ 
+ from __future__ import annotations
+ 
++import argparse
+ import hashlib
+ import json
++import sys
++from collections.abc import Mapping
+ from datetime import UTC, datetime
+ from pathlib import Path
+ from typing import Any
+ 
++from core.content_loader import approval_text, approvals, load_content, stamped
++
+ ROOT = Path(__file__).resolve().parents[1]
+ LOG = ROOT / "audit" / "log.jsonl"
+ GENESIS = "0" * 64
+ KINDS = frozenset(
+     {
++        "approval",
+         "plan_tagged",
+         "key_frozen",
+         "launch_wipe",
+@@ -61,6 +76,13 @@ def _entries(path: Path) -> list[dict[str, Any]]:
+     return out
+ 
+ 
++def payload_hash(payload: dict[str, Any]) -> str:
++    """The payload_sha256 a row stores for this payload."""
++    return hashlib.sha256(
++        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode()
++    ).hexdigest()
++
++
+ def append(
+     kind: str, payload: dict[str, Any], *, path: Path = LOG, allow_test_kind: bool = False
+ ) -> str:
+@@ -71,9 +93,7 @@ def append(
+     prev = entries[-1]["hash"] if entries else GENESIS
+     seq = len(entries) + 1
+     ts_utc = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+-    payload_sha256 = hashlib.sha256(
+-        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode()
+-    ).hexdigest()
++    payload_sha256 = payload_hash(payload)
+     digest = _hash(seq, ts_utc, kind, payload_sha256, prev)
+     entry = {
+         "seq": seq,
+@@ -111,3 +131,54 @@ def last_hash(path: Path = LOG) -> str:
+     """The hash of the last entry, or the 64 zero genesis when the log is empty."""
+     entries = _entries(path)
+     return str(entries[-1]["hash"]) if entries else GENESIS
++
++
++def approval_payload(item: str, entry: Mapping[str, Any]) -> dict[str, str]:
++    """What an approval row records: the item, the sha256 of its words, who and when."""
++    return {
++        "item": item,
++        "text_sha256": hashlib.sha256(approval_text(entry).encode()).hexdigest(),
++        "approved_by": str(entry.get("approved_by", "")),
++        "approved_on": str(entry.get("approved_on") or entry.get("approved_at") or ""),
++    }
++
++
++def approval_hashes(path: Path = LOG) -> set[str]:
++    """The payload hash of every approval row in the log."""
++    return {str(e["payload_sha256"]) for e in _entries(path) if e["kind"] == "approval"}
++
++
++def approve(root: Path, item: str) -> str:
++    """Write the approval row for one item and return its hash. Refuses an item that does not say
++    approved: true with a name and a date, and one whose words already have a row."""
++    found = dict(approvals(load_content(root, strict=False)))
++    if item not in found:
++        raise AuditError(f"{item} does not say approved: true")
++    if not stamped(found[item]):
++        raise AuditError(f"{item} needs approved_by and approved_on before it is logged")
++    payload = approval_payload(item, found[item])
++    log = root / "audit" / "log.jsonl"
++    if payload_hash(payload) in approval_hashes(log):
++        raise AuditError(f"{item} already has an approval row for these words")
++    return append("approval", payload, path=log)
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description="Record an approval in the audit log.")
++    sub = parser.add_subparsers(dest="command", required=True)
++    cmd = sub.add_parser("approve", help="after you approved it and stamped your name and date")
++    cmd.add_argument("kind", choices=("sentence", "lesson", "region"))
++    cmd.add_argument("id", help="the sentence id, the lesson feature or the region file name")
++    cmd.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
++    args = parser.parse_args(argv)
++    try:
++        digest = approve(args.root, f"{args.kind} {args.id}")
++    except AuditError as e:
++        print(f"audit-log: {e}", file=sys.stderr)
++        return 1
++    print(f"audit-log: approval of {args.kind} {args.id} recorded, hash {digest}")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/preflight.py b/scripts/preflight.py
+index 38fd852..05a2132 100644
+--- a/scripts/preflight.py
++++ b/scripts/preflight.py
+@@ -24,7 +24,7 @@ from datetime import UTC, datetime
+ from pathlib import Path
+ from typing import Any, Literal
+ 
+-from core.content_loader import load_content, placeholder_report
++from core.content_loader import Content, approvals, load_content, placeholder_report, stamped
+ from core.records import FEATURES
+ from scripts import audit_log, freeze_key, label_photos
+ from scripts.verify_claims import CLAIM_RE, resolve_pointer
+@@ -100,19 +100,41 @@ def _last_line(text: str) -> str:
+ 
+ def unapproved_marks(lessons: dict[str, Any]) -> list[str]:
+     """One line per mark still waiting for a yes, naming the lesson and the label. Any team
+-    member can approve a mark; the approval stamps who and when."""
++    member can approve a mark; the approval stamps who and when, and a mark that says approved
++    with no stamp is still waiting."""
+     out: list[str] = []
+     for fid, lesson in sorted(lessons.items()):
+         for where, mark in label_photos.iter_marks(lesson):
+-            if mark.get("approved") is not True:
++            if not stamped(mark):
+                 label = str(mark.get("label") or "(no label)")
+                 out.append(f'lesson {fid} {where}: mark "{label}" is not approved yet')
+     return out
+ 
+ 
+-# What the two minute test never touches: the creek check form and the health sentences.
+-# Both still have to be right before a judge looks, which is what make preflight-judges is for.
+-JUDGES_ONLY_RE = re.compile(r"^(form item |sentence )")
++def unlogged_approvals(content: Content, log_path: Path) -> list[str]:
++    """One line per stamped approval with no approval row in the audit log for its words as they
++    are now. Words changed after the yes land here too, because their hash no longer matches."""
++    try:
++        logged = audit_log.approval_hashes(log_path)
++    except audit_log.AuditError:
++        logged = set()  # the audit_log check reports the broken log itself
++    out: list[str] = []
++    for item, entry in approvals(content):
++        if not stamped(entry):
++            continue  # placeholder_report already names it
++        if audit_log.payload_hash(audit_log.approval_payload(item, entry)) not in logged:
++            kind, _, name = item.partition(" ")
++            out.append(
++                f"{item} has no approval row in the audit log for its words: whoever approved "
++                f"it runs scripts/audit_log.py approve {kind} {name}"
++            )
++    return out
++
++
++# What the two minute test never needs: the creek check form, its plant list and the sentences,
++# which fail closed (one not approved is simply not shown). They still have to be right before a
++# judge looks, which is what make preflight-judges is for.
++JUDGES_ONLY_RE = re.compile(r"^(form item |sentence |region )")
+ 
+ 
+ def split_by_gate(reasons: list[str]) -> tuple[list[str], list[str]]:
+@@ -142,10 +164,12 @@ def run_checks(
+     run = runner or default_runner(root)
+     checks: list[Check] = []
+ 
+-    # 1. The loader passes, 2. every human input the loader knows about is present, and
+-    # 2b. Rachel has approved every mark on a lesson photo. Alex places the marks with
+-    # scripts/label_photos.py --marks, which always writes approved: false, so this check is
+-    # what waits for her yes.
++    # 1. The loader passes, 2. every human input the loader knows about is present, each approval
++    # with a name and a date, and 2b. Rachel has approved every mark on a lesson photo. Alex
++    # places the marks with scripts/label_photos.py --marks, which always writes approved: false,
++    # so this check is what waits for her yes. 2c. Each approval has its row in the audit log.
++    # The rows came in after the launch (REVIEW_02), so they gate the judges' run; make
++    # preflight runs both gates, so words changed after their yes still show up there.
+     content_loads = Check("content_loads", "BUILD")
+     human_inputs = Check("human_inputs", "HUMAN", clears="real photos and frozen wording")
+     judges_inputs = Check(
+@@ -153,6 +177,9 @@ def run_checks(
+     )
+     second_labels = Check("second_labels", "NOTE", clears="a second labeller, optional")
+     marks_approved = Check("marks_approved", "HUMAN", clears="team approval")
++    approvals_logged = Check(
++        "approvals_logged", "HUMAN", clears="an audit log row for each approval", gate="judges"
++    )
+     try:
+         content = load_content(root, strict=False)
+         content_loads.reasons = list(content.problems)
+@@ -160,11 +187,20 @@ def run_checks(
+         human_inputs.reasons, judges_inputs.reasons = split_by_gate(blocking)
+         second_labels.reasons = notes
+         marks_approved.reasons = unapproved_marks(content.lessons)
++        approvals_logged.reasons = unlogged_approvals(content, root / "audit" / "log.jsonl")
+     except Exception as e:  # a missing or unreadable content file
+         content_loads.reasons = [f"content did not load: {e}"]
+         human_inputs.reasons = ["content did not load, so human inputs cannot be checked"]
+         marks_approved.reasons = ["content did not load, so marks cannot be checked"]
+-    checks += [content_loads, human_inputs, judges_inputs, second_labels, marks_approved]
++        approvals_logged.reasons = ["content did not load, so approvals cannot be checked"]
++    checks += [
++        content_loads,
++        human_inputs,
++        judges_inputs,
++        second_labels,
++        marks_approved,
++        approvals_logged,
++    ]
+ 
+     # 2c. Backups. Update 11 section 6 puts this in the launch gate: a study with no backup is
+     # one bad afternoon from having no data. The drill file is written by the backup step.
+diff --git a/scripts/tests/test_audit_log.py b/scripts/tests/test_audit_log.py
+index 2842484..834cf07 100644
+--- a/scripts/tests/test_audit_log.py
++++ b/scripts/tests/test_audit_log.py
+@@ -2,13 +2,20 @@
+ 
+ from __future__ import annotations
+ 
++import hashlib
+ import json
++import shutil
+ from pathlib import Path
++from typing import Any
+ 
+ import pytest
++import yaml
+ 
++from core.content_loader import approval_text
+ from scripts import audit_log, verify_audit
+ 
++REPO = Path(__file__).parents[2]
++
+ 
+ def _log_with(tmp_path: Path, n: int) -> Path:
+     path = tmp_path / "audit" / "log.jsonl"
+@@ -161,3 +168,59 @@ def test_verify_audit_cli_expect_last_catches_a_cut_off_tail(
+     args = ["--path", str(path), "--allow-test-kind", "--expect-last", posted]
+     assert verify_audit.main(args) == 1
+     assert "differs from the posted hash" in capsys.readouterr().out
++
++
++# Approval rows (REVIEW_02 F95): one per approval, for the words as they were approved.
++
++
++def _root_with_sentence(tmp_path: Path, **fields: Any) -> tuple[Path, dict[str, Any]]:
++    """A copy of content/ whose first sentence carries the given fields."""
++    root = tmp_path / "repo"
++    shutil.copytree(REPO / "content", root / "content")
++    path = root / "content" / "approved_sentences.yaml"
++    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
++    for key in ("approved_by", "approved_on"):
++        doc["sentences"][0].pop(key, None)
++    doc["sentences"][0].update(fields)
++    path.write_text(yaml.safe_dump(doc), encoding="utf-8")
++    return root, doc["sentences"][0]
++
++
++def test_approve_writes_one_row_for_the_words_and_refuses_a_second(tmp_path: Path) -> None:
++    stamp = {"approved": True, "approved_by": "Alex Velazquez", "approved_on": "2026-09-22"}
++    root, sentence = _root_with_sentence(tmp_path, **stamp)
++    item = f"sentence {sentence['id']}"
++    digest = audit_log.approve(root, item)
++    log = root / "audit" / "log.jsonl"
++    entry = json.loads(_lines(log)[0])
++    assert (entry["kind"], entry["hash"]) == ("approval", digest)
++    payload = audit_log.approval_payload(item, sentence)
++    assert payload == {
++        "item": item,
++        "text_sha256": hashlib.sha256(approval_text(sentence).encode()).hexdigest(),
++        "approved_by": "Alex Velazquez",
++        "approved_on": "2026-09-22",
++    }
++    assert entry["payload_sha256"] == audit_log.payload_hash(payload)
++    assert audit_log.approval_hashes(log) == {entry["payload_sha256"]}
++    with pytest.raises(audit_log.AuditError, match="already has an approval row"):
++        audit_log.approve(root, item)
++    assert audit_log.verify(log) == 1
++
++
++@pytest.mark.parametrize(
++    ("fields", "refusal"),
++    [
++        ({"approved": False}, "does not say approved: true"),
++        ({"approved": True}, "needs approved_by and approved_on"),
++        ({"approved": True, "approved_by": "Alex Velazquez"}, "needs approved_by and approved_on"),
++    ],
++)
++def test_approve_refuses_what_is_not_approved_with_a_name_and_a_date(
++    tmp_path: Path, capsys: pytest.CaptureFixture[str], fields: dict[str, Any], refusal: str
++) -> None:
++    root, sentence = _root_with_sentence(tmp_path, **fields)
++    args = ["approve", "sentence", sentence["id"], "--root", str(root)]
++    assert audit_log.main(args) == 1
++    assert refusal in capsys.readouterr().err
++    assert not (root / "audit" / "log.jsonl").exists()
+diff --git a/scripts/tests/test_mark_photos.py b/scripts/tests/test_mark_photos.py
+index 501a7a4..7a6a5b5 100644
+--- a/scripts/tests/test_mark_photos.py
++++ b/scripts/tests/test_mark_photos.py
+@@ -284,6 +284,12 @@ def test_preflight_fails_while_a_mark_is_unapproved_and_passes_once_it_is(repo:
+         for _, mark in label_photos.iter_marks(doc):
+             mark["approved"] = True
+         path.write_text(yaml.safe_dump(doc), encoding="utf-8")
++    assert not marks_check(repo).passed, "approved: true with no stamp is not an approval"
++    for path in sorted((repo / "content" / "lessons").glob("*.yaml")):
++        doc = label_photos.load_lesson(path)
++        for _, mark in label_photos.iter_marks(doc):
++            mark.update(approved_by="rachel", approved_at="2026-09-22T10:00:00Z")
++        path.write_text(yaml.safe_dump(doc), encoding="utf-8")
+     assert marks_check(repo).passed, "every mark approved, so the gate opens"
+ 
+     doc = label_photos.load_lesson(label_photos.lesson_path(repo, LESSON))
+diff --git a/scripts/tests/test_preflight.py b/scripts/tests/test_preflight.py
+index daaaf49..6e968b3 100644
+--- a/scripts/tests/test_preflight.py
++++ b/scripts/tests/test_preflight.py
+@@ -12,6 +12,7 @@ from pathlib import Path
+ import pytest
+ import yaml
+ 
++from core.content_loader import approvals, load_content
+ from scripts import audit_log, freeze_key, label_photos, merge_labels, preflight
+ from scripts.ingest_photos import MANIFEST_COLUMNS
+ 
+@@ -60,6 +61,10 @@ def test_current_repo_fails_only_for_known_reasons() -> None:
+     assert not any("placeholder photo in role" in r for r in reasons)
+     assert any("no second label for test photo" in r for r in reasons)
+     assert any("prereg-v1 tag missing" in r for r in reasons)
++    # Approval rows came in after the launch (REVIEW_02): the person who approved each item
++    # records it, and until then that is all this check asks for.
++    logged = next(c for c in checks if c.name == "approvals_logged")
++    assert all("has no approval row" in r for r in logged.reasons)
+     # BUILD failures today can only come from other workstreams' half-finished files.
+     others = {"hidden_field", "model_pass_table_exists", "content_loads", "verify_claims"}
+     assert build <= others, build
+@@ -99,12 +104,19 @@ def green_root(tmp_path: Path) -> Path:
+     for item in doc["items"]:
+         item["verified_against_app"] = True
+     form_path.write_text(yaml.safe_dump(doc))
++    stamp = {"approved": True, "approved_by": "a tester", "approved_on": "2026-09-22"}
+     for lesson in (root / "content" / "lessons").glob("*.yaml"):
+         doc = yaml.safe_load(lesson.read_text())
+-        doc["approved"] = True
++        doc.update(stamp)
+         for _, mark in label_photos.iter_marks(doc):
+-            mark["approved"] = True  # green means Rachel has been through every mark
++            # green means Rachel has been through every mark, and each carries her stamp
++            mark.update(approved=True, approved_by="rachel", approved_at="2026-09-22T10:00:00Z")
+         lesson.write_text(yaml.safe_dump(doc))
++    sentences_path = root / "content" / "approved_sentences.yaml"
++    doc = yaml.safe_load(sentences_path.read_text())
++    for sentence in doc["sentences"]:
++        sentence.update(stamp, source=sentence["source"] or "a page a tester checked")
++    sentences_path.write_text(yaml.safe_dump(doc))
+     locale_path = root / "content" / "locales" / "en.json"
+     locale = json.loads(locale_path.read_text())
+     locale = {
+@@ -141,6 +153,10 @@ def green_root(tmp_path: Path) -> Path:
+         == 0
+     )
+     freeze_key.freeze(root)
++    # Each approval then gets its row, written the way a person writes it.
++    for item, _ in approvals(load_content(root, strict=False)):
++        kind, _, name = item.partition(" ")
++        assert audit_log.main(["approve", kind, name, "--root", str(root)]) == 0
+     (root / "results" / "model_pass_table.json").write_text(
+         json.dumps({"real": True, "synthetic": False, "generated_at_utc": "x", "models": {}})
+     )
+@@ -207,10 +223,10 @@ def test_green_root_guards_fire_when_broken(tmp_path: Path) -> None:
+     lines = log.read_text().splitlines()
+     entry = json.loads(lines[0])
+     entry["kind"] = "plan_tagged"
+-    log.write_text(json.dumps(entry) + "\n")
++    log.write_text("\n".join([json.dumps(entry), *lines[1:]]) + "\n")
+     assert failed() == {"audit_log": "BUILD"}
+     log.write_text("\n".join(lines) + "\n")
+-    assert audit_log.verify(log) == 1
++    assert audit_log.verify(log) == len(lines)
+ 
+     items = root / "content" / "test_items.yaml"
+     doc = yaml.safe_load(items.read_text())
+@@ -307,6 +323,47 @@ def test_a_form_item_is_a_judges_reason_and_a_photo_is_a_launch_one() -> None:
+     ]
+ 
+ 
++def test_an_approval_needs_a_name_a_date_and_a_row_for_its_words(tmp_path: Path) -> None:
++    """REVIEW_02 F85 and F95: a bare approved: true, or words changed after the yes, must not
++    pass. Both were possible before: the loader and preflight read only the boolean."""
++    root = green_root(tmp_path)
++
++    def reasons() -> dict[str, list[str]]:
++        return {
++            c.name: c.reasons for c in preflight.run_checks(root, runner=ok_runner) if c.reasons
++        }
++
++    assert "approvals_logged" not in reasons()
++    sentences_path = root / "content" / "approved_sentences.yaml"
++    doc = yaml.safe_load(sentences_path.read_text())
++    swallow = next(s for s in doc["sentences"] if s["id"] == "person_no_swallow")
++
++    # New words under the old stamp, as in F85: the stamp is fine, but no row matches the words.
++    swallow["text"] = "Do not swallow creek water, and keep it out of open cuts."
++    sentences_path.write_text(yaml.safe_dump(doc))
++    assert reasons()["approvals_logged"] == [
++        "sentence person_no_swallow has no approval row in the audit log for its words: "
++        "whoever approved it runs scripts/audit_log.py approve sentence person_no_swallow"
++    ]
++    assert audit_log.main(["approve", "sentence", "person_no_swallow", "--root", str(root)]) == 0
++    assert "approvals_logged" not in reasons()
++
++    # A stamp with no name is no approval, and the approve command refuses to log it.
++    del swallow["approved_by"]
++    sentences_path.write_text(yaml.safe_dump(doc))
++    assert reasons()["judges_inputs"] == [
++        "sentence person_no_swallow says approved but has no approved_by and approved_on"
++    ]
++    assert audit_log.main(["approve", "sentence", "person_no_swallow", "--root", str(root)]) == 1
++
++    # The same holds for a mark, which stamps approved_at.
++    lesson = label_photos.lesson_path(root, "pipe_running")
++    lesson_doc = label_photos.load_lesson(lesson)
++    lesson_doc["practice_marks"][0].pop("approved_by")
++    lesson.write_text(yaml.safe_dump(lesson_doc), encoding="utf-8")
++    assert len(reasons()["marks_approved"]) == 1
++
++
+ def test_backups_block_the_launch_until_a_drill_has_run(tmp_path: Path) -> None:
+     """Update 11 section 6. A study with no backup is one bad afternoon from having no data."""
+     root = green_root(tmp_path)
+diff --git a/worker/golden/healthcard.json b/worker/golden/healthcard.json
+index b1949d2..63fb0ec 100644
+--- a/worker/golden/healthcard.json
++++ b/worker/golden/healthcard.json
+@@ -421,10 +421,10 @@
+     {
+       "expected": {
+         "city": "Replant both margins with native trees and shrubs, and stop cutting them back.",
+-        "person": "If a pipe is running after three dry days, note the place and the date and tell the city. It is worth testing.",
++        "person": "Stay out of water that smells bad, looks discoloured, or has foam, scum or mats on the surface.",
+         "pet": "Bring drinking water for your dog so it does not need to drink from the creek.",
+         "sources": [
+-          "EPA, Illicit Discharge Detection and Elimination guidance manual (2004), page 337 (72 hours dry) and page 6 (testing is needed before calling a flow polluted). https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf",
++          "CDC, Preventing Illness from Harmful Algal Blooms: if water looks or smells bad, stay out. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+           "CDC, Preventing Illness from Harmful Algal Blooms: keep pets away from water with signs of a bloom. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+           "OneAquaHealth Policy Brief (2026), page 9: rehabilitation of the riparian vegetation should prioritize a diverse corridor with native species, along both stream margins, free from unnecessary clearing. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf"
+         ]
+@@ -544,12 +544,10 @@
+             "text": "If you touch creek water, rinse your hands with tap water afterwards, and wash them before you eat."
+           },
+           {
+-            "approved": true,
+-            "approved_by": "Alex Velazquez",
+-            "approved_on": "2026-09-21",
++            "approved": false,
+             "audience": "person",
+             "id": "person_no_swallow",
+-            "note": "Cited page fetched again on 2026-09-21. The draft said keep water out of open cuts; the page says stay out if you have one, so the sentence now says what the page says.",
++            "note": "The words changed after the draft was approved: the draft said keep water out of open cuts. Alex has not yet approved the new words, so this is not shown.",
+             "source": "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html",
+             "source_quote": "Don't swallow the water. Even if water looks clean, it can still have germs in it that could make you sick. Protect open cuts or wounds. Stay out if you have an open cut or wound (particularly from a surgery or piercing).",
+             "text": "Do not swallow creek water, and stay out if you have an open cut or wound."
+@@ -575,6 +573,38 @@
+             "source": "EPA, Illicit Discharge Detection and Elimination guidance manual (2004), page 337 (72 hours dry) and page 6 (testing is needed before calling a flow polluted). https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf",
+             "source_quote": "While the traditional definition of dry weather has been 72 hours without rainfall, some communities have shortened this window to 48 hours to make sampling more practical. (page 337) Consequently, field testing and/or water quality sampling are needed to confirm whether pollutants are actually present in dry weather flow, in order to classify them as an illicit discharge. (chapter 1, page 6, PDF page 20)",
+             "text": "If a pipe is running after three dry days, note the place and the date and tell the city. It is worth testing."
++          },
++          {
++            "approved": false,
++            "audience": "reveal",
++            "id": "reveal_point",
++            "note": "Words set in Update 11D. It needs a source and Alex's yes before it is shown.",
++            "source": "",
++            "text": "The messier creek is in a more natural state. Tidy is not the same as natural."
++          },
++          {
++            "approved": false,
++            "audience": "reveal",
++            "id": "reveal_limit",
++            "note": "Words set in Update 11D. It needs a source and Alex's yes before it is shown.",
++            "source": "",
++            "text": "Neither photo can tell you whether the water is safe. That takes testing."
++          },
++          {
++            "approved": false,
++            "audience": "reveal",
++            "id": "reveal_natural_note",
++            "note": "Says what the warm-up photo shows. It needs a source and Alex's yes before it is shown.",
++            "source": "",
++            "text": "It bends, the outer bank is worn away, and fallen wood lies in the water."
++          },
++          {
++            "approved": false,
++            "audience": "reveal",
++            "id": "reveal_modified_note",
++            "note": "Says what the warm-up photo shows. It needs a source and Alex's yes before it is shown.",
++            "source": "",
++            "text": "A mown park, and the creek runs in a concrete channel."
+           }
+         ]
+       },
+diff --git a/worker/src/content.json b/worker/src/content.json
+index 932c2de..b44a8cd 100644
+--- a/worker/src/content.json
++++ b/worker/src/content.json
+@@ -1,5 +1,5 @@
+ {
+-  "content_hash": "314f3327b9b5f235",
++  "content_hash": "0a5e34bf161061b6",
+   "creeks": [
+     {
+       "name": "Strawberry Creek",
+@@ -798,7 +798,7 @@
+     "error.server": "The server could not take that. Try again in a moment.",
+     "error.start_over": "Start again",
+     "followup.checker_flag": "The checker noticed something that may be {note}. Want to look again?",
+-    "followup.dry_pipe": "It has not rained here for {days} days. Is anything coming out of that pipe? A pipe still running after three dry days is worth testing.",
++    "followup.dry_pipe": "It has not rained here for {days} days. Is anything coming out of that pipe?",
+     "followup.low_score": "You scored {correct} of 4 on {feature} in the test. Could you take a photo of the {feature} so a reviewer can check?",
+     "followup.rating_check": "You rated this stream Good, but you also reported {issues}. Do you want to keep your rating?",
+     "label.checker_noticed": "the checker noticed",
+@@ -981,12 +981,10 @@
+       "text": "If you touch creek water, rinse your hands with tap water afterwards, and wash them before you eat."
+     },
+     {
+-      "approved": true,
+-      "approved_by": "Alex Velazquez",
+-      "approved_on": "2026-09-21",
++      "approved": false,
+       "audience": "person",
+       "id": "person_no_swallow",
+-      "note": "Cited page fetched again on 2026-09-21. The draft said keep water out of open cuts; the page says stay out if you have one, so the sentence now says what the page says.",
++      "note": "The words changed after the draft was approved: the draft said keep water out of open cuts. Alex has not yet approved the new words, so this is not shown.",
+       "source": "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html",
+       "source_quote": "Don't swallow the water. Even if water looks clean, it can still have germs in it that could make you sick. Protect open cuts or wounds. Stay out if you have an open cut or wound (particularly from a surgery or piercing).",
+       "text": "Do not swallow creek water, and stay out if you have an open cut or wound."
+@@ -1012,6 +1010,38 @@
+       "source": "EPA, Illicit Discharge Detection and Elimination guidance manual (2004), page 337 (72 hours dry) and page 6 (testing is needed before calling a flow polluted). https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf",
+       "source_quote": "While the traditional definition of dry weather has been 72 hours without rainfall, some communities have shortened this window to 48 hours to make sampling more practical. (page 337) Consequently, field testing and/or water quality sampling are needed to confirm whether pollutants are actually present in dry weather flow, in order to classify them as an illicit discharge. (chapter 1, page 6, PDF page 20)",
+       "text": "If a pipe is running after three dry days, note the place and the date and tell the city. It is worth testing."
++    },
++    {
++      "approved": false,
++      "audience": "reveal",
++      "id": "reveal_point",
++      "note": "Words set in Update 11D. It needs a source and Alex's yes before it is shown.",
++      "source": "",
++      "text": "The messier creek is in a more natural state. Tidy is not the same as natural."
++    },
++    {
++      "approved": false,
++      "audience": "reveal",
++      "id": "reveal_limit",
++      "note": "Words set in Update 11D. It needs a source and Alex's yes before it is shown.",
++      "source": "",
++      "text": "Neither photo can tell you whether the water is safe. That takes testing."
++    },
++    {
++      "approved": false,
++      "audience": "reveal",
++      "id": "reveal_natural_note",
++      "note": "Says what the warm-up photo shows. It needs a source and Alex's yes before it is shown.",
++      "source": "",
++      "text": "It bends, the outer bank is worn away, and fallen wood lies in the water."
++    },
++    {
++      "approved": false,
++      "audience": "reveal",
++      "id": "reveal_modified_note",
++      "note": "Says what the warm-up photo shows. It needs a source and Alex's yes before it is shown.",
++      "source": "",
++      "text": "A mown park, and the creek runs in a concrete channel."
+     }
+   ],
+   "test_items": [

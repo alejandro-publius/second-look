@@ -1,0 +1,139 @@
+{
+ "target": "local",
+ "rate_sessions_per_minute": 50.0,
+ "minutes": 5.0,
+ "wall_seconds": 349.3,
+ "sessions_started": 250,
+ "sessions_done": 250,
+ "requests": 6125,
+ "session_errors": [],
+ "session_error_count": 0,
+ "endpoints": [
+  {
+   "endpoint": "GET /api/content/hash",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 3.4,
+   "p95_ms": 12.2,
+   "p99_ms": 56.6,
+   "max_ms": 576.2
+  },
+  {
+   "endpoint": "GET /api/creeks",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 4.0,
+   "p95_ms": 15.2,
+   "p99_ms": 85.1,
+   "max_ms": 635.0
+  },
+  {
+   "endpoint": "GET /api/fhir/validation",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 2.8,
+   "p95_ms": 10.0,
+   "p99_ms": 30.8,
+   "max_ms": 262.0
+  },
+  {
+   "endpoint": "GET /api/test/counts",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 5.9,
+   "p95_ms": 21.7,
+   "p99_ms": 75.4,
+   "max_ms": 480.6
+  },
+  {
+   "endpoint": "GET /api/two",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 5.2,
+   "p95_ms": 15.3,
+   "p99_ms": 38.1,
+   "max_ms": 93.8
+  },
+  {
+   "endpoint": "GET /health",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 4.0,
+   "p95_ms": 17.7,
+   "p99_ms": 89.9,
+   "max_ms": 447.9
+  },
+  {
+   "endpoint": "POST /api/test/complete",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 6.8,
+   "p95_ms": 25.6,
+   "p99_ms": 156.8,
+   "max_ms": 285.6
+  },
+  {
+   "endpoint": "POST /api/test/lesson-done",
+   "requests": 125,
+   "ok": 125,
+   "statuses": {
+    "200": 125
+   },
+   "p50_ms": 5.4,
+   "p95_ms": 22.6,
+   "p99_ms": 117.7,
+   "max_ms": 530.7
+  },
+  {
+   "endpoint": "POST /api/test/response",
+   "requests": 4000,
+   "ok": 4000,
+   "statuses": {
+    "200": 4000
+   },
+   "p50_ms": 7.0,
+   "p95_ms": 28.1,
+   "p99_ms": 318.3,
+   "max_ms": 968.8
+  },
+  {
+   "endpoint": "POST /api/test/session",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 6.8,
+   "p95_ms": 19.6,
+   "p99_ms": 87.0,
+   "max_ms": 143.1
+  }
+ ],
+ "think_seconds": [
+  2.0,
+  4.0
+ ],
+ "machine": "Darwin 24.1.0, 8 CPUs",
+ "finished_utc": "2026-09-23T04:51:39Z"
+}

@@ -1,0 +1,740 @@
+06-results-claims-checked: verify_claims reads the shown number, checks docs, trusts study results only when stamped
+
+diff --git a/README.md b/README.md
+index 5d50490..3a60ab0 100644
+--- a/README.md
++++ b/README.md
+@@ -26,7 +26,7 @@ Professional surveyors fixed this long ago. In the UK's River Habitat Survey, "o
+ 
+ ## How the solution aligns with OneAquaHealth
+ 
+-OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored as a dated Practitioner qualification and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in its order and keeps its closing question about how the person feels at the stream. The health card ends in one action each for the person, the pet and the city. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete. Every record validates against their implementation guide at commit b907cf0 with zero errors (`results/fhir_validation.json`). It improves monitoring of water ecosystems and their connection to human, animal and environmental health by making each observation carry its own trust mark.
++OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored as a dated Practitioner qualification and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in its order and keeps its closing question about how the person feels at the stream. The health card ends in one action each for the person, the pet and the city. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete. Every record validates against their implementation guide at commit b907cf0 with <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`results/fhir_validation.json`). It improves monitoring of water ecosystems and their connection to human, animal and environmental health by making each observation carry its own trust mark.
+ 
+ ## Innovation and practical value
+ 
+diff --git a/docs/fhir_mapping.md b/docs/fhir_mapping.md
+index 3b4e630..58f9921 100644
+--- a/docs/fhir_mapping.md
++++ b/docs/fhir_mapping.md
+@@ -1,6 +1,6 @@
+ # FHIR mapping: how one creek visit becomes a OneAquaHealth record
+ 
+-Proof P2 passed on 2026-09-20. The HL7 validator (6.10.4, FHIR 4.0.1) checked our complete visit Bundle against the OneAquaHealth guide built from hl7-eu/oah at commit b907cf0 with our additions inside it: 0 errors, 15 warnings. Every warning is either the "a resource should have narrative" best practice note (14) or the UCUM unit check that cannot run without a terminology server (1). Rerun with `make fhir-validate`. The evidence is `results/fhir_validation.json`.
++Proof P2 passed on 2026-09-20. The HL7 validator (6.10.4, FHIR 4.0.1) checks our complete visit Bundle, and every other file we emit, against the OneAquaHealth guide built from hl7-eu/oah at commit b907cf0 with our additions inside it. The latest run, `results/fhir_validation.json`, found <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors and <!--v:results/fhir_validation.json#/warnings-->52<!--/v--> warnings; that file lists every warning with its text. Rerun with `make fhir-validate`, then `make render-readme` fills these two numbers from the new file.
+ 
+ ## What one visit produces
+ 
+diff --git a/docs/ig_proposal.md b/docs/ig_proposal.md
+index 0784af3..e41ae2d 100644
+--- a/docs/ig_proposal.md
++++ b/docs/ig_proposal.md
+@@ -5,8 +5,9 @@ For the authors of hl7-eu/oah. Written by the Second Look team (Berkeley, a foll
+ ## What we are actually asking, first
+ 
+ Three gaps, found by building a citizen record against your guide at b907cf0 and running the HL7
+-validator over it with terminology checking on. It passes with zero errors, which is the good
+-news. These are the places where passing required a judgement call we would rather you made.
++validator over it with terminology checking on. It passes with
++<!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors, which is the good news. These are
++the places where passing required a judgement call we would rather you made.
+ 
+ 1. **Your guide has no profile for the person, and none for the trail from an answer to whoever
+    gave it.** There is no Practitioner, no QuestionnaireResponse and no Provenance profile at
+@@ -80,17 +81,13 @@ And one Library under your `LibraryOah` profile, your own FAIR pattern: it names
+ 
+ ## What the validator said
+ 
+-HL7 validator 6.10.4, FHIR 4.0.1, your guide built from commit b907cf0 with our FSH inside it. In CI the terminology server is off, so UCUM units cannot be checked there; the full run with terminology on is in `docs/notes/p2_validator_run.md` and also had zero errors. From `results/fhir_validation.json` on 2026-09-21:
++HL7 validator 6.10.4, FHIR 4.0.1, your guide built from commit b907cf0 with our FSH inside it. `make fhir-validate` runs in CI with the terminology server at tx.fhir.org, so UCUM units and value set bindings are checked too. Only when that server does not answer does the run go ahead without it, and then the results file says `"terminology_checks_ran": false`. The first full run, for proof P2, is written up in `docs/notes/p2_validator_run.md`. The latest run, `results/fhir_validation.json`, found <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors and <!--v:results/fhir_validation.json#/warnings-->52<!--/v--> warnings.
+ 
+-```
+-fhir-validate: 7 file(s), 0 error(s), 24 warning(s), terminology checks off; details in results/fhir_validation.json
+-```
+-
+-The seven files are the FSH example Bundle SUSHI builds from `fhir/fsh/`, the Heraklion follower city Bundle from the same folder, and five golden files the code produces: the visit as a collection and as a transaction, the referral, the example laboratory result, and the Library. Every warning is one of two kinds: the dom-6 "a resource should have narrative" best practice note on the two FSH examples, and "Unable to validate code ... in system http://unitsofmeasure.org because the validator is running without terminology services" for `m`, `mL`, `%` and `[CFU]/dL`. The Bundles the code produces carry a generated narrative on every resource, so they show only the UCUM note; the referral and the Library show none. The `preferred` binding on `Observation.code` produced information notes for our local codes, not errors.
++The files it checks are the FSH example Bundle SUSHI builds from `fhir/fsh/`, the Heraklion follower city Bundle from the same folder, the golden files the code produces (the visit as a collection and as a transaction, the referral, the example laboratory result, and the Library), and the Bundles our Worker's own tests build in `fhir/build/instances`. The results file lists every warning with its text. So far they have been of three kinds: a `Location.type` code that is not in the `ServiceDeliveryLocationRoleType` value set, which the binding allows with a warning when no code in the set fits; the dom-6 "a resource should have narrative" best practice note on the two FSH examples; and, on a run without the terminology server, "Unable to validate code ... in system http://unitsofmeasure.org" for `m`, `mL`, `%` and `[CFU]/dL`. The `preferred` binding on `Observation.code` produced information notes for our local codes, not errors.
+ 
+ ## The FSH example
+ 
+-`fhir/fsh/` holds our CodeSystem (`second-look`), two ValueSets (feature codes, answer values), the two Questionnaires (the observer test and the creek check, the second generated from our form so every linkId and answer option matches), one complete visit example, and the Heraklion scaffold: four nested Locations under `LocationOah` for a follower city, written by `make new-city`. `scripts/fhir_build.sh` copies them into `input/fsh/second-look/` inside a copy of your guide at the pinned commit and runs SUSHI 3.20.1: 0 errors, 0 warnings. That build runs in our CI on every commit, so the example cannot drift from the guide without someone noticing.
++`fhir/fsh/` holds our CodeSystem (`second-look`), two ValueSets (feature codes, answer values), the two Questionnaires (the observer test and the creek check, the second generated from our form so every linkId and answer option matches), one complete visit example, and the Heraklion scaffold: four nested Locations under `LocationOah` for a follower city, written by `make new-city`. `scripts/fhir_build.sh` copies them into `input/fsh/second-look/` inside a copy of your guide at the pinned commit and runs SUSHI 3.20.1, and the build stops if SUSHI reports an error. That build runs in our CI on every commit, so the example cannot drift from the guide without someone noticing.
+ 
+ ## What we would add to the guide
+ 
+diff --git a/evals/pick_examples.py b/evals/pick_examples.py
+index f918fdb..bea53f6 100644
+--- a/evals/pick_examples.py
++++ b/evals/pick_examples.py
+@@ -19,6 +19,7 @@ from typing import Any
+ import numpy as np
+ 
+ from evals.common import PLAN_SEED, RESULTS_DIR, load_test_items, result_header, write_json
++from scripts.verify_claims import real_result_problems
+ 
+ SCRIPT = "evals/pick_examples.py"
+ N_EXAMPLES = 3
+@@ -62,10 +63,11 @@ def load_model_accuracy(path: Path, *, synthetic: bool, allow_write: bool) -> di
+ 
+ 
+ def newest_real_usability(results_dir: Path) -> Path | None:
++    """The newest usability results that carry the full real stamp (scripts/verify_claims.py)."""
+     candidates = sorted(results_dir.glob("usability_*.json"), reverse=True)
+     for path in candidates:
+         doc = json.loads(path.read_text(encoding="utf-8"))
+-        if not doc.get("synthetic", True):
++        if not real_result_problems(path.name, doc):
+             return path
+     return None
+ 
+@@ -139,8 +141,15 @@ def main(argv: list[str] | None = None) -> int:
+         return 4
+ 
+     usability = json.loads(usability_path.read_text(encoding="utf-8"))
+-    if not args.synthetic and usability.get("synthetic"):
+-        print(f"{usability_path} is synthetic. Pass --synthetic or run the real analysis.")
++    problems: list[str] = []
++    if not args.synthetic:
++        problems = real_result_problems(usability_path.name, usability)
++        if not usability_path.name.startswith("usability_"):
++            # The stamp rule goes by the name, so a real input keeps the analysis's own name.
++            problems.append(f"{usability_path.name} is not named usability_<stamp>.json")
++    if problems:
++        print("\n".join(problems))
++        print(f"{usability_path} is not a real result. Pass --synthetic or run the real analysis.")
+         return 5
+     models_doc = load_model_accuracy(model_path, synthetic=args.synthetic, allow_write=True)
+     name, mean_acc = best_model(models_doc["models"])
+diff --git a/evals/tests/test_pick_examples.py b/evals/tests/test_pick_examples.py
+index 77da7b5..1ae7bd5 100644
+--- a/evals/tests/test_pick_examples.py
++++ b/evals/tests/test_pick_examples.py
+@@ -8,7 +8,14 @@ from pathlib import Path
+ import pytest
+ 
+ from evals.common import load_test_items, write_json
+-from evals.pick_examples import best_model, main, pick, synthetic_model_accuracy
++from evals.pick_examples import (
++    best_model,
++    main,
++    newest_real_usability,
++    pick,
++    synthetic_model_accuracy,
++)
++from scripts.verify_claims import PLAN_SHA256
+ 
+ 
+ def test_pick_takes_the_three_largest_gaps_in_either_direction() -> None:
+@@ -43,7 +50,8 @@ def test_best_model_is_the_highest_mean_with_a_stable_tie_break() -> None:
+         best_model({})
+ 
+ 
+-def _fake_usability(path: Path, *, synthetic: bool) -> None:
++def _fake_usability(path: Path, *, synthetic: bool, stamped: bool = True) -> None:
++    """A usability results file. A real one carries the full stamp unless stamped is False."""
+     per_item = {
+         row["id"]: {
+             "feature": row["feature"],
+@@ -53,14 +61,16 @@ def _fake_usability(path: Path, *, synthetic: bool) -> None:
+         }
+         for i, row in enumerate(load_test_items())
+     }
+-    write_json(
+-        path,
+-        {
+-            "synthetic": synthetic,
+-            "stamp": "SYNTHETIC" if synthetic else "20260928",
+-            "per_item": per_item,
+-        },
+-    )
++    doc = {
++        "synthetic": synthetic,
++        "stamp": "SYNTHETIC" if synthetic else "20260928",
++        "per_item": per_item,
++    }
++    if not synthetic and stamped:
++        doc["generated_at_utc"] = "2026-09-28T02:00:00Z"
++        doc["script"] = "evals/usability_analysis.py"
++        doc["plan_sha256"] = PLAN_SHA256
++    write_json(path, doc)
+ 
+ 
+ def test_main_writes_a_synthetic_model_file_when_missing(tmp_path: Path) -> None:
+@@ -109,3 +119,20 @@ def test_real_mode_refuses_synthetic_inputs(tmp_path: Path) -> None:
+     _fake_usability(tmp_path / "usability_20260928.json", synthetic=False)
+     with pytest.raises(SystemExit):
+         main(["--results-dir", str(tmp_path)])  # real usability but no real model file
++
++
++def test_a_real_looking_file_without_the_full_stamp_is_never_picked(tmp_path: Path) -> None:
++    _fake_usability(tmp_path / "usability_20260928.json", synthetic=False)
++    # Newer by name, but typed by hand: synthetic false and nothing else.
++    _fake_usability(tmp_path / "usability_20261002.json", synthetic=False, stamped=False)
++    # No synthetic key at all counts as synthetic.
++    doc = json.loads((tmp_path / "usability_20260928.json").read_text())
++    del doc["synthetic"]
++    write_json(tmp_path / "usability_20261003.json", doc)
++    # The full stamp, but made before the lock.
++    doc = json.loads((tmp_path / "usability_20260928.json").read_text())
++    doc["generated_at_utc"] = "2026-09-22T12:00:00Z"
++    write_json(tmp_path / "usability_20261004.json", doc)
++    assert newest_real_usability(tmp_path) == tmp_path / "usability_20260928.json"
++    for name in ("usability_20261002.json", "usability_20261003.json", "usability_20261004.json"):
++        assert main(["--results-dir", str(tmp_path), "--usability", str(tmp_path / name)]) == 5
+diff --git a/scripts/preflight.py b/scripts/preflight.py
+index 05a2132..e8dc102 100644
+--- a/scripts/preflight.py
++++ b/scripts/preflight.py
+@@ -27,7 +27,7 @@ from typing import Any, Literal
+ from core.content_loader import Content, approvals, load_content, placeholder_report, stamped
+ from core.records import FEATURES
+ from scripts import audit_log, freeze_key, label_photos
+-from scripts.verify_claims import CLAIM_RE, resolve_pointer
++from scripts.verify_claims import check_claims
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ Owner = Literal["HUMAN", "BUILD", "NOTE"]
+@@ -334,31 +334,13 @@ def run_checks(
+         lock.reasons.append(f"lock tests failed: {_last_line(out)}")
+     checks.append(lock)
+ 
+-    # 9. Every README claim resolves (same rules as scripts/verify_claims.py), and
+-    # 10. no cited result file is synthetic.
++    # 9. Every claim in README.md and docs/*.md holds, and 10. every cited results file is real,
++    # with the full stamp for study results. Both are scripts/verify_claims.py's own check.
+     claims = Check("verify_claims", "BUILD")
+     results_real = Check("results_real", "HUMAN", gate="judges")
+-    readme = root / "README.md"
+-    if not readme.exists():
+-        claims.reasons.append("README.md missing")
+-    else:
+-        for m in CLAIM_RE.finditer(readme.read_text(encoding="utf-8")):
+-            rel, pointer, expected = m.group(1), m.group(2), m.group(3)
+-            doc = _read_json(root / rel)
+-            if doc is None:
+-                claims.reasons.append(f"claim points at a missing or unreadable file: {rel}")
+-                continue
+-            if isinstance(doc, dict) and doc.get("synthetic"):
+-                results_real.reasons.append(
+-                    f"README cites synthetic results: {rel} (real sessions or a real model run)"
+-                )
+-            try:
+-                value = resolve_pointer(doc, pointer)
+-            except (KeyError, IndexError, ValueError):
+-                claims.reasons.append(f"claim pointer not found: {rel}#{pointer}")
+-                continue
+-            if expected is not None and str(value) != expected:
+-                claims.reasons.append(f"claim value drifted: {rel}#{pointer} is {value}")
++    _, broken, not_real = check_claims(root)
++    claims.reasons += broken
++    results_real.reasons += [f"{r} (real sessions or a real model run)" for r in not_real]
+     checks += [claims, results_real]
+ 
+     # 11. The audit log exists, verifies, and holds the key_frozen entry.
+diff --git a/scripts/render_readme.py b/scripts/render_readme.py
+index 2293292..ff66720 100644
+--- a/scripts/render_readme.py
++++ b/scripts/render_readme.py
+@@ -1,10 +1,11 @@
+-"""Fill README claim tokens from results/ and stamp the claim markers with values (rule 12).
++"""Fill claim tokens in README.md and docs/*.md from results/ and stamp the markers (rule 12).
+ 
+ Tokens: `{{claim:results/file.json#/json/pointer}}` on first render, which becomes
+ `<!--v:results/file.json#/json/pointer-->value<!--/v-->` so a later render can replace it.
+ Markers: `<!-- claim: results/file.json#/json/pointer -->` gain ` = value` so that
+-scripts/verify_claims.py compares the README with the results file in CI. Booleans render
+-as "passed" or "did not pass".
++scripts/verify_claims.py compares the text with the results file in CI. Booleans render
++as "passed" or "did not pass". Without --readme it renders README.md and docs/*.md, and it
++writes only a file whose text changed.
+ """
+ 
+ from __future__ import annotations
+@@ -21,6 +22,11 @@ RENDERED_RE = re.compile(r"<!--v:([\w./-]+#[\w/.-]+)-->(.*?)<!--/v-->", re.S)
+ MARKER_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+#[\w/.-]+)\s*(?:=\s*[^\s]+)?\s*-->")
+ 
+ 
++def claim_files(root: Path) -> list[Path]:
++    """README.md and every docs/*.md: the files where a reader meets a number."""
++    return [root / "README.md", *sorted((root / "docs").glob("*.md"))]
++
++
+ def resolve(ref: str, root: Path) -> object:
+     rel, pointer = ref.split("#", 1)
+     doc = json.loads((root / rel).read_text(encoding="utf-8"))
+@@ -79,15 +85,26 @@ def render(text: str, root: Path) -> tuple[str, list[str]]:
+     return text, sorted(set(missing))
+ 
+ 
+-def main() -> int:
++def main(argv: list[str] | None = None) -> int:
+     parser = argparse.ArgumentParser()
+-    parser.add_argument("--readme", default=str(ROOT / "README.md"))
++    parser.add_argument("--readme", type=Path, default=None, help="render this one file only")
+     parser.add_argument("--check", action="store_true", help="fail if any token is unresolved")
+-    args = parser.parse_args()
+-    path = Path(args.readme)
+-    text, missing = render(path.read_text(encoding="utf-8"), ROOT)
+-    path.write_text(text, encoding="utf-8")
+-    unresolved = len(TOKEN_RE.findall(text))
++    parser.add_argument("--root", type=Path, default=ROOT, help="the repo whose results/ to read")
++    args = parser.parse_args(argv)
++    if args.readme is not None:
++        paths = [args.readme]
++    else:
++        paths = [p for p in claim_files(args.root) if p.exists()]
++    unresolved = 0
++    missing: list[str] = []
++    for path in paths:
++        before = path.read_text(encoding="utf-8")
++        text, gone = render(before, args.root)
++        if text != before:
++            path.write_text(text, encoding="utf-8")
++        unresolved += len(TOKEN_RE.findall(text))
++        missing += gone
++    missing = sorted(set(missing))
+     print(f"render-readme: {unresolved} unresolved token(s), {len(missing)} missing ref(s)")
+     for ref in missing:
+         print(f"  missing: {ref}")
+diff --git a/scripts/tests/test_preflight.py b/scripts/tests/test_preflight.py
+index 6e968b3..90873da 100644
+--- a/scripts/tests/test_preflight.py
++++ b/scripts/tests/test_preflight.py
+@@ -15,6 +15,7 @@ import yaml
+ from core.content_loader import approvals, load_content
+ from scripts import audit_log, freeze_key, label_photos, merge_labels, preflight
+ from scripts.ingest_photos import MANIFEST_COLUMNS
++from scripts.verify_claims import PLAN_SHA256
+ 
+ REPO = Path(__file__).parents[2]
+ 
+@@ -247,6 +248,42 @@ def test_green_root_guards_fire_when_broken(tmp_path: Path) -> None:
+     assert broken == {"analysis_tests", "lock_tests"}
+ 
+ 
++def test_claims_in_docs_and_typed_study_results_fail(tmp_path: Path) -> None:
++    """The claims check is verify_claims's own: docs/*.md count, and a study result needs its
++    full real stamp, not only synthetic: false (rule 12)."""
++    root = green_root(tmp_path)
++    run = git_runner(root)
++
++    def failed() -> dict[str, list[str]]:
++        return {c.name: c.reasons for c in preflight.run_checks(root, runner=run) if not c.passed}
++
++    typed = {"synthetic": False, "primary": {"difference_points": 15.0}}
++    (root / "results" / "usability_20261002.json").write_text(json.dumps(typed))
++    readme = root / "README.md"
++    readme.write_text(
++        readme.read_text()
++        + "<!-- claim: results/usability_20261002.json#/primary/difference_points = 15.0 -->\n"
++        + "15.0 points\n"
++    )
++    reasons = failed()
++    assert set(reasons) == {"results_real"}
++    assert any("not generated at or after the data lock" in r for r in reasons["results_real"])
++
++    stamped = {
++        **typed,
++        "generated_at_utc": "2026-09-28T02:00:00Z",
++        "script": "evals/usability_analysis.py",
++        "plan_sha256": PLAN_SHA256,
++    }
++    (root / "results" / "usability_20261002.json").write_text(json.dumps(stamped))
++    assert failed() == {}
++
++    (root / "docs" / "fhir_mapping.md").write_text(
++        "<!-- claim: results/model_pass_table.json#/real = True -->\nreal: False\n"
++    )
++    assert set(failed()) == {"verify_claims"}
++
++
+ def test_report_groups_by_what_clears_it_and_counts_reasons(
+     capsys: pytest.CaptureFixture[str],
+ ) -> None:
+diff --git a/scripts/tests/test_verify_claims.py b/scripts/tests/test_verify_claims.py
+new file mode 100644
+index 0000000..5bf3f6c
+--- /dev/null
++++ b/scripts/tests/test_verify_claims.py
+@@ -0,0 +1,164 @@
++"""verify_claims reads the number a reader sees, covers docs/*.md, and trusts a study result only
++with its full real stamp (hard rule 12)."""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++
++import pytest
++
++from scripts import render_readme
++from scripts.verify_claims import PLAN_SHA256, check_claims, real_result_problems
++
++ROOT = Path(__file__).resolve().parents[2]
++REAL_STAMP = {
++    "synthetic": False,
++    "generated_at_utc": "2026-09-28T02:00:00Z",
++    "script": "evals/usability_analysis.py",
++    "plan_sha256": PLAN_SHA256,
++}
++
++
++def make_root(tmp_path: Path, readme: str, docs: dict[str, str] | None = None) -> Path:
++    (tmp_path / "results").mkdir(parents=True)
++    (tmp_path / "results" / "v.json").write_text(
++        json.dumps({"errors": 0, "warnings": 52, "mean": 61.25, "passed": True})
++    )
++    (tmp_path / "README.md").write_text(readme)
++    (tmp_path / "docs").mkdir()
++    for name, text in (docs or {}).items():
++        (tmp_path / "docs" / name).write_text(text)
++    return tmp_path
++
++
++def problems_in(root: Path, *, allow_synthetic: bool = False) -> list[str]:
++    _, broken, not_real = check_claims(root, allow_synthetic=allow_synthetic)
++    return broken + not_real
++
++
++def test_the_plan_hash_is_the_hash_of_the_tagged_plan() -> None:
++    plan = (ROOT / "docs" / "analysis_plan.md").read_bytes()
++    assert hashlib.sha256(plan).hexdigest() == PLAN_SHA256
++    notes = (ROOT / "docs" / "notes" / "plan_hash.md").read_text(encoding="utf-8")
++    assert f"`{PLAN_SHA256}`" in notes
++
++
++def test_the_repo_claims_hold_and_the_readme_has_one() -> None:
++    checked, broken, not_real = check_claims(ROOT)
++    assert broken == [] and not_real == []
++    assert checked >= 1
++    assert "<!--v:results/fhir_validation.json#/errors-->" in (ROOT / "README.md").read_text()
++
++
++def test_a_marker_that_matches_what_the_reader_sees_passes(tmp_path: Path) -> None:
++    root = make_root(
++        tmp_path,
++        "<!-- claim: results/v.json#/errors = 0 -->\n\nEvery record has 0 errors.\n"
++        "It has <!-- claim: results/v.json#/warnings = 52 -->52 warnings.\n"
++        "<!-- claim: results/v.json#/mean = 61.25 -->\n"
++        "<!-- claim: results/v.json#/passed = True -->\n"
++        "| mean | <!--v:results/v.json#/mean-->61.2<!--/v--> | passed |\n",
++    )
++    checked, broken, not_real = check_claims(root)
++    assert (checked, broken, not_real) == (5, [], [])
++
++
++def test_the_number_after_the_marker_is_read(tmp_path: Path) -> None:
++    # The review's case: the stamp matches, the prose says something else.
++    root = make_root(tmp_path, "<!-- claim: results/v.json#/errors = 0 -->\nwith 99 errors\n")
++    assert any("does not show 0" in p for p in problems_in(root))
++    root = make_root(
++        tmp_path / "b", "<!-- claim: results/v.json#/warnings = 52 -->\ngave 7 warnings\n"
++    )
++    assert any("does not show 52" in p for p in problems_in(root))
++    # A digit inside a longer number is not the number.
++    root = make_root(tmp_path / "c", "<!-- claim: results/v.json#/errors = 0 -->\n10 errors\n")
++    assert any("does not show 0" in p for p in problems_in(root))
++
++
++def test_a_marker_needs_a_value_that_matches_the_results(tmp_path: Path) -> None:
++    root = make_root(tmp_path, "<!-- claim: results/v.json#/errors -->\n0 errors\n")
++    assert any("has no '= value'" in p for p in problems_in(root))
++    root = make_root(tmp_path / "b", "<!-- claim: results/v.json#/errors = 3 -->\n3 errors\n")
++    assert any("claim value drifted" in p for p in problems_in(root))
++
++
++def test_rendered_values_are_checked_and_tokens_must_be_rendered(tmp_path: Path) -> None:
++    root = make_root(tmp_path, "with <!--v:results/v.json#/warnings-->15<!--/v--> warnings\n")
++    assert any("shows 15, results say 52" in p for p in problems_in(root))
++    root = make_root(tmp_path / "b", "with {{claim:results/v.json#/warnings}} warnings\n")
++    assert any("is not filled" in p for p in problems_in(root))
++    assert render_readme.main(["--root", str(root)]) == 0
++    assert problems_in(root) == []
++    assert "<!--v:results/v.json#/warnings-->52<!--/v-->" in (root / "README.md").read_text()
++
++
++def test_docs_are_checked_and_rendered_too(tmp_path: Path) -> None:
++    root = make_root(
++        tmp_path,
++        "No numbers here.\n",
++        {
++            "fhir_mapping.md": "0 errors, <!--v:results/v.json#/warnings-->15<!--/v--> warnings\n",
++            "plan.md": "Nothing to see.\n",
++        },
++    )
++    drifted = [p for p in problems_in(root) if p.startswith("claim value drifted")]
++    assert len(drifted) == 1 and "docs/fhir_mapping.md shows 15" in drifted[0]
++    before = (root / "docs" / "plan.md").stat().st_mtime_ns
++    assert render_readme.main(["--root", str(root)]) == 0
++    assert problems_in(root) == []
++    assert (root / "docs" / "plan.md").stat().st_mtime_ns == before
++
++
++def test_synthetic_results_pass_only_when_allowed(tmp_path: Path) -> None:
++    root = make_root(tmp_path, "<!-- claim: results/s.json#/x = 1 -->\n1 item\n")
++    (root / "results" / "s.json").write_text(json.dumps({"synthetic": True, "x": 1}))
++    assert problems_in(root) == ["README.md: results/s.json is synthetic"]
++    assert problems_in(root, allow_synthetic=True) == []
++
++
++@pytest.mark.parametrize(
++    ("change", "why"),
++    [
++        ({"synthetic": None}, "does not say synthetic: false"),
++        ({"synthetic": "false"}, "does not say synthetic: false"),
++        ({"generated_at_utc": "2026-09-28T00:59:59Z"}, "at or after the data lock"),
++        ({"generated_at_utc": None}, "at or after the data lock"),
++        ({"script": "scripts/typed_by_hand.py"}, "not written by evals/usability_analysis.py"),
++        ({"plan_sha256": "0" * 64}, "SHA-256 of the plan tagged prereg-v1"),
++        ({"plan_sha256": None}, "SHA-256 of the plan tagged prereg-v1"),
++    ],
++)
++def test_a_study_result_needs_its_full_real_stamp(change: dict[str, object], why: str) -> None:
++    doc: dict[str, object] = {**REAL_STAMP, "primary": {"difference_points": 15.0}}
++    assert real_result_problems("results/usability_20260928.json", doc) == []
++    for key, value in change.items():
++        if value is None:
++            del doc[key]
++        else:
++            doc[key] = value
++    problems = real_result_problems("results/usability_20261002.json", doc)
++    assert problems and all(why in p for p in problems)
++
++
++def test_a_typed_study_result_fails_even_with_synthetic_allowed(tmp_path: Path) -> None:
++    root = make_root(
++        tmp_path,
++        "<!-- claim: results/usability_20261002.json#/primary/difference_points = 15.0 -->\n"
++        "15.0 points\n"
++        "<!-- claim: results/consensus_20261003.json#/x = 2 -->\n2 items\n",
++    )
++    typed = {"synthetic": False, "primary": {"difference_points": 15.0}}
++    (root / "results" / "usability_20261002.json").write_text(json.dumps(typed))
++    # No synthetic key: counts as synthetic, so it passes only with --synthetic.
++    (root / "results" / "consensus_20261003.json").write_text(json.dumps({"x": 2}))
++    strict = problems_in(root)
++    assert any("consensus_20261003.json is synthetic" in p for p in strict)
++    assert any("usability_20261002.json was not generated" in p for p in strict)
++    loose = problems_in(root, allow_synthetic=True)
++    assert loose and all("usability_20261002.json" in p for p in loose)
++    stamped = {**REAL_STAMP, "primary": {"difference_points": 15.0}}
++    (root / "results" / "usability_20261002.json").write_text(json.dumps(stamped))
++    assert problems_in(root, allow_synthetic=True) == []
+diff --git a/scripts/verify_claims.py b/scripts/verify_claims.py
+index 247efeb..767a255 100644
+--- a/scripts/verify_claims.py
++++ b/scripts/verify_claims.py
+@@ -1,9 +1,18 @@
+-"""Every number in README.md must trace to results/ (hard rule 12).
++"""Every number in README.md and docs/*.md must trace to results/ (hard rule 12).
+ 
+-Claims are written in the README as `<!-- claim: <results-file>#<json-pointer> -->` on the line
+-before the number, or inline as `{{claim:<file>#<pointer>}}` markers replaced by
+-scripts/render_readme.py. Stage 1 (Phase 0): the README has no claims, so this passes when
+-no claim markers exist and no bare result-like numbers appear inside the results table.
++Two forms. A marker `<!-- claim: <results-file>#<json-pointer> = <value> -->` stands before the
++number: the value must equal the results file, and the text a reader sees right after the marker
++(the rest of its line, or else the next line with text) must show that value. A token
++`{{claim:<file>#<pointer>}}` is filled by scripts/render_readme.py into
++`<!--v:<file>#<pointer>-->value<!--/v-->`, and the value shown must be the one render_readme
++would write from the results file today. A marker with no value and a token nobody rendered
++both fail.
++
++Every cited results file must be real, unless --synthetic is given. A usability_* or consensus_*
++file counts as real only with its full stamp: synthetic exactly false, generated_at_utc at or
++after the data lock, the script that writes that kind of file, and plan_sha256 equal to the hash
++of the tagged plan. A file with no synthetic key counts as synthetic. scripts/preflight.py and
++evals/pick_examples.py use the same rule through real_result_problems.
+ """
+ 
+ from __future__ import annotations
+@@ -12,11 +21,18 @@ import argparse
+ import json
+ import re
+ import sys
++from datetime import datetime
+ from pathlib import Path
+ 
++from core.lock import is_before_lock
++from scripts.render_readme import RENDERED_RE, TOKEN_RE, claim_files, display
++
+ ROOT = Path(__file__).resolve().parents[1]
+-README = ROOT / "README.md"
+ CLAIM_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+)#([\w/.-]+)\s*(?:=\s*([^\s]+))?\s*-->")
++# SHA-256 of docs/analysis_plan.md as tagged prereg-v1 (docs/notes/plan_hash.md).
++PLAN_SHA256 = "86da527e30c0a8e8492b6fb22c3056be1a2ad3087b5ca8c6f4a0a1bd58aed9cf"
++# The study results files, by name prefix, and the one script that writes each kind.
++STUDY_SCRIPTS = {"usability_": "evals/usability_analysis.py", "consensus_": "evals/consensus.py"}
+ 
+ 
+ def resolve_pointer(doc: object, pointer: str) -> object:
+@@ -31,36 +47,145 @@ def resolve_pointer(doc: object, pointer: str) -> object:
+     return cur
+ 
+ 
+-def main() -> int:
+-    parser = argparse.ArgumentParser()
+-    parser.add_argument("--synthetic", action="store_true", help="accept results stamped synthetic")
+-    args = parser.parse_args()
+-    if not README.exists():
+-        print("verify-claims: README.md missing")
+-        return 1
+-    text = README.read_text(encoding="utf-8")
++def _after_lock(stamp: object) -> bool:
++    try:
++        when = datetime.fromisoformat(str(stamp))
++    except ValueError:
++        return False
++    return not is_before_lock(when)
++
++
++def real_result_problems(rel: str, doc: object, *, allow_synthetic: bool = False) -> list[str]:
++    """Why a results file cannot stand as a result a reader sees. Empty means it can.
++
++    A synthetic file passes only with allow_synthetic. A study file (usability_* or consensus_*)
++    that says it is real is checked in full either way, so a typed or pre-lock file never passes.
++    """
++    fields = doc if isinstance(doc, dict) else {}
++    name = Path(rel).name
++    script = next((s for prefix, s in STUDY_SCRIPTS.items() if name.startswith(prefix)), None)
++    if script is None:
++        if fields.get("synthetic") and not allow_synthetic:
++            return [f"{rel} is synthetic"]
++        return []
++    if fields.get("synthetic", True) is not False:
++        if allow_synthetic:
++            return []
++        return [f"{rel} is synthetic, or does not say synthetic: false"]
+     problems: list[str] = []
++    if not _after_lock(fields.get("generated_at_utc")):
++        problems.append(f"{rel} was not generated at or after the data lock")
++    if fields.get("script") != script:
++        problems.append(f"{rel} was not written by {script}")
++    if fields.get("plan_sha256") != PLAN_SHA256:
++        problems.append(f"{rel} does not carry the SHA-256 of the plan tagged prereg-v1")
++    return problems
++
++
++def _shows(text: str, value: str) -> bool:
++    """Is value in the text as a whole number or word, not as part of a longer one?"""
++    return re.search(rf"(?<![\w.]){re.escape(value)}(?!\w|\.\d)", text) is not None
++
++
++def _seen_after(text: str, end: int) -> str:
++    """What a reader sees after a marker: the rest of its line, or else the next line with text."""
++    rest, _, after = text[end:].partition("\n")
++    for line in [rest, *after.splitlines()]:
++        seen = RENDERED_RE.sub(lambda m: m.group(2), CLAIM_RE.sub("", line)).strip()
++        if seen:
++            return seen
++    return ""
++
++
++def check_claims(root: Path, *, allow_synthetic: bool = False) -> tuple[int, list[str], list[str]]:
++    """Check every claim in README.md and docs/*.md under root.
++
++    Returns the number of claims checked, the broken or drifted claims, and the cited results
++    files that are not real (see real_result_problems).
++    """
++    problems: list[str] = []
++    not_real: list[str] = []
+     checked = 0
+-    for m in CLAIM_RE.finditer(text):
+-        rel, pointer, expected = m.group(1), m.group(2), m.group(3)
+-        path = ROOT / rel
+-        if not path.exists():
+-            problems.append(f"claim points at missing file: {rel}")
+-            continue
+-        doc = json.loads(path.read_text(encoding="utf-8"))
+-        if isinstance(doc, dict) and doc.get("synthetic") and not args.synthetic:
+-            problems.append(f"synthetic results cited without --synthetic: {rel}")
+-            continue
++    docs: dict[str, object] = {}
++
++    def load(where: str, rel: str) -> object | None:
++        if rel not in docs:
++            try:
++                docs[rel] = json.loads((root / rel).read_text(encoding="utf-8"))
++            except (OSError, json.JSONDecodeError):
++                docs[rel] = None
++            if docs[rel] is not None:
++                for p in real_result_problems(rel, docs[rel], allow_synthetic=allow_synthetic):
++                    not_real.append(f"{where}: {p}")
++        if docs[rel] is None:
++            problems.append(f"{where}: claim points at a missing or unreadable file: {rel}")
++        return docs[rel]
++
++    def value_of(where: str, rel: str, pointer: str) -> tuple[bool, object]:
++        doc = load(where, rel)
++        if doc is None:
++            return False, None
+         try:
+-            value = resolve_pointer(doc, pointer)
++            return True, resolve_pointer(doc, pointer)
+         except (KeyError, IndexError, ValueError):
+-            problems.append(f"claim pointer not found: {rel}#{pointer}")
++            problems.append(f"{where}: claim pointer not found: {rel}#{pointer}")
++            return False, None
++
++    readme = root / "README.md"
++    if not readme.exists():
++        problems.append("README.md missing")
++    for path in claim_files(root):
++        if not path.exists():
+             continue
+-        if expected is not None and str(value) != expected:
++        where = path.relative_to(root).as_posix()
++        text = path.read_text(encoding="utf-8")
++        for m in CLAIM_RE.finditer(text):
++            rel, pointer, stamped = m.group(1), m.group(2), m.group(3)
++            found, value = value_of(where, rel, pointer)
++            if not found:
++                continue
++            checked += 1
++            if stamped is None:
++                problems.append(
++                    f"{where}: claim {rel}#{pointer} has no '= value'; run scripts/render_readme.py"
++                )
++                continue
++            if str(value) != stamped:
++                problems.append(
++                    f"claim value drifted: {rel}#{pointer} {where} says {stamped}, "
++                    f"results say {value}"
++                )
++                continue
++            seen = _seen_after(text, m.end())
++            if not (_shows(seen, stamped) or _shows(seen, display(value))):
++                problems.append(
++                    f"{where}: the text after claim {rel}#{pointer} does not show {stamped}: "
++                    f"{seen[:80]!r}"
++                )
++        for m in RENDERED_RE.finditer(text):
++            rel, pointer = m.group(1).split("#", 1)
++            found, value = value_of(where, rel, pointer)
++            if not found:
++                continue
++            checked += 1
++            if m.group(2) != display(value):
++                problems.append(
++                    f"claim value drifted: {rel}#{pointer} {where} shows {m.group(2)}, "
++                    f"results say {display(value)}; run scripts/render_readme.py"
++                )
++        for m in TOKEN_RE.finditer(text):
+             problems.append(
+-                f"claim value drifted: {rel}#{pointer} README says {expected}, results say {value}"
++                f"{where}: claim token {m.group(1)} is not filled; run scripts/render_readme.py"
+             )
+-        checked += 1
++    return checked, problems, not_real
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser()
++    parser.add_argument("--synthetic", action="store_true", help="accept results stamped synthetic")
++    args = parser.parse_args()
++    checked, problems, not_real = check_claims(ROOT, allow_synthetic=args.synthetic)
++    problems += not_real
+     if problems:
+         print("\n".join(problems))
+         print(f"verify-claims: {len(problems)} problem(s)")
