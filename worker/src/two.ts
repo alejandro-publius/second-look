@@ -49,7 +49,12 @@ async function fetchTheirsLive(env: TwoEnv): Promise<Resource | null> {
   const url = `${base}/Observation?${new URLSearchParams(theirsQuery(env)).toString()}`;
   try {
     const response = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "application/fhir+json" }, signal: AbortSignal.timeout(TIMEOUT_MS) });
-    if (response.status !== 200) return null;
+    if (response.status !== 200) {
+      // Read with `npx wrangler tail`: why their sandbox gave the Worker nothing.
+      const text = (await response.text()).slice(0, 300);
+      console.log(JSON.stringify({ at: "two.theirs", url, status: response.status, headers: Object.fromEntries(response.headers), body: text }));
+      return null;
+    }
     const body = (await response.json()) as Resource;
     if (!body || typeof body !== "object") return null;
     if (body.resourceType === "Observation") return body;
@@ -59,8 +64,10 @@ async function fetchTheirsLive(env: TwoEnv): Promise<Resource | null> {
         if (resource && resource.resourceType === "Observation") return resource;
       }
     }
+    console.log(JSON.stringify({ at: "two.theirs", url, status: 200, note: "no Observation in the reply", resourceType: body.resourceType }));
     return null;
-  } catch {
+  } catch (err) {
+    console.log(JSON.stringify({ at: "two.theirs", url, error: String(err) }));
     return null;
   }
 }
