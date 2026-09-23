@@ -9,12 +9,14 @@ says so in its own evidence field.
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import numpy as np
 import pytest
 from PIL import Image
 
+from core.content_loader import LICENSE_ALLOWLIST
 from scripts import make_frames
 
 
@@ -224,3 +226,79 @@ def test_the_licence_words_become_the_manifest_code() -> None:
     assert make_frames.license_code("CC0") == "CC0-1.0"
     # Not mapped: kept as it came, so the manifest check refuses it by name.
     assert make_frames.license_code("CC BY-SA 4.0") == "CC BY-SA 4.0"
+
+
+def test_public_domain_words_become_the_allowlist_code() -> None:
+    for words in ("public domain", "Public domain", " Public Domain "):
+        assert make_frames.license_code(words) == "public-domain"
+    assert "public-domain" in LICENSE_ALLOWLIST
+
+
+class _NoScreen:
+    def reason_to_drop(self, path: Path) -> str | None:
+        return None
+
+
+def _frames_tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Three videos: one failed before, one that fails now, one that passes. Nothing is cut."""
+    manifest = tmp_path / "videos" / "manifest.csv"
+    manifest.parent.mkdir()
+    manifest.write_text(
+        "id,title,author,license,source_url,cache_file\n"
+        "w01,One,a,CC BY 4.0,https://one,w01.mp4\n"
+        "w02,Two,a,CC BY 4.0,https://two,w02.mp4\n"
+        "w03,Three,a,CC BY 4.0,https://three,w03.mp4\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "videos" / "failed_videos.json").write_text('{"https://one": "download failed"}')
+    photos = tmp_path / "photos" / "manifest.csv"
+    photos.parent.mkdir()
+    photos.write_text(",".join(make_frames.PHOTO_COLUMNS) + "\n", encoding="utf-8")
+    frames_dir = tmp_path / "photos" / "benchmark"
+    frames_dir.mkdir()
+    for name, path in {
+        "VIDEOS": tmp_path / "videos",
+        "MANIFEST": manifest,
+        "FAILURES": tmp_path / "videos" / "failed_videos.json",
+        "REVIEW": tmp_path / "videos" / "review.json",
+        "PHOTO_MANIFEST": photos,
+        "FRAMES_DIR": frames_dir,
+    }.items():
+        monkeypatch.setattr(make_frames, name, path)
+    monkeypatch.setattr(make_frames.shutil, "which", lambda _name: "/usr/bin/ffmpeg")
+    monkeypatch.setattr(make_frames, "VisionScreen", _NoScreen)
+    monkeypatch.setattr(make_frames, "PeopleAndPlates", _NoScreen)
+
+    def fake_process(
+        video: make_frames.Video, *_args: object
+    ) -> tuple[make_frames.VideoResult, list[dict[str, str]]]:
+        count = 2 if video.id == "w02" else make_frames.MIN_KEPT_PER_VIDEO
+        kept = [(float(10 * (i + 1)), frames_dir / f"{video.id}-{10 * (i + 1):05d}.jpg", "")
+                for i in range(count)]  # fmt: skip
+        result = make_frames.VideoResult(video.id, sampled=20, kept=[k[0] for k in kept])
+        return result, make_frames.frame_rows(video, kept, video.cache_file)
+
+    monkeypatch.setattr(make_frames, "process_video", fake_process)
+    return frames_dir
+
+
+def test_a_dry_run_deletes_no_frame_when_a_video_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    frames_dir = _frames_tree(tmp_path, monkeypatch)
+    earlier = frames_dir / "w02-00010.jpg"
+    earlier.write_bytes(b"a frame from an earlier real run")
+    assert make_frames.main(["--dry-run"]) == 0
+    assert earlier.exists(), "a dry run promises to write nothing, and deleting is writing"
+    assert not (tmp_path / "videos" / "frames.json").exists()
+
+
+def test_frames_json_counts_the_videos_really_cut_apart_from_the_manifest_rows(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _frames_tree(tmp_path, monkeypatch)
+    assert make_frames.main([]) == 0
+    report = json.loads((tmp_path / "videos" / "frames.json").read_text())
+    assert report["videos"] == 3, "every manifest row, the one skipped as failed included"
+    assert report["videos_cut"] == 2
+    assert report["failed_videos"] == 1 and report["frames_kept"] == 6

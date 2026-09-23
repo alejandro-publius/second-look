@@ -24,7 +24,7 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | The consensus and power figures | synthetic | files carry `"synthetic": true` and the SYNTHETIC stamp | `results/` |
 | The screen that keeps a frame | real, run on this Mac | Apple Vision (people, faces, any readable text, a water label, blank frames) and OpenCV; every drop and its reason is in `videos/frames.json` | `scripts/make_frames.py` |
 | A video walk's record | real shape, demo content | made on the phone from the person's answers, every resource tagged `demo-walk`, never stored, counted or mirrored | `core/walks.py`, `worker/src/core/walks.ts`, `/walk/<id>` |
-| The checker's flags on a walk | synthetic until the model run | worked out at build time from `results/footage_latest.json`; a pass table from the fake client licenses no flag, so no walk asks a question yet | `scripts/build_walks.py`, `content/walks.yaml` |
+| The checker's flags on a walk | synthetic until the model run | worked out at build time from `results/footage_latest.json`; a footage run that is not real gives no flag at all, and a pass table from the fake client licenses none, so no walk asks a question yet | `scripts/build_walks.py`, `content/walks.yaml` |
 | The Heraklion follower city scaffold | example, dry run in English with no claims | the checklist says so in its first line | `docs/cities/heraklion/` |
 
 ## Where a frame's label comes from, and where it does not
@@ -32,22 +32,29 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 This is the method, written out, because it is the weakest joint in the footage work and hiding
 it would be dishonest.
 
-A frame is cut from a video whose own description we can read. The label for that frame comes
-from the description, and only from the description:
+A frame is cut from a video whose own title and description we can read. The label for that
+frame comes from the uploader's own words, and only from them. `scripts/pick_videos.py` looks for
+a short list of phrases, `LABEL_RULES`, first in the description and then in the title, and the
+evidence says which of the two it quotes. These are all of the phrases, and a test checks that
+this list and the code stay the same:
 
-- If the description says the channel is a concrete flood channel, a culvert or a lined channel,
-  or names riprap, gabions, a retaining wall or concrete walls along it, every frame from that
-  video is **artificial_bank present**. A concrete flood channel is a built
-  bank. That is the one inference we allow ourselves, and we allow it because the words are the
-  uploader's, not ours.
-- If the description says the reach was straightened, canalised or dug out, the frames are
-  **dug_out_channel present**. If it says the reach is a restored meander or an unmodified natural
-  stream, they are **dug_out_channel absent**.
-- If the description names an outfall, a storm drain or a discharge pipe, the frames are
-  **pipe_running present** in the sense our test uses, which is that a pipe or outfall is visible.
-- We never take an **invasive_plant** label from a description. A species identification needs
-  the plant in front of someone who knows it, and our own rule is that a plant we call invasive
-  must be on the Cal-IPC inventory with a link. A video description cannot meet that.
+- **artificial_bank present** when the words include any of `concrete channel`,
+  `concrete flood channel`, `concrete-lined`, `concrete lined`, `lined with concrete`,
+  `concrete culvert`, `culverted`, `flood channel`, `storm channel`, `encased in concrete`,
+  `concrete banks`, `concrete walls`, `riprap`, `rip-rap`, `rip rap`, `gabion` or
+  `retaining wall`. A concrete flood channel is a built bank. That is the one inference we allow
+  ourselves, and we allow it because the words are the uploader's, not ours.
+- **dug_out_channel present** when they include any of `straightened`, `channelized`,
+  `channelised`, `canalised`, `canalized`, `dug out` or `trapezoidal channel`.
+- **dug_out_channel absent** when they include any of `wild and scenic`, `free-flowing`,
+  `free flowing` or `unmodified channel`.
+- **pipe_running present** when they include any of `outfall`, `storm drain outlet`,
+  `discharge pipe` or `sewer outlet`, in the sense our test uses, which is that a pipe or outfall
+  is visible.
+- No plant label ever comes from a description, or from a title: there is no phrase for
+  **invasive_plant** at all. A species identification needs the plant in front of someone who
+  knows it, and our own rule is that a plant we call invasive must be on the Cal-IPC inventory
+  with a link. A video description cannot meet that.
 - Everything else is **unlabelled**. An unlabelled frame is never scored for accuracy. It is used
   only to ask whether the three models agree with each other, which is a question that needs no
   key.
@@ -68,7 +75,7 @@ result leans on agreement between models, and the accuracy figure carries its co
 zero. Adding footage with a supported label is the first thing to do with more time.
 
 A frame's manifest row carries the source video, the second it was taken at, and the sentence
-from the description that supports its label, in `label_evidence`. If the row has no label, the
+from the description (or the title) that supports its label, in `label_evidence`. If the row has no label, the
 same field says the description supported none. Anyone can open the source video and check.
 
 ## Rules this list follows

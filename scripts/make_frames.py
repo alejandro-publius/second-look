@@ -420,7 +420,8 @@ def license_code(text: str) -> str:
     """The manifest's licence code for the words a source used.
 
     YouTube's "Creative Commons Attribution license (reuse allowed)" is CC BY 3.0, the only
-    Creative Commons licence YouTube offers. Commons writes "CC BY 3.0" and the like. Anything this
+    Creative Commons licence YouTube offers. Commons writes "CC BY 3.0" and the like, and "Public
+    domain", which is the allowlist's public-domain in core/content_loader.py. Anything this
     cannot map is returned as it came, and make manifest-check then refuses it by name.
     """
     low = text.strip().lower()
@@ -428,6 +429,8 @@ def license_code(text: str) -> str:
         return "CC-BY-3.0"
     if low in {"cc0", "cc0 1.0", "cc-zero"}:
         return "CC0-1.0"
+    if low == "public domain":
+        return "public-domain"
     parts = low.replace("-", " ").split()
     if len(parts) == 3 and parts[:2] == ["cc", "by"] and parts[2] in {"2.0", "3.0", "4.0"}:
         return f"CC-BY-{parts[2]}"
@@ -619,15 +622,20 @@ def main(argv: list[str] | None = None) -> int:
                 f"only {len(result.kept)} of {result.sampled} sampled frames show water with no "
                 f"person or text, under {MIN_KEPT_PER_VIDEO}, so it is not mostly water and banks"
             )
-            for row in rows:
-                (FRAMES_DIR / Path(row["file"]).name).unlink(missing_ok=True)
+            # A dry run wrote no frame for this video, so a file here is from an earlier real run.
+            if not args.dry_run:
+                for row in rows:
+                    (FRAMES_DIR / Path(row["file"]).name).unlink(missing_ok=True)
             print(f"  {video.id}: sampled {result.sampled}, kept {len(result.kept)}: FAILED")
             continue
         all_rows.extend(rows)
         print(f"  {video.id}: sampled {result.sampled}, kept {len(result.kept)}")
 
     report: dict[str, Any] = {
+        # Every row of videos/manifest.csv, the ones skipped as already failed included.
         "videos": len(videos),
+        # The videos this run really cut frames from.
+        "videos_cut": len(results),
         "frames_kept": len(all_rows),
         "labelled": sum(1 for r in all_rows if r["gold_label"]),
         "unlabelled": sum(1 for r in all_rows if not r["gold_label"]),
@@ -649,14 +657,14 @@ def main(argv: list[str] | None = None) -> int:
     FAILURES.write_text(
         json.dumps(failures, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8"
     )
-    prune_video_manifest(failures)
+    prune_video_manifest(failures, MANIFEST)
     merge_photo_manifest(all_rows)
     (VIDEOS / "frames.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     dropped_people = sum(
         1 for r in results for d in r.dropped if d.reason.startswith(("person", "plate", "text"))
     )
     print(
-        f"frames: {len(all_rows)} frames from {len(videos)} videos "
+        f"frames: {len(all_rows)} frames; {len(results)} of {len(videos)} videos cut "
         f"({report['labelled']} labelled, {report['unlabelled']} unlabelled); "
         f"{dropped_people} dropped for a person, a plate or text; "
         f"{report['failed_videos']} videos failed and are in videos/failed_videos.json; "

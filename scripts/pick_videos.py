@@ -16,9 +16,10 @@ The rules, in the order they run. Nothing here is a judgement call:
    YouTube country is the channel's country, not the creek's, so it is ignored and the country
    comes from a place name matched in the title or description, with the name kept as evidence.
    No country means the video can still be picked, it just wins no spread points.
-5. Label: from the full description only, through a short list of phrases that can only mean
-   one thing. "Restoration project" is deliberately NOT one of them: a restoration video very
-   often shows the degraded before state, so the word says nothing about what is on screen.
+5. Label: from the title or the full description, through a short list of phrases that can only
+   mean one thing, and the evidence says which of the two it quotes. "Restoration project" is
+   deliberately NOT one of them: a restoration video very often shows the degraded before state,
+   so the word says nothing about what is on screen.
 6. A video already tried whose frames failed the screen (videos/failed_videos.json, written by
    scripts/make_frames.py) is dropped: it is not mostly footage of water and banks.
 7. Pick twelve, greedily: a new country first, then a feature we have least of, then the
@@ -225,9 +226,10 @@ class Candidate:
 
 
 # A place name we can match, and the country it is in. Only names with one obvious answer.
-PLACES: tuple[tuple[str, str], ...] = (
-    # City names come before country names: a Buenos Aires video that mentions a street called
-    # Israel is in Argentina.
+# Every specific place (a city, a region, a state, a creek) comes before every bare country name,
+# so the specific place always wins: a Buenos Aires video that mentions a street called Israel is
+# in Argentina, and an Oregon video that mentions a Canada goose is in the United States.
+SPECIFIC_PLACES: tuple[tuple[str, str], ...] = (
     ("buenos aires", "Argentina"),
     ("sheffield", "United Kingdom"),
     ("wyming brook", "United Kingdom"),
@@ -235,14 +237,11 @@ PLACES: tuple[tuple[str, str], ...] = (
     ("beverley brook", "United Kingdom"),
     ("glenlee", "United Kingdom"),
     ("dalry", "United Kingdom"),
-    ("scotland", "United Kingdom"),
     ("new england", "United States"),
-    ("england", "United Kingdom"),
     ("dordogne", "France"),
     ("ontario", "Canada"),
     ("canadian rockies", "Canada"),
     ("catlins", "New Zealand"),
-    ("new zealand", "New Zealand"),
     ("woolgoolga", "Australia"),
     ("nebraska", "United States"),
     ("reno tahoe", "United States"),
@@ -251,15 +250,47 @@ PLACES: tuple[tuple[str, str], ...] = (
     ("jujuy", "Argentina"),
     ("zion national park", "United States"),
     ("idaho", "United States"),
-    # Country names themselves, in English and in their own language. A title that names the
-    # country is the uploader saying where it is.
     ("new mexico", "United States"),
     ("new south wales", "Australia"),
-    ("northern ireland", "United Kingdom"),
-    ("germany", "Germany"),
-    ("deutschland", "Germany"),
     ("schwarzwald", "Germany"),
     ("bayern", "Germany"),
+    ("seoul", "South Korea"),
+    ("cheonggyecheon", "South Korea"),
+    ("gimhae", "South Korea"),
+    ("시흥", "South Korea"),
+    ("김해", "South Korea"),
+    ("dubai", "United Arab Emirates"),
+    ("wombourne", "United Kingdom"),
+    ("black country", "United Kingdom"),
+    ("drakensberg", "South Africa"),
+    ("wungong", "Australia"),
+    ("bibbulmun", "Australia"),
+    ("western australia", "Australia"),
+    ("walcha", "Australia"),
+    ("maipú", "Chile"),
+    ("maipu", "Chile"),
+    ("приморского", "Russia"),
+    ("партизанск", "Russia"),
+    ("south bronx", "United States"),
+    ("oklahoma", "United States"),
+    ("san antonio", "United States"),
+    ("sioux falls", "United States"),
+    ("baton rouge", "United States"),
+    ("atlanta", "United States"),
+    ("oregon", "United States"),
+    ("columbia water", "United States"),
+    ("shai zakai", "Israel"),
+)
+# Country names themselves, in English and in their own language, the four nations of the United
+# Kingdom included. A title that names the country is the uploader saying where it is.
+COUNTRY_NAMES: tuple[tuple[str, str], ...] = (
+    ("northern ireland", "United Kingdom"),
+    ("scotland", "United Kingdom"),
+    ("england", "United Kingdom"),
+    ("wales", "United Kingdom"),
+    ("new zealand", "New Zealand"),
+    ("germany", "Germany"),
+    ("deutschland", "Germany"),
     ("france", "France"),
     ("italia", "Italy"),
     ("italy", "Italy"),
@@ -288,37 +319,11 @@ PLACES: tuple[tuple[str, str], ...] = (
     ("austria", "Austria"),
     ("österreich", "Austria"),
     ("ireland", "Ireland"),
-    ("wales", "United Kingdom"),
-    ("seoul", "South Korea"),
-    ("cheonggyecheon", "South Korea"),
-    ("gimhae", "South Korea"),
-    ("시흥", "South Korea"),
-    ("김해", "South Korea"),
     ("korea", "South Korea"),
-    ("dubai", "United Arab Emirates"),
-    ("wombourne", "United Kingdom"),
-    ("black country", "United Kingdom"),
-    ("drakensberg", "South Africa"),
     ("south africa", "South Africa"),
-    ("wungong", "Australia"),
-    ("bibbulmun", "Australia"),
-    ("western australia", "Australia"),
-    ("walcha", "Australia"),
-    ("maipú", "Chile"),
-    ("maipu", "Chile"),
-    ("приморского", "Russia"),
-    ("партизанск", "Russia"),
-    ("south bronx", "United States"),
-    ("oklahoma", "United States"),
-    ("san antonio", "United States"),
-    ("sioux falls", "United States"),
-    ("baton rouge", "United States"),
-    ("atlanta", "United States"),
-    ("oregon", "United States"),
-    ("columbia water", "United States"),
-    ("shai zakai", "Israel"),
     ("israel", "Israel"),
 )
+PLACES: tuple[tuple[str, str], ...] = SPECIFIC_PLACES + COUNTRY_NAMES
 
 
 def licence_ok(licence: str) -> bool:
@@ -382,12 +387,18 @@ def place_country(text: str) -> tuple[str, str]:
     return "", ""
 
 
-def label_for(text: str, full: str) -> tuple[str, str, str]:
+def label_for(title: str, full: str) -> tuple[str, str, str]:
+    """The label a phrase in the uploader's own words supports, and a quote saying where it is.
+
+    The evidence names the place the phrase was found: the description when it is there, else
+    the title. A phrase found in neither is no evidence at all.
+    """
     for feature, value, phrases in LABEL_RULES:
         for phrase in phrases:
-            if phrase in text:
-                quote = sentence_with(full, phrase)
-                return feature, value, f'The description says: "{quote}"'
+            if phrase in full.lower():
+                return feature, value, f'The description says: "{sentence_with(full, phrase)}"'
+            if phrase in title.lower():
+                return feature, value, f'The title says: "{sentence_with(title, phrase)}"'
     return "", "", ""
 
 
@@ -510,7 +521,7 @@ def main(argv: list[str] | None = None) -> int:
             candidate.country, candidate.country_evidence = "", ""
         if not candidate.country:
             candidate.country, candidate.country_evidence = place_country(text)
-        feature, value, evidence = label_for(text, full)
+        feature, value, evidence = label_for(str(candidate.raw.get("title") or ""), full)
         candidate.label_feature, candidate.label_value, candidate.label_evidence = (
             feature,
             value,
