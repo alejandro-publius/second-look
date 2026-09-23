@@ -41,7 +41,7 @@ async function answerForm(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Yes", exact: true }).click(); // invasive species -> which ones
   await expect(page.getByRole("heading", { name: "Which ones?" })).toBeVisible();
   await expect(page.getByText("No plant list for this region yet.")).toBeVisible();
-  await page.getByLabel("Not sure").check();
+  await page.getByLabel("Can't tell").check();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "No", exact: true }).click(); // cuts
   await expect(page.getByRole("heading", { name: "Which feelings best describe your experience?" })).toBeVisible();
