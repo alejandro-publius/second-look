@@ -6,6 +6,16 @@ days pass: prices and ids move.
 **Checked 2026-09-21** against https://platform.claude.com/docs/en/about-claude/pricing (the
 older docs.claude.com path now redirects there).
 
+**Re-confirmed 2026-09-23** (UPDATE_22 section 3) on the models overview page
+(https://platform.claude.com/docs/en/about-claude/models/overview) and the pricing page. The three
+ids in `evals/models.yaml` still answer exactly as below, at the same prices and batch prices.
+What changed since Sep 21: `claude-opus-5` is now listed as a legacy model, still available, and
+the current Opus is Claude Opus 5.5, `claude-opus-5-5`, at $4 input and $20 output per MTok ($2
+and $10 in a batch), retiring no sooner than 2027-09-22. Claude Haiku 4.5 still retires no sooner
+than 2026-10-15, and Sonnet 5's $2 and $10 is now its standard price. The config is left as it is:
+the paid run needs Alex's key and Alex's word on the flags, and swapping Opus 5 for Opus 5.5 is one
+line in `evals/models.yaml` plus its row in `evals/pricing.yaml` when that word comes.
+
 **Re-confirmed 2026-09-21, this time on the models overview page**
 (https://platform.claude.com/docs/en/about-claude/models/overview), which is where the API ids
 live. All three ids below are exactly what that page's "Claude API ID" row gives, and the prices
