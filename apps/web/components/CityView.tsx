@@ -7,6 +7,7 @@ import { Row } from "./ui/Row";
 import { Skeleton } from "./ui/Skeleton";
 import { api, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
 import { t } from "@/lib/t";
+import { withoutUrl } from "@/lib/text";
 
 // "1 spot", not "1 spots": the key for one, or the key for any other number with {n} filled in.
 function count(n: number, one: string, many: string): string {
@@ -179,7 +180,7 @@ export function CityView({ creekId }: { creekId: string }) {
             <Row
               key={n.sentence_id}
               label={n.text}
-              value={`${n.because.join(", ")}. ${n.source}`}
+              value={`${n.because.join(", ")}. ${withoutUrl(n.source)}`}
               end={<Evidence href={n.fhir[0]} name={n.because.join(", ")} />}
             />
           ))}

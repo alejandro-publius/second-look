@@ -336,6 +336,11 @@ figcaption {
   border: var(--hairline) solid var(--line);
 }
 
+/* A video walk: the clip and its credit, with none of the browser's default figure margin. */
+.walk-figure {
+  margin: 0;
+}
+
 /* A video walk clip: the same frame as a photograph, 16 by 9 because that is how it was filmed. */
 .walk-clip {
   display: block;

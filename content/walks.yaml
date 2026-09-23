@@ -4,7 +4,7 @@ walks:
 - id: v02
   title: Весенний ручей, Партизанский городской округ, 2017 г.
   author: Красота Приморского края и не только
-  license: Creative Commons Attribution license (reuse allowed)
+  license: CC-BY-3.0
   source_url: https://www.youtube.com/watch?v=vN5ArGGmdUY
   country: Russia
   creek_name: A creek in Russia
@@ -32,7 +32,7 @@ walks:
 - id: v03
   title: River walk - St John's Town of Dalry to Glenlee
   author: Stravaiging with Andy
-  license: Creative Commons Attribution license (reuse allowed)
+  license: CC-BY-3.0
   source_url: https://www.youtube.com/watch?v=7soch86PJ2U
   country: United Kingdom
   creek_name: A creek in United Kingdom
@@ -58,7 +58,7 @@ walks:
 - id: v07
   title: 'Evaluating Stream Restoration in the Oregon Coast Range: Karnowsky Creek in 2026'
   author: geomorphdog
-  license: Creative Commons Attribution license (reuse allowed)
+  license: CC-BY-3.0
   source_url: https://www.youtube.com/watch?v=DaD3RJGEvhM
   country: United States
   creek_name: A creek in United States

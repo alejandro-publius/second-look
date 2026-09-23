@@ -422,5 +422,6 @@
   "city.walk_needs": "What this creek needs",
   "city.walk_nothing": "Nothing was found that needs work.",
   "credits.footage_title": "Creek footage",
-  "credits.footage_intro": "The video walks and their stills are cut from these openly licensed videos."
+  "credits.footage_intro": "The video walks and their stills are cut from these openly licensed videos.",
+  "city.walk_seen": "Checks that saw it: {n}"
 }

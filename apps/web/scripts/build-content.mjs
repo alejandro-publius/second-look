@@ -284,14 +284,15 @@ function main() {
     checker_run: w.checker?.footage_run ?? "synthetic",
     checker_dropped: w.checker?.dropped ?? 0,
   }));
-  // One credit line per video whose frames anyone can see, for /credits.
-  const videoRows = existsSync(join(contentDir, "..", "videos", "manifest.csv"))
-    ? parseCsv(readFileSync(join(contentDir, "..", "videos", "manifest.csv"), "utf8"))
-    : [];
-  const shownVideos = new Set(walksRaw.map((w) => String(w.id)));
-  const footage_credits = videoRows
-    .filter((v) => shownVideos.has(v.id))
-    .map((v) => ({ id: v.id, title: v.title, author: v.author, license: v.license, source_url: v.source_url, country: v.country }));
+  // One credit line per video a visitor can see, for /credits: the walks, with their licence code.
+  const footage_credits = walksRaw.map((w) => ({
+    id: String(w.id),
+    title: w.title,
+    author: w.author,
+    license: w.license,
+    source_url: w.source_url,
+    country: w.country,
+  }));
 
   const generated = {
     generated_at: new Date().toISOString(),

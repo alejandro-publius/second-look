@@ -54,7 +54,15 @@ export default function CreditsPage() {
               <Row
                 key={v.id}
                 label={t("credits.by", { author: v.author })}
-                value={v.license}
+                value={
+                  licenseUrl(v.license) ? (
+                    <a href={licenseUrl(v.license)} rel="license noreferrer">
+                      {v.license}
+                    </a>
+                  ) : (
+                    v.license
+                  )
+                }
                 end={
                   <a href={v.source_url} rel="noreferrer nofollow">
                     {v.title}

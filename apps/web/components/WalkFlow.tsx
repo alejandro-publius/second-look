@@ -25,7 +25,7 @@ function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
 function Clip({ walk }: { walk: Walk }) {
   const poster = content.photos[walk.poster_photo_id];
   return (
-    <figure className="stack">
+    <figure className="stack walk-figure">
       <video className="walk-clip" controls muted playsInline preload="metadata" poster={poster?.url} aria-label={t("walk.clip_label", { country: walk.country })}>
         <source src={`/${walk.clip.file}`} type="video/mp4" />
         <Photo id={walk.poster_photo_id} />

@@ -43,6 +43,7 @@ from typing import Any
 import yaml
 
 from core.gate import parse_flags
+from scripts.make_frames import license_code
 from core.records import FEATURES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -291,7 +292,7 @@ def main(argv: list[str] | None = None) -> int:
             "id": v["id"],
             "title": v["title"],
             "author": v["author"],
-            "license": v["license"],
+            "license": license_code(v["license"]),
             "source_url": v["source_url"],
             "country": v["country"],
             "creek_name": f"A creek in {v['country']}",
