@@ -98,7 +98,7 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | Duplicate and test pins fill the map | A precise pin within 30 metres of an existing spot is offered as that spot; test-looking names are refused; a coarse pin is never compared | `core/act.py`, `core/tests/test_act.py` |
 | A record a city's systems cannot read | Every emitted resource is validated against their guide in CI, in Python and in the TypeScript Worker | `scripts/fhir_validate.py`, `worker/test/golden.test.ts` |
 | Someone edits history | A hash-chained audit log, checked by a script | `audit/`, `scripts/verify_audit.py` |
-| We fool ourselves with the statistics | The analysis plan is tagged before any data; every README number is checked against `results/` in CI; a synthetic result can never be cited | `docs/analysis_plan.md` at `prereg-v1`, `scripts/verify_claims.py` |
+| We fool ourselves with the statistics | The analysis plan is tagged before any data; every README number is checked against `results/` in CI; a synthetic result is cited only where the sentence says it is a simulation | `docs/analysis_plan.md` at `prereg-v1`, `scripts/verify_claims.py` |
 | Judge mode leaks the answer key | Judge mode is shut until Sep 28 by a lock constant, and a per-item answer is never sent before the test closes | `core/lock.py`, `core/tests/test_lock.py` |
 | A refresh loses a session | The session resumes from the server; the creek check queues offline and sends later | `apps/web/lib/offline.ts`, `apps/web/tests/` |
 
@@ -286,6 +286,7 @@ The full list, kept current, is `docs/REAL_VS_SYNTHETIC.md`. In short:
 | A referral for a pipe worth testing | real, computed on request from stored visits |
 | The laboratory result coming back | example, tagged and labelled EXAMPLE everywhere |
 | The model pass table and every AI number until the model run | synthetic, stamped SYNTHETIC, cited nowhere |
+| The simulation of weighted votes under Known weaknesses | synthetic by design: made-up people, stamped SYNTHETIC |
 
 ## For judges
 
@@ -321,7 +322,7 @@ AI coding tools wrote most of the code and text here: Claude Code, working from 
 ## Known weaknesses
 
 - One labeller. Every gold label was set by one person, so we report no agreement figure.
-- Four photos per feature is coarse. It shows a person what to practise and flags an answer worth a second look. It is too coarse to weight votes with, and our own simulation says so.
+- Four photos per feature is coarse. It shows a person what to practise and flags an answer worth a second look. It is too coarse to weight votes by feature. In our simulation with made-up people (`results/consensus_coarseness.json`), for groups of <!--v:results/consensus_coarseness.json#/summary/at_headline_size/group_size-->5<!--/v-->, weights from each feature's own photos did worse than a plain majority in <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_feature_only_clearly_loses-->5<!--/v--> of <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns-->5<!--/v--> skill patterns, by <!--v:results/consensus_coarseness.json#/summary/at_headline_size/feature_only_loss_points_min-->12.1<!--/v--> to <!--v:results/consensus_coarseness.json#/summary/at_headline_size/feature_only_loss_points_max-->20.6<!--/v--> points. Weights that also use a person's whole score did better in <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_a_weighted_method_clearly_beats_plain-->1<!--/v--> pattern, where a third of people guessed, by at most <!--v:results/consensus_coarseness.json#/summary/at_headline_size/largest_weighted_gain_over_plain_points-->1.1<!--/v--> points. Leaving out low scorers did better in <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_passers_only_clearly_beats_plain-->2<!--/v-->, by at most <!--v:results/consensus_coarseness.json#/summary/at_headline_size/largest_passers_only_gain_points-->2.2<!--/v--> points.
 - The photos come from open collections in several countries and seasons, not from the creeks a Berkeley visitor will stand in.
 - The footage labels come from the videos' own descriptions, and almost no openly licensed description names a feature, so the footage result leans on agreement between models, which is not accuracy.
 - The citizen observer is modelled as a FHIR Practitioner, for want of a better fit in the guide; our proposal says so.
