@@ -13,7 +13,7 @@ the model run.
 | | 6 deploy main and check it | done 2026-09-22: Pages deployment 945eaee9, /demo text, paint 760 ms, phone sitting passed; that sitting was stored as real (stale QA key), logged in docs/deviations.md, repair is Alex's |
 | 2 Content and cleanup | 1 to 6 | done |
 | 3 AI on the test and footage | 1 the 16-photo test | partly: pipeline, fake run, ids and prices re-confirmed; batch ids fixed; the paid run is Alex's one command |
-| | 2 to 5 footage | done: 68 candidates, pick by rule, Vision screen, eye check (`videos/review.json`), 6 videos, 3 countries |
+| | 2 to 5 footage | done: 68 candidates, pick by rule, Vision screen, eye check (`videos/review.json`), 5 videos, 3 countries |
 | | 6 AI on footage | built and run on the fake client (`evals/footage.py`); real numbers wait on the key |
 | | 7 video walks | built: `/walk`, three walks from three countries (a fourth country is not in the pool) |
 | | 8 README numbers | footage pool, walks and validation counts come from `results/`; AI numbers say they arrive with the model run |

@@ -17,8 +17,10 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import httpx
 
@@ -28,6 +30,7 @@ IG_RESOURCES = ROOT / "fhir" / "build" / "ig" / "fsh-generated" / "resources"
 INSTANCES = ROOT / "fhir" / "build" / "instances"
 GOLDEN = ROOT / "fhir" / "golden"
 RESULTS = ROOT / "results" / "fhir_validation.json"
+OUTCOME = ROOT / "fhir" / "build" / "validation_outcome.json"
 LOCK = ROOT / "fhir" / "ig.lock"
 
 
@@ -71,6 +74,29 @@ def our_files() -> list[Path]:
     if INSTANCES.exists():
         files += sorted(INSTANCES.glob("*.json"))
     return files
+
+
+class ValidatorFailed(RuntimeError):
+    """The validator wrote no outcome this run, so there is nothing to count."""
+
+
+def run_validator(cmd: Sequence[str], outcome_path: Path) -> tuple[dict[str, Any], str]:
+    """Run the validator and read the outcome it wrote this run, never one left from before.
+
+    The old outcome is deleted first. Without that, a validator that crashed before writing
+    would leave the last run's file in place, and its counts would be reported as this run's.
+    """
+    outcome_path.unlink(missing_ok=True)
+    proc = subprocess.run(list(cmd), capture_output=True, text=True)
+    tail = "\n".join(proc.stdout.splitlines()[-25:])
+    if not outcome_path.exists():
+        said = [ln.strip() for ln in (proc.stderr + proc.stdout).splitlines() if ln.strip()]
+        raise ValidatorFailed(
+            f"fhir-validate: the validator exited with code {proc.returncode} and wrote no "
+            f"outcome, so nothing was validated: {said[-1] if said else '(no output)'}"
+        )
+    outcome: dict[str, Any] = json.loads(outcome_path.read_text(encoding="utf-8"))
+    return outcome, tail
 
 
 def summarise(outcome: dict) -> tuple[dict[str, dict[str, int]], list[dict[str, str]]]:
@@ -134,7 +160,6 @@ def main() -> int:
         print("fhir-validate: no emitted instances yet, nothing to validate")
         return 0
     ensure_jar()
-    outcome_path = ROOT / "fhir" / "build" / "validation_outcome.json"
     cmd = [
         java_cmd(),
         "-Xmx3g",
@@ -148,11 +173,13 @@ def main() -> int:
         "-tx",
         args.tx,
         "-output",
-        str(outcome_path),
+        str(OUTCOME),
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    tail = "\n".join(proc.stdout.splitlines()[-25:])
-    outcome = json.loads(outcome_path.read_text(encoding="utf-8")) if outcome_path.exists() else {}
+    try:
+        outcome, tail = run_validator(cmd, OUTCOME)
+    except ValidatorFailed as exc:
+        print(exc)
+        return 1
     by_file, messages = summarise(outcome)
     errors = sum(c.get("error", 0) for c in by_file.values())
     warnings = sum(c.get("warning", 0) for c in by_file.values())

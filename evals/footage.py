@@ -22,8 +22,10 @@ Run: uv run python evals/footage.py --fake     fake client, spends nothing, stam
      uv run python evals/footage.py --real     Batch API, needs ANTHROPIC_API_KEY in .env
 
 The real run is capped at --max-usd (25 by default, Update 14). Models run cheapest first. Before
-each model the expected cost of that model is checked against what is left of the cap, using the
-spend actually measured so far, and the run stops rather than pass it.
+each model the expected cost of that model, its footage frames and its adversarial frames
+together, is checked against what is left of the cap, using the spend actually measured so far,
+and the model is skipped rather than pass it. A model's adversarial pass runs right after its
+footage frames, so its measured cost counts before the next model's check.
 
 Writes results/footage_<stamp>.json and results/footage_latest.json.
 """
@@ -39,7 +41,6 @@ from itertools import combinations
 from pathlib import Path
 from typing import Any
 
-from core.checker import force_answer
 from core.gate import parse_flags
 from core.records import FEATURES
 from evals.agreement import cohens_kappa
@@ -189,12 +190,25 @@ def gate_outcome(records: Sequence[AnswerRecord], pass_table: Mapping[str, Any])
     }
 
 
+def adversarial_images() -> dict[str, bytes]:
+    """One image per adversarial query and run, keyed like the queries, for the cost estimate."""
+    return {
+        f"adv-{name}|{feature}": data
+        for name, data in adversarial_frames().items()
+        for feature in FEATURES
+    }
+
+
 def adversarial(
     client: Client, model_ids: Sequence[str], questions: Mapping[str, str], runs: int
-) -> dict[str, dict[str, dict[str, str]]]:
-    """Each adversarial frame, each feature, each model: the majority answer over the runs."""
+) -> tuple[dict[str, dict[str, dict[str, str]]], list[AnswerRecord]]:
+    """Each adversarial frame, each feature, each model: the majority answer over the runs.
+
+    The records come back too, so the caller can add what the pass cost to the spend.
+    """
     frames = adversarial_frames()
     out: dict[str, dict[str, dict[str, str]]] = {}
+    records: list[AnswerRecord] = []
     for model_id in model_ids:
         queries = [
             Query(
@@ -213,11 +227,13 @@ def adversarial(
         raws = client.answer_many(queries)
         answers: dict[tuple[str, str], list[str]] = {}
         for q, raw in zip(queries, raws, strict=True):
+            record = record_from(q, raw, "")
+            records.append(record)
             name = q.item_id.split("|", 1)[0].removeprefix("adv-")
-            answers.setdefault((name, q.feature), []).append(force_answer(raw.payload).answer)
+            answers.setdefault((name, q.feature), []).append(record.answer)
         for (name, feature), got in answers.items():
             out.setdefault(name, {}).setdefault(feature, {})[model_id] = majority(got)
-    return out
+    return out, records
 
 
 def summary_lines(doc: Mapping[str, Any]) -> list[str]:
@@ -308,20 +324,30 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
             purpose="footage",
         )
 
-    # Cheapest first, so a cap that bites stops the dearest model, not the cheapest.
+    # The adversarial pass is paid for like the footage frames, so the cap counts it too.
     per_model = {
         m: estimate_cost([m], images, pricing, config.settings, runs=runs)["expected_usd"]
         for m in model_ids
     }
-    order = sorted(model_ids, key=lambda m: per_model[m])
+    adv_images = adversarial_images()
+    adv_per_model = {
+        m: estimate_cost([m], adv_images, pricing, config.settings, runs=runs)["expected_usd"]
+        for m in model_ids
+    }
+    # Cheapest first, so a cap that bites stops the dearest model, not the cheapest.
+    order = sorted(model_ids, key=lambda m: per_model[m] + adv_per_model[m])
     records: list[AnswerRecord] = []
+    adv_out: dict[str, dict[str, dict[str, str]]] = {}
     spent = 0.0
+    adv_spent = 0.0
     skipped: dict[str, str] = {}
     for model_id in order:
-        if args.real and spent + per_model[model_id] > args.max_usd:
+        expected = per_model[model_id] + adv_per_model[model_id]
+        if args.real and spent + expected > args.max_usd:
             skipped[model_id] = (
-                f"expected {per_model[model_id]:.2f} USD with {spent:.2f} spent would pass "
-                f"the {args.max_usd:.2f} USD cap"
+                f"expected {expected:.2f} USD ({per_model[model_id]:.2f} on the footage frames, "
+                f"{adv_per_model[model_id]:.2f} on the adversarial frames) with {spent:.2f} "
+                f"spent would pass the {args.max_usd:.2f} USD cap"
             )
             continue
         queries = [
@@ -342,6 +368,14 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
         mine = [record_from(q, r, gold[q.item_id]) for q, r in zip(queries, raws, strict=True)]
         records.extend(mine)
         spent += sum(r.cost_usd for r in mine)
+        # Right after the model's own frames, so the next model's check sees what this cost.
+        answered, adv_records = adversarial(client, [model_id], questions, runs)
+        for name, by_feature in answered.items():
+            for feature, by_model in by_feature.items():
+                adv_out.setdefault(name, {}).setdefault(feature, {}).update(by_model)
+        adv_cost = sum(r.cost_usd for r in adv_records)
+        adv_spent += adv_cost
+        spent += adv_cost
     ran = [m for m in order if m not in skipped]
 
     pass_table = json.loads(PASS_TABLE.read_text(encoding="utf-8")) if PASS_TABLE.exists() else {}
@@ -368,7 +402,7 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
         "accuracy_against_description_labels": labelled_accuracy(records, ran),
         "agreement": model_agreement(records, ran),
         "gate": gate_outcome(records, pass_table),
-        "adversarial": adversarial(client, ran, questions, runs),
+        "adversarial": adv_out,
         "ablation": (
             "not run: no frame carries a description label, so there is nothing to score it on"
             if not any(i.gold for i in items)
@@ -392,10 +426,13 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
             for r in records
             if r.note and r.answer == "yes"
         ][:30],
+        # Everything paid for, the adversarial pass included.
         "cost": {
             "usd": round(spent, 6),
+            "adversarial_usd": round(adv_spent, 6),
             "per_100_frames_usd": round(spent / frames * 100, 4) if frames else None,
             "expected_real_usd_by_model": per_model,
+            "expected_adversarial_usd_by_model": adv_per_model,
         },
     }
     if not args.real:

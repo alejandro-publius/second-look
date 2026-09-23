@@ -43,7 +43,13 @@ def walk_spot(walk: Mapping[str, Any]) -> Spot:
 
 
 def utc_stamp(moment: datetime) -> str:
-    """Seconds in UTC with a Z, the one spelling both languages write the same way."""
+    """Seconds in UTC with a Z, the one spelling both languages write the same way.
+
+    A time with no zone is read as UTC, as core/fhir_emit.py and the Worker read it. astimezone
+    alone would read it as this machine's local time, so the id would change with the machine.
+    """
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=UTC)
     return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 

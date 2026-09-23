@@ -10,9 +10,9 @@ somebody's credit.
 The five steps:
 
 1. Tests. The whole Python suite and the Worker's golden vector suite.
-2. FHIR. Every committed example validated against the OneAquaHealth guide at the pinned commit,
-   read from the last validation run, and the golden Bundles checked byte for byte against what
-   the emitter produces today.
+2. FHIR. The result of the last HL7 validator run, read from the committed
+   results/fhir_validation.json (this step does not run the validator; make fhir-validate does),
+   and the golden Bundles checked byte for byte against what the emitter produces today.
 3. Web. The app builds, and the design gate passes: tokens, contrast and tap targets.
 4. Audit log. The hash chain walks from the genesis hash to the last entry with no break.
 5. Secrets. gitleaks over the history when it is installed, and a scan of the working tree for
@@ -32,8 +32,10 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 # Anything that looks like a live credential. The fake values in tests are all shorter than this
@@ -121,6 +123,19 @@ def step_tests(root: Path, env: dict[str, str]) -> Step:
     return step
 
 
+def files_validated(data: Mapping[str, Any]) -> int:
+    """How many files the last validator run checked.
+
+    scripts/fhir_validate.py writes files_validated as a number and files as the list of paths,
+    so a missing count falls back to the length of the list.
+    """
+    count = data.get("files_validated")
+    if isinstance(count, int):
+        return count
+    files = data.get("files") or []
+    return len(files) if isinstance(files, list) else 0
+
+
 def step_fhir(root: Path, env: dict[str, str]) -> Step:
     step = Step("fhir")
     results = root / "results" / "fhir_validation.json"
@@ -129,13 +144,15 @@ def step_fhir(root: Path, env: dict[str, str]) -> Step:
         return step
     data = json.loads(results.read_text(encoding="utf-8"))
     errors = int(data.get("errors", 0) or 0)
-    files = int(data.get("files", 0) or len(data.get("results", []) or []))
+    files = files_validated(data)
     commit = data.get("ig_commit", "?")
     if errors:
         step.fail(f"{errors} validation error(s) in the last run")
+    # This step reads the committed results of the last validator run. It does not run the
+    # validator, which needs Java and a download; make fhir-validate does that.
     step.lines.append(
-        f"{files} resource(s) validated against hl7-eu/oah at {commit} "
-        f"with {errors} errors, validator {data.get('validator_version', '?')}"
+        f"last validator run: {files} file(s) against hl7-eu/oah at {commit}, "
+        f"{errors} errors, validator {data.get('validator_version', '?')}"
     )
     rc, out = run(
         ["uv", "run", "python", "-m", "pytest", "-q", "core/tests/test_fhir_emit.py"], root, env
