@@ -35,6 +35,7 @@ import httpx
 
 from core.fhir_emit import to_transaction
 from core.fhir_library import LIBRARY_ID, check_library, library_entry
+from core.walks import is_demo
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = Path(os.environ.get("SANDBOX_LEDGER") or ROOT / "fhir" / "sandbox_ledger.jsonl")
@@ -61,13 +62,17 @@ def user_agent() -> str:
 
 def _is_visit_bundle(data: object) -> bool:
     """A collection Bundle with one Provenance: a visit record. Nothing else is ever mirrored,
-    so a transaction file, a referral or an example laboratory result cannot be sent by mistake."""
+    so a transaction file, a referral, an example laboratory result or a demo walk cannot be sent
+    by mistake."""
     if not isinstance(data, dict) or data.get("resourceType") != "Bundle":
         return False
     if data.get("type") != "collection":
         return False
     tags = data.get("meta", {}).get("tag", [])
     if any(t.get("code") == "example" for t in tags):
+        return False
+    # A video walk's record is a demo made on a phone. It is never stored, so never mirrored.
+    if is_demo(data):
         return False
     types = [e.get("resource", {}).get("resourceType") for e in data.get("entry", [])]
     return types.count("Provenance") == 1 and "ServiceRequest" not in types

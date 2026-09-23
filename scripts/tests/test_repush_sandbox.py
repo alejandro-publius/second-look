@@ -455,3 +455,15 @@ def test_push_hands_its_provenances_to_the_library(
     )
     assert code == 0
     assert len(seen) == 1 and seen[0].startswith("Provenance/"), "one Provenance per visit"
+
+
+def test_a_demo_walk_record_is_never_mirrored() -> None:
+    from datetime import UTC, datetime
+
+    from core.walks import walk_bundle
+
+    walk = {"id": "v03", "spot_name": "The stretch in the clip", "creek_name": "A creek"}
+    bundle = walk_bundle(walk, {"bank_type": "present"}, datetime(2026, 9, 24, 16, 0, tzinfo=UTC))
+    assert rs._is_visit_bundle(bundle) is False
+    untagged = {**bundle, "meta": {}}
+    assert rs._is_visit_bundle(untagged) is True

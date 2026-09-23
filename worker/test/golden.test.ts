@@ -18,6 +18,7 @@ import { observerLabel } from "../src/core/labels";
 import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
+import { isDemo, walkBundle } from "../src/core/walks";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
@@ -127,6 +128,10 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
     const file = `ts-${String(bundle.id)}.json`;
     writeFileSync(join(outDir, file), JSON.stringify(bundle, null, 2) + "\n");
   }
+  // A fullUrl used twice is caught (bdl-7), as the HL7 validator would.
+  const doubled = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at) as { entry: unknown[] };
+  doubled.entry.push(JSON.parse(JSON.stringify(doubled.entry[2])));
+  assert.ok(checkBundle(doubled as never).some((p) => p.includes("appears twice")));
   // And a broken Bundle is caught, so the check is not a rubber stamp.
   const broken = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at) as { entry: { resource: Record<string, unknown> }[] };
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance")!;
@@ -147,4 +152,20 @@ test("fhir_referral: the ServiceRequest and the example result, the same as Pyth
   mkdirSync(outDir, { recursive: true });
   writeFileSync(join(outDir, `ts-${String(made.id)}.json`), JSON.stringify(made, null, 2) + "\n");
   writeFileSync(join(outDir, `ts-${String(result.id)}.json`), JSON.stringify(result, null, 2) + "\n");
+});
+
+test("walks: the same demo Bundle as Python, tagged on every resource, and structurally sound", () => {
+  const doc = golden("walks");
+  const outDir = join(root, "fhir", "build", "instances");
+  mkdirSync(outDir, { recursive: true });
+  for (const c of doc.cases) {
+    const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at);
+    same(bundle, c.expected, c.name);
+    assert.deepEqual(checkBundle(bundle as never), [], `${c.name}: structural check`);
+    assert.ok(isDemo(bundle), `${c.name}: the Bundle carries the demo tag`);
+    for (const e of bundle.entry as { resource: Record<string, never> }[]) {
+      assert.ok(isDemo(e.resource), `${c.name}: ${String(e.resource.resourceType)} carries the demo tag`);
+    }
+    writeFileSync(join(outDir, `ts-${String(bundle.id)}.json`), JSON.stringify(bundle, null, 2) + "\n");
+  }
 });

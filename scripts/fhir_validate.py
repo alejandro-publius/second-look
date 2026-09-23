@@ -169,6 +169,8 @@ def main() -> int:
                 "files": [str(f.relative_to(ROOT)) for f in files],
                 "errors": errors,
                 "warnings": warnings,
+                "files_validated": len(by_file),
+                "walk_records_validated": sum(1 for f in by_file if "sl-visit-walk-" in f),
                 "by_file": by_file,
                 "messages": messages,
             },

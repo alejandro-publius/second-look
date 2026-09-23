@@ -24,7 +24,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-from core import act, followups, healthcard, labels, regions
+from core import act, followups, healthcard, labels, regions, walks
 from core.content_loader import load_content
 from core.fhir_emit import check_bundle, emit_visit, fhir_id
 from core.fhir_referral import example_lab_result, referral_bundle
@@ -819,6 +819,40 @@ def fhir_vectors() -> dict[str, Any]:
     }
 
 
+def walk_vectors() -> dict[str, Any]:
+    """Update 14 3.7: a walk visit, built on the device, tagged as a demo on every resource."""
+    walk = {"id": "v03", "spot_name": "The stretch in the clip", "creek_name": "A creek in a clip"}
+
+    def run(name: str, answers: dict[str, Any], at: datetime) -> dict[str, Any]:
+        bundle = walks.walk_bundle(walk, answers, at)
+        assert check_bundle(bundle) == [] and walks.is_demo(bundle)
+        return case(
+            name,
+            {
+                "walk": walk,
+                "answers": answers,
+                "answered_at": at.isoformat().replace("+00:00", "Z"),
+            },
+            bundle,
+        )
+
+    return {
+        "function": "core.walks.walk_bundle",
+        "cases": [
+            run(
+                "a walk with a built bank, a pipe and a number",
+                {"bank_type": "present", "draining_pipes": "present", "water_height_m": 1.0},
+                datetime(2026, 9, 24, 16, 5, 9, tzinfo=UTC),
+            ),
+            run(
+                "a walk where the person saw nothing and skipped the rest",
+                {"bank_type": "absent"},
+                datetime(2026, 9, 25, 8, 0, 0, 750000, tzinfo=UTC),
+            ),
+        ],
+    }
+
+
 def helper_vectors() -> dict[str, Any]:
     texts = [
         "",
@@ -905,6 +939,7 @@ def build() -> dict[str, dict[str, Any]]:
         "act": act_vectors(finding_key_for, approved),
         "regions": region_vectors(content.regions),
         "fhir_emit": fhir_vectors(),
+        "walks": walk_vectors(),
         "helpers": helper_vectors(),
     }
 
