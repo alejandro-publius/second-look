@@ -13,7 +13,9 @@ test("landing paints without the API and wakes it afterwards", async ({ page }) 
   await expect(page.getByText("This trains your eyes for the visit.")).toBeVisible();
   const imgs = page.getByRole("group", { name: "Two creek photos" }).locator("img");
   await expect(imgs).toHaveCount(2);
-  await expect(imgs.first()).toHaveAttribute("alt", "gray placeholder block, not a photo");
+  // Real photographs now. The alt text describes a creek and never gives the answer away.
+  await expect(imgs.first()).toHaveAttribute("alt", "photo of a creek");
+  await expect(imgs.last()).toHaveAttribute("alt", "photo of a creek");
   await expect.poll(() => calls.filter((c) => c.path === "/health").length).toBeGreaterThan(0);
   expect(await page.evaluate(() => sessionStorage.getItem("sl_src"))).toBe("poster");
   await expect(page.getByRole("link", { name: "Find out in two minutes" })).toHaveAttribute("href", "/t?src=poster");
@@ -65,9 +67,13 @@ test("every photograph a visitor can see is named on the credits page", async ({
   await page.goto("/credits");
   await expect(page.getByRole("heading", { name: "Photo credits" })).toBeVisible();
 
-  // Today every photo is a placeholder, so the page says so rather than showing an empty card.
-  await expect(page.getByText("No photographs are loaded yet.")).toBeVisible();
-  await expect(page.getByText("Placeholder blocks are not photographs.")).toBeVisible();
+  // Every photograph is real and credited by name; no placeholder is left to explain.
+  await expect(page.getByText("by Gregwadley").first()).toBeVisible();
+  await expect(page.getByText("by Roger Kidd").first()).toBeVisible();
+  await expect(page.getByText("No photographs are loaded yet.")).toHaveCount(0);
+  await expect(page.getByText("Placeholder blocks are not photographs.")).toHaveCount(0);
+  // The video walks' footage is credited too, one line per video.
+  await expect(page.getByRole("heading", { name: "Creek footage" })).toBeVisible();
 
   // The judges' door and About both reach it. The participant's door deliberately does not.
   await page.goto("/judges");

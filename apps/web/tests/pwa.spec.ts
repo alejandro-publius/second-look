@@ -38,6 +38,6 @@ test.describe("with service workers allowed", () => {
           }),
         { timeout: 30_000 },
       )
-      .toEqual(expect.arrayContaining(["/t", "/check", "/photos/ph-warmup-01.jpg"]));
+      .toEqual(expect.arrayContaining(["/t", "/check", "/photos/ph-warmup-03.jpg"]));
   });
 });

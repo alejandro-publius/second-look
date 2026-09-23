@@ -73,7 +73,14 @@ if (walkId) {
         await page.getByRole("button", { name: "Finish" }).click();
         continue;
       }
-      await page.getByRole("button", { name: "Skip" }).first().click();
+      // Each kind of question has its own way on: Skip, "None of these", a choice, or Next.
+      const skip = page.getByRole("button", { name: "Skip" });
+      const none = page.getByRole("button", { name: "None of these" });
+      const choice = page.getByRole("main").getByRole("group").first().getByRole("button");
+      if (await skip.first().isVisible()) await skip.first().click();
+      else if (await none.isVisible()) await none.click();
+      else if (await choice.first().isVisible()) await choice.first().click();
+      else await page.getByRole("button", { name: "Next", exact: true }).click();
     }
     await page.getByText("Every link inside the record checks out").waitFor({ timeout: 10000 });
   });
