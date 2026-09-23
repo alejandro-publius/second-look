@@ -889,6 +889,18 @@ pre.code {
   word-break: break-all;
 }
 
+/* The observer score on a record card: the one line that says how much to trust the record. */
+.record-score {
+  margin: var(--s2) 0;
+  padding: var(--s2) var(--s3);
+  background: var(--surface-sunk);
+  border-left: var(--s1) solid var(--flag);
+}
+
+.record-score dd {
+  font-weight: 700;
+}
+
 .share-card {
   width: 100%;
   height: auto;
