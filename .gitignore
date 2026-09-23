@@ -1,4 +1,9 @@
 .env
+# Local secrets in any folder (hard rule 14): wrangler dev reads the Worker's from .dev.vars and
+# .dev.vars.<env>, and .env.local and its kind hold them too. .env.example is the one committed.
+.dev.vars*
+.env.*
+!.env.example
 data/raw/
 node_modules/
 .venv/

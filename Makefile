@@ -79,6 +79,17 @@ fhir-validate:
 audit-verify:
 	$(PY) scripts/verify_audit.py
 
+# Hard rule 14 on every commit, not only at submission: `check: secrets` below makes it part of
+# make check. gitleaks reads the history of the checked out commit, where each fake value is
+# named in .gitleaksignore with its reason, then the submit-check scan reads every file git
+# would commit. CI installs gitleaks 8.30.1; on a Mac, brew install gitleaks.
+.PHONY: secrets
+check: secrets
+secrets:
+	@command -v gitleaks >/dev/null || { echo "secrets: gitleaks is not installed; brew install gitleaks"; exit 1; }
+	gitleaks git . --log-opts=HEAD --redact --no-banner --exit-code 1
+	$(PY) scripts/submit_check.py --secrets-only
+
 # The read only MCP server over our records (Update 10 tier 2 item 2). Local, over stdio.
 # make export-records writes data/export from the local database; make mcp serves it.
 export-records:

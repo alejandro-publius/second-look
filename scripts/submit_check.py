@@ -1,6 +1,7 @@
 """The submission gate: every item in docs/SUBMISSION_CHECKLIST.md that a script can check.
 
 Run: make submit-check  (uv run python scripts/submit_check.py [--video path.mp4])
+     make secrets runs only the working tree secret scan (--secrets-only), inside make check.
 Prints one line per check and ends with "submit-check: N failed: <names>". Exit 1 on any failure.
 Until submission day the expected failures are: the video link, the public repo, and real
 (not synthetic) results.
@@ -33,6 +34,12 @@ HEADERS = [
     "A clear demonstration of what was built",
 ]
 URL_RE = re.compile(r"https?://[^\s)>\]]+")
+# A name that ends in a secret word, as EXPORT_TOKEN, QA_KEY and NEXT_PUBLIC_QA_KEY do in .env and
+# worker/.dev.vars, and export_token does in code. The made up values never count: change-me is
+# the placeholder .env.example and apps/api/settings.py ship with, test- starts the ones in the
+# test suites, and e2e- the key worker/test/e2e.mjs gives its own local Worker.
+SECRET_NAME = r"(api[_-]?key|secret([_-]?key)?|token|password|qa[_-]?key)"
+NOT_PLACEHOLDER = r"(?!change-me|test-|e2e-)"
 SECRET_PATTERNS = {
     "AWS access key": re.compile(r"AKIA[0-9A-Z]{16}"),
     "Anthropic key": re.compile(r"sk-ant-[A-Za-z0-9_-]{20,}"),
@@ -42,9 +49,18 @@ SECRET_PATTERNS = {
     "Google API key": re.compile(r"AIza[0-9A-Za-z_-]{35}"),
     "private key block": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     "assigned secret": re.compile(
-        r"(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*['\"][A-Za-z0-9/+_=-]{20,}['\"]"
+        rf"(?i){SECRET_NAME}\s*[:=]\s*['\"]{NOT_PLACEHOLDER}[A-Za-z0-9/+_=-]{{20,}}['\"]"
+    ),
+    # The same without quotes, as a .env line has it. The value has to end the line, so code
+    # such as token = new_contributor_token() is not a hit.
+    "secret in a .env line": re.compile(
+        rf"(?im){SECRET_NAME}\s*=\s*{NOT_PLACEHOLDER}[A-Za-z0-9/+_=-]{{20,}}\s*$"
     ),
 }
+# Files that hold local secrets: .env and its kind for the API, .dev.vars for wrangler dev.
+# .gitignore keeps them out in every folder; one that git would still pick up fails the scan.
+LOCAL_SECRET_FILE = re.compile(r"\.(env|dev\.vars)(\..+)?")
+LOCAL_SECRET_EXAMPLE = ".env.example"
 BINARY_SUFFIXES = {
     ".png",
     ".jpg",
@@ -114,6 +130,8 @@ def candidate_files(root: Path, run: Runner) -> list[Path]:
 def scan_secrets(root: Path, files: list[Path]) -> list[str]:
     hits: list[str] = []
     for path in files:
+        if LOCAL_SECRET_FILE.fullmatch(path.name) and path.name != LOCAL_SECRET_EXAMPLE:
+            hits.append(f"{path.relative_to(root)}: a local secrets file that is not ignored")
         if path.suffix.lower() in BINARY_SUFFIXES or not path.is_file():
             continue
         try:
@@ -306,13 +324,35 @@ def report(checks: list[Check]) -> int:
     return len(failed)
 
 
+def tree_secrets(root: Path) -> int:
+    """The working tree half of secrets_scan, for make secrets inside make check.
+
+    make secrets runs gitleaks over the history first, so this reads only the files git would
+    commit: tracked ones and untracked ones that are not ignored. It names the file and line of a
+    hit, never the value.
+    """
+    files = candidate_files(root, default_runner(root))
+    hits = scan_secrets(root, files)
+    for hit in hits:
+        print(f"FAIL  {hit}")
+    print(f"secrets: {len(hits)} found in the {len(files)} files git would commit")
+    return 1 if hits else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     import os
 
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--video", type=Path, default=None, help="local video file to time")
     parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--secrets-only",
+        action="store_true",
+        help="only scan the working tree for secrets, as make secrets does",
+    )
     args = parser.parse_args(argv)
+    if args.secrets_only:
+        return tree_secrets(args.root.resolve())
     checks = run_checks(args.root, video=args.video, env_url=os.environ.get("NEXT_PUBLIC_SITE_URL"))
     return 1 if report(checks) else 0
 
