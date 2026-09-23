@@ -142,7 +142,11 @@ async function main() {
   });
   await step("lab and volunteer side by side, from the API", async () => {
     await page.goto(`${site}/two`);
-    await page.locator(".row").first().waitFor({ timeout: 15000 });
+    // Our record shows whenever our API answers; theirs only while their sandbox answers the Worker.
+    await page.getByRole("region", { name: "Volunteer (Second Look)" }).waitFor({ timeout: 15000 });
+    if (!(await page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" }).isVisible())) {
+      console.log("live-readonly: NOTE /two shows only our record: their sandbox did not answer the Worker");
+    }
   });
 
   await browser.close();
