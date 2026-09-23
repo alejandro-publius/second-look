@@ -176,7 +176,7 @@ await record("08-how-we-know", async (page) => {
 await record("extra-score-filter", async (page) => {
   await page.goto(`${base}/spot?id=example`);
   await beat(2000);
-  const filter = page.getByText("Only people who passed this feature").first();
+  const filter = page.getByText("Only show answers from people who passed the test for that feature").first();
   if (await filter.isVisible()) await filter.click();
   await beat(3000);
 });

@@ -69,7 +69,7 @@ test("/two renders both observers with one card and says plainly when theirs is 
 test("/quick/example posts the fixed enums", async ({ page }) => {
   const calls = await mockApi(page);
   await page.goto("/quick?spot=example");
-  await expect(page.getByText("20 second check", { exact: true })).toBeVisible();
+  await expect(page.getByText("Quick check", { exact: true }).first()).toBeVisible();
   // One question per screen: a tap moves on, and Send waits for the last screen.
   await expect(page.getByRole("group", { name: "Water colour" })).toBeVisible();
   await expect(page.getByText("Step 1 of 4")).toBeVisible();

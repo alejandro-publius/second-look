@@ -40,7 +40,8 @@ const OUTCOME_KEYS = new Map([
   ["cant_tell", "spot.outcome_cant_tell"],
   ["skipped", "spot.outcome_skipped"],
 ]);
-// The rating check answers. The API stores "change"; the check page has sent "changed".
+// The rating check answers. The servers store "change" and always refused "changed", which the
+// check page sent until 2026-09-23; "changed" stays here only so an old mock record reads right.
 const RATING_ANSWERS = new Set(["keep", "change", "changed"]);
 
 /** What the person did with a check, in words. The rating check reads the visit's two ratings. */

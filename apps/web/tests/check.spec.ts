@@ -86,7 +86,7 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await page.getByRole("button", { name: "Finish" }).click();
 
   const fin = calls.find((c) => c.path === "/api/check/finalize")!;
-  expect(fin.body).toEqual({ draft_id: "d1", followup_answers: { dry_pipe: "yes", rating_check: "changed" }, final_rating: "moderate" });
+  expect(fin.body).toEqual({ draft_id: "d1", followup_answers: { dry_pipe: "yes", rating_check: "change" }, final_rating: "moderate" });
   await expect(page.getByRole("heading", { name: "Saved" })).toBeVisible();
   await expect(page.getByRole("link", { name: "See this creek's record" })).toHaveAttribute("href", "/spot?id=example");
   expect(await page.evaluate(() => localStorage.getItem("sl_saved_spots"))).toContain("Footbridge");

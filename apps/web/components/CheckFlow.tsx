@@ -232,7 +232,7 @@ export function CheckFlow() {
               onFinalRating={(r) => {
                 setFinalRating(r);
                 setChangingRating(false);
-                setFollowupAnswers((a) => ({ ...a, [f.rule_id]: "changed" }));
+                setFollowupAnswers((a) => ({ ...a, [f.rule_id]: "change" }));
               }}
             />
           ))}
@@ -352,7 +352,7 @@ function FollowupCard({
             <button type="button" className="btn" aria-pressed={value === "keep"} onClick={() => onAnswer("keep")}>
               {t("check.keep_rating")}
             </button>
-            <button type="button" className="btn btn-secondary" aria-pressed={value === "changed"} onClick={onChangeRating}>
+            <button type="button" className="btn btn-secondary" aria-pressed={value === "change"} onClick={onChangeRating}>
               {t("check.change_rating")}
             </button>
           </div>
