@@ -64,6 +64,7 @@ async function main() {
   const walkId = walk.id;
 
   const results = [];
+  const notYet = [];
   function ok(name, pass, detail = "") {
     results.push({ name, pass, detail });
     console.log(`live-readonly: ${pass ? "PASS" : "FAIL"} ${name}${detail ? `: ${detail}` : ""}`);
@@ -145,11 +146,21 @@ async function main() {
     // Our record shows whenever our API answers.
     await page.getByRole("region", { name: "Volunteer (Second Look)" }).waitFor({ timeout: 15000 });
   });
-  await step("their lab record beside ours, fetched from their sandbox by the Mac job", async () => {
-    // scripts/cache_their_records.py stores it daily; the Worker cannot reach their sandbox.
-    await page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" }).waitFor({ timeout: 15000 });
-    await page.getByText("Fetched from their sandbox at").waitFor({ timeout: 5000 });
-  });
+  // Their lab record comes from their sandbox through scripts/cache_their_records.py on the Mac.
+  // While the job has stored nothing (their sandbox's name stopped resolving on 2026-09-23), this
+  // is reported as NOT YET, apart from the passes, so their outage cannot hide a fault of ours.
+  // REQUIRE_THEIRS=1 turns it into a failure.
+  const pair = await fetch(`${api}/api/two`).then((r) => r.json()).catch(() => null);
+  if (pair?.theirs_status === "down" && process.env.REQUIRE_THEIRS !== "1") {
+    notYet.push("their lab record on /two: nothing stored by the Mac job yet");
+    console.log("live-readonly: NOT YET their lab record on /two: the Mac job has stored nothing yet");
+  } else {
+    await step("their lab record beside ours, fetched from their sandbox by the Mac job", async () => {
+      await page.goto(`${site}/two`);
+      await page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" }).waitFor({ timeout: 15000 });
+      await page.getByText("Fetched from their sandbox at").waitFor({ timeout: 5000 });
+    });
+  }
 
   await browser.close();
   const after = await readCounts(api);
@@ -157,7 +168,7 @@ async function main() {
   const counts = countsCheck(before, after);
   ok("the public counts did not move", counts.pass, counts.detail);
   const failed = results.filter((r) => !r.pass);
-  console.log(`live-readonly: ${results.length - failed.length} of ${results.length} passed`);
+  console.log(`live-readonly: ${results.length - failed.length} of ${results.length} passed${notYet.length ? `, ${notYet.length} not yet (${notYet.join("; ")})` : ""}`);
   process.exit(failed.length ? 1 : 0);
 }
 

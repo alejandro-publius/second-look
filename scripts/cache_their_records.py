@@ -1,9 +1,10 @@
 """Fetch the lab record /two shows from their sandbox, on the Mac, and store it in D1.
 
-Their sandbox answers a Cloudflare Worker with HTTP 530 and "error code: 1016", Cloudflare's
-origin DNS error, while it answers this Mac at once. So the Worker never fetches it (see
-worker/src/two.ts): this script does, once a day through launchd (scripts/install_cache_job.sh),
-and the Worker shows what it stored with the time it was fetched.
+On 2026-09-23 the Worker's own fetch got Cloudflare's origin DNS error (HTTP 530, code 1016):
+the sandbox's name had dropped out of their DNS. So the Worker never fetches it (see
+worker/src/two.ts): this script does, from the Mac, once a day through launchd
+(scripts/install_cache_job.sh), and the Worker shows what it stored with the time it was fetched.
+While their name does not resolve, the fetch fails, nothing is stored and the page says so.
 
 One read-only GET to their sandbox per run, with the same query, user agent and one second pacing
 as apps/api/fhir_routes.py (hard rule 10). Their record goes into the sandbox_cache table only,

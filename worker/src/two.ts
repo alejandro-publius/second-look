@@ -1,7 +1,8 @@
 // GET /api/two on the Worker: one volunteer Observation of ours beside one laboratory Observation
 // from their sandbox. A port of apps/api/fhir_routes.py, with one difference: the Worker never
-// fetches their record itself. Their sandbox answers a Cloudflare Worker with HTTP 530 and
-// "error code: 1016" (Cloudflare's origin DNS error), while it answers a laptop at once, so
+// fetches their record itself. On 2026-09-23 the Worker's fetch got HTTP 530, "error code: 1016"
+// (Cloudflare's origin DNS error): the sandbox's name had dropped out of their DNS (NXDOMAIN at
+// their own nameserver), and the Mac reached it only from a cached answer. So
 // scripts/cache_their_records.py fetches it on the Mac once a day and stores it in D1, and the
 // Worker shows what that script stored, with the time it was fetched. If nothing is stored yet,
 // the screen says so and shows ours alone. Their record is never written to git.
