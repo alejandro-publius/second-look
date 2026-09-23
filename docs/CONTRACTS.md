@@ -45,6 +45,7 @@ The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`
 - `content/regions/<region>.yaml`: `region`, `name`, `approved`, `invasive_plants[] {common_name, latin_name, source}`.
 - `content/locales/en.json`: flat `key: string` with `{placeholders}`. All UI strings come from here.
 - `photos/manifest.csv`: columns `id, file, sha256, source_url, author, license, capture_date, coarse_location, scene_id, role, feature, gold_label, labeller_2, synthetic, faces, notes, label_evidence`. License `placeholder` marks a gray block. `label_evidence` says where the source itself supports the label: a research grade identification, a caption, a category name. A photo with a `source_url` needs one, and an invasive plant row needs the Cal-IPC profile link in it (Update 09 section 1).
+- `photos/derived/manifest.csv`: smaller AVIF and WebP copies of a manifest photo, written by `scripts/derive_photos.py`. Columns `file, source_id, source_sha256, sha256, format, width, height, quality, bytes`. A copy is named `<source id>-<width>.<format>` and is the whole source picture scaled down, with no EXIF, XMP or colour profile. Only warm-up photos get copies; the JPEG stays in `photos/warmup/` as the fallback. `scripts/check_manifest.py` fails a copy with no row, a row whose source row or source sha256 does not match, a copy of a photo in another role, a copy over the byte cap `DERIVED_MAX_BYTES` in `core/content_loader.py`, and a copy that is cropped, stretched or carries metadata (Update 22 section 1).
 
 ## W1 API contract (W4 builds against this)
 

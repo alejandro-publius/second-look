@@ -7,10 +7,22 @@ import hashlib
 import sys
 from pathlib import Path
 
+from PIL import Image, ImageChops, ImageStat
+
 from core import content_loader
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
+# One list with core/content_loader.py, so an image type one of them skips cannot hide here.
+IMAGE_SUFFIXES = content_loader.IMAGE_SUFFIXES
+DERIVED_DIR = content_loader.DERIVED_DIR
+DERIVED_FORMATS = {".avif": ("avif", "AVIF"), ".webp": ("webp", "WEBP")}
+# What a smaller copy may not carry. The AVIF colour box (colr, nclx) is not on the list: it says
+# how to decode the colours, and it names nothing and no one.
+METADATA_KEYS = ("exif", "xmp", "XML:com.adobe.xmp", "icc_profile", "comment")
+# Same picture, same framing: the copy and its source, both grey and 64 pixels wide, differ by
+# at most this much on average (0 to 255). The real copies differ by under 2; cropping 2 per cent
+# off each edge already gives 9, and a mirror image over 40.
+SAME_PICTURE_MAX_DIFF = 4.0
 REQUIRED_COLUMNS = [
     "id",
     "file",
@@ -61,6 +73,79 @@ def sha256_of(path: Path) -> str:
     return h.hexdigest()
 
 
+def _thumb(image: Image.Image, size: tuple[int, int] | None = None) -> Image.Image:
+    grey = image.convert("L")
+    return grey.resize(size or (64, round(64 * grey.height / grey.width)), Image.Resampling.BOX)
+
+
+def picture_difference(copy: Image.Image, source: Image.Image) -> float:
+    """Mean grey difference between two small thumbnails. Near 0 means the same framing."""
+    a = _thumb(source)
+    b = _thumb(copy, a.size)
+    return float(ImageStat.Stat(ImageChops.difference(a, b)).mean[0])
+
+
+def check_derived(root: Path, by_id: dict[str, dict[str, str]], images: list[Path]) -> list[str]:
+    """Every smaller copy traces to a manifest row and its sha256, and is what its row says."""
+    problems: list[str] = []
+    rows = content_loader.derived_rows(root)
+    if rows:
+        missing_cols = [c for c in content_loader.DERIVED_COLUMNS if c not in rows[0]]
+        if missing_cols:
+            return [f"photos/{DERIVED_DIR}/manifest.csv missing columns: {missing_cols}"]
+    by_file = {row["file"]: row for row in rows}
+    for img in images:
+        rel = img.relative_to(root / "photos").as_posix()
+        row = by_file.get(rel)
+        if row is None:
+            problems.append(f"no derived manifest row: photos/{rel}")
+            continue
+        source = by_id.get(row["source_id"])
+        if source is None:
+            problems.append(f"copy of a photo with no manifest row: photos/{rel}")
+            continue
+        if row["source_sha256"] != source["sha256"]:
+            problems.append(f"copy of another version of {source['file']}: photos/{rel}")
+        if source["role"] not in content_loader.DERIVED_ROLES:
+            problems.append(f"copy of a {source['role']} photo: photos/{rel}")
+        if row["sha256"] != sha256_of(img):
+            problems.append(f"sha256 mismatch: photos/{rel}")
+        size = img.stat().st_size
+        if row["bytes"] != str(size):
+            problems.append(f"byte count mismatch: photos/{rel}")
+        if size > content_loader.DERIVED_MAX_BYTES:
+            problems.append(
+                f"copy over {content_loader.DERIVED_MAX_BYTES} bytes: photos/{rel} ({size})"
+            )
+        fmt, pil_format = DERIVED_FORMATS.get(img.suffix.lower(), ("", ""))
+        if rel != f"{DERIVED_DIR}/{row['source_id']}-{row['width']}.{fmt}":
+            problems.append(f"copy not named <source id>-<width>.<format>: photos/{rel}")
+        source_path = root / "photos" / source["file"]
+        if not source_path.exists():
+            continue
+        with Image.open(img) as copy, Image.open(source_path) as original:
+            if copy.format != pil_format or row["format"] != fmt:
+                problems.append(f"format is not {row['format']}: photos/{rel}")
+            if [str(copy.width), str(copy.height)] != [row["width"], row["height"]]:
+                problems.append(f"size is not {row['width']}x{row['height']}: photos/{rel}")
+            if copy.width > original.width:
+                problems.append(f"copy wider than its source: photos/{rel}")
+            if abs(copy.height - copy.width * original.height / original.width) > 1:
+                problems.append(f"copy changes the aspect ratio of its source: photos/{rel}")
+            carried = [k for k in METADATA_KEYS if copy.info.get(k)]
+            if carried or len(copy.getexif()):
+                problems.append(f"copy carries metadata: photos/{rel} ({carried or ['exif']})")
+            diff = picture_difference(copy, original)
+            if diff > SAME_PICTURE_MAX_DIFF:
+                problems.append(
+                    f"copy is not the whole source picture: photos/{rel} (differs by {diff:.1f})"
+                )
+    for rel in by_file:
+        if not (root / "photos" / rel).exists():
+            problems.append(f"derived manifest row without file: photos/{rel}")
+    return problems
+
+
 def main(root: Path = ROOT) -> int:
     problems: list[str] = []
     manifest = root / "photos" / "manifest.csv"
@@ -76,7 +161,13 @@ def main(root: Path = ROOT) -> int:
         problems.append(f"manifest missing columns: {missing_cols}")
     by_file = {row["file"]: row for row in rows if row.get("file")}
     images = [p for p in (root / "photos").rglob("*") if p.suffix.lower() in IMAGE_SUFFIXES]
+    # Smaller copies answer to their own manifest, which names the source row.
+    derived = [p for p in images if p.relative_to(root / "photos").parts[0] == DERIVED_DIR]
+    by_id = {row["id"]: row for row in rows if row.get("id")}
+    problems.extend(check_derived(root, by_id, derived))
     for img in images:
+        if img in derived:
+            continue
         rel = str(img.relative_to(root / "photos"))
         row = by_file.get(rel)
         if row is None:
@@ -113,7 +204,10 @@ def main(root: Path = ROOT) -> int:
         print("\n".join(problems))
         print(f"manifest-check: {len(problems)} problem(s)")
         return 1
-    print(f"manifest-check: {len(images)} image(s), all with matching rows")
+    print(
+        f"manifest-check: {len(images) - len(derived)} image(s) and {len(derived)} smaller "
+        "copies, all with matching rows"
+    )
     return 0
 
 

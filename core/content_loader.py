@@ -38,7 +38,27 @@ NEEDS_ATTRIBUTION = {lic for lic in LICENSE_ALLOWLIST if lic.startswith(("CC-BY"
 REAL_LICENSES = LICENSE_ALLOWLIST - {"placeholder"}
 ROLES = {"warmup", "lesson", "practice", "test", "benchmark"}
 TEST_SIZE = 16
-IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
+IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
+
+# Smaller copies of a manifest photo (Update 22 section 1 answer 2). They sit in photos/derived/
+# with a manifest of their own. Each row names its source row and the source's sha256, so a copy
+# is traced to a photo that already passed every rule. scripts/derive_photos.py writes them and
+# scripts/check_manifest.py checks them. Only warm-up photos get copies: the test photos are
+# study material, frozen since prereg-v1.
+DERIVED_DIR = "derived"
+DERIVED_COLUMNS = [
+    "file",
+    "source_id",
+    "source_sha256",
+    "sha256",
+    "format",
+    "width",
+    "height",
+    "quality",
+    "bytes",
+]
+DERIVED_ROLES = {"warmup"}
+DERIVED_MAX_BYTES = 250_000
 
 
 class ContentError(Exception):
@@ -97,6 +117,15 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def derived_rows(root: Path) -> list[dict[str, str]]:
+    """The rows of photos/derived/manifest.csv, or none when there is no such file."""
+    manifest = root / "photos" / DERIVED_DIR / "manifest.csv"
+    if not manifest.exists():
+        return []
+    with manifest.open(newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
 def _flag_false(value: str) -> bool:
     return value.strip().lower() in {"false", "0", ""}
 
@@ -142,6 +171,12 @@ def _load_manifest(root: Path, problems: list[str]) -> dict[str, Photo]:
         )
     images = [p for p in (root / "photos").rglob("*") if p.suffix.lower() in IMAGE_SUFFIXES]
     listed = {str((root / "photos" / p.file).resolve()) for p in photos.values()}
+    # A smaller copy counts as listed only through a row that names a photo we have, at the
+    # sha256 we have. scripts/check_manifest.py checks the rest of what a copy must be.
+    for row in derived_rows(root):
+        source = photos.get(row.get("source_id", ""))
+        if source is not None and source.sha256 == row.get("source_sha256"):
+            listed.add(str((root / "photos" / row.get("file", "")).resolve()))
     for img in images:
         if str(img.resolve()) not in listed:
             problems.append(f"photo without manifest row: {img.relative_to(root)}")
