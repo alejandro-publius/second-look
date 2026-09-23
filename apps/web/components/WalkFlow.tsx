@@ -49,6 +49,16 @@ function Clip({ walk }: { walk: Walk }) {
 }
 
 /**
+ * The line under the record about the checker. The count of stopped guesses is shown only when the
+ * checker's run on the footage was real: a number from the fake client's run is never shown.
+ */
+export function checkerLine(walk: Pick<Walk, "question" | "checker_run" | "checker_dropped">): string {
+  if (walk.question) return t("walk.checker_asked");
+  if (walk.checker_run !== "real") return t("walk.checker_not_real");
+  return t("walk.checker_none", { n: walk.checker_dropped });
+}
+
+/**
  * A guided creek check made while watching a clip (Update 14 3.7). The checker's flag, if the gate
  * let one through at build time, is asked only after the person has answered. The record is made
  * on this device and never sent.
@@ -149,7 +159,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           <p className={problems.length === 0 ? "badge badge-ok" : "badge badge-bad"} data-testid="walk-structure">
             {problems.length === 0 ? t("walk.structure_ok") : t("walk.structure_bad", { n: problems.length })}
           </p>
-          <p className="small muted">{walk.question ? t("walk.checker_asked") : t("walk.checker_none", { n: walk.checker_dropped })}</p>
+          <p className="small muted">{checkerLine(walk)}</p>
           <FhirView load={() => Promise.resolve(bundle)} curl={t("walk.no_curl")} />
           <p>
             <Link className="btn btn-block" href={`/city?walk=${encodeURIComponent(walk.id)}`}>

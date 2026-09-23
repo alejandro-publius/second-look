@@ -411,6 +411,7 @@
   "walk.structure_bad": "{n} problems inside the record",
   "walk.checker_asked": "The checker asked one question after you answered, because it passed the test for that feature.",
   "walk.checker_none": "The checker asked nothing. It is only allowed to ask about a feature it passed the same test on, and {n} of its guesses on this clip were stopped for that reason.",
+  "walk.checker_not_real": "The checker asked nothing. It has not taken the test for real yet, so it is not allowed to ask anything.",
   "walk.no_curl": "This record was made on your phone and has no web address.",
   "walk.city_link": "See this creek as a city would",
   "walk.more": "Try another creek",
