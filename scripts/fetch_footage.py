@@ -41,6 +41,8 @@ from scripts.find_open_photos import COMMONS_API, RateLimit
 ROOT = Path(__file__).resolve().parents[1]
 FOOTAGE_CSV = ROOT / "docs" / "video" / "footage.csv"
 FETCHED = ROOT / "docs" / "video" / "footage_fetched.json"
+CREDITS = ROOT / "docs" / "video" / "CREDITS.md"
+VIDEO_LICENCE = "CC BY-SA 4.0"
 MEDIA = Path(os.environ.get("SECOND_LOOK_MEDIA", str(Path.home() / "second-look-media")))
 USER_AGENT = (
     "second-look/1.0 (https://github.com/alejandro-publius/second-look; "
@@ -182,6 +184,7 @@ def fetch_row(row: Row, client: httpx.Client, limiter: RateLimit, media: Path) -
         "title": row.title,
         "author": row.author,
         "source_page": row.source_page,
+        "shows": re.split(r"(?<=\.) ", row.use, maxsplit=1)[0],
     }
     try:
         title = commons_title(row.source_page)
@@ -249,9 +252,49 @@ def manifest(entries: list[dict[str, Any]], media: Path) -> dict[str, Any]:
             for e in entries
             if not e.get("kept")
         ],
-        "video_licence": "CC BY-SA 4.0",
+        "video_licence": VIDEO_LICENCE,
         "items": entries,
     }
+
+
+def credits_markdown(fetched: dict[str, Any]) -> str:
+    """docs/video/CREDITS.md, written from the manifest so the two never drift apart."""
+    kept = [e for e in fetched["items"] if e.get("kept")]
+    lines = [
+        "# Video credits",
+        "",
+        "UPDATE_22 section 6 item 6. Written by `scripts/fetch_footage.py` from "
+        "`docs/video/footage_fetched.json`; do not edit by hand.",
+        "",
+        "The creek footage and photos in the Second Look video are not ours. They are openly "
+        "licensed files from Wikimedia Commons, listed in `docs/video/footage.csv`. Before each "
+        "download the script asked Commons for the licence again and kept an item only if it "
+        f"still matched the list. Last check: {fetched['checked_at'][:10]}. Nobody from the "
+        "project filmed at a creek.",
+        "",
+        f"The video is released under {VIDEO_LICENCE} "
+        f"({LICENCE_URLS[licence_key(VIDEO_LICENCE)]}), because several of the clips in it are "
+        "CC BY-SA. Every clip also carries its own credit line on screen: title, author, licence, "
+        "Wikimedia Commons. The same list is on the app's credits page, `/credits`.",
+        "",
+        "| Title | What it shows | Author | Licence | Licence link | Source page |",
+        "|---|---|---|---|---|---|",
+    ]
+    for e in kept:
+        lines.append(
+            f"| {e['title']} | {e.get('shows', '')} | {e['author']} | {e['licence_csv']} "
+            f"| {e['licence_url']} "
+            f"| {e['source_page']} |"
+        )
+    dropped = [e for e in fetched["items"] if not e.get("kept")]
+    lines.append("")
+    if dropped:
+        lines.append("Dropped, and not in the video:")
+        lines.append("")
+        lines += [f"- {e['title']}: {e.get('reason', '')}" for e in dropped]
+    else:
+        lines.append("No item was dropped: every licence on Commons still matched the list.")
+    return "\n".join(lines) + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -259,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--media", type=Path, default=MEDIA)
     parser.add_argument("--csv", type=Path, default=FOOTAGE_CSV)
     parser.add_argument("--out", type=Path, default=FETCHED)
+    parser.add_argument("--credits", type=Path, default=CREDITS)
     args = parser.parse_args(argv)
     media = args.media.expanduser()
     if media.resolve().is_relative_to(ROOT.resolve()):
@@ -288,6 +332,7 @@ def main(argv: list[str] | None = None) -> int:
     if out["clips"] and old.get("clips_folder"):
         out["clips_folder"] = old["clips_folder"]
     args.out.write_text(json.dumps(out, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    args.credits.write_text(credits_markdown(out), encoding="utf-8")
     print(f"fetch-footage: {out['kept']} of {len(entries)} kept, manifest {args.out.name}")
     return 0 if out["kept"] else 1
 

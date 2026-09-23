@@ -192,3 +192,38 @@ def test_the_committed_manifest_holds_no_media_and_names_every_row() -> None:
             assert e["licence_same"] is True
             assert e["sha1"] == e["sha1_commons"]
             assert e["bytes"] > 0
+
+
+def test_the_video_credits_match_the_manifest_and_name_every_kept_item() -> None:
+    fetched = json.loads(fetch_footage.FETCHED.read_text(encoding="utf-8"))
+    text = fetch_footage.CREDITS.read_text(encoding="utf-8")
+    assert text == fetch_footage.credits_markdown(fetched)
+    rows = [line for line in text.splitlines() if line.startswith("| ") and "---" not in line]
+    for e in fetched["items"]:
+        if not e["kept"]:
+            continue
+        line = next(r for r in rows if r.startswith(f"| {e['title']} |"))
+        for field in (e["author"], e["licence_csv"], e["licence_url"], e["source_page"]):
+            assert f"| {field} |" in line, (e["title"], field)
+        assert e["licence_url"].startswith("https://creativecommons.org/")
+    assert "released under CC BY-SA 4.0" in text
+
+
+def test_the_strawberry_creek_photos_are_strawberry_creek_by_coro() -> None:
+    fetched = json.loads(fetch_footage.FETCHED.read_text(encoding="utf-8"))
+    coro = [e for e in fetched["items"] if e["title"].startswith("StrawberryCreek")]
+    assert coro
+    for e in coro:
+        assert e["author"] == "Coro"
+        assert "Strawberry Creek" in e["shows"]
+
+
+def test_a_dropped_item_is_named_in_the_credits_as_not_in_the_video() -> None:
+    fetched = {
+        "checked_at": "2026-09-23T00:00:00Z",
+        "items": [{"title": "Gone.webm", "kept": False, "reason": "licence changed: GFDL"}],
+    }
+    text = fetch_footage.credits_markdown(fetched)
+    assert "Dropped, and not in the video" in text
+    assert "Gone.webm: licence changed" in text
+    assert "| Gone.webm |" not in text
