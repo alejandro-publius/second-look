@@ -1,0 +1,850 @@
+09-check-target-gates: make check fails on a stale THIRD_PARTY list, hype words, a bad audit log; CI runs origin specs
+
+diff --git a/.github/workflows/check.yml b/.github/workflows/check.yml
+index 02c5bfc..5e0cef0 100644
+--- a/.github/workflows/check.yml
++++ b/.github/workflows/check.yml
+@@ -37,6 +37,10 @@ jobs:
+       - run: cd apps/web && npx playwright install --with-deps chromium
+       - run: cd worker && npm ci
+       - run: make check
++      # Hard rule 7: the specs that assert every request stays on our own origin, over the landing
++      # page, the whole test in both arms and the creek check. The API is mocked inside the
++      # browser, so this needs no network; design-check above ran only tests/design.spec.ts.
++      - run: cd apps/web && npx playwright test tests/landing.spec.ts tests/test-flow.spec.ts tests/check.spec.ts
+       # The Worker end to end under wrangler dev with a local D1 and KV, rain from a stub, no
+       # login and no network beyond this runner (Update 10 answer A3). Wrangler 4.135 needs
+       # Node 22; the web build above keeps its Node 20 pin (PLAN.md), so the switch comes last.
+diff --git a/Makefile b/Makefile
+index cfa6d21..1566556 100644
+--- a/Makefile
++++ b/Makefile
+@@ -4,7 +4,7 @@ SHELL := /bin/bash
+ PY := uv run python
+ WEB := apps/web
+ 
+-.PHONY: judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
++.PHONY: judge-check diagrams readability words-check third-party-check worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+ 
+ help:
+ 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
+@@ -13,7 +13,7 @@ dev:
+ 	@echo "API on :8000, web on :3000. Stop with Ctrl-C."
+ 	@bash -c 'trap "kill 0" EXIT; $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
+ 
+-check: lint types test manifest-check dash-check readability diagrams verify-claims worker-check fhir-validate web-build design-check
++check: lint types test manifest-check dash-check words-check readability diagrams verify-claims third-party-check audit-verify worker-check fhir-validate web-build design-check
+ 	@echo "CHECK GREEN"
+ 
+ # Update 10 answer A3. Python is the reference: it writes worker/src/content.json and the golden
+@@ -60,6 +60,16 @@ diagrams:
+ dash-check:
+ 	$(PY) scripts/check_dashes.py
+ 
++# Hard rules 18 and 20: none of the eight hype words in docs/CONTRACTS.md rule 9, and the audit
++# log is never called a blockchain, in the README, the public docs, content/ and the web app.
++words-check:
++	$(PY) scripts/check_words.py
++
++# Hard rule 1: docs/THIRD_PARTY.md lists every package in uv.lock and both package-lock.json
++# files at its locked version. A new dependency fails here until the file is regenerated.
++third-party-check:
++	$(PY) scripts/third_party.py --check
++
+ # The look and feel gate from docs/internal/updates/UPDATE_06.md section 6. Runs after web-build because
+ # the tap target measurement drives the built app on the phone viewport.
+ design-check:
+@@ -74,6 +84,8 @@ render-readme:
+ fhir-validate:
+ 	$(PY) scripts/fhir_validate.py
+ 
++# Hard rule 20. Fails on a broken chain and on a missing or empty log; make submit-check also
++# compares the last hash with the one README.md shows.
+ audit-verify:
+ 	$(PY) scripts/verify_audit.py
+ 
+diff --git a/README.md b/README.md
+index 397c52b..6b24fef 100644
+--- a/README.md
++++ b/README.md
+@@ -58,7 +58,7 @@ Our data set as OneAquaHealth registers one, live on their sandbox: `curl -H "Ac
+ 
+ ## How we know it works
+ 
+-- The analysis plan, `docs/analysis_plan.md`, is tagged `prereg-v1` before the first participant. The tag, the plan's SHA-256 and the audit log's hash at freeze are posted publicly on the day and written into this section by `scripts/render_readme.py` from `results/`, so they can be checked against the post.
++- The analysis plan, `docs/analysis_plan.md`, is tagged `prereg-v1` before the first participant. The tag, the plan's SHA-256 and the audit log's hash at freeze are posted publicly on the day, so they can be checked against the post; the tag and the SHA-256 are in `docs/notes/plan_hash.md`. The audit log's last hash, written here by `scripts/render_readme.py` from `audit/log.jsonl` and checked against the log by `make submit-check`: <!--audit:last_hash-->3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3<!--/audit-->.
+ - Two arms, randomized 1 to 1 in permuted blocks of four, server side. Trained: lesson then test. Untrained: test, then the lesson as a thank you. One confirmatory test: the difference in mean accuracy, percentile bootstrap with 10,000 resamples and a two-sided permutation test, seed 20260920. Exclusions were fixed in advance and each one's count is reported in `results/`.
+ - Participant flow: completed sessions per arm, randomized and started counts, the exclusion counts and the count by source are in `results/usability_<stamp>.json` after the run, and the completed counts stand in the results section.
+ - Nobody is recruited, so the arms are reported as a description with their count whatever arrives. The plan said the confirmatory claim needs 20 completed sessions per arm; it was tagged before that was decided and it stands, unmet, on the record.
+diff --git a/apps/web/tests/landing.spec.ts b/apps/web/tests/landing.spec.ts
+index 0e9a7e1..1b3eb27 100644
+--- a/apps/web/tests/landing.spec.ts
++++ b/apps/web/tests/landing.spec.ts
+@@ -1,4 +1,5 @@
+ import { expect, test } from "@playwright/test";
++import { content } from "../lib/content";
+ import { API_ORIGIN, assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
+ import { BASE } from "./helpers";
+ 
+@@ -13,7 +14,10 @@ test("landing paints without the API and wakes it afterwards", async ({ page })
+   await expect(page.getByText("This trains your eyes for the visit.")).toBeVisible();
+   const imgs = page.getByRole("group", { name: "Two creek photos" }).locator("img");
+   await expect(imgs).toHaveCount(2);
+-  await expect(imgs.first()).toHaveAttribute("alt", "gray placeholder block, not a photo");
++  // Each real photo carries the scene line from the manifest's alt column, never the placeholder's.
++  const first = content.photos[content.warmup[0].photo_id];
++  expect(first.placeholder).toBe(false);
++  await expect(imgs.first()).toHaveAttribute("alt", first.alt);
+   await expect.poll(() => calls.filter((c) => c.path === "/health").length).toBeGreaterThan(0);
+   expect(await page.evaluate(() => sessionStorage.getItem("sl_src"))).toBe("poster");
+   await expect(page.getByRole("link", { name: "Find out in two minutes" })).toHaveAttribute("href", "/t?src=poster");
+@@ -65,9 +69,13 @@ test("every photograph a visitor can see is named on the credits page", async ({
+   await page.goto("/credits");
+   await expect(page.getByRole("heading", { name: "Photo credits" })).toBeVisible();
+ 
+-  // Today every photo is a placeholder, so the page says so rather than showing an empty card.
+-  await expect(page.getByText("No photographs are loaded yet.")).toBeVisible();
+-  await expect(page.getByText("Placeholder blocks are not photographs.")).toBeVisible();
++  // The real photos are in, so every one a visitor can see has a row with its author.
++  const real = content.credits;
++  expect(real.length).toBeGreaterThan(0);
++  for (const p of real.filter((p) => p.author)) {
++    await expect(page.getByText(`by ${p.author}`).first()).toBeVisible();
++  }
++  await expect(page.getByText("No photographs are loaded yet.")).toHaveCount(0);
+ 
+   // The judges' door and About both reach it. The participant's door deliberately does not.
+   await page.goto("/judges");
+diff --git a/apps/web/tests/test-flow.spec.ts b/apps/web/tests/test-flow.spec.ts
+index e14a6e1..e7bcda2 100644
+--- a/apps/web/tests/test-flow.spec.ts
++++ b/apps/web/tests/test-flow.spec.ts
+@@ -34,7 +34,8 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async
+ 
+   // The rule of thumb is the heading of the lesson card; the feature name rides on the gauge.
+   await expect(page.locator(".gauge-count", { hasText: "Built banks" })).toBeVisible();
+-  // A lesson that is not approved carries no words at all now, so there is no draft notice.
++  // The four lessons are approved (Update 11D), and a lesson that is not approved carries no
++  // words at all now, so no draft notice reaches a participant.
+   await expect(page.getByText("Draft wording, not yet approved")).toHaveCount(0);
+   await finishLesson(page);
+   await expect.poll(() => calls.filter((c) => c.path === "/api/test/lesson-done").length).toBe(1);
+diff --git a/docs/THIRD_PARTY.md b/docs/THIRD_PARTY.md
+index a411363..4641942 100644
+--- a/docs/THIRD_PARTY.md
++++ b/docs/THIRD_PARTY.md
+@@ -1,6 +1,6 @@
+ # Third party dependencies
+ 
+-Generated on 2026-09-22 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
++Generated on 2026-09-23 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
+ 
+ ## External services
+ 
+@@ -42,7 +42,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
+   `apps/web/scripts/build-icons.mjs` generates `components/ui/Icon.tsx` from its SVG assets, so
+   there is no icon runtime in the bundle and no second icon family can appear.
+ 
+-## Python packages (88, from uv.lock)
++## Python packages (90, from uv.lock)
+ 
+ | Package | Version | License |
+ |---|---|---|
+@@ -88,6 +88,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
+ | mypy | 2.3.1 | MIT |
+ | mypy-extensions | 1.1.0 | MIT |
+ | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 |
++| opencv-python-headless | 5.0.0.93 | Apache 2.0 |
+ | opentelemetry-api | 1.44.0 | Apache-2.0 |
+ | packaging | 26.3 | Apache-2.0 OR BSD-2-Clause |
+ | pandas | 3.0.6 | BSD |
+@@ -134,6 +135,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
+ | uvloop | 0.22.1 | MIT License |
+ | watchfiles | 1.2.0 | MIT |
+ | websockets | 17.1 | BSD-3-Clause |
++| yt-dlp | 2026.8.19 | Unlicense |
+ 
+ ## Web packages (438, from apps/web/package-lock.json)
+ 
+diff --git a/scripts/check_words.py b/scripts/check_words.py
+new file mode 100644
+index 0000000..f49afe1
+--- /dev/null
++++ b/scripts/check_words.py
+@@ -0,0 +1,98 @@
++"""Fail on a hype word, or on calling the audit log a blockchain (hard rules 18 and 20).
++
++The words are the eight in docs/CONTRACTS.md rule 9. "blockchain" passes only as a denial: "not a
++blockchain", "never a blockchain", never "blockchain". What is read: the tracked text a person or
++a judge reads, which is README.md, docs/ outside docs/internal/, content/, apps/web/app/ and
++apps/web/components/. Two things are not a use of a word: the word alone inside quotes, which
++names it (rule 9 itself does that), and a Markdown quote line starting with ">", which is
++someone else's words.
++
++Run: uv run python scripts/check_words.py
++"""
++
++from __future__ import annotations
++
++import argparse
++import re
++import subprocess
++import sys
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[1]
++SCOPE = ("README.md", "docs", "content", "apps/web/app", "apps/web/components")
++SKIP = ("docs/internal/",)
++BINARY_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".woff", ".woff2"}
++HYPE = re.compile(
++    r"\b(?:seamless\w*|robust\w*|leverag\w*|cutting[\s-]+edge|empower\w*|unlock\w*"
++    r"|first[\s-]+of[\s-]+its[\s-]+kind|real\s+numbers?)\b",
++    re.IGNORECASE,
++)
++BLOCKCHAIN = re.compile(r"\bblockchain\w*", re.IGNORECASE)
++DENIAL = re.compile(r"\b(?:not\s+a|never(?:\s+a)?)$", re.IGNORECASE)
++QUOTES = "\"'`“”‘’"
++
++
++def tracked_files(root: Path) -> list[str]:
++    out = subprocess.run(
++        ["git", "ls-files", "-z", "--", *SCOPE], cwd=root, check=True, capture_output=True
++    ).stdout
++    return [p for p in out.decode().split("\0") if p and not p.startswith(SKIP)]
++
++
++def _line_of(text: str, pos: int) -> tuple[int, str]:
++    start = text.rfind("\n", 0, pos) + 1
++    end = text.find("\n", pos)
++    return text.count("\n", 0, pos) + 1, text[start : end if end >= 0 else len(text)]
++
++
++def _named(text: str, m: re.Match[str]) -> bool:
++    """The word alone inside quotes: a mention of the word, not a use of it."""
++    before = text[m.start() - 1] if m.start() > 0 else ""
++    after = text[m.end()] if m.end() < len(text) else ""
++    return bool(before) and bool(after) and before in QUOTES and after in QUOTES
++
++
++def check_text(rel: str, text: str) -> list[str]:
++    """Every hit in one file as "path:line: why". Phrases may wrap across a line break."""
++    hits: list[str] = []
++    for m in HYPE.finditer(text):
++        n, line = _line_of(text, m.start())
++        if _named(text, m) or (rel.endswith(".md") and line.lstrip().startswith(">")):
++            continue
++        word = " ".join(m.group(0).split())
++        hits.append(f"{rel}:{n}: hype word '{word}' (rule 18)")
++    for m in BLOCKCHAIN.finditer(text):
++        before = " ".join(text[max(0, m.start() - 40) : m.start()].split()).rstrip(QUOTES + " ")
++        if DENIAL.search(before):
++            continue
++        n, _ = _line_of(text, m.start())
++        hits.append(f"{rel}:{n}: '{m.group(0)}' outside a denial; it is an audit log (rule 20)")
++    return hits
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
++    parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
++    args = parser.parse_args(argv)
++    root = args.root.resolve()
++    hits: list[str] = []
++    files = tracked_files(root)
++    for rel in files:
++        path = root / rel
++        if path.suffix.lower() in BINARY_SUFFIXES or not path.is_file():
++            continue
++        try:
++            text = path.read_text(encoding="utf-8")
++        except (UnicodeDecodeError, OSError):
++            continue
++        hits += check_text(rel, text)
++    if hits:
++        print("\n".join(hits))
++        print(f"words-check: {len(hits)} hit(s)")
++        return 1
++    print(f"words-check: no hype word and no blockchain claim in {len(files)} tracked files")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/render_readme.py b/scripts/render_readme.py
+index ff66720..7bdde77 100644
+--- a/scripts/render_readme.py
++++ b/scripts/render_readme.py
+@@ -16,6 +16,8 @@ import re
+ import sys
+ from pathlib import Path
+ 
++from scripts import audit_log
++
+ ROOT = Path(__file__).resolve().parents[1]
+ TOKEN_RE = re.compile(r"\{\{claim:([\w./-]+#[\w/.-]+)\}\}")
+ RENDERED_RE = re.compile(r"<!--v:([\w./-]+#[\w/.-]+)-->(.*?)<!--/v-->", re.S)
+@@ -54,6 +56,21 @@ def marker_value(value: object) -> str:
+     return str(value)
+ 
+ 
++# Rule 20. `{{audit:last_hash}}` becomes `<!--audit:last_hash-->hash<!--/audit-->`, the last hash
++# of audit/log.jsonl once the chain verifies. make submit-check compares it with the log, so a log
++# cut short, emptied or rewritten after the render fails the submission gate.
++AUDIT_LOG = "audit/log.jsonl"
++AUDIT_RE = re.compile(r"\{\{audit:last_hash\}\}|<!--audit:last_hash-->([0-9a-f]*)<!--/audit-->")
++
++
++def posted_audit_hash(text: str) -> str | None:
++    """The audit log's last hash as the README shows it, or None before the first render."""
++    for m in AUDIT_RE.finditer(text):
++        if m.group(1):
++            return m.group(1)
++    return None
++
++
+ def render(text: str, root: Path) -> tuple[str, list[str]]:
+     missing: list[str] = []
+ 
+@@ -79,9 +96,21 @@ def render(text: str, root: Path) -> tuple[str, list[str]]:
+         v = value_for(ref)
+         return m.group(0) if v is None else f"<!-- claim: {ref} = {marker_value(v)} -->"
+ 
++    def sub_audit(m: re.Match[str]) -> str:
++        log = root / AUDIT_LOG
++        try:
++            length = audit_log.verify(log)
++        except audit_log.AuditError:
++            length = 0  # never print the hash of a broken chain
++        if length == 0:
++            missing.append(AUDIT_LOG)
++            return m.group(0)
++        return f"<!--audit:last_hash-->{audit_log.last_hash(log)}<!--/audit-->"
++
+     text = RENDERED_RE.sub(sub_rendered, text)
+     text = TOKEN_RE.sub(sub_token, text)
+     text = MARKER_RE.sub(sub_marker, text)
++    text = AUDIT_RE.sub(sub_audit, text)
+     return text, sorted(set(missing))
+ 
+ 
+diff --git a/scripts/submit_check.py b/scripts/submit_check.py
+index 29ba4eb..a020068 100644
+--- a/scripts/submit_check.py
++++ b/scripts/submit_check.py
+@@ -20,7 +20,7 @@ from pathlib import Path
+ 
+ import httpx
+ 
+-from scripts import audit_log
++from scripts import render_readme, verify_audit
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ Runner = Callable[[list[str]], tuple[int, str]]
+@@ -266,15 +266,20 @@ def run_checks(
+         claims.reasons.append(f"verify_claims without --synthetic failed: {_last_line(out)}")
+     checks.append(claims)
+ 
++    # The chain alone cannot see a cut off tail or a chain rewritten from the start, so the last
++    # hash README.md shows (scripts/render_readme.py writes it) goes in as --expect-last.
+     audit = Check("audit_log")
+-    try:
+-        n = audit_log.verify(root / "audit" / "log.jsonl")
+-    except audit_log.AuditError as e:
+-        audit.reasons.append(f"audit log broken: {e}")
+-    else:
+-        audit.notes.append(
+-            f"{n} entries, last hash {audit_log.last_hash(root / 'audit' / 'log.jsonl')}"
++    posted = render_readme.posted_audit_hash(readme)
++    if posted is None:
++        audit.reasons.append(
++            "README.md does not show the audit log's last hash; run scripts/render_readme.py"
+         )
++    rc, lines = verify_audit.check(root / "audit" / "log.jsonl", expect_last=posted)
++    said = [ln.removeprefix("audit-log: ").removeprefix("BROKEN: ") for ln in lines]
++    if rc != 0:
++        audit.reasons.append("audit log broken: " + "; ".join(said))
++    else:
++        audit.notes.extend(said)
+     checks.append(audit)
+ 
+     public = Check("repo_public")
+diff --git a/scripts/tests/test_check_words.py b/scripts/tests/test_check_words.py
+new file mode 100644
+index 0000000..343b096
+--- /dev/null
++++ b/scripts/tests/test_check_words.py
+@@ -0,0 +1,84 @@
++"""The words check fails on a hype word or a blockchain claim, and passes on the repo as it is."""
++
++from __future__ import annotations
++
++import subprocess
++from pathlib import Path
++
++import pytest
++
++from scripts import check_words
++
++REPO = Path(__file__).parents[2]
++
++
++@pytest.mark.parametrize(
++    "text",
++    [
++        "A seamless way to check a creek.",
++        "Robust scores for every volunteer.",
++        "We leverage open photos.",
++        "Cutting-edge vision models.",
++        "This will empower volunteers.",
++        "Unlock the lesson.",
++        "A first of its kind test.",
++        "Real numbers, not guesses.",
++        "Real\nnumbers, wrapped across a line.",
++    ],
++)
++def test_each_hype_word_fails(text: str) -> None:
++    hits = check_words.check_text("README.md", text)
++    assert len(hits) == 1 and "hype word" in hits[0] and hits[0].startswith("README.md:1:")
++
++
++def test_a_named_word_and_a_quote_line_pass() -> None:
++    rule = (
++        'Never the words "seamless", "robust", "cutting-edge",\n"first-of-its-kind", "real number".'
++    )
++    assert check_words.check_text("docs/CONTRACTS.md", rule) == []
++    quoted = "> Constraint failed: dom-6: 'narrative for robust management'\n"
++    assert check_words.check_text("docs/notes/run.md", quoted) == []
++    assert check_words.check_text("apps/web/app/page.tsx", quoted) != []
++
++
++@pytest.mark.parametrize(
++    "text",
++    [
++        "a hash-chained audit log, not a blockchain.",
++        "It is an audit log, not\na blockchain.",
++        "Call it an audit log, never a blockchain.",
++        'Say "audit log" if it comes up. Never "blockchain".',
++    ],
++)
++def test_blockchain_passes_only_as_a_denial(text: str) -> None:
++    assert check_words.check_text("docs/DATA_HANDLING.md", text) == []
++
++
++@pytest.mark.parametrize(
++    "text",
++    ["Every answer is stored on a blockchain.", "Our blockchain-backed log.", "not blockchain"],
++)
++def test_blockchain_as_a_claim_fails(text: str) -> None:
++    hits = check_words.check_text("README.md", text)
++    assert len(hits) == 1 and "rule 20" in hits[0]
++
++
++def test_hit_names_the_line() -> None:
++    hits = check_words.check_text("content/x.yaml", "one\ntwo\nthree: seamlessly\n")
++    assert hits == ["content/x.yaml:3: hype word 'seamlessly' (rule 18)"]
++
++
++def test_scope_skips_internal_docs_and_scripts(tmp_path: Path) -> None:
++    root = tmp_path / "repo"
++    for rel in ("docs/internal/review.md", "scripts/x.py", "docs/public.md", "README.md"):
++        (root / rel).parent.mkdir(parents=True, exist_ok=True)
++        (root / rel).write_text("a robust log\n", encoding="utf-8")
++    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
++    subprocess.run(["git", "add", "-A"], cwd=root, check=True)
++    assert sorted(check_words.tracked_files(root)) == ["README.md", "docs/public.md"]
++    assert check_words.main(["--root", str(root)]) == 1
++
++
++def test_repo_is_clean(capsys: pytest.CaptureFixture[str]) -> None:
++    assert check_words.main(["--root", str(REPO)]) == 0
++    assert "words-check: no hype word" in capsys.readouterr().out
+diff --git a/scripts/tests/test_render_readme.py b/scripts/tests/test_render_readme.py
+index e961532..289a57a 100644
+--- a/scripts/tests/test_render_readme.py
++++ b/scripts/tests/test_render_readme.py
+@@ -1,7 +1,8 @@
+ import json
+ from pathlib import Path
+ 
+-from scripts.render_readme import render
++from scripts import audit_log
++from scripts.render_readme import posted_audit_hash, render
+ 
+ 
+ def test_render_fills_tokens_and_stamps_markers(tmp_path: Path) -> None:
+@@ -31,3 +32,31 @@ def test_missing_file_leaves_token_and_reports(tmp_path: Path) -> None:
+     out, missing = render("{{claim:results/none.json#/a}}", tmp_path)
+     assert out == "{{claim:results/none.json#/a}}"
+     assert missing == ["results/none.json#/a"]
++
++
++def test_render_writes_the_audit_log_last_hash_and_keeps_it_current(tmp_path: Path) -> None:
++    log = tmp_path / "audit" / "log.jsonl"
++    text = "The audit log's last hash: {{audit:last_hash}}.\n"
++    out, missing = render(text, tmp_path)
++    assert out == text and missing == ["audit/log.jsonl"]  # no log, so no hash is printed
++    assert posted_audit_hash(out) is None
++    first = audit_log.append("key_frozen", {"k": 1}, path=log)
++    out, missing = render(text, tmp_path)
++    assert missing == []
++    assert f"<!--audit:last_hash-->{first}<!--/audit-->." in out
++    assert posted_audit_hash(out) == first
++    second = audit_log.append("plan_tagged", {"p": 2}, path=log)
++    out2, _ = render(out, tmp_path)
++    assert posted_audit_hash(out2) == second and first not in out2
++
++
++def test_render_never_prints_the_hash_of_a_broken_chain(tmp_path: Path) -> None:
++    log = tmp_path / "audit" / "log.jsonl"
++    audit_log.append("key_frozen", {"k": 1}, path=log)
++    good, _ = render("{{audit:last_hash}}", tmp_path)
++    lines = log.read_text(encoding="utf-8").splitlines()
++    entry = json.loads(lines[0])
++    entry["kind"] = "plan_tagged"
++    log.write_text(json.dumps(entry) + "\n", encoding="utf-8")
++    out, missing = render(good, tmp_path)
++    assert out == good and missing == ["audit/log.jsonl"]
+diff --git a/scripts/tests/test_submit_third_party.py b/scripts/tests/test_submit_third_party.py
+index 939d162..0b8eb2b 100644
+--- a/scripts/tests/test_submit_third_party.py
++++ b/scripts/tests/test_submit_third_party.py
+@@ -7,7 +7,7 @@ from pathlib import Path
+ 
+ import pytest
+ 
+-from scripts import submit_check, third_party
++from scripts import audit_log, submit_check, third_party
+ 
+ REPO = Path(__file__).parents[2]
+ STATEMENT = (REPO / "docs" / "track_statement.md").read_text().strip()
+@@ -34,7 +34,10 @@ def build_root(tmp_path: Path, *, video: bool = True, headers: str = HEADERS) ->
+     (root / "docs").mkdir(parents=True)
+     (root / "docs" / "track_statement.md").write_text(STATEMENT + "\n")
+     video_line = "\nVideo: https://youtu.be/fake\n" if video else ""
+-    (root / "README.md").write_text(f"{STATEMENT}\n\n# Second Look\n{video_line}{headers}")
++    audit_log.append("key_frozen", {"n": 1}, path=root / "audit" / "log.jsonl")
++    last = audit_log.append("plan_tagged", {"n": 2}, path=root / "audit" / "log.jsonl")
++    posted = f"\nAudit log last hash: <!--audit:last_hash-->{last}<!--/audit-->\n"
++    (root / "README.md").write_text(f"{STATEMENT}\n\n# Second Look\n{video_line}{posted}{headers}")
+     (root / "docs" / "devpost.md").write_text(f"Demo: https://example.org/demo\n{video_line}")
+     (root / "LICENSE").write_text("MIT License\n\nCopyright 2026\n")
+     return root
+@@ -74,12 +77,36 @@ def test_each_guard_fires(tmp_path: Path) -> None:
+     root = build_root(tmp_path / "c")
+     (root / "README.md").write_text("# Not the statement\n" + HEADERS)
+     (root / "LICENSE").write_text("Proprietary\n")
+-    (root / "audit").mkdir()
+     (root / "audit" / "log.jsonl").write_text("{}\n")
+     checks = submit_check.run_checks(root, runner=fake_runner("PUBLIC"), fetch=lambda url: 200)
+     assert {"track_statement", "license", "audit_log", "video_link"} <= names_failed(checks)
+ 
+ 
++def test_audit_check_compares_the_readme_hash_with_the_log(tmp_path: Path) -> None:
++    """A cut off tail, an emptied log and a rewritten chain all verify; the README hash does not."""
++    log = build_root(tmp_path) / "audit" / "log.jsonl"
++    root = log.parents[1]
++    lines = log.read_text().splitlines()
++
++    def audit_reasons() -> list[str]:
++        checks = submit_check.run_checks(root, runner=fake_runner("PUBLIC"), fetch=lambda u: 200)
++        return next(c.reasons for c in checks if c.name == "audit_log")
++
++    assert audit_reasons() == []
++    log.write_text(lines[0] + "\n")  # the tail cut off
++    assert audit_log.verify(log) == 1
++    assert "differs from the posted hash" in audit_reasons()[0]
++    log.write_text("")  # emptied
++    assert audit_log.verify(log) == 0
++    assert "has no entries" in audit_reasons()[0]
++    audit_log.append("key_frozen", {"n": "rewritten"}, path=log)
++    assert audit_log.verify(log) == 1  # a whole new chain is intact on its own
++    assert "differs from the posted hash" in audit_reasons()[0]
++    readme = root / "README.md"
++    readme.write_text(readme.read_text().replace("<!--audit:last_hash-->", "<!--x-->"))
++    assert "README.md does not show the audit log's last hash" in audit_reasons()[0]
++
++
+ def test_secrets_scan_catches_planted_keys_and_passes_clean(tmp_path: Path) -> None:
+     root = build_root(tmp_path)
+     assert submit_check.scan_secrets(root, submit_check.candidate_files(root, fake_runner())) == []
+@@ -154,3 +181,35 @@ def test_third_party_parses_both_lockfiles(tmp_path: Path) -> None:
+     out = tmp_path / "TP.md"
+     assert third_party.main(["--root", str(REPO), "--out", str(out)]) == 0
+     assert out.read_text() == text.replace(text.split("\n")[2], out.read_text().split("\n")[2])
++
++
++def test_third_party_check_fails_on_a_missing_row_but_not_on_the_date(tmp_path: Path) -> None:
++    text = third_party.build(REPO)
++    out = tmp_path / "TP.md"
++    args = ["--root", str(REPO), "--out", str(out), "--check"]
++    old_date = third_party.DATE_RE.sub("Generated on 2026-09-01 ", text)
++    assert old_date != text
++    out.write_text(old_date)
++    assert third_party.main(args) == 0
++    row = next(line for line in text.splitlines() if line.startswith("| pillow |"))
++    out.write_text(old_date.replace(row + "\n", ""))
++    assert third_party.main(args) == 1
++    assert out.read_text() == old_date.replace(row + "\n", ""), "--check never writes"
++    assert third_party.stale_lines(text.replace(row + "\n", ""), text) == [f"+ {row}"]
++
++
++def test_third_party_check_allows_a_license_this_machine_cannot_read() -> None:
++    """greenlet is installed on x86_64 CI and not on an arm64 Mac; the file must pass on both."""
++    here = "| greenlet | 3.5.6 | not installed here |"
++    there = "| greenlet | 3.5.6 | MIT AND Python-2.0 |"
++    assert third_party.stale_lines(here, there) == []
++    assert third_party.stale_lines(there, here) == []
++    assert third_party.stale_lines(there, "| greenlet | 3.5.7 | not installed here |") != []
++    assert third_party.stale_lines("| a | 1 | MIT |", "| a | 1 | BSD |") != []
++    footer = "Licenses not found for 5 Python and 0 web and worker packages; check by hand."
++    assert third_party.stale_lines(footer, footer.replace("5", "4")) == []
++
++
++def test_committed_third_party_file_is_current() -> None:
++    """Rule 1: every package in the three lockfiles has a row. Rerun third_party.py if not."""
++    assert third_party.main(["--root", str(REPO), "--check"]) == 0
+diff --git a/scripts/tests/test_verify_audit.py b/scripts/tests/test_verify_audit.py
+new file mode 100644
+index 0000000..f9cf425
+--- /dev/null
++++ b/scripts/tests/test_verify_audit.py
+@@ -0,0 +1,35 @@
++"""verify_audit fails on a log with nothing in it, and hands submit-check its lines."""
++
++from __future__ import annotations
++
++from pathlib import Path
++
++import pytest
++
++from scripts import audit_log, verify_audit
++
++
++def test_an_empty_or_missing_log_fails(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
++    """An emptied log is a chain of nothing; it must not pass as intact."""
++    path = tmp_path / "audit" / "log.jsonl"
++    assert verify_audit.main(["--path", str(path)]) == 1
++    assert "no log at" in capsys.readouterr().out
++    path.parent.mkdir(parents=True)
++    path.write_text("", encoding="utf-8")
++    assert verify_audit.main(["--path", str(path)]) == 1
++    assert "has no entries" in capsys.readouterr().out
++    assert verify_audit.main(["--path", str(path), "--allow-missing"]) == 0
++    assert "0 entries, chain intact" in capsys.readouterr().out
++
++
++def test_check_returns_the_lines_submit_check_reads(tmp_path: Path) -> None:
++    path = tmp_path / "audit" / "log.jsonl"
++    for i in range(2):
++        audit_log.append("test_only", {"i": i}, path=path, allow_test_kind=True)
++    last = audit_log.last_hash(path)
++    assert verify_audit.check(path, expect_last=last, allow_test_kind=True) == (
++        0,
++        [f"audit-log: 2 entries, chain intact, last hash {last}"],
++    )
++    code, lines = verify_audit.check(path, expect_last="0" * 64, allow_test_kind=True)
++    assert code == 1 and lines[-1].startswith("audit-log: BROKEN: last hash differs")
+diff --git a/scripts/third_party.py b/scripts/third_party.py
+index 158fc75..3e3d20b 100644
+--- a/scripts/third_party.py
++++ b/scripts/third_party.py
+@@ -1,6 +1,7 @@
+ """Build docs/THIRD_PARTY.md from uv.lock and apps/web/package-lock.json (hard rule 1).
+ 
+ Run: uv run python scripts/third_party.py
++     uv run python scripts/third_party.py --check   fail if the committed file is stale (make check)
+ Python licenses come from the installed package metadata (importlib.metadata); web licenses from
+ the lockfile or each installed package's package.json. Where neither says, the table says so.
+ The external services section is written here too, so the file is always whole.
+@@ -9,7 +10,9 @@ The external services section is written here too, so the file is always whole.
+ from __future__ import annotations
+ 
+ import argparse
++import difflib
+ import json
++import re
+ import sys
+ import tomllib
+ from datetime import UTC, datetime
+@@ -19,6 +22,9 @@ from typing import Any
+ 
+ ROOT = Path(__file__).resolve().parents[1]
+ NOT_STATED = "not stated in package metadata"
++NOT_INSTALLED = "not installed here"
++DATE_RE = re.compile(r"^Generated on \d{4}-\d{2}-\d{2} ", re.MULTILINE)
++FOOTER = "Licenses not found for "
+ 
+ SERVICES = """## External services
+ 
+@@ -67,7 +73,7 @@ def python_license(name: str) -> str:
+     try:
+         meta = metadata.metadata(name)
+     except metadata.PackageNotFoundError:
+-        return "not installed here"
++        return NOT_INSTALLED
+     expr = meta.get("License-Expression")
+     if expr:
+         return str(expr).strip()
+@@ -183,7 +189,7 @@ def build(root: Path) -> str:
+         "|---|---|---|---|",
+     ]
+     out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in worker]
+-    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
++    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, NOT_INSTALLED})
+     unknown_web = sum(1 for _, _, lic, _ in web + worker if lic == NOT_STATED)
+     out += [
+         "",
+@@ -194,17 +200,60 @@ def build(root: Path) -> str:
+     return "\n".join(out)
+ 
+ 
++def same_line(old: str, new: str) -> bool:
++    """True when two lines differ only where one machine cannot know better than another.
++
++    The date changes every day. A license reads "not installed here" for a package this machine
++    did not install (greenlet on an arm64 Mac, pywin32 anywhere but Windows), and the count of
++    unknown licenses in the last line moves with it. Nothing else may differ.
++    """
++    if DATE_RE.sub("", old) == DATE_RE.sub("", new):
++        return True
++    if old.startswith(FOOTER) and new.startswith(FOOTER):
++        return True
++    if not (old.startswith("| ") and new.startswith("| ")):
++        return False
++    a, b = ([c.strip() for c in line.strip().strip("|").split("|")] for line in (old, new))
++    if len(a) != len(b) or len(a) < 3:
++        return False
++    return a[:2] == b[:2] and a[3:] == b[3:] and NOT_INSTALLED in {a[2], b[2]}
++
++
++def stale_lines(committed: str, fresh: str) -> list[str]:
++    """The lines where the committed file and a fresh build differ, marked - and +."""
++    old, new = committed.splitlines(), fresh.splitlines()
++    out: list[str] = []
++    matcher = difflib.SequenceMatcher(None, old, new, autojunk=False)
++    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
++        if tag == "equal":
++            continue
++        if i2 - i1 == j2 - j1 and all(map(same_line, old[i1:i2], new[j1:j2])):
++            continue
++        out += [f"- {line}" for line in old[i1:i2]] + [f"+ {line}" for line in new[j1:j2]]
++    return out
++
++
+ def main(argv: list[str] | None = None) -> int:
+     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+     parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
+     parser.add_argument("--out", type=Path, default=None, help="default docs/THIRD_PARTY.md")
++    parser.add_argument("--check", action="store_true", help="fail if the file is stale")
+     args = parser.parse_args(argv)
+     root = args.root.resolve()
+     text = build(root)
+     out = args.out or (root / "docs" / "THIRD_PARTY.md")
++    shown = out.relative_to(root) if out.is_relative_to(root) else out
++    if args.check:
++        committed = out.read_text(encoding="utf-8") if out.exists() else ""
++        diff = stale_lines(committed, text)
++        if diff:
++            print("\n".join(diff[:20]))
++            print(f"third-party: {shown} is stale; run uv run python scripts/third_party.py")
++            return 1
++        print(f"third-party: {shown} matches uv.lock and both package-lock.json files")
++        return 0
+     out.write_text(text, encoding="utf-8")
+     py = text.count("\n| ") - text.count("| Package |") - text.count("|---|")
+-    shown = out.relative_to(root) if out.is_relative_to(root) else out
+     print(f"third-party: wrote {shown} with {py} package rows")
+     return 0
+ 
+diff --git a/scripts/verify_audit.py b/scripts/verify_audit.py
+index faeb0a7..b378af5 100644
+--- a/scripts/verify_audit.py
++++ b/scripts/verify_audit.py
+@@ -1,8 +1,9 @@
+ """Walk audit/log.jsonl and fail on any break. Prints the chain length and the last hash.
+ 
+ Run: uv run python scripts/verify_audit.py [--path audit/log.jsonl] [--expect-last <hash>]
+---expect-last compares the last hash with the one Alex posted publicly at freeze, which is the
+-only way to notice lines cut off the end of the file.
++--expect-last compares the last hash with the one README.md shows (scripts/render_readme.py
++writes it, make submit-check passes it here), which is the only way to notice lines cut off the
++end of the file. A missing or empty log fails too: a chain of nothing proves nothing.
+ """
+ 
+ from __future__ import annotations
+@@ -14,6 +15,38 @@ from pathlib import Path
+ from scripts import audit_log
+ 
+ 
++def check(
++    path: Path,
++    *,
++    expect_last: str | None = None,
++    allow_test_kind: bool = False,
++    allow_missing: bool = False,
++) -> tuple[int, list[str]]:
++    """The exit code and the lines to print. make submit-check calls this too."""
++    if not path.exists() and not allow_missing:
++        return 1, [
++            f"audit-log: BROKEN: no log at {path}. Nothing has been recorded, so this check "
++            "proves nothing. Pass --allow-missing before the first entry is written."
++        ]
++    try:
++        length = audit_log.verify(path, allow_test_kind=allow_test_kind)
++    except audit_log.AuditError as e:
++        return 1, [f"audit-log: BROKEN: {e}"]
++    if length == 0 and not allow_missing:
++        return 1, [
++            f"audit-log: BROKEN: the log at {path} has no entries. An emptied log verifies "
++            "as a chain of nothing, so this check fails. Pass --allow-missing before the first "
++            "entry is written."
++        ]
++    last = audit_log.last_hash(path)
++    if expect_last and expect_last != last:
++        return 1, [
++            f"audit-log: {length} entries, last hash {last}",
++            f"audit-log: BROKEN: last hash differs from the posted hash {expect_last}",
++        ]
++    return 0, [f"audit-log: {length} entries, chain intact, last hash {last}"]
++
++
+ def main(argv: list[str] | None = None) -> int:
+     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+     parser.add_argument("--path", type=Path, default=audit_log.LOG)
+@@ -22,27 +55,17 @@ def main(argv: list[str] | None = None) -> int:
+     parser.add_argument(
+         "--allow-missing",
+         action="store_true",
+-        help="a missing log is fine, before the first entry",
++        help="a missing or empty log is fine, before the first entry",
+     )
+     args = parser.parse_args(argv)
+-    if not args.path.exists() and not args.allow_missing:
+-        print(
+-            f"audit-log: BROKEN: no log at {args.path}. Nothing has been recorded, so this check "
+-            "proves nothing. Pass --allow-missing before the first entry is written."
+-        )
+-        return 1
+-    try:
+-        length = audit_log.verify(args.path, allow_test_kind=args.allow_test_kind)
+-    except audit_log.AuditError as e:
+-        print(f"audit-log: BROKEN: {e}")
+-        return 1
+-    last = audit_log.last_hash(args.path)
+-    if args.expect_last and args.expect_last != last:
+-        print(f"audit-log: {length} entries, last hash {last}")
+-        print(f"audit-log: BROKEN: last hash differs from the posted hash {args.expect_last}")
+-        return 1
+-    print(f"audit-log: {length} entries, chain intact, last hash {last}")
+-    return 0
++    code, lines = check(
++        args.path,
++        expect_last=args.expect_last,
++        allow_test_kind=args.allow_test_kind,
++        allow_missing=args.allow_missing,
++    )
++    print("\n".join(lines))
++    return code
+ 
+ 
+ if __name__ == "__main__":

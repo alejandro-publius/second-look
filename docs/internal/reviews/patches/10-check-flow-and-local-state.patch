@@ -1,0 +1,1189 @@
+10-check-flow-and-local-state: rating check sends change, busy server waits, sent checks leave the phone, Start fresh
+
+diff --git a/apps/web/app/privacy/page.tsx b/apps/web/app/privacy/page.tsx
+index 812b72b..b50bffd 100644
+--- a/apps/web/app/privacy/page.tsx
++++ b/apps/web/app/privacy/page.tsx
+@@ -1,4 +1,5 @@
+ import type { Metadata } from "next";
++import { StartFresh } from "@/components/SharedDevice";
+ import { t } from "@/lib/t";
+ 
+ export const metadata: Metadata = { title: `${t("privacy.title")}: ${t("app.name")}` };
+@@ -25,6 +26,8 @@ export default function PrivacyPage() {
+       <p>{t("privacy.hosts_body")}</p>
+       <h2>{t("privacy.rights_title")}</h2>
+       <p>{t("privacy.rights_body")}</p>
++      <h2>{t("fresh.title")}</h2>
++      <StartFresh />
+       <p className="small muted">{t("consent.contact")}</p>
+     </article>
+   );
+diff --git a/apps/web/components/CheckFlow.tsx b/apps/web/components/CheckFlow.tsx
+index 0b220e9..3c3c423 100644
+--- a/apps/web/components/CheckFlow.tsx
++++ b/apps/web/components/CheckFlow.tsx
+@@ -7,9 +7,10 @@ import { FormQuestion } from "./FormQuestion";
+ import { LocationStep } from "./LocationStep";
+ import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
+ import { Progress } from "./Progress";
++import { ScoreTokenNote } from "./SharedDevice";
+ import { api, ApiError, isNetworkError, uploadOrSkip, type AnswerValue, type DraftRequest, type DraftResponse, type Followup, type SpotRef } from "@/lib/api";
+ import { content, type FormItem } from "@/lib/content";
+-import { enqueue, flushQueue, getQueued, onQueueChange } from "@/lib/offline";
++import { enqueue, flushQueue, getQueued, listQueue, onQueueChange, removeQueued, retryQueued, type QueuedCheck } from "@/lib/offline";
+ import { clearContributorToken, getContributorToken, rememberSpot } from "@/lib/session";
+ import { t } from "@/lib/t";
+ 
+@@ -51,16 +52,21 @@ export function CheckFlow() {
+   const firstRating = typeof answers.overall_rating === "string" ? answers.overall_rating : null;
+   const ratingItem = content.form.items.find((i) => i.id === "overall_rating");
+ 
+-  // Watch the queue while a saved check waits.
++  // Watch the queue while a saved check waits. A sent check is removed from the phone, so "sent"
++  // arrives once as an event, never from storage.
+   const queuedId = stage.name === "queued" ? stage.id : null;
+   useEffect(() => {
+     if (queuedId === null) return;
+     const id = queuedId;
+     const refresh = async () => {
+       const q = await getQueued(id);
+-      if (q) setStage({ name: "queued", id, status: q.status, spot_id: q.result?.spot_id });
++      if (q) setStage((s) => (s.name === "queued" && s.status === "sent" ? s : { name: "queued", id, status: q.status, spot_id: q.result?.spot_id }));
+     };
+-    const off = onQueueChange(() => void refresh());
++    const off = onQueueChange((detail) => {
++      const d = detail as { type?: string; id?: number; result?: { spot_id?: string } };
++      if (d.type === "sent" && d.id === id) setStage({ name: "queued", id, status: "sent", spot_id: d.result?.spot_id });
++      else void refresh();
++    });
+     void refresh();
+     return off;
+   }, [queuedId]);
+@@ -155,6 +161,7 @@ export function CheckFlow() {
+           <button type="button" className="btn btn-block" onClick={() => setStage({ name: "location" })}>
+             {t("check.start")}
+           </button>
++          <RefusedChecks />
+         </div>
+       );
+     case "location":
+@@ -192,6 +199,7 @@ export function CheckFlow() {
+           <FocusHeading>{t("check.photos_title")}</FocusHeading>
+           <p>{t("check.photos_intro")}</p>
+           <PhotoPicker photos={photos} onChange={setPhotos} />
++          <ScoreTokenNote />
+           <div className="btn-row">
+             <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "items", index: Math.max(0, items.length - 1) })}>
+               {t("check.back")}
+@@ -229,7 +237,7 @@ export function CheckFlow() {
+               onFinalRating={(r) => {
+                 setFinalRating(r);
+                 setChangingRating(false);
+-                setFollowupAnswers((a) => ({ ...a, [f.rule_id]: "changed" }));
++                setFollowupAnswers((a) => ({ ...a, [f.rule_id]: "change" }));
+               }}
+             />
+           ))}
+@@ -271,9 +279,19 @@ export function CheckFlow() {
+               ) : null}
+             </>
+           ) : stage.status === "failed" ? (
+-            <p className="notice notice-bad" role="alert">
+-              {t("check.queue_failed")}
+-            </p>
++            <>
++              <p className="notice notice-bad" role="alert">
++                {t("check.queue_failed")}
++              </p>
++              <div className="btn-row">
++                <button type="button" className="btn btn-secondary" onClick={() => void retryQueued(stage.id)}>
++                  {t("error.retry")}
++                </button>
++                <button type="button" className="btn btn-quiet" onClick={() => void removeQueued(stage.id).then(() => setStage({ name: "intro" }))}>
++                  {t("check.delete")}
++                </button>
++              </div>
++            </>
+           ) : (
+             <>
+               <p className="notice notice-warn" role="status" data-testid="queue-saved">
+@@ -302,6 +320,47 @@ export function CheckFlow() {
+   }
+ }
+ 
++/**
++ * Checks the server refused, listed here so a reload never hides them. Each stays on this phone,
++ * with its answers and photos, until the person tries it again or deletes it.
++ */
++function RefusedChecks() {
++  const [items, setItems] = useState<QueuedCheck[]>([]);
++  useEffect(() => {
++    const load = async () => setItems((await listQueue()).filter((q) => q.status === "failed" && q.id !== undefined));
++    const off = onQueueChange(() => void load());
++    void load();
++    return off;
++  }, []);
++  if (items.length === 0) return null;
++  return (
++    <section className="card stack" aria-labelledby="refused-title">
++      <h2 id="refused-title">{t("check.refused_title")}</h2>
++      <p className="small muted">{t("check.refused_intro")}</p>
++      <ul className="stack">
++        {items.map((q) => {
++          const id = q.id as number;
++          const spot = q.draft?.spot;
++          const name = q.kind === "quick" ? t("quick.title") : spot && "new" in spot ? spot.new.name : t("check.saved_spot_default");
++          return (
++            <li key={id} className="stack">
++              <p id={`refused-${id}`}>{t("check.refused_item", { name, when: new Date(q.created_at).toLocaleString() })}</p>
++              <div className="btn-row">
++                <button type="button" className="btn btn-secondary" aria-describedby={`refused-${id}`} onClick={() => void retryQueued(id)}>
++                  {t("error.retry")}
++                </button>
++                <button type="button" className="btn btn-quiet" aria-describedby={`refused-${id}`} onClick={() => void removeQueued(id)}>
++                  {t("check.delete")}
++                </button>
++              </div>
++            </li>
++          );
++        })}
++      </ul>
++    </section>
++  );
++}
++
+ function FollowupCard({
+   followup,
+   value,
+@@ -349,7 +408,7 @@ function FollowupCard({
+             <button type="button" className="btn" aria-pressed={value === "keep"} onClick={() => onAnswer("keep")}>
+               {t("check.keep_rating")}
+             </button>
+-            <button type="button" className="btn btn-secondary" aria-pressed={value === "changed"} onClick={onChangeRating}>
++            <button type="button" className="btn btn-secondary" aria-pressed={value === "change"} onClick={onChangeRating}>
+               {t("check.change_rating")}
+             </button>
+           </div>
+@@ -366,7 +425,7 @@ function FollowupCard({
+       ) : null}
+       {followup.kind === "look_again" ? (
+         <div className="btn-row">
+-          <button type="button" className="btn" aria-pressed={value === "looked"} onClick={() => onAnswer("looked")}>
++          <button type="button" className="btn" aria-pressed={value === "yes"} onClick={() => onAnswer("yes")}>
+             {t("check.looked_again")}
+           </button>
+           <button type="button" className="btn btn-secondary" aria-pressed={value === "skipped"} onClick={() => onAnswer("skipped")}>
+diff --git a/apps/web/components/PhotoPicker.tsx b/apps/web/components/PhotoPicker.tsx
+index 03dd3e6..21cbb59 100644
+--- a/apps/web/components/PhotoPicker.tsx
++++ b/apps/web/components/PhotoPicker.tsx
+@@ -15,17 +15,24 @@ export interface PickedPhoto {
+ export function PhotoPicker({ photos, onChange, max = 4, capture = true }: { photos: PickedPhoto[]; onChange: (p: PickedPhoto[]) => void; max?: number; capture?: boolean }) {
+   const input = useRef<HTMLInputElement>(null);
+   const [busy, setBusy] = useState(false);
++  const [refused, setRefused] = useState(false);
+ 
+   async function picked(e: React.ChangeEvent<HTMLInputElement>) {
+     const files = Array.from(e.target.files ?? []);
+     if (files.length === 0) return;
+     setBusy(true);
++    setRefused(false);
+     try {
+       const next = photos.slice();
+       for (const f of files) {
+         if (next.length >= max) break;
+         if (!f.type.startsWith("image/")) continue;
+         const blob = await downsize(f);
++        // A photo this phone cannot redraw still holds its EXIF, GPS among it. Leave it out.
++        if (!blob) {
++          setRefused(true);
++          continue;
++        }
+         next.push({ name: f.name.replace(/\.[^.]+$/, "") + ".jpg", type: blob.type || "image/jpeg", blob, bytes: blob.size });
+       }
+       onChange(next);
+@@ -57,6 +64,11 @@ export function PhotoPicker({ photos, onChange, max = 4, capture = true }: { pho
+       <p className="small muted" role="status">
+         {t("check.photo_count", { n: photos.length })}
+       </p>
++      {refused ? (
++        <p className="notice notice-warn" role="alert">
++          {t("check.photo_refused")}
++        </p>
++      ) : null}
+       {photos.length > 0 ? (
+         <ul className="stack">
+           {photos.map((p, i) => (
+diff --git a/apps/web/components/QuickCheck.tsx b/apps/web/components/QuickCheck.tsx
+index 63e4974..cd6f0dc 100644
+--- a/apps/web/components/QuickCheck.tsx
++++ b/apps/web/components/QuickCheck.tsx
+@@ -4,6 +4,7 @@ import Link from "next/link";
+ import { useState } from "react";
+ import { FocusHeading } from "./FocusHeading";
+ import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
++import { ScoreTokenNote } from "./SharedDevice";
+ import { api, ApiError, isNetworkError, uploadOrSkip, type QuickColour, type QuickSmell } from "@/lib/api";
+ import { enqueue } from "@/lib/offline";
+ import { clearContributorToken, getContributorToken } from "@/lib/session";
+@@ -125,6 +126,7 @@ export function QuickCheck({ spotId }: { spotId: string }) {
+         <legend>{t("quick.photo")}</legend>
+         <PhotoPicker photos={photos} onChange={setPhotos} max={1} />
+       </fieldset>
++      <ScoreTokenNote />
+       {error ? (
+         <p className="notice notice-warn" role="alert">
+           {error}
+diff --git a/apps/web/components/SharedDevice.tsx b/apps/web/components/SharedDevice.tsx
+new file mode 100644
+index 0000000..4473061
+--- /dev/null
++++ b/apps/web/components/SharedDevice.tsx
+@@ -0,0 +1,68 @@
++"use client";
++
++import { useState, useSyncExternalStore } from "react";
++import { clearQueue } from "@/lib/offline";
++import { clearContributorToken, forgetThisDevice, getContributorToken } from "@/lib/session";
++import { t } from "@/lib/t";
++
++const noSubscribe = () => () => undefined;
++
++/**
++ * "Start fresh" for a phone or tablet that more than one person uses. One browser counts as one
++ * person to the study, so this forgets everything this browser keeps: the open sitting, the
++ * random browser token, the contributor token, saved spots and checks that wait to be sent.
++ */
++export function StartFresh({ onDone }: { onDone?: () => void }) {
++  const [done, setDone] = useState(false);
++
++  async function run() {
++    forgetThisDevice();
++    await clearQueue().catch(() => undefined);
++    setDone(true);
++    onDone?.();
++  }
++
++  return (
++    <div className="stack">
++      <p className="small muted">{t("fresh.note")}</p>
++      <div className="btn-row">
++        <button type="button" className="btn btn-secondary" onClick={() => void run()}>
++          {t("fresh.button")}
++        </button>
++      </div>
++      {done ? (
++        <p className="notice notice-ok" role="status">
++          {t("fresh.done")}
++        </p>
++      ) : null}
++    </div>
++  );
++}
++
++/**
++ * Says whose score a creek check will carry before it is sent, by the first four characters of
++ * the kept token, with "Not me" to forget the token on this browser. Read after the first paint,
++ * because the static page has no storage to read.
++ */
++export function ScoreTokenNote() {
++  const stored = useSyncExternalStore(noSubscribe, getContributorToken, () => null);
++  const [notMe, setNotMe] = useState(false);
++  if (!stored || notMe) return null;
++  return (
++    <section className="card stack" data-testid="token-note">
++      <p>{t("check.token_note", { token: stored.slice(0, 4) })}</p>
++      <div className="btn-row">
++        <button
++          type="button"
++          className="btn btn-secondary"
++          onClick={() => {
++            clearContributorToken();
++            setNotMe(true);
++          }}
++        >
++          {t("check.token_not_me")}
++        </button>
++      </div>
++    </section>
++  );
++}
+diff --git a/apps/web/components/TestFlow.tsx b/apps/web/components/TestFlow.tsx
+index ee9544b..ebd7ee2 100644
+--- a/apps/web/components/TestFlow.tsx
++++ b/apps/web/components/TestFlow.tsx
+@@ -5,6 +5,7 @@ import { Consent } from "./Consent";
+ import { FocusHeading } from "./FocusHeading";
+ import { Lesson } from "./Lesson";
+ import { ScoreScreen } from "./ScoreScreen";
++import { StartFresh } from "./SharedDevice";
+ import { TestItems } from "./TestItems";
+ import { Warmup } from "./Warmup";
+ import { Button } from "./ui/Button";
+@@ -52,6 +53,9 @@ export function TestFlow() {
+   const [failed, setFailed] = useState(0);
+   const [prior, setPrior] = useState<"yes" | "no" | null>(null);
+   const [keep, setKeep] = useState(false);
++  // True while the screen came back from this browser's storage rather than from a tap, so a
++  // shared device can offer the next person a fresh start. The next step forward clears it.
++  const [restored, setRestored] = useState(false);
+ 
+   useEffect(() => {
+     captureSource(window.location.search);
+@@ -67,6 +71,7 @@ export function TestFlow() {
+     }
+     try {
+       const state = await api.resume(open.session_id);
++      setRestored(true);
+       const known = state.item_order.filter((id) => testItemById(id));
+       const session: SessionResponse = {
+         session_id: state.session_id,
+@@ -76,8 +81,9 @@ export function TestFlow() {
+       };
+       if (state.completed) {
+         // The end screen again, from what the server already scored. Nothing new is created and
+-        // no second contributor token is minted. The id stays in this browser, because one
+-        // browser is one sitting: a reload must not offer a second run of the test.
++        // no second contributor token is minted. The id stays in this browser until the person
++        // leaves the end screen or OPEN_SESSION_HOURS pass. A later run from this browser keeps
++        // its arm and does not count, because one browser is one person to the study.
+         setStage({
+           name: "score",
+           session,
+@@ -96,6 +102,7 @@ export function TestFlow() {
+     } catch {
+       // The sitting is gone or the API is down. Start clean rather than strand the person.
+       clearOpenSession();
++      setRestored(false);
+       setStage({ name: "consent" });
+     }
+   }
+@@ -126,6 +133,7 @@ export function TestFlow() {
+ 
+   function onAnswer(session: SessionResponse) {
+     return (itemId: string, answer: TestAnswer, rtMs: number, position: number, trail: AnswerTrail) => {
++      setRestored(false);
+       const body: ResponseRequest = { session_id: session.session_id, item_id: itemId, answer, rt_ms: rtMs, position, ...trail };
+       sent.current.set(itemId, body);
+       const p = api
+@@ -146,6 +154,7 @@ export function TestFlow() {
+    * still fails does the sitting carry an unsent count.
+    */
+   async function complete(session: SessionResponse) {
++    setRestored(false);
+     setStage({ name: "completing", session });
+     await Promise.allSettled(pending.current);
+     try {
+@@ -167,6 +176,21 @@ export function TestFlow() {
+     }
+   }
+ 
++  // Leaving the end screen closes the sitting here, so the next person to open /t on a shared
++  // device does not land on this score. The random browser token stays until Start fresh.
++  function leaveScore(next: Stage) {
++    clearOpenSession();
++    setRestored(false);
++    setStage(next);
++  }
++
++  const freshNote = restored ? (
++    <section className="card stack" data-testid="resumed-note">
++      <p>{t("fresh.resumed")}</p>
++      <StartFresh onDone={() => window.location.reload()} />
++    </section>
++  ) : null;
++
+   switch (stage.name) {
+     case "restoring":
+       return <Skeleton label={t("test.resuming")} lines={2} photo={false} />;
+@@ -186,22 +210,27 @@ export function TestFlow() {
+       return <Skeleton label={t("test.assigning")} />;
+     case "lesson":
+       return (
+-        <Lesson
+-          features={FEATURE_IDS}
+-          startIndex={stage.startIndex}
+-          onIndex={(i) => {
+-            if (stage.after === "test") setOpenSession({ session_id: stage.session.session_id, lesson_index: i });
+-          }}
+-          onDone={(seconds) => {
+-            void api.lessonDone(stage.session.session_id, seconds).catch(() => undefined);
+-            if (stage.after === "test") setStage({ name: "test", session: stage.session, startIndex: 0 });
+-            else setStage({ name: "done" });
+-          }}
+-        />
++        <>
++          {freshNote}
++          <Lesson
++            features={FEATURE_IDS}
++            startIndex={stage.startIndex}
++            onIndex={(i) => {
++              if (stage.after === "test") setOpenSession({ session_id: stage.session.session_id, lesson_index: i });
++            }}
++            onDone={(seconds) => {
++              setRestored(false);
++              void api.lessonDone(stage.session.session_id, seconds).catch(() => undefined);
++              if (stage.after === "test") setStage({ name: "test", session: stage.session, startIndex: 0 });
++              else setStage({ name: "done" });
++            }}
++          />
++        </>
+       );
+     case "test":
+       return (
+         <>
++          {freshNote}
+           {failed > 0 ? (
+             <div className="notice notice-warn" role="status">
+               <Icon name="wifi-slash" />
+@@ -221,6 +250,7 @@ export function TestFlow() {
+           }}
+         >
+           <FocusHeading>{t("end.before_title")}</FocusHeading>
++          {freshNote}
+           <fieldset className="card">
+             <legend>{t("end.prior_experience")}</legend>
+             <div className="option-list">
+@@ -255,21 +285,22 @@ export function TestFlow() {
+       return (
+         <div className="stack">
+           <FocusHeading>{t("end.title")}</FocusHeading>
++          {freshNote}
+           <ScoreScreen scores={stage.result.scores} correctTotal={stage.result.correct_total} token={stage.token}>
+             {untrained ? (
+               <section className="card stack">
+                 <h2>{t("end.lesson_offer_title")}</h2>
+                 <p>{t("end.lesson_offer")}</p>
+                 <div className="btn-row">
+-                  <Button onClick={() => setStage({ name: "lesson", session: stage.session, after: "done", startIndex: 0 })}>{t("end.lesson_start")}</Button>
+-                  <Button kind="secondary" onClick={() => setStage({ name: "done" })}>
++                  <Button onClick={() => leaveScore({ name: "lesson", session: stage.session, after: "done", startIndex: 0 })}>{t("end.lesson_start")}</Button>
++                  <Button kind="secondary" onClick={() => leaveScore({ name: "done" })}>
+                     {t("end.lesson_skip")}
+                   </Button>
+                 </div>
+               </section>
+             ) : (
+               <div className="btn-row">
+-                <Button kind="secondary" onClick={() => setStage({ name: "done" })}>
++                <Button kind="secondary" onClick={() => leaveScore({ name: "done" })}>
+                   {t("end.finish")}
+                 </Button>
+               </div>
+@@ -284,6 +315,10 @@ export function TestFlow() {
+           <FocusHeading>{t("end.done_title")}</FocusHeading>
+           <p>{t("end.done")}</p>
+           <p>{t("end.last_line")}</p>
++          <section className="card stack">
++            <h2>{t("fresh.title")}</h2>
++            <StartFresh />
++          </section>
+         </div>
+       );
+     case "error":
+diff --git a/apps/web/lib/image.ts b/apps/web/lib/image.ts
+index 227abda..ec34422 100644
+--- a/apps/web/lib/image.ts
++++ b/apps/web/lib/image.ts
+@@ -1,15 +1,18 @@
+-// Downsize a photo on the phone before upload. Long side 1600 px, JPEG. Nothing is stripped here;
+-// the API strips EXIF. If the browser lacks canvas support the original file goes as is.
++// Downsize a photo on the phone before upload. Long side 1600 px, JPEG. Drawing it on a canvas
++// makes a new file, so the camera's EXIF (GPS among it) is not carried over; the API strips EXIF
++// again. If this browser cannot redraw a photo (no canvas, or a format it cannot read, such as
++// HEIC on some phones), the photo is refused, so the original never waits in the offline queue.
+ 
+ export const MAX_SIDE = 1600;
+ 
+-export async function downsize(file: File, maxSide = MAX_SIDE): Promise<Blob> {
+-  if (typeof createImageBitmap === "undefined" || typeof document === "undefined") return file;
++/** The downsized JPEG, or null when this browser cannot redraw the file. */
++export async function downsize(file: File, maxSide = MAX_SIDE): Promise<Blob | null> {
++  if (typeof createImageBitmap === "undefined" || typeof document === "undefined") return null;
+   let bitmap: ImageBitmap;
+   try {
+     bitmap = await createImageBitmap(file);
+   } catch {
+-    return file;
++    return null;
+   }
+   const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+   const w = Math.max(1, Math.round(bitmap.width * scale));
+@@ -18,9 +21,8 @@ export async function downsize(file: File, maxSide = MAX_SIDE): Promise<Blob> {
+   canvas.width = w;
+   canvas.height = h;
+   const ctx = canvas.getContext("2d");
+-  if (!ctx) return file;
++  if (!ctx) return null;
+   ctx.drawImage(bitmap, 0, 0, w, h);
+   bitmap.close?.();
+-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+-  return blob ?? file;
++  return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+ }
+diff --git a/apps/web/lib/offline.ts b/apps/web/lib/offline.ts
+index 7f4566e..12e3d5f 100644
+--- a/apps/web/lib/offline.ts
++++ b/apps/web/lib/offline.ts
+@@ -1,6 +1,8 @@
+ // The offline queue for creek checks. Drafts and downsized photos wait in IndexedDB on the phone
+ // and are sent on the next visit, when the network returns, or by the service worker's sync event.
+-import { api, isNetworkError, uploadOrSkip, type DraftRequest } from "./api";
++// A check is removed from the phone once it is sent. One the server refused stays until the
++// person tries it again or deletes it.
++import { api, ApiError, isNetworkError, uploadOrSkip, type DraftRequest } from "./api";
+ 
+ const DB_NAME = "second-look";
+ const STORE = "queue";
+@@ -99,7 +101,25 @@ async function uploadAll(photos: QueuedPhoto[]): Promise<string[]> {
+   return ids;
+ }
+ 
+-/** Sends one queued item. Returns its status afterwards: sent, waiting (network) or failed (refused). */
++/** Empties the queue: "Start fresh" on a shared device. */
++export async function clearQueue(): Promise<void> {
++  await tx("readwrite", (s) => s.clear());
++  announce({ type: "cleared" });
++}
++
++/**
++ * Worth another try later: no network, or a server that is busy or down for a moment (a timeout,
++ * too many requests, a 5xx). Any other refusal is final until the person tries again.
++ */
++function worthWaiting(err: unknown): boolean {
++  if (isNetworkError(err)) return true;
++  return err instanceof ApiError && (err.status === 408 || err.status === 429 || err.status >= 500);
++}
++
++/**
++ * Sends one queued item. Returns its status afterwards: sent (and removed from the phone), waiting
++ * (network or a busy server) or failed (refused).
++ */
+ export async function sendQueued(item: QueuedCheck): Promise<QueuedCheck["status"]> {
+   if (item.status === "sent") return "sent";
+   item.status = "sending";
+@@ -118,12 +138,12 @@ export async function sendQueued(item: QueuedCheck): Promise<QueuedCheck["status
+       await api.quick(item.quick.spot_id, body as never);
+       item.result = { spot_id: item.quick.spot_id };
+     }
+-    item.status = "sent";
+-    item.photos = [];
+-    await put(item);
++    // Sent: nothing about it stays on the phone. The page that saved it hears the result once.
++    if (item.id !== undefined) await removeQueued(item.id);
++    announce({ type: "sent", id: item.id, result: item.result });
+     return "sent";
+   } catch (err) {
+-    if (isNetworkError(err)) {
++    if (worthWaiting(err)) {
+       item.status = "waiting";
+       await put(item);
+       return "waiting";
+@@ -146,6 +166,8 @@ export async function flushQueue(): Promise<{ sent: number; waiting: number }> {
+   try {
+     const items = await listQueue();
+     for (const item of items) {
++      // An older build kept sent checks, with their spot and token. Nothing sent stays now.
++      if (item.status === "sent" && item.id !== undefined) await removeQueued(item.id);
+       if (item.status === "sent" || item.status === "failed") continue;
+       const status = await sendQueued(item);
+       if (status === "sent") sent += 1;
+@@ -158,6 +180,16 @@ export async function flushQueue(): Promise<{ sent: number; waiting: number }> {
+   return { sent, waiting };
+ }
+ 
++/** Puts a refused item back in line and tries to send it now. */
++export async function retryQueued(id: number): Promise<void> {
++  const item = await getQueued(id);
++  if (!item || item.status !== "failed") return;
++  item.status = "waiting";
++  delete item.error;
++  await put(item);
++  await flushQueue();
++}
++
+ /** Wires the online event and a slow timer. Returns an unsubscribe function. */
+ export function startQueueWatcher(intervalMs = 5000): () => void {
+   const onOnline = () => {
+diff --git a/apps/web/lib/session.ts b/apps/web/lib/session.ts
+index 1288a14..690628c 100644
+--- a/apps/web/lib/session.ts
++++ b/apps/web/lib/session.ts
+@@ -1,16 +1,26 @@
+ // Browser-side helpers for the study session: the hashed random token, the device class, the
+-// coarse source label from ?src=, and the contributor token after "keep my score".
++// coarse source label from ?src=, and the contributor token after "keep my score". Everything
++// here stays in this browser, and forgetThisDevice clears it for the next person.
+ import type { UaClass } from "./api";
+ 
+ const TOKEN_KEY = "sl_client_token";
+ const SRC_KEY = "sl_src";
+ const CONTRIB_KEY = "sl_contributor_token";
++const CONTRIB_AT_KEY = "sl_contributor_saved_at";
+ const SPOTS_KEY = "sl_saved_spots";
+ const GUESS_KEY = "sl_landing_guess";
+ const OPEN_KEY = "sl_open_session";
+ 
+ export const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other"] as const;
+ 
++const DAY_MS = 24 * 60 * 60 * 1000;
++// A kept score is good for 90 days (SCORE_VALID_DAYS in core/records.py), so the token that
++// carries it rides on creek checks from this browser for 90 days and no longer.
++export const CONTRIBUTOR_TOKEN_DAYS = 90;
++// An open sitting left this long is not picked up again, so a shared device does not hand the
++// next person the last person's test or score.
++export const OPEN_SESSION_HOURS = 3;
++
+ function randomHex(bytes: number): string {
+   const arr = new Uint8Array(bytes);
+   crypto.getRandomValues(arr);
+@@ -76,7 +86,19 @@ export function siteUrl(): string {
+ 
+ export function getContributorToken(): string | null {
+   try {
+-    return localStorage.getItem(CONTRIB_KEY);
++    const token = localStorage.getItem(CONTRIB_KEY);
++    if (!token) return null;
++    const savedAt = Number(localStorage.getItem(CONTRIB_AT_KEY));
++    if (!savedAt) {
++      // Kept by a build that wrote no date: its 90 days start now.
++      localStorage.setItem(CONTRIB_AT_KEY, String(Date.now()));
++      return token;
++    }
++    if (Date.now() - savedAt > CONTRIBUTOR_TOKEN_DAYS * DAY_MS) {
++      clearContributorToken();
++      return null;
++    }
++    return token;
+   } catch {
+     return null;
+   }
+@@ -85,6 +107,7 @@ export function getContributorToken(): string | null {
+ export function setContributorToken(token: string): void {
+   try {
+     localStorage.setItem(CONTRIB_KEY, token);
++    localStorage.setItem(CONTRIB_AT_KEY, String(Date.now()));
+   } catch {
+     // nothing to do; the person saw it once
+   }
+@@ -93,6 +116,7 @@ export function setContributorToken(token: string): void {
+ export function clearContributorToken(): void {
+   try {
+     localStorage.removeItem(CONTRIB_KEY);
++    localStorage.removeItem(CONTRIB_AT_KEY);
+   } catch {
+     // ignore
+   }
+@@ -178,17 +202,19 @@ export function takeLandingGuess(): string | null {
+ }
+ 
+ /**
+- * The open sitting. A reload asks the server where it was, so only the id and the lesson card
+- * live here. Cleared when the person finishes, so the end screen is not shown forever.
++ * The open sitting. A reload asks the server where it was, so only the id, the lesson card and
++ * when it was last saved live here. Cleared when the person leaves the end screen, and not
++ * picked up again after OPEN_SESSION_HOURS, so the end screen is not shown forever.
+  */
+ export interface OpenSession {
+   session_id: string;
+   lesson_index?: number;
++  saved_at?: number;
+ }
+ 
+ export function setOpenSession(open: OpenSession): void {
+   try {
+-    localStorage.setItem(OPEN_KEY, JSON.stringify(open));
++    localStorage.setItem(OPEN_KEY, JSON.stringify({ ...open, saved_at: Date.now() }));
+   } catch {
+     // storage blocked: a reload starts again, which is the behaviour we had before
+   }
+@@ -199,7 +225,13 @@ export function getOpenSession(): OpenSession | null {
+     const raw = localStorage.getItem(OPEN_KEY);
+     if (!raw) return null;
+     const v = JSON.parse(raw) as OpenSession;
+-    return v && typeof v.session_id === "string" ? v : null;
++    if (!v || typeof v.session_id !== "string") return null;
++    // No date means an older build saved it, and it is as old as that build.
++    if (typeof v.saved_at !== "number" || Date.now() - v.saved_at > OPEN_SESSION_HOURS * 60 * 60 * 1000) {
++      localStorage.removeItem(OPEN_KEY);
++      return null;
++    }
++    return v;
+   } catch {
+     return null;
+   }
+@@ -212,3 +244,26 @@ export function clearOpenSession(): void {
+     // nothing to do
+   }
+ }
++
++/**
++ * "Start fresh" on a shared device. Forgets the open sitting, the random browser token, the
++ * contributor token and the saved spots, so the next person is a new person to the study and
++ * no check of theirs carries someone else's score. The offline queue is cleared by clearQueue
++ * in lib/offline.ts.
++ */
++export function forgetThisDevice(): void {
++  for (const key of [OPEN_KEY, TOKEN_KEY, CONTRIB_KEY, CONTRIB_AT_KEY, SPOTS_KEY]) {
++    try {
++      localStorage.removeItem(key);
++    } catch {
++      // storage blocked: nothing was kept
++    }
++  }
++  for (const key of [SRC_KEY, GUESS_KEY]) {
++    try {
++      sessionStorage.removeItem(key);
++    } catch {
++      // storage blocked: nothing was kept
++    }
++  }
++}
+diff --git a/apps/web/public/sw.js b/apps/web/public/sw.js
+index 10d9e72..840759d 100644
+--- a/apps/web/public/sw.js
++++ b/apps/web/public/sw.js
+@@ -8,7 +8,7 @@
+  */
+ // The cache name carries the content hash, so new photos and new copy replace the placeholders
+ // on the next visit instead of hiding behind a stale cache. build-content.mjs rewrites this line.
+-const VERSION = "sl-314f3327b9b5f235";
++const VERSION = "sl-1f8e4eece3e6e16a";
+ const PRECACHE = `${VERSION}-precache`;
+ const RUNTIME = `${VERSION}-runtime`;
+ 
+diff --git a/apps/web/tests/check.spec.ts b/apps/web/tests/check.spec.ts
+index 126808f..c48b665 100644
+--- a/apps/web/tests/check.spec.ts
++++ b/apps/web/tests/check.spec.ts
+@@ -54,6 +54,58 @@ async function answerForm(page: import("@playwright/test").Page) {
+   await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
+ }
+ 
++/** A check as CheckFlow saves it in the phone's queue while offline. */
++function queuedCheck(name: string, status: "waiting" | "failed") {
++  return {
++    kind: "check",
++    created_at: "2026-09-22T17:00:00.000Z",
++    draft: { spot: { new: { name, latitude: 37.8719, longitude: -122.2585, coarse: false } }, answers: { bank_type: "present" }, first_rating: "good", photo_ids: [] },
++    photos: [],
++    status,
++    ...(status === "failed" ? { error: "POST /api/check/draft failed with 422" } : {}),
++  };
++}
++
++/** Puts rows straight into the queue in IndexedDB, the store lib/offline.ts reads. */
++async function seedQueue(page: import("@playwright/test").Page, rows: object[]) {
++  await page.evaluate(
++    (items) =>
++      new Promise<void>((resolve, reject) => {
++        const req = indexedDB.open("second-look", 1);
++        req.onupgradeneeded = () => req.result.createObjectStore("queue", { keyPath: "id", autoIncrement: true });
++        req.onsuccess = () => {
++          const tx = req.result.transaction("queue", "readwrite");
++          for (const item of items) tx.objectStore("queue").add(item);
++          tx.oncomplete = () => {
++            req.result.close();
++            resolve();
++          };
++          tx.onerror = () => reject(tx.error);
++        };
++      }),
++    rows,
++  );
++}
++
++/** Everything the queue holds on this phone right now. */
++async function readQueue(page: import("@playwright/test").Page) {
++  return page.evaluate(
++    () =>
++      new Promise<Record<string, unknown>[]>((resolve) => {
++        const req = indexedDB.open("second-look", 1);
++        req.onupgradeneeded = () => req.result.createObjectStore("queue", { keyPath: "id", autoIncrement: true });
++        req.onsuccess = () => {
++          const tx = req.result.transaction("queue", "readonly");
++          const all = tx.objectStore("queue").getAll();
++          all.onsuccess = () => {
++            req.result.close();
++            resolve(all.result);
++          };
++        };
++      }),
++  );
++}
++
+ test("guided check: one question per screen, follow-ups in place, finalize", async ({ page }) => {
+   const urls = watchRequests(page);
+   const calls = await mockApi(page);
+@@ -86,7 +138,8 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
+   await page.getByRole("button", { name: "Finish" }).click();
+ 
+   const fin = calls.find((c) => c.path === "/api/check/finalize")!;
+-  expect(fin.body).toEqual({ draft_id: "d1", followup_answers: { dry_pipe: "yes", rating_check: "changed" }, final_rating: "moderate" });
++  // "change" is the word the API and the Worker take. The mock refuses any other, as they do.
++  expect(fin.body).toEqual({ draft_id: "d1", followup_answers: { dry_pipe: "yes", rating_check: "change" }, final_rating: "moderate" });
+   await expect(page.getByRole("heading", { name: "Saved" })).toBeVisible();
+   await expect(page.getByRole("link", { name: "See this creek's record" })).toHaveAttribute("href", "/spot?id=example");
+   expect(await page.evaluate(() => localStorage.getItem("sl_saved_spots"))).toContain("Footbridge");
+@@ -105,18 +158,7 @@ test("offline: the check is saved on the phone and sent when the network returns
+   await page.getByRole("button", { name: "Send" }).click();
+   await expect(page.getByTestId("queue-saved")).toHaveText("Saved on this phone. It will send when you are back online.");
+   expect(calls.filter((c) => c.path === "/api/check/finalize")).toHaveLength(0);
+-  const queued = await page.evaluate(
+-    () =>
+-      new Promise<number>((resolve) => {
+-        const req = indexedDB.open("second-look", 1);
+-        req.onsuccess = () => {
+-          const tx = req.result.transaction("queue", "readonly");
+-          const all = tx.objectStore("queue").getAll();
+-          all.onsuccess = () => resolve(all.result.length);
+-        };
+-      }),
+-  );
+-  expect(queued).toBe(1);
++  expect(await readQueue(page)).toHaveLength(1);
+ 
+   offline.value = false;
+   await context.setOffline(false);
+@@ -125,6 +167,120 @@ test("offline: the check is saved on the phone and sent when the network returns
+   const fin = calls.find((c) => c.path === "/api/check/finalize")!;
+   expect(fin.body).toMatchObject({ draft_id: "d1", followup_answers: {}, final_rating: "good" });
+   await expect(page.getByRole("link", { name: "See this creek's record" })).toBeVisible();
++  // Sent, so nothing about it stays on the phone: not the pin, not the answers.
++  expect(await readQueue(page)).toEqual([]);
++});
++
++test("a queued check that meets a busy server waits and goes on the next try", async ({ page }) => {
++  const calls = await mockApi(page, { statuses: { "/api/check/draft": [503] } });
++  await page.goto("/privacy");
++  await seedQueue(page, [queuedCheck("Footbridge", "waiting")]);
++  await page.goto("/check");
++  // The first try meets a 503. That is a server down for a moment, not a refusal.
++  await expect.poll(() => calls.filter((c) => c.path === "/api/check/finalize").length, { timeout: 20_000 }).toBe(1);
++  expect(calls.filter((c) => c.path === "/api/check/draft")).toHaveLength(2);
++  expect(await readQueue(page)).toEqual([]);
++});
++
++test("refused checks are listed after a reload, with Try again and Delete", async ({ page }) => {
++  const calls = await mockApi(page);
++  await page.goto("/privacy");
++  await seedQueue(page, [queuedCheck("Footbridge", "failed"), queuedCheck("Culvert", "failed")]);
++  await page.goto("/check");
++  const refused = page.getByRole("region", { name: "Checks the server refused" });
++  await expect(refused.getByText(/^Footbridge, saved /)).toBeVisible();
++  await expect(refused.getByText(/^Culvert, saved /)).toBeVisible();
++
++  await refused.getByRole("button", { name: "Delete" }).nth(1).click();
++  await expect(refused.getByText(/^Culvert/)).toHaveCount(0);
++  await refused.getByRole("button", { name: "Try again" }).click();
++  await expect(refused).toHaveCount(0);
++  expect(calls.filter((c) => c.path === "/api/check/finalize")).toHaveLength(1);
++  expect(calls.find((c) => c.path === "/api/check/draft")!.body.spot.new.name).toBe("Footbridge");
++  expect(await readQueue(page)).toEqual([]);
++});
++
++test("offline: a check the server refuses can be tried again from its own screen", async ({ page, context }) => {
++  const offline = { value: false };
++  const calls = await mockApi(page, { offline, statuses: { "/api/check/draft": [422] } });
++  await page.goto("/check");
++  await placePin(page);
++  await answerForm(page);
++
++  offline.value = true;
++  await context.setOffline(true);
++  await page.getByRole("button", { name: "Send" }).click();
++  await expect(page.getByTestId("queue-saved")).toBeVisible();
++  offline.value = false;
++  await context.setOffline(false);
++  await expect(page.getByRole("alert").filter({ hasText: "The server refused this check." })).toHaveText("The server refused this check. It stays on this phone until you try again or delete it.", { timeout: 20_000 });
++
++  await page.getByRole("button", { name: "Try again" }).click();
++  await expect(page.getByTestId("queue-sent")).toHaveText("Sent.");
++  expect(calls.filter((c) => c.path === "/api/check/finalize")).toHaveLength(1);
++  expect(await readQueue(page)).toEqual([]);
++});
++
++test("Start fresh forgets the tokens, the spots and the queue", async ({ page }) => {
++  await mockApi(page);
++  await page.goto("/privacy");
++  await page.evaluate(() => {
++    localStorage.setItem("sl_client_token", "a".repeat(64));
++    localStorage.setItem("sl_contributor_token", "MOCKTOKEN1234567");
++    localStorage.setItem("sl_saved_spots", JSON.stringify([{ spot_id: "example", name: "Footbridge" }]));
++    localStorage.setItem("sl_open_session", JSON.stringify({ session_id: "s-1", saved_at: Date.now() }));
++  });
++  await seedQueue(page, [queuedCheck("Footbridge", "failed")]);
++  await page.getByRole("button", { name: "Start fresh" }).click();
++  await expect(page.getByText("Done. This browser has forgotten all of it.")).toBeVisible();
++  const kept = await page.evaluate(() => ["sl_client_token", "sl_contributor_token", "sl_saved_spots", "sl_open_session"].map((k) => localStorage.getItem(k)));
++  expect(kept).toEqual([null, null, null, null]);
++  expect(await readQueue(page)).toEqual([]);
++});
++
++test("a photo the phone cannot redraw is refused when it is picked, so its GPS never waits in the queue", async ({ page }) => {
++  await mockApi(page);
++  await page.goto("/quick?spot=example");
++  await expect(page.getByRole("heading", { name: "20 second check" })).toBeVisible();
++  await page.locator("#photo-input").setInputFiles({ name: "creek.heic", mimeType: "image/heic", buffer: Buffer.from("ftypheic GPSLatitude 37.871912 GPSLongitude -122.258512") });
++  await expect(page.getByRole("alert").filter({ hasText: "could not prepare" })).toHaveText("This phone could not prepare that photo, so it was left out. Try another photo.");
++  await expect(page.getByText("0 photo(s) ready")).toBeVisible();
++});
++
++test("the 20 second check names the kept score, and Not me sends it without the token", async ({ page }) => {
++  const calls = await mockApi(page);
++  await page.goto("/quick?spot=example");
++  await page.evaluate(() => localStorage.setItem("sl_contributor_token", "MOCKTOKEN1234567"));
++  await page.reload();
++  await expect(page.getByTestId("token-note")).toContainText("the test score of token MOCK.");
++  await page.getByRole("button", { name: "Not me" }).click();
++  await expect(page.getByTestId("token-note")).toHaveCount(0);
++  await page.getByRole("button", { name: "Muddy" }).click();
++  await page.getByRole("button", { name: "Bad smell" }).click();
++  await page.getByRole("button", { name: "Yes", exact: true }).click();
++  await page.getByRole("button", { name: "Send" }).click();
++  await expect(page.getByText("Saved. Thank you.")).toBeVisible();
++  expect(calls.find((c) => c.path === "/api/quick/example")!.body.contributor_token).toBeUndefined();
++  expect(await page.evaluate(() => localStorage.getItem("sl_contributor_token"))).toBeNull();
++});
++
++test("a contributor token kept more than 90 days ago no longer rides on a check", async ({ page }) => {
++  const calls = await mockApi(page);
++  await page.goto("/quick?spot=example");
++  await page.evaluate(() => {
++    localStorage.setItem("sl_contributor_token", "MOCKTOKEN1234567");
++    localStorage.setItem("sl_contributor_saved_at", String(Date.now() - 91 * 24 * 60 * 60 * 1000));
++  });
++  await page.reload();
++  await expect(page.getByRole("heading", { name: "20 second check" })).toBeVisible();
++  await expect(page.getByTestId("token-note")).toHaveCount(0);
++  await page.getByRole("button", { name: "Clear" }).click();
++  await page.getByRole("button", { name: "None" }).click();
++  await page.getByRole("button", { name: "No", exact: true }).click();
++  await page.getByRole("button", { name: "Send" }).click();
++  await expect(page.getByText("Saved. Thank you.")).toBeVisible();
++  expect(calls.find((c) => c.path === "/api/quick/example")!.body.contributor_token).toBeUndefined();
++  expect(await page.evaluate(() => localStorage.getItem("sl_contributor_token"))).toBeNull();
+ });
+ 
+ test("a saved contributor token travels with the check", async ({ page }) => {
+@@ -134,6 +290,9 @@ test("a saved contributor token travels with the check", async ({ page }) => {
+   await page.reload();
+   await placePin(page);
+   await answerForm(page);
++  // Before it goes, the check says whose score it carries, by the first four characters only.
++  await expect(page.getByTestId("token-note")).toContainText("the test score of token MOCK.");
++  await expect(page.getByTestId("token-note")).not.toContainText("MOCKTOKEN1234567");
+   await page.getByRole("button", { name: "Send" }).click();
+   await expect(page.getByRole("heading", { name: "One or two follow-ups" })).toBeVisible();
+   expect(calls.find((c) => c.path === "/api/check/draft")!.body.contributor_token).toBe("MOCKTOKEN1234567");
+diff --git a/apps/web/tests/mock-api.mjs b/apps/web/tests/mock-api.mjs
+index 30ca412..0290a22 100644
+--- a/apps/web/tests/mock-api.mjs
++++ b/apps/web/tests/mock-api.mjs
+@@ -11,6 +11,9 @@ export const BUILT_IN_DEFAULT = "http://localhost:8000";
+ 
+ const ITEM_IDS = Array.from({ length: 16 }, (_, i) => `t${String(i + 1).padStart(2, "0")}`);
+ const FEATURES = ["artificial_bank", "dug_out_channel", "invasive_plant", "pipe_running"];
++// The follow-up answers the real API takes (FOLLOWUP_ANSWERS in apps/api/check.py and
++// worker/src/check.ts). Finalize refuses any other word here too, so a test cannot pass on one.
++const FOLLOWUP_ANSWERS = new Set(["yes", "no", "cant_tell", "keep", "change", "skipped"]);
+ 
+ /** The mock's private gold key: two present then two absent per feature, matching the placeholder items. */
+ export function goldFor(itemId) {
+@@ -178,7 +181,7 @@ export const exampleSpot = {
+       ],
+       checks: [
+         { rule_id: "dry_pipe", asked: true, question_text: "It has not rained here for 5 days. Is anything coming out of that pipe?", answer: "yes", detail: { days: 5 } },
+-        { rule_id: "rating_check", asked: true, question_text: "You rated this stream Good, but you also reported built banks. Do you want to keep your rating?", answer: "changed", detail: {} },
++        { rule_id: "rating_check", asked: true, question_text: "You rated this stream Good, but you also reported built banks. Do you want to keep your rating?", answer: "change", detail: {} },
+       ],
+     },
+     {
+@@ -233,6 +236,9 @@ export async function mockApi(page, options = {}) {
+       { rule_id: "dry_pipe", question_text: "It has not rained here for 5 days. Is anything coming out of that pipe?", kind: "yesno" },
+       { rule_id: "rating_check", question_text: "You rated this stream Good, but you also reported built banks. Do you want to keep your rating?", kind: "keep_rating" },
+     ];
++  // Option statuses: { path: [status, ...] }. Each request to that path answers with the next
++  // status as an error until the list runs out, like a server that is down for a moment.
++  const statuses = Object.fromEntries(Object.entries(options.statuses ?? {}).map(([path, list]) => [path, [...list]]));
+   const responses = new Map();
+   // Enough session state for a reload to resume, the way the real API does.
+   const sessions = new Map();
+@@ -267,6 +273,15 @@ export async function mockApi(page, options = {}) {
+       return;
+     }
+     const json = (data, status = 200) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(data) });
++    const failWith = statuses[path]?.shift();
++    if (failWith) return json({ detail: `The mock answers ${failWith} this time.` }, failWith);
++    if (path === "/api/check/finalize") {
++      for (const [rule, answer] of Object.entries(body.followup_answers ?? {})) {
++        const kind = followups.find((f) => f.rule_id === rule)?.kind;
++        // A photo follow-up may carry a photo id instead of a word.
++        if (kind !== "photo" && !FOLLOWUP_ANSWERS.has(answer)) return json({ detail: `${rule}: answer yes, no, cant_tell, keep, change or skipped.` }, 422);
++      }
++    }
+ 
+     if (path === "/health") return json({ status: "ok" });
+     if (path === "/api/content/hash") return json({ content_hash: "mock", build_hash: "mock" });
+diff --git a/apps/web/tests/resume.spec.ts b/apps/web/tests/resume.spec.ts
+index 065bfd5..3150a8c 100644
+--- a/apps/web/tests/resume.spec.ts
++++ b/apps/web/tests/resume.spec.ts
+@@ -75,6 +75,73 @@ test("a finished sitting shows its end screen again and creates nothing new", as
+   expect(calls.filter((c) => c.path === "/api/test/complete").length).toBeGreaterThan(0);
+ });
+ 
++/**
++ * A shared tablet at a poster stand or in a lab. The next person must not carry on the last
++ * person's sitting or land on their score, and Start fresh makes them a new person to the study.
++ */
++test("leaving the end screen closes the sitting, so the next visit starts at consent", async ({ page }) => {
++  const calls = await mockApi(page, { lessonFirst: false });
++  await page.goto("/t");
++  await passConsent(page);
++  await pickWarmup(page);
++  await answerAllItems(page, () => "Yes");
++  await page.getByRole("button", { name: "See my score" }).click();
++  await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();
++  await page.getByRole("button", { name: "No thanks" }).click();
++  await expect(page.getByRole("heading", { name: "Thank you" })).toBeVisible();
++  await expect(page.getByRole("heading", { name: "Shared device?" })).toBeVisible();
++
++  await page.goto("/t");
++
++  await expect(page.getByRole("heading", { name: "Before you start" })).toBeVisible();
++  await expect(page.getByText("8 of 16 right")).toHaveCount(0);
++  expect(calls.filter((c) => c.path === "/api/test/resume")).toHaveLength(0);
++});
++
++test("a picked up sitting offers Start fresh, and the next person gets a new browser token", async ({ page }) => {
++  const calls = await mockApi(page, { lessonFirst: false });
++  await page.goto("/t");
++  await passConsent(page);
++  await pickWarmup(page);
++  for (let i = 1; i <= 3; i++) {
++    await expect(page.getByText(`Photo ${i} of 16`)).toBeVisible();
++    await answerItem(page, "Yes");
++  }
++
++  await page.goto("/t");
++
++  await expect(page.getByText("Photo 4 of 16")).toBeVisible();
++  await expect(page.getByTestId("resumed-note")).toContainText("This browser already started the test.");
++  await page.getByRole("button", { name: "Start fresh" }).click();
++  await passConsent(page);
++  await pickWarmup(page);
++  await expect(page.getByText("Photo 1 of 16")).toBeVisible();
++  await expect(page.getByTestId("resumed-note")).toHaveCount(0);
++  const made = calls.filter((c) => c.path === "/api/test/session");
++  expect(made).toHaveLength(2);
++  expect(made[1].body.client_token_hash).not.toBe(made[0].body.client_token_hash);
++});
++
++test("a sitting left for more than three hours is not picked up again", async ({ page }) => {
++  const calls = await mockApi(page, { lessonFirst: false });
++  await page.goto("/t");
++  await passConsent(page);
++  await pickWarmup(page);
++  await expect(page.getByText("Photo 1 of 16")).toBeVisible();
++  await answerItem(page, "Yes");
++  await expect(page.getByText("Photo 2 of 16")).toBeVisible();
++  await page.evaluate(() => {
++    const open = JSON.parse(localStorage.getItem("sl_open_session")!);
++    localStorage.setItem("sl_open_session", JSON.stringify({ ...open, saved_at: Date.now() - 4 * 60 * 60 * 1000 }));
++  });
++
++  await page.reload();
++
++  await expect(page.getByRole("heading", { name: "Before you start" })).toBeVisible();
++  expect(calls.filter((c) => c.path === "/api/test/resume")).toHaveLength(0);
++  expect(await page.evaluate(() => localStorage.getItem("sl_open_session"))).toBeNull();
++});
++
+ /**
+  * Update 07 sections 1.2 and 2.4. The network goes away for ten seconds in the middle of the
+  * test. Every answer must still reach the server before the end screen appears.
+diff --git a/content/locales/en.json b/content/locales/en.json
+index 65a893a..3334f76 100644
+--- a/content/locales/en.json
++++ b/content/locales/en.json
+@@ -161,7 +161,19 @@
+   "check.saved_offline": "Saved on this phone. It will send when you are back online.",
+   "check.send_now": "Send now",
+   "check.sent": "Sent.",
+-  "check.queue_failed": "The server refused this check. It stays on this phone.",
++  "check.queue_failed": "The server refused this check. It stays on this phone until you try again or delete it.",
++  "check.delete": "Delete",
++  "check.refused_title": "Checks the server refused",
++  "check.refused_intro": "They stay on this phone until you try again or delete them.",
++  "check.refused_item": "{name}, saved {when}",
++  "check.photo_refused": "This phone could not prepare that photo, so it was left out. Try another photo.",
++  "check.token_note": "This check will carry the test score of token {token}. If that is not your score, tap Not me.",
++  "check.token_not_me": "Not me",
++  "fresh.title": "Shared device?",
++  "fresh.note": "Start fresh so the next person counts as a new person. This browser then forgets the test, the score token, saved spots and checks that wait to be sent.",
++  "fresh.button": "Start fresh",
++  "fresh.done": "Done. This browser has forgotten all of it.",
++  "fresh.resumed": "This browser already started the test. If that was not you, tap Start fresh.",
+   "spot.title": "Creek record",
+   "spot.loading": "Loading the record",
+   "spot.not_found": "No record for this spot.",
+@@ -243,7 +255,7 @@
+   "privacy.stored_test": "Test: a random session id. Your group. Your answers. How long each screen took. A hash of a random token your browser made. Your device type: phone, tablet or desktop. The version of the consent text. A coarse label from the link you used: poster, chat, friends, creek group or other.",
+   "privacy.stored_check": "Creek check: your answers. Where the spot is, rounded to about 1 km unless you placed the pin yourself. The time. Your contributor token, if you chose to keep your score.",
+   "privacy.stored_photos": "Photos: kept private, location data removed on arrival, deleted after 30 days.",
+-  "privacy.stored_phone": "On your phone only: your random browser token, your contributor token, saved spots, and checks that wait to be sent while you are offline.",
++  "privacy.stored_phone": "On your phone only: your random browser token, your contributor token for 90 days, an unfinished test for 3 hours, saved spots, and checks that wait to be sent. A check is removed from the phone once it is sent. One browser counts as one person, so on a shared phone use Start fresh below.",
+   "privacy.not_stored_title": "What we never store",
+   "privacy.not_stored_1": "Your name, email, phone number or IP address.",
+   "privacy.not_stored_2": "Free text of any kind. Every answer is a choice from a list or a number.",
+diff --git a/docs/DATA_HANDLING.md b/docs/DATA_HANDLING.md
+index 110b280..49bc78c 100644
+--- a/docs/DATA_HANDLING.md
++++ b/docs/DATA_HANDLING.md
+@@ -109,6 +109,33 @@ the consent text.
+   Our own FHIR store is the source of truth; the sandbox mirror is a copy we can rebuild.
+ - `sandbox_cache`: replaced on each successful fetch; never committed to git.
+ 
++## What the browser keeps
++
++None of it is sent anywhere except inside the requests described above. Every key is in
++`apps/web/lib/session.ts` or `apps/web/lib/offline.ts`.
++
++- `sl_client_token` (localStorage): the random browser token. Only its hash is sent.
++- `sl_open_session` (localStorage): the id of an unfinished test, the lesson card and when it
++  was last saved, so a reload resumes. Cleared when the person leaves the end screen, and not
++  picked up again after 3 hours (`OPEN_SESSION_HOURS`).
++- `sl_contributor_token` and `sl_contributor_saved_at` (localStorage): only after "Keep my
++  score". The token rides on creek checks from this browser for 90 days, the life of the score
++  (`CONTRIBUTOR_TOKEN_DAYS`), and is then forgotten. Before a check is sent the app names the
++  first four characters of the token and offers "Not me", which forgets it.
++- `sl_saved_spots` (localStorage): the names and ids of spots this browser checked.
++- `sl_src` and `sl_landing_guess` (sessionStorage): the link label and the landing page choice,
++  gone when the tab closes.
++- IndexedDB `second-look`, store `queue`: creek checks that wait to be sent, with their answers,
++  the spot, the contributor token and the photos. A check is removed once it is sent. A check
++  the server refused stays until the person taps Try again or Delete on `/check`; a timeout, a
++  429 or a 5xx is not a refusal, so that check waits and goes on the next try. Photos are
++  redrawn on the phone before they are queued, which leaves the camera's EXIF behind, and a
++  photo the phone cannot redraw is refused when it is picked.
++
++One browser counts as one person: it keeps one arm, and only its first completed test counts.
++On a shared phone or tablet the next person taps "Start fresh" (on `/privacy`, on the last test
++screen, or when `/t` picks up a test this browser started), which clears all of the above.
++
+ ## The rate limit, and why the deployed API has none
+ 
+ The Python API limits requests per client address over a short window. The counter lives in
+diff --git a/worker/src/content.json b/worker/src/content.json
+index b44a8cd..3694cd0 100644
+--- a/worker/src/content.json
++++ b/worker/src/content.json
+@@ -1,5 +1,5 @@
+ {
+-  "content_hash": "0a5e34bf161061b6",
++  "content_hash": "1f8e4eece3e6e16a",
+   "creeks": [
+     {
+       "name": "Strawberry Creek",
