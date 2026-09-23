@@ -1,0 +1,12 @@
+# gitleaks reads this file from the repo root. It keeps every default rule and allows one path:
+# the review patch files under docs/internal/reviews/patches/ quote the made up test values the
+# patches add, and each of those values is named in .gitleaksignore where it lives in the code.
+# The patch files are working notes, and make go-public removes docs/internal.
+title = "Second Look gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "review patch files quote made up test values"
+paths = ['''^docs/internal/reviews/patches/[0-9]{2}-[a-z0-9-]+\.patch$''']

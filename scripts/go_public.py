@@ -29,6 +29,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INTERNAL = "docs/internal"
+GITLEAKS_CONFIG = ".gitleaks.toml"
 PUBLIC_CMD = [
     "gh",
     "repo",
@@ -74,7 +75,9 @@ def run(cmd: list[str]) -> tuple[int, str]:
 
 
 def mentions() -> list[tuple[str, int]]:
-    # This script and its test name the folder on purpose, and are the one place that may.
+    # This script and its test name the folder on purpose. So does .gitleaks.toml: gitleaks reads
+    # the whole history, which keeps the folder after this run, so its allowlist for the review
+    # patch files there has to keep the real path.
     code, out = run(
         [
             "git",
@@ -86,6 +89,7 @@ def mentions() -> list[tuple[str, int]]:
             f":!{INTERNAL}",
             ":!scripts/go_public.py",
             ":!scripts/tests/test_go_public.py",
+            f":!{GITLEAKS_CONFIG}",
         ]
     )
     rows = []
