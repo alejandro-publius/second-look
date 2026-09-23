@@ -8,12 +8,29 @@ import { Skeleton } from "./ui/Skeleton";
 import { api, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
 import { t } from "@/lib/t";
 
-/** The laboratory Observations of an example result: the ones that point at a Specimen. */
 // "1 spot", not "1 spots": the key for one, or the key for any other number with {n} filled in.
 function count(n: number, one: string, many: string): string {
   return n === 1 ? t(one) : t(many, { n });
 }
 
+function people(n: number): string {
+  return count(n, "city.observer_one", "city.observers");
+}
+
+/**
+ * "Open the records" on screen. A screen reader hears what the link opens as well, so five of
+ * these in a links list can be told apart.
+ */
+function Evidence({ href, name }: { href: string; name: string }) {
+  return (
+    <a href={href} rel="noreferrer">
+      {t("city.evidence")}
+      <span className="visually-hidden"> {t("city.evidence_for", { name })}</span>
+    </a>
+  );
+}
+
+/** The laboratory Observations of an example result: the ones that point at a Specimen. */
 function panelOf(entries: { resource: FhirResource }[] | undefined): FhirResource[] {
   return (entries ?? []).map((e) => e.resource).filter((r) => r.resourceType === "Observation" && r.specimen !== undefined);
 }
@@ -32,7 +49,7 @@ function valueOf(r: FhirResource): string {
  * One pipe worth testing. The referral link is real. The example result is fetched only when
  * asked for, wears the word Example in a badge and in a notice, and is never a number on this page.
  */
-function PipeRow({ pipe, people }: { pipe: CityPipe; people: (n: number) => string }) {
+function PipeRow({ pipe }: { pipe: CityPipe }) {
   const [example, setExample] = useState<FhirResource[] | null>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,12 +74,8 @@ function PipeRow({ pipe, people }: { pipe: CityPipe; people: (n: number) => stri
     <div className="stack">
       <Row
         label={pipe.spot_name}
-        value={`${people(pipe.observers)}, ${t("city.dry_days", { days: Math.max(...pipe.dry_days) })}`}
-        end={
-          <a href={pipe.fhir[0]} rel="noreferrer">
-            {t("city.evidence")}
-          </a>
-        }
+        value={`${people(pipe.observers)}, ${count(Math.max(...pipe.dry_days), "city.dry_day_one", "city.dry_days")}`}
+        end={<Evidence href={pipe.fhir[0]} name={pipe.spot_name} />}
       />
       <div className="btn-row">
         <a className="btn btn-secondary" href={pipe.referral} rel="noreferrer">
@@ -141,13 +154,6 @@ export function CityView({ creekId }: { creekId: string }) {
   }
   if (!view) return <Skeleton label={t("city.title")} lines={3} photo={false} />;
 
-  const people = (n: number) => (n === 1 ? t("city.observer_one") : t("city.observers", { n }));
-  const evidence = (links: string[]) => (
-    <a href={links[0]} rel="noreferrer">
-      {t("city.evidence")}
-    </a>
-  );
-
   return (
     <div className="stack">
       <FocusHeading>{t("city.title")}</FocusHeading>
@@ -174,7 +180,7 @@ export function CityView({ creekId }: { creekId: string }) {
               key={n.sentence_id}
               label={n.text}
               value={`${n.because.join(", ")}. ${n.source}`}
-              end={evidence(n.fhir)}
+              end={<Evidence href={n.fhir[0]} name={n.because.join(", ")} />}
             />
           ))}
         </div>
@@ -187,7 +193,7 @@ export function CityView({ creekId }: { creekId: string }) {
       ) : (
         <div className="card stack">
           {view.pipes_worth_testing.map((p) => (
-            <PipeRow key={p.spot_id} pipe={p} people={people} />
+            <PipeRow key={p.spot_id} pipe={p} />
           ))}
         </div>
       )}
@@ -208,7 +214,12 @@ export function CityView({ creekId }: { creekId: string }) {
                 ) : (
                   <div className="card">
                     {r.notes.map((n) => (
-                      <Row key={`${n.from_reach_slug}:${n.feature}`} label={n.line} value={n.from_reach_name} end={evidence(n.fhir)} />
+                      <Row
+                        key={`${n.from_reach_slug}:${n.feature}`}
+                        label={n.line}
+                        value={n.from_reach_name}
+                        end={<Evidence href={n.fhir[0]} name={`${n.feature_name}, ${n.from_reach_name}`} />}
+                      />
                     ))}
                   </div>
                 )}
@@ -229,7 +240,7 @@ export function CityView({ creekId }: { creekId: string }) {
               key={`${f.spot_id}:${f.feature}`}
               label={`${f.feature_name}, ${f.spot_name}`}
               value={people(f.observers)}
-              end={evidence(f.fhir)}
+              end={<Evidence href={f.fhir[0]} name={`${f.feature_name}, ${f.spot_name}`} />}
             />
           ))}
         </div>
