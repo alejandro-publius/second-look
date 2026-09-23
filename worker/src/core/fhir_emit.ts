@@ -2,7 +2,7 @@
 // Python writes for the same inputs, proved by golden/fhir_emit.json. The tables (systems,
 // displays, form items) come from content.json, so the two emitters read one source.
 
-import CONTENT from "../content.json";
+import CONTENT from "./core_content.json";
 import { pyRound } from "./pyround";
 import { sha256Hex } from "./sha256";
 import { addDays, instant, type AnswerValue, type FeatureScore, type FormItem, type Json, type TestSitting, type VisitRecord } from "./types";
@@ -404,6 +404,14 @@ export function checkBundle(bundle: Resource): string[] {
   const problems: string[] = [];
   if (bundle.resourceType !== "Bundle") return ["not a Bundle"];
   const entries = (bundle.entry ?? []) as Resource[];
+  // bdl-7: two entries with one fullUrl make every reference to it ambiguous.
+  const seenUrls = new Set<string>();
+  entries.forEach((e, i) => {
+    const url = String(e.fullUrl ?? "");
+    const r = (e.resource ?? {}) as Resource;
+    if (url && seenUrls.has(url)) problems.push(`entry[${i}] ${String(r.resourceType)}/${r.id ?? e.fullUrl ?? "?"}: fullUrl ${url} appears twice`);
+    seenUrls.add(url);
+  });
   const keys = new Set<string>();
   for (const e of entries) {
     const r = (e.resource ?? {}) as Resource;

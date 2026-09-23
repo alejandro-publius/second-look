@@ -32,6 +32,27 @@ function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
   });
 }
 
+/** What the rating follow-up holds: its answer, the rating the record will carry, and whether the picker is open. */
+export interface RatingFollowup {
+  answer: string | undefined;
+  finalRating: string | null;
+  changingRating: boolean;
+}
+
+/** A tap on the rating follow-up: Keep, Change, or a rating picked after Change. */
+export type RatingTap = "keep" | "change" | { rating: string };
+
+/**
+ * The rating follow-up after one tap. Keep puts the first rating back and closes the picker, so a
+ * record can never say keep beside a changed rating. Change opens the picker, and a rating picked
+ * there becomes the final one.
+ */
+export function tapRating(state: RatingFollowup, tap: RatingTap, firstRating: string | null): RatingFollowup {
+  if (tap === "keep") return { answer: "keep", finalRating: firstRating, changingRating: false };
+  if (tap === "change") return { ...state, changingRating: true };
+  return { answer: "change", finalRating: tap.rating, changingRating: false };
+}
+
 /**
  * The guided creek check from content/form.yaml: one question per screen in the form's order,
  * location first, photos welcome, follow-ups from the API shown in place, offline queue when the
@@ -133,6 +154,14 @@ export function CheckFlow() {
     }
   }
 
+  function onRatingTap(ruleId: string, tap: RatingTap) {
+    const next = tapRating({ answer: followupAnswers[ruleId], finalRating, changingRating }, tap, firstRating);
+    const answer = next.answer;
+    setFinalRating(next.finalRating);
+    setChangingRating(next.changingRating);
+    if (answer !== undefined) setFollowupAnswers((a) => ({ ...a, [ruleId]: answer }));
+  }
+
   function answerItem(index: number, value: AnswerValue | undefined) {
     const item = items[index];
     const next = { ...answers };
@@ -152,9 +181,12 @@ export function CheckFlow() {
           <FocusHeading>{t("check.title")}</FocusHeading>
           <p>{t("check.intro")}</p>
           <p className="small muted">{t("check.unverified_note")}</p>
-          <button type="button" className="btn btn-block" onClick={() => setStage({ name: "location" })}>
-            {t("check.start")}
-          </button>
+          {/* The same bottom block as the test screens, so Start sits in thumb reach. */}
+          <div className="actions">
+            <button type="button" className="btn btn-block" onClick={() => setStage({ name: "location" })}>
+              {t("check.start")}
+            </button>
+          </div>
         </div>
       );
     case "location":
@@ -223,14 +255,9 @@ export function CheckFlow() {
               photos={followupPhotos[f.rule_id] ?? []}
               onPhotos={(p) => setFollowupPhotos((m) => ({ ...m, [f.rule_id]: p }))}
               changingRating={changingRating}
-              onChangeRating={() => setChangingRating(true)}
               ratingOptions={ratingItem?.options ?? []}
               finalRating={finalRating}
-              onFinalRating={(r) => {
-                setFinalRating(r);
-                setChangingRating(false);
-                setFollowupAnswers((a) => ({ ...a, [f.rule_id]: "changed" }));
-              }}
+              onRatingTap={(tap) => onRatingTap(f.rule_id, tap)}
             />
           ))}
           <button type="button" className="btn btn-block" onClick={() => void finalize(stage.draft, followupAnswers, finalRating)}>
@@ -309,10 +336,9 @@ function FollowupCard({
   photos,
   onPhotos,
   changingRating,
-  onChangeRating,
   ratingOptions,
   finalRating,
-  onFinalRating,
+  onRatingTap,
 }: {
   followup: Followup;
   value: string | undefined;
@@ -320,10 +346,9 @@ function FollowupCard({
   photos: PickedPhoto[];
   onPhotos: (p: PickedPhoto[]) => void;
   changingRating: boolean;
-  onChangeRating: () => void;
   ratingOptions: { id: string; label: string; value: string }[];
   finalRating: string | null;
-  onFinalRating: (r: string) => void;
+  onRatingTap: (tap: RatingTap) => void;
 }) {
   return (
     <section className="card stack" aria-label={followup.rule_id}>
@@ -346,17 +371,17 @@ function FollowupCard({
       {followup.kind === "keep_rating" ? (
         <div className="stack">
           <div className="btn-row">
-            <button type="button" className="btn" aria-pressed={value === "keep"} onClick={() => onAnswer("keep")}>
+            <button type="button" className="btn" aria-pressed={value === "keep"} onClick={() => onRatingTap("keep")}>
               {t("check.keep_rating")}
             </button>
-            <button type="button" className="btn btn-secondary" aria-pressed={value === "changed"} onClick={onChangeRating}>
+            <button type="button" className="btn btn-secondary" aria-pressed={value === "change"} onClick={() => onRatingTap("change")}>
               {t("check.change_rating")}
             </button>
           </div>
           {changingRating ? (
             <div className="option-list">
               {ratingOptions.map((o) => (
-                <button key={o.id} type="button" className="option" aria-pressed={finalRating === o.value} onClick={() => onFinalRating(o.value)}>
+                <button key={o.id} type="button" className="option" aria-pressed={finalRating === o.value} onClick={() => onRatingTap({ rating: o.value })}>
                   {o.label}
                 </button>
               ))}

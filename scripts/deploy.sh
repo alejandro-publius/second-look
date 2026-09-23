@@ -23,6 +23,8 @@ case "$WHAT" in
     echo "deploy: worker live; now run the study contract tests and the phone tests against production"
     ;;
   web)
+    # The walk clips are never committed; cut them from the cache, and refuse to ship without them.
+    uv run python scripts/build_walks.py --clips-only
     (cd apps/web && NEXT_PUBLIC_API_ORIGIN="" NEXT_PUBLIC_SITE_URL="https://second-look-79t.pages.dev" NEXT_PUBLIC_BUILD_HASH="$(git rev-parse --short HEAD)" npm run export)
     (cd apps/web && npx wrangler pages deploy out --project-name second-look --branch main --commit-dirty=true)
     echo "deploy: web live at https://second-look-79t.pages.dev; run the phone tests again and check /health through the Pages origin"

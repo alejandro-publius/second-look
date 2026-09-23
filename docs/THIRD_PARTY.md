@@ -42,7 +42,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
   `apps/web/scripts/build-icons.mjs` generates `components/ui/Icon.tsx` from its SVG assets, so
   there is no icon runtime in the bundle and no second icon family can appear.
 
-## Python packages (88, from uv.lock)
+## Python packages (95, from uv.lock)
 
 | Package | Version | License |
 |---|---|---|
@@ -88,6 +88,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | mypy | 2.3.1 | MIT |
 | mypy-extensions | 1.1.0 | MIT |
 | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 |
+| opencv-python-headless | 4.14.0.94 | Apache 2.0 |
 | opentelemetry-api | 1.44.0 | Apache-2.0 |
 | packaging | 26.3 | Apache-2.0 OR BSD-2-Clause |
 | pandas | 3.0.6 | BSD |
@@ -103,6 +104,11 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | pydantic-settings | 2.15.0 | MIT |
 | pygments | 2.21.0 | BSD-2-Clause |
 | pyjwt | 2.14.0 | MIT |
+| pyobjc-core | 12.2.2 | MIT |
+| pyobjc-framework-cocoa | 12.2.2 | MIT |
+| pyobjc-framework-coreml | 12.2.2 | MIT |
+| pyobjc-framework-quartz | 12.2.2 | MIT |
+| pyobjc-framework-vision | 12.2.2 | MIT |
 | pyparsing | 3.3.3 | MIT |
 | pytest | 9.1.1 | MIT |
 | pytest-asyncio | 1.4.0 | Apache-2.0 |
@@ -134,6 +140,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | uvloop | 0.22.1 | MIT License |
 | watchfiles | 1.2.0 | MIT |
 | websockets | 17.1 | BSD-3-Clause |
+| yt-dlp | 2026.8.19 | Unlicense |
 
 ## Web packages (438, from apps/web/package-lock.json)
 

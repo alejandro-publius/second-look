@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -41,7 +41,7 @@ test:
 	uv run pytest
 
 web-build:
-	@if [ -f $(WEB)/package.json ]; then cd $(WEB) && npm run build --silent && echo "web build ok"; else echo "no web app yet"; fi
+	@if [ -f $(WEB)/package.json ]; then cd $(WEB) && npm run build --silent && echo "web build ok" && node scripts/check-bundle.mjs; else echo "no web app yet"; fi
 
 manifest-check:
 	$(PY) scripts/check_manifest.py
@@ -67,6 +67,8 @@ design-check:
 
 verify-claims:
 	$(PY) scripts/verify_claims.py --synthetic
+	$(PY) scripts/verify_claims.py --file docs/devpost.md
+	$(PY) scripts/verify_claims.py --file docs/submission/JUDGE_QA.md
 
 render-readme:
 	$(PY) scripts/render_readme.py
@@ -112,6 +114,34 @@ preflight-judges:
 submit-check:
 	$(PY) scripts/submit_check.py
 
+# The paid model run, in one command, for Alex once the model gate flags are flipped and the key
+# is in .env (docs/ALEX_TODO.md step 2). Batch API throughout. The 16-photo sweep refuses above 10
+# dollars worst case and the footage run above 25 expected, inside the 40 dollar cap of Update 14.
+# Afterwards the walks are gated again on the real answers and the pool numbers rewritten; the
+# README's AI table is filled by the next session from results/, never by hand.
+ai-run:
+	$(PY) evals/model_sweep.py --real --max-usd 10
+	$(PY) evals/benchmark.py --real --runs 3
+	$(PY) evals/footage.py --real --max-usd 25
+	$(PY) scripts/build_walks.py --no-clips
+	$(PY) evals/footage_pool.py
+
+# Update 14 section 7. Screen recordings (needs the built app on 3100), then the rough cut with a
+# scratch voice. Nothing either writes is committed: they are video files.
+video-clips:
+	@mkdir -p docs/video/clips
+	uv run --with markdown python -c "import markdown,pathlib; r=pathlib.Path('.').resolve(); h=markdown.markdown(pathlib.Path('README.md').read_text(), extensions=['tables','fenced_code','toc']); pathlib.Path('docs/video/clips/readme.html').write_text('<!doctype html><meta charset=utf-8><base href=\"file://'+str(r)+'/\"><style>body{font:18px/1.5 -apple-system,sans-serif;max-width:980px;margin:40px auto;padding:0 24px}img{max-width:100%}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px}</style>'+h)"
+	cd $(WEB) && README_HTML=$(CURDIR)/docs/video/clips/readme.html node scripts/record-clips.mjs
+
+video-rough:
+	$(PY) scripts/video_rough.py
+
+# Update 14 section 8 item 2. Says what it would do; with GO=yes, on main on Sep 30, removes the
+# working notes, runs submit-check, and only then makes the repository public.
+go-public:
+	$(PY) scripts/go_public.py $(if $(filter yes,$(GO)),--yes,)
+# bash scripts/go_public.sh --run does the same thing; Alex was told that command first.
+
 # The one command for a judge: no key, no network, five lines out. Tests, FHIR validation,
 # the web build and the design gate, the audit chain, and a scan for secrets.
 judge-check:
@@ -143,6 +173,7 @@ deploy:
 # never touches production: production deploys come from main only.
 PREVIEW_URL := https://depth.second-look-79t.pages.dev
 deploy-preview:
+	$(PY) scripts/build_walks.py --clips-only
 	cd $(WEB) && NEXT_PUBLIC_API_ORIGIN="" NEXT_PUBLIC_SITE_URL=$(PREVIEW_URL) NEXT_PUBLIC_BUILD_HASH=$$(git rev-parse --short HEAD) npm run export
 	cd $(WEB) && npx wrangler pages deploy out --project-name second-look --branch depth --commit-dirty=true
 	@echo "preview at $(PREVIEW_URL); check with: curl -sI $(PREVIEW_URL)/health"

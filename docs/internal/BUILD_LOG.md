@@ -50,3 +50,38 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: the live Pages build predates the consent contact email, so the deployed smoke test fails on it; the web deploy that fixes it, and emptying the live D1 table, are both outside what this terminal may do on its own.
 - Decisions: Update 14 lives under docs/internal/updates; no key means the fake client everywhere; depth takes main's tagged plan verbatim.
 - Next: phase 3, the AI on the 16-photo test and on open creek footage.
+
+## Update 14 phases 3 to 8, cloud takeover by prompt 18, 2026-09-22 21:50Z
+- What: CI green on main and depth (PRs #2, #3); `make go-public` prints the Sep 30 steps and changes nothing; docs/JUDGE_SCORECARD.md and docs/ACCEPTANCE.md; `apps/web/scripts/record-clips.mjs` and docs/video/SHOTLIST.md. The kits (voice script, teleprompter, creek plan, Devpost paste, judge questions, upstream) are on `finish`.
+- Proof: `make go-public` lists 15 live files that point at docs/internal; `make submit-check` fails only on video_link and repo_public; a trial `node apps/web/scripts/record-clips.mjs` wrote six clips.
+- Surprises: evals/models.yaml and evals/pricing.yaml still say unconfirmed although docs/notes/model_ids.md records the check on 2026-09-21, so the paid run refuses until someone flips them. That is Alex's call, left for him.
+- Decisions: no key and no Mac here, so no paid run, no footage download, no deploy, no merge into main. Those are commands in the status issue.
+- Next: Alex flips the two flags and runs `uv run python evals/model_sweep.py --real`; then the footage search, /walk, the merge and deploy in the hosting.md order, on the Mac.
+
+## Update 14 phase 3, the Mac's part, by prompt 15, 2026-09-23 06:00Z
+- What: open creek footage searched (68 candidates), picked by rule over eight rounds, screened by Apple Vision and by eye: 46 frames from 5 videos in 3 countries. /walk: three walks, every second screened, the record built on the phone and never sent. evals/footage.py built and run on the fake client. The branch was merged with the cloud takeover (7f2b1d5).
+- Proof: `uv run python evals/footage_pool.py` prints 68 candidates, 5 videos, 3 countries, 46 frames, 3 walks; `make fhir-validate` 14 files, 0 errors, 2 of them walk records; `cd worker && npm test` 10 passed.
+- Surprises: the OpenCV screen let through a talking head, title cards and a hiker; the stopped session's only labelled video was that talking head. YouTube began answering with a bot check. The validator caught two Locations with one fullUrl in the walk Bundle, and check_bundle now catches that too.
+- Decisions: no plant label from a description; three walks, not four; the model gate flags stay Alex's; the batch custom ids are positional.
+- Next: design review 02's safe findings, the Playwright specs, the screenshots.
+
+## Update 14 phases 4 and 5, 2026-09-23 06:40Z
+- What: README in the tier 3 shape under the organizers' five headers, every number rendered from results/ and checked; the scorecard and acceptance lists joined with the cloud's; design review 02's safe findings fixed by six agents in their own worktrees; every screen photographed again with the walks.
+- Proof: `make check` CHECK GREEN; `npx playwright test` 55 passed, 0 failed; `uv run python scripts/verify_claims.py` 10 claims match.
+- Surprises: the merge emptied sw.js (a one line write that truncated before it read), and nothing noticed until a Playwright spec that CI does not run; the creek check sent "changed" for the rating check, which both servers refuse.
+- Decisions: the test flow findings and the landing labels are left alone; "Not sure" stays in seven check questions because it is the official app's text.
+- Next: the Devpost fields, the gates, the video.
+
+## Update 14 phases 6 to 8, 2026-09-23 07:00Z
+- What: the merge proof; the sandbox checked and the re-push job installed; recordings and a rough cut with a scratch voice; docs/devpost.md current and checked; make go-public prepared; gitleaks clean with reasons.
+- Proof: `git diff --stat prereg-v1..HEAD` over the test flow and study code is empty; `make submit-check` fails only on video_link and repo_public; `make video-rough` 4:28 with cards, 3:46 without.
+- Surprises: Playwright pads a page into a larger video; submit-check had never run gitleaks since Sep 21.
+- Decisions: production waits for Alex's QA key and his word on timing; no video file is committed.
+- Next: Alex's page, docs/ALEX_TODO.md.
+
+## UPDATE_19: the merge, 2026-09-23 19:30Z
+- What: pull request #5's missing files brought in and #5 closed; the QA key set; the D1 tables and the Worker deployed; depth merged into main; Pages deployed with the API on the same origin; Early Hints restored for the landing page and the poster.
+- Proof: CI green on depth (8cdc5d2) and on main; `git diff --stat prereg-v1..HEAD` over 17 paths empty, 16 of 16 study functions identical; `live-check.mjs` with the QA key passed three times against production, each sitting stored as a test; `live-readonly.mjs` 11 of 11; counts 2 randomized, 1 completed before and after; `/demo` says Judge mode opens on Sep 28; 15 of 15 ledger resources on their sandbox answer 200.
+- Surprises: a judge answer in #5 cited a results file that says the opposite; the read-only check waited for a row /two no longer draws; Pages dropped the Early Hints when Functions arrived; their sandbox does not answer the Worker.
+- Decisions: the when-Alex-is-back list and the creek plan merged into depth's existing files; the throttled first screen restored through _headers, not by touching the test photos.
+- Next: docs/ALEX_TODO.md step 1, then the model run.

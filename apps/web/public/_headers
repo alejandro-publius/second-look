@@ -7,6 +7,12 @@
   X-Frame-Options: DENY
   Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
 
+/
+  Link: </photos/ph-warmup-03.jpg>; rel=preload; as=image, </photos/ph-warmup-04.jpg>; rel=preload; as=image
+
+/poster
+  Link: </photos/ph-warmup-03.jpg>; rel=preload; as=image, </photos/ph-warmup-04.jpg>; rel=preload; as=image
+
 /check
   Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()
 

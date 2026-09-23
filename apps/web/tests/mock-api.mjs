@@ -178,7 +178,7 @@ export const exampleSpot = {
       ],
       checks: [
         { rule_id: "dry_pipe", asked: true, question_text: "It has not rained here for 5 days. Is anything coming out of that pipe?", answer: "yes", detail: { days: 5 } },
-        { rule_id: "rating_check", asked: true, question_text: "You rated this stream Good, but you also reported built banks. Do you want to keep your rating?", answer: "changed", detail: {} },
+        { rule_id: "rating_check", asked: true, question_text: "You rated this stream Good, but you also reported built banks. Do you want to keep your rating?", answer: "change", detail: {} },
       ],
     },
     {
@@ -322,7 +322,17 @@ export async function mockApi(page, options = {}) {
     }
     if (path === "/api/upload") return json({ photo_id: "ph-upload-" + calls.length, token: "uploadtoken" });
     if (path === "/api/check/draft") return json({ draft_id: "d1", followups });
-    if (path === "/api/check/finalize") return json({ visit_id: "v3", spot_id: "example", fhir_saved: true });
+    if (path === "/api/check/finalize") {
+      // The same answers apps/api/check.py and worker/src/check.ts accept (FOLLOWUP_ANSWERS), or a
+      // photo id from an upload. A mock that took anything once hid a follow-up the servers refused.
+      const allowed = new Set(["yes", "no", "cant_tell", "keep", "change", "skipped"]);
+      for (const [rule, v] of Object.entries(body.followup_answers ?? {})) {
+        if (!allowed.has(String(v)) && !String(v).startsWith("ph-upload-")) {
+          return json({ detail: `${rule}: answer yes, no, cant_tell, keep, change or skipped.` }, 422);
+        }
+      }
+      return json({ visit_id: "v3", spot_id: "example", fhir_saved: true });
+    }
     if (path.startsWith("/api/spot/") && path.endsWith("/fhir")) {
       return json({ resourceType: "Bundle", type: "collection", entry: [{ resource: exampleObservation("Practitioner/sl-practitioner-1", null, "4 of 4 on Built banks, tested Sep 23") }] });
     }

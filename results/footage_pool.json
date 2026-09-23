@@ -1,0 +1,38 @@
+{
+  "candidates": 68,
+  "countries_kept": 3,
+  "country_names": [
+    "Russia",
+    "United Kingdom",
+    "United States"
+  ],
+  "frames_dropped_in_last_cut": {
+    "near duplicate": 17,
+    "no water": 284,
+    "other": 10,
+    "person": 154,
+    "plate or number": 3,
+    "text on screen": 75
+  },
+  "frames_kept": 46,
+  "frames_labelled": 0,
+  "frames_unlabelled": 46,
+  "real": true,
+  "script": "evals/footage_pool.py",
+  "synthetic": false,
+  "videos_failed": 59,
+  "videos_failed_by_reason": {
+    "checked by eye": 2,
+    "download failed": 7,
+    "too few frames passed the screen": 50
+  },
+  "videos_kept": 5,
+  "walk_countries": [
+    "Russia",
+    "United Kingdom",
+    "United States"
+  ],
+  "walk_country_count": 3,
+  "walks": 3,
+  "walks_with_a_checker_question": 0
+}

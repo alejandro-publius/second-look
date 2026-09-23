@@ -161,7 +161,15 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: 
       );
     }
     case "sliders": {
-      const current = (draft && typeof draft === "object" && !Array.isArray(draft) ? draft : {}) as Record<string, number | string>;
+      // The API takes sliders as a list like ["joy:3", "fear:not_applicable"] (content/form.yaml,
+      // apps/api/check.py, worker/src/check.ts). The screen works on a map; this reads a list back.
+      const current: Record<string, number | string> = {};
+      if (Array.isArray(draft)) {
+        for (const entry of draft) {
+          const [k, v] = String(entry).split(":");
+          current[k] = v === "not_applicable" ? "na" : Number(v);
+        }
+      } else if (draft && typeof draft === "object") Object.assign(current, draft);
       const set = (k: string, v: number | string) => setDraft({ ...current, [k]: v });
       return (
         <div className="stack">
@@ -194,8 +202,10 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: 
               type="button"
               className="btn"
               onClick={() => {
-                const out: Record<string, number | string> = {};
-                for (const s of item.sliders ?? []) out[s] = current[s] ?? 0;
+                const out = (item.sliders ?? []).map((s) => {
+                  const v = current[s] ?? 0;
+                  return `${s}:${v === "na" ? "not_applicable" : v}`;
+                });
                 onAnswer(out);
               }}
             >

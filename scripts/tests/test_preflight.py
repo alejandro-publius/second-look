@@ -163,7 +163,7 @@ def green_root(tmp_path: Path) -> Path:
 
 def test_green_root_passes_every_check(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     root = green_root(tmp_path)
-    checks = preflight.run_checks(root, runner=git_runner(root))
+    checks = preflight.run_checks(root, runner=git_runner(root), backup_dir=root / "backups")
     failed = {c.name: c.reasons for c in checks if not c.passed}
     assert failed == {}, failed
     assert preflight.report(checks) == (0, 0)
@@ -177,7 +177,7 @@ def test_green_root_guards_fire_when_broken(tmp_path: Path) -> None:
     def failed(owner: str | None = None) -> dict[str, str]:
         return {
             c.name: c.owner
-            for c in preflight.run_checks(root, runner=run)
+            for c in preflight.run_checks(root, runner=run, backup_dir=root / "backups")
             if not c.passed and (owner is None or c.owner == owner)
         }
 
@@ -227,7 +227,11 @@ def test_green_root_guards_fire_when_broken(tmp_path: Path) -> None:
     items.write_text(
         yaml.safe_dump(yaml.safe_load((REPO / "content" / "test_items.yaml").read_text()))
     )
-    broken = {c.name for c in preflight.run_checks(root, runner=fail_pytest) if not c.passed}
+    broken = {
+        c.name
+        for c in preflight.run_checks(root, runner=fail_pytest, backup_dir=root / "backups")
+        if not c.passed
+    }
     assert broken == {"analysis_tests", "lock_tests"}
 
 

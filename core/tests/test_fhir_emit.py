@@ -615,3 +615,9 @@ def test_the_contributor_token_itself_never_appears_in_the_record(golden_bundle:
     text = json.dumps(golden_bundle)
     assert "ct_7f3a9c2e" not in text
     assert _practitioner_id("ct_7f3a9c2e") in text
+
+
+def test_check_bundle_reports_a_fullurl_used_twice(golden_bundle: dict) -> None:
+    broken = json.loads(json.dumps(golden_bundle))
+    broken["entry"].append(json.loads(json.dumps(broken["entry"][2])))
+    assert any("appears twice" in p for p in check_bundle(broken))

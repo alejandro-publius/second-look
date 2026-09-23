@@ -22,3 +22,19 @@ c73ab6ab06c77ee2bc2d2548857bf9e40abbbefc:core/tests/test_followups.py:generic-ap
 c73ab6ab06c77ee2bc2d2548857bf9e40abbbefc:core/tests/test_gate.py:generic-api-key:265
 # core/tests/test_gate.py line 351: a made up pseudonymous volunteer token in a test fixture
 c73ab6ab06c77ee2bc2d2548857bf9e40abbbefc:core/tests/test_gate.py:generic-api-key:351
+# Added 2026-09-23. submit-check ran gitleaks on this Mac for the first time since Sep 21 (the
+# cloud session had no gitleaks, so the check was skipped there). Every one is a made up value.
+# core/tests/test_harden_followups_properties.py line 83 (branch harden): the test token ct-harden-props-01
+8d7ca4789550a80eed660c6ccb388cc00462a3b9:core/tests/test_harden_followups_properties.py:generic-api-key:83
+# results/key_hash.json line 5: the SHA-256 of the frozen answer key, published on purpose as proof of the freeze
+a1bb1c0bdfc5d34f94d41285a5c53defe026857a:results/key_hash.json:generic-api-key:5
+# worker/test/e2e.mjs line 18: the fake QA key the local Worker end to end run sets for itself
+e219c5f0cd071736b3b13dd73f141d1bb8c268cc:worker/test/e2e.mjs:generic-api-key:18
+# evals/golden_vectors.py line 564: the test token ct_0b1c2d3e4f5a in a golden vector
+1a271a69e3b597be16683a358a560687c396ca10:evals/golden_vectors.py:generic-api-key:564
+# worker/golden/fhir_emit.json line 1818: the same test token, written out by evals/golden_vectors.py
+1a271a69e3b597be16683a358a560687c396ca10:worker/golden/fhir_emit.json:generic-api-key:1818
+# worker/src/index.ts line 25: the alphabet a token is drawn from, not a token
+2f61b23c885b40a44ac62d9cae8ab23ec9037f11:worker/src/index.ts:generic-api-key:25
+# docs/reviews/REVIEW_01.md line 629: a pseudonymous token the review made against a throwaway local stack
+138751dedd4b1382ff53f8f511d3ae08e206b072:docs/reviews/REVIEW_01.md:generic-api-key:629

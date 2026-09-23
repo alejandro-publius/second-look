@@ -745,7 +745,8 @@ def reference_problems(bundle: Mapping[str, Any]) -> list[str]:
 def check_bundle(bundle: Mapping[str, Any]) -> list[str]:
     """Structural problems a stored Bundle must not have. Empty list means it is fine.
 
-    Every reference resolves inside the Bundle, there is exactly one Provenance and it targets
+    Every fullUrl is unique, every reference resolves inside the Bundle, there is exactly one
+    Provenance and it targets
     every Observation, and every Observation carries the profile, a subject, a performer and a
     time. The HL7 validator is the judge of the rest.
     """
@@ -754,6 +755,13 @@ def check_bundle(bundle: Mapping[str, Any]) -> list[str]:
         return ["not a Bundle"]
     entries = list(bundle.get("entry", []))
     problems.extend(reference_problems(bundle))
+    # bdl-7: two entries with one fullUrl make every reference to it ambiguous.
+    seen_urls: set[str] = set()
+    for i, entry in enumerate(entries):
+        url = str(entry.get("fullUrl", ""))
+        if url and url in seen_urls:
+            problems.append(f"{entry_label(i, entry)}: fullUrl {url} appears twice")
+        seen_urls.add(url)
 
     observations: list[str] = []
     provenances: list[Mapping[str, Any]] = []

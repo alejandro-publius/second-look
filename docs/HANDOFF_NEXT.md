@@ -1,20 +1,69 @@
-# Handoff: where Second Look stands, 2026-09-21
+# Handoff: where Second Look stands, 2026-09-23
 
-Two branches, two jobs.
+## UPDATE_19, the merge (19:12Z)
 
-- **`main`, in `~/second-look`.** The launch build. Production deploys come from here only. It is
-  waiting on photo picks: open `photos/candidates/*.html`, tick photos, press the download button.
-  `make preflight-launch` is the gate, 66 failures, all of them content.
-- **`depth`, in the `~/second-look-depth` worktree.** Update 10 and 10B, the full loop. Nothing
-  here is deployed to the live link. Merge into `main` only after `make check` and the phone end
-  to end tests pass, and never between the `prereg-v1` tag and data lock unless the diff leaves
-  the test flow untouched.
+`depth` is merged into `main` and both are the same commit; keep working on `depth` and move `main`
+forward with a fast-forward. Production runs this commit: the Worker with the additive D1 tables,
+and the Pages site with the API on its own origin (`connect-src 'self'`). The QA key is set on the
+Worker and kept as `QA_KEY` in the ignored `.env` of both checkouts; load it with
+`set -a; . ./.env; set +a` before `apps/web/scripts/live-check.mjs`. Pull request #5 is closed and
+its files are on this branch; #1 is merged. Draft #8 (`harden`, another session's work in
+`~/second-look-harden`) targets `depth`, is red and is not based on the current `depth`: leave it to
+that session or Alex.
+
+- `/two` in production shows only our record: the Worker gets nothing from their sandbox, while the
+  same query from the Mac answers 200 in 0.6 seconds with 6 results. Not the user agent, not the
+  certificate chain. Next step: have `fetchTheirsLive` in `worker/src/two.ts` report the status it
+  saw, deploy, and read it. Beat 11 of the video waits on this.
+- The first screen is fast only with Early Hints. The landing page preloads two warm-up photos of
+  1.4 MB together; Pages stopped writing their Link headers once the project had Functions, and
+  the throttled first screen went to 8.5 seconds until `_headers` carried them again (d6c9d2b).
+  On a really slow link those bytes still cost seconds; making the photos smaller touches the test
+  flow and needs the planner.
+- The README's Known weaknesses line on weighting votes rests on the planner's simulation in
+  UPDATE_09, which is not in `results/`; the committed `results/consensus_synthetic.json` uses the
+  older rule and shows the opposite. Commit that simulation or soften the line.
+
+## Update 14 status, end of the prompt 15 run
+
+The brief is `docs/internal/updates/UPDATE_14.md`, resumed by `UPDATE_15.md`. A cloud session
+(prompt 18, status issue #4) worked in parallel while this branch sat unpushed; its work is merged
+in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid run.
+
+| Phase | State |
+|---|---|
+| 1 Launch on main | done, except two machine sittings in the live D1 table that Alex marks as tests (docs/ALEX_TODO.md step 1) |
+| 2 Content and cleanup | done |
+| 3 AI on the test and footage | footage, walks and the eval pipeline done; the model gate flags and the paid run are Alex's (step 2) |
+| 4 README and docs | done: tier 3 README under the organizers' headers, scorecard, acceptance, architecture |
+| 5 How it feels | done: design review 02's safe findings fixed, every screen photographed; the test flow findings and /check's button height left, see DECISIONS |
+| 6 Merge and deploy | done on Sep 23 by UPDATE_19: proof, D1 tables, Worker, phone tests, merge, Pages, phone tests again; sandbox checked |
+| 7 Video | shot list, recordings and rough cut done; creek footage and Alex's voice are his |
+| 8 Submission pack | done: docs/devpost.md, make go-public, docs/ALEX_TODO.md; submit-check fails only on video_link and repo_public |
+| 9 Report | docs/internal/reports/, this run |
+
+## Traps found in this run
+
+- Never write a file with `open(p, "w").write(f(open(p).read()))`: the write opens and empties the
+  file before the read. It emptied `apps/web/public/sw.js` once; `scripts/tests/test_web_static.py`
+  now guards that file.
+- A command piped through `tail` exits with tail's code. Gate a commit on the test command itself
+  (`set -o pipefail`), or a red test commits.
+- Frame and clip screening need macOS: `pyobjc-framework-Vision` is a darwin-only dev dependency.
+  Screens are cached in `~/second-look-cache/screens/`; videos in `~/second-look-cache/videos/`.
+- Walk clips are never committed. `scripts/deploy.sh web` and `make deploy-preview` cut them from the
+  cache with `scripts/build_walks.py --clips-only` and refuse to ship without them.
+- YouTube now answers downloads from this machine with a bot check; the footage pool is closed
+  until that clears.
+- Playwright pads a page into a larger video size; record at the viewport's own size.
+- The mock API's finalize refuses what the servers refuse. Keep it that way: a mock that took
+  anything hid the rating check bug.
 
 ## Live
 
 | Thing | Where |
 |---|---|
-| Site | https://second-look-79t.pages.dev (from `main`) |
+| Site | https://second-look-79t.pages.dev (from `main`, d6c9d2b), API on the same origin under `/api` |
 | Preview of `depth` | https://depth.second-look-79t.pages.dev, API on the same origin, `make deploy-preview` |
 | API | https://second-look-api.thealexschroeder.workers.dev |
 | Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |

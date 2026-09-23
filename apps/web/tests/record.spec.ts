@@ -15,7 +15,13 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
   await expect(page.getByText("2 of 4 on Pipes and sewage signs, tested Sep 23")).toBeVisible();
   await expect(page.getByText("Score expired.")).toBeVisible();
-  await expect(page.getByText("dry_pipe")).toBeVisible();
+  // The checks by their plain names, never the rule ids, and what the person did in words.
+  await expect(page.getByText("Pipe after dry days")).toBeVisible();
+  await expect(page.getByText("Rating check")).toBeVisible();
+  await expect(page.getByText("You said yes.")).toBeVisible();
+  await expect(page.getByText("You changed your rating from good to moderate.")).toBeVisible();
+  await expect(page.getByText("dry_pipe")).toHaveCount(0);
+  await expect(page.getByText("rating_check")).toHaveCount(0);
   await expect(page.getByText("First rating: good. Final rating: moderate.")).toBeVisible();
   // The health card: one approved action each for the person, the pet and the city, with sources.
   await expect(page.getByRole("heading", { name: "What you can do" })).toBeVisible();
@@ -24,10 +30,10 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText("Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water.")).toBeVisible();
   await expect(page.getByText("Sources:")).toBeVisible();
 
-  await page.getByLabel("Only people who passed this feature").check();
+  await page.getByLabel("Only show answers from people who passed the test for that feature").check();
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
   await expect(page.getByText("2 of 4 on Pipes and sewage signs, tested Sep 23")).toHaveCount(0);
-  await expect(page.getByText("No answers from people who passed this feature.")).toBeVisible();
+  await expect(page.getByText("No answers here from people who passed the test for that feature.")).toBeVisible();
 
   await page.getByRole("button", { name: "View as FHIR" }).click();
   await expect(page.getByText("Validated against guide commit b907cf0: passed")).toBeVisible();
@@ -35,7 +41,7 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText('"resourceType": "Bundle"')).toBeVisible();
   expect(calls.some((c) => c.path === "/api/spot/example/fhir")).toBe(true);
   expect(calls.some((c) => c.path === "/api/fhir/validation")).toBe(true);
-  await expect(page.getByRole("link", { name: "20 second return check" })).toHaveAttribute("href", "/quick?spot=example");
+  await expect(page.getByRole("link", { name: "Quick check", exact: true })).toHaveAttribute("href", "/quick?spot=example");
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
 });
 
@@ -63,12 +69,22 @@ test("/two renders both observers with one card and says plainly when theirs is 
 test("/quick/example posts the fixed enums", async ({ page }) => {
   const calls = await mockApi(page);
   await page.goto("/quick?spot=example");
-  await expect(page.getByRole("heading", { name: "20 second check" })).toBeVisible();
-  await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Pick a colour" })).toBeVisible();
+  await expect(page.getByText("Quick check", { exact: true }).first()).toBeVisible();
+  // One question per screen: a tap moves on, and Send waits for the last screen.
+  await expect(page.getByRole("group", { name: "Water colour" })).toBeVisible();
+  await expect(page.getByText("Step 1 of 4")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Foam" })).toHaveCount(0);
   await page.getByRole("button", { name: "Muddy" }).click();
+  await expect(page.getByRole("heading", { name: "Smell", exact: true })).toBeFocused();
+  await page.getByRole("button", { name: "Bad smell" }).click();
+  // Back keeps the answer, and tapping it again moves on.
+  await expect(page.getByRole("group", { name: "Is the pipe running?" })).toBeVisible();
+  await page.getByRole("button", { name: "Back" }).click();
+  await expect(page.getByRole("button", { name: "Bad smell" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Bad smell" }).click();
   await page.getByRole("button", { name: "Yes", exact: true }).click();
+  await expect(page.getByText("No photo yet")).toBeVisible();
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByText("Saved. Thank you.")).toBeVisible();
   const q = calls.find((c) => c.path === "/api/quick/example")!;
@@ -121,10 +137,10 @@ test("/city shows two lists decided by code, and no number without its records",
 
   // The reaches, hills first, and the one line that landed below the finding.
   await expect(page.getByRole("heading", { name: "Reaches, from the hills to the Bay" })).toBeVisible();
-  await expect(page.getByText("Flows into Below the forks, west campus. 5 visits at 1 spots.")).toBeVisible();
+  await expect(page.getByText("Flows into Below the forks, west campus. 5 visits at 1 spot.")).toBeVisible();
   await expect(page.getByText("Upstream of here, 2 people reported pipes and sewage signs on Sep 23.")).toBeVisible();
   await expect(page.getByText("Nothing reported upstream.")).toHaveCount(1);
-  await expect(page.getByText("1 spots sit on this creek but on no reach")).toBeVisible();
+  await expect(page.getByText("1 spot sits on this creek but on no reach")).toBeVisible();
 
   // The referral is one tap away, and the example result says what it is before it says anything else.
   await expect(page.getByRole("link", { name: "Referral as FHIR" })).toHaveAttribute("href", "/api/fhir/referral/example");

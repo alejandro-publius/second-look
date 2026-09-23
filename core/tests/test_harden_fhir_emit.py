@@ -446,7 +446,12 @@ def test_a_bundle_with_no_provenance_is_named(good_bundle: dict[str, Any]) -> No
 
 def test_a_bundle_with_two_provenances_is_named(good_bundle: dict[str, Any]) -> None:
     broken = broken_copy(good_bundle)
-    broken["entry"].append(broken_copy(broken["entry"][index_of(broken, "Provenance")]))
+    second = broken_copy(broken["entry"][index_of(broken, "Provenance")])
+    # A second Provenance with its own id and fullUrl, so only the count check can fire;
+    # depth's check_bundle names a repeated fullUrl on its own line.
+    second["resource"]["id"] = "sl-provenance-second"
+    second["fullUrl"] = str(second["fullUrl"]).rsplit("/", 1)[0] + "/sl-provenance-second"
+    broken["entry"].append(second)
     assert check_bundle(broken) == ["expected one Provenance, found 2"]
 
 

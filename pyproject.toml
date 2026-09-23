@@ -38,7 +38,8 @@ dev = [
   "types-requests",
   "respx>=0.23.1",
   "yt-dlp>=2026.1.1",
-  "opencv-python-headless>=4.10",
+  "opencv-python-headless>=4.10,<5",
+  "pyobjc-framework-Vision>=11; sys_platform == 'darwin'",
 ]
 
 [build-system]

@@ -1,0 +1,2216 @@
+{
+  "videos": 6,
+  "frames_kept": 46,
+  "labelled": 0,
+  "unlabelled": 46,
+  "failed_videos": 0,
+  "per_video": [
+    {
+      "video_id": "v01",
+      "sampled": 15,
+      "kept": 6,
+      "dropped": [
+        {
+          "reason": "no water in view: the best water label scored 0.15",
+          "at_s": 1.22
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.17",
+          "at_s": 9.22
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 17.22
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 21.22
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.16",
+          "at_s": 25.22
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.18",
+          "at_s": 29.22
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.19",
+          "at_s": 41.22
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 53.22
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.14",
+          "at_s": 57.22
+        }
+      ]
+    },
+    {
+      "video_id": "v02",
+      "sampled": 50,
+      "kept": 13,
+      "dropped": [
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): \u0412\u0435\u0441\u0435\u043d\u043d\u0438\u0439 \u0440\u0443\u0447\u0435\u0439",
+          "at_s": 3.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): \u0412\u0435\u0441\u0435\u043d\u043d\u0438\u0439 \u0440\u0443\u0447\u0435\u0439",
+          "at_s": 7.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): \u0412\u0435\u0441\u0435\u043d\u043d\u0438\u0439 \u0440\u0443\u0447\u0435\u0439",
+          "at_s": 11.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 19.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 23.0
+        },
+        {
+          "reason": "person: hog people detector",
+          "at_s": 27.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 31.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 39.0
+        },
+        {
+          "reason": "plate or number: a small bright rectangle with dense dark marks",
+          "at_s": 43.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 51.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 55.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 67.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 71.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 75.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 83.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 87.0
+        },
+        {
+          "reason": "person: hog people detector",
+          "at_s": 95.0
+        },
+        {
+          "reason": "person: hog people detector",
+          "at_s": 99.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 103.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 107.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 111.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 115.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 119.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 123.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 131.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 135.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): evsne",
+          "at_s": 139.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 147.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 151.0
+        },
+        {
+          "reason": "plate or number: a small bright rectangle with dense dark marks",
+          "at_s": 155.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 159.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 167.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 179.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 183.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): \u041e\u0436\u043d\u043e\u0435 \u041f\u0440\u0438\u043c\u043e\u0440\u044c\u0435; \u041c\u0430\u0440\u0442 2017 \u0433.; LEND THE END",
+          "at_s": 191.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): \u042e\u0436\u043d\u043e\u0435 \u041f\u0440\u0438\u043c\u043e\u0440\u044c\u0435; \u041c\u0430\u0440\u0442 2017 \u0433.",
+          "at_s": 195.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): \u042e\u0436\u043d\u043e\u0435 \u041f\u0440\u0438\u043c\u043e\u0440\u044c\u0435; \u041c\u0430\u0440\u0442 2017 \u0433.",
+          "at_s": 199.0
+        }
+      ]
+    },
+    {
+      "video_id": "v03",
+      "sampled": 148,
+      "kept": 9,
+      "dropped": [
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DALRY TO GLENLEE; RIVER RONTE; Shortened version",
+          "at_s": 3.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Filmed 26 December 2023; CLICHAN; -AU-",
+          "at_s": 7.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): WAYSON ART TRAIL; WATSON BIRD WALK; Toltets; No; parking; DA",
+          "at_s": 11.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DUTHERN UPLAND; WAY; DALLRY TOWN HALL",
+          "at_s": 15.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 19.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 23.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 27.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 31.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 35.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 39.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 43.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 47.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DALRYO",
+          "at_s": 51.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DANGER; SUDDEN INCREASES IN WATER LE; DUE TO HYDRD-ELECTRIC ",
+          "at_s": 55.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): WATSON BIRD WALK; Galloway",
+          "at_s": 59.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DANGER; SUDDEN INCREASES IN WATER LEVE; DUE TO HYDRO-ELECTRI",
+          "at_s": 63.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 67.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DUIO; WATER OF KEN",
+          "at_s": 71.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): WATER OF KEN",
+          "at_s": 75.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): WATER OF KEN",
+          "at_s": 79.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): STVIND",
+          "at_s": 83.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 87.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 91.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Waterside Hill",
+          "at_s": 95.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): MNGER",
+          "at_s": 99.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.08",
+          "at_s": 103.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 107.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 111.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 115.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Inveress; Aberdeen; SCOTLAND; Dundee; Glasgow; 88; NORTHERN;",
+          "at_s": 119.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Firth of; Stranraer; \u0410\u0443\u0442; Newton Stewart; Wigtown; Luce Bay;",
+          "at_s": 123.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Over Barskeoch; Knorkehoan; Loch; Ayr Rd; Creaganfois; hn's;",
+          "at_s": 127.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): roch Wooc; 90m; 140 ml; 00m; Black Bank Wood; Ayr Rd; U O9; ",
+          "at_s": 131.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 135.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 139.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 143.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 147.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 151.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 155.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 159.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.15",
+          "at_s": 171.0
+        },
+        {
+          "reason": "person: hog people detector",
+          "at_s": 175.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.12",
+          "at_s": 179.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.12",
+          "at_s": 183.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 187.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 191.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 195.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Sn gi",
+          "at_s": 199.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.12",
+          "at_s": 207.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 211.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 215.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 219.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 223.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 227.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 231.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 235.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 239.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 243.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 247.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 251.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 255.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 259.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 263.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 267.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 271.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 275.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 291.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 295.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 299.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 303.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 307.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 311.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 315.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 319.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 323.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Public Path; Road liable to flooding; Do not enter floodwate",
+          "at_s": 327.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): COOM BRIDGE",
+          "at_s": 331.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): COOM BRIDGE",
+          "at_s": 335.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): GLENLEE HYDRO POWER STATION TAIL RACE",
+          "at_s": 339.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): GLENLEE HYDRO POWER STATION TAIL RACE",
+          "at_s": 343.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): GLENLEE HYDRO POWER STATION TAIL RACE",
+          "at_s": 347.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): GLENLEE HYDRO POWER STAT ION TAIL RACE",
+          "at_s": 351.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): GLENLEE HYDRO POWER STATION TAIL RACE",
+          "at_s": 355.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 359.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 363.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 367.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 371.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 375.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 379.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 383.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 387.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): COOM BURN",
+          "at_s": 391.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): COOM BURN",
+          "at_s": 395.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): HANA",
+          "at_s": 403.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 411.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 415.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 419.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 423.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 427.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 431.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 435.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 439.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 443.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 447.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 451.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 455.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): STRAIGHT ONITO GARROCH GLEN; WILL REJOIN HERE IN'ANOTHER VID",
+          "at_s": 459.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): STRAIGHT ON TO GARROCH GLEN; WILL REJOIN HERE IN ANGTHER VID",
+          "at_s": 463.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 467.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 471.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 475.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): 1T\u041bE",
+          "at_s": 479.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 483.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 491.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.05",
+          "at_s": 495.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 499.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 503.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 507.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.05",
+          "at_s": 511.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 515.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 519.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 523.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 527.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 531.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 535.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.14",
+          "at_s": 539.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 543.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 547.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 551.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 555.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 559.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 563.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 567.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 571.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Public Path; Dalry 1\u00bd",
+          "at_s": 575.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 579.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): TO GARROCH GLEN",
+          "at_s": 583.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 587.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 591.0
+        }
+      ]
+    },
+    {
+      "video_id": "v06",
+      "sampled": 148,
+      "kept": 9,
+      "dropped": [
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 3.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): OKLAHOMA; SWATE; UANvERem; Division; of; Agricultural; Scien",
+          "at_s": 7.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): OKLAHOMA; SATE; UANvEngIn; AGRICULTURE; Division of; Agricul",
+          "at_s": 11.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 15.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 19.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 23.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 27.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 31.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 35.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 39.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 43.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 51.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 55.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 59.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 63.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Natural Stream; Restoration:",
+          "at_s": 67.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Natural Stream; Restoration:; Streams in Nature; ostedoy; Ja",
+          "at_s": 71.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 75.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 79.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 83.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 87.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 91.0
+        },
+        {
+          "reason": "person: vision found 2 people and 0 faces",
+          "at_s": 95.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 99.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 103.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 107.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 111.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 115.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 119.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 123.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 127.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.07",
+          "at_s": 131.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.08",
+          "at_s": 135.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.14",
+          "at_s": 139.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.16",
+          "at_s": 143.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.16",
+          "at_s": 147.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 151.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 155.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 159.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 163.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 167.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 171.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.18",
+          "at_s": 175.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 179.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 183.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 187.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 191.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 195.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 199.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 203.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 207.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.08",
+          "at_s": 211.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 215.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 219.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 223.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 227.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 231.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 235.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 239.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 243.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 247.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 251.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 255.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): EASIL; EAST; 51",
+          "at_s": 263.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 267.0
+        },
+        {
+          "reason": "person: vision found 4 people and 0 faces",
+          "at_s": 271.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 275.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 279.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 283.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 287.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 291.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 295.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.20",
+          "at_s": 299.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 303.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 307.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): *FI50; CAO CE C\u00d4 CE G, \u0110\u00e2ng",
+          "at_s": 311.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 315.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 319.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 323.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 327.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Height; Slope; Length",
+          "at_s": 331.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Height; slope; Length",
+          "at_s": 335.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Height; slope; Length",
+          "at_s": 339.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 343.0
+        },
+        {
+          "reason": "person: hog people detector",
+          "at_s": 347.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 351.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 359.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 363.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 367.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Riffles",
+          "at_s": 371.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Riffles",
+          "at_s": 375.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Pools",
+          "at_s": 379.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Pools",
+          "at_s": 383.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 387.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.05",
+          "at_s": 391.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.07",
+          "at_s": 395.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.13",
+          "at_s": 399.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 407.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.19",
+          "at_s": 411.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 415.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 419.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 423.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 431.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 435.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 439.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 443.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): abojvnze",
+          "at_s": 447.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 451.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+          "at_s": 459.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+          "at_s": 463.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, too far off for the detectors",
+          "at_s": 467.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+          "at_s": 471.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+          "at_s": 475.0
+        },
+        {
+          "reason": "checked by eye: the same small figure in the stream",
+          "at_s": 479.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+          "at_s": 483.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+          "at_s": 487.0
+        },
+        {
+          "reason": "checked by eye: a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+          "at_s": 491.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 495.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 499.0
+        },
+        {
+          "reason": "person: fullbody",
+          "at_s": 503.0
+        },
+        {
+          "reason": "plate or number: a small bright rectangle with dense dark marks",
+          "at_s": 515.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.13",
+          "at_s": 519.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 527.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DEERE",
+          "at_s": 531.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): DEERE-; S.CE)",
+          "at_s": 535.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Jason Vogel, Ph.D., P.E.; Assistant Professor and Stormwater",
+          "at_s": 539.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Jason Vogel, Ph.D., P.E.; Assistant Professor and Stormwater",
+          "at_s": 543.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): nivel engweer ana cmertus rrotessur; Biological and Agricult",
+          "at_s": 547.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Alabama Cooperative Extension System; Department of Agronomy",
+          "at_s": 551.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Conservation Reserve Enhancement Program; Oklahoma Conservat",
+          "at_s": 555.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Terry Sherman; Manager; Illinois River Ranch; Support for th",
+          "at_s": 559.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Oklahoma Agricultural Experiment Station, and; the Oklahoma ",
+          "at_s": 563.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): City of Tahlequah, OK; War Eagle Floats, Tahlaquah, OK; Okla",
+          "at_s": 567.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): UU8SUI; Post Oak Lodge, Tulsa, OK; Additional still & video ",
+          "at_s": 571.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Derek Heeren; Biological Systems Engineering; University of ",
+          "at_s": 575.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Construction operations in the video completed by; North Sta",
+          "at_s": 579.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Production services provided by; Agricultural Communication ",
+          "at_s": 583.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): Craig Woods; Sr. Producer/Director; Scriptwriter/Producer; K",
+          "at_s": 587.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): For more information visit us on the web at; http://lid.okst",
+          "at_s": 591.0
+        }
+      ]
+    },
+    {
+      "video_id": "v07",
+      "sampled": 228,
+      "kept": 9,
+      "dropped": [
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 3.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.20",
+          "at_s": 7.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): SURFACE PROCESSES; RESTARCH GROUP",
+          "at_s": 15.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 19.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 23.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 27.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 31.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 35.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 39.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 43.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 47.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 51.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 55.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 59.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 63.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 67.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.14",
+          "at_s": 71.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.16",
+          "at_s": 75.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 79.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.13",
+          "at_s": 83.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 87.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 91.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 95.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 99.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 103.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.05",
+          "at_s": 107.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.13",
+          "at_s": 115.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 119.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.18",
+          "at_s": 123.0
+        },
+        {
+          "reason": "near duplicate of a frame we kept",
+          "at_s": 131.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 135.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.15",
+          "at_s": 139.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 143.0
+        },
+        {
+          "reason": "checked by eye: a hand at the bottom edge of the frame",
+          "at_s": 151.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.08",
+          "at_s": 155.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 159.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 163.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 167.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 171.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 175.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 179.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 183.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 187.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 191.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 195.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 199.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 203.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 207.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 211.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 215.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 219.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 223.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 227.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 231.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 235.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 239.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 243.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 247.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 251.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 255.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 259.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 263.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.07",
+          "at_s": 267.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 271.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 275.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): wwen?",
+          "at_s": 279.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 283.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 287.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 291.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 295.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 299.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.12",
+          "at_s": 303.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 307.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.12",
+          "at_s": 311.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.17",
+          "at_s": 319.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 323.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 327.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.14",
+          "at_s": 331.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.08",
+          "at_s": 335.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 339.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 343.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 347.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.12",
+          "at_s": 351.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.12",
+          "at_s": 355.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.14",
+          "at_s": 359.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 363.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.13",
+          "at_s": 367.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.08",
+          "at_s": 371.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.05",
+          "at_s": 375.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 379.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 383.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 387.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 391.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 395.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 399.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 403.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 407.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 411.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 415.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 419.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 423.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 427.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 431.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 435.0
+        },
+        {
+          "reason": "person: vision found 0 people and 1 faces",
+          "at_s": 439.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 443.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 447.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 451.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 455.0
+        },
+        {
+          "reason": "text on screen (a title, caption, watermark, plate or number): 140",
+          "at_s": 459.0
+        },
+        {
+          "reason": "person: upperbody",
+          "at_s": 467.0
+        },
+        {
+          "reason": "person: profileface",
+          "at_s": 471.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.11",
+          "at_s": 475.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 479.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.18",
+          "at_s": 483.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 487.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.15",
+          "at_s": 491.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 499.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.17",
+          "at_s": 503.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 507.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 511.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 515.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 523.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 527.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 531.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 535.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 539.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 543.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 547.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.05",
+          "at_s": 551.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 555.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 559.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 567.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 571.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 575.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.16",
+          "at_s": 579.0
+        },
+        {
+          "reason": "person: profileface",
+          "at_s": 583.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 587.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 591.0
+        },
+        {
+          "reason": "person: vision found 2 people and 0 faces",
+          "at_s": 595.0
+        },
+        {
+          "reason": "person: vision found 2 people and 0 faces",
+          "at_s": 599.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 603.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 607.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.09",
+          "at_s": 611.0
+        },
+        {
+          "reason": "person: vision found 3 people and 1 faces",
+          "at_s": 615.0
+        },
+        {
+          "reason": "person: vision found 3 people and 1 faces",
+          "at_s": 619.0
+        },
+        {
+          "reason": "person: vision found 2 people and 0 faces",
+          "at_s": 623.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 627.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 631.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 635.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 639.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 643.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 647.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.13",
+          "at_s": 651.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.08",
+          "at_s": 655.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 659.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 663.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 667.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 671.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 675.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 679.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.06",
+          "at_s": 683.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 687.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.07",
+          "at_s": 691.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 695.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.10",
+          "at_s": 699.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 703.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 707.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 711.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 715.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 719.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 723.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 727.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 731.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 735.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 739.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 743.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 747.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 751.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 755.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 759.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 763.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 767.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 771.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 775.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 779.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 783.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 787.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 791.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 795.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 799.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 803.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 807.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 811.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 815.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 819.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 823.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 827.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 831.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 835.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 839.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 843.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.00",
+          "at_s": 847.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 851.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 855.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 859.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 863.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 867.0
+        },
+        {
+          "reason": "no water in view: the best water label scored 0.14",
+          "at_s": 871.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 875.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 879.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 883.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 887.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 891.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 895.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 899.0
+        },
+        {
+          "reason": "person: frontalface_default",
+          "at_s": 903.0
+        },
+        {
+          "reason": "person: vision found 1 people and 0 faces",
+          "at_s": 907.0
+        },
+        {
+          "reason": "person: vision found 1 people and 1 faces",
+          "at_s": 911.0
+        }
+      ]
+    }
+  ]
+}

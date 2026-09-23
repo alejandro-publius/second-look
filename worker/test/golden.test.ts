@@ -1,9 +1,11 @@
 // The golden vectors: Python wrote worker/golden/*.json (evals/golden_vectors.py); the TypeScript
 // ports must reproduce every expected output exactly. Run with npm test. The emitter's Bundles are
-// also written to fhir/build/instances/ so the HL7 validator checks them in make check.
+// also written to fhir/build/instances/ so the HL7 validator checks them in make check. The ts-
+// Bundles an earlier run left there are deleted first, so the validator counts this code's only.
 
 import assert from "node:assert/strict";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -18,10 +20,36 @@ import { observerLabel } from "../src/core/labels";
 import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
+import { isDemo, walkBundle } from "../src/core/walks";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
 const golden = (name: string) => JSON.parse(readFileSync(join(root, "worker", "golden", `${name}.json`), "utf8"));
+const instancesDir = join(root, "fhir", "build", "instances");
+
+/** The Worker's Bundles in a folder: every ts-*.json. */
+function tsBundles(dir: string): string[] {
+  return readdirSync(dir).filter((f) => f.startsWith("ts-") && f.endsWith(".json")).sort();
+}
+
+/** Delete the ts- Bundles an earlier run wrote. The validator reads every file in the folder, so
+ * one left from older code would be counted as if today's code had written it. */
+function clearOldBundles(dir: string): string[] {
+  mkdirSync(dir, { recursive: true });
+  const old = tsBundles(dir);
+  for (const f of old) rmSync(join(dir, f));
+  return old;
+}
+
+// Once, before any test writes a Bundle.
+clearOldBundles(instancesDir);
+const written = new Set<string>();
+
+function writeBundle(bundle: { id?: unknown }): void {
+  const file = `ts-${String(bundle.id)}.json`;
+  writeFileSync(join(instancesDir, file), JSON.stringify(bundle, null, 2) + "\n");
+  written.add(file);
+}
 
 /** JSON with sorted keys, so two documents compare as data and not as key order. */
 function canonical(value: unknown): string {
@@ -118,15 +146,16 @@ test("regions: placement on a creek and a reach, and the reaches below", () => {
 
 test("fhir_emit: the same Bundle as Python, and it passes the structural check", () => {
   const doc = golden("fhir_emit");
-  const outDir = join(root, "fhir", "build", "instances");
-  mkdirSync(outDir, { recursive: true });
   for (const c of doc.cases) {
     const bundle = emitVisit(c.input.visit, c.input.test_sitting, c.input.emitted_at);
     same(bundle, c.expected, c.name);
     assert.deepEqual(checkBundle(bundle), [], `${c.name}: structural check`);
-    const file = `ts-${String(bundle.id)}.json`;
-    writeFileSync(join(outDir, file), JSON.stringify(bundle, null, 2) + "\n");
+    writeBundle(bundle);
   }
+  // A fullUrl used twice is caught (bdl-7), as the HL7 validator would.
+  const doubled = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at) as { entry: unknown[] };
+  doubled.entry.push(JSON.parse(JSON.stringify(doubled.entry[2])));
+  assert.ok(checkBundle(doubled as never).some((p) => p.includes("appears twice")));
   // And a broken Bundle is caught, so the check is not a rubber stamp.
   const broken = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at) as { entry: { resource: Record<string, unknown> }[] };
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance")!;
@@ -143,8 +172,36 @@ test("fhir_referral: the ServiceRequest and the example result, the same as Pyth
   const result = exampleLabResult(example.input.referral, example.input.collected_at, example.input.reported_at);
   same(result, example.expected, example.name);
   assert.equal(isExample(result), true, "the way back is an example, and says so");
-  const outDir = join(root, "fhir", "build", "instances");
-  mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, `ts-${String(made.id)}.json`), JSON.stringify(made, null, 2) + "\n");
-  writeFileSync(join(outDir, `ts-${String(result.id)}.json`), JSON.stringify(result, null, 2) + "\n");
+  writeBundle(made);
+  writeBundle(result);
+});
+
+test("walks: the same demo Bundle as Python, tagged on every resource, and structurally sound", () => {
+  const doc = golden("walks");
+  for (const c of doc.cases) {
+    const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at);
+    same(bundle, c.expected, c.name);
+    assert.deepEqual(checkBundle(bundle as never), [], `${c.name}: structural check`);
+    assert.ok(isDemo(bundle), `${c.name}: the Bundle carries the demo tag`);
+    for (const e of bundle.entry as { resource: Record<string, never> }[]) {
+      assert.ok(isDemo(e.resource), `${c.name}: ${String(e.resource.resourceType)} carries the demo tag`);
+    }
+    writeBundle(bundle);
+  }
+});
+
+test("old Bundles: only ts- JSON files are deleted, and only the ones in that folder", () => {
+  const dir = mkdtempSync(join(tmpdir(), "sl-instances-"));
+  for (const f of ["ts-old-visit.json", "ts-old-walk.json", "visit-from-python.json", "ts-notes.txt"]) {
+    writeFileSync(join(dir, f), "{}\n");
+  }
+  assert.deepEqual(clearOldBundles(dir), ["ts-old-visit.json", "ts-old-walk.json"]);
+  assert.deepEqual(readdirSync(dir).sort(), ["ts-notes.txt", "visit-from-python.json"]);
+  rmSync(dir, { recursive: true });
+});
+
+// Last, after every test above has written its Bundles.
+test("old Bundles: every ts- Bundle the validator will read was written by this run", () => {
+  assert.ok(written.size > 0, "the tests above wrote Bundles");
+  assert.deepEqual(tsBundles(instancesDir), [...written].sort());
 });

@@ -1,0 +1,81 @@
+# Written by scripts/build_walks.py. Do not edit by hand: change the rule there.
+# The clips themselves are never committed; the script cuts them from the cache.
+walks:
+- id: v02
+  title: Весенний ручей, Партизанский городской округ, 2017 г.
+  author: Красота Приморского края и не только
+  license: CC-BY-3.0
+  source_url: https://www.youtube.com/watch?v=vN5ArGGmdUY
+  country: Russia
+  creek_name: A creek in Russia
+  spot_name: The stretch in the clip
+  clip:
+    file: walks/v02.mp4
+    start_s: 24
+    seconds: 40
+    screened: 'every second checked by Vision: no person, face or text'
+  poster_photo_id: v02-00035
+  frames_in_clip:
+  - v02-00035
+  - v02-00047
+  - v02-00059
+  - v02-00063
+  checker:
+    pass_table_real: false
+    kept: {}
+    dropped: 0
+    drop_reasons: {}
+    question: null
+    footage_run: synthetic
+    reason: the footage run is synthetic, so no flag is taken
+- id: v03
+  title: River walk - St John's Town of Dalry to Glenlee
+  author: Stravaiging with Andy
+  license: CC-BY-3.0
+  source_url: https://www.youtube.com/watch?v=7soch86PJ2U
+  country: United Kingdom
+  creek_name: A creek in United Kingdom
+  spot_name: The stretch in the clip
+  clip:
+    file: walks/v03.mp4
+    start_s: 248
+    seconds: 40
+    screened: 'every second checked by Vision: no person, face or text'
+  poster_photo_id: v03-00279
+  frames_in_clip:
+  - v03-00279
+  - v03-00283
+  - v03-00287
+  checker:
+    pass_table_real: false
+    kept: {}
+    dropped: 0
+    drop_reasons: {}
+    question: null
+    footage_run: synthetic
+    reason: the footage run is synthetic, so no flag is taken
+- id: v07
+  title: 'Evaluating Stream Restoration in the Oregon Coast Range: Karnowsky Creek in 2026'
+  author: geomorphdog
+  license: CC-BY-3.0
+  source_url: https://www.youtube.com/watch?v=DaD3RJGEvhM
+  country: United States
+  creek_name: A creek in United States
+  spot_name: The stretch in the clip
+  clip:
+    file: walks/v07.mp4
+    start_s: 103
+    seconds: 40
+    screened: 'every second checked by Vision: no person, face or text'
+  poster_photo_id: v07-00111
+  frames_in_clip:
+  - v07-00111
+  - v07-00127
+  checker:
+    pass_table_real: false
+    kept: {}
+    dropped: 0
+    drop_reasons: {}
+    question: null
+    footage_run: synthetic
+    reason: the footage run is synthetic, so no flag is taken

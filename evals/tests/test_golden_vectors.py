@@ -32,6 +32,7 @@ def test_every_port_has_a_file_and_every_case_has_the_three_parts() -> None:
         "helpers.json",
         "labels.json",
         "regions.json",
+        "walks.json",
     ]
     total = 0
     for name in files:

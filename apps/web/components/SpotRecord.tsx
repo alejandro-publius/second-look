@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
-import { api, type SpotRecordOut, type VisitOut } from "@/lib/api";
+import { api, type CheckResultOut, type SpotRecordOut, type VisitOut } from "@/lib/api";
 import { featureById } from "@/lib/content";
-import { t } from "@/lib/t";
+import { has, t } from "@/lib/t";
 
 function when(iso: string): string {
   const d = new Date(iso);
@@ -18,6 +18,50 @@ function valueText(v: VisitOut["answers"][number]): string {
   if (Array.isArray(v.value)) return v.value.join(", ");
   if (typeof v.value === "object" && v.value !== null) return Object.entries(v.value).map(([k, x]) => `${k}: ${String(x)}`).join(", ");
   return String(v.value);
+}
+
+/** A check's title from the locale. The rule id is a code name and is never shown. */
+function checkTitle(ruleId: string): string {
+  const key = `spot.rule_${ruleId}`;
+  return has(key) ? t(key) : t("spot.rule_other");
+}
+
+/** A stored rating (good, moderate, poor) as the word a person reads. */
+function ratingWord(value: string | null): string | null {
+  if (!value) return null;
+  const key = `spot.rating_word_${value}`;
+  return has(key) ? t(key) : value;
+}
+
+// The follow-up answers the API accepts, each written as a sentence.
+const OUTCOME_KEYS = new Map([
+  ["yes", "spot.outcome_yes"],
+  ["no", "spot.outcome_no"],
+  ["cant_tell", "spot.outcome_cant_tell"],
+  ["skipped", "spot.outcome_skipped"],
+]);
+// The rating check answers. The servers store "change" and always refused "changed", which the
+// check page sent until 2026-09-23; "changed" stays here only so an old mock record reads right.
+const RATING_ANSWERS = new Set(["keep", "change", "changed"]);
+
+/** What the person did with a check, in words. The rating check reads the visit's two ratings. */
+function checkOutcome(c: CheckResultOut, v: VisitOut): string {
+  if (!c.asked) return t("spot.check_not_asked");
+  const answer = c.answer ?? null;
+  if (!answer) return t("spot.outcome_none");
+  if (RATING_ANSWERS.has(answer)) {
+    const from = ratingWord(v.first_rating);
+    const to = ratingWord(v.final_rating);
+    if (from && to && v.first_rating !== v.final_rating) return t("spot.outcome_changed", { from, to });
+    const kept = to ?? from;
+    if (answer === "keep" || (from && to)) return kept ? t("spot.outcome_kept", { rating: kept }) : t("spot.outcome_kept_plain");
+    return t("spot.outcome_changed_plain");
+  }
+  const said = OUTCOME_KEYS.get(answer);
+  if (said) return t(said);
+  // A photo follow-up stores the upload id, which means nothing to a person.
+  if (c.rule_id === "low_score" || c.detail?.kind === "photo") return t("spot.outcome_photo");
+  return t("spot.check_answer", { answer });
 }
 
 /** The creek's record: a timeline of visits, each answer beside the observer's label, the checks, FHIR, the health card. */
@@ -117,7 +161,7 @@ export function SpotRecord({ spotId }: { spotId: string }) {
               <h3>{when(v.answered_at)}</h3>
               {v.first_rating || v.final_rating ? (
                 <p className="small muted">
-                  {t("spot.rating_first")}: {v.first_rating ?? t("spot.none")}. {t("spot.rating_final")}: {v.final_rating ?? t("spot.none")}.
+                  {t("spot.rating_first")}: {ratingWord(v.first_rating) ?? t("spot.none")}. {t("spot.rating_final")}: {ratingWord(v.final_rating) ?? t("spot.none")}.
                 </p>
               ) : null}
               {answers.length === 0 ? <p className="small muted">{t("spot.no_passed_answers")}</p> : null}
@@ -138,12 +182,18 @@ export function SpotRecord({ spotId }: { spotId: string }) {
               {v.checks.length > 0 ? (
                 <div className="stack">
                   <h3>{t("spot.checks")}</h3>
-                  <ul>
+                  <ul className="stack">
                     {v.checks.map((c) => (
                       <li key={c.rule_id} className="small">
-                        <strong>{c.rule_id}</strong>: {c.asked ? t("spot.check_asked") : t("spot.check_not_asked")}
-                        {c.question_text ? ` ${c.question_text}` : ""}
-                        {c.answer ? ` ${t("spot.check_answer", { answer: c.answer })}` : ""}
+                        <strong>{checkTitle(c.rule_id)}</strong>
+                        {c.asked && c.question_text ? (
+                          <>
+                            <br />
+                            <span className="muted">{c.question_text}</span>
+                          </>
+                        ) : null}
+                        <br />
+                        {checkOutcome(c, v)}
                       </li>
                     ))}
                   </ul>

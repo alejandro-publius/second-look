@@ -581,12 +581,15 @@ class RealClient:
             self.check_ready(q.model_id)
         if not queries:
             return []
+        # The Batch API takes a custom_id of letters, digits, _ and - only, 64 at most, so our
+        # own ids (model|item|run) never go on the wire. Each query gets its position instead.
+        wire = [f"q{index:05d}" for index in range(len(queries))]
         requests = [
             {
-                "custom_id": q.custom_id,
+                "custom_id": wire_id,
                 "params": self.build_params(q.model_id, q.image_bytes, q.question),
             }
-            for q in queries
+            for wire_id, q in zip(wire, queries, strict=True)
         ]
         batch = self._sdk.messages.batches.create(requests=requests)
         waited = 0.0
@@ -602,8 +605,8 @@ class RealClient:
         for result in self._sdk.messages.batches.results(batch.id):
             by_id[str(result.custom_id)] = result.result
         out: list[RawAnswer] = []
-        for q in queries:
-            result = by_id.get(q.custom_id)
+        for wire_id, q in zip(wire, queries, strict=True):
+            result = by_id.get(wire_id)
             kind = getattr(result, "type", None)
             if kind == "succeeded":
                 raw = raw_from_message(getattr(result, "message", None), q.model_id)

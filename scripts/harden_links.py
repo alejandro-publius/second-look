@@ -31,6 +31,8 @@ from urllib.parse import unquote, urlparse
 
 import httpx
 
+from scripts.go_public import INTERNAL
+
 ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN = ("api.enora-oah.eu", "resilience")  # hard rule 9: never called, only listed
 SANDBOX = "sandbox.hl7europe.eu"  # hard rule 10: read-only GETs, one a second, 50 at most
@@ -306,7 +308,7 @@ def main() -> int:
             r
             for r in rows
             if r["status"] == status
-            and (internal is None or r["file"].startswith("docs/internal/") == internal)
+            and (internal is None or r["file"].startswith(INTERNAL + "/") == internal)
         ]
         if not hit:
             return ["None.", ""]

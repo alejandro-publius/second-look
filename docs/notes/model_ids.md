@@ -54,3 +54,10 @@ Rules that still hold:
 - The Batch API discount and caching multipliers stack.
 - Claude 4.6 and later carry the full 1M token context at standard pricing. Irrelevant to us; our
   requests are one photo and one question.
+
+**Re-confirmed 2026-09-22** (Update 14 section 3 item 1) against the Claude API reference bundled
+with Claude Code (its model table, cached 2026-06-24). The three ids above are still current and
+their prices are unchanged; the Batch API still halves both input and output. Claude Opus 5.5
+(`claude-opus-5-5`, $4 and $20 per MTok) is launching. The brief names Opus 5, and the
+configuration was frozen with it, so it stays; a later run may add Opus 5.5 as a fourth row.
+No paid call has run: `.env` holds no `ANTHROPIC_API_KEY`, so this run used the fake client.
