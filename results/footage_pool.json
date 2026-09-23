@@ -22,8 +22,9 @@
   "synthetic": false,
   "videos_failed": 59,
   "videos_failed_by_reason": {
+    "checked by eye": 2,
     "download failed": 7,
-    "too few frames passed the screen": 52
+    "too few frames passed the screen": 50
   },
   "videos_kept": 5,
   "walk_countries": [

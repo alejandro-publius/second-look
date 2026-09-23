@@ -93,8 +93,9 @@ def checker_line(walk: dict[str, Any]) -> str:
 def test_a_walk_from_a_synthetic_run_shows_no_number() -> None:
     synthetic = [w for w in walks() if w["checker_run"] != "real"]
     assert synthetic, "content/walks.yaml has no synthetic walk to hold this to"
-    for w in synthetic:
-        assert w["checker_dropped"] > 0
+    # A fake run takes no flag at all now (scripts/build_walks.py), so the count is 0; the page
+    # must still show no number, and must show none even if a count were there.
+    for w in [*synthetic, {"question": None, "checker_run": "synthetic", "checker_dropped": 4}]:
         line = checker_line(w)
         assert line == LOCALE["walk.checker_not_real"]
         assert not re.search(r"\d", line), line

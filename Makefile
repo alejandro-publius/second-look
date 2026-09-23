@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -112,6 +112,18 @@ preflight-judges:
 
 submit-check:
 	$(PY) scripts/submit_check.py
+
+# The paid model run, in one command, for Alex once the model gate flags are flipped and the key
+# is in .env (docs/ALEX_TODO.md step 2). Batch API throughout. The 16-photo sweep refuses above 10
+# dollars worst case and the footage run above 25 expected, inside the 40 dollar cap of Update 14.
+# Afterwards the walks are gated again on the real answers and the pool numbers rewritten; the
+# README's AI table is filled by the next session from results/, never by hand.
+ai-run:
+	$(PY) evals/model_sweep.py --real --max-usd 10
+	$(PY) evals/benchmark.py --real --runs 3
+	$(PY) evals/footage.py --real --max-usd 25
+	$(PY) scripts/build_walks.py --no-clips
+	$(PY) evals/footage_pool.py
 
 # Update 14 section 7. Screen recordings (needs the built app on 3100), then the rough cut with a
 # scratch voice. Nothing either writes is committed: they are video files.

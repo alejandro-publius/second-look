@@ -46,6 +46,8 @@ def core_doc(doc: dict[str, Any]) -> dict[str, Any]:
     if '"gold"' in text or "test_items" in text:
         raise SystemExit("build-worker-content: the gold key would reach core_content.json")
     return core
+
+
 # The locale strings the ports fill: follow-up questions, labels and the yes/no words.
 LOCALE_PREFIXES = ("followup.", "label.", "test.yes", "test.no", "test.cant_tell", "error.")
 

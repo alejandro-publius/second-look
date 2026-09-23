@@ -1,13 +1,14 @@
 // test/golden.test.ts
 import assert from "node:assert/strict";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "dc7590d5ac8b7e54",
+  content_hash: "da8d84222fad8ba4",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -3240,6 +3241,23 @@ function isDemo(bundle) {
 var here = dirname(fileURLToPath(import.meta.url));
 var root = join(here, "..", "..");
 var golden = (name) => JSON.parse(readFileSync(join(root, "worker", "golden", `${name}.json`), "utf8"));
+var instancesDir = join(root, "fhir", "build", "instances");
+function tsBundles(dir) {
+  return readdirSync(dir).filter((f) => f.startsWith("ts-") && f.endsWith(".json")).sort();
+}
+function clearOldBundles(dir) {
+  mkdirSync(dir, { recursive: true });
+  const old = tsBundles(dir);
+  for (const f of old) rmSync(join(dir, f));
+  return old;
+}
+clearOldBundles(instancesDir);
+var written = /* @__PURE__ */ new Set();
+function writeBundle(bundle) {
+  const file = `ts-${String(bundle.id)}.json`;
+  writeFileSync(join(instancesDir, file), JSON.stringify(bundle, null, 2) + "\n");
+  written.add(file);
+}
 function canonical(value) {
   return JSON.stringify(value, (_k, v) => {
     if (v && typeof v === "object" && !Array.isArray(v)) {
@@ -3324,14 +3342,11 @@ test("regions: placement on a creek and a reach, and the reaches below", () => {
 });
 test("fhir_emit: the same Bundle as Python, and it passes the structural check", () => {
   const doc = golden("fhir_emit");
-  const outDir = join(root, "fhir", "build", "instances");
-  mkdirSync(outDir, { recursive: true });
   for (const c of doc.cases) {
     const bundle = emitVisit(c.input.visit, c.input.test_sitting, c.input.emitted_at);
     same(bundle, c.expected, c.name);
     assert.deepEqual(checkBundle(bundle), [], `${c.name}: structural check`);
-    const file = `ts-${String(bundle.id)}.json`;
-    writeFileSync(join(outDir, file), JSON.stringify(bundle, null, 2) + "\n");
+    writeBundle(bundle);
   }
   const doubled = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at);
   doubled.entry.push(JSON.parse(JSON.stringify(doubled.entry[2])));
@@ -3350,15 +3365,11 @@ test("fhir_referral: the ServiceRequest and the example result, the same as Pyth
   const result = exampleLabResult(example.input.referral, example.input.collected_at, example.input.reported_at);
   same(result, example.expected, example.name);
   assert.equal(isExample(result), true, "the way back is an example, and says so");
-  const outDir = join(root, "fhir", "build", "instances");
-  mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, `ts-${String(made.id)}.json`), JSON.stringify(made, null, 2) + "\n");
-  writeFileSync(join(outDir, `ts-${String(result.id)}.json`), JSON.stringify(result, null, 2) + "\n");
+  writeBundle(made);
+  writeBundle(result);
 });
 test("walks: the same demo Bundle as Python, tagged on every resource, and structurally sound", () => {
   const doc = golden("walks");
-  const outDir = join(root, "fhir", "build", "instances");
-  mkdirSync(outDir, { recursive: true });
   for (const c of doc.cases) {
     const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at);
     same(bundle, c.expected, c.name);
@@ -3367,6 +3378,19 @@ test("walks: the same demo Bundle as Python, tagged on every resource, and struc
     for (const e of bundle.entry) {
       assert.ok(isDemo(e.resource), `${c.name}: ${String(e.resource.resourceType)} carries the demo tag`);
     }
-    writeFileSync(join(outDir, `ts-${String(bundle.id)}.json`), JSON.stringify(bundle, null, 2) + "\n");
+    writeBundle(bundle);
   }
+});
+test("old Bundles: only ts- JSON files are deleted, and only the ones in that folder", () => {
+  const dir = mkdtempSync(join(tmpdir(), "sl-instances-"));
+  for (const f of ["ts-old-visit.json", "ts-old-walk.json", "visit-from-python.json", "ts-notes.txt"]) {
+    writeFileSync(join(dir, f), "{}\n");
+  }
+  assert.deepEqual(clearOldBundles(dir), ["ts-old-visit.json", "ts-old-walk.json"]);
+  assert.deepEqual(readdirSync(dir).sort(), ["ts-notes.txt", "visit-from-python.json"]);
+  rmSync(dir, { recursive: true });
+});
+test("old Bundles: every ts- Bundle the validator will read was written by this run", () => {
+  assert.ok(written.size > 0, "the tests above wrote Bundles");
+  assert.deepEqual(tsBundles(instancesDir), [...written].sort());
 });

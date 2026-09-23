@@ -19,8 +19,9 @@ is done. Times are Pacific.
    `evals/pricing.yaml` still say unconfirmed, and they are what licenses spending money. The ids
    and prices were checked on Sep 21 and again on Sep 22 (`docs/notes/model_ids.md`). If you agree,
    flip the flags to true. Then put your key in `~/second-look-depth/.env` as
-   `ANTHROPIC_API_KEY=...` and run the one command in the report. It spends at most 40 dollars,
-   through the Batch API, and fills every AI slot in the README from `results/`.
+   `ANTHROPIC_API_KEY=...` and run `cd ~/second-look-depth && make ai-run`. It spends at most
+   40 dollars, through the Batch API, and writes every AI result to `results/`; the next session
+   fills the README's AI table from those files.
 
 3. **Now, 2 minutes: the QA key.** Set a fresh one and keep it in your password manager:
    `cd ~/second-look/worker && npx wrangler secret put QA_KEY`. With it, the full phone sitting

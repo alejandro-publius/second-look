@@ -23,12 +23,11 @@ walks:
   checker:
     pass_table_real: false
     kept: {}
-    dropped: 4
-    drop_reasons:
-      unknown model 'claude-haiku-4-5-20251001': 2
-      unknown model 'claude-sonnet-5': 2
+    dropped: 0
+    drop_reasons: {}
     question: null
     footage_run: synthetic
+    reason: the footage run is synthetic, so no flag is taken
 - id: v03
   title: River walk - St John's Town of Dalry to Glenlee
   author: Stravaiging with Andy
@@ -50,11 +49,11 @@ walks:
   checker:
     pass_table_real: false
     kept: {}
-    dropped: 1
-    drop_reasons:
-      unknown model 'claude-haiku-4-5-20251001': 1
+    dropped: 0
+    drop_reasons: {}
     question: null
     footage_run: synthetic
+    reason: the footage run is synthetic, so no flag is taken
 - id: v07
   title: 'Evaluating Stream Restoration in the Oregon Coast Range: Karnowsky Creek in 2026'
   author: geomorphdog
@@ -65,20 +64,18 @@ walks:
   spot_name: The stretch in the clip
   clip:
     file: walks/v07.mp4
-    start_s: 108
+    start_s: 103
     seconds: 40
     screened: 'every second checked by Vision: no person, face or text'
   poster_photo_id: v07-00111
   frames_in_clip:
   - v07-00111
   - v07-00127
-  - v07-00147
   checker:
     pass_table_real: false
     kept: {}
-    dropped: 3
-    drop_reasons:
-      unknown model 'claude-haiku-4-5-20251001': 2
-      unknown model 'claude-sonnet-5': 1
+    dropped: 0
+    drop_reasons: {}
     question: null
     footage_run: synthetic
+    reason: the footage run is synthetic, so no flag is taken
