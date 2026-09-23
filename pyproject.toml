@@ -23,6 +23,7 @@ dependencies = [
   "matplotlib>=3.9",
   "anthropic>=0.40",
   "python-multipart>=0.0.9",
+  "mcp>=2.2.0",
 ]
 
 [dependency-groups]
@@ -36,6 +37,9 @@ dev = [
   "pandas-stubs",
   "types-requests",
   "respx>=0.23.1",
+  "yt-dlp>=2026.1.1",
+  "opencv-python-headless>=4.10,<5",
+  "pyobjc-framework-Vision>=11; sys_platform == 'darwin'",
 ]
 
 [build-system]
@@ -47,7 +51,7 @@ packages = ["core", "apps", "evals", "scripts"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["core", "apps/api", "evals", "scripts"]
+testpaths = ["core", "apps/api", "apps/mcp", "evals", "scripts"]
 addopts = "-q -p no:cacheprovider"
 asyncio_mode = "auto"
 filterwarnings = ["ignore::DeprecationWarning"]

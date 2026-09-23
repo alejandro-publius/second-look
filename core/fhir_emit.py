@@ -77,6 +77,12 @@ SL_DISPLAYS: dict[str, str] = {
     "good": "Good overall rating",
     "moderate": "Moderate overall rating",
     "poor": "Poor overall rating",
+    # The referral and the way back (core/fhir_referral.py).
+    "test-pipe-outflow": "Test the water coming out of this pipe",
+    "example": "Example, not a real result",
+    "lab-enterobacteriaceae-share": "Enterobacteriaceae, share of 16S reads",
+    "lab-hf183": "Human faecal marker HF183",
+    "lab-ecoli-cfu": "Escherichia coli, colony forming units",
 }
 
 # The OneAquaHealth temporary codes we use, with their displays. A test checks this table
@@ -95,7 +101,14 @@ OAH_DISPLAYS: dict[str, str] = {
     "herbaceous": "Herbaceous (height < 1.5m)",
 }
 
-UCUM_DISPLAYS: dict[str, str] = {"m": "metre", "cm": "centimetre", "Cel": "degree Celsius"}
+UCUM_DISPLAYS: dict[str, str] = {
+    "m": "metre",
+    "cm": "centimetre",
+    "Cel": "degree Celsius",
+    "mL": "millilitre",
+    "%": "percent",
+    "[CFU]/dL": "colony forming units per 100 mL",
+}
 
 _ID_BAD = re.compile(r"[^A-Za-z0-9.\-]")
 _FORM_PATH = Path(__file__).resolve().parents[1] / "content" / "form.yaml"
@@ -687,32 +700,35 @@ def to_transaction(bundle: Mapping[str, Any], *, tag_system: str, tag_code: str)
     }
 
 
-def check_bundle(bundle: Mapping[str, Any]) -> list[str]:
-    """Structural problems a stored Bundle must not have. Empty list means it is fine.
+def entry_label(index: int, entry: Mapping[str, Any]) -> str:
+    """How a structural problem names its resource: "entry[3] Observation/sl-obs-1"."""
+    resource = entry.get("resource", {})
+    rtype = resource.get("resourceType")
+    return f"entry[{index}] {rtype}/{resource.get('id', entry.get('fullUrl', '?'))}"
 
-    Every reference resolves inside the Bundle, there is exactly one Provenance and it targets
-    every Observation, and every Observation carries the profile, a subject, a performer and a
-    time. The HL7 validator is the judge of the rest.
-    """
-    problems: list[str] = []
-    if bundle.get("resourceType") != "Bundle":
-        return ["not a Bundle"]
-    entries = list(bundle.get("entry", []))
+
+def bundle_keys(bundle: Mapping[str, Any]) -> set[str]:
+    """Every string a reference inside this Bundle may point at."""
     keys: set[str] = set()
-    for entry in entries:
+    for entry in bundle.get("entry", []):
         resource = entry.get("resource", {})
         if bundle.get("type") == "transaction":
             keys.add(entry.get("fullUrl", ""))
         else:
             keys.add(f"{resource.get('resourceType')}/{resource.get('id')}")
             keys.add(entry.get("fullUrl", ""))
-    references: list[str] = []
+    return keys
+
+
+def reference_problems(bundle: Mapping[str, Any]) -> list[str]:
+    """Every reference that does not resolve inside the Bundle, named by its path."""
+    keys = bundle_keys(bundle)
+    problems: list[str] = []
 
     def walk(node: Any, path: str) -> None:
         if isinstance(node, dict):
             for key, value in node.items():
                 if key == "reference" and isinstance(value, str):
-                    references.append(value)
                     if value not in keys:
                         problems.append(f"{path}: reference {value} does not resolve in the Bundle")
                 else:
@@ -721,13 +737,38 @@ def check_bundle(bundle: Mapping[str, Any]) -> list[str]:
             for i, value in enumerate(node):
                 walk(value, f"{path}[{i}]")
 
+    for i, entry in enumerate(bundle.get("entry", [])):
+        walk(entry.get("resource", {}), entry_label(i, entry))
+    return problems
+
+
+def check_bundle(bundle: Mapping[str, Any]) -> list[str]:
+    """Structural problems a stored Bundle must not have. Empty list means it is fine.
+
+    Every fullUrl is unique, every reference resolves inside the Bundle, there is exactly one
+    Provenance and it targets
+    every Observation, and every Observation carries the profile, a subject, a performer and a
+    time. The HL7 validator is the judge of the rest.
+    """
+    problems: list[str] = []
+    if bundle.get("resourceType") != "Bundle":
+        return ["not a Bundle"]
+    entries = list(bundle.get("entry", []))
+    problems.extend(reference_problems(bundle))
+    # bdl-7: two entries with one fullUrl make every reference to it ambiguous.
+    seen_urls: set[str] = set()
+    for i, entry in enumerate(entries):
+        url = str(entry.get("fullUrl", ""))
+        if url and url in seen_urls:
+            problems.append(f"{entry_label(i, entry)}: fullUrl {url} appears twice")
+        seen_urls.add(url)
+
     observations: list[str] = []
     provenances: list[Mapping[str, Any]] = []
     for i, entry in enumerate(entries):
         resource = entry.get("resource", {})
         rtype = resource.get("resourceType")
-        label = f"entry[{i}] {rtype}/{resource.get('id', entry.get('fullUrl', '?'))}"
-        walk(resource, label)
+        label = entry_label(i, entry)
         if rtype == "Observation":
             observations.append(
                 f"Observation/{resource.get('id')}"

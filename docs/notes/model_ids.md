@@ -6,7 +6,18 @@ days pass: prices and ids move.
 **Checked 2026-09-21** against https://platform.claude.com/docs/en/about-claude/pricing (the
 older docs.claude.com path now redirects there).
 
-The three models docs/MASTER_BRIEF.md names for the test run, cheapest first:
+**Re-confirmed 2026-09-21, this time on the models overview page**
+(https://platform.claude.com/docs/en/about-claude/models/overview), which is where the API ids
+live. All three ids below are exactly what that page's "Claude API ID" row gives, and the prices
+match its pricing row. Two things worth writing down from that page:
+
+- Every current id is a pinned snapshot, dateless ones included. `claude-haiku-4-5-20251001` is
+  the pinned id and `claude-haiku-4-5` is its alias; we keep the pinned one so a rerun in October
+  answers the same question as a run today.
+- Claude Haiku 4.5 retires no sooner than 2026-10-15. That is after the deadline, but anyone
+  rerunning our evals later should expect to swap it.
+
+The three models docs/internal/MASTER_BRIEF.md names for the test run, cheapest first:
 
 | Model | Id used in our config | Input per MTok | Output per MTok | Batch input | Batch output |
 |---|---|---|---|---|---|
@@ -14,9 +25,10 @@ The three models docs/MASTER_BRIEF.md names for the test run, cheapest first:
 | Claude Sonnet 5 | `claude-sonnet-5` | $2 | $10 | $1 | $5 |
 | Claude Opus 5 | `claude-opus-5` | $5 | $25 | $2.50 | $12.50 |
 
-The pricing page lists model names, not API ids. The ids above are the ones in our config. Confirm
-them against the models page on the console before the first paid call, which is the one thing
-this file cannot do for you.
+All three are confirmed against the models overview page as of 2026-09-21. Every current model
+takes image input, which is what this run needs. Haiku 4.5 does not support the effort parameter
+and still uses the older thinking shape; we send neither, so the same request body works on all
+three.
 
 ## What this means for our budget
 
@@ -42,3 +54,10 @@ Rules that still hold:
 - The Batch API discount and caching multipliers stack.
 - Claude 4.6 and later carry the full 1M token context at standard pricing. Irrelevant to us; our
   requests are one photo and one question.
+
+**Re-confirmed 2026-09-22** (Update 14 section 3 item 1) against the Claude API reference bundled
+with Claude Code (its model table, cached 2026-06-24). The three ids above are still current and
+their prices are unchanged; the Batch API still halves both input and output. Claude Opus 5.5
+(`claude-opus-5-5`, $4 and $20 per MTok) is launching. The brief names Opus 5, and the
+configuration was frozen with it, so it stays; a later run may add Opus 5.5 as a fourth row.
+No paid call has run: `.env` holds no `ANTHROPIC_API_KEY`, so this run used the fake client.

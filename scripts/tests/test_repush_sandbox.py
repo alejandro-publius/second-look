@@ -203,3 +203,267 @@ def test_parse_location() -> None:
     assert rs._parse_location("Observation/12/_history/1") == ("Observation", "12")
     assert rs._parse_location("https://x/fhir/Location/451") == ("Location", "451")
     assert rs._parse_location("") is None
+
+
+# --bundle, --library and --evidence (Update 10 tier 2 item 1) ------------------------------------
+
+REFERRAL = ROOT / "fhir" / "golden" / "referral-strawberry-creek-1.json"
+EXAMPLE = ROOT / "fhir" / "golden" / "example-lab-result-strawberry-creek-1.json"
+TRANSACTION = ROOT / "fhir" / "golden" / "visit-strawberry-creek-1.transaction.json"
+
+
+def test_only_a_visit_bundle_can_be_named_with_bundle(tmp_path: Path) -> None:
+    """A referral, an example result or a transaction file is refused by name, and skipped when
+    it sits in the store, so nothing but a visit record ever reaches their sandbox."""
+    assert len(rs.load_bundles(tmp_path, [GOLDEN])) == 1
+    for wrong in (REFERRAL, EXAMPLE, TRANSACTION):
+        with pytest.raises(rs.RepushError, match="not a visit Bundle"):
+            rs.load_bundles(tmp_path, [wrong])
+    folder = tmp_path / "mixed"
+    folder.mkdir()
+    for src in (GOLDEN, REFERRAL, EXAMPLE, TRANSACTION):
+        shutil.copy(src, folder / src.name)
+    assert [p.name for p, _ in rs.load_bundles(folder)] == [GOLDEN.name]
+
+
+def library_response(tx: dict, status: str = "201 Created") -> dict:
+    return {
+        "resourceType": "Bundle",
+        "type": "transaction-response",
+        "entry": [{"response": {"status": status, "location": "Library/900/_history/1"}}],
+    }
+
+
+@respx.mock
+def test_register_library_lists_the_ledgers_provenances_and_saves_the_evidence(
+    ledger: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("SANDBOX_MIRROR_ENABLED", "true")
+    with ledger.open("a") as f:
+        f.write(
+            json.dumps(
+                {
+                    "ts_utc": "t",
+                    "action": "create",
+                    "resourceType": "Provenance",
+                    "id": "77",
+                    "base": BASE,
+                }
+            )
+            + "\n"
+        )
+        # A Provenance on some other server, and one we deleted, are not listed.
+        f.write(
+            json.dumps(
+                {
+                    "ts_utc": "t",
+                    "action": "create",
+                    "resourceType": "Provenance",
+                    "id": "78",
+                    "base": "https://elsewhere.test/fhir",
+                }
+            )
+            + "\n"
+        )
+        f.write(
+            json.dumps(
+                {
+                    "ts_utc": "t",
+                    "action": "create",
+                    "resourceType": "Provenance",
+                    "id": "79",
+                    "base": BASE,
+                }
+            )
+            + "\n"
+        )
+        f.write(
+            json.dumps(
+                {
+                    "ts_utc": "t",
+                    "action": "delete",
+                    "resourceType": "Provenance",
+                    "id": "79",
+                    "base": BASE,
+                }
+            )
+            + "\n"
+        )
+    assert rs.created_provenances(BASE) == ["Provenance/77"]
+
+    posted = respx.post(BASE).mock(return_value=httpx.Response(200, json=library_response({})))
+    back = respx.get(f"{BASE}/Library/900").mock(
+        return_value=httpx.Response(200, json={"resourceType": "Library", "id": "900"})
+    )
+    waits: list[float] = []
+    lines: list[str] = []
+    evidence = tmp_path / "docs" / "notes" / "sandbox_library.md"
+    from datetime import date
+
+    code = rs.register_library(
+        BASE, today=date(2026, 9, 21), sleep=waits.append, out=lines.append, evidence=evidence
+    )
+    assert code == 0
+    sent = json.loads(posted.calls.last.request.content)
+    (entry,) = sent["entry"]
+    assert entry["request"] == {
+        "method": "POST",
+        "url": "Library",
+        "ifNoneExist": "Library?identifier=https://github.com/alejandro-publius/second-look/fhir/library-id|second-look-citizen-creek-checks",
+    }
+    library = entry["resource"]
+    assert {
+        "system": "https://github.com/alejandro-publius/second-look",
+        "code": "second-look",
+    } in library["meta"]["tag"]
+    assert "id" not in library, "a conditional create lets the server pick the id"
+    assert library["content"][-1]["url"] == "Provenance/77"
+    assert library["extension"][1]["valueInteger"] == 1
+    assert back.call_count == 1 and waits == [1.0], "read back after the one second gap"
+    rows = [json.loads(line) for line in ledger.read_text().splitlines()]
+    assert (
+        rows[-1]["action"] == "create"
+        and rows[-1]["resourceType"] == "Library"
+        and rows[-1]["id"] == "900"
+    )
+    assert rows[-1]["bundle"] == "library:second-look-citizen-creek-checks"
+    assert lines[-1] == "library: create Library/900, read back 200, 1 records"
+    text = evidence.read_text()
+    assert "Library: `Library/900` (create)" in text
+    assert "docs/screens/sandbox-library.png" in text
+    assert '"resourceType": "Library"' in text
+
+
+@respx.mock
+def test_main_mirrors_one_bundle_then_registers_the_library(
+    ledger: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("SANDBOX_MIRROR_ENABLED", "true")
+    monkeypatch.setattr(rs.time, "sleep", lambda _s: None)
+    tx = rs.transactions(tmp_path, [GOLDEN])[0][1]
+    calls: list[dict] = []
+
+    def answer(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        calls.append(body)
+        if body["entry"][0]["request"]["url"] == "Library":
+            return httpx.Response(200, json=library_response(body, "200 OK"))
+        return httpx.Response(200, json=transaction_response(tx))
+
+    respx.post(BASE).mock(side_effect=answer)
+    respx.get(f"{BASE}/Library/900").mock(
+        return_value=httpx.Response(200, json={"resourceType": "Library"})
+    )
+    code = rs.main(
+        [
+            "--bundle",
+            str(GOLDEN),
+            "--library",
+            "--base-url",
+            BASE,
+            "--evidence",
+            str(tmp_path / "e.md"),
+        ]
+    )
+    assert code == 0
+    assert (
+        len(calls) == 2
+        and len(calls[0]["entry"]) == 14
+        and calls[1]["entry"][0]["request"]["url"] == "Library"
+    )
+    # The Library lists the Provenance the first transaction just created.
+    assert calls[1]["entry"][0]["resource"]["content"][-1]["url"].startswith("Provenance/")
+    rows = [json.loads(line) for line in ledger.read_text().splitlines()]
+    assert rows[-1] == {**rows[-1], "action": "exists", "resourceType": "Library", "id": "900"}
+
+
+def test_library_alone_refuses_without_the_flag(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("SANDBOX_MIRROR_ENABLED", raising=False)
+    assert rs.main(["--library"]) == 2
+
+
+@respx.mock
+def test_a_second_library_run_updates_the_entry_on_our_own_identifier(
+    ledger: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Update 10C answer 3: the count follows each push. The first run created Library/900; the
+    second run finds it in the ledger and does a conditional update by our identifier, which can
+    only ever match our own resource. No search deletes anything."""
+    monkeypatch.setenv("SANDBOX_MIRROR_ENABLED", "true")
+    with ledger.open("a") as f:
+        row = {
+            "ts_utc": "t",
+            "action": "create",
+            "resourceType": "Library",
+            "id": "900",
+            "base": BASE,
+        }
+        f.write(json.dumps(row) + "\n")
+    assert rs.library_on_server(BASE) == "900"
+    put = respx.put(f"{BASE}/Library").mock(
+        return_value=httpx.Response(200, json={"resourceType": "Library", "id": "900"})
+    )
+    respx.get(f"{BASE}/Library/900").mock(
+        return_value=httpx.Response(200, json={"resourceType": "Library"})
+    )
+    lines: list[str] = []
+    from datetime import date
+
+    code = rs.register_library(
+        BASE,
+        today=date(2026, 9, 28),
+        sleep=lambda _s: None,
+        out=lines.append,
+        refs=["Provenance/480", "Provenance/481"],
+    )
+    assert code == 0
+    request = put.calls.last.request
+    assert request.url.params["identifier"] == (
+        "https://github.com/alejandro-publius/second-look/fhir/library-id|second-look-citizen-creek-checks"
+    )
+    sent = json.loads(request.content)
+    assert sent["extension"][1]["valueInteger"] == 2, "the count is what this run put there"
+    assert [c["url"] for c in sent["content"]][-2:] == ["Provenance/480", "Provenance/481"]
+    tag = {"system": "https://github.com/alejandro-publius/second-look", "code": "second-look"}
+    assert tag in sent["meta"]["tag"]
+    rows = [json.loads(line) for line in ledger.read_text().splitlines()]
+    assert rows[-1]["action"] == "update" and rows[-1]["id"] == "900"
+    assert lines[-1] == "library: update Library/900, read back 200, 2 records"
+    # A Library we deleted is not updated; a fresh one would be created.
+    with ledger.open("a") as f:
+        row = {
+            "ts_utc": "t",
+            "action": "delete",
+            "resourceType": "Library",
+            "id": "900",
+            "base": BASE,
+        }
+        f.write(json.dumps(row) + "\n")
+    assert rs.library_on_server(BASE) is None
+
+
+@respx.mock
+def test_push_hands_its_provenances_to_the_library(
+    ledger: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("SANDBOX_MIRROR_ENABLED", "true")
+    tx = rs.transactions(tmp_path, [GOLDEN])[0][1]
+    respx.post(BASE).mock(return_value=httpx.Response(200, json=transaction_response(tx, "200 OK")))
+    seen: list[str] = []
+    code = rs.push(
+        tmp_path, BASE, sleep=lambda _s: None, out=lambda _l: None, only=[GOLDEN], provenances=seen
+    )
+    assert code == 0
+    assert len(seen) == 1 and seen[0].startswith("Provenance/"), "one Provenance per visit"
+
+
+def test_a_demo_walk_record_is_never_mirrored() -> None:
+    from datetime import UTC, datetime
+
+    from core.walks import walk_bundle
+
+    walk = {"id": "v03", "spot_name": "The stretch in the clip", "creek_name": "A creek"}
+    bundle = walk_bundle(walk, {"bank_type": "present"}, datetime(2026, 9, 24, 16, 0, tzinfo=UTC))
+    assert rs._is_visit_bundle(bundle) is False
+    untagged = {**bundle, "meta": {}}
+    assert rs._is_visit_bundle(untagged) is True

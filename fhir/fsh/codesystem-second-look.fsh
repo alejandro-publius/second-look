@@ -33,6 +33,14 @@ Description: """Codes for the four stream features a volunteer is tested on, the
 * #good "Good overall rating" "Overall rating: the ecosystem components are there."
 * #moderate "Moderate overall rating" "Overall rating: some alterations, still biodiverse."
 * #poor "Poor overall rating" "Overall rating: highly modified, loss of vegetation and habitats, polluted."
+// The referral and the way back (core/fhir_referral.py). A ServiceRequest asks a city to test a pipe
+// two people who passed the pipe feature saw running in dry weather. The laboratory codes name the
+// measures in the example result that shows how a result would return to the same record.
+* #test-pipe-outflow "Test the water coming out of this pipe" "A request to sample and test the water leaving a pipe reported running in dry weather."
+* #example "Example, not a real result" "A tag on any resource that exists only to show the shape of a record. Never counted."
+* #lab-enterobacteriaceae-share "Enterobacteriaceae, share of 16S reads" "Share of 16S rRNA sequencing reads assigned to Enterobacteriaceae, in percent."
+* #lab-hf183 "Human faecal marker HF183" "The HF183 Bacteroides marker of human faecal pollution, present or absent."
+* #lab-ecoli-cfu "Escherichia coli, colony forming units" "Escherichia coli by culture, colony forming units per 100 mL."
 
 ValueSet: SecondLookFeatureVS
 Id: second-look-feature-vs

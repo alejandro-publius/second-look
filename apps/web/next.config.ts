@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { NextConfig } from "next";
 import { buildHeaders } from "./security-headers.mjs";
 
@@ -9,12 +10,21 @@ const isDev = process.env.NODE_ENV === "development";
 // Cloudflare Pages. A static export gets no headers from Next, so the two must not drift.
 const { everywhere, fieldPermissions } = buildHeaders({ apiOrigin, isDev });
 
-// NEXT_EXPORT=1 builds the static site Cloudflare Pages serves. The default stays standalone so
-// docker compose, `next start` and the Playwright suite keep working exactly as before.
+// NEXT_EXPORT=1 builds the static site Cloudflare Pages serves. The default stays standalone for
+// docker compose. `next start` and the Playwright suite serve .next itself, not the standalone copy.
 const isExport = process.env.NEXT_EXPORT === "1";
+
+// The repository root, so the web app can import the Worker's pure core (worker/src/core), the
+// same functions the golden vectors prove equal to Python. The video walks build their record
+// with it on the device. Next sets the tracing root and the Turbopack root to one value, so both
+// are the repo root, and that moves the standalone server: it is .next/standalone/apps/web/server.js,
+// not .next/standalone/server.js. apps/web/Dockerfile copies worker/src/core and runs that path.
+const repoRoot = join(__dirname, "..", "..");
 
 const nextConfig: NextConfig = {
   output: isExport ? "export" : "standalone",
+  turbopack: { root: repoRoot },
+  outputFileTracingRoot: repoRoot,
   poweredByHeader: false,
   // A static export serves no headers of its own, so the same policy lives in public/_headers,
   // which Cloudflare Pages reads. scripts/check_headers.mjs proves the two say the same thing.

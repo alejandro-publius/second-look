@@ -34,7 +34,8 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async 
 
   // The rule of thumb is the heading of the lesson card; the feature name rides on the gauge.
   await expect(page.locator(".gauge-count", { hasText: "Built banks" })).toBeVisible();
-  await expect(page.getByText("Draft wording, not yet approved")).toBeVisible();
+  // The wording was frozen and approved on 2026-09-21, so the draft notice is gone.
+  await expect(page.getByText("Draft wording, not yet approved")).toHaveCount(0);
   await finishLesson(page);
   await expect.poll(() => calls.filter((c) => c.path === "/api/test/lesson-done").length).toBe(1);
   const lesson = calls.find((c) => c.path === "/api/test/lesson-done")!.body;

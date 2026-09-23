@@ -1,8 +1,8 @@
 # CLAUDE.md: Second Look
 
-Start every session by reading PLAN.md, then only the brief section the session names. Precedence: newest file in docs/updates/ wins over docs/MASTER_BRIEF.md, which wins over PLAN.md unless docs/DECISIONS.md records the change. End every session and every decision point with the report block from docs/updates/UPDATE_02.md section 1 and nothing after it.
+Start every session by reading PLAN.md, then only the brief section the session names. Precedence: newest file in docs/internal/updates/ wins over docs/internal/MASTER_BRIEF.md, which wins over PLAN.md unless docs/DECISIONS.md records the change. End every session and every decision point with the report block from docs/internal/updates/UPDATE_02.md section 1 and nothing after it.
 
-## Hard rules, one line each (full text: docs/MASTER_BRIEF.md section 4 and docs/updates/)
+## Hard rules, one line each (full text: docs/internal/MASTER_BRIEF.md section 4 and docs/internal/updates/)
 
 1. New code only, written in this repo inside Sep 16 to 30. Never copy from Alex's earlier projects. Dependencies and licenses in docs/THIRD_PARTY.md.
 2. The model never decides. Model output becomes Flag objects through core/gate.py or is rejected. A flag can only make one follow-up question eligible. Gate changes ship with a test in the same commit.
@@ -13,7 +13,7 @@ Start every session by reading PLAN.md, then only the brief section the session 
 7. The usability test is anonymous: no names, emails, IPs, free text, third-party scripts or fingerprinting. docs/DATA_HANDLING.md says what the host logs.
 8. Field use is pseudonymous: random contributor token, EXIF stripped, uploads private and deleted after 30 days, coarse location unless the user places the pin.
 9. No calls to api.enora-oah.eu or the Resilience Map API until Alex says permission arrived. Never commit their raw data.
-10. The sandbox is a mirror of our store: conditional creates, meta.tag on everything, delete only ledger ids, never delete by search, never $expunge. Read-only GETs allowed from Session E at one per second, 50 per session.
+10. The sandbox is a mirror of our store: conditional creates, meta.tag on everything, delete only ledger ids, never delete by search, never $expunge. One exception: a conditional update is allowed on our own Library entry only, matched by our own identifier, because that match can only ever hit our resource. Read-only GETs allowed from Session E at one per second, 50 per session.
 11. FHIR R4 4.0.1. IG pinned to hl7-eu/oah b907cf0 in fhir/ig.lock. Package built by SUSHI 3.20.1. Every emitted resource validated in CI.
 12. Every number in README or docs comes from evals/ through results/. scripts/verify_claims.py runs in CI. Never hand-edit a number.
 13. docs/analysis_plan.md is tagged prereg-v1 before the first participant. Analysis refuses real data before the lock, 2026-09-28T01:00:00Z. Changes go in docs/deviations.md.
@@ -32,7 +32,7 @@ apps/web/   Next.js PWA          apps/api/  FastAPI          core/     pure func
 content/    lessons, items, form, followups, glossary, approved sentences, regions/, locales/
 photos/     manifest.csv + images    evals/    every reported number    results/  eval outputs, failures included
 scripts/    verify_claims, preflight, freeze_key, wipe_for_launch, repush_sandbox, ingest/label/merge photos, verify_audit
-fhir/       ig.lock, FSH, sandbox_ledger.jsonl, postman/    audit/    log.jsonl    docs/    brief, updates/, plan, notes/
+fhir/       ig.lock, FSH, sandbox_ledger.jsonl, postman/    audit/    log.jsonl    docs/    product docs, notes/; docs/internal/ holds the brief, updates/, reports/
 ```
 
 ## Commands

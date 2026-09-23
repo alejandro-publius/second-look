@@ -8,7 +8,12 @@
 // scripts/seed_arms.py writes its sequence into the arm_slot table and this Worker only takes the
 // next slot, so core.allocator.replay still checks every stored assignment.
 
+import VALIDATION from "../../results/fhir_validation.json";
 import CONTENT from "./content.json";
+import { Invalid, NotFound, createDraft, finalize, latestBundleForSpot, loadVisitBundle, quickCheck, spotView, todayOf } from "./check";
+import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, referralView } from "./city";
+import { TooLarge, photoResponse, storeUpload } from "./uploads";
+import { two } from "./two";
 
 export interface Env {
   DB: D1Database;
@@ -16,6 +21,11 @@ export interface Env {
   QA_KEY?: string;
   EXPORT_TOKEN?: string;
   ALLOWED_ORIGIN?: string;
+  SANDBOX_BASE_URL?: string;
+  SANDBOX_THEIRS_CODE?: string;
+  // Where the dry pipe rule asks about rain. Open-Meteo by default; the e2e run points it at a
+  // stub, because a question that depends on today's weather cannot be tested against the sky.
+  RAIN_URL?: string;
 }
 
 const DATA_LOCK_UTC = Date.parse("2026-09-28T01:00:00Z");
@@ -448,6 +458,46 @@ export default {
 
     if (path === "/api/content/hash") return json(env, { content_hash: CONTENT.content_hash, build_hash: "worker" });
 
+    // The judge facing endpoints (Update 10 answer A3): the creek check, the record, the city view,
+    // the FHIR behind every number, the two observer screen. Their pure parts are ports of core/
+    // proved equal to Python by golden vectors; this only routes.
+    const now = nowIso();
+    const checkEnv = { DB: env.DB, PHOTOS: env.PHOTOS, RAIN_FETCH: env.RAIN_URL ? rainFetchAt(env.RAIN_URL) : undefined };
+    try {
+      if (path === "/api/upload" && request.method === "POST") return json(env, await storeUpload(env, request, now));
+      const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
+      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, decodeURIComponent(photo[1]), url.searchParams.get("t")));
+      if (path === "/api/creeks") return json(env, await creeksView(checkEnv));
+      const city = /^\/api\/city\/([^/]+)$/.exec(path);
+      if (city) return json(env, await cityView(checkEnv, decodeURIComponent(city[1]), todayOf(now)));
+      const spotFhir = /^\/api\/spot\/([^/]+)\/fhir$/.exec(path);
+      if (spotFhir) {
+        const bundle = await latestBundleForSpot(env.DB, decodeURIComponent(spotFhir[1]));
+        if (bundle === null) return json(env, { detail: "no FHIR record for this spot yet" }, 404);
+        return json(env, bundle);
+      }
+      const spot = /^\/api\/spot\/([^/]+)$/.exec(path);
+      if (spot && request.method === "GET") {
+        const id = decodeURIComponent(spot[1]);
+        const view = await spotView(checkEnv, id, todayOf(now));
+        return json(env, { ...view, place: await placeForSpot(checkEnv, id), downstream_notes: await notesForSpot(checkEnv, id, todayOf(now)) });
+      }
+      const bundle = /^\/api\/fhir\/Bundle\/([^/]+)$/.exec(path);
+      if (bundle) {
+        const found = await loadVisitBundle(env.DB, decodeURIComponent(bundle[1]));
+        if (found === null) return json(env, { detail: "no FHIR record for this visit" }, 404);
+        return json(env, found);
+      }
+      if (path === "/api/fhir/validation") return json(env, VALIDATION);
+      const example = /^\/api\/fhir\/referral\/([^/]+)\/example-result$/.exec(path);
+      if (example) return json(env, await exampleResultView(checkEnv, decodeURIComponent(example[1]), now));
+      const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
+      if (referral) return json(env, await referralView(checkEnv, decodeURIComponent(referral[1]), now));
+      if (path === "/api/two") return json(env, await two(env, Date.now()));
+    } catch (err) {
+      return errorResponse(env, err);
+    }
+
     let body: Record<string, unknown> = {};
     if (request.method === "POST" && (request.headers.get("content-type") ?? "").includes("application/json")) {
       try {
@@ -458,6 +508,10 @@ export default {
     }
 
     try {
+      if (path === "/api/check/draft" && request.method === "POST") return json(env, await createDraft(checkEnv, body, now));
+      if (path === "/api/check/finalize" && request.method === "POST") return json(env, await finalize(checkEnv, body, now));
+      const quick = /^\/api\/quick\/([^/]+)$/.exec(path);
+      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, decodeURIComponent(quick[1]), body, now));
       if (path === "/api/test/session" && request.method === "POST") {
         const isTest = sameSecret(request.headers.get("x-qa-key"), env.QA_KEY);
         return await createSession(env, body, isTest);
@@ -486,8 +540,32 @@ export default {
         return json(env, { correct: isCorrect(String(body.answer ?? ""), gold) });
       }
     } catch (err) {
-      return json(env, { detail: "The server could not take that. Try again in a moment.", error: String(err) }, 500);
+      return errorResponse(env, err);
     }
     return json(env, { detail: "Not found." }, 404);
   },
 };
+
+/** The plain errors the check code raises become the same answers the Python API gives. */
+function errorResponse(env: Env, err: unknown): Response {
+  if (err instanceof Invalid) return json(env, { detail: err.message }, 422);
+  if (err instanceof NotFound) return json(env, { detail: err.message }, 404);
+  if (err instanceof TooLarge) return json(env, { detail: err.message }, 413);
+  return json(env, { detail: "The server could not take that. Try again in a moment.", error: String(err) }, 500);
+}
+
+function withCors(env: Env, response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(corsHeaders(env))) headers.set(k, v);
+  return new Response(response.body, { status: response.status, headers });
+}
+
+/** A rain fetch that swaps Open-Meteo's host for the one in RAIN_URL and keeps the query. */
+function rainFetchAt(base: string): (url: string) => Promise<unknown> {
+  return async (url: string) => {
+    const query = url.split("?")[1] ?? "";
+    const response = await fetch(`${base}?${query}`, { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) throw new Error(`rain ${response.status}`);
+    return response.json();
+  };
+}

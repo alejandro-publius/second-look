@@ -1,0 +1,383 @@
+{
+  "cases": [
+    {
+      "expected": [
+        {
+          "kind": "yesno",
+          "params": {
+            "days": 5
+          },
+          "question_key": "followup.dry_pipe",
+          "rule_id": "dry_pipe"
+        },
+        {
+          "kind": "keep_rating",
+          "params": {
+            "first_rating": "good",
+            "issues": "artificial banks, a sewage discharge"
+          },
+          "question_key": "followup.rating_check",
+          "rule_id": "rating_check"
+        }
+      ],
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "invasive_species": "absent",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "checker_enabled": false,
+        "observer": null,
+        "site": {
+          "dry_days": 5,
+          "mm_in_window": 0.0,
+          "rain": "dry"
+        }
+      },
+      "name": "dry pipe and rating check, in priority order"
+    },
+    {
+      "expected": [
+        {
+          "kind": "keep_rating",
+          "params": {
+            "first_rating": "good",
+            "issues": "artificial banks, a sewage discharge"
+          },
+          "question_key": "followup.rating_check",
+          "rule_id": "rating_check"
+        }
+      ],
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "invasive_species": "absent",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "checker_enabled": false,
+        "observer": null,
+        "site": {
+          "dry_days": 0,
+          "mm_in_window": 7.2,
+          "rain": "wet"
+        }
+      },
+      "name": "wet weather asks no dry pipe question"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {
+          "draining_pipes": "present"
+        },
+        "checker_enabled": false,
+        "observer": null,
+        "site": {
+          "dry_days": null,
+          "mm_in_window": null,
+          "rain": "unknown"
+        }
+      },
+      "name": "unknown rain fails closed"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {
+          "draining_pipes": "present"
+        },
+        "checker_enabled": false,
+        "observer": null,
+        "site": {
+          "dry_days": 0,
+          "mm_in_window": 0.0,
+          "rain": "dry"
+        }
+      },
+      "name": "zero dry days reads as a guess"
+    },
+    {
+      "expected": [
+        {
+          "kind": "yesno",
+          "params": {
+            "days": 5
+          },
+          "question_key": "followup.dry_pipe",
+          "rule_id": "dry_pipe"
+        }
+      ],
+      "input": {
+        "answers": {
+          "overall_rating": "poor",
+          "sewage_discharge": "present"
+        },
+        "checker_enabled": false,
+        "observer": null,
+        "site": {
+          "dry_days": 5,
+          "mm_in_window": 0.0,
+          "rain": "dry"
+        }
+      },
+      "name": "sewage discharge alone is a pipe item"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {
+          "bank_type": "absent",
+          "overall_rating": "good"
+        },
+        "checker_enabled": false,
+        "observer": null,
+        "site": {
+          "dry_days": 0,
+          "mm_in_window": 7.2,
+          "rain": "wet"
+        }
+      },
+      "name": "rating good with no issue asks nothing"
+    },
+    {
+      "expected": [
+        {
+          "kind": "photo",
+          "params": {
+            "correct": 1,
+            "feature": "invasive plant",
+            "feature_id": "invasive_plant",
+            "item_id": "invasive_species"
+          },
+          "question_key": "followup.low_score",
+          "rule_id": "low_score"
+        }
+      ],
+      "input": {
+        "answers": {
+          "bank_type": "absent",
+          "draining_pipes": "absent",
+          "invasive_species": "absent",
+          "overall_rating": "moderate"
+        },
+        "checker_enabled": false,
+        "observer": {
+          "contributor_token": "weaktoken2345678",
+          "scores": [
+            {
+              "correct": 2,
+              "feature": "artificial_bank",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "dug_out_channel",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 1,
+              "feature": "invasive_plant",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 2,
+              "feature": "pipe_running",
+              "tested_on": "2026-09-23",
+              "total": 4
+            }
+          ],
+          "test_sitting_id": null
+        },
+        "site": {
+          "dry_days": 0,
+          "mm_in_window": 7.2,
+          "rain": "wet"
+        }
+      },
+      "name": "low score photo for the weakest absent feature"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {
+          "bank_type": "absent",
+          "invasive_species": "absent",
+          "overall_rating": "moderate"
+        },
+        "checker_enabled": false,
+        "observer": {
+          "contributor_token": "strongtoken23456",
+          "scores": [
+            {
+              "correct": 4,
+              "feature": "artificial_bank",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "dug_out_channel",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "invasive_plant",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "pipe_running",
+              "tested_on": "2026-09-23",
+              "total": 4
+            }
+          ],
+          "test_sitting_id": null
+        },
+        "site": {
+          "dry_days": 0,
+          "mm_in_window": 7.2,
+          "rain": "wet"
+        }
+      },
+      "name": "a strong observer is not asked for a photo"
+    },
+    {
+      "expected": [
+        {
+          "kind": "yesno",
+          "params": {
+            "days": 5
+          },
+          "question_key": "followup.dry_pipe",
+          "rule_id": "dry_pipe"
+        },
+        {
+          "kind": "keep_rating",
+          "params": {
+            "first_rating": "good",
+            "issues": "artificial banks, a sewage discharge"
+          },
+          "question_key": "followup.rating_check",
+          "rule_id": "rating_check"
+        }
+      ],
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "invasive_species": "absent",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "checker_enabled": false,
+        "observer": {
+          "contributor_token": "weaktoken2345678",
+          "scores": [
+            {
+              "correct": 2,
+              "feature": "artificial_bank",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "dug_out_channel",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 1,
+              "feature": "invasive_plant",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 2,
+              "feature": "pipe_running",
+              "tested_on": "2026-09-23",
+              "total": 4
+            }
+          ],
+          "test_sitting_id": null
+        },
+        "site": {
+          "dry_days": 5,
+          "mm_in_window": 0.0,
+          "rain": "dry"
+        }
+      },
+      "name": "the cap is two: dry pipe and rating beat low score"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {},
+        "checker_enabled": false,
+        "observer": null,
+        "site": {
+          "dry_days": null,
+          "mm_in_window": null,
+          "rain": "unknown"
+        }
+      },
+      "name": "nothing at all"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "invasive_species": "present"
+        },
+        "checker_enabled": false,
+        "observer": {
+          "contributor_token": "weaktoken2345678",
+          "scores": [
+            {
+              "correct": 2,
+              "feature": "artificial_bank",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "dug_out_channel",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 1,
+              "feature": "invasive_plant",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 2,
+              "feature": "pipe_running",
+              "tested_on": "2026-09-23",
+              "total": 4
+            }
+          ],
+          "test_sitting_id": null
+        },
+        "site": {
+          "dry_days": 0,
+          "mm_in_window": 7.2,
+          "rain": "wet"
+        }
+      },
+      "name": "present answers do not ask for a photo"
+    }
+  ],
+  "function": "core.followups.select_followups",
+  "generated_by": "evals/golden_vectors.py"
+}

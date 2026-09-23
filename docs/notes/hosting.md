@@ -1,6 +1,6 @@
 # Hosting: what was tried, what won, and why
 
-Update 09 section 2. Vercel and Fly.io are dropped. Nothing here needs a card.
+Update 09 section 2. Hosting is Cloudflare only: Pages for the web, a Worker with D1 and KV for the API. Nothing here needs a card.
 
 Cloudflare account: `thealexschroeder@gmail.com`, account id `b8a915bd28ade9fec05659028b395865`.
 `npx wrangler whoami` was already logged in, so nothing is waiting on Alex to run a command.
@@ -52,11 +52,25 @@ promises the assignment can be replayed. So `scripts/seed_arms.py` writes the al
 sequence into an `arm_slot` table and the Worker only takes the next slot.
 `core.allocator.replay` still checks every stored assignment.
 
+## One origin: the API behind /api/* on the Pages site (Update 10 answer A1)
+
+On the `depth` preview the browser talks to one origin only. `apps/web/wrangler.jsonc` is the
+Pages project's configuration and binds the API Worker as a service named `API`;
+`apps/web/functions/api/[[path]].js` and `functions/health.js` hand every `/api/*` and `/health`
+request to it unchanged; `apps/web/public/_routes.json` sends only those paths to the Function
+and keeps `/api/share/*`, the static share cards, out of it. The export is built with
+`NEXT_PUBLIC_API_ORIGIN=""`, so every fetch is a relative path and the policy says
+`connect-src 'self'`. `make deploy-preview` does all of it for the `depth` branch. Verified on
+2026-09-21 at https://depth.second-look-79t.pages.dev: `/health` and `/api/test/counts` answer
+from the Worker, `/api/share/13` is still an SVG file, the CSP header reads `connect-src 'self'`.
+Production keeps its dashboard configuration until `main` deploys with this file.
+
 ## What is live
 
 | Thing | Where |
 |---|---|
-| Site | https://second-look-79t.pages.dev |
+| Site | https://second-look-79t.pages.dev (production, from `main`) |
+| Preview of `depth` | https://depth.second-look-79t.pages.dev (API on the same origin) |
 | API | https://second-look-api.thealexschroeder.workers.dev |
 | Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
 | Photo store | Workers KV `PHOTOS`, id `221e06ab5b54434ab5b4322712128ef3` |
@@ -79,9 +93,53 @@ R2 was not used, because it asks for a card. Creek check photos go to KV after d
 - The export is token gated live: no token returns 404, the right token returns a 2,600 byte zip
   holding `sessions.csv` and `responses.csv` in the contract's schema.
 
+## The judge facing endpoints on the Worker (Update 10 answer A3)
+
+Built on the `depth` branch, not yet deployed. `worker/src/check.ts`, `city.ts`, `uploads.ts`
+and `two.ts` port `apps/api/check.py`, `city.py` and `fhir_routes.py`; the pure parts under
+`worker/src/core/` are ports of `core/` proved equal to Python by the golden vectors in
+`worker/golden/` (`make worker-check`). Storage is D1 (`spot`, `visit`, `check_result`,
+`fhir_bundle`, `upload`, `sandbox_cache` in `worker/schema.sql`) and KV for photo bytes with a
+30 day expiry. `make worker-e2e` runs the whole thing under `wrangler dev` with a local D1 and
+KV, rain from a stub, and drives every route: 9 sections, green on 2026-09-21.
+
+Until the merge, the depth preview's `/api/*` reaches the production Worker, which answers
+the study routes and 404s the rest.
+
+## The merge, after data lock (Update 10C answer 2)
+
+The merge waits until after data lock on 2026-09-28T01:00:00Z. Production stays exactly as it is
+while strangers take the test: nothing about the study's network path changes mid study. At the
+merge, both halves go in one session, in this order, and not the other way round:
+
+1. Apply the new D1 tables. They are additive only, every one is `CREATE TABLE IF NOT EXISTS`:
+   `cd worker && npx wrangler d1 execute second-look --remote --file schema.sql`.
+2. Deploy the Worker: `cd worker && npx wrangler deploy`. The study routes are unchanged in it.
+3. Run the study contract tests and the phone end to end tests against production:
+   `uv run pytest -q apps/api/tests/test_study.py` for the contract, and
+   `SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-check.mjs` on the phone
+   viewport with the QA key, so the check lands in no study data.
+4. Only then ship the Pages file that puts the API behind the same origin: deploy `main` with
+   `apps/web/wrangler.jsonc`, `functions/` and `public/_routes.json`, the export built with
+   `NEXT_PUBLIC_API_ORIGIN=""`.
+5. Run the phone tests again against production, and check with curl that `/health` and
+   `/api/test/counts` answer through the Pages origin, `/api/share/13` is still an SVG, and the
+   policy reads `connect-src 'self'`.
+
+## The sandbox mirror after launch (Update 10C answer 3)
+
+Real creek visits are mirrored once, as one tagged batch after data lock, not as they arrive:
+fewer writes on a server everyone shares, and one clean ledger. Two minute test sessions are
+never mirrored, because they are not creek observations; the repush script mirrors visit
+Bundles only and refuses anything else by shape. The repush runs again just before the video is
+recorded, again on Sep 30 and again on Oct 1, because anyone can delete records there. Each run
+updates the Library entry's count and its list of Provenances to what that run put on the
+server: `SANDBOX_MIRROR_ENABLED=true uv run python scripts/repush_sandbox.py --library
+--evidence docs/notes/sandbox_library.md`.
+
 ## What is not done
 
 - The rate limit. See docs/DATA_HANDLING.md: it is deliberately absent rather than built on an
   address.
-- The judge-facing endpoints on the Worker.
-- Photo upload to KV. The binding exists and is empty.
+- Deploying the judge facing endpoints: they are built and proved locally, and production
+  deploys come from `main` only.

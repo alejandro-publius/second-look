@@ -1,0 +1,32 @@
+# Voice script: 3:45 at about 150 words a minute
+
+The words Alex reads, one beat per row. They are the words in the "Alex says" column of `docs/video/SHOTLIST.md`, and `scripts/tests/test_video_words.py` fails if the two files or `docs/video/teleprompter.html` ever differ. Read them with `docs/video/teleprompter.html`: open it in a browser on the laptop, no network needed.
+
+This came from pull request #5, with the three cuts `docs/video/SHOTLIST.md` explains, so every spoken claim is backed: beat 1 no longer says what most people pick, beat 9 no longer says what water in a dry pipe can mean, and beat 13 shows a video walk. Beat 5 also lost its last sentence, about a cup of tea.
+
+Rules for the words: plain, one idea per sentence, no number that is not in `results/` or the README. A slot in square brackets like `[SLOT: ...]` is a number that does not exist yet. Read it off the named file on the day you record, or cut the sentence. Never guess it. The test counts the spoken words, a slot as one word, and holds them between 520 and 580.
+
+| # | Time | Screen | Words |
+|---|---|---|---|
+| 1 | 0:00 | `/` on a phone: the two creek photos, "Which creek is healthier?" Hold 4 seconds before speaking, then a tap on one photo. | Look at these two creeks. Which one is healthier? Take a second. The tidy, green one has concrete banks and a pretty plant that does not belong there. The plain, messy one is doing better. |
+| 2 | 0:15 | Strawberry Creek: a concrete bank, then a pipe in the bank. | Volunteers who check creeks make this mistake all the time. OneAquaHealth's project lead told us so. People catch smell, foam and colour. They walk past built banks, a channel that was dug out, and plants that do not belong. |
+| 3 | 0:30 | The README on a desktop, "The problem", at the River Habitat Survey line. | Professional river surveyors fixed this long ago. In the UK, a survey only counts if the surveyor passed a test. Volunteers have never had that. So a city cannot tell a careful observer from a hopeful one. |
+| 4 | 0:45 | `/t`: consent, then one lesson card with its marks. | Second Look is that test, in two minutes, on a phone. First, a short lesson on the four things people miss. Each card shows a real photo and marks the part that matters. A built bank. A dug-out channel. An invasive plant. A pipe or drain outlet. |
+| 5 | 1:05 | `/t`: three test items, Yes, No, Can't tell. | Then sixteen photos. For each one you answer yes, no, or can't tell. There are four photos for each of the four features. No camera needed. You can take it right now at the link below, on any phone or laptop. |
+| 6 | 1:25 | The end screen with the score per feature. | At the end you get a score for each feature, like four of four on built banks. Not a grade. Not a probability. Just how many you got right, and the date. |
+| 7 | 1:40 | The README first screen on a desktop: the AI table and the footage beside it. | We gave the same sixteen photos to AI models, with the same words, three times each. [SLOT: models that passed at least one feature, from results/model_pass_table.json] passed at least one feature. To pass a feature, a model has to get all four photos right in at least two of three runs. A model may only speak about a feature it passed. |
+| 8 | 2:00 | `/how-we-know`, then `core/gate.py` in the editor for 2 seconds. | And even then, it never decides. The volunteer always answers first. The AI can only raise one follow-up question, and code chooses it. A test proves that the stored answers are always the human answers, whatever the model says. The AI is a second look, never the first. |
+| 9 | 2:20 | `/check` at the creek on the phone, one question per screen, then the dry pipe follow-up card. Hands only. | At the creek, the check asks one question at a time. It follows the official OneAquaHealth app. When it has not rained for days, it asks: is anything coming out of that pipe? That is worth a lab test. |
+| 10 | 2:40 | `/spot?id=example`: an answer beside "4 of 4 on built banks", then View as FHIR with the validation badge. | Every answer is saved beside the score of the person who gave it. The record is FHIR, under OneAquaHealth's own profiles. Our last validation run found zero errors. A city that already reads OneAquaHealth records can read ours. |
+| 11 | 2:55 | `/two`: the lab Observation from their sandbox next to ours. | Here is a lab result from their sandbox, next to a volunteer's answer, in the same viewer. Both now carry a mark of how far to trust them. |
+| 12 | 3:05 | `/city?creek=strawberry-creek`, then the health card on `/spot`. | For a city analyst, this means seeing who answered, not just what they answered. The creek page lists what it needs, in OneAquaHealth's own restoration measures. And the health card gives one action for you, one for your dog, and one for your city. |
+| 13 | 3:25 | `/walk`: a creek in another country, the clip playing, one question answered under it. | Berkeley can do this with OneAquaHealth's five steps for a follower city. So can any other city. It costs nothing to run, and every step is written down in the repository. |
+| 14 | 3:35 | End card over a creek shot: Second Look, the live link, the repo link, "No camera needed." | Take the two-minute test yourself. Then go and look at your own creek again. It might look different now. |
+
+## Checks before recording
+
+- Beat 7: open `results/model_pass_table.json` from the real run (it must say `"real": true`). If no model passed any feature, say: "None of them passed a feature, so none of them may speak." That is a finding, not a failure.
+- Beat 10: zero errors comes from `results/fhir_validation.json` (`errors`). Re-read it on the day.
+- Beat 11: record only when `/two` shows the sandbox record. If their sandbox is down, cut beat 11 and say nothing about it.
+- Say "audit log" if the hash chain comes up. Never "blockchain".
+- Never say what comes out of a real pipe. We never state a risk for a specific site.

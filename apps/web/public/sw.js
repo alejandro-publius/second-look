@@ -8,7 +8,7 @@
  */
 // The cache name carries the content hash, so new photos and new copy replace the placeholders
 // on the next visit instead of hiding behind a stale cache. build-content.mjs rewrites this line.
-const VERSION = "sl-bfa482c8b5c0b84d";
+const VERSION = "sl-da8d84222fad8ba4";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 
@@ -56,6 +56,9 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (!isSameOrigin(url)) return;
   if (url.pathname.startsWith("/api/")) return;
+  // Walk clips stream straight from the network: a browser asks for them in byte ranges, and a
+  // 20 MB clip has no business in a phone's cache.
+  if (url.pathname.startsWith("/walks/")) return;
 
   if (req.mode === "navigate" || url.searchParams.has("_rsc")) {
     event.respondWith(networkFirst(req));

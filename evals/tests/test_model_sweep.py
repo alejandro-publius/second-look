@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -265,16 +266,25 @@ def checked_pricing() -> Pricing:
 
 def test_real_client_refuses_unconfirmed_model_ids_and_unchecked_prices() -> None:
     sdk = SimpleNamespace()
-    unconfirmed = ms.load_models_config()
+    base = ms.load_models_config()
+    unconfirmed = ModelsConfig(
+        models=(ModelSpec("m", "m", False, False),),
+        settings=base.settings,
+        prompt=base.prompt,
+        fake_profiles={},
+    )
     client = RealClient(
         api_key="not-a-real-key", config=unconfirmed, pricing=checked_pricing(), sdk_client=sdk
     )
     with pytest.raises(RealClientRefused, match="not yet confirmed"):
-        client.check_ready(MODEL_IDS[0])
+        client.check_ready("m")
+    unchecked = Pricing(
+        models={"m": ms.ModelPrice(2.0, 10.0, False)}, batch_multiplier=0.5, batch_checked=True
+    )
     client = RealClient(
         api_key="not-a-real-key",
         config=confirmed_config(),
-        pricing=ms.load_pricing(),
+        pricing=unchecked,
         sdk_client=sdk,
     )
     with pytest.raises(RealClientRefused, match="not yet checked"):
@@ -335,7 +345,7 @@ class StubSDK:
 
 
 def test_batch_flow_collects_by_custom_id_and_logs_every_call(tmp_path: Path) -> None:
-    sdk = StubSDK(fail_id="m|t02|r0")
+    sdk = StubSDK(fail_id="q00001")
     log = CostLog(tmp_path / "cost.jsonl")
     client = RealClient(
         api_key="not-a-real-key",
@@ -349,7 +359,9 @@ def test_batch_flow_collects_by_custom_id_and_logs_every_call(tmp_path: Path) ->
     items = fake_items()[:3]
     records = run_sweep(client, ["m"], items, QUESTIONS, runs=1, settings=Settings(), images=IMAGES)
     assert [r.custom_id for r in records] == ["m|t01|r0", "m|t02|r0", "m|t03|r0"]
-    assert records[0].answer == "no" and records[0].note == "n m|t01|r0"
+    assert records[0].answer == "no" and records[0].note == "n q00000"
+    # The Batch API refuses any custom_id outside [a-zA-Z0-9_-]{1,64}; ours has a | in it.
+    assert all(re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", r["custom_id"]) for r in sdk.requests)
     assert records[1].error == "errored" and records[1].answer == "cant_tell"
     assert not records[1].correct
     assert records[0].input_tokens == 1300 and records[0].output_tokens == 40
@@ -428,6 +440,7 @@ def test_same_seed_same_pass_table(tmp_path: Path) -> None:
 def test_models_yaml_holds_the_three_ids_unconfirmed_and_the_resize_rule() -> None:
     config = ms.load_models_config()
     assert tuple(config.model_ids()) == MODEL_IDS
+    # Flipping these is Alex's decision (status issue #4); docs/notes/model_ids.md has the checks.
     assert all(not m.confirmed_against_models_page for m in config.models)
     assert config.settings.temperature == 0 and config.settings.resize_long_side_px == 1092
     questions = ms.load_questions()

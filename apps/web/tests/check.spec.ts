@@ -41,7 +41,7 @@ async function answerForm(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Yes", exact: true }).click(); // invasive species -> which ones
   await expect(page.getByRole("heading", { name: "Which ones?" })).toBeVisible();
   await expect(page.getByText("No plant list for this region yet.")).toBeVisible();
-  await page.getByLabel("Not sure").check();
+  await page.getByLabel("Can't tell").check();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "No", exact: true }).click(); // cuts
   await expect(page.getByRole("heading", { name: "Which feelings best describe your experience?" })).toBeVisible();
@@ -70,7 +70,10 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   expect(draft.body.answers.water_height_m).toBe(0.3);
   expect(draft.body.answers.habitats).toEqual(["riffles"]);
   expect(draft.body.answers.invasive_which).toEqual(["cant_tell"]);
-  expect(draft.body.answers.feelings).toMatchObject({ joy: 4 });
+  // The shape the API validates (SLIDER_RE in worker/src/check.ts and apps/api/check.py). It was
+  // an object once, which both servers answered with a 400.
+  expect(draft.body.answers.feelings).toContain("joy:4");
+  for (const entry of draft.body.answers.feelings) expect(entry).toMatch(/^(joy|serenity|anger|fear):([0-5]|not_applicable)$/);
   expect(draft.body.answers.natural_debris).toBeUndefined();
   expect(draft.body.photo_ids).toEqual([]);
   expect(draft.body.contributor_token).toBeUndefined();
@@ -83,7 +86,7 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await page.getByRole("button", { name: "Finish" }).click();
 
   const fin = calls.find((c) => c.path === "/api/check/finalize")!;
-  expect(fin.body).toEqual({ draft_id: "d1", followup_answers: { dry_pipe: "yes", rating_check: "changed" }, final_rating: "moderate" });
+  expect(fin.body).toEqual({ draft_id: "d1", followup_answers: { dry_pipe: "yes", rating_check: "change" }, final_rating: "moderate" });
   await expect(page.getByRole("heading", { name: "Saved" })).toBeVisible();
   await expect(page.getByRole("link", { name: "See this creek's record" })).toHaveAttribute("href", "/spot?id=example");
   expect(await page.evaluate(() => localStorage.getItem("sl_saved_spots"))).toContain("Footbridge");

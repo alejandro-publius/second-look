@@ -1,0 +1,263 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { FocusHeading } from "./FocusHeading";
+import { Icon } from "./ui/Icon";
+import { Row } from "./ui/Row";
+import { Skeleton } from "./ui/Skeleton";
+import { api, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
+import { t } from "@/lib/t";
+import { withoutUrl } from "@/lib/text";
+
+// "1 spot", not "1 spots": the key for one, or the key for any other number with {n} filled in.
+function count(n: number, one: string, many: string): string {
+  return n === 1 ? t(one) : t(many, { n });
+}
+
+function people(n: number): string {
+  return count(n, "city.observer_one", "city.observers");
+}
+
+/**
+ * "Open the records" on screen. A screen reader hears what the link opens as well, so five of
+ * these in a links list can be told apart.
+ */
+function Evidence({ href, name }: { href: string; name: string }) {
+  return (
+    <a href={href} rel="noreferrer">
+      {t("city.evidence")}
+      <span className="visually-hidden"> {t("city.evidence_for", { name })}</span>
+    </a>
+  );
+}
+
+/** The laboratory Observations of an example result: the ones that point at a Specimen. */
+function panelOf(entries: { resource: FhirResource }[] | undefined): FhirResource[] {
+  return (entries ?? []).map((e) => e.resource).filter((r) => r.resourceType === "Observation" && r.specimen !== undefined);
+}
+
+function measureOf(r: FhirResource): string {
+  return r.code?.coding?.[0]?.display ?? r.code?.text ?? r.id ?? "";
+}
+
+function valueOf(r: FhirResource): string {
+  if (r.valueQuantity) return `${r.valueQuantity.value ?? ""} ${r.valueQuantity.unit ?? r.valueQuantity.code ?? ""}`.trim();
+  const coding = r.valueCodeableConcept?.coding?.[0];
+  return coding?.display ?? coding?.code ?? "";
+}
+
+/**
+ * One pipe worth testing. The referral link is real. The example result is fetched only when
+ * asked for, wears the word Example in a badge and in a notice, and is never a number on this page.
+ */
+function PipeRow({ pipe }: { pipe: CityPipe }) {
+  const [example, setExample] = useState<FhirResource[] | null>(null);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function toggle() {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    setOpen(true);
+    if (example === null) {
+      try {
+        const bundle = await api.fhirAt(pipe.example_result);
+        setExample(panelOf(bundle.entry));
+      } catch {
+        setError(t("error.network"));
+      }
+    }
+  }
+
+  return (
+    <div className="stack">
+      <Row
+        label={pipe.spot_name}
+        value={`${people(pipe.observers)}, ${count(Math.max(...pipe.dry_days), "city.dry_day_one", "city.dry_days")}`}
+        end={<Evidence href={pipe.fhir[0]} name={pipe.spot_name} />}
+      />
+      <div className="btn-row">
+        <a className="btn btn-secondary" href={pipe.referral} rel="noreferrer">
+          {t("city.referral_link")}
+        </a>
+        <button type="button" className="btn btn-secondary" aria-expanded={open} onClick={() => void toggle()}>
+          {open ? t("city.example_hide") : t("city.example_show")}
+        </button>
+      </div>
+      {open ? (
+        <section className="stack" aria-label={t("city.example_badge")}>
+          <span className="badge badge-warn">{t("city.example_badge")}</span>
+          <div className="notice notice-warn">
+            <Icon name="info" />
+            <p>{t("city.example_note")}</p>
+          </div>
+          {error ? <p className="notice notice-bad">{error}</p> : null}
+          {example === null && !error ? <p className="muted">{t("city.example_loading")}</p> : null}
+          {example !== null ? (
+            <table className="tabular">
+              <thead>
+                <tr>
+                  <th scope="col">{t("city.example_measure")}</th>
+                  <th scope="col">{t("city.example_value")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {example.map((r) => (
+                  <tr key={r.id}>
+                    <td>{measureOf(r)}</td>
+                    <td>{valueOf(r)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+          <a href={pipe.example_result} rel="noreferrer">
+            {t("city.example_fhir")}
+          </a>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * What a city analyst sees. Two lists decided by code, and never a number without the records
+ * behind it: every figure here carries a link to the FHIR Bundles it was counted from.
+ *
+ * An empty "what this creek needs" is said out loud rather than left blank, because no measure
+ * and no approved sentence look identical from the outside and mean very different things.
+ */
+export function CityView({ creekId }: { creekId: string }) {
+  const [view, setView] = useState<CityOut | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!creekId) return;
+    let live = true;
+    api
+      .city(creekId)
+      .then((v) => live && setView(v))
+      .catch(() => live && setError(t("error.network")));
+    return () => {
+      live = false;
+    };
+  }, [creekId]);
+
+  if (!creekId || error) {
+    return (
+      <div className="notice notice-warn" role="status">
+        <Icon name="info" />
+        <p>{error ?? t("city.none")}</p>
+      </div>
+    );
+  }
+  if (!view) return <Skeleton label={t("city.title")} lines={3} photo={false} />;
+
+  return (
+    <div className="stack">
+      <FocusHeading>{t("city.title")}</FocusHeading>
+      <p>{t("city.intro", { creek: view.creek_name })}</p>
+      <p className="small muted tabular">{t("city.visits", { visits: count(view.visits, "city.n_visit", "city.n_visits"), spots: count(view.spots, "city.n_spot", "city.n_spots") })}</p>
+
+      <h2>{t("city.needs_title")}</h2>
+      <p className="small muted">
+        {t("city.needs_source")}{" "}
+        <a href="https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf" rel="noreferrer">
+          {t("city.needs_source_link")}
+        </a>
+        .
+      </p>
+      {view.needs.length === 0 ? (
+        <div className="notice notice-warn">
+          <Icon name="info" />
+          <p>{t("city.needs_waiting")}</p>
+        </div>
+      ) : (
+        <div className="card">
+          {view.needs.map((n) => (
+            <Row
+              key={n.sentence_id}
+              label={n.text}
+              value={`${n.because.join(", ")}. ${withoutUrl(n.source)}`}
+              end={<Evidence href={n.fhir[0]} name={n.because.join(", ")} />}
+            />
+          ))}
+        </div>
+      )}
+
+      <h2>{t("city.pipes_title")}</h2>
+      <p className="small muted">{t("city.pipes_note")}</p>
+      {view.pipes_worth_testing.length === 0 ? (
+        <p className="muted">{t("city.pipes_none")}</p>
+      ) : (
+        <div className="card stack">
+          {view.pipes_worth_testing.map((p) => (
+            <PipeRow key={p.spot_id} pipe={p} />
+          ))}
+        </div>
+      )}
+
+      {view.reaches.length > 0 ? (
+        <>
+          <h2>{t("city.reaches_title")}</h2>
+          <p className="small muted">{t("city.reaches_note")}</p>
+          <ol className="timeline">
+            {view.reaches.map((r) => (
+              <li key={r.slug}>
+                <h3>{r.name}</h3>
+                <p className="small muted tabular">
+                  {r.flows_into_name ? t("city.flows_into", { name: r.flows_into_name }) : t("city.flows_end")}. {t("city.reach_counts", { visits: count(r.visits, "city.n_visit", "city.n_visits"), spots: count(r.spots, "city.n_spot", "city.n_spots") })}.
+                </p>
+                {r.notes.length === 0 ? (
+                  <p className="small muted">{t("city.reach_quiet")}</p>
+                ) : (
+                  <div className="card">
+                    {r.notes.map((n) => (
+                      <Row
+                        key={`${n.from_reach_slug}:${n.feature}`}
+                        label={n.line}
+                        value={n.from_reach_name}
+                        end={<Evidence href={n.fhir[0]} name={`${n.feature_name}, ${n.from_reach_name}`} />}
+                      />
+                    ))}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+          {view.unplaced_spots > 0 ? <p className="small muted">{count(view.unplaced_spots, "city.unplaced_one", "city.unplaced")}</p> : null}
+        </>
+      ) : null}
+
+      <h2>{t("city.findings_title")}</h2>
+      {view.findings.length === 0 ? (
+        <p className="muted">{t("city.none")}</p>
+      ) : (
+        <div className="card">
+          {view.findings.map((f) => (
+            <Row
+              key={`${f.spot_id}:${f.feature}`}
+              label={`${f.feature_name}, ${f.spot_name}`}
+              value={people(f.observers)}
+              end={<Evidence href={f.fhir[0]} name={`${f.feature_name}, ${f.spot_name}`} />}
+            />
+          ))}
+        </div>
+      )}
+
+      {view.flagged_spots.length > 0 ? (
+        <>
+          <h2>{t("city.flagged_title")}</h2>
+          <p className="small muted">{t("city.flagged_note")}</p>
+          <div className="card">
+            {view.flagged_spots.map((s) => (
+              <Row key={s.spot_id} label={s.spot_name} value={s.why} />
+            ))}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}

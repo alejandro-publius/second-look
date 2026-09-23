@@ -83,13 +83,33 @@ def labelled_pool(manifest: Mapping[str, Mapping[str, str]], root: Path = ROOT) 
     return pool
 
 
+def _video_frame(row: Mapping[str, str]) -> bool:
+    return row.get("scene_id", "").startswith("video-")
+
+
 def skipped_rows(manifest: Mapping[str, Mapping[str, str]]) -> int:
-    """Benchmark or test rows left out for want of a label or a feature."""
+    """Benchmark or test rows left out for want of a label or a feature.
+
+    A frame from open footage whose video description supports no label is not skipped: it is
+    unlabelled by design and goes to the agreement figure in evals/footage.py instead.
+    """
     return sum(
         1
         for row in manifest.values()
         if row.get("role") in POOL_ROLES
+        and not _video_frame(row)
         and (row.get("gold_label") not in GOLD_VALUES or row.get("feature") not in FEATURES)
+    )
+
+
+def unlabelled_video_frames(manifest: Mapping[str, Mapping[str, str]]) -> int:
+    """Video frames with no description label, counted so the pool says where they went."""
+    return sum(
+        1
+        for row in manifest.values()
+        if row.get("role") == "benchmark"
+        and _video_frame(row)
+        and row.get("gold_label") not in GOLD_VALUES
     )
 
 
@@ -224,6 +244,7 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
             "n_photos": len(pool),
             "n_placeholders": placeholders,
             "skipped_unlabelled": skipped,
+            "unlabelled_video_frames_left_to_evals_footage": unlabelled_video_frames(manifest),
             "by_feature": {f: sum(1 for i in pool if i.feature == f) for f in FEATURES},
             "photo_ids": [i.id for i in pool],
         },

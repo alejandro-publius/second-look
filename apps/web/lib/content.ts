@@ -120,6 +120,35 @@ export interface Content {
   lessons: Record<string, Lesson>;
   locale: Record<string, string>;
   photos: Record<string, Photo>;
+  walks: Walk[];
+  footage_credits: FootageCredit[];
+}
+
+/** A video walk (Update 14 3.7), from content/walks.yaml via scripts/build_walks.py. */
+export interface Walk {
+  id: string;
+  title: string;
+  author: string;
+  license: string;
+  source_url: string;
+  country: string;
+  creek_name: string;
+  spot_name: string;
+  clip: { file: string; start_s: number; seconds: number };
+  poster_photo_id: string;
+  /** The one question a gated flag made eligible at build time, or null. */
+  question: { feature: FeatureId; note: string } | null;
+  checker_run: "real" | "synthetic";
+  checker_dropped: number;
+}
+
+export interface FootageCredit {
+  id: string;
+  title: string;
+  author: string;
+  license: string;
+  source_url: string;
+  country: string;
 }
 
 export interface WarmupItem {
@@ -180,4 +209,8 @@ export function licenseUrl(license: string): string | undefined {
 
 export function shownPhotos(): Photo[] {
   return Object.values(content.photos).sort((a, b) => a.id.localeCompare(b.id));
+}
+
+export function walkById(id: string): Walk | undefined {
+  return (content.walks ?? []).find((w) => w.id === id);
 }

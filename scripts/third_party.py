@@ -32,19 +32,21 @@ SERVICES = """## External services
 - hl7-eu/oah implementation guide, commit b907cf0, built from source in CI with SUSHI 3.20.1 and
   validated with the HL7 validator. That repo has no LICENSE file, so nothing from it is
   redistributed here; `fhir/ig.lock` records the commit and the package sha256.
-- Vercel (web) and Fly.io (API) host the app. What they log on their own is written in
-  docs/DATA_HANDLING.md.
+- Cloudflare Pages (web) and Cloudflare Workers with D1 (API) host the app (Update 09). What
+  they log on their own is written in docs/DATA_HANDLING.md.
+- The MCP server in `apps/mcp/` runs locally over stdio through the `mcp` Python SDK (MIT). It
+  reads our own read only endpoint or a local export and calls no other service.
 """
 
 REFERENCES = """## Design references
 
-Read during the design pass (docs/updates/UPDATE_06.md). Nothing is copied from either: no brand
-colour, name, logo or font was taken. They informed structure and restraint only.
+Read during the design pass (docs/internal/updates/UPDATE_06.md). Nothing is copied from either:
+no brand colour, name, logo or font was taken. They informed structure and restraint only.
 
 - Vercel Web Interface Guidelines, MIT
   (https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md).
   `apps/web` was audited against every rule in it; the findings are in
-  docs/reviews/DESIGN_REVIEW_01.md.
+  docs/internal/reviews/DESIGN_REVIEW_01.md.
 - VoltAgent awesome-design-md, MIT (https://github.com/VoltAgent/awesome-design-md). The Airbnb
   file for how a product lets photographs lead, the Wise file for how forms stay clear. Structure
   of docs/design/DESIGN.md borrows their shape: one read, tokens, components, do and do not.
@@ -140,13 +142,15 @@ def build(root: Path) -> str:
     py = python_packages(root / "uv.lock")
     web_lock = root / "apps" / "web" / "package-lock.json"
     web = npm_packages(web_lock) if web_lock.exists() else []
+    worker_lock = root / "worker" / "package-lock.json"
+    worker = npm_packages(worker_lock) if worker_lock.exists() else []
     today = datetime.now(UTC).strftime("%Y-%m-%d")
     out = [
         "# Third party dependencies",
         "",
-        f"Generated on {today} by `uv run python scripts/third_party.py` from `uv.lock` and "
-        "`apps/web/package-lock.json`. Do not edit by hand; rerun the script. Our own code is "
-        "MIT; our photos and copy are CC BY 4.0 (README).",
+        f"Generated on {today} by `uv run python scripts/third_party.py` from `uv.lock`, "
+        "`apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun "
+        "the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).",
         "",
         SERVICES.rstrip(),
         "",
@@ -168,11 +172,22 @@ def build(root: Path) -> str:
         "|---|---|---|---|",
     ]
     out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in web]
-    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
-    unknown_web = sum(1 for _, _, lic, _ in web if lic == NOT_STATED)
     out += [
         "",
-        f"Licenses not found for {unknown_py} Python and {unknown_web} web packages; "
+        f"## Worker packages ({len(worker)}, from worker/package-lock.json)",
+        "",
+        "All dev: the toolchain that type checks, tests and runs the Worker locally. The deployed "
+        "Worker bundles only our own code and worker/src/content.json.",
+        "",
+        "| Package | Version | License | dev |",
+        "|---|---|---|---|",
+    ]
+    out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in worker]
+    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
+    unknown_web = sum(1 for _, _, lic, _ in web + worker if lic == NOT_STATED)
+    out += [
+        "",
+        f"Licenses not found for {unknown_py} Python and {unknown_web} web and worker packages; "
         "check those by hand before the repo goes public.",
         "",
     ]

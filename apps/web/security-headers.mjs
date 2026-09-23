@@ -6,12 +6,15 @@ export function buildHeaders({ apiOrigin, isDev = false }) {
   // Next's App Router hydrates through inline <script> tags it writes itself, so script-src needs
   // 'unsafe-inline'; a nonce would force every page to render per request and the landing page
   // must stay static. 'unsafe-eval' is development only. Styles come from our own CSS files only.
+  // An empty apiOrigin means the API is served under /api/* on this same origin (Update 10 A1),
+  // so the browser may connect to 'self' and nowhere else.
+  const connect = apiOrigin ? `connect-src 'self' ${apiOrigin}` : "connect-src 'self'";
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
     `style-src 'self'${isDev ? " 'unsafe-inline'" : ""}`,
     "img-src 'self' data: blob:",
-    `connect-src 'self' ${apiOrigin}`,
+    connect,
     "font-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

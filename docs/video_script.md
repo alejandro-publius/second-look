@@ -1,6 +1,6 @@
 # Video script
 
-DRAFT, written 2026-09-20 from the beats in docs/updates/UPDATE_02.md section 13. Target 3:45 (the organizers allow 3 to 5 minutes). One line of speech and one shot per beat, tied to real routes. Every number spoken on camera is read off the results file at recording time, never from this script. Record the sandbox beat (2:40) the day `/two` first works, because anyone can delete records there. No faces without a signed `docs/release_form.md`.
+DRAFT, written 2026-09-20 from the beats in docs/internal/updates/UPDATE_02.md section 13. Target 3:45 (the organizers allow 3 to 5 minutes). One line of speech and one shot per beat, tied to real routes. Every number spoken on camera is read off the results file at recording time, never from this script. Record the sandbox beat (2:40) the day `/two` first works, because anyone can delete records there. No faces without a signed `docs/release_form.md`.
 
 | Time | Speech (one line) | Shot | Route or source |
 |---|---|---|---|

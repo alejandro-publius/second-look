@@ -17,8 +17,12 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
+
+import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
 JAR = ROOT / "fhir" / "tools" / "validator_cli.jar"
@@ -26,6 +30,7 @@ IG_RESOURCES = ROOT / "fhir" / "build" / "ig" / "fsh-generated" / "resources"
 INSTANCES = ROOT / "fhir" / "build" / "instances"
 GOLDEN = ROOT / "fhir" / "golden"
 RESULTS = ROOT / "results" / "fhir_validation.json"
+OUTCOME = ROOT / "fhir" / "build" / "validation_outcome.json"
 LOCK = ROOT / "fhir" / "ig.lock"
 
 
@@ -71,6 +76,29 @@ def our_files() -> list[Path]:
     return files
 
 
+class ValidatorFailed(RuntimeError):
+    """The validator wrote no outcome this run, so there is nothing to count."""
+
+
+def run_validator(cmd: Sequence[str], outcome_path: Path) -> tuple[dict[str, Any], str]:
+    """Run the validator and read the outcome it wrote this run, never one left from before.
+
+    The old outcome is deleted first. Without that, a validator that crashed before writing
+    would leave the last run's file in place, and its counts would be reported as this run's.
+    """
+    outcome_path.unlink(missing_ok=True)
+    proc = subprocess.run(list(cmd), capture_output=True, text=True)
+    tail = "\n".join(proc.stdout.splitlines()[-25:])
+    if not outcome_path.exists():
+        said = [ln.strip() for ln in (proc.stderr + proc.stdout).splitlines() if ln.strip()]
+        raise ValidatorFailed(
+            f"fhir-validate: the validator exited with code {proc.returncode} and wrote no "
+            f"outcome, so nothing was validated: {said[-1] if said else '(no output)'}"
+        )
+    outcome: dict[str, Any] = json.loads(outcome_path.read_text(encoding="utf-8"))
+    return outcome, tail
+
+
 def summarise(outcome: dict) -> tuple[dict[str, dict[str, int]], list[dict[str, str]]]:
     by_file: dict[str, dict[str, int]] = {}
     messages: list[dict[str, str]] = []
@@ -96,11 +124,35 @@ def summarise(outcome: dict) -> tuple[dict[str, dict[str, int]], list[dict[str, 
     return by_file, messages
 
 
+DEFAULT_TX = "https://tx.fhir.org"
+
+
+def tx_reachable(url: str, timeout: float = 8.0) -> bool:
+    """Is the terminology server answering? A run that cannot reach it falls back, and says so."""
+    if url == "n/a":
+        return False
+    try:
+        with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+            return client.get(f"{url.rstrip('/')}/metadata").status_code < 500
+    except Exception:
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-build", action="store_true")
-    parser.add_argument("--tx", default="n/a")
+    parser.add_argument(
+        "--tx",
+        default=DEFAULT_TX,
+        help=f"terminology server, or n/a for none (default {DEFAULT_TX})",
+    )
     args = parser.parse_args()
+    # PLAN.md: the run uses terminology checking, and if the server cannot be reached it runs
+    # again with the checks off and the results file says so. A silent pass with the checks off
+    # would let a bad code pass for a good one.
+    if args.tx != "n/a" and not tx_reachable(args.tx):
+        print(f"fhir-validate: {args.tx} is not answering, so terminology checks are off this run")
+        args.tx = "n/a"
     if not args.no_build:
         subprocess.run(["bash", str(ROOT / "scripts" / "fhir_build.sh")], check=True)
     files = our_files()
@@ -108,7 +160,6 @@ def main() -> int:
         print("fhir-validate: no emitted instances yet, nothing to validate")
         return 0
     ensure_jar()
-    outcome_path = ROOT / "fhir" / "build" / "validation_outcome.json"
     cmd = [
         java_cmd(),
         "-Xmx3g",
@@ -122,11 +173,13 @@ def main() -> int:
         "-tx",
         args.tx,
         "-output",
-        str(outcome_path),
+        str(OUTCOME),
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    tail = "\n".join(proc.stdout.splitlines()[-25:])
-    outcome = json.loads(outcome_path.read_text(encoding="utf-8")) if outcome_path.exists() else {}
+    try:
+        outcome, tail = run_validator(cmd, OUTCOME)
+    except ValidatorFailed as exc:
+        print(exc)
+        return 1
     by_file, messages = summarise(outcome)
     errors = sum(c.get("error", 0) for c in by_file.values())
     warnings = sum(c.get("warning", 0) for c in by_file.values())
@@ -143,6 +196,8 @@ def main() -> int:
                 "files": [str(f.relative_to(ROOT)) for f in files],
                 "errors": errors,
                 "warnings": warnings,
+                "files_validated": len(by_file),
+                "walk_records_validated": sum(1 for f in by_file if "sl-visit-walk-" in f),
                 "by_file": by_file,
                 "messages": messages,
             },

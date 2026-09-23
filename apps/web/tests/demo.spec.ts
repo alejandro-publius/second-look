@@ -1,10 +1,20 @@
 import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 // Update 09 section 4.5: /demo gives feedback on the same sixteen photos the study uses, so it
 // stays shut until the data lock. These tests move the browser clock past it.
 const AFTER_LOCK = new Date("2026-09-29T00:00:00Z");
 import { assertOnlyOurOrigins, goldFor, mockApi, watchRequests } from "./mock-api.mjs";
 import { answerAllItems, BASE } from "./helpers";
+
+
+// The real photographs have their own ids, so the item on screen is found through the generated
+// content: photo url to photo id to test item.
+const GENERATED = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
+const ITEM_FOR_PHOTO_URL: Record<string, string> = Object.fromEntries(
+  (GENERATED.test_items as { id: string; photo_id: string }[]).map((t) => [GENERATED.photos[t.photo_id].url, t.id]),
+);
 
 test("judge mode gives feedback, stores nothing, and teaches only what was missed", async ({ page }) => {
   const urls = watchRequests(page);
@@ -37,7 +47,8 @@ test("a judge who passes every feature gets no lesson", async ({ page }) => {
   for (let i = 1; i <= 16; i++) {
     await expect(page.getByText(`Photo ${i} of 16`)).toBeVisible();
     const src = await page.locator("img.photo-large").getAttribute("src");
-    const itemId = "t" + src!.match(/ph-test-(\d\d)/)![1];
+    const itemId = ITEM_FOR_PHOTO_URL[src!];
+    expect(itemId, `no test item shows ${src}`).toBeTruthy();
     await page.getByRole("button", { name: goldFor(itemId) === "present" ? "Yes" : "No", exact: true }).click();
     await page.locator("[data-confirm]").click();
     await expect(page.getByRole("status")).toContainText("Right.");

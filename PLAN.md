@@ -1,18 +1,18 @@
 # PLAN.md: Second Look build plan
 
-Version 2, Sun Sep 20 2026. Folds docs/updates/UPDATE_02.md into the plan from docs/MASTER_BRIEF.md section 17. Precedence: the latest file in docs/updates/ wins over the brief; the brief wins over this plan unless a change is recorded in docs/DECISIONS.md.
+Version 2, Sun Sep 20 2026. Folds docs/internal/updates/UPDATE_02.md into the plan from docs/internal/MASTER_BRIEF.md section 17. Precedence: the latest file in docs/internal/updates/ wins over the brief; the brief wins over this plan unless a change is recorded in docs/DECISIONS.md.
 
 Tags: MUST before the Wednesday Sep 23 launch. SHOULD before the Saturday Sep 26 freeze. COULD only if everything above it is green.
 
 ## How we work
 
-Alex works only in this terminal and relays reports to the planner. Every session, and every decision point, ends with the report block from docs/updates/UPDATE_02.md section 1 and nothing after it. Short replies, paths and key lines only, targeted tests while working, one full `make check` per milestone.
+Alex works only in this terminal and relays reports to the planner. Every session, and every decision point, ends with the report block from docs/internal/updates/UPDATE_02.md section 1 and nothing after it. Short replies, paths and key lines only, targeted tests while working, one full `make check` per milestone.
 
 ## Decisions made now, one path each
 
-- Hosting: web on Vercel (Hobby). API on one Fly.io shared-cpu machine with a 1 GB volume and `auto_stop_machines = false`, so it never sleeps and no ping job is needed. SQLite on the volume. `DATABASE_URL` switches to Postgres (Neon) in one line. Cost through Oct 15: under 5 dollars. Cold-start time to first screen is measured and reported anyway.
-- Backups: Fly volume snapshots are automatic, daily and private. A restore drill runs once in Session C. Amendment 5 is satisfied without a new service.
-- Uploads (rung 2) live on the private volume with a 30 day cleanup job, not a cloud bucket. No new account, same privacy.
+- Hosting: Cloudflare only (Update 09, docs/notes/hosting.md). Pages serves the static export of the web app; a TypeScript Worker on D1 serves the API, with KV for photo bytes. Workers do not sleep, so no ping job is needed. Cost through Oct 15: nothing, and no card. Time to first screen is measured and reported anyway.
+- Backups: a daily D1 export kept as a private GitHub artifact (`.github/workflows/backup.yml`), manual only until the two secrets exist. A restore drill runs once before launch. Amendment 5 is satisfied without a new service.
+- Uploads (rung 2) live in Workers KV with a 30 day expiry, not a cloud bucket. No new account, same privacy.
 - Python 3.12 through uv. Local Node 26, CI Node 20. Next.js App Router. Playwright with axe-core.
 - FHIR toolchain pins in CI: SUSHI 3.20.1, Node 20, Java 17, one validator jar version recorded in fhir/ig.lock, `~/.fhir/packages` cached. If the terminology server is unreachable, the validator reruns with terminology checks off and the results file says so. Locally the validator runs in Docker because this Mac has Java 8.
 - IG pin: hl7-eu/oah commit b907cf0 is the current HEAD (2026-06-11). Confirmed Sep 20. The package is built from source; the .tgz is never committed because their repo has no LICENSE.
@@ -59,11 +59,11 @@ Proving command: `uv run pytest -q evals/tests/test_consensus.py scripts/tests` 
 
 ### Session B, Mon Sep 21, about 4 hours. MUST except the poster's A4 size.
 
-Goal: the brief section 6 flow as a Next.js PWA, deployed, with the recruiting tools.
+Goal: the brief section 6 flow as a Next.js PWA, deployed, with the poster and the share card.
 
 Build: static landing that paints at once and wakes the API in the background; consent with version stamp and the hidden bot-trap field; warm-up; assignment call; lesson cards with progress and per-screen seconds; 16-item test with Yes, No, Can't tell and glossary tooltips; end screen with per-feature score, the prior-experience question and a share card whose preview image is rendered on the server from the score alone; `?src=` carried into the coarse source label; `/demo` with per-answer feedback, a summary of missed features and only those lessons, never stored; `/health`. Poster: HTML to PDF with Playwright, Letter and A4, two warm-up photos, the question, "Scan to find out. Two minutes. Anonymous.", QR to `?src=poster`, no answer printed.
 
-Deploy: Fly app for the API with a volume and auto-stop off; Vercel project for the web; environment variables; `make preflight --remote` smoke mode.
+Deploy: the Worker on D1 for the API; the Pages project for the web; environment variables; `make preflight --remote` smoke mode.
 
 Proving command: `npx playwright test` green for both arms on a phone viewport including the third-party request check; the public URL completes one QA session flagged `is_test` from Alex's phone; the report states the measured cold-start time to first screen.
 
@@ -124,8 +124,8 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 ## Skipped or downgraded, with reasons
 
 - Offline queue (UPDATE_02 section 10): downgraded from SHOULD to COULD. A service worker plus an IndexedDB queue for answers and photo blobs plus sync conflict handling is at least an evening on its own, and Session D already holds the form, follow-ups, rainfall and analyst view. The fail-closed rules from the same section stay SHOULD because they are cheap.
-- Scheduled ping every 10 minutes (section 11.3): not needed, the Fly machine never sleeps with auto-stop off.
-- Cloud bucket for uploads (section 11.8): replaced by the private volume plus a cleanup job. Same guarantee, one fewer account.
+- Scheduled ping every 10 minutes (section 11.3): not needed, a Worker does not sleep.
+- Cloud bucket for uploads (section 11.8): replaced by Workers KV with a 30 day expiry. Same guarantee, one fewer account.
 - Spanish locale (section 9): stays COULD and ships only with a named checker.
 
 ## Inputs and latest workable dates
@@ -139,7 +139,7 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 | Five lines on their AI image model video to docs/notes/their_image_model.md | Alex | today | Sun Sep 27 |
 | API workspace spend limit and alert set | Alex | today | Tue Sep 22 19:00 |
 | Consent contact email | Alex | Mon Sep 21 | Mon Sep 21 18:00 |
-| Vercel account and Fly.io account with a payment method | Alex | Mon Sep 21 | Mon Sep 21 18:00 |
+| Cloudflare account, logged in through wrangler, no card needed | Alex | done Sep 20 | done |
 | ANTHROPIC_API_KEY with a few dollars of credit, in .env only | Alex | Tue Sep 22 | Tue Sep 22 19:00 |
 | About 40 photos per the shot list, originals kept, spot and date noted | Rachel | Tue Sep 22 12:00 | Tue Sep 22 19:00 |
 | Gold labels for the 16 test photos, blind, through scripts/label_photos.py | Rachel | with the photos | Tue Sep 22 21:00 |
@@ -147,7 +147,6 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 | Bay Area invasive list checked against the Cal-IPC inventory | Rachel | Tue Sep 22 12:00 | Tue Sep 22 19:00 |
 | Independent second labels through scripts/label_photos.py | Alex | Tue Sep 22 evening | Tue Sep 22 22:00 |
 | Approved health and ecology sentences after the indicator factsheets | Rachel | Fri Sep 25 | Sat Sep 26 12:00 |
-| Recruiting through chats, servers, posters where allowed, creek groups | Alex | Wed Sep 23 08:00 | continuous until Sun Sep 27 18:00 |
 | One creek visitor on camera taking the test, with a signed release | Both | Sun Sep 27 | Mon Sep 28 15:00 |
 | Permission from ENORA for their site list or the Resilience Map API | Alex | optional | never required |
 
@@ -163,24 +162,26 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 ## Risks
 
 - Photos arrive late: the launch slips one day per day late. The lock does not move, so the sample shrinks.
-- Recruiting falls short: below 20 completed sessions per arm the result is descriptive and the first screen says so.
+- Nobody is recruited (Update 14 section 0). Any sessions that arrive are reported as a description with their count. Fallback F1 is the standing plan, not a fallback.
 - Another team wipes the sandbox: repush from our store; the ledger makes it a one-command fix; the sandbox part of the video is recorded the day it first works.
 - Every vision model fails every feature: the checker ships with zero flags and the README says where AI should stay quiet.
 - The Devpost form refuses a one-person team: add Rachel as a teammate before Sep 28.
 
 ## Decision points
 
-From docs/updates/UPDATE_03.md, recovered on 2026-09-21. The current state of each kill test is
-in docs/KILL_TESTS.md.
+From docs/internal/updates/UPDATE_03.md, recovered on 2026-09-21. The current state of each kill test is
+in docs/internal/KILL_TESTS.md.
 
 - **Launch decision, Tuesday Sep 22 at 22:00 PDT.** Go if P1 passed, K3 and K4 passed for at
   least three features, and `make preflight` is green. Otherwise do not launch a test we cannot
   stand behind. Take F1 and keep building the record. **P1 has not passed as written**: the
-  skeleton runs on docker compose, not on a real host, because no Vercel or Fly account exists
-  yet. That is the single thing most likely to stop the launch.
-- **Reach check, Thursday Sep 24 at 22:00 PDT.** Fewer than 20 completed sessions means the
-  headline switches to F1 now, while collection continues to data lock. The switch is a change of
-  emphasis in the README and the video, never a change to the analysis plan.
+  skeleton runs on docker compose, not on a real host, because no hosting account existed
+  yet. That is the single thing most likely to stop the launch. (Since Update 09 it runs on
+  Cloudflare and P1 passed there; see docs/internal/KILL_TESTS.md.)
+- **Reach check: decided on Sep 21, not on Sep 24.** Nobody is recruited, so the headline is F1
+  from here: the full loop, the AI on the same 16 photos and on open creek footage, and a citizen
+  record validated in their own format. Whatever sessions arrive are reported as a description
+  with their count. The analysis plan is unchanged; only the emphasis is (Update 14 section 0).
 - **Spend checks.** API spend above 150 dollars by Sep 23 or 350 dollars by Sep 26 means routine
   sessions drop to the cheaper model and nothing tagged COULD is built. If Alex reports his weekly
   usage limit above 90 percent before it resets, stop COULD and SHOULD work and ask him whether to
@@ -197,7 +198,7 @@ in docs/KILL_TESTS.md.
 - **F2. Their profiles reject a citizen record, or the sandbox refuses writes.** The headline
   becomes the lesson and the test on strangers, entered in Track 1. The FHIR work ships as plain
   valid R4 plus docs/ig_gap_report.md. **Not in force:** P2 passed with terminology on and K6
-  passed, both recorded in docs/KILL_TESTS.md.
+  passed, both recorded in docs/internal/KILL_TESTS.md.
 - **F3. A feature cannot be photographed or labelled reliably.** Three features, 12 items, written
   into the plan before the tag.
 - **F4. The models ace the early photos.** The checker is described as a second pair of eyes that
@@ -214,7 +215,7 @@ Each with the reason in a line. Items 1, 2, 4, 5, 6 and 9 are already reflected 
 1. Use their codes where they exist, ours only where they do not. Their value set already has `present` and `absent`, and codes for channel morphology, invasive organisms, land use, foam and riparian vegetation. The "same value sets as lab data" sentence then holds word for word.
 2. Feature answers as CodeableConcepts, not booleans. Their Observation profile rejects any other value type.
 3. Pre-fill the app-mirroring items from the app's public frontend text saved at ~/scratch/oah-research/, marked unverified until Alex's screenshots. Exact wording in seven languages, from a static page and not from api.enora-oah.eu, and it saves Alex an evening of typing.
-4. Production database: SQLite on a Fly volume instead of Postgres. Eighty sessions do not need a second service, and data lock becomes copying one file.
+4. Production database: Cloudflare D1, which is SQLite, instead of Postgres. Eighty sessions do not need a second service, and data lock becomes one export.
 5. Scope the no-third-party-origin rule to the study flow. A map pin in rung 2 cannot exist without a tile server.
 6. Add to rule 10: the sandbox has no StructureDefinitions loaded, so it validates nothing, and on Sep 20 it held zero Provenance and zero QuestionnaireResponse resources. Our CI is the only validator, and the README can say, with the date, that ours are the first citizen records there.
 7. Drop the wait for a "Session 5 recording". Only five sessions exist, the fifth ran Sep 16 with no recording posted, and there is no Session 6.

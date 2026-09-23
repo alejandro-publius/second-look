@@ -1,0 +1,162 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "expired": false,
+        "passed": true,
+        "text": "4 of 4 on Built banks, tested Sep 23"
+      },
+      "input": {
+        "feature_name": "Built banks",
+        "locale": {
+          "label.checker_noticed": "the checker noticed",
+          "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+          "label.score": "{correct} of {total} on {feature}, tested {date}"
+        },
+        "score": {
+          "correct": 4,
+          "feature": "artificial_bank",
+          "tested_on": "2026-09-23",
+          "total": 4
+        },
+        "today": "2026-09-25"
+      },
+      "name": "four of four, passed"
+    },
+    {
+      "expected": {
+        "expired": true,
+        "passed": null,
+        "text": "Score expired. Tested Jun 1, more than 90 days ago. Retake the test."
+      },
+      "input": {
+        "feature_name": "Pipes and sewage signs",
+        "locale": {
+          "label.checker_noticed": "the checker noticed",
+          "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+          "label.score": "{correct} of {total} on {feature}, tested {date}"
+        },
+        "score": {
+          "correct": 3,
+          "feature": "pipe_running",
+          "tested_on": "2026-06-01",
+          "total": 4
+        },
+        "today": "2026-09-25"
+      },
+      "name": "expired after ninety days"
+    },
+    {
+      "expected": {
+        "expired": false,
+        "passed": true,
+        "text": "3 of 4 on Pipes and sewage signs, tested Jun 27"
+      },
+      "input": {
+        "feature_name": "Pipes and sewage signs",
+        "locale": {
+          "label.checker_noticed": "the checker noticed",
+          "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+          "label.score": "{correct} of {total} on {feature}, tested {date}"
+        },
+        "score": {
+          "correct": 3,
+          "feature": "pipe_running",
+          "tested_on": "2026-06-27",
+          "total": 4
+        },
+        "today": "2026-09-25"
+      },
+      "name": "exactly ninety days still counts"
+    },
+    {
+      "expected": {
+        "expired": true,
+        "passed": null,
+        "text": "Score expired. Tested Jun 26, more than 90 days ago. Retake the test."
+      },
+      "input": {
+        "feature_name": "Pipes and sewage signs",
+        "locale": {
+          "label.checker_noticed": "the checker noticed",
+          "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+          "label.score": "{correct} of {total} on {feature}, tested {date}"
+        },
+        "score": {
+          "correct": 3,
+          "feature": "pipe_running",
+          "tested_on": "2026-06-26",
+          "total": 4
+        },
+        "today": "2026-09-25"
+      },
+      "name": "ninety one days is expired"
+    },
+    {
+      "expected": {
+        "expired": false,
+        "passed": false,
+        "text": "2 of 4 on Dug-out channel, tested Sep 1"
+      },
+      "input": {
+        "feature_name": "Dug-out channel",
+        "locale": {
+          "label.checker_noticed": "the checker noticed",
+          "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+          "label.score": "{correct} of {total} on {feature}, tested {date}"
+        },
+        "score": {
+          "correct": 2,
+          "feature": "dug_out_channel",
+          "tested_on": "2026-09-01",
+          "total": 4
+        },
+        "today": "2026-09-25"
+      },
+      "name": "two of four does not pass"
+    },
+    {
+      "expected": {
+        "expired": false,
+        "passed": null,
+        "text": ""
+      },
+      "input": {
+        "feature_name": "Built banks",
+        "locale": {
+          "label.checker_noticed": "the checker noticed",
+          "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+          "label.score": "{correct} of {total} on {feature}, tested {date}"
+        },
+        "score": null,
+        "today": "2026-09-25"
+      },
+      "name": "no score, empty label"
+    },
+    {
+      "expected": {
+        "expired": false,
+        "passed": true,
+        "text": "3 of 4 on Plants that do not belong, tested Dec 1"
+      },
+      "input": {
+        "feature_name": "Plants that do not belong",
+        "locale": {
+          "label.checker_noticed": "the checker noticed",
+          "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
+          "label.score": "{correct} of {total} on {feature}, tested {date}"
+        },
+        "score": {
+          "correct": 3,
+          "feature": "invasive_plant",
+          "tested_on": "2026-12-01",
+          "total": 4
+        },
+        "today": "2026-12-20"
+      },
+      "name": "a december date"
+    }
+  ],
+  "function": "core.labels.observer_label",
+  "generated_by": "evals/golden_vectors.py"
+}

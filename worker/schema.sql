@@ -61,3 +61,78 @@ CREATE TABLE IF NOT EXISTS skeleton_ping (
   note TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+
+-- The creek check (Update 10 answer A3). Mirrors apps/api/models.py. Coordinates are rounded to
+-- about 1 km unless the person placed the pin. No name, address or token beyond the random
+-- contributor token the person chose to keep.
+
+CREATE TABLE IF NOT EXISTS spot (
+  spot_id TEXT PRIMARY KEY,
+  spot_name TEXT NOT NULL,
+  reach_id TEXT NOT NULL,
+  reach_name TEXT NOT NULL,
+  creek_id TEXT NOT NULL,
+  creek_name TEXT NOT NULL,
+  latitude REAL,
+  longitude REAL,
+  coarse INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS visit (
+  visit_id TEXT PRIMARY KEY,
+  spot_id TEXT NOT NULL REFERENCES spot (spot_id),
+  kind TEXT NOT NULL,
+  contributor_token TEXT,
+  answered_at TEXT NOT NULL,
+  answers_json TEXT NOT NULL,
+  first_rating TEXT,
+  final_rating TEXT,
+  photo_ids_json TEXT NOT NULL,
+  followups_json TEXT NOT NULL,
+  site_json TEXT NOT NULL,
+  finalized_at TEXT,
+  software_version TEXT NOT NULL DEFAULT '0.1.0'
+);
+
+CREATE INDEX IF NOT EXISTS visit_spot ON visit (spot_id);
+
+CREATE TABLE IF NOT EXISTS check_result (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  visit_id TEXT NOT NULL REFERENCES visit (visit_id),
+  rule_id TEXT NOT NULL,
+  asked INTEGER NOT NULL DEFAULT 1,
+  question_text TEXT,
+  answer TEXT,
+  detail_json TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS check_result_visit ON check_result (visit_id);
+
+-- Our store of validated FHIR JSON: one Bundle per finalized visit, the source of truth the
+-- sandbox mirrors. On the Python side this is a folder of files; here it is a table.
+CREATE TABLE IF NOT EXISTS fhir_bundle (
+  visit_id TEXT PRIMARY KEY REFERENCES visit (visit_id),
+  spot_id TEXT NOT NULL,
+  bundle_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS fhir_bundle_spot ON fhir_bundle (spot_id);
+
+-- A photo lives in KV under its id; this row holds the hash of the one token that can read it.
+CREATE TABLE IF NOT EXISTS upload (
+  photo_id TEXT PRIMARY KEY,
+  token_hash TEXT NOT NULL,
+  content_type TEXT NOT NULL,
+  size_bytes INTEGER NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+-- What GET /api/two last fetched from the sandbox, so the screen still works when it is down.
+CREATE TABLE IF NOT EXISTS sandbox_cache (
+  cache_key TEXT PRIMARY KEY,
+  body TEXT NOT NULL,
+  status TEXT NOT NULL,
+  fetched_at TEXT NOT NULL
+);

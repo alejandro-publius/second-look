@@ -1,0 +1,1069 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "entry": [
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+            "resource": {
+              "active": true,
+              "id": "sl-org",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+                  "value": "second-look"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "name": "Second Look project",
+              "resourceType": "Organization",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+            "resource": {
+              "deviceName": [
+                {
+                  "name": "Second Look web app",
+                  "type": "user-friendly-name"
+                }
+              ],
+              "id": "sl-device",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/device",
+                  "value": "second-look-web"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Device",
+              "status": "active",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>",
+                "status": "generated"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "software",
+                    "display": "Second Look software",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              },
+              "version": [
+                {
+                  "value": "0.1.0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03",
+            "resource": {
+              "id": "sl-loc-walk-v03",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "A creek in a clip",
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>A creek in a clip. A creek used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-reach",
+            "resource": {
+              "id": "sl-loc-walk-v03-reach",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-reach"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A reach used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-spot",
+            "resource": {
+              "id": "sl-loc-walk-v03-spot",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-spot"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03-reach"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A spot used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-bbbefee08a25",
+            "resource": {
+              "active": true,
+              "id": "sl-practitioner-bbbefee08a25",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+                  "value": "sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Practitioner",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-walk-d2ef0549e6f251c4",
+            "resource": {
+              "author": {
+                "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+              },
+              "authored": "2026-09-24T16:05:09Z",
+              "id": "sl-qr-visit-walk-d2ef0549e6f251c4",
+              "identifier": {
+                "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+                "value": "walk-d2ef0549e6f251c4"
+              },
+              "item": [
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "bank_type"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "draining_pipes"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueDecimal": 1.0
+                    }
+                  ],
+                  "linkId": "water_height_m"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+              "resourceType": "QuestionnaireResponse",
+              "status": "completed",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-24T16:05:09Z, 3 items answered.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-d2ef0549e6f251c4-bank-type",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "morophology",
+                      "display": "Morphology of the streams",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "artificial-bank",
+                    "display": "Artificial bank",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Bank type"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-d2ef0549e6f251c4"
+                }
+              ],
+              "effectiveDateTime": "2026-09-24T16:05:09Z",
+              "id": "sl-obs-walk-d2ef0549e6f251c4-bank-type",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-d2ef0549e6f251c4-bank_type"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank type at The stretch in the clip: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-d2ef0549e6f251c4-draining-pipes",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "pipe-running",
+                    "display": "Pipe running",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Are there pipes draining polluted water into the stream?"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-d2ef0549e6f251c4"
+                }
+              ],
+              "effectiveDateTime": "2026-09-24T16:05:09Z",
+              "id": "sl-obs-walk-d2ef0549e6f251c4-draining-pipes",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-d2ef0549e6f251c4-draining_pipes"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Are there pipes draining polluted water into the stream? at The stretch in the clip: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-d2ef0549e6f251c4-water-height-m",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "hydrology",
+                    "display": "Hydrology of the stream",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Water height in metres"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-d2ef0549e6f251c4"
+                }
+              ],
+              "effectiveDateTime": "2026-09-24T16:05:09Z",
+              "id": "sl-obs-walk-d2ef0549e6f251c4-water-height-m",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-d2ef0549e6f251c4-water_height_m"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Water height in metres at The stretch in the clip: 1.0 metre.</p></div>",
+                "status": "generated"
+              },
+              "valueQuantity": {
+                "code": "m",
+                "system": "http://unitsofmeasure.org",
+                "unit": "metre",
+                "value": 1.0
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-walk-d2ef0549e6f251c4",
+            "resource": {
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "author",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "assembler",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Device/sl-device"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-walk-d2ef0549e6f251c4"
+                  }
+                }
+              ],
+              "id": "sl-provenance-walk-d2ef0549e6f251c4",
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "recorded": "2026-09-24T16:05:09Z",
+              "resourceType": "Provenance",
+              "target": [
+                {
+                  "reference": "Observation/sl-obs-walk-d2ef0549e6f251c4-bank-type"
+                },
+                {
+                  "reference": "Observation/sl-obs-walk-d2ef0549e6f251c4-draining-pipes"
+                },
+                {
+                  "reference": "Observation/sl-obs-walk-d2ef0549e6f251c4-water-height-m"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>3 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+                "status": "generated"
+              }
+            }
+          }
+        ],
+        "id": "sl-visit-walk-d2ef0549e6f251c4",
+        "meta": {
+          "tag": [
+            {
+              "code": "demo-walk",
+              "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+              "system": "https://github.com/alejandro-publius/second-look/tags"
+            }
+          ]
+        },
+        "resourceType": "Bundle",
+        "timestamp": "2026-09-24T16:05:09Z",
+        "type": "collection"
+      },
+      "input": {
+        "answered_at": "2026-09-24T16:05:09Z",
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "water_height_m": 1.0
+        },
+        "walk": {
+          "creek_name": "A creek in a clip",
+          "id": "v03",
+          "spot_name": "The stretch in the clip"
+        }
+      },
+      "name": "a walk with a built bank, a pipe and a number"
+    },
+    {
+      "expected": {
+        "entry": [
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+            "resource": {
+              "active": true,
+              "id": "sl-org",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+                  "value": "second-look"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "name": "Second Look project",
+              "resourceType": "Organization",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+            "resource": {
+              "deviceName": [
+                {
+                  "name": "Second Look web app",
+                  "type": "user-friendly-name"
+                }
+              ],
+              "id": "sl-device",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/device",
+                  "value": "second-look-web"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Device",
+              "status": "active",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>",
+                "status": "generated"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "software",
+                    "display": "Second Look software",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              },
+              "version": [
+                {
+                  "value": "0.1.0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03",
+            "resource": {
+              "id": "sl-loc-walk-v03",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "A creek in a clip",
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>A creek in a clip. A creek used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-reach",
+            "resource": {
+              "id": "sl-loc-walk-v03-reach",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-reach"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A reach used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-spot",
+            "resource": {
+              "id": "sl-loc-walk-v03-spot",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-spot"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03-reach"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A spot used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-bbbefee08a25",
+            "resource": {
+              "active": true,
+              "id": "sl-practitioner-bbbefee08a25",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+                  "value": "sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Practitioner",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-walk-4116f9ddf7b8b451",
+            "resource": {
+              "author": {
+                "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+              },
+              "authored": "2026-09-25T08:00:00Z",
+              "id": "sl-qr-visit-walk-4116f9ddf7b8b451",
+              "identifier": {
+                "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+                "value": "walk-4116f9ddf7b8b451"
+              },
+              "item": [
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "absent",
+                        "display": "Absent",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "bank_type"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+              "resourceType": "QuestionnaireResponse",
+              "status": "completed",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T08:00:00Z, 1 items answered.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-4116f9ddf7b8b451-bank-type",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "morophology",
+                      "display": "Morphology of the streams",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "artificial-bank",
+                    "display": "Artificial bank",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Bank type"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-4116f9ddf7b8b451"
+                }
+              ],
+              "effectiveDateTime": "2026-09-25T08:00:00Z",
+              "id": "sl-obs-walk-4116f9ddf7b8b451-bank-type",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-4116f9ddf7b8b451-bank_type"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank type at The stretch in the clip: absent.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "absent",
+                    "display": "Absent",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-walk-4116f9ddf7b8b451",
+            "resource": {
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "author",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "assembler",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Device/sl-device"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-walk-4116f9ddf7b8b451"
+                  }
+                }
+              ],
+              "id": "sl-provenance-walk-4116f9ddf7b8b451",
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "recorded": "2026-09-25T08:00:00Z",
+              "resourceType": "Provenance",
+              "target": [
+                {
+                  "reference": "Observation/sl-obs-walk-4116f9ddf7b8b451-bank-type"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>1 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+                "status": "generated"
+              }
+            }
+          }
+        ],
+        "id": "sl-visit-walk-4116f9ddf7b8b451",
+        "meta": {
+          "tag": [
+            {
+              "code": "demo-walk",
+              "display": "Demo visit from a video walk. Made on the device, never stored or counted.",
+              "system": "https://github.com/alejandro-publius/second-look/tags"
+            }
+          ]
+        },
+        "resourceType": "Bundle",
+        "timestamp": "2026-09-25T08:00:00Z",
+        "type": "collection"
+      },
+      "input": {
+        "answered_at": "2026-09-25T08:00:00.750000Z",
+        "answers": {
+          "bank_type": "absent"
+        },
+        "walk": {
+          "creek_name": "A creek in a clip",
+          "id": "v03",
+          "spot_name": "The stretch in the clip"
+        }
+      },
+      "name": "a walk where the person saw nothing and skipped the rest"
+    }
+  ],
+  "function": "core.walks.walk_bundle",
+  "generated_by": "evals/golden_vectors.py"
+}

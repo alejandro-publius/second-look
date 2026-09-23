@@ -64,7 +64,8 @@ def test_draft_asks_the_dry_pipe_and_rating_check_questions(client, monkeypatch)
     r = _draft(client)
     assert r.status_code == 200, r.text
     body = r.json()
-    assert set(body) == {"draft_id", "followups"}
+    assert set(body) == {"draft_id", "followups", "nearby_spot"}
+    assert body["nearby_spot"] is None, "the first pin on an empty map has no neighbour"
     rules = [f["rule_id"] for f in body["followups"]]
     assert rules == ["dry_pipe", "rating_check"]
     dry, rating = body["followups"]
@@ -210,7 +211,7 @@ def test_finalize_without_the_record_builder_is_a_plain_503(client, monkeypatch)
 
 def test_finalize_survives_a_missing_fhir_store(client, monkeypatch):
     monkeypatch.setattr(core_calls, "rain_status", _unknown)
-    monkeypatch.setattr(core_calls, "save_visit_bundle", lambda visit: None)
+    monkeypatch.setattr(core_calls, "save_visit_bundle", lambda visit, **_kw: None)
     draft = _draft(client).json()
     body = client.post("/api/check/finalize", json={"draft_id": draft["draft_id"]}).json()
     assert body["fhir_saved"] is False
@@ -235,9 +236,17 @@ def test_spot_view_shows_answers_beside_the_observer_label(client, monkeypatch):
         "spot_id"
     ]
     view = client.get(f"/api/spot/{spot_id}").json()
-    assert set(view) == {"spot", "visits", "health_card"}
+    assert set(view) == {"spot", "visits", "health_card", "place", "downstream_notes"}
     assert view["spot"]["spot_id"] == spot_id and view["spot"]["coarse"] is True
-    assert view["health_card"] is None  # no approved sentence yet, so nothing is shown
+    # A coarse pin near the campus sits on Strawberry Creek, on no reach, and gets no note.
+    assert view["place"]["creek_slug"] == "strawberry-creek"
+    assert view["place"]["reach_slug"] is None
+    assert view["downstream_notes"] == []
+    # Update 13: one approved action each for the person, the pet and the city, with sources.
+    card = view["health_card"]
+    assert set(card) == {"person", "pet", "city", "sources"}
+    assert card["person"] and card["pet"] and card["city"] and len(card["sources"]) == 3
+    assert "Policy Brief" in card["sources"][2]
     assert len(view["visits"]) == 1
     visit = view["visits"][0]
     assert set(visit) >= {

@@ -16,7 +16,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
-from core.records import CheckResult, FeatureScore, Observer, Spot, VisitRecord
+from core.records import CheckResult, FeatureScore, Observer, Spot, TestSitting, VisitRecord
 
 log = logging.getLogger("apps.api")
 
@@ -187,7 +187,7 @@ def build_record(
     )
 
 
-def save_visit_bundle(visit: VisitRecord) -> Path | None:
+def save_visit_bundle(visit: VisitRecord, test_sitting: TestSitting | None = None) -> Path | None:
     """apps.api.fhir_store.save_visit_bundle (W3). None when the store is not there yet or
     refuses the visit; the database row is the source of truth either way."""
     try:
@@ -195,7 +195,7 @@ def save_visit_bundle(visit: VisitRecord) -> Path | None:
     except ImportError:
         return None
     try:
-        path = store(visit)
+        path = store(visit, test_sitting=test_sitting)
     except Exception as exc:
         log.warning("fhir store refused visit %s: %s", visit.visit_id, type(exc).__name__)
         return None

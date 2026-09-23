@@ -11,7 +11,7 @@ import io
 import json
 import re
 import secrets
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -24,7 +24,8 @@ from apps.api.db import as_utc
 from apps.api.models import CheckResultRow, ObserverRow, SpotRow, UploadRow, VisitRow
 from apps.api.security import sha256_hex
 from apps.api.settings import settings
-from core.records import CheckResult, FeatureId, FeatureScore, Observer, Spot
+from core import act
+from core.records import CheckResult, FeatureId, FeatureScore, Observer, Spot, TestSitting
 
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 MAX_IMAGE_SIDE = 1600
@@ -177,6 +178,36 @@ def _round_coarse(value: float | None, coarse: bool) -> float | None:
     return round(value, COARSE_DECIMALS) if coarse else round(value, 6)
 
 
+def nearby_existing_spot(db: Session, ref: SpotRef) -> dict[str, Any] | None:
+    """An existing spot within 30 metres of a new pin, so the app can offer it first.
+
+    A suggestion, never a merge. Two spots twenty five metres apart can be two real places, and
+    quietly folding one into the other would lose a visit nobody could get back. Update 10
+    tier 1 item 3; the arithmetic is core.act.nearest_spot, which is pure and tested.
+    """
+    if ref.spot_id or ref.new is None:
+        return None
+    if ref.new.latitude is None or ref.new.longitude is None:
+        return None
+    # Only precise pins can be compared. A coarse spot is deliberately rounded to about a
+    # kilometre for privacy, so asking whether it is within thirty metres of anything is noise,
+    # and answering would offer the wrong spot far more often than the right one.
+    if ref.new.coarse:
+        return None
+    existing = [
+        spot_from_row(r)
+        for r in db.exec(select(SpotRow).where(SpotRow.coarse == False)).all()  # noqa: E712
+    ]
+    near = act.nearest_spot(ref.new.latitude, ref.new.longitude, existing)
+    if near is None:
+        return None
+    return {
+        "spot_id": near.spot.spot_id,
+        "spot_name": near.spot.spot_name,
+        "metres": round(near.metres),
+    }
+
+
 def resolve_spot(db: Session, ref: SpotRef, *, now: datetime) -> SpotRow:
     if ref.spot_id:
         row = db.get(SpotRow, ref.spot_id)
@@ -277,6 +308,8 @@ def create_draft(db: Session, body: DraftBody, *, now: datetime) -> dict[str, An
     answers = validate_answers(body.answers)
     first_rating = validate_rating(body.first_rating)
     photo_ids = _check_photo_ids(db, body.photo_ids)
+    # Look before the new spot is made, or it finds itself.
+    nearby = nearby_existing_spot(db, body.spot)
     spot = resolve_spot(db, body.spot, now=now)
     rain = core_calls.rain_status(spot.latitude, spot.longitude, now)
     c = content.get_content()
@@ -316,6 +349,8 @@ def create_draft(db: Session, body: DraftBody, *, now: datetime) -> dict[str, An
     db.commit()
     return {
         "draft_id": visit_id,
+        # Not a merge: the app offers this spot first and the person decides.
+        "nearby_spot": nearby,
         "followups": [
             {
                 "rule_id": f["rule_id"],
@@ -407,8 +442,30 @@ def finalize(db: Session, body: FinalizeBody, *, now: datetime) -> dict[str, Any
     row.finalized_at = now
     db.add(row)
     db.commit()
-    saved = core_calls.save_visit_bundle(record)
+    saved = core_calls.save_visit_bundle(
+        record, test_sitting=sitting_for(db, row.contributor_token)
+    )
     return {"visit_id": row.visit_id, "spot_id": row.spot_id, "fhir_saved": saved is not None}
+
+
+def sitting_for(db: Session, token: str | None) -> TestSitting | None:
+    """The observer's test sitting as the record carries it: the per feature k of 4, structured,
+    so a reader of the FHIR does not have to parse a narrative to find the score. The sitting id
+    is a hash of the token, like the Practitioner id, so the token itself never appears."""
+    if not token:
+        return None
+    row = db.get(ObserverRow, token)
+    if row is None:
+        return None
+    observer = observer_from_token(db, token)
+    if observer is None or not observer.scores:
+        return None
+    return TestSitting(
+        sitting_id=f"sitting-{sha256_hex(token)[:12]}",
+        contributor_token=token,
+        completed_at=datetime.combine(row.tested_on, datetime.min.time(), tzinfo=UTC),
+        scores=observer.scores,
+    )
 
 
 def quick_check(db: Session, spot_id: str, body: QuickBody, *, now: datetime) -> dict[str, Any]:

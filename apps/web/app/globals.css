@@ -336,6 +336,22 @@ figcaption {
   border: var(--hairline) solid var(--line);
 }
 
+/* A video walk: the clip and its credit, with none of the browser's default figure margin. */
+.walk-figure {
+  margin: 0;
+}
+
+/* A video walk clip: the same frame as a photograph, 16 by 9 because that is how it was filmed. */
+.walk-clip {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  background: var(--surface-sunk);
+  border: var(--hairline) solid var(--line);
+}
+
 .photo-large {
   max-height: 46dvh;
 }
@@ -484,6 +500,8 @@ figcaption {
 .row-value {
   color: var(--ink-soft);
   font-size: var(--text-small);
+  /* A source can be a bare URL; let it wrap so a card never runs past a phone's edge. */
+  overflow-wrap: anywhere;
 }
 
 .row-end {
@@ -729,6 +747,19 @@ progress {
   background: var(--surface);
 }
 
+/* One question per screen as a fieldset. The legend holds the screen heading, so neither draws the
+   default box, and the fieldset may shrink to a narrow phone instead of its widest word. */
+.question-set {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.question-set > legend {
+  padding: 0;
+}
+
 .option-list {
   display: grid;
   gap: var(--s2);
@@ -874,6 +905,18 @@ pre.code {
   max-height: 60dvh;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+/* The observer score on a record card: the one line that says how much to trust the record. */
+.record-score {
+  margin: var(--s2) 0;
+  padding: var(--s2) var(--s3);
+  background: var(--surface-sunk);
+  border-left: var(--s1) solid var(--flag);
+}
+
+.record-score dd {
+  font-weight: 700;
 }
 
 .share-card {

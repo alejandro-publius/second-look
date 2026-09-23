@@ -1,6 +1,6 @@
 # Third party dependencies
 
-Generated on 2026-09-21 by `uv run python scripts/third_party.py` from `uv.lock` and `apps/web/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
+Generated on 2026-09-22 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
 
 ## External services
 
@@ -14,18 +14,20 @@ Generated on 2026-09-21 by `uv run python scripts/third_party.py` from `uv.lock`
 - hl7-eu/oah implementation guide, commit b907cf0, built from source in CI with SUSHI 3.20.1 and
   validated with the HL7 validator. That repo has no LICENSE file, so nothing from it is
   redistributed here; `fhir/ig.lock` records the commit and the package sha256.
-- Vercel (web) and Fly.io (API) host the app. What they log on their own is written in
-  docs/DATA_HANDLING.md.
+- Cloudflare Pages (web) and Cloudflare Workers with D1 (API) host the app (Update 09). What
+  they log on their own is written in docs/DATA_HANDLING.md.
+- The MCP server in `apps/mcp/` runs locally over stdio through the `mcp` Python SDK (MIT). It
+  reads our own read only endpoint or a local export and calls no other service.
 
 ## Design references
 
-Read during the design pass (docs/updates/UPDATE_06.md). Nothing is copied from either: no brand
-colour, name, logo or font was taken. They informed structure and restraint only.
+Read during the design pass (docs/internal/updates/UPDATE_06.md). Nothing is copied from either:
+no brand colour, name, logo or font was taken. They informed structure and restraint only.
 
 - Vercel Web Interface Guidelines, MIT
   (https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md).
   `apps/web` was audited against every rule in it; the findings are in
-  docs/reviews/DESIGN_REVIEW_01.md.
+  docs/internal/reviews/DESIGN_REVIEW_01.md.
 - VoltAgent awesome-design-md, MIT (https://github.com/VoltAgent/awesome-design-md). The Airbnb
   file for how a product lets photographs lead, the Wise file for how forms stay clear. Structure
   of docs/design/DESIGN.md borrows their shape: one read, tokens, components, do and do not.
@@ -40,7 +42,7 @@ colour, name, logo or font was taken. They informed structure and restraint only
   `apps/web/scripts/build-icons.mjs` generates `components/ui/Icon.tsx` from its SVG assets, so
   there is no icon runtime in the bundle and no second icon family can appear.
 
-## Python packages (74, from uv.lock)
+## Python packages (95, from uv.lock)
 
 | Package | Version | License |
 |---|---|---|
@@ -50,10 +52,13 @@ colour, name, logo or font was taken. They informed structure and restraint only
 | anthropic | 1.7.0 | MIT |
 | anyio | 4.15.1 | MIT |
 | ast-serialize | 0.11.2 | MIT |
+| attrs | 26.1.0 | MIT |
 | certifi | 2026.7.22 | MPL-2.0 |
+| cffi | 2.1.1 | MIT-0 |
 | click | 8.5.0 | BSD-3-Clause |
 | colorama | 0.4.6 | not installed here |
 | contourpy | 1.4.0 | BSD-3-Clause |
+| cryptography | 50.0.1 | Apache-2.0 OR BSD-3-Clause |
 | cycler | 0.12.1 | BSD |
 | docstring-parser | 0.18.0 | MIT |
 | duckdb | 1.5.5 | MIT |
@@ -71,14 +76,20 @@ colour, name, logo or font was taken. They informed structure and restraint only
 | idna | 3.20 | BSD-3-Clause |
 | iniconfig | 2.3.0 | MIT |
 | jiter | 0.17.0 | MIT |
+| jsonschema | 4.26.0 | MIT |
+| jsonschema-specifications | 2025.9.1 | MIT |
 | kiwisolver | 1.5.1 | BSD |
 | librt | 0.15.0 | MIT |
 | mako | 1.4.1 | MIT |
 | markupsafe | 3.0.3 | BSD-3-Clause |
 | matplotlib | 3.11.2 | Python Software Foundation |
+| mcp | 2.2.0 | MIT |
+| mcp-types | 2.2.0 | MIT |
 | mypy | 2.3.1 | MIT |
 | mypy-extensions | 1.1.0 | MIT |
 | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 |
+| opencv-python-headless | 4.14.0.94 | Apache 2.0 |
+| opentelemetry-api | 1.44.0 | Apache-2.0 |
 | packaging | 26.3 | Apache-2.0 OR BSD-2-Clause |
 | pandas | 3.0.6 | BSD |
 | pandas-stubs | 3.0.5.260914 | BSD-3-Clause |
@@ -87,18 +98,28 @@ colour, name, logo or font was taken. They informed structure and restraint only
 | pluggy | 1.6.0 | MIT |
 | psycopg | 3.3.6 | LGPL-3.0-only |
 | psycopg-binary | 3.3.6 | LGPL-3.0-only |
+| pycparser | 3.0 | BSD-3-Clause |
 | pydantic | 2.13.5 | MIT |
 | pydantic-core | 2.46.5 | MIT |
 | pydantic-settings | 2.15.0 | MIT |
 | pygments | 2.21.0 | BSD-2-Clause |
+| pyjwt | 2.14.0 | MIT |
+| pyobjc-core | 12.2.2 | MIT |
+| pyobjc-framework-cocoa | 12.2.2 | MIT |
+| pyobjc-framework-coreml | 12.2.2 | MIT |
+| pyobjc-framework-quartz | 12.2.2 | MIT |
+| pyobjc-framework-vision | 12.2.2 | MIT |
 | pyparsing | 3.3.3 | MIT |
 | pytest | 9.1.1 | MIT |
 | pytest-asyncio | 1.4.0 | Apache-2.0 |
 | python-dateutil | 2.9.0.post0 | Dual License |
 | python-dotenv | 1.2.3 | BSD-3-Clause |
 | python-multipart | 0.0.32 | Apache-2.0 |
+| pywin32 | 312 | not installed here |
 | pyyaml | 6.0.3 | MIT |
+| referencing | 0.37.0 | MIT |
 | respx | 0.23.1 | BSD-3-Clause |
+| rpds-py | 2026.6.3 | MIT |
 | ruff | 0.16.8 | MIT |
 | scipy | 1.18.1 | BSD |
 | six | 1.17.0 | MIT |
@@ -106,6 +127,7 @@ colour, name, logo or font was taken. They informed structure and restraint only
 | sortedcontainers | 2.4.0 | Apache 2.0 |
 | sqlalchemy | 2.0.54 | MIT |
 | sqlmodel | 0.0.42 | MIT |
+| sse-starlette | 3.4.11 | BSD-3-Clause |
 | starlette | 1.6.0 | BSD-3-Clause |
 | truststore | 0.10.4 | MIT |
 | types-pyyaml | 6.0.12.20260906 | Apache-2.0 |
@@ -118,6 +140,7 @@ colour, name, logo or font was taken. They informed structure and restraint only
 | uvloop | 0.22.1 | MIT License |
 | watchfiles | 1.2.0 | MIT |
 | websockets | 17.1 | BSD-3-Clause |
+| yt-dlp | 2026.8.19 | Unlicense |
 
 ## Web packages (438, from apps/web/package-lock.json)
 
@@ -564,4 +587,131 @@ dev = only used to build or test, not shipped to a browser.
 | zod | 4.6.5 | MIT | yes |
 | zod-validation-error | 4.0.2 | MIT | yes |
 
-Licenses not found for 4 Python and 0 web packages; check those by hand before the repo goes public.
+## Worker packages (120, from worker/package-lock.json)
+
+All dev: the toolchain that type checks, tests and runs the Worker locally. The deployed Worker bundles only our own code and worker/src/content.json.
+
+| Package | Version | License | dev |
+|---|---|---|---|
+| @cloudflare/kv-asset-handler | 0.5.0 | MIT OR Apache-2.0 | yes |
+| @cloudflare/unenv-preset | 2.16.1 | MIT OR Apache-2.0 | yes |
+| @cloudflare/workerd-darwin-64 | 1.20260918.1 | Apache-2.0 | yes |
+| @cloudflare/workerd-darwin-arm64 | 1.20260918.1 | Apache-2.0 | yes |
+| @cloudflare/workerd-linux-64 | 1.20260918.1 | Apache-2.0 | yes |
+| @cloudflare/workerd-linux-arm64 | 1.20260918.1 | Apache-2.0 | yes |
+| @cloudflare/workerd-windows-64 | 1.20260918.1 | Apache-2.0 | yes |
+| @cloudflare/workers-types | 5.20260921.1 | MIT OR Apache-2.0 | yes |
+| @cspotcode/source-map-support | 0.8.1 | MIT | yes |
+| @emnapi/runtime | 1.11.3 | MIT | yes |
+| @esbuild/aix-ppc64 | 0.28.1 | MIT | yes |
+| @esbuild/aix-ppc64 | 0.28.2 | MIT | yes |
+| @esbuild/android-arm | 0.28.1 | MIT | yes |
+| @esbuild/android-arm | 0.28.2 | MIT | yes |
+| @esbuild/android-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/android-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/android-x64 | 0.28.1 | MIT | yes |
+| @esbuild/android-x64 | 0.28.2 | MIT | yes |
+| @esbuild/darwin-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/darwin-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/darwin-x64 | 0.28.1 | MIT | yes |
+| @esbuild/darwin-x64 | 0.28.2 | MIT | yes |
+| @esbuild/freebsd-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/freebsd-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/freebsd-x64 | 0.28.1 | MIT | yes |
+| @esbuild/freebsd-x64 | 0.28.2 | MIT | yes |
+| @esbuild/linux-arm | 0.28.1 | MIT | yes |
+| @esbuild/linux-arm | 0.28.2 | MIT | yes |
+| @esbuild/linux-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/linux-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/linux-ia32 | 0.28.1 | MIT | yes |
+| @esbuild/linux-ia32 | 0.28.2 | MIT | yes |
+| @esbuild/linux-loong64 | 0.28.1 | MIT | yes |
+| @esbuild/linux-loong64 | 0.28.2 | MIT | yes |
+| @esbuild/linux-mips64el | 0.28.1 | MIT | yes |
+| @esbuild/linux-mips64el | 0.28.2 | MIT | yes |
+| @esbuild/linux-ppc64 | 0.28.1 | MIT | yes |
+| @esbuild/linux-ppc64 | 0.28.2 | MIT | yes |
+| @esbuild/linux-riscv64 | 0.28.1 | MIT | yes |
+| @esbuild/linux-riscv64 | 0.28.2 | MIT | yes |
+| @esbuild/linux-s390x | 0.28.1 | MIT | yes |
+| @esbuild/linux-s390x | 0.28.2 | MIT | yes |
+| @esbuild/linux-x64 | 0.28.1 | MIT | yes |
+| @esbuild/linux-x64 | 0.28.2 | MIT | yes |
+| @esbuild/netbsd-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/netbsd-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/netbsd-x64 | 0.28.1 | MIT | yes |
+| @esbuild/netbsd-x64 | 0.28.2 | MIT | yes |
+| @esbuild/openbsd-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/openbsd-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/openbsd-x64 | 0.28.1 | MIT | yes |
+| @esbuild/openbsd-x64 | 0.28.2 | MIT | yes |
+| @esbuild/openharmony-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/openharmony-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/sunos-x64 | 0.28.1 | MIT | yes |
+| @esbuild/sunos-x64 | 0.28.2 | MIT | yes |
+| @esbuild/win32-arm64 | 0.28.1 | MIT | yes |
+| @esbuild/win32-arm64 | 0.28.2 | MIT | yes |
+| @esbuild/win32-ia32 | 0.28.1 | MIT | yes |
+| @esbuild/win32-ia32 | 0.28.2 | MIT | yes |
+| @esbuild/win32-x64 | 0.28.1 | MIT | yes |
+| @esbuild/win32-x64 | 0.28.2 | MIT | yes |
+| @img/colour | 1.1.0 | MIT | yes |
+| @img/sharp-darwin-arm64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-darwin-x64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-freebsd-wasm32 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-libvips-darwin-arm64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-darwin-x64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linux-arm | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linux-arm64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linux-ppc64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linux-riscv64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linux-s390x | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linux-x64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linuxmusl-arm64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-libvips-linuxmusl-x64 | 1.3.3 | LGPL-3.0-or-later | yes |
+| @img/sharp-linux-arm | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-linux-arm64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-linux-ppc64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-linux-riscv64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-linux-s390x | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-linux-x64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-linuxmusl-arm64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-linuxmusl-x64 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-wasm32 | 0.35.4 | Apache-2.0 AND LGPL-3.0-or-later AND MIT | yes |
+| @img/sharp-webcontainers-wasm32 | 0.35.4 | Apache-2.0 | yes |
+| @img/sharp-win32-arm64 | 0.35.4 | Apache-2.0 AND LGPL-3.0-or-later | yes |
+| @img/sharp-win32-ia32 | 0.35.4 | Apache-2.0 AND LGPL-3.0-or-later | yes |
+| @img/sharp-win32-x64 | 0.35.4 | Apache-2.0 AND LGPL-3.0-or-later | yes |
+| @jridgewell/resolve-uri | 3.1.2 | MIT | yes |
+| @jridgewell/sourcemap-codec | 1.6.0 | MIT | yes |
+| @jridgewell/trace-mapping | 0.3.9 | MIT | yes |
+| @poppinss/colors | 4.1.6 | MIT | yes |
+| @poppinss/dumper | 0.6.5 | MIT | yes |
+| @poppinss/exception | 1.2.3 | MIT | yes |
+| @sindresorhus/is | 7.2.0 | MIT | yes |
+| @speed-highlight/core | 1.2.24 | CC0-1.0 | yes |
+| blake3-wasm | 2.1.5 | MIT | yes |
+| cookie | 1.1.1 | MIT | yes |
+| detect-libc | 2.1.2 | Apache-2.0 | yes |
+| error-stack-parser-es | 1.0.5 | MIT | yes |
+| esbuild | 0.28.1 | MIT | yes |
+| esbuild | 0.28.2 | MIT | yes |
+| fsevents | 2.3.3 | MIT | yes |
+| kleur | 4.1.5 | MIT | yes |
+| miniflare | 5.20260918.0-alpha | MIT | yes |
+| path-to-regexp | 6.3.0 | MIT | yes |
+| pathe | 2.0.3 | MIT | yes |
+| semver | 7.8.5 | ISC | yes |
+| sharp | 0.35.4 | Apache-2.0 | yes |
+| supports-color | 10.2.2 | MIT | yes |
+| tslib | 2.8.1 | 0BSD | yes |
+| typescript | 5.9.3 | Apache-2.0 | yes |
+| undici | 7.29.0 | MIT | yes |
+| unenv | 2.0.0-rc.24 | MIT | yes |
+| workerd | 1.20260918.1 | Apache-2.0 | yes |
+| wrangler | 4.135.0 | MIT OR Apache-2.0 | yes |
+| ws | 8.21.0 | MIT | yes |
+| youch | 4.1.0-beta.10 | MIT | yes |
+| youch-core | 0.3.3 | MIT | yes |
+
+Licenses not found for 5 Python and 0 web and worker packages; check those by hand before the repo goes public.

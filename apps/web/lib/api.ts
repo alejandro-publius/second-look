@@ -1,8 +1,15 @@
 // The one client for the W1 API. Shapes mirror docs/CONTRACTS.md exactly. Nothing else in the app
 // calls fetch against the API origin.
 
+// Empty means the API is served under /api/* on this same origin (Update 10 A1): every fetch is
+// then a relative path and the policy says connect-src 'self'.
 export const API_ORIGIN = (process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:8000").replace(/\/$/, "");
 
+/** An absolute URL for a path a person may copy, such as a curl line. */
+export function absoluteApiUrl(path: string): string {
+  if (API_ORIGIN) return `${API_ORIGIN}${path}`;
+  return typeof window === "undefined" ? path : `${window.location.origin}${path}`;
+}
 /**
  * Set only on the dry-run build. It makes the server stamp every session this build starts as
  * is_test, so three friends trying the thing out never land in the study (Update 11D item 5).
@@ -180,6 +187,8 @@ export interface SpotRecordOut {
   spot: SpotOut;
   visits: VisitOut[];
   health_card: HealthCardOut | null;
+  place?: SpotPlace | null;
+  downstream_notes?: DownstreamNote[];
 }
 
 export interface FhirValidationOut {
@@ -194,6 +203,110 @@ export interface FhirValidationOut {
 }
 
 export type FhirObservation = Record<string, unknown>;
+
+/** The analyst's view. Every number carries the visit ids and Bundle links behind it. */
+export interface CityFinding {
+  spot_id: string;
+  spot_name: string;
+  feature: string;
+  feature_name: string;
+  observers: number;
+  first_seen: string;
+  last_seen: string;
+  visit_ids: string[];
+  fhir: string[];
+}
+
+export interface CityNeed {
+  sentence_id: string;
+  text: string;
+  source: string;
+  because: string[];
+  visit_ids: string[];
+  fhir: string[];
+}
+
+export interface CityPipe {
+  spot_id: string;
+  spot_name: string;
+  observers: number;
+  dry_days: number[];
+  last_seen: string;
+  visit_ids: string[];
+  fhir: string[];
+  /** The ServiceRequest for this pipe, real and computed from the visits above. */
+  referral: string;
+  /** How a laboratory result would come back to the same record. An example, tagged as one. */
+  example_result: string;
+}
+
+/** The little of FHIR the example panel needs to draw a table. */
+export interface FhirBundle {
+  resourceType: "Bundle";
+  meta?: { tag?: { system?: string; code?: string; display?: string }[] };
+  entry?: { resource: FhirResource }[];
+}
+
+export interface FhirResource {
+  resourceType: string;
+  id?: string;
+  meta?: { tag?: { system?: string; code?: string; display?: string }[] };
+  code?: { coding?: { code?: string; display?: string }[]; text?: string };
+  valueQuantity?: { value?: number; unit?: string; code?: string };
+  valueCodeableConcept?: { coding?: { code?: string; display?: string }[] };
+  specimen?: { reference?: string };
+  [k: string]: unknown;
+}
+
+/** One plain line on a reach below a finding, with the visits it was counted from. */
+export interface DownstreamNote {
+  reach_slug: string;
+  reach_name: string;
+  from_reach_slug: string;
+  from_reach_name: string;
+  feature: string;
+  feature_name: string;
+  line: string;
+  observers: number;
+  visit_ids: string[];
+  fhir: string[];
+}
+
+/** A reach from the region pack, hills first, with the notes that land on it. */
+export interface CityReach {
+  slug: string;
+  name: string;
+  flows_into: string | null;
+  flows_into_name: string | null;
+  spots: number;
+  visits: number;
+  notes: DownstreamNote[];
+}
+
+export interface CityOut {
+  creek_id: string;
+  /** The readable slug from the region pack, or null for a creek the pack does not know. */
+  creek_slug: string | null;
+  creek_name: string;
+  visits: number;
+  spots: number;
+  findings: CityFinding[];
+  needs: CityNeed[];
+  pipes_worth_testing: CityPipe[];
+  flagged_spots: { spot_id: string; spot_name: string; why: string }[];
+  measures_waiting_for_approval: boolean;
+  reaches: CityReach[];
+  downstream_notes: DownstreamNote[];
+  unplaced_spots: number;
+}
+
+/** Where a spot sits in the region pack. reach_* are null for a coarse pin. */
+export interface SpotPlace {
+  creek_slug: string;
+  creek_name: string;
+  reach_slug: string | null;
+  reach_name: string | null;
+}
 
 export interface TwoOut {
   ours: FhirObservation;
@@ -305,10 +418,20 @@ export const api = {
     return request<Record<string, unknown>>("GET", `/api/spot/${encodeURIComponent(spot_id)}/fhir`);
   },
   spotFhirUrl(spot_id: string) {
-    return `${API_ORIGIN}/api/spot/${encodeURIComponent(spot_id)}/fhir`;
+    return absoluteApiUrl(`/api/spot/${encodeURIComponent(spot_id)}/fhir`);
   },
   fhirValidation() {
     return request<FhirValidationOut>("GET", "/api/fhir/validation");
+  },
+  city(creek_id: string) {
+    return request<CityOut>("GET", `/api/city/${encodeURIComponent(creek_id)}`);
+  },
+  /** A path the city view handed us, such as a pipe's referral or its example result. */
+  fhirAt(path: string) {
+    return request<FhirBundle>("GET", path);
+  },
+  fhirUrl(path: string) {
+    return absoluteApiUrl(path);
   },
   two() {
     return request<TwoOut>("GET", "/api/two");

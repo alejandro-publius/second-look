@@ -1,0 +1,19 @@
+{
+  "_about": "A person looked at every kept frame on 2026-09-22 (Update 15). The screens in scripts/make_frames.py miss small figures far off and a hand at the edge. Frames and videos listed here are dropped on every run, with the reason. A frame is named by its video's link and the second it was cut at, so a new pick that renumbers the videos cannot move a drop onto the wrong frame.",
+  "frames": {
+    "https://www.youtube.com/watch?v=CsayzeejVzY@467": "a small figure standing in the stream, too far off for the detectors",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@479": "the same small figure in the stream",
+    "https://www.youtube.com/watch?v=DaD3RJGEvhM@151": "a hand at the bottom edge of the frame",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@459": "a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@463": "a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@471": "a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@475": "a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@483": "a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@487": "a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s",
+    "https://www.youtube.com/watch?v=CsayzeejVzY@491": "a small figure standing in the stream, far off; this stretch of the video from 459 s to 491 s"
+  },
+  "videos": {
+    "https://www.youtube.com/watch?v=1M91MFV5bjA": "a montage of stock clips (a waterfall with a crowded walkway, a fjord, sea waves on a beach), not footage of one creek",
+    "https://commons.wikimedia.org/wiki/File:1._Lewis_and_Clark_Bridge_-_Sunny_March_28,_2019.webm": "the Ohio River from a drone at a highway bridge; the creek its description names is a side creek that barely appears, so this is not creek footage"
+  }
+}
