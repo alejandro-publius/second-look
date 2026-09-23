@@ -742,6 +742,19 @@ progress {
   background: var(--surface);
 }
 
+/* One question per screen as a fieldset. The legend holds the screen heading, so neither draws the
+   default box, and the fieldset may shrink to a narrow phone instead of its widest word. */
+.question-set {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.question-set > legend {
+  padding: 0;
+}
+
 .option-list {
   display: grid;
   gap: var(--s2);
