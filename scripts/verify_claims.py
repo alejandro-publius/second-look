@@ -47,11 +47,15 @@ def resolve_pointer(doc: object, pointer: str) -> object:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--synthetic", action="store_true", help="accept results stamped synthetic")
+    parser.add_argument(
+        "--file", type=Path, default=None, help="check this markdown file instead of README.md"
+    )
     args = parser.parse_args()
-    if not README.exists():
-        print("verify-claims: README.md missing")
+    target = ROOT / args.file if args.file and not args.file.is_absolute() else args.file or README
+    if not target.exists():
+        print(f"verify-claims: {target.name} missing")
         return 1
-    text = README.read_text(encoding="utf-8")
+    text = target.read_text(encoding="utf-8")
     problems: list[str] = []
     checked = 0
     for m in CLAIM_RE.finditer(text):

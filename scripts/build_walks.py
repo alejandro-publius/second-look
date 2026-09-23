@@ -43,8 +43,8 @@ from typing import Any
 import yaml
 
 from core.gate import parse_flags
-from scripts.make_frames import license_code
 from core.records import FEATURES
+from scripts.make_frames import license_code
 
 ROOT = Path(__file__).resolve().parents[1]
 VIDEOS = ROOT / "videos" / "manifest.csv"

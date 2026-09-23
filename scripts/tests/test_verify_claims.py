@@ -41,3 +41,16 @@ def test_a_rendered_synthetic_number_fails(tmp_path: Path, monkeypatch: pytest.M
 
 def test_a_token_nobody_rendered_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert run(tmp_path, monkeypatch, "{{claim:results/x.json#/frames}}", {"frames": 1}) == 1
+
+
+def test_another_file_is_checked_the_same_way(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "results").mkdir()
+    (tmp_path / "results" / "x.json").write_text(json.dumps({"frames": 46}))
+    (tmp_path / "README.md").write_text("nothing here")
+    (tmp_path / "devpost.md").write_text("<!-- claim: results/x.json#/frames = 45 -->")
+    monkeypatch.setattr(vc, "ROOT", tmp_path)
+    monkeypatch.setattr(vc, "README", tmp_path / "README.md")
+    monkeypatch.setattr("sys.argv", ["verify_claims.py", "--file", "devpost.md"])
+    assert vc.main() == 1
