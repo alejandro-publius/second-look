@@ -1,0 +1,55 @@
+{
+ "target": "live",
+ "rate_sessions_per_minute": 50.0,
+ "minutes": 5.0,
+ "wall_seconds": 301.3,
+ "sessions_started": 250,
+ "sessions_done": 250,
+ "requests": 750,
+ "session_errors": [],
+ "session_error_count": 0,
+ "endpoints": [
+  {
+   "endpoint": "GET api /api/content/hash",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 43.8,
+   "p95_ms": 133.5,
+   "p99_ms": 337.5,
+   "max_ms": 492.3
+  },
+  {
+   "endpoint": "GET api /health",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 44.8,
+   "p95_ms": 136.5,
+   "p99_ms": 259.5,
+   "max_ms": 4356.2
+  },
+  {
+   "endpoint": "GET site /",
+   "requests": 250,
+   "ok": 250,
+   "statuses": {
+    "200": 250
+   },
+   "p50_ms": 62.2,
+   "p95_ms": 177.3,
+   "p99_ms": 1972.0,
+   "max_ms": 4285.0
+  }
+ ],
+ "think_seconds": [
+  0.5,
+  1.5
+ ],
+ "machine": "Darwin 24.1.0, 8 CPUs",
+ "finished_utc": "2026-09-23T04:45:26Z"
+}
