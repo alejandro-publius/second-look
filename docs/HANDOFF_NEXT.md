@@ -1,4 +1,29 @@
-# Handoff: where Second Look stands, 2026-09-21
+# Handoff: where Second Look stands, 2026-09-22
+
+## Update 14 status (prompt 15 run, written before work started, then kept current)
+
+The brief is `docs/internal/updates/UPDATE_14.md`, resumed by `UPDATE_15.md`. No API key exists
+in `.env`, so every AI step runs on the fake client and the result slots say results arrive with
+the model run.
+
+| Phase | Step | State |
+|---|---|---|
+| 1 Launch on main | 1 to 3, 5 | done |
+| | 4 wipe | partly: local database wiped; the live D1 rows wait on Alex's command in `docs/ALEX_TODO.md` |
+| | 6 deploy main and check it | done 2026-09-22: Pages deployment 945eaee9, /demo text, paint 760 ms, phone sitting passed; that sitting was stored as real (stale QA key), logged in docs/deviations.md, repair is Alex's |
+| 2 Content and cleanup | 1 to 6 | done |
+| 3 AI on the test and footage | 1 the 16-photo test | partly: pipeline, fake run, ids and prices re-confirmed; batch ids fixed; the paid run is Alex's one command |
+| | 2 to 5 footage | done: 68 candidates, pick by rule, Vision screen, eye check (`videos/review.json`), 6 videos, 3 countries |
+| | 6 AI on footage | built and run on the fake client (`evals/footage.py`); real numbers wait on the key |
+| | 7 video walks | built: `/walk`, three walks from three countries (a fourth country is not in the pool) |
+| | 8 README numbers | footage pool, walks and validation counts come from `results/`; AI numbers say they arrive with the model run |
+| 4 README and docs | | README in the tier 3 shape under the organizers' five headers; ACCEPTANCE, SCORECARD, ARCHITECTURE |
+| 5 How it feels | | partly: `make readability`, Spanish draft (unverified); screenshots, critic and fixes to do |
+| 6 Merge and deploy | | not started; sandbox checked (15 of 15 resources answer), re-push job written |
+| 7 Video | | shot list, creek brief, recorder and rough cut built; recordings after the UI settles |
+| 8 Submission pack | | `make go-public` and `docs/ALEX_TODO.md` done; devpost and submit-check to do |
+| 9 Report | | not started |
+
 
 Two branches, two jobs.
 

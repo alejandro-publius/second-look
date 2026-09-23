@@ -25,7 +25,10 @@ def test_a_backticked_path_and_the_bare_folder_are_rewritten() -> None:
 
 
 def test_the_readme_line_about_the_folder_goes() -> None:
-    line = "docs/        product docs; docs/internal/ holds the working notes, removed before the repo opens"
+    line = (
+        "docs/        product docs; docs/internal/ holds the working notes, removed before the "
+        "repo opens"
+    )
     assert gp.rewrite(line) == "docs/        product docs"
 
 

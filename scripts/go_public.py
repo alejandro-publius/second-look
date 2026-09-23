@@ -60,7 +60,20 @@ def run(cmd: list[str]) -> tuple[int, str]:
 
 
 def mentions() -> list[tuple[str, int]]:
-    code, out = run(["git", "grep", "-c", INTERNAL, "--", ".", f":!{INTERNAL}"])
+    # This script and its test name the folder on purpose, and are the one place that may.
+    code, out = run(
+        [
+            "git",
+            "grep",
+            "-c",
+            INTERNAL,
+            "--",
+            ".",
+            f":!{INTERNAL}",
+            ":!scripts/go_public.py",
+            ":!scripts/tests/test_go_public.py",
+        ]
+    )
     rows = []
     for line in out.splitlines() if code == 0 else []:
         path, _, count = line.rpartition(":")
