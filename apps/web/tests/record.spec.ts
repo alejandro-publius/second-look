@@ -15,7 +15,13 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
   await expect(page.getByText("2 of 4 on Pipes and sewage signs, tested Sep 23")).toBeVisible();
   await expect(page.getByText("Score expired.")).toBeVisible();
-  await expect(page.getByText("dry_pipe")).toBeVisible();
+  // The checks by their plain names, never the rule ids, and what the person did in words.
+  await expect(page.getByText("Pipe after dry days")).toBeVisible();
+  await expect(page.getByText("Rating check")).toBeVisible();
+  await expect(page.getByText("You said yes.")).toBeVisible();
+  await expect(page.getByText("You changed your rating from good to moderate.")).toBeVisible();
+  await expect(page.getByText("dry_pipe")).toHaveCount(0);
+  await expect(page.getByText("rating_check")).toHaveCount(0);
   await expect(page.getByText("First rating: good. Final rating: moderate.")).toBeVisible();
   // The health card: one approved action each for the person, the pet and the city, with sources.
   await expect(page.getByRole("heading", { name: "What you can do" })).toBeVisible();
@@ -24,10 +30,10 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText("Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water.")).toBeVisible();
   await expect(page.getByText("Sources:")).toBeVisible();
 
-  await page.getByLabel("Only people who passed this feature").check();
+  await page.getByLabel("Only show answers from people who passed the test for that feature").check();
   await expect(page.getByText("4 of 4 on Built banks, tested Sep 23")).toBeVisible();
   await expect(page.getByText("2 of 4 on Pipes and sewage signs, tested Sep 23")).toHaveCount(0);
-  await expect(page.getByText("No answers from people who passed this feature.")).toBeVisible();
+  await expect(page.getByText("No answers here from people who passed the test for that feature.")).toBeVisible();
 
   await page.getByRole("button", { name: "View as FHIR" }).click();
   await expect(page.getByText("Validated against guide commit b907cf0: passed")).toBeVisible();
@@ -35,7 +41,7 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText('"resourceType": "Bundle"')).toBeVisible();
   expect(calls.some((c) => c.path === "/api/spot/example/fhir")).toBe(true);
   expect(calls.some((c) => c.path === "/api/fhir/validation")).toBe(true);
-  await expect(page.getByRole("link", { name: "20 second return check" })).toHaveAttribute("href", "/quick?spot=example");
+  await expect(page.getByRole("link", { name: "Quick check", exact: true })).toHaveAttribute("href", "/quick?spot=example");
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
 });
 
