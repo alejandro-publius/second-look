@@ -133,7 +133,7 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 | Input | Who | Wanted by | Latest without moving launch or lock |
 |---|---|---|---|
 | Run `bash scripts/sandbox_write_test.sh` and save the output to docs/notes/sandbox_write_test.txt | Alex | today | Thu Sep 24 |
-| Strawberry Creek trip: shot list photos, video footage, one official app assessment with a screenshot of every screen | Alex | today | Tue Sep 22 19:00 |
+| Strawberry Creek trip: dropped by UPDATE_22 section 6. The video uses open footage from Wikimedia Commons, credited in `docs/video/CREDITS.md`, so nobody films at a creek | Alex | dropped | dropped |
 | Hackathon Slack: channel list, pinned posts, any data set or recording links, to docs/notes/slack.md | Alex | today | Wed Sep 23 |
 | Devpost Create Project form fields to docs/notes/devpost_fields.md, and whether a one-person team is refused | Alex | today | Sun Sep 27 |
 | Five lines on their AI image model video to docs/notes/their_image_model.md | Alex | today | Sun Sep 27 |
@@ -147,7 +147,7 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 | Bay Area invasive list checked against the Cal-IPC inventory | Rachel | Tue Sep 22 12:00 | Tue Sep 22 19:00 |
 | Independent second labels through scripts/label_photos.py | Alex | Tue Sep 22 evening | Tue Sep 22 22:00 |
 | Approved health and ecology sentences after the indicator factsheets | Rachel | Fri Sep 25 | Sat Sep 26 12:00 |
-| One creek visitor on camera taking the test, with a signed release | Both | Sun Sep 27 | Mon Sep 28 15:00 |
+| One creek visitor on camera taking the test: dropped by UPDATE_22 section 6. The beat shows the check in a drawn phone frame, with no person | Both | dropped | dropped |
 | Permission from ENORA for their site list or the Resilience Map API | Alex | optional | never required |
 
 ## Cut order if a session runs late

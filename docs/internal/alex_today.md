@@ -20,7 +20,7 @@ DRAFT, written 2026-09-20 by Claude Code. Tick each line when done. Every comman
 - [ ] Probe photos (a handful of real creek JPEGs for the model probe) go in `data/probe/`. Create it with `mkdir -p data/probe`. Everything under `data/` is gitignored, so originals never enter the repo.
 - [ ] Rachel's originals go through `uv run python scripts/ingest_photos.py --help` (it strips EXIF location data, resizes, and writes manifest rows). Originals stay out of the repo.
 - [ ] Your own blind labels: `uv run python scripts/label_photos.py --name alex`. Do not open `labels_rachel.csv`.
-- [ ] Strawberry Creek trip: the shot list is in `docs/team_pack.md`. Also record video footage and do one assessment in the official OneAquaHealth app with a screenshot of every screen. Keep the screenshots in `data/app_screenshots/` (gitignored) and write which form items you verified in `docs/notes/app_wording.md`.
+- Dropped by UPDATE_22 section 6: the Strawberry Creek trip. The video uses open footage from Wikimedia Commons (`docs/video/CREDITS.md`), so nobody films at a creek. The current list is `docs/ALEX_TODO.md`.
 
 ## The sandbox write test
 
@@ -57,4 +57,4 @@ Evidence is a file in the repo (a saved output under `docs/notes/`, a results fi
 
 - [ ] Messages are ready in `docs/recruiting_messages.md`. Replace the site URL first. Each link carries its own `?src=` so `GET /api/test/counts` tells you where people came from.
 - [ ] Check names and contacts of creek groups yourself (for example Friends of Five Creeks and the campus office that looks after Strawberry Creek). Post posters only where posting is allowed.
-- [ ] One creek visitor on camera taking the test, ideally someone walking a dog there, with `docs/release_form.md` signed.
+- Dropped by UPDATE_22 section 6: a creek visitor on camera. The video shows the check in a drawn phone frame, with no person.

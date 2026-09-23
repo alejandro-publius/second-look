@@ -37,7 +37,7 @@ DRAFT, written 2026-09-20 by Claude Code for Alex to hand to Rachel. Plain words
 | One rule of thumb per feature (12 words or fewer) with a source, and the four test questions in your words | Tue Sep 22, noon | Tue Sep 22, 21:00 (frozen at the tag) |
 | The Bay Area invasive plant list, checked against the Cal-IPC Inventory | Tue Sep 22, noon | Tue Sep 22, 19:00 |
 | Your approved health and ecology sentences, after reading the factsheets | Fri Sep 25 | Sat Sep 26, noon |
-| One creek visitor on camera taking the test (with Alex), release signed | Sun Sep 27 | Mon Sep 28, 15:00 |
+| Dropped (UPDATE_22 section 6): no creek visitor on camera. The video uses open footage and shows the check in a phone frame | dropped | dropped |
 
 If a date slips, the launch slips a day for every day late. The data lock (Sun Sep 27, 18:00) does not move.
 
