@@ -1,0 +1,169 @@
+{
+ "measured_utc": "2026-09-23T04:37:55Z",
+ "commit": "92fa280",
+ "before_ref": "92fa280",
+ "suite_before": "656 passed, 2 skipped in 87.23s (0:01:27)",
+ "suite_after": "1023 passed, 1 skipped, 11 xfailed in 112.20s (0:01:52)",
+ "totals": {
+  "core/": {
+   "before": {
+    "statements": 1858,
+    "missing": 127,
+    "branches": 800,
+    "missing_branches": 107,
+    "percent": 91.2
+   },
+   "after": {
+    "statements": 1858,
+    "missing": 4,
+    "branches": 800,
+    "missing_branches": 5,
+    "percent": 99.7
+   }
+  },
+  "apps/api/": {
+   "before": {
+    "statements": 1606,
+    "missing": 103,
+    "branches": 382,
+    "missing_branches": 73,
+    "percent": 91.1
+   },
+   "after": {
+    "statements": 1606,
+    "missing": 103,
+    "branches": 382,
+    "missing_branches": 73,
+    "percent": 91.1
+   }
+  }
+ },
+ "functions_under_90_before": {
+  "core/allocator.py::block_contents": 88.9,
+  "core/checker.py::feature_passed": 87.5,
+  "core/checker.py::_gate_parse_flags": 50.0,
+  "core/content_loader.py::Content.photo_by_id": 0.0,
+  "core/content_loader.py::_load_manifest": 61.4,
+  "core/content_loader.py::_check_disjoint": 76.5,
+  "core/content_loader.py::_check_warmup": 60.0,
+  "core/content_loader.py::_check_test_items": 69.8,
+  "core/content_loader.py::load_content": 75.0,
+  "core/content_loader.py::placeholder_report": 77.8,
+  "core/fhir_emit.py::code_for_answer": 85.7,
+  "core/fhir_emit.py::_item_code": 80.0,
+  "core/fhir_emit.py::_test_response": 85.7,
+  "core/fhir_emit.py::_qr_answers": 89.5,
+  "core/fhir_emit.py::_if_none_exist": 73.9,
+  "core/fhir_emit.py::check_bundle": 83.1,
+  "core/fhir_referral.py::is_example": 87.5,
+  "core/fhir_referral.py::_identifier_value": 83.3,
+  "core/fhir_referral.py::referral_bundle": 89.7,
+  "core/fhir_referral.py::_example_observation": 78.9,
+  "core/fhir_referral.py::example_lab_result": 88.2,
+  "core/fhir_referral.py::check_referral_bundle": 78.8,
+  "core/fhir_referral.py::check_example_bundle": 76.1,
+  "core/followups.py::_item_by_id": 75.0,
+  "core/followups.py::_issue_label": 23.1,
+  "core/followups.py::_rules_in_priority": 71.4,
+  "core/gate.py::Flag._finite_confidence": 60.0,
+  "core/gate.py::parse_flags": 50.0,
+  "core/rainfall.py::_default_fetch": 0.0,
+  "core/regions.py::Creek.reach": 75.0,
+  "core/regions.py::Creek.contains": 71.4,
+  "core/regions.py::_bbox": 88.2,
+  "core/regions.py::creeks_from_regions": 88.4,
+  "core/regions.py::reaches_below": 89.5
+ },
+ "functions_under_90_after": {},
+ "worker": {
+  "files": {
+   "worker/src/core/act.ts": {
+    "lines": 100,
+    "branches": 96.03,
+    "functions": 100
+   },
+   "worker/src/core/fhir_emit.ts": {
+    "lines": 98.22,
+    "branches": 78.2,
+    "functions": 100
+   },
+   "worker/src/core/fhir_referral.ts": {
+    "lines": 100,
+    "branches": 70.68,
+    "functions": 100
+   },
+   "worker/src/core/followups.ts": {
+    "lines": 92.16,
+    "branches": 73.33,
+    "functions": 100
+   },
+   "worker/src/core/healthcard.ts": {
+    "lines": 100,
+    "branches": 84.21,
+    "functions": 100
+   },
+   "worker/src/core/labels.ts": {
+    "lines": 100,
+    "branches": 90,
+    "functions": 100
+   },
+   "worker/src/core/pyround.ts": {
+    "lines": 100,
+    "branches": 80,
+    "functions": 100
+   },
+   "worker/src/core/regions.ts": {
+    "lines": 95.78,
+    "branches": 86.04,
+    "functions": 100
+   },
+   "worker/src/core/sha256.ts": {
+    "lines": 100,
+    "branches": 90,
+    "functions": 100
+   },
+   "worker/src/core/types.ts": {
+    "lines": 98.24,
+    "branches": 75,
+    "functions": 100
+   },
+   "worker/src/check.ts": {
+    "lines": 0.0,
+    "branches": 0.0,
+    "functions": 0.0,
+    "not_loaded": 1
+   },
+   "worker/src/city.ts": {
+    "lines": 0.0,
+    "branches": 0.0,
+    "functions": 0.0,
+    "not_loaded": 1
+   },
+   "worker/src/core/rainfall.ts": {
+    "lines": 0.0,
+    "branches": 0.0,
+    "functions": 0.0,
+    "not_loaded": 1
+   },
+   "worker/src/index.ts": {
+    "lines": 0.0,
+    "branches": 0.0,
+    "functions": 0.0,
+    "not_loaded": 1
+   },
+   "worker/src/two.ts": {
+    "lines": 0.0,
+    "branches": 0.0,
+    "functions": 0.0,
+    "not_loaded": 1
+   },
+   "worker/src/uploads.ts": {
+    "lines": 0.0,
+    "branches": 0.0,
+    "functions": 0.0,
+    "not_loaded": 1
+   }
+  },
+  "tests": "tests 9, pass 9"
+ }
+}
