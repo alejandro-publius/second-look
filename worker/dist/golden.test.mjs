@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "25859de7df64b26e",
+  content_hash: "dc7590d5ac8b7e54",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -1110,6 +1110,915 @@ var content_default = {
   ]
 };
 
+// src/core/core_content.json
+var core_content_default = {
+  creeks: [
+    {
+      name: "Strawberry Creek",
+      reaches: [
+        {
+          bbox: [
+            37.869,
+            -122.253,
+            37.878,
+            -122.235
+          ],
+          flows_into: "south-fork-campus",
+          name: "South Fork, Strawberry Canyon",
+          slug: "south-fork-canyon"
+        },
+        {
+          bbox: [
+            37.8695,
+            -122.2645,
+            37.873,
+            -122.253
+          ],
+          flows_into: "campus-west",
+          name: "South Fork, central campus",
+          slug: "south-fork-campus"
+        },
+        {
+          bbox: [
+            37.8731,
+            -122.2645,
+            37.8775,
+            -122.253
+          ],
+          flows_into: "campus-west",
+          name: "North Fork, campus",
+          slug: "north-fork-campus"
+        },
+        {
+          bbox: [
+            37.87,
+            -122.267,
+            37.8735,
+            -122.2645
+          ],
+          flows_into: "downtown-culvert",
+          name: "Below the forks, west campus",
+          slug: "campus-west"
+        },
+        {
+          bbox: [
+            37.866,
+            -122.286,
+            37.874,
+            -122.267
+          ],
+          flows_into: "strawberry-creek-park",
+          name: "Downtown culvert",
+          slug: "downtown-culvert"
+        },
+        {
+          bbox: [
+            37.8655,
+            -122.2905,
+            37.869,
+            -122.286
+          ],
+          flows_into: "west-culvert",
+          name: "Strawberry Creek Park",
+          slug: "strawberry-creek-park"
+        },
+        {
+          bbox: [
+            37.86,
+            -122.32,
+            37.872,
+            -122.2905
+          ],
+          flows_into: null,
+          name: "West Berkeley culvert, to the Bay",
+          slug: "west-culvert"
+        }
+      ],
+      slug: "strawberry-creek",
+      source: "Hand filled 2026-09-21 from public maps of the UC Berkeley campus and the City of Berkeley. Boxes are approximate."
+    }
+  ],
+  fhir: {
+    oah_displays: {
+      LandUse: "Land use in the margins",
+      absent: "Absent",
+      bushes: "Bushes (height (1.5-3m)",
+      foam: "Foam/colour/smell",
+      herbaceous: "Herbaceous (height < 1.5m)",
+      hydrology: "Hydrology of the stream",
+      invasiveOrganisms: "Invasive invertebrate, plants and fish",
+      morophology: "Morphology of the streams",
+      present: "Present",
+      riparianVegetation: "Riparian vegetation",
+      trees: "Trees (height >3m)"
+    },
+    oah_location_profile: "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah",
+    oah_observation_profile: "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah",
+    oah_system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu",
+    repo_url: "https://github.com/alejandro-publius/second-look",
+    sl_displays: {
+      "aquatic-vegetation": "Aquatic vegetation",
+      "artificial-bank": "Artificial bank",
+      "cant-tell": "Can't tell",
+      dry: "Dry channel",
+      "dug-out-channel": "Dug-out channel",
+      example: "Example, not a real result",
+      "fallen-branches": "Fallen branches",
+      "fallen-trees": "Fallen trees",
+      fast: "Fast flow",
+      flat: "Flat channel",
+      good: "Good overall rating",
+      "invasive-plant": "Invasive plant",
+      "lab-ecoli-cfu": "Escherichia coli, colony forming units",
+      "lab-enterobacteriaceae-share": "Enterobacteriaceae, share of 16S reads",
+      "lab-hf183": "Human faecal marker HF183",
+      "leaf-deposits": "Deposits of fallen leaves",
+      moderate: "Moderate overall rating",
+      "pipe-running": "Pipe running",
+      poor: "Poor overall rating",
+      riffles: "Riffles, rapids or falls",
+      "sand-banks": "Sand banks",
+      "sand-islands": "Sand islands",
+      "second-look-test": "Second Look observer test",
+      slow: "Slow flow",
+      software: "Second Look software",
+      stagnant: "Stagnant or intermittent flow",
+      "stone-deposits": "Stone deposits",
+      "test-pipe-outflow": "Test the water coming out of this pipe",
+      "u-shape": "U shaped channel",
+      "v-shape": "V shaped channel"
+    },
+    sl_system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look",
+    ucum_displays: {
+      "%": "percent",
+      Cel: "degree Celsius",
+      "[CFU]/dL": "colony forming units per 100 mL",
+      cm: "centimetre",
+      m: "metre",
+      mL: "millilitre"
+    }
+  },
+  form_items: [
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "channel_form",
+      options: [
+        {
+          id: "flat",
+          label: "Flat",
+          value: "flat"
+        },
+        {
+          id: "u_shape",
+          label: "U shape",
+          value: "u_shape"
+        },
+        {
+          id: "v_shape",
+          label: "V shape",
+          value: "v_shape"
+        },
+        {
+          id: "not_sure",
+          label: "I'm not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      text: "Channel form",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "bottom_type",
+      options: [
+        {
+          id: "natural",
+          label: "Natural",
+          value: "absent"
+        },
+        {
+          id: "artificial",
+          label: "Artificial (concrete or stones with concrete)",
+          value: "present"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      text: "Bottom type",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: "artificial_bank",
+      fhir: {
+        category: "morophology",
+        code: "artificial-bank",
+        code_system: "sl"
+      },
+      id: "bank_type",
+      options: [
+        {
+          id: "natural",
+          label: "Natural",
+          value: "absent"
+        },
+        {
+          id: "artificial",
+          label: "Artificial (concrete or stones with concrete)",
+          value: "present"
+        },
+        {
+          id: "laid_stones",
+          label: "Laid stones with no concrete",
+          value: "absent"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      short_label: "artificial banks",
+      text: "Bank type",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "habitats",
+      options: [
+        {
+          id: "sand_banks",
+          label: "Sand banks",
+          value: "sand_banks"
+        },
+        {
+          id: "sand_islands",
+          label: "Sand islands",
+          value: "sand_islands"
+        },
+        {
+          id: "stone_deposits",
+          label: "Stone deposits",
+          value: "stone_deposits"
+        },
+        {
+          id: "riffles",
+          label: "Riffles, rapids, falls",
+          value: "riffles"
+        },
+        {
+          id: "aquatic_vegetation",
+          label: "Aquatic vegetation",
+          value: "aquatic_vegetation"
+        }
+      ],
+      section: "what_you_see",
+      text: "Habitats",
+      type: "multi",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "natural_debris",
+      options: [
+        {
+          id: "fallen_trees",
+          label: "Fallen trees",
+          value: "fallen_trees"
+        },
+        {
+          id: "fallen_branches",
+          label: "Fallen branches",
+          value: "fallen_branches"
+        },
+        {
+          id: "leaf_deposits",
+          label: "Deposits of fallen leaves",
+          value: "leaf_deposits"
+        }
+      ],
+      section: "what_you_see",
+      text: "Natural debris",
+      type: "multi",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "hydrology",
+        code_system: "oah"
+      },
+      id: "water_flow",
+      options: [
+        {
+          id: "fast",
+          label: "Fast (with waves or high velocity)",
+          value: "fast"
+        },
+        {
+          id: "slow",
+          label: "Slow",
+          value: "slow"
+        },
+        {
+          id: "stagnant",
+          label: "Stagnant or intermittent",
+          value: "stagnant"
+        },
+        {
+          id: "dry",
+          label: "Dry",
+          value: "dry"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "what_you_see",
+      text: "Water flow",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "foam",
+        code_system: "oah"
+      },
+      id: "water_aspect",
+      options: [
+        {
+          id: "clear",
+          label: "Clear or transparent",
+          value: "absent"
+        },
+        {
+          id: "muddy",
+          label: "Muddy or turbid",
+          value: "present"
+        },
+        {
+          id: "foam",
+          label: "Has foam",
+          value: "present"
+        },
+        {
+          id: "colour",
+          label: "Has colours or altered colour",
+          value: "present"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "water",
+      text: "How is the water?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "hydrology",
+        code_system: "oah"
+      },
+      id: "water_withdrawal",
+      section: "water",
+      text: "Is there any kind of obvious water collection, use or removal from the stream?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "barriers",
+      section: "water",
+      text: "Do you see any dams or other transversal artificial barriers?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: "pipe_running",
+      fhir: {
+        category: "hydrology",
+        code: "pipe-running",
+        code_system: "sl"
+      },
+      id: "draining_pipes",
+      section: "water",
+      text: "Are there pipes draining polluted water into the stream?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: "pipe_running",
+      fhir: {
+        category: "hydrology",
+        code: "pipe-running",
+        code_system: "sl"
+      },
+      id: "sewage_discharge",
+      section: "water",
+      short_label: "a sewage discharge",
+      text: "Is there any kind of water entry or discharge of sewage?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "morophology",
+        code_system: "oah"
+      },
+      id: "construction",
+      section: "water",
+      text: "Is there any construction or works in the stream?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "hydrology",
+        code_system: "oah",
+        unit: "m"
+      },
+      id: "water_height_m",
+      section: "water",
+      text: "Water height in metres",
+      type: "number",
+      unit: "m",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "LandUse",
+        code_system: "oah"
+      },
+      id: "impervious_left",
+      section: "margins",
+      short_label: "a paved left margin",
+      text: "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "LandUse",
+        code_system: "oah"
+      },
+      id: "impervious_right",
+      section: "margins",
+      short_label: "a paved right margin",
+      text: "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_left",
+      section: "margins",
+      text: "Is the left margin covered by vegetation?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_right",
+      section: "margins",
+      text: "Is the right margin covered by vegetation?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_type_left",
+      options: [
+        {
+          id: "herbs",
+          label: "Herbs",
+          value: "herbaceous"
+        },
+        {
+          id: "shrubs",
+          label: "Shrubs",
+          value: "bushes"
+        },
+        {
+          id: "trees",
+          label: "Trees",
+          value: "trees"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "margins",
+      text: "Left margin: what is dominant (more than half) in the first 5 m?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_type_right",
+      options: [
+        {
+          id: "herbs",
+          label: "Herbs",
+          value: "herbaceous"
+        },
+        {
+          id: "shrubs",
+          label: "Shrubs",
+          value: "bushes"
+        },
+        {
+          id: "trees",
+          label: "Trees",
+          value: "trees"
+        },
+        {
+          id: "not_sure",
+          label: "Not sure",
+          value: "cant_tell"
+        }
+      ],
+      section: "margins",
+      text: "Right margin: what is dominant (more than half) in the first 5 m?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: "invasive_plant",
+      fhir: {
+        category: "invasiveOrganisms",
+        code: "invasive-plant",
+        code_system: "sl"
+      },
+      id: "invasive_species",
+      section: "margins",
+      short_label: "invasive plants",
+      text: "Do you see any non-native or invasive plant species?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "master_brief"
+    },
+    {
+      depends_on: {
+        item: "invasive_species",
+        value: "present"
+      },
+      feature: "invasive_plant",
+      fhir: {
+        category: "invasiveOrganisms",
+        code: "invasive-plant",
+        code_system: "sl"
+      },
+      id: "invasive_which",
+      note: "The app offers free text here. We offer the regional list plus Not sure, so no free text is stored.",
+      region_list: "invasive_plants",
+      section: "margins",
+      text: "Which ones?",
+      type: "pick_region_list",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: {
+        code: "riparianVegetation",
+        code_system: "oah"
+      },
+      id: "vegetation_cuts",
+      section: "margins",
+      text: "Have there been recent cuts of vegetation (partial or total) on the banks?",
+      type: "yesno",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      allow_not_applicable: true,
+      feature: null,
+      fhir: null,
+      id: "feelings",
+      section: "feelings",
+      sliders: [
+        "joy",
+        "serenity",
+        "anger",
+        "fear"
+      ],
+      text: "Which feelings best describe your experience?",
+      type: "sliders",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    },
+    {
+      feature: null,
+      fhir: null,
+      id: "overall_rating",
+      options: [
+        {
+          id: "good",
+          label: "Good: the ecosystem components are there, riparian vegetation, natural channel, good water quality, biodiversity",
+          value: "good"
+        },
+        {
+          id: "moderate",
+          label: "Moderate: some alterations, still biodiverse, with vegetation in the margins, water looks good",
+          value: "moderate"
+        },
+        {
+          id: "poor",
+          label: "Poor: highly modified or artificialized, loss of riparian vegetation, loss of habitats, polluted",
+          value: "poor"
+        }
+      ],
+      rating_check: true,
+      section: "overall",
+      text: "Overall, how would you rate this stream?",
+      type: "choice",
+      verified_against_app: false,
+      wording_source: "app_public_text"
+    }
+  ],
+  rules: {
+    features_in_order: [
+      "artificial_bank",
+      "dug_out_channel",
+      "invasive_plant",
+      "pipe_running"
+    ],
+    human_pass_min: 3,
+    items_per_feature: 4,
+    low_score_max_correct: 2,
+    measure_for_feature: {
+      artificial_bank: [
+        "city_replant_margins",
+        "city_remove_concrete"
+      ],
+      barriers: [
+        "city_remove_barriers"
+      ],
+      dug_out_channel: [
+        "city_reconnect_floodplain"
+      ],
+      pipe_running: [
+        "city_fix_sewers"
+      ]
+    },
+    pipe_items: [
+      "draining_pipes",
+      "sewage_discharge"
+    ],
+    pipe_observers_needed: 2,
+    rating_issue_items: [
+      "bank_type",
+      "impervious_left",
+      "impervious_right",
+      "invasive_species",
+      "sewage_discharge"
+    ],
+    same_spot_metres: 30,
+    score_valid_days: 90,
+    test_name_words: [
+      "abc",
+      "asdf",
+      "bar",
+      "baz",
+      "delete",
+      "demo",
+      "dummy",
+      "example",
+      "foo",
+      "ignore",
+      "placeholder",
+      "qwerty",
+      "sample",
+      "test",
+      "testing",
+      "todo",
+      "xxx"
+    ]
+  },
+  sentences: [
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_replant_margins",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: rehabilitation of the riparian vegetation should prioritize a diverse corridor with native species, along both stream margins, free from unnecessary clearing. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Replant both margins with native trees and shrubs, and stop cutting them back."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_fix_sewers",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: improvement of sewage systems and water treatments. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Find and fix leaking or wrongly connected sewers, and improve the treatment of waste water."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_reconnect_floodplain",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: creation of space for natural flooding, removal of grey infrastructure from the margins and floodplains. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Give the stream room to flood: move walls, pavement and pipes back from the banks and the floodplain."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_remove_barriers",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: removal of barriers to the longitudinal connectivity (dams, weirs, grids). https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Remove dams, weirs and grids that stop water, sand and animals moving along the stream."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "city",
+      id: "city_remove_concrete",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "OneAquaHealth Policy Brief (2026), page 9: removal of artificial materials (e.g. concrete); renaturalization of channels and margins with natural materials. https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
+      text: "Take the concrete out of the channel and banks and rebuild them with natural materials."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_keep_out_foam",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: keep pets and livestock away from water with signs of a bloom. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "Keep dogs out of water that smells bad, looks discoloured, or has foam, scum or mats, and do not let them drink it."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_rinse_after",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: rinse them off immediately; do not let them lick their fur before you rinse them. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "If your dog goes in, rinse it with tap water straight away and do not let it lick its fur first."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_bring_water",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: keep pets away from water with signs of a bloom. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "Bring drinking water for your dog so it does not need to drink from the creek."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "pet",
+      id: "pet_call_vet",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: if your pets seem sick after going in or near water, call a veterinarian right away. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "If your dog seems sick after being in or near the water, call a vet right away."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_avoid_foam_scum",
+      note: "Checked against the source text by the planner on 2026-09-21.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: if water looks or smells bad, stay out. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html",
+      text: "Stay out of water that smells bad, looks discoloured, or has foam, scum or mats on the surface."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_rinse_hands",
+      note: "Both cited pages fetched again on 2026-09-21; the matching sentences are in source_quote.",
+      source: "CDC, Preventing Illness from Harmful Algal Blooms: rinse off immediately after touching water; CDC, Healthy Swimming, Steps to Take: wash your hands before eating. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html and https://www.cdc.gov/healthy-swimming/prevention/index.html",
+      source_quote: "If you do go in or touch water that may have a harmful algal bloom, rinse off immediately after. Use tap water from a sink, shower, hose, or outdoor spigot. (CDC, Harmful Algal Blooms, Prevention.) Wash your hands for 20 seconds before eating, especially if you have been playing in or touching sand. (CDC, Healthy Swimming, Prevention.)",
+      text: "If you touch creek water, rinse your hands with tap water afterwards, and wash them before you eat."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_no_swallow",
+      note: "Cited page fetched again on 2026-09-21. The draft said keep water out of open cuts; the page says stay out if you have one, so the sentence now says what the page says.",
+      source: "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html",
+      source_quote: "Don't swallow the water. Even if water looks clean, it can still have germs in it that could make you sick. Protect open cuts or wounds. Stay out if you have an open cut or wound (particularly from a surgery or piercing).",
+      text: "Do not swallow creek water, and stay out if you have an open cut or wound."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_avoid_pipes",
+      note: "Cited page fetched again on 2026-09-21; the matching sentence is in source_quote.",
+      source: "CDC, Healthy Swimming, Steps to Take: stay out if you see pipes. https://www.cdc.gov/healthy-swimming/prevention/index.html",
+      source_quote: "Stay out if you see pipes. Pipes draining into or around the water could be putting germs or harmful chemicals into the water.",
+      text: "Stay out of the water right below a pipe that drains into the creek."
+    },
+    {
+      approved: true,
+      approved_by: "Alex Velazquez",
+      approved_on: "2026-09-21",
+      audience: "person",
+      id: "person_report_dry_pipe",
+      note: "The PDF was fetched again on 2026-09-21 and both sentences found by text search; they are in source_quote.",
+      source: "EPA, Illicit Discharge Detection and Elimination guidance manual (2004), page 337 (72 hours dry) and page 6 (testing is needed before calling a flow polluted). https://www.epa.gov/sites/default/files/2015-11/documents/idde_manualwithappendices.pdf",
+      source_quote: "While the traditional definition of dry weather has been 72 hours without rainfall, some communities have shortened this window to 48 hours to make sampling more practical. (page 337) Consequently, field testing and/or water quality sampling are needed to confirm whether pollutants are actually present in dry weather flow, in order to classify them as an illicit discharge. (chapter 1, page 6, PDF page 20)",
+      text: "If a pipe is running after three dry days, note the place and the date and tell the city. It is worth testing."
+    }
+  ]
+};
+
 // src/core/types.ts
 function scoreFor(observer, feature) {
   for (const s of observer.scores) if (s.feature === feature) return s;
@@ -1148,8 +2057,8 @@ function compareStrings(a, b) {
 }
 
 // src/core/labels.ts
-var HUMAN_PASS_MIN = content_default.rules.human_pass_min;
-var SCORE_VALID_DAYS = content_default.rules.score_valid_days;
+var HUMAN_PASS_MIN = core_content_default.rules.human_pass_min;
+var SCORE_VALID_DAYS = core_content_default.rules.score_valid_days;
 var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 var KEY_SCORE = "label.score";
 var KEY_EXPIRED = "label.expired";
@@ -1174,7 +2083,7 @@ function observerLabel(score, featureName, today, locale) {
 }
 
 // src/core/regions.ts
-var CREEKS = content_default.creeks;
+var CREEKS = core_content_default.creeks;
 function creekBySlug(slug, creeks = CREEKS) {
   for (const c of creeks) if (c.slug === slug) return c;
   return null;
@@ -1235,14 +2144,14 @@ function placeSpot(spot, creeks = CREEKS) {
 }
 
 // src/core/act.ts
-var FEATURES = content_default.rules.features_in_order;
-var SCORE_VALID_DAYS2 = content_default.rules.score_valid_days;
-var MEASURE_FOR_FEATURE = content_default.rules.measure_for_feature;
+var FEATURES = core_content_default.rules.features_in_order;
+var SCORE_VALID_DAYS2 = core_content_default.rules.score_valid_days;
+var MEASURE_FOR_FEATURE = core_content_default.rules.measure_for_feature;
 var DRY_PIPE_RULE = "dry_pipe";
-var PIPE_OBSERVERS_NEEDED = content_default.rules.pipe_observers_needed;
-var SAME_SPOT_METRES = content_default.rules.same_spot_metres;
+var PIPE_OBSERVERS_NEEDED = core_content_default.rules.pipe_observers_needed;
+var SAME_SPOT_METRES = core_content_default.rules.same_spot_metres;
 var EARTH_RADIUS_M = 6371e3;
-var TEST_NAME_WORDS = new Set(content_default.rules.test_name_words);
+var TEST_NAME_WORDS = new Set(core_content_default.rules.test_name_words);
 function present(value) {
   return value === "present" || value === "yes" || value === true || value === 1;
 }
@@ -1534,7 +2443,7 @@ function sha256Hex(input) {
 }
 
 // src/core/fhir_emit.ts
-var FHIR = content_default.fhir;
+var FHIR = core_content_default.fhir;
 var REPO_URL = FHIR.repo_url;
 var FHIR_BASE = `${REPO_URL}/fhir`;
 var SL_SYSTEM = FHIR.sl_system;
@@ -1557,9 +2466,9 @@ var DEVICE_ID = "sl-device";
 var SL_DISPLAYS = FHIR.sl_displays;
 var OAH_DISPLAYS = FHIR.oah_displays;
 var UCUM_DISPLAYS = FHIR.ucum_displays;
-var FEATURES2 = content_default.rules.features_in_order;
-var SCORE_VALID_DAYS3 = content_default.rules.score_valid_days;
-var FORM_ITEMS = content_default.form_items;
+var FEATURES2 = core_content_default.rules.features_in_order;
+var SCORE_VALID_DAYS3 = core_content_default.rules.score_valid_days;
+var FORM_ITEMS = core_content_default.form_items;
 var FhirEmitError = class extends Error {
 };
 function fhirId(...parts) {
@@ -1939,8 +2848,8 @@ var EXAMPLE_LAB_ROLE_ID = "sl-example-lab-role";
 var SPECIMEN_TYPE_CODE = "11713004";
 var SPECIMEN_TYPE_DISPLAY = "Water";
 var SAMPLE_ML = 500;
-var PIPE_ITEMS = content_default.rules.pipe_items;
-var UCUM_DISPLAYS2 = content_default.fhir.ucum_displays;
+var PIPE_ITEMS = core_content_default.rules.pipe_items;
+var UCUM_DISPLAYS2 = core_content_default.fhir.ucum_displays;
 var EXAMPLE_PANEL = [
   ["lab-enterobacteriaceae-share", "quantity", 1.8, "%"],
   ["lab-hf183", "coded", "absent", null],
@@ -2121,10 +3030,10 @@ function exampleLabResult(referral, collectedAt, reportedAt) {
 
 // src/core/followups.ts
 var DEFAULT_MAX_QUESTIONS = 2;
-var LOW_SCORE_MAX_CORRECT = content_default.rules.low_score_max_correct;
-var FEATURES3 = content_default.rules.features_in_order;
-var PIPE_ITEMS2 = content_default.rules.pipe_items;
-var RATING_ISSUE_ITEMS = content_default.rules.rating_issue_items;
+var LOW_SCORE_MAX_CORRECT = core_content_default.rules.low_score_max_correct;
+var FEATURES3 = core_content_default.rules.features_in_order;
+var PIPE_ITEMS2 = core_content_default.rules.pipe_items;
+var RATING_ISSUE_ITEMS = core_content_default.rules.rating_issue_items;
 var PRESENT = "present";
 var ABSENT = "absent";
 var BEST_RATING = "good";
