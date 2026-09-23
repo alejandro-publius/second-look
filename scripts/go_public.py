@@ -10,9 +10,13 @@ What it does, in order, stopping at the first thing that is wrong:
 3. Rewrites every mention of docs/internal left in a tracked file to "the team's working notes",
    so no page points at a folder that is gone. Nothing reads a file there; every mention is a
    comment or a sentence, which the dry run lists.
-4. Runs `make submit-check`. The only failure it accepts is the repository not yet being public,
-   which is the next step. Anything else stops the run before anything is published.
+4. Runs `make submit-check` and reads its "submit-check: N failed: ..." line. The only failure it
+   accepts is the repository not yet being public, which is the next step. Any other failure, or
+   no such line at all (a crash), stops the run before anything is published.
 5. Commits, pushes, and only then runs `gh repo edit --visibility public`.
+
+The commit removes the working notes from the tip only. Git history still holds docs/internal,
+and this script never rewrites history (hard rule 15).
 """
 
 from __future__ import annotations
@@ -41,6 +45,8 @@ MENTION = re.compile(
     r"(?=[\s,.;:)]|$)"
 )
 ALLOWED_SUBMIT_FAILURES = {"repo_public"}
+SUBMIT_SUMMARY = re.compile(r"^submit-check: (\d+) failed: (.*)$", re.MULTILINE)
+COMMIT_MESSAGE = "Open the repository: remove the working notes from the tip; history keeps them"
 
 
 def rewrite(text: str) -> str:
@@ -54,9 +60,15 @@ def rewrite(text: str) -> str:
     return MENTION.sub(named, text)
 
 
-def run(cmd: list[str]) -> tuple[int, str]:
+def run_parts(cmd: list[str]) -> tuple[int, str, str]:
+    """The exit code, stdout and stderr, kept apart."""
     proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
-    return proc.returncode, (proc.stdout + proc.stderr).strip()
+    return proc.returncode, proc.stdout, proc.stderr
+
+
+def run(cmd: list[str]) -> tuple[int, str]:
+    code, out, err = run_parts(cmd)
+    return code, (out + err).strip()
 
 
 def mentions() -> list[tuple[str, int]]:
@@ -81,12 +93,34 @@ def mentions() -> list[tuple[str, int]]:
     return rows
 
 
-def submit_failures(output: str) -> set[str]:
-    """The names after "submit-check: N failed:" in its last line, or an empty set."""
-    m = re.search(
-        r"submit-check: \d+ failed: (.+)$", output.strip().splitlines()[-1] if output else ""
-    )
-    return {n.strip() for n in m.group(1).split(",")} if m else set()
+def submit_failures(output: str) -> set[str] | None:
+    """The names on the last "submit-check: N failed: ..." line anywhere in the output.
+
+    None when there is no such line, or when its count and its names disagree: submit-check
+    crashed or was cut off, so nothing it says can be trusted. Make adds its own lines after it
+    ("make: *** [submit-check] Error 1"), which is why this does not read only the last line.
+    """
+    found = SUBMIT_SUMMARY.findall(output)
+    if not found:
+        return None
+    count, listed = found[-1]
+    if int(count) == 0:
+        return set()
+    names = {n.strip() for n in listed.split(",") if n.strip()}
+    return names if len(names) == int(count) else None
+
+
+def submit_blocker(code: int, stdout: str) -> str | None:
+    """Why the run must stop after make submit-check, or None when it may publish."""
+    failed = submit_failures(stdout)
+    if failed is None:
+        return "submit-check printed no summary line it could read (did it crash?)"
+    others = failed - ALLOWED_SUBMIT_FAILURES
+    if others:
+        return f"submit-check failed on {sorted(others)}"
+    if code != 0 and not failed:
+        return f"submit-check exited {code} but named no failed check"
+    return None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -101,10 +135,12 @@ def main(argv: list[str] | None = None) -> int:
         print("go-public: dry run, nothing changes. With GO=yes it would:")
         print("  1. check it is on main with a clean tree")
         print(f"  2. git rm -r {INTERNAL}")
+        print(f"     (from the tip only: the git history still holds {INTERNAL})")
         print(f"  3. rewrite {sum(c for _, c in rows)} mentions in {len(rows)} files:")
         for path, count in rows:
             print(f"       {path}: {count}")
-        print("  4. run make submit-check; stop on anything but the repo not being public yet")
+        print("  4. run make submit-check; stop on anything but the repo not being public yet,")
+        print("     and stop if it prints no summary line")
         print("  5. commit, push, then: " + " ".join(PUBLIC_CMD))
         return 0
 
@@ -127,15 +163,15 @@ def main(argv: list[str] | None = None) -> int:
     if left:
         print(f"go-public: stopped, mentions left after the rewrite: {left}")
         return 1
-    code, out = run(["make", "submit-check"])
-    failed = submit_failures(out)
-    if code != 0 and not failed <= ALLOWED_SUBMIT_FAILURES:
-        print(out)
-        print(f"go-public: stopped before publishing; submit-check failed on {sorted(failed)}")
+    code, out, err = run_parts(["make", "submit-check"])
+    blocker = submit_blocker(code, out)
+    if blocker:
+        print((out + err).strip())
+        print(f"go-public: stopped before publishing; {blocker}")
         return 1
     for cmd in (
         ["git", "add", "-A"],
-        ["git", "commit", "-q", "-m", "Open the repository: the working notes stay private"],
+        ["git", "commit", "-q", "-m", COMMIT_MESSAGE],
         ["git", "push", "-q", "origin", "main"],
         PUBLIC_CMD,
     ):
