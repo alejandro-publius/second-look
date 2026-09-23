@@ -437,15 +437,15 @@ def test_same_seed_same_pass_table(tmp_path: Path) -> None:
     assert a == b
 
 
-def test_models_yaml_holds_the_three_ids_unconfirmed_and_the_resize_rule() -> None:
+def test_models_yaml_holds_the_three_ids_confirmed_and_the_resize_rule() -> None:
     config = ms.load_models_config()
     assert tuple(config.model_ids()) == MODEL_IDS
-    # Flipping these is Alex's decision (status issue #4); docs/notes/model_ids.md has the checks.
-    assert all(not m.confirmed_against_models_page for m in config.models)
+    # Checked on 2026-09-23 against the models and pricing pages; docs/notes/model_ids.md.
+    assert all(m.confirmed_against_models_page for m in config.models)
     assert config.settings.temperature == 0 and config.settings.resize_long_side_px == 1092
     questions = ms.load_questions()
     for f in FEATURES:
         assert questions[f] in config.prompt.user_text(questions[f])
     pricing = ms.load_pricing()
     assert set(pricing.models) == set(MODEL_IDS)
-    assert not any(p.source_checked for p in pricing.models.values())
+    assert all(p.source_checked for p in pricing.models.values()) and pricing.batch_checked

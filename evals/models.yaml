@@ -3,7 +3,8 @@
 #
 # confirmed_against_models_page: false means nobody has checked this id against the live
 # models page yet. The real client refuses to run while any used model is unconfirmed.
-# Session C flips the flag after checking, before the first paid run.
+# Session C flips the flag after checking, before the first paid run. All three were checked on
+# 2026-09-23 against the models overview page (docs/notes/model_ids.md, UPDATE_22 section 3).
 #
 # accepts_temperature: newer models reject sampling settings with a 400 error. The real client
 # sends temperature only where this is true. The fake client ignores it.
@@ -11,15 +12,15 @@
 models:
   - id: claude-haiku-4-5-20251001
     short: haiku
-    confirmed_against_models_page: false
+    confirmed_against_models_page: true
     accepts_temperature: true
   - id: claude-sonnet-5
     short: sonnet
-    confirmed_against_models_page: false
+    confirmed_against_models_page: true
     accepts_temperature: false
   - id: claude-opus-5
     short: opus
-    confirmed_against_models_page: false
+    confirmed_against_models_page: true
     accepts_temperature: false
 
 settings:
