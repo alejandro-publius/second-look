@@ -2,7 +2,7 @@
 // ServiceRequest, real and computed from stored visits; an example Specimen and panel show how a
 // laboratory result would return to the same record, tagged example and never counted.
 
-import CONTENT from "../content.json";
+import CONTENT from "./core_content.json";
 import type { PipeCase } from "./act";
 import { FHIR_BASE, ORG_ID, SL_SYSTEM, escapeXml, fhirId, oahCoding, slCoding, OAH_OBSERVATION_PROFILE } from "./fhir_emit";
 import { instant, type Json } from "./types";

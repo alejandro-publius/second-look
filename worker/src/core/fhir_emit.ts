@@ -2,7 +2,7 @@
 // Python writes for the same inputs, proved by golden/fhir_emit.json. The tables (systems,
 // displays, form items) come from content.json, so the two emitters read one source.
 
-import CONTENT from "../content.json";
+import CONTENT from "./core_content.json";
 import { pyRound } from "./pyround";
 import { sha256Hex } from "./sha256";
 import { addDays, instant, type AnswerValue, type FeatureScore, type FormItem, type Json, type TestSitting, type VisitRecord } from "./types";

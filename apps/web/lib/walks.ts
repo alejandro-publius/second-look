@@ -6,7 +6,9 @@ import { checkBundle } from "../../../worker/src/core/fhir_emit";
 import { findingsFromVisits, needsFromFindings, type Finding, type Need } from "../../../worker/src/core/act";
 import { walkBundle, walkVisit, type WalkRef } from "../../../worker/src/core/walks";
 import type { AnswerValue, VisitRecord } from "../../../worker/src/core/types";
-import WORKER_CONTENT from "../../../worker/src/content.json";
+// The approved sentences as the Worker's ports read them. core_content.json carries no gold key;
+// the full worker/src/content.json does, and must never be imported here.
+import CORE_CONTENT from "../../../worker/src/core/core_content.json";
 import { content, type Walk } from "./content";
 
 const KEY = "second-look.walks";
@@ -56,6 +58,6 @@ export function demoCreek(walk: Walk): { visits: VisitRecord[]; findings: Findin
   for (const item of content.form.items) if (item.feature) findingKeyFor[item.id] = item.feature;
   const findings = findingsFromVisits(visits, findingKeyFor);
   // The approved sentences, with their sources, as the Worker has them; an unapproved one is absent.
-  const needs = needsFromFindings(findings, WORKER_CONTENT.sentences as Record<string, unknown>[]);
+  const needs = needsFromFindings(findings, CORE_CONTENT.sentences as Record<string, unknown>[]);
   return { visits, findings, needs };
 }

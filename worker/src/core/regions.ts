@@ -1,7 +1,7 @@
 // core/regions.py: which creek and reach a stored spot sits on, from the region pack's creeks in
 // content.json. The pack is validated when Python builds that file, so this only reads it.
 
-import CONTENT from "../content.json";
+import CONTENT from "./core_content.json";
 import type { Spot } from "./types";
 
 export interface Reach {

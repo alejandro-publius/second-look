@@ -1,5 +1,4 @@
 {
-  "content_hash": "dc7590d5ac8b7e54",
   "creeks": [
     {
       "name": "Strawberry Creek",
@@ -86,38 +85,6 @@
       "source": "Hand filled 2026-09-21 from public maps of the UC Berkeley campus and the City of Berkeley. Boxes are approximate."
     }
   ],
-  "feature_list": [
-    {
-      "id": "artificial_bank",
-      "name": "Built banks",
-      "plain": "concrete walls and other built banks",
-      "question": "Are the banks artificial, such as concrete or stones set in concrete?"
-    },
-    {
-      "id": "dug_out_channel",
-      "name": "Dug-out channel",
-      "plain": "a channel that was deepened or straightened",
-      "question": "Has this channel been straightened or dug out?"
-    },
-    {
-      "id": "invasive_plant",
-      "name": "Plants that do not belong",
-      "plain": "pretty plants that do not belong here",
-      "question": "Do you see any non-native or invasive plant species?"
-    },
-    {
-      "id": "pipe_running",
-      "name": "Pipes and drain outlets",
-      "plain": "pipes and drain outlets that empty into the creek",
-      "question": "Can you see a pipe or drain outlet that empties into this creek?"
-    }
-  ],
-  "features": [
-    "artificial_bank",
-    "dug_out_channel",
-    "invasive_plant",
-    "pipe_running"
-  ],
   "fhir": {
     "oah_displays": {
       "LandUse": "Land use in the margins",
@@ -177,64 +144,6 @@
       "m": "metre",
       "mL": "millilitre"
     }
-  },
-  "followups": {
-    "max_questions": 2,
-    "rules": [
-      {
-        "dry_rule": {
-          "max_mm": 2.5,
-          "window_hours": 72
-        },
-        "fail_closed": "if rainfall or location is unknown, this rule does not fire",
-        "id": "dry_pipe",
-        "needs_items": [
-          "draining_pipes",
-          "sewage_discharge"
-        ],
-        "priority": 1,
-        "question_key": "followup.dry_pipe",
-        "trigger": "draining_pipes or sewage_discharge answered present, and rainfall status is dry"
-      },
-      {
-        "id": "rating_check",
-        "needs_items": [
-          "overall_rating",
-          "bank_type",
-          "impervious_left",
-          "impervious_right",
-          "invasive_species",
-          "sewage_discharge"
-        ],
-        "priority": 2,
-        "question_key": "followup.rating_check",
-        "stores": [
-          "first_rating",
-          "final_rating"
-        ],
-        "trigger": "overall_rating is good, and any of bank_type present, impervious_left present, impervious_right present, invasive_species present, sewage_discharge present"
-      },
-      {
-        "feature_flag": "CHECKER_ENABLED",
-        "id": "checker_flag",
-        "needs_items": [],
-        "priority": 3,
-        "question_key": "followup.checker_flag",
-        "trigger": "a Flag from core.gate for a feature the model passed, shown only after the person answered"
-      },
-      {
-        "asks_for": "photo",
-        "id": "low_score",
-        "needs_items": [
-          "bank_type",
-          "draining_pipes",
-          "invasive_species"
-        ],
-        "priority": 4,
-        "question_key": "followup.low_score",
-        "trigger": "observer scored 2 of 4 or lower on a feature and answered absent for that feature"
-      }
-    ]
   },
   "form_items": [
     {
@@ -790,25 +699,6 @@
       "wording_source": "app_public_text"
     }
   ],
-  "locale": {
-    "error.content": "This photo is missing from the content. Please tell us.",
-    "error.network": "Something did not send. Check your connection and try again.",
-    "error.nothing_here": "There is nothing to show on this screen. The content may be part way through an edit.",
-    "error.retry": "Try again",
-    "error.server": "The server could not take that. Try again in a moment.",
-    "error.start_over": "Start again",
-    "followup.checker_flag": "The checker noticed something that may be {note}. Want to look again?",
-    "followup.dry_pipe": "It has not rained here for {days} days. Is anything coming out of that pipe? A pipe still running after three dry days is worth testing.",
-    "followup.low_score": "You scored {correct} of 4 on {feature} in the test. Could you take a photo of the {feature} so a reviewer can check?",
-    "followup.rating_check": "You rated this stream Good, but you also reported {issues}. Do you want to keep your rating?",
-    "label.checker_noticed": "the checker noticed",
-    "label.expired": "Score expired. Tested {date}, more than 90 days ago. Retake the test.",
-    "label.score": "{correct} of {total} on {feature}, tested {date}",
-    "test.cant_tell": "Can't tell",
-    "test.no": "No",
-    "test.yes": "Yes"
-  },
-  "region_plants": [],
   "rules": {
     "features_in_order": [
       "artificial_bank",
@@ -1013,91 +903,5 @@
       "source_quote": "While the traditional definition of dry weather has been 72 hours without rainfall, some communities have shortened this window to 48 hours to make sampling more practical. (page 337) Consequently, field testing and/or water quality sampling are needed to confirm whether pollutants are actually present in dry weather flow, in order to classify them as an illicit discharge. (chapter 1, page 6, PDF page 20)",
       "text": "If a pipe is running after three dry days, note the place and the date and tell the city. It is worth testing."
     }
-  ],
-  "test_items": [
-    {
-      "feature": "artificial_bank",
-      "gold": "present",
-      "id": "t01"
-    },
-    {
-      "feature": "artificial_bank",
-      "gold": "present",
-      "id": "t02"
-    },
-    {
-      "feature": "artificial_bank",
-      "gold": "absent",
-      "id": "t03"
-    },
-    {
-      "feature": "artificial_bank",
-      "gold": "absent",
-      "id": "t04"
-    },
-    {
-      "feature": "dug_out_channel",
-      "gold": "present",
-      "id": "t05"
-    },
-    {
-      "feature": "dug_out_channel",
-      "gold": "present",
-      "id": "t06"
-    },
-    {
-      "feature": "dug_out_channel",
-      "gold": "absent",
-      "id": "t07"
-    },
-    {
-      "feature": "dug_out_channel",
-      "gold": "absent",
-      "id": "t08"
-    },
-    {
-      "feature": "invasive_plant",
-      "gold": "present",
-      "id": "t09"
-    },
-    {
-      "feature": "invasive_plant",
-      "gold": "present",
-      "id": "t10"
-    },
-    {
-      "feature": "invasive_plant",
-      "gold": "absent",
-      "id": "t11"
-    },
-    {
-      "feature": "invasive_plant",
-      "gold": "absent",
-      "id": "t12"
-    },
-    {
-      "feature": "pipe_running",
-      "gold": "present",
-      "id": "t13"
-    },
-    {
-      "feature": "pipe_running",
-      "gold": "present",
-      "id": "t14"
-    },
-    {
-      "feature": "pipe_running",
-      "gold": "absent",
-      "id": "t15"
-    },
-    {
-      "feature": "pipe_running",
-      "gold": "absent",
-      "id": "t16"
-    }
-  ],
-  "warmup_ids": [
-    "w01",
-    "w02"
   ]
 }

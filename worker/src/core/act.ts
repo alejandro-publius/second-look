@@ -1,7 +1,7 @@
 // core/act.py: turning a creek's record into what the creek needs, which pipes are worth testing,
 // and the two pin guards. Pure. Every number carries the visit ids it was counted from.
 
-import CONTENT from "../content.json";
+import CONTENT from "./core_content.json";
 import { HUMAN_PASS_MIN, shortDate } from "./labels";
 import { reachesBelow, type Creek, type Reach } from "./regions";
 import { compareStrings, dayOf, daysBetween, scoreFor, type Spot, type VisitRecord } from "./types";

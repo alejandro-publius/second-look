@@ -3,7 +3,7 @@
 // table. Two questions at most. The checker is not wired on the Worker, so flags are always
 // empty and checker_flag never fires; the rule is kept so the priority order is the same.
 
-import CONTENT from "../content.json";
+import CONTENT from "./core_content.json";
 import { scoreFor, type AnswerValue, type FormItem, type Observer } from "./types";
 
 export const DEFAULT_MAX_QUESTIONS = 2;

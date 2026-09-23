@@ -34,6 +34,18 @@ from core.regions import creeks_from_regions
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "worker" / "src" / "content.json"
+# What the pure ports in worker/src/core read, and nothing else. The web app imports those ports
+# for the video walks, so this file ships to browsers: it must never hold the gold key.
+CORE_OUT = ROOT / "worker" / "src" / "core" / "core_content.json"
+CORE_KEYS = ("creeks", "fhir", "form_items", "rules", "sentences")
+
+
+def core_doc(doc: dict[str, Any]) -> dict[str, Any]:
+    core = {k: doc[k] for k in CORE_KEYS}
+    text = json.dumps(core)
+    if '"gold"' in text or "test_items" in text:
+        raise SystemExit("build-worker-content: the gold key would reach core_content.json")
+    return core
 # The locale strings the ports fill: follow-up questions, labels and the yes/no words.
 LOCALE_PREFIXES = ("followup.", "label.", "test.yes", "test.no", "test.cant_tell", "error.")
 
@@ -118,14 +130,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     doc = build()
     text = json.dumps(doc, indent=2, sort_keys=True) + "\n"
+    core_text = json.dumps(core_doc(doc), indent=2, sort_keys=True) + "\n"
     if args.check:
-        if not OUT.exists() or OUT.read_text(encoding="utf-8") != text:
-            print("build-worker-content: worker/src/content.json is stale; run this script")
-            return 1
-        print("build-worker-content: worker/src/content.json is current")
+        for path, want in ((OUT, text), (CORE_OUT, core_text)):
+            if not path.exists() or path.read_text(encoding="utf-8") != want:
+                print(f"build-worker-content: {path.relative_to(ROOT)} is stale; run this script")
+                return 1
+        print("build-worker-content: worker/src/content.json and core_content.json are current")
         return 0
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(text, encoding="utf-8")
+    CORE_OUT.write_text(core_text, encoding="utf-8")
     print(
         f"build-worker-content: {len(doc['test_items'])} test items, {len(doc['form_items'])} "
         f"form items, {len(doc['creeks'])} creeks into {OUT.relative_to(ROOT)}"

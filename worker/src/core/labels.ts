@@ -1,7 +1,7 @@
 // core/labels.py: what the analyst sees beside an answer. Raw k of 4 and the test date, or the
 // expired sentence. No blended grade, no probability. Text from the locale.
 
-import CONTENT from "../content.json";
+import CONTENT from "./core_content.json";
 import { daysBetween, parseDate, type FeatureScore } from "./types";
 
 export const HUMAN_PASS_MIN: number = CONTENT.rules.human_pass_min;
