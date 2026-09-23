@@ -67,6 +67,17 @@ These are the ones worth arguing about, so each names the test that would go red
 | The sandbox is only ever written with conditional creates, and deleted only by ledger id | `scripts/repush_sandbox.py` | `scripts/tests/test_repush_sandbox.py` |
 | A frame's label comes from the video's own description or the frame is unlabelled | `videos/manifest.csv`, `scripts/make_frames.py` | `scripts/tests/test_make_frames.py`; the method is in `docs/REAL_VS_SYNTHETIC.md` |
 
+## Beyond the gates
+
+| The promise | Command | What it prints when it holds |
+|---|---|---|
+| Everything a contributor runs | `make check` | `CHECK GREEN` |
+| The Worker behaves end to end with a local D1 | `make worker-e2e` | exit code 0 |
+| The launch gate for the two-minute test | `make preflight-launch` | 0 failed |
+| The submission gate | `make submit-check` | fails only on `video_link` and `repo_public` until Sep 30, then nothing |
+| No video file is ever committed | `uv run pytest -q scripts/tests/test_no_video_files.py` | 2 passed |
+| The live site answers, and a phone check writes nothing | `SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-readonly.mjs` | every step PASS, the counts unchanged |
+
 ## What a failure here means
 
 A red row is not a bug to be worked around. Every row above exists because a specific thing could

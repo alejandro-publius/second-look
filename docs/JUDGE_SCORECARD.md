@@ -1,28 +1,75 @@
-# Our own scorecard, against the judges' rubric
+# Judge scorecard
 
-We marked ourselves against each line of the rubric, with the weak spots written in. The marks are
-words, not numbers, because they are our judgment and not a measurement. Every claim in the
-"why" column points at something you can open or run.
+The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
 
-| Rubric line (weight) | Our mark | Why | What pulls it down |
-|---|---|---|---|
-| Impact and alignment with the OneAquaHealth mission (30%) | strong | Every volunteer observation carries its observer's per-feature score, in their own FHIR profiles, validated against their guide at b907cf0 with 0 errors (`results/fhir_validation.json`). The city view speaks only in their own restoration measures from the Policy Brief, page 9. | No real creek visit has gone through the loop yet; the worked Strawberry Creek visit is an example. No recruited study, so no measured effect on volunteers. |
-| Innovation and creativity (20%) | strong | A two-minute test, per feature, whose result travels with the data. The AI takes the same test as the people and may only raise a question where it passed; code, not the model, picks every question. Video walks let anyone run the full loop from a desk. | The idea of testing observers is old in professional surveys (the River Habitat Survey). What is new is doing it in two minutes, inside the flow, and storing it. |
-| Technical implementation (20%) | strong | Python reference and a TypeScript Worker proved equal by golden vectors; the HL7 validator runs in CI on both; a hash-chained audit log; a read only MCP server; `make judge-check` runs offline with no key. See `docs/ACCEPTANCE.md`. | The AI results come from a model run that needs a key; until it runs, every AI number on the site says so. Footage labels come from video descriptions, and few descriptions name a feature. |
-| Usability and user experience (15%) | partial | One question per screen, plain words at a reading age of about 12 (`make readability`), WCAG 2.2 AA checks and 44 px tap targets (`make design-check`), works offline and queues the check. | English only; the Spanish draft is unverified and out of the build. The form items are marked unverified against the official app until Alex checks screenshots. |
-| Feasibility and scalability (15%) | strong | Runs on Cloudflare's free plan with no card. `make new-city` scaffolds a follower city in seconds (`docs/cities/TIMES.md`). A city that reads OneAquaHealth records reads ours, because they use its profiles. | The sandbox is shared and anyone can delete there, so the mirror is re-pushed on a schedule. One region pack (the Bay Area) is filled by hand. |
+## Impact and alignment with the OneAquaHealth mission (30%)
 
-## The five things the organizers asked every submission to show
+Our mark: strong. The per-feature score travels with every observation in their own profiles, and the city view speaks only in their own measures.
 
-| What they asked for | Where it is |
+
+| What to look at | Where |
 |---|---|
-| The problem | README, "The problem" |
-| How the solution aligns with OneAquaHealth | README, "How OneAquaHealth is used" |
-| Innovation and practical value | README, "Why trust a volunteer, and the AI?" |
-| Effective use of data, technology, AI, APIs and standards | README, "Architecture" and "Evals" |
-| A clear demonstration of what was built | README, "See it work", and `/judges` on the live site |
+| The problem, in the project lead's own words: volunteers miss built banks, dug-out channels and invasive plants | README, The problem |
+| The score travels with every observation, as a Practitioner qualification under their profiles | `fhir/golden/visit-strawberry-creek-1.json`; `/spot` |
+| City actions are OneAquaHealth's own restoration measures, from their Policy Brief (2026), page 9 | `/city?creek=strawberry-creek`; README |
+| One action each for the person, the pet and the city, from approved sentences with sources | `content/approved_sentences.yaml`; the health card on `/spot` |
 
-## The weaknesses, in full
+Thin: no recruited study, so no measured effect of the lesson on people. Said in Known weaknesses.
 
-They are listed once, in the README under "Known weaknesses", so this file and the README cannot
-disagree.
+## Innovation and creativity (20%)
+
+Our mark: strong. Testing observers is old in professional surveys; doing it in two minutes, inside the flow, and storing it with the data is what is new.
+
+
+| What to look at | Where |
+|---|---|
+| A volunteer is tested per feature and the score is stored with the data, like a lab's quality checks | README, Innovation and practical value |
+| The AI takes the same test and may only speak on a feature it passed | `core/gate.py`; `results/model_pass_table.json` |
+| Follow-ups chosen by code from answers, scores and the weather, two at most | `core/followups.py`; `/check` |
+| The whole loop from a desk: a clip of a creek in another country, the same check, a record made on the phone and never stored | `/walk`; `core/walks.py`; `content/walks.yaml` |
+
+Thin: the model results arrive with the paid run (`uv run python evals/model_sweep.py --real`).
+
+## Technical implementation (20%)
+
+Our mark: strong, with the AI numbers still to come from the paid run.
+
+
+| What to look at | Where |
+|---|---|
+| FHIR R4 against their guide at b907cf0, validated in CI, zero errors in the latest run | `results/fhir_validation.json`; `make fhir-validate` |
+| Their sandbox mirrored with conditional creates, a tag on everything, a ledger of ids | `fhir/sandbox_ledger.jsonl`; `/two` |
+| A read-only MCP server over our own records | `apps/mcp/server.py`; `examples/mcp/transcript.md` |
+| One command, no key, no network | `make judge-check` |
+| Frames from open creek footage, screened by Vision and by eye, every drop with its reason | `videos/frames.json`; `videos/review.json`; `evals/footage.py` |
+| Python and the TypeScript Worker proved equal by golden vectors, walks included | `evals/golden_vectors.py`; `worker/test/golden.test.ts` |
+
+Thin: the citizen observer is modelled as a Practitioner because R4 has no better fit; the question is open with the guide's authors (`docs/ig_proposal.md`).
+
+## Usability and user experience (15%)
+
+Our mark: partial. English only, and the form's wording waits on a check against the official app.
+
+
+| What to look at | Where |
+|---|---|
+| Two minutes, no camera, any phone | https://second-look-79t.pages.dev |
+| One question per screen at the creek | `/check` |
+| Reading age measured on every string in CI | `make readability` |
+| Tap targets and contrast measured in CI | `make design-check` |
+
+Thin: English only; a Spanish draft is not in the build.
+
+## Feasibility and scalability (15%)
+
+Our mark: strong. Free to run, a follower city scaffolds in seconds, and a city that reads OneAquaHealth records reads ours.
+
+
+| What to look at | Where |
+|---|---|
+| OneAquaHealth's five steps for a follower city, run on Berkeley | README, Feasibility |
+| A second city scaffold, and a second plant list | `fhir/fsh/city-heraklion.fsh`; `content/regions/heraklion.yaml` |
+| Free to run on Cloudflare, no card | `docs/notes/hosting.md` |
+| The example offered back to their guide | `docs/ig_proposal.md` |
+
+Thin: four photos per feature is coarse, and the photos come from open collections in several countries, not from the creek a Berkeley volunteer stands in.

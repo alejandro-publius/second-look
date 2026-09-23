@@ -15,8 +15,11 @@ is done. Times are Pacific.
 
    Afterwards `curl -s https://second-look-api.thealexschroeder.workers.dev/api/test/counts` shows 0.
 
-2. **Now, 2 minutes: the model run.** Put your key in `~/second-look-depth/.env` as
-   `ANTHROPIC_API_KEY=...`, then run the one command in the report. It spends at most 40 dollars,
+2. **Now, 5 minutes: the model run.** Your decision first: `evals/models.yaml` and
+   `evals/pricing.yaml` still say unconfirmed, and they are what licenses spending money. The ids
+   and prices were checked on Sep 21 and again on Sep 22 (`docs/notes/model_ids.md`). If you agree,
+   flip the flags to true. Then put your key in `~/second-look-depth/.env` as
+   `ANTHROPIC_API_KEY=...` and run the one command in the report. It spends at most 40 dollars,
    through the Batch API, and fills every AI slot in the README from `results/`.
 
 3. **Now, 2 minutes: the QA key.** Set a fresh one and keep it in your password manager:

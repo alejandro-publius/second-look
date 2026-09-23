@@ -321,6 +321,7 @@ def test_the_warmup_sheet_only_offers_the_warmup_role() -> None:
     assert '"warmup": 2' in html
 
 
+@respx.mock
 def test_a_candidate_fetch_would_refuse_gets_no_pick_control() -> None:
     """Picking something the tool then refuses wastes a person's evening."""
     from scripts.find_open_photos import pick_control

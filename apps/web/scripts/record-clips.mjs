@@ -3,8 +3,9 @@
 // Judge mode is recorded with Playwright's clock set after the lock: the lock constant is
 // overridden in this test environment only, and the app is untouched.
 //
-// Needs: npm run build && npm run start (port 3100). Writes webm to a scratch folder, then
+// Needs: npm run build && npm run start (port 3100). Writes webm to docs/video/clips/raw, then
 // scripts/video_rough.py converts them to 30 fps mp4 in docs/video/clips/ (never committed).
+// Clip names follow docs/video/SHOTLIST.md; extra-* clips are cutaways no beat names.
 import { mkdirSync, readFileSync, renameSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -65,12 +66,7 @@ await record("01-landing", async (page) => {
   await page.getByRole("button", { name: "This creek, on the left" }).click();
   await beat(2500);
 });
-await record("05-consent", async (page) => {
-  await page.goto(`${base}/t`);
-  await beat(1500);
-  await consent(page);
-});
-await record("06-lesson", async (page) => {
+await record("04-lesson", async (page) => {
   await page.goto(`${base}/t`);
   await consent(page);
   await page.getByRole("button", { name: "This creek, on the left" }).click();
@@ -79,7 +75,7 @@ await record("06-lesson", async (page) => {
   await click(page, "Next photo");
   await beat(2500);
 });
-await record("07-test-items", async (page) => {
+await record("05-test-items", async (page) => {
   await page.goto(`${base}/t`);
   await consent(page);
   await page.getByRole("button", { name: "This creek, on the left" }).click();
@@ -98,7 +94,7 @@ await record("07-test-items", async (page) => {
     await beat();
   }
 });
-await record("08-end-score", async (page) => {
+await record("06-end-score", async (page) => {
   await page.goto(`${base}/t`);
   await consent(page);
   await page.getByRole("button", { name: "This creek, on the left" }).click();
@@ -118,7 +114,7 @@ await record("08-end-score", async (page) => {
   await beat(4000);
 });
 await record(
-  "18-judges",
+  "extra-judge-mode",
   async (page) => {
     await page.goto(`${base}/judges`);
     await beat(2000);
@@ -129,7 +125,7 @@ await record(
   },
   { after: "2026-09-28T02:00:00Z" },
 );
-await record("12-check", async (page) => {
+await record("extra-check", async (page) => {
   await page.goto(`${base}/check`);
   await beat(1500);
   await click(page, "Start the check");
@@ -142,24 +138,24 @@ await record("12-check", async (page) => {
   await click(page, "U shape");
   await beat(1500);
 });
-await record("13-record", async (page) => {
+await record("10-record", async (page) => {
   await page.goto(`${base}/spot?id=example`);
   await beat(2500);
   await page.getByRole("button", { name: "View as FHIR" }).first().click();
   await beat(3500);
 });
-await record("14-two", async (page) => {
+await record("11-two", async (page) => {
   await page.goto(`${base}/two`);
   await beat(3500);
 });
-await record("17-city", async (page) => {
+await record("12-city", async (page) => {
   await page.goto(`${base}/city?creek=strawberry-creek`);
   await beat(2500);
   await page.mouse.wheel(0, 600);
   await beat(2500);
 });
 if (walk) {
-  await record("10-walk", async (page) => {
+  await record("13-walk", async (page) => {
     await page.goto(`${base}/walk/${walk.id}`);
     await beat(1500);
     await page.locator("video").evaluate((v) => v.play()).catch(() => undefined);
@@ -169,17 +165,25 @@ if (walk) {
     await beat(1500);
   });
 }
-await record("16-score-filter", async (page) => {
+await record("08-how-we-know", async (page) => {
+  await page.goto(`${base}/how-we-know`);
+  await beat(2500);
+  for (let i = 0; i < 4; i++) {
+    await page.mouse.wheel(0, 300);
+    await beat(1200);
+  }
+});
+await record("extra-score-filter", async (page) => {
   await page.goto(`${base}/spot?id=example`);
   await beat(2000);
   const filter = page.getByText("Only people who passed this feature").first();
   if (await filter.isVisible()) await filter.click();
   await beat(3000);
 });
-// The README on a desktop, from a local render (scripts/video_rough.py writes it), never GitHub.
+// The README on a desktop, from a local render (make video-clips writes it), never GitHub.
 const readme = process.env.README_HTML;
 if (readme) {
-  for (const [name, anchor] of [["02-surveyors", "the-problem"], ["09-readme-results", ""], ["19-end", "feasibility-berkeley-as-a-follower-city"]]) {
+  for (const [name, anchor] of [["03-rhs-manual", "the-problem"], ["07-readme-results", ""]]) {
     await record(
       name,
       async (page) => {

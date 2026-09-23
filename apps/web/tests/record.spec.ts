@@ -121,10 +121,10 @@ test("/city shows two lists decided by code, and no number without its records",
 
   // The reaches, hills first, and the one line that landed below the finding.
   await expect(page.getByRole("heading", { name: "Reaches, from the hills to the Bay" })).toBeVisible();
-  await expect(page.getByText("Flows into Below the forks, west campus. 5 visits at 1 spots.")).toBeVisible();
+  await expect(page.getByText("Flows into Below the forks, west campus. 5 visits at 1 spot.")).toBeVisible();
   await expect(page.getByText("Upstream of here, 2 people reported pipes and sewage signs on Sep 23.")).toBeVisible();
   await expect(page.getByText("Nothing reported upstream.")).toHaveCount(1);
-  await expect(page.getByText("1 spots sit on this creek but on no reach")).toBeVisible();
+  await expect(page.getByText("1 spot sits on this creek but on no reach")).toBeVisible();
 
   // The referral is one tap away, and the example result says what it is before it says anything else.
   await expect(page.getByRole("link", { name: "Referral as FHIR" })).toHaveAttribute("href", "/api/fhir/referral/example");

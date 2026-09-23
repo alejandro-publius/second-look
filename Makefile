@@ -115,7 +115,9 @@ submit-check:
 # Update 14 section 7. Screen recordings (needs the built app on 3100), then the rough cut with a
 # scratch voice. Nothing either writes is committed: they are video files.
 video-clips:
-	cd $(WEB) && node scripts/record-clips.mjs
+	@mkdir -p docs/video/clips
+	uv run --with markdown python -c "import markdown,pathlib; r=pathlib.Path('.').resolve(); h=markdown.markdown(pathlib.Path('README.md').read_text(), extensions=['tables','fenced_code','toc']); pathlib.Path('docs/video/clips/readme.html').write_text('<!doctype html><meta charset=utf-8><base href=\"file://'+str(r)+'/\"><style>body{font:18px/1.5 -apple-system,sans-serif;max-width:980px;margin:40px auto;padding:0 24px}img{max-width:100%}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px}</style>'+h)"
+	cd $(WEB) && README_HTML=$(CURDIR)/docs/video/clips/readme.html node scripts/record-clips.mjs
 
 video-rough:
 	$(PY) scripts/video_rough.py
@@ -124,6 +126,7 @@ video-rough:
 # working notes, runs submit-check, and only then makes the repository public.
 go-public:
 	$(PY) scripts/go_public.py $(if $(filter yes,$(GO)),--yes,)
+# bash scripts/go_public.sh --run does the same thing; Alex was told that command first.
 
 # The one command for a judge: no key, no network, five lines out. Tests, FHIR validation,
 # the web build and the design gate, the audit chain, and a scan for secrets.
