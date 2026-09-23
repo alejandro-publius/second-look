@@ -1,39 +1,39 @@
-# Handoff: where Second Look stands, 2026-09-22
+# Handoff: where Second Look stands, 2026-09-23
 
-## Update 14 status (prompt 15 run, written before work started, then kept current)
+## Update 14 status, end of the prompt 15 run
 
-The brief is `docs/internal/updates/UPDATE_14.md`, resumed by `UPDATE_15.md`. No API key exists
-in `.env`, so every AI step runs on the fake client and the result slots say results arrive with
-the model run.
+The brief is `docs/internal/updates/UPDATE_14.md`, resumed by `UPDATE_15.md`. A cloud session
+(prompt 18, status issue #4) worked in parallel while this branch sat unpushed; its work is merged
+in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid run.
 
-| Phase | Step | State |
-|---|---|---|
-| 1 Launch on main | 1 to 3, 5 | done |
-| | 4 wipe | partly: local database wiped; the live D1 rows wait on Alex's command in `docs/ALEX_TODO.md` |
-| | 6 deploy main and check it | done 2026-09-22: Pages deployment 945eaee9, /demo text, paint 760 ms, phone sitting passed; that sitting was stored as real (stale QA key), logged in docs/deviations.md, repair is Alex's |
-| 2 Content and cleanup | 1 to 6 | done |
-| 3 AI on the test and footage | 1 the 16-photo test | partly: pipeline, fake run, ids and prices re-confirmed; batch ids fixed; the paid run is Alex's one command |
-| | 2 to 5 footage | done: 68 candidates, pick by rule, Vision screen, eye check (`videos/review.json`), 6 videos, 3 countries |
-| | 6 AI on footage | built and run on the fake client (`evals/footage.py`); real numbers wait on the key |
-| | 7 video walks | built: `/walk`, three walks from three countries (a fourth country is not in the pool) |
-| | 8 README numbers | footage pool, walks and validation counts come from `results/`; AI numbers say they arrive with the model run |
-| 4 README and docs | | README in the tier 3 shape under the organizers' five headers; ACCEPTANCE, SCORECARD, ARCHITECTURE |
-| 5 How it feels | | partly: `make readability`, Spanish draft (unverified); screenshots, critic and fixes to do |
-| 6 Merge and deploy | | not started; sandbox checked (15 of 15 resources answer), re-push job written |
-| 7 Video | | shot list, creek brief, recorder and rough cut built; recordings after the UI settles |
-| 8 Submission pack | | `make go-public` and `docs/ALEX_TODO.md` done; devpost and submit-check to do |
-| 9 Report | | not started |
+| Phase | State |
+|---|---|
+| 1 Launch on main | done, except two machine sittings in the live D1 table that only Alex can mark as tests (docs/ALEX_TODO.md step 1) |
+| 2 Content and cleanup | done |
+| 3 AI on the test and footage | footage, walks and the eval pipeline done; the model gate flags and the paid run are Alex's (step 2) |
+| 4 README and docs | done: tier 3 README under the organizers' headers, scorecard, acceptance, architecture |
+| 5 How it feels | done: design review 02's safe findings fixed, every screen photographed; the test flow findings and /check's button height left, see DECISIONS |
+| 6 Merge and deploy | proof done, sandbox checked, re-push job installed; the merge into main and the deploy wait for Alex's QA key and his word (DECISIONS 2026-09-23) |
+| 7 Video | shot list, recordings and rough cut done; creek footage and Alex's voice are his |
+| 8 Submission pack | done: docs/devpost.md, make go-public, docs/ALEX_TODO.md; submit-check fails only on video_link and repo_public |
+| 9 Report | docs/internal/reports/, this run |
 
+## Traps found in this run
 
-Two branches, two jobs.
-
-- **`main`, in `~/second-look`.** The launch build. Production deploys come from here only. It is
-  waiting on photo picks: open `photos/candidates/*.html`, tick photos, press the download button.
-  `make preflight-launch` is the gate, 66 failures, all of them content.
-- **`depth`, in the `~/second-look-depth` worktree.** Update 10 and 10B, the full loop. Nothing
-  here is deployed to the live link. Merge into `main` only after `make check` and the phone end
-  to end tests pass, and never between the `prereg-v1` tag and data lock unless the diff leaves
-  the test flow untouched.
+- Never write a file with `open(p, "w").write(f(open(p).read()))`: the write opens and empties the
+  file before the read. It emptied `apps/web/public/sw.js` once; `scripts/tests/test_web_static.py`
+  now guards that file.
+- A command piped through `tail` exits with tail's code. Gate a commit on the test command itself
+  (`set -o pipefail`), or a red test commits.
+- Frame and clip screening need macOS: `pyobjc-framework-Vision` is a darwin-only dev dependency.
+  Screens are cached in `~/second-look-cache/screens/`; videos in `~/second-look-cache/videos/`.
+- Walk clips are never committed. `scripts/deploy.sh web` and `make deploy-preview` cut them from the
+  cache with `scripts/build_walks.py --clips-only` and refuse to ship without them.
+- YouTube now answers downloads from this machine with a bot check; the footage pool is closed
+  until that clears.
+- Playwright pads a page into a larger video size; record at the viewport's own size.
+- The mock API's finalize refuses what the servers refuse. Keep it that way: a mock that took
+  anything hid the rating check bug.
 
 ## Live
 

@@ -57,3 +57,24 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: evals/models.yaml and evals/pricing.yaml still say unconfirmed although docs/notes/model_ids.md records the check on 2026-09-21, so the paid run refuses until someone flips them. That is Alex's call, left for him.
 - Decisions: no key and no Mac here, so no paid run, no footage download, no deploy, no merge into main. Those are commands in the status issue.
 - Next: Alex flips the two flags and runs `uv run python evals/model_sweep.py --real`; then the footage search, /walk, the merge and deploy in the hosting.md order, on the Mac.
+
+## Update 14 phase 3, the Mac's part, by prompt 15, 2026-09-23 06:00Z
+- What: open creek footage searched (68 candidates), picked by rule over eight rounds, screened by Apple Vision and by eye: 46 frames from 5 videos in 3 countries. /walk: three walks, every second screened, the record built on the phone and never sent. evals/footage.py built and run on the fake client. The branch was merged with the cloud takeover (7f2b1d5).
+- Proof: `uv run python evals/footage_pool.py` prints 68 candidates, 5 videos, 3 countries, 46 frames, 3 walks; `make fhir-validate` 14 files, 0 errors, 2 of them walk records; `cd worker && npm test` 10 passed.
+- Surprises: the OpenCV screen let through a talking head, title cards and a hiker; the stopped session's only labelled video was that talking head. YouTube began answering with a bot check. The validator caught two Locations with one fullUrl in the walk Bundle, and check_bundle now catches that too.
+- Decisions: no plant label from a description; three walks, not four; the model gate flags stay Alex's; the batch custom ids are positional.
+- Next: design review 02's safe findings, the Playwright specs, the screenshots.
+
+## Update 14 phases 4 and 5, 2026-09-23 06:40Z
+- What: README in the tier 3 shape under the organizers' five headers, every number rendered from results/ and checked; the scorecard and acceptance lists joined with the cloud's; design review 02's safe findings fixed by six agents in their own worktrees; every screen photographed again with the walks.
+- Proof: `make check` CHECK GREEN; `npx playwright test` 55 passed, 0 failed; `uv run python scripts/verify_claims.py` 10 claims match.
+- Surprises: the merge emptied sw.js (a one line write that truncated before it read), and nothing noticed until a Playwright spec that CI does not run; the creek check sent "changed" for the rating check, which both servers refuse.
+- Decisions: the test flow findings and the landing labels are left alone; "Not sure" stays in seven check questions because it is the official app's text.
+- Next: the Devpost fields, the gates, the video.
+
+## Update 14 phases 6 to 8, 2026-09-23 07:00Z
+- What: the merge proof; the sandbox checked and the re-push job installed; recordings and a rough cut with a scratch voice; docs/devpost.md current and checked; make go-public prepared; gitleaks clean with reasons.
+- Proof: `git diff --stat prereg-v1..HEAD` over the test flow and study code is empty; `make submit-check` fails only on video_link and repo_public; `make video-rough` 4:28 with cards, 3:46 without.
+- Surprises: Playwright pads a page into a larger video; submit-check had never run gitleaks since Sep 21.
+- Decisions: production waits for Alex's QA key and his word on timing; no video file is committed.
+- Next: Alex's page, docs/ALEX_TODO.md.
