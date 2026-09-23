@@ -1,6 +1,6 @@
 # Handoff: where Second Look stands, 2026-09-23
 
-## UPDATE_19, the merge (19:40Z)
+## UPDATE_19, the merge (19:12Z)
 
 `depth` is merged into `main` and both are the same commit; keep working on `depth` and move `main`
 forward with a fast-forward. Production runs this commit: the Worker with the additive D1 tables,
