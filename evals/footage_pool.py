@@ -30,6 +30,15 @@ def reason_group(reason: str) -> str:
     return "other"
 
 
+def failed_group(why: str) -> str:
+    """Why a whole video failed: its download, a person who looked at it, or the frame screen."""
+    if why.startswith("download"):
+        return "download failed"
+    if why.startswith("checked by eye"):
+        return "checked by eye"
+    return "too few frames passed the screen"
+
+
 def build(root: Path = ROOT) -> dict[str, Any]:
     def load(rel: str, default: Any) -> Any:
         path = root / rel
@@ -53,10 +62,7 @@ def build(root: Path = ROOT) -> dict[str, Any]:
     for v in frames.get("per_video", []):
         for d in v.get("dropped", []):
             drops[reason_group(d["reason"])] += 1
-    failed_reasons: Counter[str] = Counter(
-        "download failed" if why.startswith("download") else "too few frames passed the screen"
-        for why in failed.values()
-    )
+    failed_reasons: Counter[str] = Counter(failed_group(why) for why in failed.values())
     return {
         "real": True,
         "synthetic": False,

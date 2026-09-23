@@ -5,7 +5,7 @@ licensed creek video, served from our own origin with its credit on screen. The 
 guided creek check while watching. The checker's flags for the clip are worked out here, at build
 time, from the footage run's answers on the clip's own frames, and go through core/gate.py with
 the committed pass table. At most one becomes a question, and the page shows it only after the
-person has answered.
+person has answered. A footage run that is not real gives no flag at all.
 
 The rule, with no taste in it:
 
@@ -16,13 +16,16 @@ The rule, with no taste in it:
 3. Four walks, countries taken in order of kept frames.
 4. A clip plays every frame, not the one in four the frame screen saw, so every second of the
    video goes through Vision, and the clip is the window (40 seconds, else 35, else 30) in which
-   every second has no person, face or text and which holds the most kept frames. A video with no
-   such window cannot be a walk, and the next video in that country is tried. Sound is dropped:
-   a clip needs no voice, and a stranger's voice is not ours to publish.
+   every second has no person, face or text and which holds the most kept frames. A second within
+   3 seconds of a frame a person dropped by eye (videos/review.json) is never clean, because
+   Vision missed what they saw. A video with no such window cannot be a walk, and the next video
+   in that country is tried. Sound is dropped: a clip needs no voice, and a stranger's voice is
+   not ours to publish.
 
 Writes content/walks.yaml (committed) and apps/web/public/walks/<id>.mp4 (never committed; the
 .gitignore refuses every video file). With --no-clips it writes only the yaml, which is what CI
-and a machine without the cache can do.
+and a machine without the cache can do. With --clips-only it cuts every clip the yaml names again
+and deletes any other clip in that folder.
 
 Run: uv run python scripts/build_walks.py
 """
@@ -51,6 +54,10 @@ VIDEOS = ROOT / "videos" / "manifest.csv"
 PHOTOS = ROOT / "photos" / "manifest.csv"
 FOOTAGE = ROOT / "results" / "footage_latest.json"
 PASS_TABLE = ROOT / "results" / "model_pass_table.json"
+# A person looked at every kept frame; the frames they dropped are named "<source_url>@<second>".
+REVIEW = ROOT / "videos" / "review.json"
+# A figure a person saw in one frame is in the seconds around it too, so those seconds go as well.
+REVIEW_MARGIN_S = 3
 OUT_YAML = ROOT / "content" / "walks.yaml"
 OUT_CLIPS = ROOT / "apps" / "web" / "public" / "walks"
 DEFAULT_CACHE = Path.home() / "second-look-cache" / "videos"
@@ -141,6 +148,24 @@ def screen_seconds(src: Path, cache_dir: Path) -> set[int]:
     return clean
 
 
+def reviewed_seconds(review_frames: dict[str, str], source_url: str) -> set[int]:
+    """Every second within REVIEW_MARGIN_S of a frame a person dropped from this video.
+
+    Vision missed these (a small figure far off, a hand at the edge), so a clip must not show
+    them either. The keys are "<source_url>@<second>", as scripts/make_frames.py reads them.
+    """
+    near: set[int] = set()
+    for key in review_frames:
+        url, _, second = key.rpartition("@")
+        if url != source_url:
+            continue
+        if not second.isdigit():
+            raise SystemExit(f"walks: {REVIEW} names a frame with no second: {key}")
+        at = int(second)
+        near.update(range(max(0, at - REVIEW_MARGIN_S), at + REVIEW_MARGIN_S + 1))
+    return near
+
+
 def best_window(seconds: list[int], duration_s: float, window: int = WINDOW_S) -> int:
     """The start of the window holding the most kept frames, the earliest when tied."""
     best_start, best_count = 0, -1
@@ -199,6 +224,29 @@ def gated_flags(
     }
 
 
+def walk_checker(
+    footage: dict[str, Any], frame_ids: set[str], pass_table: dict[str, Any]
+) -> dict[str, Any]:
+    """The checker entry for one walk. A footage run that is not real gives no flag at all.
+
+    A synthetic run's answers and notes were made up by the fake client, so none of them may
+    reach the gate, let alone become a question, whatever the pass table says.
+    """
+    if footage.get("real") is not True:
+        return {
+            "pass_table_real": pass_table.get("real") is True,
+            "kept": {},
+            "dropped": 0,
+            "drop_reasons": {},
+            "question": None,
+            "footage_run": "synthetic",
+            "reason": "the footage run is synthetic, so no flag is taken",
+        }
+    checker = gated_flags(footage.get("answers", []), frame_ids, pass_table)
+    checker["footage_run"] = "real"
+    return checker
+
+
 def cut_clip(src: Path, dest: Path, start: int, seconds: int = WINDOW_S) -> int:
     dest.parent.mkdir(parents=True, exist_ok=True)
     for crf in (28, 32, 36):
@@ -215,20 +263,31 @@ def cut_clip(src: Path, dest: Path, start: int, seconds: int = WINDOW_S) -> int:
 
 
 def cut_named_clips(cache: Path) -> int:
-    """For a deploy: the committed walks, cut again from the cache. The clips are never in git."""
+    """For a deploy: the committed walks, cut again from the cache. The clips are never in git.
+
+    Every clip the yaml names is cut again, even when a file is already there, because an old
+    file may be another window or a walk that has since changed. Any other clip in the folder
+    belongs to a walk that is gone, so it is deleted and never shipped.
+    """
     walks = (yaml.safe_load(OUT_YAML.read_text(encoding="utf-8")) or {}).get("walks", [])
     by_id = {v["id"]: v for v in read_csv(VIDEOS)}
+    named = {(OUT_CLIPS.parent / w["clip"]["file"]).resolve() for w in walks}
+    if OUT_CLIPS.exists():
+        for old in sorted(OUT_CLIPS.glob("*.mp4")):
+            if old.resolve() not in named:
+                old.unlink()
+                print(f"walks: deleted {old.name}, which no walk in {OUT_YAML.name} names")
     for w in walks:
-        dest = ROOT / "apps" / "web" / "public" / w["clip"]["file"]
-        if dest.exists() and dest.stat().st_size > 0:
-            continue
+        dest = OUT_CLIPS.parent / w["clip"]["file"]
         video = by_id.get(w["id"])
         src = cache / video["cache_file"] if video else None
         if src is None or not src.exists():
+            # A clip that cannot be cut again from its source is not shipped as it was.
+            dest.unlink(missing_ok=True)
             print(f"walks: {w['id']} has no source in {cache}; run scripts/fetch_videos.py")
             return 1
         cut_clip(src, dest, int(w["clip"]["start_s"]), int(w["clip"]["seconds"]))
-    print(f"walks: {len(walks)} clips in apps/web/public/walks")
+    print(f"walks: {len(walks)} clips cut again in apps/web/public/walks")
     return 0
 
 
@@ -256,6 +315,8 @@ def main(argv: list[str] | None = None) -> int:
             frames[row["scene_id"].removeprefix("video-")].append(row["id"])
     footage = json.loads(FOOTAGE.read_text(encoding="utf-8")) if FOOTAGE.exists() else {}
     table = json.loads(PASS_TABLE.read_text(encoding="utf-8")) if PASS_TABLE.exists() else {}
+    review = json.loads(REVIEW.read_text(encoding="utf-8")) if REVIEW.exists() else {}
+    review_frames: dict[str, str] = review.get("frames", {})
     if shutil.which("ffmpeg") is None:
         print("walks: ffmpeg is not installed; brew install ffmpeg")
         return 1
@@ -272,10 +333,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"walks: {src} is not in the cache; run scripts/fetch_videos.py")
                 return 1
             ids = sorted(frames[v["id"]], key=frame_seconds)
+            # Vision's clean seconds, less the seconds near any frame a person dropped by eye.
+            clean = screen_seconds(src, args.cache.parent) - reviewed_seconds(
+                review_frames, v["source_url"]
+            )
             window = clean_window(
-                [frame_seconds(i) for i in ids],
-                screen_seconds(src, args.cache.parent),
-                float(v["duration_s"] or 0),
+                [frame_seconds(i) for i in ids], clean, float(v["duration_s"] or 0)
             )
             if window is None:
                 skipped.append(f"{v['id']}: no 30 second stretch with no person, face or text")
@@ -286,8 +349,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         v, ids, (start, seconds) = picked
         in_clip = [i for i in ids if start <= frame_seconds(i) < start + seconds]
-        checker = gated_flags(footage.get("answers", []), set(in_clip), table)
-        checker["footage_run"] = "real" if footage.get("real") else "synthetic"
+        checker = walk_checker(footage, set(in_clip), table)
         walk = {
             "id": v["id"],
             "title": v["title"],
