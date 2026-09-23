@@ -152,9 +152,12 @@ export function CheckFlow() {
           <FocusHeading>{t("check.title")}</FocusHeading>
           <p>{t("check.intro")}</p>
           <p className="small muted">{t("check.unverified_note")}</p>
-          <button type="button" className="btn btn-block" onClick={() => setStage({ name: "location" })}>
-            {t("check.start")}
-          </button>
+          {/* The same bottom block as the test screens, so Start sits in thumb reach. */}
+          <div className="actions">
+            <button type="button" className="btn btn-block" onClick={() => setStage({ name: "location" })}>
+              {t("check.start")}
+            </button>
+          </div>
         </div>
       );
     case "location":
