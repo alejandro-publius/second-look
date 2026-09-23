@@ -1,0 +1,1322 @@
+{
+  "generated_at_utc": "2026-09-23T19:58:08Z",
+  "script": "evals/consensus_coarseness.py",
+  "synthetic": true,
+  "stamp": "SYNTHETIC",
+  "question": "With four photos per feature, does weighting a person's vote by their score beat a plain majority? UPDATE_22 section 1 answer 1; the planner's method from UPDATE_09 item 4",
+  "seed": 20260921,
+  "summary": {
+    "statement": "In groups of 5, plain majority is best in 3 of 5 skill patterns. Feature only weights clearly lose to plain majority in 5 of 5, by 12.1 to 20.6 points. A weighted method clearly beats plain majority in 1 of 5 (third_at_chance), by at most 1.1 points (shrunk_k6). Passers only clearly beats plain majority in 2 of 5 (uniform_per_person, third_at_chance), by at most 2.2 points.",
+    "beats_rule": "a method clearly beats (or loses to) plain majority when its mean share right is higher (or lower) by more than twice the Monte Carlo standard error of the paired difference",
+    "weighted_methods": [
+      "feature_only",
+      "shrunk_k3",
+      "shrunk_k6",
+      "overall_only"
+    ],
+    "at_headline_size": {
+      "group_size": 5,
+      "n_patterns": 5,
+      "patterns_where_plain_is_best": [
+        "equal",
+        "normal_per_person",
+        "uniform_per_person_and_feature"
+      ],
+      "n_patterns_where_plain_is_best": 3,
+      "patterns_where_a_weighted_method_clearly_beats_plain": [
+        "third_at_chance"
+      ],
+      "n_patterns_where_a_weighted_method_clearly_beats_plain": 1,
+      "patterns_where_passers_only_clearly_beats_plain": [
+        "uniform_per_person",
+        "third_at_chance"
+      ],
+      "n_patterns_where_passers_only_clearly_beats_plain": 2,
+      "n_patterns_where_feature_only_clearly_loses": 5,
+      "feature_only_loss_points_min": 12.1,
+      "feature_only_loss_points_max": 20.6,
+      "largest_gain_over_plain_points": 2.2,
+      "largest_gain_method": "passers_only",
+      "largest_gain_pattern": "third_at_chance",
+      "largest_weighted_gain_over_plain_points": 1.1,
+      "largest_weighted_gain_method": "shrunk_k6",
+      "largest_weighted_gain_pattern": "third_at_chance",
+      "largest_passers_only_gain_points": 2.2,
+      "largest_passers_only_gain_pattern": "third_at_chance",
+      "statement": "In groups of 5, plain majority is best in 3 of 5 skill patterns. Feature only weights clearly lose to plain majority in 5 of 5, by 12.1 to 20.6 points. A weighted method clearly beats plain majority in 1 of 5 (third_at_chance), by at most 1.1 points (shrunk_k6). Passers only clearly beats plain majority in 2 of 5 (uniform_per_person, third_at_chance), by at most 2.2 points."
+    },
+    "all_sizes": {
+      "cells": 15,
+      "cells_where_plain_is_best": 9,
+      "cells_where_a_weighted_method_clearly_beats_plain": 3,
+      "cells_where_passers_only_clearly_beats_plain": 6
+    },
+    "by_pattern": {
+      "equal": {
+        "label": "everyone at 0.70",
+        "size_3": {
+          "plain_pct": 78.3,
+          "best_method": "plain",
+          "best_pct": 78.3,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -7.7,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -2.8,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -24.4,
+          "statement": "Groups of 3, everyone at 0.70: plain majority is best (78.3 percent right). The best weighted method, feature weights shrunk to overall, k = 6, is 7.7 points behind plain majority; passers only is 2.8 points behind plain majority."
+        },
+        "size_5": {
+          "plain_pct": 83.6,
+          "best_method": "plain",
+          "best_pct": 83.6,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -7.0,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -3.8,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -20.6,
+          "statement": "Groups of 5, everyone at 0.70: plain majority is best (83.6 percent right). The best weighted method, feature weights shrunk to overall, k = 6, is 7.0 points behind plain majority; passers only is 3.8 points behind plain majority."
+        },
+        "size_7": {
+          "plain_pct": 87.3,
+          "best_method": "plain",
+          "best_pct": 87.3,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -6.7,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -4.3,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -18.2,
+          "statement": "Groups of 7, everyone at 0.70: plain majority is best (87.3 percent right). The best weighted method, feature weights shrunk to overall, k = 6, is 6.7 points behind plain majority; passers only is 4.3 points behind plain majority."
+        }
+      },
+      "normal_per_person": {
+        "label": "normal around 0.70, sd 0.07, one skill per person",
+        "size_3": {
+          "plain_pct": 78.5,
+          "best_method": "plain",
+          "best_pct": 78.5,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -5.9,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -1.7,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -22.7,
+          "statement": "Groups of 3, normal around 0.70, sd 0.07, one skill per person: plain majority is best (78.5 percent right). The best weighted method, feature weights shrunk to overall, k = 6, is 5.9 points behind plain majority; passers only is 1.7 points behind plain majority."
+        },
+        "size_5": {
+          "plain_pct": 83.8,
+          "best_method": "plain",
+          "best_pct": 83.8,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -4.8,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -2.2,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -18.5,
+          "statement": "Groups of 5, normal around 0.70, sd 0.07, one skill per person: plain majority is best (83.8 percent right). The best weighted method, feature weights shrunk to overall, k = 6, is 4.8 points behind plain majority; passers only is 2.2 points behind plain majority."
+        },
+        "size_7": {
+          "plain_pct": 87.5,
+          "best_method": "plain",
+          "best_pct": 87.5,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -4.4,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -2.5,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -15.9,
+          "statement": "Groups of 7, normal around 0.70, sd 0.07, one skill per person: plain majority is best (87.5 percent right). The best weighted method, feature weights shrunk to overall, k = 6, is 4.4 points behind plain majority; passers only is 2.5 points behind plain majority."
+        }
+      },
+      "uniform_per_person_and_feature": {
+        "label": "uniform 0.50 to 0.95 per person and feature",
+        "size_3": {
+          "plain_pct": 81.6,
+          "best_method": "plain",
+          "best_pct": 81.6,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -4.3,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -1.6,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -17.5,
+          "statement": "Groups of 3, uniform 0.50 to 0.95 per person and feature: plain majority is best (81.6 percent right). The best weighted method, feature weights shrunk to overall, k = 6, is 4.3 points behind plain majority; passers only is 1.6 points behind plain majority."
+        },
+        "size_5": {
+          "plain_pct": 86.9,
+          "best_method": "plain",
+          "best_pct": 86.9,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k3",
+          "best_weighted_minus_plain_points": -2.9,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -2.0,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -12.5,
+          "statement": "Groups of 5, uniform 0.50 to 0.95 per person and feature: plain majority is best (86.9 percent right). The best weighted method, feature weights shrunk to overall, k = 3, is 2.9 points behind plain majority; passers only is 2.0 points behind plain majority."
+        },
+        "size_7": {
+          "plain_pct": 90.5,
+          "best_method": "plain",
+          "best_pct": 90.5,
+          "best_minus_plain_points": 0.0,
+          "best_clearly_beats_plain": false,
+          "best_weighted_method": "shrunk_k3",
+          "best_weighted_minus_plain_points": -2.4,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": -2.1,
+          "passers_only_clearly_beats_plain": false,
+          "feature_only_minus_plain_points": -9.6,
+          "statement": "Groups of 7, uniform 0.50 to 0.95 per person and feature: plain majority is best (90.5 percent right). The best weighted method, feature weights shrunk to overall, k = 3, is 2.4 points behind plain majority; passers only is 2.1 points behind plain majority."
+        }
+      },
+      "uniform_per_person": {
+        "label": "uniform 0.50 to 0.95 per person, same for every feature",
+        "size_3": {
+          "plain_pct": 81.5,
+          "best_method": "passers_only",
+          "best_pct": 82.0,
+          "best_minus_plain_points": 0.5,
+          "best_clearly_beats_plain": true,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -1.8,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": 0.5,
+          "passers_only_clearly_beats_plain": true,
+          "feature_only_minus_plain_points": -17.3,
+          "statement": "Groups of 3, uniform 0.50 to 0.95 per person, same for every feature: passers only (6 of 8) is best, 0.5 points ahead of plain majority, a clear gain. The best weighted method, feature weights shrunk to overall, k = 6, is 1.8 points behind plain majority."
+        },
+        "size_5": {
+          "plain_pct": 86.8,
+          "best_method": "passers_only",
+          "best_pct": 87.5,
+          "best_minus_plain_points": 0.7,
+          "best_clearly_beats_plain": true,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -0.2,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": 0.7,
+          "passers_only_clearly_beats_plain": true,
+          "feature_only_minus_plain_points": -12.3,
+          "statement": "Groups of 5, uniform 0.50 to 0.95 per person, same for every feature: passers only (6 of 8) is best, 0.7 points ahead of plain majority, a clear gain. The best weighted method, feature weights shrunk to overall, k = 6, is 0.2 points behind plain majority."
+        },
+        "size_7": {
+          "plain_pct": 90.4,
+          "best_method": "passers_only",
+          "best_pct": 91.1,
+          "best_minus_plain_points": 0.7,
+          "best_clearly_beats_plain": true,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": 0.3,
+          "weighted_methods_that_clearly_beat_plain": [
+            "shrunk_k6",
+            "overall_only"
+          ],
+          "passers_only_minus_plain_points": 0.7,
+          "passers_only_clearly_beats_plain": true,
+          "feature_only_minus_plain_points": -9.4,
+          "statement": "Groups of 7, uniform 0.50 to 0.95 per person, same for every feature: passers only (6 of 8) is best, 0.7 points ahead of plain majority, a clear gain. The best weighted method, feature weights shrunk to overall, k = 6, is 0.3 points ahead of plain majority, a clear gain."
+        }
+      },
+      "third_at_chance": {
+        "label": "13 of 40 at 0.50, the rest normal around 0.80, sd 0.06",
+        "size_3": {
+          "plain_pct": 78.8,
+          "best_method": "passers_only",
+          "best_pct": 80.5,
+          "best_minus_plain_points": 1.7,
+          "best_clearly_beats_plain": true,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": -0.7,
+          "weighted_methods_that_clearly_beat_plain": [],
+          "passers_only_minus_plain_points": 1.7,
+          "passers_only_clearly_beats_plain": true,
+          "feature_only_minus_plain_points": -17.1,
+          "statement": "Groups of 3, 13 of 40 at 0.50, the rest normal around 0.80, sd 0.06: passers only (6 of 8) is best, 1.7 points ahead of plain majority, a clear gain. The best weighted method, feature weights shrunk to overall, k = 6, is 0.7 points behind plain majority."
+        },
+        "size_5": {
+          "plain_pct": 84.2,
+          "best_method": "passers_only",
+          "best_pct": 86.4,
+          "best_minus_plain_points": 2.2,
+          "best_clearly_beats_plain": true,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": 1.1,
+          "weighted_methods_that_clearly_beat_plain": [
+            "shrunk_k3",
+            "shrunk_k6",
+            "overall_only"
+          ],
+          "passers_only_minus_plain_points": 2.2,
+          "passers_only_clearly_beats_plain": true,
+          "feature_only_minus_plain_points": -12.1,
+          "statement": "Groups of 5, 13 of 40 at 0.50, the rest normal around 0.80, sd 0.06: passers only (6 of 8) is best, 2.2 points ahead of plain majority, a clear gain. The best weighted method, feature weights shrunk to overall, k = 6, is 1.1 points ahead of plain majority, a clear gain."
+        },
+        "size_7": {
+          "plain_pct": 88.0,
+          "best_method": "passers_only",
+          "best_pct": 90.2,
+          "best_minus_plain_points": 2.2,
+          "best_clearly_beats_plain": true,
+          "best_weighted_method": "shrunk_k6",
+          "best_weighted_minus_plain_points": 1.5,
+          "weighted_methods_that_clearly_beat_plain": [
+            "shrunk_k3",
+            "shrunk_k6",
+            "overall_only"
+          ],
+          "passers_only_minus_plain_points": 2.2,
+          "passers_only_clearly_beats_plain": true,
+          "feature_only_minus_plain_points": -9.2,
+          "statement": "Groups of 7, 13 of 40 at 0.50, the rest normal around 0.80, sd 0.06: passers only (6 of 8) is best, 2.2 points ahead of plain majority, a clear gain. The best weighted method, feature weights shrunk to overall, k = 6, is 1.5 points ahead of plain majority, a clear gain."
+        }
+      }
+    }
+  },
+  "monte_carlo": {
+    "max_se_of_a_mean": 0.0017,
+    "max_se_of_a_difference_from_plain": 0.0012,
+    "smallest_weighted_sum_not_counted_as_a_tie": 2.09e-05,
+    "tie_tolerance": 1e-09
+  },
+  "parameters": {
+    "people": 40,
+    "features": 4,
+    "items_per_feature": 4,
+    "items": 16,
+    "answers": "yes or no only, so each vote is right or wrong; Can't tell is not modelled",
+    "skill_clip": [
+      0.5,
+      0.95
+    ],
+    "patterns": {
+      "equal": "skill 0.70 for every person and feature",
+      "normal_per_person": "one draw per person from normal(0.70, sd 0.07), used for all four features",
+      "uniform_per_person_and_feature": "one draw per person and feature from uniform(0.50, 0.95)",
+      "uniform_per_person": "one draw per person from uniform(0.50, 0.95), used for all features",
+      "third_at_chance": "exactly 13 of 40 people (40 / 3 rounded to the nearest whole person) at 0.50 on every feature; the rest one draw per person from normal(0.80, sd 0.06), used for all four features"
+    },
+    "at_chance_count_in_third_at_chance": 13,
+    "at_chance_rounding": "40 / 3 = 13.33, rounded to the nearest whole person",
+    "group_sizes": [
+      3,
+      5,
+      7
+    ],
+    "headline_group_size": 5,
+    "halves": "for every feature 2 of its 4 items go to half A and 2 to half B; score on one half, vote on the other, then swap; results are over both ways",
+    "items_per_feature_per_half": 2,
+    "pass_mark_of_8": 6,
+    "populations_per_pattern": 1000,
+    "random_splits_per_population": 8,
+    "score_vote_pairs_per_population": 16,
+    "groups_per_size_per_pair": 50,
+    "group_votes_per_cell": 800000,
+    "paired": "every method is scored on the same populations, splits and groups",
+    "methods": {
+      "plain": "w = 1",
+      "feature_only": "w = max(0, logit((c + 0.5) / 3))",
+      "shrunk_k3": "r = (C + 0.5) / 9; p = (c + 0.5 + 3 * r) / (3 + 3); w = max(0, logit(p))",
+      "shrunk_k6": "r = (C + 0.5) / 9; p = (c + 0.5 + 6 * r) / (3 + 6); w = max(0, logit(p))",
+      "overall_only": "w = max(0, logit((C + 0.5) / 9))",
+      "passers_only": "people with C >= 6 vote by plain majority; when nobody in the group passed or the passers tie, the whole group votes by plain majority"
+    },
+    "symbols": {
+      "c": "right of the 2 calibration items of the voted item's feature",
+      "C": "right of all 8 calibration items",
+      "r": "(C + 0.5) / 9, the person's overall calibration rate",
+      "logit": "logit(p) = ln(p / (1 - p))"
+    },
+    "weights_by_c_feature_only": [
+      0.0,
+      0.0,
+      1.6094
+    ],
+    "weights_by_C_overall_only": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.452,
+      0.9555,
+      1.6094,
+      2.8332
+    ],
+    "vote_rule": "sum of w over people right minus sum of w over people wrong; above zero is right",
+    "tie_rule": "a sum of exactly zero (a tie, including every weight zero) counts as wrong for every method; sums within the tie tolerance of zero are treated as zero to absorb floating point rounding",
+    "monte_carlo_error": "standard error across the simulated populations: the standard deviation of the per population mean share right over the square root of the number of populations"
+  },
+  "patterns": {
+    "equal": {
+      "label": "everyone at 0.70",
+      "skill_rule": "skill 0.70 for every person and feature",
+      "share_of_people_passing_a_half": 0.5502,
+      "by_size": {
+        "3": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.7832,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.5394,
+              "se": 0.0013,
+              "minus_plain": -0.2437,
+              "minus_plain_se": 0.0009,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.287
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.7018,
+              "se": 0.001,
+              "minus_plain": -0.0814,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.033
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.7058,
+              "se": 0.001,
+              "minus_plain": -0.0774,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0295
+            },
+            "overall_only": {
+              "mean_share_right": 0.6906,
+              "se": 0.0011,
+              "minus_plain": -0.0925,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0552
+            },
+            "passers_only": {
+              "mean_share_right": 0.7551,
+              "se": 0.0009,
+              "minus_plain": -0.028,
+              "minus_plain_se": 0.0003,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.2625,
+          "share_of_groups_with_no_passer": 0.0908
+        },
+        "5": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8361,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.6299,
+              "se": 0.0015,
+              "minus_plain": -0.2061,
+              "minus_plain_se": 0.0011,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.208
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.7623,
+              "se": 0.0011,
+              "minus_plain": -0.0738,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0089
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.7662,
+              "se": 0.0011,
+              "minus_plain": -0.0699,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0072
+            },
+            "overall_only": {
+              "mean_share_right": 0.756,
+              "se": 0.0011,
+              "minus_plain": -0.0801,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0227
+            },
+            "passers_only": {
+              "mean_share_right": 0.7979,
+              "se": 0.001,
+              "minus_plain": -0.0382,
+              "minus_plain_se": 0.0004,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.1892,
+          "share_of_groups_with_no_passer": 0.0186
+        },
+        "7": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.873,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.6908,
+              "se": 0.0017,
+              "minus_plain": -0.1821,
+              "minus_plain_se": 0.0012,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1627
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.8027,
+              "se": 0.0012,
+              "minus_plain": -0.0703,
+              "minus_plain_se": 0.0008,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0032
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.8061,
+              "se": 0.0012,
+              "minus_plain": -0.0669,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0022
+            },
+            "overall_only": {
+              "mean_share_right": 0.7988,
+              "se": 0.0012,
+              "minus_plain": -0.0742,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.011
+            },
+            "passers_only": {
+              "mean_share_right": 0.8298,
+              "se": 0.0011,
+              "minus_plain": -0.0431,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.1467,
+          "share_of_groups_with_no_passer": 0.0037
+        }
+      }
+    },
+    "normal_per_person": {
+      "label": "normal around 0.70, sd 0.07, one skill per person",
+      "skill_rule": "one draw per person from normal(0.70, sd 0.07), used for all four features",
+      "share_of_people_passing_a_half": 0.5549,
+      "by_size": {
+        "3": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.7848,
+              "se": 0.0009,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.5583,
+              "se": 0.0014,
+              "minus_plain": -0.2266,
+              "minus_plain_se": 0.0009,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.2795
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.7206,
+              "se": 0.0011,
+              "minus_plain": -0.0642,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0339
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.7255,
+              "se": 0.0011,
+              "minus_plain": -0.0593,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0305
+            },
+            "overall_only": {
+              "mean_share_right": 0.7124,
+              "se": 0.0011,
+              "minus_plain": -0.0725,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0557
+            },
+            "passers_only": {
+              "mean_share_right": 0.7683,
+              "se": 0.0009,
+              "minus_plain": -0.0165,
+              "minus_plain_se": 0.0003,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.2532,
+          "share_of_groups_with_no_passer": 0.088
+        },
+        "5": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8378,
+              "se": 0.0009,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.6532,
+              "se": 0.0016,
+              "minus_plain": -0.1846,
+              "minus_plain_se": 0.0011,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1988
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.7853,
+              "se": 0.0012,
+              "minus_plain": -0.0525,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0089
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.7899,
+              "se": 0.0012,
+              "minus_plain": -0.0479,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0072
+            },
+            "overall_only": {
+              "mean_share_right": 0.7821,
+              "se": 0.0012,
+              "minus_plain": -0.0558,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0215
+            },
+            "passers_only": {
+              "mean_share_right": 0.8156,
+              "se": 0.0011,
+              "minus_plain": -0.0222,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.1782,
+          "share_of_groups_with_no_passer": 0.0178
+        },
+        "7": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.875,
+              "se": 0.0009,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.7156,
+              "se": 0.0017,
+              "minus_plain": -0.1594,
+              "minus_plain_se": 0.0012,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1534
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.8271,
+              "se": 0.0012,
+              "minus_plain": -0.0479,
+              "minus_plain_se": 0.0008,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0031
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.8314,
+              "se": 0.0012,
+              "minus_plain": -0.0436,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0022
+            },
+            "overall_only": {
+              "mean_share_right": 0.8265,
+              "se": 0.0012,
+              "minus_plain": -0.0485,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0101
+            },
+            "passers_only": {
+              "mean_share_right": 0.8501,
+              "se": 0.0011,
+              "minus_plain": -0.0249,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.1343,
+          "share_of_groups_with_no_passer": 0.0035
+        }
+      }
+    },
+    "uniform_per_person_and_feature": {
+      "label": "uniform 0.50 to 0.95 per person and feature",
+      "skill_rule": "one draw per person and feature from uniform(0.50, 0.95)",
+      "share_of_people_passing_a_half": 0.6159,
+      "by_size": {
+        "3": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8158,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.641,
+              "se": 0.0012,
+              "minus_plain": -0.1748,
+              "minus_plain_se": 0.0008,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.2379
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.7725,
+              "se": 0.0009,
+              "minus_plain": -0.0433,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0255
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.7726,
+              "se": 0.0009,
+              "minus_plain": -0.0432,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0218
+            },
+            "overall_only": {
+              "mean_share_right": 0.7494,
+              "se": 0.001,
+              "minus_plain": -0.0664,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0414
+            },
+            "passers_only": {
+              "mean_share_right": 0.8,
+              "se": 0.0008,
+              "minus_plain": -0.0158,
+              "minus_plain_se": 0.0003,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.2232,
+          "share_of_groups_with_no_passer": 0.0563
+        },
+        "5": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8691,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.7446,
+              "se": 0.0013,
+              "minus_plain": -0.1246,
+              "minus_plain_se": 0.0009,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1566
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.8396,
+              "se": 0.0009,
+              "minus_plain": -0.0295,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0063
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.8381,
+              "se": 0.0009,
+              "minus_plain": -0.0311,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0048
+            },
+            "overall_only": {
+              "mean_share_right": 0.8183,
+              "se": 0.001,
+              "minus_plain": -0.0508,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0156
+            },
+            "passers_only": {
+              "mean_share_right": 0.8492,
+              "se": 0.0009,
+              "minus_plain": -0.0199,
+              "minus_plain_se": 0.0004,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.151,
+          "share_of_groups_with_no_passer": 0.0083
+        },
+        "7": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.9048,
+              "se": 0.0007,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.8093,
+              "se": 0.0013,
+              "minus_plain": -0.0956,
+              "minus_plain_se": 0.0009,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1117
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.881,
+              "se": 0.0009,
+              "minus_plain": -0.0239,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0021
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.8789,
+              "se": 0.0009,
+              "minus_plain": -0.026,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0013
+            },
+            "overall_only": {
+              "mean_share_right": 0.8619,
+              "se": 0.001,
+              "minus_plain": -0.043,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0071
+            },
+            "passers_only": {
+              "mean_share_right": 0.8836,
+              "se": 0.0009,
+              "minus_plain": -0.0213,
+              "minus_plain_se": 0.0004,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.1095,
+          "share_of_groups_with_no_passer": 0.0012
+        }
+      }
+    },
+    "uniform_per_person": {
+      "label": "uniform 0.50 to 0.95 per person, same for every feature",
+      "skill_rule": "one draw per person from uniform(0.50, 0.95), used for all features",
+      "share_of_people_passing_a_half": 0.6021,
+      "by_size": {
+        "3": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8145,
+              "se": 0.001,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.641,
+              "se": 0.0016,
+              "minus_plain": -0.1735,
+              "minus_plain_se": 0.0009,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.2383
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.7906,
+              "se": 0.0012,
+              "minus_plain": -0.0239,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0304
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.796,
+              "se": 0.0011,
+              "minus_plain": -0.0185,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0276
+            },
+            "overall_only": {
+              "mean_share_right": 0.7879,
+              "se": 0.0012,
+              "minus_plain": -0.0266,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0468
+            },
+            "passers_only": {
+              "mean_share_right": 0.8197,
+              "se": 0.001,
+              "minus_plain": 0.0052,
+              "minus_plain_se": 0.0003,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.2098,
+          "share_of_groups_with_no_passer": 0.0633
+        },
+        "5": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8684,
+              "se": 0.001,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.7449,
+              "se": 0.0017,
+              "minus_plain": -0.1235,
+              "minus_plain_se": 0.001,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1571
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.8615,
+              "se": 0.0011,
+              "minus_plain": -0.0069,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0072
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.8667,
+              "se": 0.0011,
+              "minus_plain": -0.0017,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0058
+            },
+            "overall_only": {
+              "mean_share_right": 0.8635,
+              "se": 0.0011,
+              "minus_plain": -0.005,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0149
+            },
+            "passers_only": {
+              "mean_share_right": 0.8754,
+              "se": 0.001,
+              "minus_plain": 0.007,
+              "minus_plain_se": 0.0004,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.1319,
+          "share_of_groups_with_no_passer": 0.0101
+        },
+        "7": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.9041,
+              "se": 0.001,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.8105,
+              "se": 0.0016,
+              "minus_plain": -0.0936,
+              "minus_plain_se": 0.001,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1111
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.9026,
+              "se": 0.001,
+              "minus_plain": -0.0015,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0023
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.9071,
+              "se": 0.001,
+              "minus_plain": 0.003,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0016
+            },
+            "overall_only": {
+              "mean_share_right": 0.9059,
+              "se": 0.001,
+              "minus_plain": 0.0018,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0061
+            },
+            "passers_only": {
+              "mean_share_right": 0.9111,
+              "se": 0.0009,
+              "minus_plain": 0.007,
+              "minus_plain_se": 0.0004,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.0899,
+          "share_of_groups_with_no_passer": 0.0016
+        }
+      }
+    },
+    "third_at_chance": {
+      "label": "13 of 40 at 0.50, the rest normal around 0.80, sd 0.06",
+      "skill_rule": "exactly 13 of 40 people (40 / 3 rounded to the nearest whole person) at 0.50 on every feature; the rest one draw per person from normal(0.80, sd 0.06), used for all four features",
+      "share_of_people_passing_a_half": 0.5754,
+      "by_size": {
+        "3": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.788,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.6169,
+              "se": 0.0013,
+              "minus_plain": -0.1712,
+              "minus_plain_se": 0.0009,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.2542
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.7742,
+              "se": 0.001,
+              "minus_plain": -0.0139,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0372
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.7808,
+              "se": 0.0009,
+              "minus_plain": -0.0072,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0338
+            },
+            "overall_only": {
+              "mean_share_right": 0.7722,
+              "se": 0.001,
+              "minus_plain": -0.0158,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.0559
+            },
+            "passers_only": {
+              "mean_share_right": 0.8051,
+              "se": 0.0008,
+              "minus_plain": 0.0171,
+              "minus_plain_se": 0.0004,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.2178,
+          "share_of_groups_with_no_passer": 0.0735
+        },
+        "5": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8424,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.7211,
+              "se": 0.0014,
+              "minus_plain": -0.1212,
+              "minus_plain_se": 0.001,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1703
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.8469,
+              "se": 0.001,
+              "minus_plain": 0.0045,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.009
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.853,
+              "se": 0.0009,
+              "minus_plain": 0.0107,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0072
+            },
+            "overall_only": {
+              "mean_share_right": 0.8494,
+              "se": 0.0009,
+              "minus_plain": 0.007,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.018
+            },
+            "passers_only": {
+              "mean_share_right": 0.8643,
+              "se": 0.0008,
+              "minus_plain": 0.0219,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.138,
+          "share_of_groups_with_no_passer": 0.0122
+        },
+        "7": {
+          "voted_items_per_population": 6400,
+          "methods": {
+            "plain": {
+              "mean_share_right": 0.8797,
+              "se": 0.0008,
+              "minus_plain": 0.0,
+              "minus_plain_se": 0.0,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            },
+            "feature_only": {
+              "mean_share_right": 0.7872,
+              "se": 0.0014,
+              "minus_plain": -0.0925,
+              "minus_plain_se": 0.0011,
+              "clearly_beats_plain": false,
+              "clearly_loses_to_plain": true,
+              "tie_share": 0.1236
+            },
+            "shrunk_k3": {
+              "mean_share_right": 0.8895,
+              "se": 0.0009,
+              "minus_plain": 0.0098,
+              "minus_plain_se": 0.0007,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.003
+            },
+            "shrunk_k6": {
+              "mean_share_right": 0.8948,
+              "se": 0.0009,
+              "minus_plain": 0.0151,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.002
+            },
+            "overall_only": {
+              "mean_share_right": 0.8935,
+              "se": 0.0009,
+              "minus_plain": 0.0138,
+              "minus_plain_se": 0.0006,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0074
+            },
+            "passers_only": {
+              "mean_share_right": 0.9022,
+              "se": 0.0008,
+              "minus_plain": 0.0225,
+              "minus_plain_se": 0.0005,
+              "clearly_beats_plain": true,
+              "clearly_loses_to_plain": false,
+              "tie_share": 0.0
+            }
+          },
+          "passers_only_share_of_items_sent_back_to_everyone": 0.0945,
+          "share_of_groups_with_no_passer": 0.0019
+        }
+      }
+    }
+  },
+  "outputs": {
+    "table": "consensus_coarseness.md"
+  }
+}

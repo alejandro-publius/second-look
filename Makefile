@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -13,7 +13,7 @@ dev:
 	@echo "API on :8000, web on :3000. Stop with Ctrl-C."
 	@bash -c 'trap "kill 0" EXIT; $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
 
-check: lint types test manifest-check dash-check readability diagrams verify-claims worker-check fhir-validate web-build design-check
+check: lint types test manifest-check dash-check readability diagrams verify-claims consensus-check worker-check fhir-validate web-build design-check
 	@echo "CHECK GREEN"
 
 # Update 10 answer A3. Python is the reference: it writes worker/src/content.json and the golden
@@ -72,6 +72,16 @@ verify-claims:
 
 render-readme:
 	$(PY) scripts/render_readme.py
+
+# UPDATE_22 section 1 answer 1: can four photos per feature weight a group's votes? A synthetic
+# simulation, about 15 seconds. It writes results/consensus_coarseness.json and the table
+# results/consensus_coarseness.md. consensus-check runs it again and fails unless both committed
+# files are exactly what it writes, so the README's numbers from that file cannot go stale.
+consensus-coarseness:
+	$(PY) evals/consensus_coarseness.py
+
+consensus-check:
+	$(PY) evals/consensus_coarseness.py --check
 
 fhir-validate:
 	$(PY) scripts/fhir_validate.py
