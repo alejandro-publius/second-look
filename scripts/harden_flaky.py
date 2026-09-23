@@ -6,8 +6,10 @@ apps/web/public/_headers, npm test rewrites worker/dist) can touch the worktree.
 - pytest over every test path in pyproject.toml, with a JUnit file per run;
 - the Worker golden tests (esbuild, then node --test with the JUnit reporter);
 - the Worker end to end (wrangler dev with local D1 and KV) on a port from 8900 to 8999;
-- the web end to end (Playwright on the phone viewport), only when ports 3100 and 8100 are free,
-  because its config reuses any server already on 3100 and would test somebody else's build.
+- with --web, the web end to end (Playwright on the phone viewport), only when ports 3100 and 8100
+  are free, because its config reuses any server already on 3100 and would test somebody else's
+  build. It is off by default: while another session uses 3100 on the same machine, binding it
+  would get in that session's way.
 
 A test is flaky when its outcome differs between runs. Writes results/harden/flaky.md and
 results/harden/flaky.json.
@@ -85,6 +87,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--work", type=Path, required=True, help="scratch folder outside the repo")
     ap.add_argument("--runs", type=int, default=3)
+    ap.add_argument("--web", action="store_true", help="also run the Playwright suite on 3100")
     ap.add_argument("--out", type=Path, default=ROOT / "results" / "harden")
     args = ap.parse_args()
     if ROOT in args.work.resolve().parents:
@@ -98,8 +101,9 @@ def main() -> int:
     setup = {
         "uv sync": run(["uv", "sync", "--frozen"], tree),
         "worker npm ci": run(["npm", "ci", "--no-audit", "--no-fund"], tree / "worker"),
-        "web npm ci": run(["npm", "ci", "--no-audit", "--no-fund"], tree / "apps" / "web"),
     }
+    if args.web:
+        setup["web npm ci"] = run(["npm", "ci", "--no-audit", "--no-fund"], tree / "apps" / "web")
     runs: list[dict[str, Any]] = []
     for i in range(1, args.runs + 1):
         rd = args.work / f"run{i}"
@@ -143,7 +147,10 @@ def main() -> int:
             }
         }
         r["suites"]["worker e2e"] = e2e
-        if port_free(3100) and port_free(8100):
+        web: dict[str, Any]
+        if not args.web:
+            web = {"code": None, "seconds": 0, "tail": "not run: needs --web", "tests": {}}
+        elif port_free(3100) and port_free(8100):
             web = run(
                 ["npx", "playwright", "test", "--reporter=junit"],
                 tree / "apps" / "web",

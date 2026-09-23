@@ -1,0 +1,110 @@
+{
+ "measured_utc": "2026-09-23T04:45:24Z",
+ "commit": "5474757",
+ "setup": {
+  "uv sync": 0,
+  "worker npm ci": 0
+ },
+ "runs": [
+  {
+   "run": 1,
+   "suites": {
+    "pytest": {
+     "code": 0,
+     "seconds": 117.6,
+     "counts": {
+      "passed": 1022,
+      "skipped": 2,
+      "xfail": 11
+     }
+    },
+    "worker golden": {
+     "code": 0,
+     "seconds": 0.2,
+     "counts": {
+      "passed": 9
+     }
+    },
+    "worker e2e": {
+     "code": 0,
+     "seconds": 9.0,
+     "counts": {
+      "passed": 1
+     }
+    },
+    "web e2e": {
+     "code": null,
+     "seconds": 0,
+     "counts": {}
+    }
+   }
+  },
+  {
+   "run": 2,
+   "suites": {
+    "pytest": {
+     "code": 0,
+     "seconds": 81.7,
+     "counts": {
+      "passed": 1022,
+      "skipped": 2,
+      "xfail": 11
+     }
+    },
+    "worker golden": {
+     "code": 0,
+     "seconds": 0.2,
+     "counts": {
+      "passed": 9
+     }
+    },
+    "worker e2e": {
+     "code": 0,
+     "seconds": 8.5,
+     "counts": {
+      "passed": 1
+     }
+    },
+    "web e2e": {
+     "code": null,
+     "seconds": 0,
+     "counts": {}
+    }
+   }
+  },
+  {
+   "run": 3,
+   "suites": {
+    "pytest": {
+     "code": 0,
+     "seconds": 79.8,
+     "counts": {
+      "passed": 1022,
+      "skipped": 2,
+      "xfail": 11
+     }
+    },
+    "worker golden": {
+     "code": 0,
+     "seconds": 0.3,
+     "counts": {
+      "passed": 9
+     }
+    },
+    "worker e2e": {
+     "code": 0,
+     "seconds": 9.7,
+     "counts": {
+      "passed": 1
+     }
+    },
+    "web e2e": {
+     "code": null,
+     "seconds": 0,
+     "counts": {}
+    }
+   }
+  }
+ ],
+ "flaky": []
+}
