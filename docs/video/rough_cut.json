@@ -1,9 +1,11 @@
 {
   "file": "docs/video/rough_cut_scratch_voice.mp4",
   "committed": false,
-  "voice": "scratch, macOS say; Alex replaces it with his own voice",
-  "length_s": 268.1,
-  "length_without_title_cards_s": 226.1,
+  "voice": "scratch, macOS say (Samantha); Alex replaces it with his own voice",
+  "video_licence": "CC BY-SA 4.0",
+  "length_s": 268.3,
+  "length_without_title_cards_s": 226.3,
+  "bytes": 44513600,
   "beats": 14,
   "recorded": [
     "01-landing",
@@ -13,26 +15,267 @@
     "06-end-score",
     "07-readme-results",
     "08-how-we-know",
+    "extra-check",
     "10-record",
     "11-two",
     "12-city",
     "13-walk"
   ],
-  "waiting_for_footage_or_recording": [
+  "footage_clips_used": [
+    "action-salmon-river-wood-jam-side-channel-restoration",
+    "berkeley-strawberry-creek-estuary-berkeley",
+    "berkeley-strawberrycreek10",
+    "berkeley-strawberrycreek12",
+    "berkeley-strawberrycreek3",
+    "berkeley-strawberrycreek6",
+    "berkeley-strawberrycreek8",
+    "gauge-strawberrycreek9",
+    "global-crows-and-bagmati-river",
+    "natural-north-creek-bothell-wa-01",
+    "natural-vincent-creek-33841689304",
+    "pipes-florhamparksewerageutilityoutfall",
+    "problem-sonoma-creek-january-5-2023-sarah-stierch"
+  ],
+  "footage_folder": "~/second-look-media/clips",
+  "played": [
+    {
+      "time": "0:00",
+      "seconds": 15.0,
+      "voice_waits_s": 3.5,
+      "parts": [
+        {
+          "clip": "berkeley-strawberrycreek3",
+          "from_s": 0.0,
+          "seconds": 3.5
+        },
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 8.5
+        },
+        {
+          "clip": "natural-north-creek-bothell-wa-01",
+          "from_s": 0.0,
+          "seconds": 3.0
+        }
+      ]
+    },
     {
       "time": "0:15",
-      "clip": "02-creek-broll",
-      "needs": "creek footage"
+      "seconds": 15.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "problem-sonoma-creek-january-5-2023-sarah-stierch",
+          "from_s": 0.0,
+          "seconds": 7.0
+        },
+        {
+          "clip": "berkeley-strawberrycreek6",
+          "from_s": 0.0,
+          "seconds": 8.0
+        }
+      ]
+    },
+    {
+      "time": "0:30",
+      "seconds": 15.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 15.0
+        }
+      ]
+    },
+    {
+      "time": "0:45",
+      "seconds": 20.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 13.5
+        },
+        {
+          "clip": "pipes-florhamparksewerageutilityoutfall",
+          "from_s": 0.0,
+          "seconds": 6.5
+        }
+      ]
+    },
+    {
+      "time": "1:05",
+      "seconds": 20.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 20.0
+        }
+      ]
+    },
+    {
+      "time": "1:25",
+      "seconds": 15.17,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "gauge-strawberrycreek9",
+          "from_s": 0.0,
+          "seconds": 5.0
+        },
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 10.17
+        }
+      ]
+    },
+    {
+      "time": "1:40",
+      "seconds": 20.89,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 20.89
+        }
+      ]
+    },
+    {
+      "time": "2:00",
+      "seconds": 20.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 20.0
+        }
+      ]
     },
     {
       "time": "2:20",
-      "clip": "09-check-at-creek",
-      "needs": "creek footage"
+      "seconds": 20.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "berkeley-strawberrycreek10",
+          "from_s": 0.0,
+          "seconds": 2.5
+        },
+        {
+          "clip": "screen in a phone frame",
+          "from_s": 0.0,
+          "seconds": 5.5
+        },
+        {
+          "clip": "pipes-florhamparksewerageutilityoutfall",
+          "from_s": 5.0,
+          "seconds": 4.5
+        },
+        {
+          "clip": "screen in a phone frame",
+          "from_s": 5.5,
+          "seconds": 7.5
+        }
+      ]
+    },
+    {
+      "time": "2:40",
+      "seconds": 15.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 15.0
+        }
+      ]
+    },
+    {
+      "time": "2:55",
+      "seconds": 10.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 10.0
+        }
+      ]
+    },
+    {
+      "time": "3:05",
+      "seconds": 20.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 5.5
+        },
+        {
+          "clip": "action-salmon-river-wood-jam-side-channel-restoration",
+          "from_s": 2.5,
+          "seconds": 5.0
+        },
+        {
+          "clip": "screen",
+          "from_s": 5.5,
+          "seconds": 9.5
+        }
+      ]
+    },
+    {
+      "time": "3:25",
+      "seconds": 10.2,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "berkeley-strawberrycreek8",
+          "from_s": 0.0,
+          "seconds": 2.3
+        },
+        {
+          "clip": "berkeley-strawberrycreek12",
+          "from_s": 0.0,
+          "seconds": 2.0
+        },
+        {
+          "clip": "global-crows-and-bagmati-river",
+          "from_s": 1.5,
+          "seconds": 2.0
+        },
+        {
+          "clip": "screen",
+          "from_s": 0.0,
+          "seconds": 3.9
+        }
+      ]
     },
     {
       "time": "3:35",
-      "clip": "14-end-card",
-      "needs": "creek footage"
+      "seconds": 10.0,
+      "voice_waits_s": 0,
+      "parts": [
+        {
+          "clip": "natural-vincent-creek-33841689304",
+          "from_s": 0.0,
+          "seconds": 3.5
+        },
+        {
+          "clip": "berkeley-strawberry-creek-estuary-berkeley",
+          "from_s": 0.0,
+          "seconds": 6.5
+        }
+      ]
     }
-  ]
+  ],
+  "waiting_for_footage_or_recording": []
 }
