@@ -21,7 +21,6 @@ export interface Env {
   QA_KEY?: string;
   EXPORT_TOKEN?: string;
   ALLOWED_ORIGIN?: string;
-  SANDBOX_BASE_URL?: string;
   SANDBOX_THEIRS_CODE?: string;
   // Where the dry pipe rule asks about rain. Open-Meteo by default; the e2e run points it at a
   // stub, because a question that depends on today's weather cannot be tested against the sky.
@@ -493,7 +492,7 @@ export default {
       if (example) return json(env, await exampleResultView(checkEnv, decodeURIComponent(example[1]), now));
       const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
       if (referral) return json(env, await referralView(checkEnv, decodeURIComponent(referral[1]), now));
-      if (path === "/api/two") return json(env, await two(env, Date.now()));
+      if (path === "/api/two") return json(env, await two(env));
     } catch (err) {
       return errorResponse(env, err);
     }

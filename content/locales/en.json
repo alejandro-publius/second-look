@@ -216,7 +216,7 @@
   "two.ours": "Volunteer (Second Look)",
   "two.theirs": "Lab (OneAquaHealth sandbox)",
   "two.down": "Their sandbox did not answer, so only our record is shown.",
-  "two.cached": "Their record is from our cache, fetched {when}.",
+  "two.cached": "Fetched from their sandbox at {when}.",
   "two.point_same": "Same creek, same answer. Only the volunteer record says how much to trust it.",
   "two.point": "Both are the same kind of record. Only the volunteer record says how much to trust it.",
   "two.performer_theirs": "A lab",

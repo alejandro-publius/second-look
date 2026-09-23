@@ -142,11 +142,13 @@ async function main() {
   });
   await step("lab and volunteer side by side, from the API", async () => {
     await page.goto(`${site}/two`);
-    // Our record shows whenever our API answers; theirs only while their sandbox answers the Worker.
+    // Our record shows whenever our API answers.
     await page.getByRole("region", { name: "Volunteer (Second Look)" }).waitFor({ timeout: 15000 });
-    if (!(await page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" }).isVisible())) {
-      console.log("live-readonly: NOTE /two shows only our record: their sandbox did not answer the Worker");
-    }
+  });
+  await step("their lab record beside ours, fetched from their sandbox by the Mac job", async () => {
+    // scripts/cache_their_records.py stores it daily; the Worker cannot reach their sandbox.
+    await page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" }).waitFor({ timeout: 15000 });
+    await page.getByText("Fetched from their sandbox at").waitFor({ timeout: 5000 });
   });
 
   await browser.close();

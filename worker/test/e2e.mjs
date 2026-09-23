@@ -6,6 +6,7 @@
 //   cd worker && npm run e2e
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -178,7 +179,7 @@ try {
       // The local runtime binary lags the edge; the date only has to be one this binary knows.
       "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
       "--var", `QA_KEY:${QA_KEY}`, "--var", `RAIN_URL:http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
-      "--var", "SANDBOX_BASE_URL:http://127.0.0.1:9/fhir", "--show-interactive-dev-session=false",
+      "--show-interactive-dev-session=false",
     ]),
     { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV },
   );
@@ -300,12 +301,23 @@ try {
   bad.append("file", new Blob([new TextEncoder().encode("not an image")], { type: "text/plain" }), "x.txt");
   assert.equal((await fetch(`${BASE}/api/upload`, { method: "POST", body: bad })).status, 422);
 
-  // 8. Two observers: theirs is down here, ours stands alone and the screen is told.
+  // 8. Two observers. The Worker never fetches their sandbox; it shows what
+  // scripts/cache_their_records.py stored. Nothing stored: ours stands alone and the screen is
+  // told. A stored record: it comes back with the time it was fetched. The key is the one the
+  // Mac script writes: the first 16 hex of sha256 over JSON.stringify of the query.
   at("two observers");
   const pair = await api("GET", "/api/two");
   assert.equal(pair.status, 200);
   assert.equal(pair.data.theirs_status, "down");
   assert.equal(pair.data.ours.resourceType, "Observation");
+  const query = { subject: "Location/Loc-Almyros", code: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu|dissolved-oxygen", _sort: "-date", _count: "1" };
+  const key = `theirs-${createHash("sha256").update(JSON.stringify(query)).digest("hex").slice(0, 16)}`;
+  const lab = JSON.stringify({ resourceType: "Observation", id: "lab-e2e", status: "final" }).replaceAll("'", "''");
+  wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--command", `INSERT OR REPLACE INTO sandbox_cache (cache_key, body, status, fetched_at) VALUES ('${key}', '${lab}', 'ok', '2026-09-23T07:30:00Z')`]);
+  const stored = await api("GET", "/api/two");
+  assert.equal(stored.data.theirs_status, "cached");
+  assert.equal(stored.data.theirs.id, "lab-e2e");
+  assert.equal(stored.data.fetched_at, "2026-09-23T07:30:00Z");
 
   // 9. Bad input is a plain 422 or 404, never a 500.
   at("bad input");
