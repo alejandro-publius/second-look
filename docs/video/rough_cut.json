@@ -2,105 +2,37 @@
   "file": "docs/video/rough_cut_scratch_voice.mp4",
   "committed": false,
   "voice": "scratch, macOS say; Alex replaces it with his own voice",
-  "length_s": 282.0,
-  "length_without_title_cards_s": 225.0,
-  "beats": 19,
-  "recorded": [],
+  "length_s": 268.1,
+  "length_without_title_cards_s": 226.1,
+  "beats": 14,
+  "recorded": [
+    "01-landing",
+    "03-rhs-manual",
+    "04-lesson",
+    "05-test-items",
+    "06-end-score",
+    "07-readme-results",
+    "08-how-we-know",
+    "10-record",
+    "11-two",
+    "12-city",
+    "13-walk"
+  ],
   "waiting_for_footage_or_recording": [
     {
-      "time": "0:00",
-      "clip": "01-landing",
-      "needs": "screen recording"
-    },
-    {
-      "time": "0:20",
-      "clip": "02-surveyors",
-      "needs": "screen recording"
-    },
-    {
-      "time": "0:30",
-      "clip": "03-creek-phone",
+      "time": "0:15",
+      "clip": "02-creek-broll",
       "needs": "creek footage"
     },
     {
-      "time": "0:40",
-      "clip": "04-creek-test",
-      "needs": "person on camera"
-    },
-    {
-      "time": "0:50",
-      "clip": "05-consent",
-      "needs": "screen recording"
-    },
-    {
-      "time": "0:56",
-      "clip": "06-lesson",
-      "needs": "screen recording"
-    },
-    {
-      "time": "1:08",
-      "clip": "07-test-items",
-      "needs": "screen recording"
-    },
-    {
-      "time": "1:20",
-      "clip": "08-end-score",
-      "needs": "screen recording"
-    },
-    {
-      "time": "1:30",
-      "clip": "09-readme-results",
-      "needs": "screen recording"
-    },
-    {
-      "time": "1:45",
-      "clip": "10-walk",
-      "needs": "screen recording"
-    },
-    {
-      "time": "2:10",
-      "clip": "11-creek-pipe",
+      "time": "2:20",
+      "clip": "09-check-at-creek",
       "needs": "creek footage"
     },
     {
-      "time": "2:18",
-      "clip": "12-check",
-      "needs": "screen recording"
-    },
-    {
-      "time": "2:40",
-      "clip": "13-record",
-      "needs": "screen recording"
-    },
-    {
-      "time": "2:54",
-      "clip": "14-two",
-      "needs": "screen recording"
-    },
-    {
-      "time": "3:04",
-      "clip": "15-sandbox-library",
-      "needs": "screen recording"
-    },
-    {
-      "time": "3:10",
-      "clip": "16-score-filter",
-      "needs": "screen recording"
-    },
-    {
-      "time": "3:20",
-      "clip": "17-city",
-      "needs": "screen recording"
-    },
-    {
-      "time": "3:30",
-      "clip": "18-judges",
-      "needs": "screen recording"
-    },
-    {
-      "time": "3:37",
-      "clip": "19-end",
-      "needs": "screen recording"
+      "time": "3:35",
+      "clip": "14-end-card",
+      "needs": "creek footage"
     }
   ]
 }

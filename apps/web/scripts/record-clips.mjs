@@ -18,9 +18,11 @@ mkdirSync(out, { recursive: true });
 const base = process.env.SCREENS_URL || "http://127.0.0.1:3100";
 const content = JSON.parse(readFileSync(resolve(here, "..", "generated", "content.json"), "utf8"));
 const walk = (content.walks ?? [])[0];
-// Playwright caps a recording at the viewport it records; twice the phone size keeps text sharp.
+// Playwright records at CSS pixels and pads, never scales, a page into a larger video size, so a
+// video twice the viewport came out as a small page in a grey frame. The video is the viewport;
+// scripts/video_rough.py scales it up.
 const PHONE = { width: 390, height: 844 };
-const PHONE_VIDEO = { width: 780, height: 1688 };
+const PHONE_VIDEO = PHONE;
 const DESKTOP = { width: 1280, height: 800 };
 const beat = (ms = 900) => new Promise((r) => setTimeout(r, ms));
 
