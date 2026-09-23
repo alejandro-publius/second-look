@@ -55,7 +55,7 @@ MIN_SECONDS = 1.0
 MIN_DURATION = 60
 MAX_DURATION = 1200
 MIN_HEIGHT = 720
-TARGET = 100  # Update 14 aimed at 40; Update 15 widens it twice, see docs/DECISIONS.md
+TARGET = 150  # Update 14 aimed at 40; Update 15 widens it twice, see docs/DECISIONS.md
 PER_QUERY = 2  # candidates kept per query per source
 YOUTUBE_LOOKUPS = 3  # metadata lookups per query, the only slow step
 COMMONS_ROWS = 40  # search results asked for per Commons query
@@ -562,6 +562,22 @@ SEARCHES: list[Search] = [
         "creek walk no talking",
         "urban stream ambience",
         "brook sounds relaxing",
+    ),
+    # Third widening: the same ambient footage asked for in the languages of the places it is
+    # filmed, because walks need four countries and a place name is how a country is known.
+    *_both(
+        "Bach Rauschen Wald",
+        "ruisseau bruit de l'eau",
+        "sonido de arroyo naturaleza",
+        "ruscello suono natura",
+        "ручей звук природы",
+        "strumyk szum wody",
+        "beek geluid natuur",
+        "小川 せせらぎ",
+        "계곡 물소리",
+        "stream sounds Japan",
+        "creek sounds New Zealand",
+        "brook sounds Scotland",
     ),
 ]
 

@@ -80,6 +80,8 @@ PHOTO_COLUMNS = [
 
 
 FAILURES = VIDEOS / "failed_videos.json"
+# A person looks at every kept frame; what they drop is written here and honoured on every run.
+REVIEW = VIDEOS / "review.json"
 MIN_KEPT_PER_VIDEO = 6
 # Scene labels from Vision's classifier that mean water is in view, and the confidence it needs.
 # Small creeks often come back as wetland rather than water, so wetland counts.
@@ -126,8 +128,8 @@ class VisionScreen:
 
     def __init__(self) -> None:
         try:
-            import Vision  # type: ignore[import-not-found]
-            from Foundation import NSURL  # type: ignore[import-not-found]
+            import Vision
+            from Foundation import NSURL
         except ImportError as e:
             raise FrameError(
                 "Vision is not importable. Frames are cut on macOS with pyobjc-framework-Vision "
@@ -332,7 +334,7 @@ class PeopleAndPlates:
             path = base / name
             if not path.exists():
                 continue
-            cascade = cv2.CascadeClassifier(str(path))  # type: ignore[attr-defined]
+            cascade = cv2.CascadeClassifier(str(path))
             if not cascade.empty():
                 self.cascades.append((name, cascade))
         if not self.cascades:
@@ -340,7 +342,7 @@ class PeopleAndPlates:
                 "OpenCV has no Haar cascades here, so frames cannot be screened for people. "
                 "Version 5 dropped them; install opencv-python-headless 4.x"
             )
-        self.hog = cv2.HOGDescriptor()  # type: ignore[attr-defined]
+        self.hog = cv2.HOGDescriptor()
         self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())  # type: ignore[attr-defined]
 
     def reason_to_drop(self, path: Path) -> str | None:
@@ -414,6 +416,24 @@ def resize_and_save(src: Path, dest: Path) -> tuple[str, int, int]:
     return digest, out_w, out_h
 
 
+def license_code(text: str) -> str:
+    """The manifest's licence code for the words a source used.
+
+    YouTube's "Creative Commons Attribution license (reuse allowed)" is CC BY 3.0, the only
+    Creative Commons licence YouTube offers. Commons writes "CC BY 3.0" and the like. Anything this
+    cannot map is returned as it came, and make manifest-check then refuses it by name.
+    """
+    low = text.strip().lower()
+    if low.startswith("creative commons attribution license"):
+        return "CC-BY-3.0"
+    if low in {"cc0", "cc0 1.0", "cc-zero"}:
+        return "CC0-1.0"
+    parts = low.replace("-", " ").split()
+    if len(parts) == 3 and parts[:2] == ["cc", "by"] and parts[2] in {"2.0", "3.0", "4.0"}:
+        return f"CC-BY-{parts[2]}"
+    return text
+
+
 def frame_rows(
     video: Video, kept: list[tuple[float, Path, str]], cache_name: str
 ) -> list[dict[str, str]]:
@@ -435,7 +455,7 @@ def frame_rows(
                 "sha256": digest,
                 "source_url": video.source_url,
                 "author": video.author,
-                "license": video.license,
+                "license": license_code(video.license),
                 "capture_date": "",
                 "coarse_location": video.country,
                 "scene_id": f"video-{video.id}",
@@ -463,7 +483,9 @@ def process_video(
     hash_distance: int,
     screen: Any,
     dry_run: bool,
+    review: dict[str, str] | None = None,
 ) -> tuple[VideoResult, list[dict[str, str]]]:
+    review = review or {}
     result = VideoResult(video_id=video.id)
     source = cache / video.cache_file
     if not source.exists():
@@ -477,6 +499,10 @@ def process_video(
             result.sampled += 1
             if grabbed is None:
                 result.dropped.append(Dropped("ffmpeg found no frame", at_s))
+                continue
+            by_eye = review.get(f"{video.source_url}@{int(at_s)}")
+            if by_eye:
+                result.dropped.append(Dropped(f"checked by eye: {by_eye}", at_s))
                 continue
             with Image.open(grabbed) as image:
                 digest_bits = dhash(image)
@@ -505,6 +531,20 @@ def process_video(
         kept = [item for index, item in enumerate(kept) if index in chosen_index]
         result.kept = [at_s for at_s, _, _ in kept]
     return result, frame_rows(video, kept, source.name)
+
+
+def prune_video_manifest(failures: dict[str, str], path: Path = MANIFEST) -> int:
+    """videos/manifest.csv lists only the videos in use: a failed video's row goes."""
+    with path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        fields = list(reader.fieldnames or [])
+        rows = list(reader)
+    kept = [r for r in rows if r.get("source_url", "") not in failures]
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(kept)
+    return len(rows) - len(kept)
 
 
 def merge_photo_manifest(rows: list[dict[str, str]]) -> int:
@@ -551,6 +591,10 @@ def main(argv: list[str] | None = None) -> int:
     failures: dict[str, str] = (
         json.loads(FAILURES.read_text(encoding="utf-8")) if FAILURES.exists() else {}
     )
+    reviewed = json.loads(REVIEW.read_text(encoding="utf-8")) if REVIEW.exists() else {}
+    for url, why in reviewed.get("videos", {}).items():
+        failures.setdefault(url, f"checked by eye: {why}")
+    frame_review: dict[str, str] = reviewed.get("frames", {})
     for video in videos:
         if video.source_url in failures:
             print(f"  {video.id}: skipped, already failed: {failures[video.source_url][:80]}")
@@ -564,6 +608,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.hash_distance,
                 screen,
                 args.dry_run,
+                frame_review,
             )
         except FrameError as e:
             print(f"frames: refused: {e}")
@@ -604,6 +649,7 @@ def main(argv: list[str] | None = None) -> int:
     FAILURES.write_text(
         json.dumps(failures, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8"
     )
+    prune_video_manifest(failures)
     merge_photo_manifest(all_rows)
     (VIDEOS / "frames.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     dropped_people = sum(

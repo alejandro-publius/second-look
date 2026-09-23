@@ -207,3 +207,20 @@ def test_the_screens_drop_when_any_one_screen_drops() -> None:
 
     assert make_frames.Screens(Keep(), Keep()).reason_to_drop(Path("x")) is None
     assert make_frames.Screens(Keep(), Drop()).reason_to_drop(Path("x")) == "person: test"
+
+
+def test_the_video_manifest_keeps_only_videos_in_use(tmp_path: Path) -> None:
+    path = tmp_path / "manifest.csv"
+    path.write_text("id,source_url\nv01,https://a\nv02,https://b\n", encoding="utf-8")
+    assert make_frames.prune_video_manifest({"https://b": "download failed"}, path) == 1
+    assert [r["id"] for r in csv.DictReader(path.open())] == ["v01"]
+
+
+def test_the_licence_words_become_the_manifest_code() -> None:
+    youtube = "Creative Commons Attribution license (reuse allowed)"
+    assert make_frames.license_code(youtube) == "CC-BY-3.0"
+    assert make_frames.license_code("CC BY 3.0") == "CC-BY-3.0"
+    assert make_frames.license_code("CC BY 4.0") == "CC-BY-4.0"
+    assert make_frames.license_code("CC0") == "CC0-1.0"
+    # Not mapped: kept as it came, so the manifest check refuses it by name.
+    assert make_frames.license_code("CC BY-SA 4.0") == "CC BY-SA 4.0"

@@ -1,0 +1,347 @@
+{
+  "candidates": 68,
+  "passed_filters": 9,
+  "chosen": 9,
+  "countries": [
+    "Canada",
+    "Russia",
+    "United Kingdom",
+    "United States"
+  ],
+  "labelled": 0,
+  "kept": [
+    {
+      "id": "commons-118458570",
+      "manifest_id": "v01",
+      "country": "United States",
+      "label": "unlabelled",
+      "why": [
+        "first video from United States",
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": "Geese in the Bear Creek Park, Redmond, Washington, (2022-05-28). Video 2. Media from YouTube|May 2022 in Washington (state)|Branta canadensis in Washington (state)|License review needed (video)|Videos by Steven Pavlov|Uploaded with video2commons|Branta canadensis in the United States|Videos of 2022 from the United States|Videos of birds in Washington (state)|Birds (Images by Steven Pavlov)|Videos taken with iPhone X|Bear Creek Park, Redmond, WA (Images by Steven Pavlov)|Bear Creek Park, Redmond, Washington"
+    },
+    {
+      "id": "youtube-vN5ArGGmdUY",
+      "manifest_id": "v02",
+      "country": "Russia",
+      "label": "unlabelled",
+      "why": [
+        "first video from Russia",
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": ""
+    },
+    {
+      "id": "youtube-7soch86PJ2U",
+      "manifest_id": "v03",
+      "country": "United Kingdom",
+      "label": "unlabelled",
+      "why": [
+        "first video from United Kingdom",
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": ""
+    },
+    {
+      "id": "youtube-WohJOKd2egY",
+      "manifest_id": "v04",
+      "country": "Canada",
+      "label": "unlabelled",
+      "why": [
+        "first video from Canada",
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": ""
+    },
+    {
+      "id": "commons-117894426",
+      "manifest_id": "v05",
+      "country": "United States",
+      "label": "unlabelled",
+      "why": [
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": "Lewis and Clark Bridge on March 28, 2019. The Mavic 2 Pro took off from Captains Quarters Restaurant on River Road, Louisville, Kentucky. Harrod's Creek meets the Ohio and leads to Cunninghams Restaurant and other delights near Prospect, Kentucky. Louisville, Kentucky. Media from YouTube|WebM videos|Lewis and Clark Bridge (Ohio River)|License review needed (video)|Uploaded with video2commons"
+    },
+    {
+      "id": "youtube-CsayzeejVzY",
+      "manifest_id": "v06",
+      "country": "United States",
+      "label": "unlabelled",
+      "why": [
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": ""
+    },
+    {
+      "id": "youtube-DaD3RJGEvhM",
+      "manifest_id": "v07",
+      "country": "United States",
+      "label": "unlabelled",
+      "why": [
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": ""
+    },
+    {
+      "id": "youtube-1M91MFV5bjA",
+      "manifest_id": "v08",
+      "country": "",
+      "label": "unlabelled",
+      "why": [
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": ""
+    },
+    {
+      "id": "youtube-6bxqzoLU4Mw",
+      "manifest_id": "v09",
+      "country": "",
+      "label": "unlabelled",
+      "why": [
+        "unlabelled, so it only ever feeds the agreement figure"
+      ],
+      "description": ""
+    }
+  ],
+  "not_chosen": [],
+  "dropped": [
+    {
+      "id": "youtube-mKRZGlV-raQ",
+      "why": "frames: only 2 of 88 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-TXQUvVzvIJA",
+      "why": "frames: only 4 of 191 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-sCtt85T2D_w",
+      "why": "frames: only 0 of 39 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-QrUo4Woc4O4",
+      "why": "frames: download failed: ERROR: unable to download video data: HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "youtube-J3t60KACmF4",
+      "why": "frames: only 0 of 265 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-k56s2hSyKmI",
+      "why": "frames: only 2 of 15 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-2huCy740HFI",
+      "why": "off topic: the words ['adventure ride', 'africa twin', 'motorcycle'] say this is about something else"
+    },
+    {
+      "id": "youtube-rGIVb7dZVc0",
+      "why": "frames: only 0 of 37 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-adZQ9kHfGB8",
+      "why": "night footage: the words ['nights -', 'after dark', 'nighttime'] say so, and the dark is a different test"
+    },
+    {
+      "id": "youtube-EkEE_thSN30",
+      "why": "frames: only 1 of 31 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-8zm76Z55m9o",
+      "why": "frames: only 0 of 26 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-YUMuGRFKLGs",
+      "why": "frames: only 0 of 117 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-EoJuKtX5oRE",
+      "why": "frames: only 0 of 46 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-dgW_JoyXVx0",
+      "why": "frames: only 1 of 117 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-ujQLDtA81Ko",
+      "why": "off topic: the words ['baile', 'murga'] say this is about something else"
+    },
+    {
+      "id": "youtube-YViVKQ9pw_4",
+      "why": "no creek, stream, brook or urban river in the title or description"
+    },
+    {
+      "id": "youtube-gmIhISoeOSs",
+      "why": "frames: only 0 of 14 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-qFHad4SHeNk",
+      "why": "off topic: the words ['ヒーリング'] say this is about something else"
+    },
+    {
+      "id": "youtube-pFcq_wP4wFo",
+      "why": "night footage: the words ['저녁'] say so, and the dark is a different test"
+    },
+    {
+      "id": "youtube-6FIXmnwKoNI",
+      "why": "frames: only 0 of 66 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-47698704",
+      "why": "frames: only 1 of 43 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-61327670",
+      "why": "frames: only 1 of 19 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-118458635",
+      "why": "frames: only 2 of 15 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-74933749",
+      "why": "frames: only 0 of 34 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-62590420",
+      "why": "frames: only 0 of 23 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-165928590",
+      "why": "frames: only 0 of 16 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-165929042",
+      "why": "frames: only 0 of 19 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-114596027",
+      "why": "frames: only 0 of 192 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-153105845",
+      "why": "frames: only 0 of 47 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-190049008",
+      "why": "frames: only 0 of 29 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-132098408",
+      "why": "frames: only 0 of 299 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "commons-174592235",
+      "why": "frames: only 1 of 14 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-kiBrFR-ASSc",
+      "why": "frames: download failed: ERROR: unable to download video data: HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "youtube-7fHkBuXkgDY",
+      "why": "frames: only 3 of 37 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-MSFZZPRDpHg",
+      "why": "frames: only 3 of 69 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-cU_r7vyMkl8",
+      "why": "frames: only 1 of 47 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-Qgq3rZoVEcU",
+      "why": "frames: only 4 of 149 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-GzqJQDI7tkI",
+      "why": "frames: only 5 of 164 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-tfN_LgVSV2o",
+      "why": "night footage: the words ['night walk'] say so, and the dark is a different test"
+    },
+    {
+      "id": "youtube-p5UzK8BoRjE",
+      "why": "frames: only 0 of 20 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-LsOrg85iBpQ",
+      "why": "frames: only 0 of 16 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-r-k88hcQ0Mc",
+      "why": "frames: only 0 of 24 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-pWWGn-Uewf8",
+      "why": "frames: only 0 of 19 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-zZIYPTP9YTg",
+      "why": "frames: download failed: ERROR: unable to download video data: HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "youtube-agZP74tdCXA",
+      "why": "frames: only 0 of 43 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-9Q-KbvrfVq8",
+      "why": "frames: only 0 of 139 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-zOEE6UzLy4E",
+      "why": "frames: only 0 of 67 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-bIubikAoLII",
+      "why": "frames: only 0 of 43 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-EL6AtVkl15s",
+      "why": "night footage: the words ['nocturno'] say so, and the dark is a different test"
+    },
+    {
+      "id": "youtube-huvtX0R-pOE",
+      "why": "frames: download failed: ERROR: unable to download video data: HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "youtube-KbDsJ5E9dXE",
+      "why": "frames: only 3 of 117 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-88Cl__zBzwM",
+      "why": "frames: only 4 of 164 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-59StrjR9WCU",
+      "why": "frames: only 4 of 206 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-wPCU2rpeuqM",
+      "why": "frames: only 0 of 188 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-JHF59W3rZxI",
+      "why": "frames: only 3 of 53 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-L9q8DXP3jy8",
+      "why": "frames: download failed: ERROR: unable to download video data: HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "youtube-57OLpZZ0klg",
+      "why": "frames: only 2 of 26 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    },
+    {
+      "id": "youtube-4xYLu8i8Z5A",
+      "why": "no creek, stream, brook or urban river in the title or description"
+    },
+    {
+      "id": "youtube-wskM3ojl4fk",
+      "why": "frames: only 0 of 212 sampled frames show water with no person or text, under 6, so it is not mostly water and banks"
+    }
+  ]
+}

@@ -72,3 +72,10 @@ def test_a_video_whose_frames_failed_is_dropped_and_another_is_picked(
     assert [k["id"] for k in picked["kept"]] == ["bbb"]
     dropped = {d["id"]: d["why"] for d in picked["dropped"]}
     assert dropped["aaa"].startswith("frames: only 2 of 40")
+
+
+def test_a_longer_place_name_wins_over_the_country_inside_it() -> None:
+    assert pick_videos.place_country("a creek in new mexico")[0] == "United States"
+    assert pick_videos.place_country("blue mountains, new south wales")[0] == "Australia"
+    assert pick_videos.place_country("a brook in wales")[0] == "United Kingdom"
+    assert pick_videos.place_country("the ruhr, deutschland")[0] == "Germany"

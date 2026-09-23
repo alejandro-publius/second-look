@@ -11,15 +11,15 @@
 models:
   - id: claude-haiku-4-5-20251001
     short: haiku
-    confirmed_against_models_page: true  # checked 2026-09-21 and 2026-09-22, docs/notes/model_ids.md
+    confirmed_against_models_page: false
     accepts_temperature: true
   - id: claude-sonnet-5
     short: sonnet
-    confirmed_against_models_page: true  # checked 2026-09-21 and 2026-09-22, docs/notes/model_ids.md
+    confirmed_against_models_page: false
     accepts_temperature: false
   - id: claude-opus-5
     short: opus
-    confirmed_against_models_page: true  # checked 2026-09-21 and 2026-09-22, docs/notes/model_ids.md
+    confirmed_against_models_page: false
     accepts_temperature: false
 
 settings:
