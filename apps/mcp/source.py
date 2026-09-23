@@ -2,15 +2,18 @@
 
 Both sources answer the same four questions with the same JSON documents, so every tool in
 apps/mcp/server.py is written once. The API source calls our own endpoints and nothing else, with
-a user agent that names the repository. The export source reads a folder that
-scripts/export_records.py wrote, so the server also runs with no network at all.
+a user agent that names the repository. It refuses an id that is not one plain path segment, so
+an id such as ../skeleton or ..%2Ftwo can never reach another route. The export source reads a
+folder that scripts/export_records.py wrote, so the server also runs with no network at all.
 """
 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Protocol
+from urllib.parse import quote
 
 import httpx
 
@@ -19,6 +22,7 @@ from core.fhir_emit import REPO_URL
 USER_AGENT = f"second-look-mcp (+{REPO_URL})"
 TIMEOUT_SECONDS = 15.0
 DEFAULT_API = "https://second-look-api.thealexschroeder.workers.dev"
+ID_RE = re.compile(r"[A-Za-z0-9._-]+")
 
 
 class SourceError(Exception):
@@ -44,6 +48,15 @@ def _safe_name(value: str) -> str:
     if not cleaned:
         raise SourceError(f"{value!r} is not an id")
     return cleaned
+
+
+def _path_id(value: str) -> str:
+    """An id as one segment of our own route: letters, digits, dot, underscore and hyphen, and
+    never "." or "..". Anything else is refused, not cleaned: "../skeleton", "..%2Ftwo" or
+    "x%3Fy" would otherwise climb to another Worker route or carry a query."""
+    if not ID_RE.fullmatch(value) or value in {".", ".."}:
+        raise SourceError(f"{value!r} is not an id")
+    return quote(value, safe="")
 
 
 class ExportSource:
@@ -82,7 +95,7 @@ class ExportSource:
 
 
 class ApiSource:
-    """Our own read only endpoints over HTTP. Calls nothing else."""
+    """Our own read only endpoints over HTTP. Calls nothing else, and _path_id checks every id."""
 
     def __init__(self, base_url: str = DEFAULT_API, client: httpx.Client | None = None) -> None:
         self.base_url = base_url.rstrip("/")
@@ -118,10 +131,10 @@ class ApiSource:
         return list(listed) if isinstance(listed, list) else []
 
     def city(self, creek: str) -> dict[str, Any]:
-        return self._get(f"/api/city/{httpx.URL(path=creek).path}", f"creek {creek!r}")
+        return self._get(f"/api/city/{_path_id(creek)}", f"creek {creek!r}")
 
     def spot(self, spot_id: str) -> dict[str, Any]:
-        return self._get(f"/api/spot/{httpx.URL(path=spot_id).path}", f"spot {spot_id!r}")
+        return self._get(f"/api/spot/{_path_id(spot_id)}", f"spot {spot_id!r}")
 
     def bundle(self, visit_id: str) -> dict[str, Any]:
-        return self._get(f"/api/fhir/Bundle/{httpx.URL(path=visit_id).path}", f"visit {visit_id!r}")
+        return self._get(f"/api/fhir/Bundle/{_path_id(visit_id)}", f"visit {visit_id!r}")
