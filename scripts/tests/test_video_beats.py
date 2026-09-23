@@ -7,6 +7,7 @@ import json
 import pytest
 
 from scripts.fetch_footage import FETCHED
+from scripts.submit_check import video_links
 from scripts.video_rough import (
     PHONE,
     SCREEN,
@@ -146,6 +147,15 @@ def test_bad_tables_are_refused() -> None:
         plan([part(SCREEN, None), part("a", None)], 10, 5)
     with pytest.raises(ValueError):
         plan([part(SCREEN, 3), part("a", 2, before=True)], 10, 5)
+
+
+def test_devpost_says_the_video_licence_without_faking_a_video_link() -> None:
+    # make submit-check passes the video slot on any line with "video" and a link, so the licence
+    # line next to the slot must carry no link of its own.
+    devpost = (SHOTLIST.parents[1] / "devpost.md").read_text(encoding="utf-8")
+    lines = [ln for ln in devpost.splitlines() if "CC BY-SA 4.0" in ln and "video" in ln.lower()]
+    assert lines, "docs/devpost.md must say the video is CC BY-SA 4.0"
+    assert all(not video_links(ln) for ln in lines)
 
 
 def test_the_committed_summary_has_nothing_missing_and_says_the_licence() -> None:
