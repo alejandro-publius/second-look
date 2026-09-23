@@ -13,7 +13,9 @@ is done. Times are Pacific.
    npx wrangler d1 execute second-look --remote --command "UPDATE session SET is_test = 1 WHERE is_test = 0 AND started_at < '2026-09-22T17:33:00Z'"
    ```
 
-   Afterwards `curl -s https://second-look-api.thealexschroeder.workers.dev/api/test/counts` shows 0.
+   Afterwards `curl -s https://second-look-79t.pages.dev/api/test/counts` shows 0. Then take two
+   minutes to look at the live site on your phone: `/`, `/walk`, `/judges` and `/demo`, which says
+   Judge mode opens on Sep 28. Everything from `depth` is live since Sep 23.
 
 2. **Now, 5 minutes: the model run.** Your decision first: `evals/models.yaml` and
    `evals/pricing.yaml` still say unconfirmed, and they are what licenses spending money. The ids

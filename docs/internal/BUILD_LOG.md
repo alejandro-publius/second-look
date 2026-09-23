@@ -78,3 +78,10 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: Playwright pads a page into a larger video; submit-check had never run gitleaks since Sep 21.
 - Decisions: production waits for Alex's QA key and his word on timing; no video file is committed.
 - Next: Alex's page, docs/ALEX_TODO.md.
+
+## UPDATE_19: the merge, 2026-09-23 19:50Z
+- What: pull request #5's missing files brought in and #5 closed; the QA key set; the D1 tables and the Worker deployed; depth merged into main; Pages deployed with the API on the same origin; Early Hints restored for the landing page and the poster.
+- Proof: CI green on depth (8cdc5d2) and on main; `git diff --stat prereg-v1..HEAD` over 17 paths empty, 16 of 16 study functions identical; `live-check.mjs` with the QA key passed three times against production, each sitting stored as a test; `live-readonly.mjs` 11 of 11; counts 2 randomized, 1 completed before and after; `/demo` says Judge mode opens on Sep 28; 15 of 15 ledger resources on their sandbox answer 200.
+- Surprises: a judge answer in #5 cited a results file that says the opposite; the read-only check waited for a row /two no longer draws; Pages dropped the Early Hints when Functions arrived; their sandbox does not answer the Worker.
+- Decisions: the when-Alex-is-back list and the creek plan merged into depth's existing files; the throttled first screen restored through _headers, not by touching the test photos.
+- Next: docs/ALEX_TODO.md step 1, then the model run.
