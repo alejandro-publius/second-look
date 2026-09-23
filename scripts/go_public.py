@@ -41,7 +41,7 @@ PUBLIC_CMD = [
 # The one line in the README that talks about the folder itself goes, rather than being reworded.
 README_LINE = re.compile(r"; docs/internal/ holds the working notes, removed before the repo opens")
 MENTION = re.compile(
-    r"`?docs/internal(?:/(?:(?:updates|reports|reviews)/)?(?P<name>[A-Za-z0-9_.-]+?)?(?:\.md)?/?)?`?"
+    r"`?docs/internal(?:/(?:(?:updates|reports|reviews|upstream)/)?(?P<name>[A-Za-z0-9_.-]+?)?(?:\.md)?/?)?`?"
     r"(?=[\s,.;:)]|$)"
 )
 ALLOWED_SUBMIT_FAILURES = {"repo_public"}

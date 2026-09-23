@@ -1,8 +1,8 @@
 # Shot list, 3:45
 
-UPDATE_14 section 7 item 1. Fourteen beats. The words are the ones in `docs/video/VOICE_SCRIPT.md` on the `finish` branch (pull request #5), copied here so `make video-rough` can speak them with a scratch voice. If the two ever differ, VOICE_SCRIPT.md is the one Alex reads from, and this table is fixed to match.
+UPDATE_14 section 7 item 1. Fourteen beats. The words are the ones Alex reads from `docs/video/VOICE_SCRIPT.md` and `docs/video/teleprompter.html`, here too so `make video-rough` can speak them with a scratch voice. `scripts/tests/test_video_words.py` fails if the three ever differ.
 
-Three changes from VOICE_SCRIPT.md, all to keep every spoken claim backed: beat 1 drops "Most people pick the tidy, green one", because nothing we measured says what most people pick; beat 9 drops "Water in a pipe with no rain can mean sewage", a health claim with no approved sentence behind it; beat 13 shows a video walk, `/walk`, which did not exist when the voice script was written. Alex may want the same two cuts in VOICE_SCRIPT.md.
+Three changes from the voice script in pull request #5, all to keep every spoken claim backed, and all three are in `docs/video/VOICE_SCRIPT.md` now: beat 1 drops "Most people pick the tidy, green one", because nothing we measured says what most people pick; beat 9 drops "Water in a pipe with no rain can mean sewage", a health claim with no approved sentence behind it; beat 13 shows a video walk, `/walk`, which did not exist when the voice script was written.
 
 Screen clips come from `make video-clips` (`apps/web/scripts/record-clips.mjs`) against a local build and the mocked API, so no recording adds a session or a visit anywhere. They are written to `docs/video/clips/` on this Mac and never committed, whatever their size. Creek footage comes from `docs/video/RECORD_AT_THE_CREEK.md`.
 
@@ -27,8 +27,8 @@ Total: 3:45 (225 seconds).
 
 ## Notes
 
-- **Numbers.** Every number Alex says is read off the README or the named `results/` file on the day he records. Beat 7's slot is filled from `results/model_pass_table.json` after the real run; if no model passed, say "None of them passed a feature, so none of them may speak." Beat 10's zero errors comes from `results/fhir_validation.json`.
-- **Scratch voice.** The voice in the rough cut (`docs/video/rough_cut_scratch_voice.mp4`, built by `make video-rough`, never committed) is macOS `say`, not Alex. It is there only to check the timing. Alex records his own voice against `docs/video/teleprompter.html` (on `finish`).
+- **Numbers.** Every number Alex says is read off the README or the named `results/` file on the recording day. Beat 7's slot is filled from `results/model_pass_table.json` after the real run; if no model passed, say "None of them passed a feature, so none of them may speak." Beat 10's zero errors comes from `results/fhir_validation.json`.
+- **Scratch voice.** The voice in the rough cut (`docs/video/rough_cut_scratch_voice.mp4`, built by `make video-rough`, never committed) is macOS `say`, not Alex. It is there only to check the timing. Alex records the real voice against `docs/video/teleprompter.html`.
 - **Title cards and grey cards.** The rough cut puts a 3 second title card before each beat and burns each line in as a caption; the cards are not part of the 3:45. Until the creek footage exists, beats 2, 9 and 14 are grey cards.
 - **Extra clips.** `make video-clips` also records judge mode (with the clock set after the lock, in the recording only), the score filter on `/spot` and `/judges` on a desktop, for any cutaway Alex wants.
 - **The sandbox.** Anyone can delete records there. Record beat 11 soon after a re-push. If their sandbox does not answer on the day, cut beat 11 and say nothing about it.
