@@ -69,12 +69,22 @@ test("/two renders both observers with one card and says plainly when theirs is 
 test("/quick/example posts the fixed enums", async ({ page }) => {
   const calls = await mockApi(page);
   await page.goto("/quick?spot=example");
-  await expect(page.getByRole("heading", { name: "20 second check" })).toBeVisible();
-  await page.getByRole("button", { name: "Send" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Pick a colour" })).toBeVisible();
+  await expect(page.getByText("20 second check", { exact: true })).toBeVisible();
+  // One question per screen: a tap moves on, and Send waits for the last screen.
+  await expect(page.getByRole("group", { name: "Water colour" })).toBeVisible();
+  await expect(page.getByText("Step 1 of 4")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Foam" })).toHaveCount(0);
   await page.getByRole("button", { name: "Muddy" }).click();
+  await expect(page.getByRole("heading", { name: "Smell", exact: true })).toBeFocused();
+  await page.getByRole("button", { name: "Bad smell" }).click();
+  // Back keeps the answer, and tapping it again moves on.
+  await expect(page.getByRole("group", { name: "Is the pipe running?" })).toBeVisible();
+  await page.getByRole("button", { name: "Back" }).click();
+  await expect(page.getByRole("button", { name: "Bad smell" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Bad smell" }).click();
   await page.getByRole("button", { name: "Yes", exact: true }).click();
+  await expect(page.getByText("No photo yet")).toBeVisible();
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByText("Saved. Thank you.")).toBeVisible();
   const q = calls.find((c) => c.path === "/api/quick/example")!;
