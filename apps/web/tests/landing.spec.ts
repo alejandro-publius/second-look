@@ -74,6 +74,19 @@ test("every photograph a visitor can see is named on the credits page", async ({
   await expect(page.getByText("Placeholder blocks are not photographs.")).toHaveCount(0);
   // The video walks' footage is credited too, one line per video.
   await expect(page.getByRole("heading", { name: "Creek footage" })).toBeVisible();
+  // The open footage in the video, each item with its author and licence, and the video's own
+  // licence, CC BY-SA 4.0 (UPDATE_22 6.6).
+  await expect(page.getByRole("heading", { name: "Footage in our video" })).toBeVisible();
+  await expect(page.getByText("by Coro").first()).toBeVisible();
+  await expect(page.getByText("by Awinch1001")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Our video's licence: CC BY-SA 4.0" })).toHaveAttribute(
+    "href",
+    "https://creativecommons.org/licenses/by-sa/4.0/",
+  );
+  await expect(page.getByRole("link", { name: "StrawberryCreek9.JPG" })).toHaveAttribute(
+    "href",
+    "https://commons.wikimedia.org/wiki/File:StrawberryCreek9.JPG",
+  );
 
   // The judges' door and About both reach it. The participant's door deliberately does not.
   await page.goto("/judges");

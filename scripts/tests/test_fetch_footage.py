@@ -14,6 +14,7 @@ from typing import Any
 import httpx
 import pytest
 import respx
+import yaml
 
 from scripts import fetch_footage
 from scripts.fetch_footage import (
@@ -160,7 +161,10 @@ def test_media_inside_the_repository_is_refused(
     inside = fetch_footage.ROOT / "docs" / "video" / "media-guard-probe"
     out = tmp_path / "fetched.json"
     try:
-        code = fetch_footage.main(["--media", str(inside), "--out", str(out)])
+        code = fetch_footage.main(
+            ["--media", str(inside), "--out", str(out), "--credits", str(tmp_path / "c.md")]
+            + ["--web-credits", str(tmp_path / "c.yaml")]
+        )
     finally:
         created = inside.exists()
         if created:
@@ -207,6 +211,20 @@ def test_the_video_credits_match_the_manifest_and_name_every_kept_item() -> None
             assert f"| {field} |" in line, (e["title"], field)
         assert e["licence_url"].startswith("https://creativecommons.org/")
     assert "released under CC BY-SA 4.0" in text
+
+
+def test_the_credits_page_lists_what_the_manifest_kept() -> None:
+    fetched = json.loads(fetch_footage.FETCHED.read_text(encoding="utf-8"))
+    text = fetch_footage.WEB_CREDITS.read_text(encoding="utf-8")
+    assert text == fetch_footage.web_credits_yaml(fetched)
+    web = yaml.safe_load(text)
+    assert web["video_licence"] == "CC BY-SA 4.0"
+    assert web["video_licence_url"] == "https://creativecommons.org/licenses/by-sa/4.0/"
+    kept = [e for e in fetched["items"] if e["kept"]]
+    assert [i["title"] for i in web["items"]] == [e["title"] for e in kept]
+    for item in web["items"]:
+        assert item["author"] and item["licence_url"].startswith("https://creativecommons.org/")
+        assert item["source_page"].startswith("https://commons.wikimedia.org/wiki/File:")
 
 
 def test_the_strawberry_creek_photos_are_strawberry_creek_by_coro() -> None:

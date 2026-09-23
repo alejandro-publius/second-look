@@ -13,6 +13,8 @@ export default function CreditsPage() {
   const photos = shownPhotos();
   const real = photos.filter((p) => !p.placeholder);
   const placeholders = photos.length - real.length;
+  // The open footage in the video: named here too, with the video's own licence (UPDATE_22 6.6).
+  const video = content.video_credits;
   return (
     <div className="stack">
       <FocusHeading>{t("credits.title")}</FocusHeading>
@@ -62,6 +64,35 @@ export default function CreditsPage() {
                   ) : (
                     v.license
                   )
+                }
+                end={
+                  <a href={v.source_url} rel="noreferrer nofollow">
+                    {v.title}
+                  </a>
+                }
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
+      {(video?.items ?? []).length > 0 ? (
+        <section className="stack">
+          <h2>{t("credits.video_title")}</h2>
+          <p>{t("credits.video_intro")}</p>
+          <p>
+            <a href={video.licence_url} rel="license noreferrer">
+              {t("credits.video_licence", { licence: video.licence })}
+            </a>
+          </p>
+          <div className="card">
+            {video.items.map((v) => (
+              <Row
+                key={v.title}
+                label={t("credits.by", { author: v.author })}
+                value={
+                  <a href={v.license_url} rel="license noreferrer">
+                    {v.license}
+                  </a>
                 }
                 end={
                   <a href={v.source_url} rel="noreferrer nofollow">

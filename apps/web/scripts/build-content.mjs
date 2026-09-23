@@ -293,6 +293,27 @@ function main() {
     source_url: w.source_url,
     country: w.country,
   }));
+  // The open creek footage and photos in the video (UPDATE_22 6.6), written by
+  // scripts/fetch_footage.py. Several are CC BY-SA, so the build refuses one without its author,
+  // its licence link or its source page rather than publish it uncredited.
+  const videoPath = join(contentDir, "video_credits.yaml");
+  const videoRaw = existsSync(videoPath) ? readYaml(videoPath) : { items: [] };
+  const video_credits = {
+    licence: videoRaw.video_licence ?? "",
+    licence_url: videoRaw.video_licence_url ?? "",
+    items: (videoRaw.items ?? []).map((v) => ({
+      title: String(v.title),
+      author: String(v.author ?? ""),
+      license: String(v.licence ?? ""),
+      license_url: String(v.licence_url ?? ""),
+      source_url: String(v.source_page ?? ""),
+    })),
+  };
+  const uncredited = video_credits.items.filter(
+    (v) => !v.author.trim() || !v.license_url.startsWith("https://") || !v.source_url.startsWith("https://"),
+  );
+  if (uncredited.length) fail(`video footage needs an author, a licence link and a source: ${uncredited.map((v) => v.title).join(", ")}`);
+  if (video_credits.items.length && !video_credits.licence_url) fail("video_credits.yaml needs the video's own licence");
 
   const generated = {
     generated_at: new Date().toISOString(),
@@ -312,6 +333,7 @@ function main() {
     photos,
     walks,
     footage_credits,
+    video_credits,
   };
 
   // Guard: nothing named gold may remain anywhere in the output.

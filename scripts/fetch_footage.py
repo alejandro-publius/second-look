@@ -12,7 +12,8 @@ is not downloaded again.
 
 What the repository keeps is text only: docs/video/footage_fetched.json, with the licence check,
 the size and the hash of every item. No media file is ever committed. scripts/cut_footage.py adds
-the clip checks to the same file.
+the clip checks to the same file. From it this script also writes the credits: docs/video/CREDITS.md
+and content/video_credits.yaml, which the app's /credits page lists (UPDATE_22 6.6).
 
 Run: uv run python scripts/fetch_footage.py
      uv run python scripts/fetch_footage.py --media ~/second-look-media
@@ -35,6 +36,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+import yaml
 
 from scripts.find_open_photos import COMMONS_API, RateLimit
 
@@ -42,6 +44,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FOOTAGE_CSV = ROOT / "docs" / "video" / "footage.csv"
 FETCHED = ROOT / "docs" / "video" / "footage_fetched.json"
 CREDITS = ROOT / "docs" / "video" / "CREDITS.md"
+WEB_CREDITS = ROOT / "content" / "video_credits.yaml"
 VIDEO_LICENCE = "CC BY-SA 4.0"
 MEDIA = Path(os.environ.get("SECOND_LOOK_MEDIA", str(Path.home() / "second-look-media")))
 USER_AGENT = (
@@ -297,12 +300,37 @@ def credits_markdown(fetched: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def web_credits_yaml(fetched: dict[str, Any]) -> str:
+    """content/video_credits.yaml, what /credits lists for the video. Kept items only."""
+    body = {
+        "video_licence": VIDEO_LICENCE,
+        "video_licence_url": LICENCE_URLS[licence_key(VIDEO_LICENCE)],
+        "items": [
+            {
+                "title": e["title"],
+                "author": e["author"],
+                "licence": e["licence_csv"],
+                "licence_url": e["licence_url"],
+                "source_page": e["source_page"],
+            }
+            for e in fetched["items"]
+            if e.get("kept")
+        ],
+    }
+    head = (
+        "# Written by scripts/fetch_footage.py from docs/video/footage_fetched.json. Do not edit\n"
+        "# by hand. The open creek footage and photos in the video, for /credits (UPDATE_22 6.6).\n"
+    )
+    return head + yaml.safe_dump(body, sort_keys=False, allow_unicode=True, width=1000)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     parser.add_argument("--media", type=Path, default=MEDIA)
     parser.add_argument("--csv", type=Path, default=FOOTAGE_CSV)
     parser.add_argument("--out", type=Path, default=FETCHED)
     parser.add_argument("--credits", type=Path, default=CREDITS)
+    parser.add_argument("--web-credits", type=Path, default=WEB_CREDITS)
     args = parser.parse_args(argv)
     media = args.media.expanduser()
     if media.resolve().is_relative_to(ROOT.resolve()):
@@ -333,6 +361,7 @@ def main(argv: list[str] | None = None) -> int:
         out["clips_folder"] = old["clips_folder"]
     args.out.write_text(json.dumps(out, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     args.credits.write_text(credits_markdown(out), encoding="utf-8")
+    args.web_credits.write_text(web_credits_yaml(out), encoding="utf-8")
     print(f"fetch-footage: {out['kept']} of {len(entries)} kept, manifest {args.out.name}")
     return 0 if out["kept"] else 1
 
