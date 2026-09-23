@@ -291,7 +291,7 @@ The full list, kept current, is `docs/REAL_VS_SYNTHETIC.md`. In short:
 
 A 45 second path: [the test](https://second-look-79t.pages.dev/t?src=other), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record](https://second-look-79t.pages.dev/spot?id=example), [what the city sees](https://second-look-79t.pages.dev/city?creek=strawberry-creek), [lab and volunteer side by side](https://second-look-79t.pages.dev/two). Every door is on [/judges](https://second-look-79t.pages.dev/judges).
 
-`make judge-check` needs no key and no network. It runs the tests, validates the committed FHIR examples against the pinned guide, builds the web app, verifies the audit log and scans for secrets, then prints five lines.
+`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests. It reads the result of the last HL7 validator run from `results/fhir_validation.json` and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets, then prints five lines.
 
 | Proof | Where |
 |---|---|

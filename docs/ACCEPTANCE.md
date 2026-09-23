@@ -34,7 +34,7 @@ Nothing below needs an API key. Nothing below needs a network except the two row
 | 12 | Everything above, in one run | `make check` | `CHECK GREEN` |
 | 13 | The launch gate | `make preflight-launch` | `0 failed` |
 | 14 | The submission gate | `make submit-check` | every item except the video link and the repo being public |
-| 15 | One command for a judge | `make judge-check` | five lines, all PASS |
+| 15 | One command for a judge | `make judge-check` | five lines, all PASS: the Python tests and the Worker's golden vector tests; the last HL7 validator run read from `results/fhir_validation.json` (it does not run the validator; row 3 does) and the golden Bundles checked against the emitter; the web build and the design check; the audit log; the secrets scan |
 
 ## The gates that need a network or a browser
 

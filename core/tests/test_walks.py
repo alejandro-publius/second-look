@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+import time
+from collections.abc import Iterator
+from datetime import UTC, datetime, timedelta, timezone
+
+import pytest
 
 from core.fhir_emit import check_bundle
-from core.walks import DEMO_TAG_CODE, is_demo, walk_bundle, walk_spot, walk_visit_id
+from core.walks import DEMO_TAG_CODE, is_demo, utc_stamp, walk_bundle, walk_spot, walk_visit_id
 
 WALK = {"id": "v03", "spot_name": "The stretch in the clip", "creek_name": "A creek in Chile"}
 AT = datetime(2026, 9, 24, 16, 5, 9, tzinfo=UTC)
@@ -52,3 +56,28 @@ def test_the_spot_reach_and_creek_are_three_locations_with_three_urls() -> None:
         e["resource"]["id"] for e in bundle["entry"] if e["resource"]["resourceType"] == "Location"
     ]
     assert len(set(locations)) == 3
+
+
+@pytest.fixture
+def far_from_utc(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Run as a machine in California would, so a time read as local time shows up."""
+    monkeypatch.setenv("TZ", "America/Los_Angeles")
+    time.tzset()
+    yield
+    monkeypatch.undo()
+    time.tzset()
+
+
+@pytest.mark.usefixtures("far_from_utc")
+def test_a_time_with_no_zone_is_read_as_utc_like_the_emitter_and_the_worker() -> None:
+    naive = AT.replace(tzinfo=None)
+    assert utc_stamp(naive) == "2026-09-24T16:05:09Z"
+    assert walk_visit_id("v03", naive) == walk_visit_id("v03", AT)
+    # The record's own times read it the same way, so the id and the record agree.
+    record = walk_bundle(WALK, {"bank_type": "present"}, naive)
+    assert record == walk_bundle(WALK, {"bank_type": "present"}, AT)
+
+
+def test_a_time_with_a_zone_is_moved_to_utc() -> None:
+    berlin = AT.astimezone(timezone(timedelta(hours=2)))
+    assert utc_stamp(berlin) == "2026-09-24T16:05:09Z"
