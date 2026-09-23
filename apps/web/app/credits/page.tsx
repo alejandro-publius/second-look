@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FocusHeading } from "@/components/FocusHeading";
 import { Row } from "@/components/ui/Row";
-import { licenseUrl, shownPhotos } from "@/lib/content";
+import { content, licenseUrl, shownPhotos } from "@/lib/content";
 import { t } from "@/lib/t";
 
 export const metadata: Metadata = { title: `${t("credits.title")}: ${t("app.name")}` };
@@ -45,6 +45,26 @@ export default function CreditsPage() {
         </div>
       ) : null}
       {placeholders > 0 ? <p className="small muted">{t("credits.placeholder_note")}</p> : null}
+      {(content.footage_credits ?? []).length > 0 ? (
+        <section className="stack">
+          <h2>{t("credits.footage_title")}</h2>
+          <p>{t("credits.footage_intro")}</p>
+          <div className="card">
+            {content.footage_credits.map((v) => (
+              <Row
+                key={v.id}
+                label={t("credits.by", { author: v.author })}
+                value={v.license}
+                end={
+                  <a href={v.source_url} rel="noreferrer nofollow">
+                    {v.title}
+                  </a>
+                }
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -22,6 +22,9 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | The sandbox mirror and its ledger | real, one write proven on 2026-09-20 | `fhir/sandbox_ledger.jsonl` | `scripts/repush_sandbox.py` |
 | Rainfall behind the dry pipe question | real, from Open-Meteo, or unknown | `site_json.source` on the visit says `open-meteo` or `unknown` | `core/rainfall.py` |
 | The consensus and power figures | synthetic | files carry `"synthetic": true` and the SYNTHETIC stamp | `results/` |
+| The screen that keeps a frame | real, run on this Mac | Apple Vision (people, faces, any readable text, a water label, blank frames) and OpenCV; every drop and its reason is in `videos/frames.json` | `scripts/make_frames.py` |
+| A video walk's record | real shape, demo content | made on the phone from the person's answers, every resource tagged `demo-walk`, never stored, counted or mirrored | `core/walks.py`, `worker/src/core/walks.ts`, `/walk/<id>` |
+| The checker's flags on a walk | synthetic until the model run | worked out at build time from `results/footage_latest.json`; a pass table from the fake client licenses no flag, so no walk asks a question yet | `scripts/build_walks.py`, `content/walks.yaml` |
 | The Heraklion follower city scaffold | example, dry run in English with no claims | the checklist says so in its first line | `docs/cities/heraklion/` |
 
 ## Where a frame's label comes from, and where it does not
@@ -33,7 +36,8 @@ A frame is cut from a video whose own description we can read. The label for tha
 from the description, and only from the description:
 
 - If the description says the channel is a concrete flood channel, a culvert or a lined channel,
-  every frame from that video is **artificial_bank present**. A concrete flood channel is a built
+  or names riprap, gabions, a retaining wall or concrete walls along it, every frame from that
+  video is **artificial_bank present**. A concrete flood channel is a built
   bank. That is the one inference we allow ourselves, and we allow it because the words are the
   uploader's, not ours.
 - If the description says the reach was straightened, canalised or dug out, the frames are
@@ -56,6 +60,12 @@ What this method is not:
   nothing about the plants on those banks, so those frames stay unlabelled for the plant feature.
 - It is **not a claim about the water**. No frame carries a statement about pollution or health,
   and `/city` never states a risk for a named site.
+
+What the search found, stated plainly: openly licensed creek footage whose description names a
+feature is close to nonexistent. The Commons files that do (a storm drain in Accra, Himalayan
+balsam in England) are under a minute long or CC BY-SA, which Update 14 excludes. So the footage
+result leans on agreement between models, and the accuracy figure carries its count, which can be
+zero. Adding footage with a supported label is the first thing to do with more time.
 
 A frame's manifest row carries the source video, the second it was taken at, and the sentence
 from the description that supports its label, in `label_evidence`. If the row has no label, the

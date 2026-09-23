@@ -336,6 +336,17 @@ figcaption {
   border: var(--hairline) solid var(--line);
 }
 
+/* A video walk clip: the same frame as a photograph, 16 by 9 because that is how it was filmed. */
+.walk-clip {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  background: var(--surface-sunk);
+  border: var(--hairline) solid var(--line);
+}
+
 .photo-large {
   max-height: 46dvh;
 }

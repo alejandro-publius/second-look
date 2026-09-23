@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { NextConfig } from "next";
 import { buildHeaders } from "./security-headers.mjs";
 
@@ -13,8 +14,15 @@ const { everywhere, fieldPermissions } = buildHeaders({ apiOrigin, isDev });
 // docker compose, `next start` and the Playwright suite keep working exactly as before.
 const isExport = process.env.NEXT_EXPORT === "1";
 
+// The repository root, so the web app can import the Worker's pure core (worker/src/core), the
+// same functions the golden vectors prove equal to Python. The video walks build their record
+// with it on the device.
+const repoRoot = join(__dirname, "..", "..");
+
 const nextConfig: NextConfig = {
   output: isExport ? "export" : "standalone",
+  turbopack: { root: repoRoot },
+  outputFileTracingRoot: repoRoot,
   poweredByHeader: false,
   // A static export serves no headers of its own, so the same policy lives in public/_headers,
   // which Cloudflare Pages reads. scripts/check_headers.mjs proves the two say the same thing.

@@ -156,6 +156,7 @@ deploy:
 # never touches production: production deploys come from main only.
 PREVIEW_URL := https://depth.second-look-79t.pages.dev
 deploy-preview:
+	$(PY) scripts/build_walks.py --clips-only
 	cd $(WEB) && NEXT_PUBLIC_API_ORIGIN="" NEXT_PUBLIC_SITE_URL=$(PREVIEW_URL) NEXT_PUBLIC_BUILD_HASH=$$(git rev-parse --short HEAD) npm run export
 	cd $(WEB) && npx wrangler pages deploy out --project-name second-look --branch depth --commit-dirty=true
 	@echo "preview at $(PREVIEW_URL); check with: curl -sI $(PREVIEW_URL)/health"

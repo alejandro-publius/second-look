@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "0589948d4c7be750",
+  content_hash: "cf28c592ddea5c4e",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -1872,6 +1872,13 @@ function checkBundle(bundle) {
   const problems = [];
   if (bundle.resourceType !== "Bundle") return ["not a Bundle"];
   const entries = bundle.entry ?? [];
+  const seenUrls = /* @__PURE__ */ new Set();
+  entries.forEach((e, i) => {
+    const url = String(e.fullUrl ?? "");
+    const r = e.resource ?? {};
+    if (url && seenUrls.has(url)) problems.push(`entry[${i}] ${String(r.resourceType)}/${r.id ?? e.fullUrl ?? "?"}: fullUrl ${url} appears twice`);
+    seenUrls.add(url);
+  });
   const keys = /* @__PURE__ */ new Set();
   for (const e of entries) {
     const r = e.resource ?? {};
@@ -2263,6 +2270,63 @@ function pickActions(sentences, seed) {
   };
 }
 
+// src/core/walks.ts
+var DEMO_TAG_SYSTEM = `${REPO_URL}/tags`;
+var DEMO_TAG_CODE = "demo-walk";
+var DEMO_TAG_DISPLAY = "Demo visit from a video walk. Made on the device, never stored or counted.";
+var WALK_PREFIX = "walk-";
+function walkSpot(walk) {
+  const wid = `${WALK_PREFIX}${walk.id}`;
+  return {
+    spot_id: `${wid}-spot`,
+    spot_name: walk.spot_name,
+    reach_id: `${wid}-reach`,
+    reach_name: walk.spot_name,
+    creek_id: wid,
+    creek_name: walk.creek_name,
+    latitude: null,
+    longitude: null,
+    coarse: true
+  };
+}
+function walkVisitId(walkId, answeredAt) {
+  return WALK_PREFIX + sha256Hex(`${walkId}|${instant(answeredAt)}`).slice(0, 16);
+}
+function walkVisit(walk, answers, answeredAt) {
+  return {
+    visit_id: walkVisitId(walk.id, answeredAt),
+    spot: walkSpot(walk),
+    observer: { contributor_token: `demo-walk-${walk.id}`, scores: [], test_sitting_id: null },
+    answered_at: instant(answeredAt),
+    answers: { ...answers },
+    first_rating: null,
+    final_rating: null,
+    checks: [],
+    photo_ids: [],
+    software_version: "0.1.0"
+  };
+}
+function tagDemo(bundle) {
+  const out = JSON.parse(JSON.stringify(bundle));
+  const tag = { system: DEMO_TAG_SYSTEM, code: DEMO_TAG_CODE, display: DEMO_TAG_DISPLAY };
+  const nodes = [out, ...(out.entry ?? []).map((e) => e.resource)];
+  for (const node of nodes) {
+    const meta = node.meta ?? {};
+    const kept = (meta.tag ?? []).filter((t) => t.system !== DEMO_TAG_SYSTEM);
+    meta.tag = [...kept, { ...tag }];
+    node.meta = meta;
+  }
+  return out;
+}
+function walkBundle(walk, answers, answeredAt) {
+  const visit = walkVisit(walk, answers, answeredAt);
+  return tagDemo(emitVisit(visit, null, instant(answeredAt)));
+}
+function isDemo(bundle) {
+  const tags = bundle.meta?.tag ?? [];
+  return tags.some((t) => t.system === DEMO_TAG_SYSTEM && t.code === DEMO_TAG_CODE);
+}
+
 // test/golden.test.ts
 var here = dirname(fileURLToPath(import.meta.url));
 var root = join(here, "..", "..");
@@ -2360,6 +2424,9 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
     const file = `ts-${String(bundle.id)}.json`;
     writeFileSync(join(outDir, file), JSON.stringify(bundle, null, 2) + "\n");
   }
+  const doubled = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at);
+  doubled.entry.push(JSON.parse(JSON.stringify(doubled.entry[2])));
+  assert.ok(checkBundle(doubled).some((p) => p.includes("appears twice")));
   const broken = emitVisit(doc.cases[0].input.visit, doc.cases[0].input.test_sitting, doc.cases[0].input.emitted_at);
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance");
   prov.resource.target.push({ reference: "Observation/nowhere" });
@@ -2378,4 +2445,19 @@ test("fhir_referral: the ServiceRequest and the example result, the same as Pyth
   mkdirSync(outDir, { recursive: true });
   writeFileSync(join(outDir, `ts-${String(made.id)}.json`), JSON.stringify(made, null, 2) + "\n");
   writeFileSync(join(outDir, `ts-${String(result.id)}.json`), JSON.stringify(result, null, 2) + "\n");
+});
+test("walks: the same demo Bundle as Python, tagged on every resource, and structurally sound", () => {
+  const doc = golden("walks");
+  const outDir = join(root, "fhir", "build", "instances");
+  mkdirSync(outDir, { recursive: true });
+  for (const c of doc.cases) {
+    const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at);
+    same(bundle, c.expected, c.name);
+    assert.deepEqual(checkBundle(bundle), [], `${c.name}: structural check`);
+    assert.ok(isDemo(bundle), `${c.name}: the Bundle carries the demo tag`);
+    for (const e of bundle.entry) {
+      assert.ok(isDemo(e.resource), `${c.name}: ${String(e.resource.resourceType)} carries the demo tag`);
+    }
+    writeFileSync(join(outDir, `ts-${String(bundle.id)}.json`), JSON.stringify(bundle, null, 2) + "\n");
+  }
 });

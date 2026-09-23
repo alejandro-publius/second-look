@@ -208,11 +208,16 @@ function main() {
   const consent_version = "en-" + createHash("sha256").update(consentKeys.map((k) => `${k}=${locale[k]}`).join("\n")).digest("hex").slice(0, 12);
 
   const manifestRows = parseCsv(readFileSync(join(photosDir, "manifest.csv"), "utf8"));
+  // Video walks (Update 14 3.7). Written by scripts/build_walks.py. A walk's poster is one of its
+  // clip's own benchmark frames, so it is shown, copied and credited like any other photograph.
+  const walksPath = join(contentDir, "walks.yaml");
+  const walksRaw = existsSync(walksPath) ? readYaml(walksPath).walks ?? [] : [];
+  const posterIds = new Set(walksRaw.map((w) => w.poster_photo_id));
   const photos = {};
   const copyList = [];
   for (const row of manifestRows) {
     if (!row.id || !row.file) continue;
-    if (!SHOWN_ROLES.has(row.role)) continue;
+    if (!SHOWN_ROLES.has(row.role) && !posterIds.has(row.id)) continue;
     const src = join(photosDir, row.file);
     if (!existsSync(src)) fail(`manifest row ${row.id} points at a missing file ${row.file}`);
     const isPlaceholder = row.license === "placeholder";
@@ -262,6 +267,32 @@ function main() {
     if (lesson.practice && !photos[lesson.practice.photo_id]) fail(`lesson ${fid} practice photo missing`);
   }
 
+  for (const w of walksRaw) if (!photos[w.poster_photo_id]) fail(`walk ${w.id} has no poster row ${w.poster_photo_id}`);
+  // What a walk page needs, and nothing about which model said what beyond the one question.
+  const walks = walksRaw.map((w) => ({
+    id: String(w.id),
+    title: w.title,
+    author: w.author,
+    license: w.license,
+    source_url: w.source_url,
+    country: w.country,
+    creek_name: w.creek_name,
+    spot_name: w.spot_name,
+    clip: w.clip,
+    poster_photo_id: w.poster_photo_id,
+    question: w.checker?.question ?? null,
+    checker_run: w.checker?.footage_run ?? "synthetic",
+    checker_dropped: w.checker?.dropped ?? 0,
+  }));
+  // One credit line per video whose frames anyone can see, for /credits.
+  const videoRows = existsSync(join(contentDir, "..", "videos", "manifest.csv"))
+    ? parseCsv(readFileSync(join(contentDir, "..", "videos", "manifest.csv"), "utf8"))
+    : [];
+  const shownVideos = new Set(walksRaw.map((w) => String(w.id)));
+  const footage_credits = videoRows
+    .filter((v) => shownVideos.has(v.id))
+    .map((v) => ({ id: v.id, title: v.title, author: v.author, license: v.license, source_url: v.source_url, country: v.country }));
+
   const generated = {
     generated_at: new Date().toISOString(),
     content_hash,
@@ -278,6 +309,8 @@ function main() {
     lessons,
     locale,
     photos,
+    walks,
+    footage_credits,
   };
 
   // Guard: nothing named gold may remain anywhere in the output.

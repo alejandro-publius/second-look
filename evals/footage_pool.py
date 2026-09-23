@@ -73,6 +73,7 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         "frames_dropped_in_last_cut": dict(drops.most_common()),
         "walks": len(walks),
         "walk_countries": sorted({w["country"] for w in walks}),
+        "walk_country_count": len({w["country"] for w in walks}),
         "walks_with_a_checker_question": sum(1 for w in walks if w["checker"]["question"]),
     }
 
