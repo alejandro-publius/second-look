@@ -1,11 +1,11 @@
 {
- "checked_utc": "2026-09-24T07:50:13Z",
+ "checked_utc": "2026-09-24T10:21:01Z",
  "service": "OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin",
  "client": "opentimestamps-client 0.7.2",
  "upgraded": true,
  "counts": {
-  "pending": 3,
-  "confirmed": 0,
+  "pending": 0,
+  "confirmed": 3,
   "unchecked": 0,
   "broken": 0
  },
@@ -21,9 +21,15 @@
     "https://btc.calendar.catallaxy.com",
     "https://finney.calendar.eternitywall.com"
    ],
-   "bitcoin": null,
+   "bitcoin": {
+    "block_height": 968372,
+    "merkle_root": "697447960371ceb159611c3ab55825e7dbdddf48c3551c618533079ce2db7911",
+    "block_hash": "0000000000000000000213179af767323e60340c990385e88ec1c470c0a20f55",
+    "block_time_utc": "2026-09-24T08:35:54Z",
+    "header_from": "https://blockstream.info/api"
+   },
    "problem": null,
-   "status": "pending"
+   "status": "confirmed"
   },
   {
    "proof": "proofs/audit-head-2026-09-24.ots",
@@ -36,10 +42,16 @@
     "https://btc.calendar.catallaxy.com",
     "https://finney.calendar.eternitywall.com"
    ],
-   "bitcoin": null,
+   "bitcoin": {
+    "block_height": 968372,
+    "merkle_root": "697447960371ceb159611c3ab55825e7dbdddf48c3551c618533079ce2db7911",
+    "block_hash": "0000000000000000000213179af767323e60340c990385e88ec1c470c0a20f55",
+    "block_time_utc": "2026-09-24T08:35:54Z",
+    "header_from": "https://blockstream.info/api"
+   },
    "problem": null,
    "audit_seq": 3,
-   "status": "pending"
+   "status": "confirmed"
   },
   {
    "proof": "proofs/prereg-v1.tag.ots",
@@ -52,9 +64,15 @@
     "https://btc.calendar.catallaxy.com",
     "https://finney.calendar.eternitywall.com"
    ],
-   "bitcoin": null,
+   "bitcoin": {
+    "block_height": 968372,
+    "merkle_root": "697447960371ceb159611c3ab55825e7dbdddf48c3551c618533079ce2db7911",
+    "block_hash": "0000000000000000000213179af767323e60340c990385e88ec1c470c0a20f55",
+    "block_time_utc": "2026-09-24T08:35:54Z",
+    "header_from": "https://blockstream.info/api"
+   },
    "problem": null,
-   "status": "pending"
+   "status": "confirmed"
   }
  ]
 }
