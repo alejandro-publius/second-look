@@ -26,6 +26,9 @@ const nextConfig: NextConfig = {
   turbopack: { root: repoRoot },
   outputFileTracingRoot: repoRoot,
   poweredByHeader: false,
+  // next dev writes a block into AGENTS.md and CLAUDE.md when it thinks an AI agent runs it. The
+  // block has an em dash, which dash-check refuses, and it dirties two tracked files on every run.
+  agentRules: false,
   // A static export serves no headers of its own, so the same policy lives in public/_headers,
   // which Cloudflare Pages reads. scripts/check_headers.mjs proves the two say the same thing.
   ...(isExport

@@ -4,14 +4,32 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: test-counts consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
 
+# npm run dev serves the site on 3100, so the API is told that origin, or the browser's calls fail
+# CORS. The audit log line each stored check writes goes under data/, never to the tracked
+# audit/log.jsonl. make demo-offline below is the same with seeded data and no network.
 dev:
-	@echo "API on :8000, web on :3000. Stop with Ctrl-C."
-	@bash -c 'trap "kill 0" EXIT; $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
+	@echo "API on :8000, web on http://localhost:3100. Stop with Ctrl-C."
+	@bash -c 'trap "kill 0" EXIT; PUBLIC_WEB_ORIGIN=http://localhost:3100 AUDIT_LOG_PATH=$(CURDIR)/data/dev_audit.jsonl $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
+
+# The site and the API on this machine with no network and no key, on seeded demo data (UPDATE_27
+# block 24). scripts/seed_demo.py fills data/demo through the API's own routes with every socket
+# to another machine refused, and fails if one was tried. Then the API serves that folder and the
+# site runs in dev mode against it. Neither process gets a key; their proxy goes nowhere; the QA
+# key and the export token are empty, so nothing can be marked or exported. Needs one `uv sync`
+# and one `npm ci` in apps/web beforehand, which are the only steps that use the network.
+DEMO_DIR := $(CURDIR)/data/demo
+DEMO_API_PORT ?= 8000
+DEMO_WEB_PORT ?= 3100
+DEMO_ENV := ANTHROPIC_API_KEY= DATABASE_URL=sqlite:///$(DEMO_DIR)/demo.db FHIR_STORE_DIR=$(DEMO_DIR)/fhir_store UPLOAD_DIR=$(DEMO_DIR)/uploads AUDIT_LOG_PATH=$(DEMO_DIR)/audit.jsonl SANDBOX_CACHE_DIR=$(DEMO_DIR)/sandbox_cache QA_KEY= EXPORT_TOKEN= PUBLIC_WEB_ORIGIN=http://localhost:$(DEMO_WEB_PORT) HTTP_PROXY=http://127.0.0.1:9 HTTPS_PROXY=http://127.0.0.1:9 NO_PROXY=localhost,127.0.0.1 NEXT_TELEMETRY_DISABLED=1
+demo-offline:
+	env -u ANTHROPIC_API_KEY uv run --offline python scripts/seed_demo.py --out $(DEMO_DIR)
+	@echo "demo-offline: API on :$(DEMO_API_PORT), site on http://localhost:$(DEMO_WEB_PORT)/city?creek=strawberry-creek. Stop with Ctrl-C."
+	@bash -c 'trap "kill 0" EXIT; env $(DEMO_ENV) uv run --offline python -m uvicorn apps.api.main:app --port $(DEMO_API_PORT) & (cd $(WEB) && node scripts/build-content.mjs && env $(DEMO_ENV) NEXT_PUBLIC_API_ORIGIN=http://localhost:$(DEMO_API_PORT) npx next dev -p $(DEMO_WEB_PORT)) & wait'
 
 check: lint types test manifest-check dash-check readability diagrams verify-claims consensus-check worker-check fhir-validate web-build design-check
 	@echo "CHECK GREEN"
