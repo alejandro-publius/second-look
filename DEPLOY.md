@@ -193,12 +193,12 @@ a row names something the code no longer reads, or when a default below differs 
 | `NEXT_PUBLIC_SITE_URL` | `https://second-look.example` | `apps/web/lib/session.ts`, `scripts/submit_check.py` | the site's own address, for share links |
 | `NEXT_PUBLIC_BUILD_HASH` | `dev` | `apps/web/lib/session.ts` | the commit, sent with each sitting |
 | `NEXT_PUBLIC_QA_KEY` | empty | `apps/web/lib/api.ts` | set only on a dry-run build, so every sitting it starts is a test; the launch build leaves it empty |
-| `NEXT_PUBLIC_PLAN_TAG` | a line saying the plan is not tagged yet | `apps/web/app/how-we-know/page.tsx` | the tag the "how we know" page names |
+| `NEXT_PUBLIC_PLAN_TAG` | `prereg-v1 (not yet tagged)` | `apps/web/app/how-we-know/page.tsx` | the tag the "how we know" page names |
 | `NEXT_EXPORT` | not set | `apps/web/next.config.ts` | `1` builds the static export for Pages; `npm run export` sets it |
 | `NODE_ENV` | set by Next | `apps/web/next.config.ts`, `apps/web/components/SwRegister.tsx` | development relaxes the policy and skips the service worker |
 | `CI` | set by GitHub Actions | `apps/web/playwright.config.ts` | one retry for a Playwright test in CI |
 | `SITE_URL` | none, must be set | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs` | the deployed site the phone checks drive |
-| `API_URL` | the Worker's own address, or the site | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs` | where the phone checks read the counts |
+| `API_URL` | `https://second-look-api.thealexschroeder.workers.dev` in live-check; the site itself in live-readonly | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs` | where the phone checks read the counts |
 | `WALK_ID` | empty | `apps/web/scripts/live-readonly.mjs` | one walk to check by id |
 | `REQUIRE_THEIRS` | not set | `apps/web/scripts/live-readonly.mjs` | `1` fails the read only check when their record is missing |
 | `DEPLOYED_URL`, `DEPLOYED_API` | empty, so the spec skips | `apps/web/tests/deployed-smoke.spec.ts` | point the deployed smoke spec at a site |

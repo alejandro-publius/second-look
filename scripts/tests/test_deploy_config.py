@@ -106,6 +106,57 @@ def test_every_launchd_job_has_a_row() -> None:
     assert labels and labels == documented
 
 
+def test_every_launchd_job_row_names_the_time_its_installer_sets() -> None:
+    """The "When" cell says the HH:MM each installer writes into its plist."""
+    rows = {
+        m.group(1): m.group(2)
+        for m in re.finditer(r"^\| `(com\.[\w.]+)` \| ([^|]+) \|", section("Jobs on the Mac"), re.M)
+    }
+    for path in sorted((ROOT / "scripts").glob("install_*_job.sh")):
+        text = path.read_text(encoding="utf-8")
+        label = re.search(r'^LABEL="([\w.]+)"', text, re.M)
+        assert label, path
+        times = re.findall(
+            r"<key>Hour</key><integer>(\d+)</integer><key>Minute</key><integer>(\d+)</integer>",
+            text,
+        )
+        assert times, f"{path.name} sets no time"
+        for hour, minute in times:
+            when = f"{int(hour):02d}:{int(minute):02d}"
+            assert when in rows[label.group(1)], f"{label.group(1)}: {when} is not in {path.name}"
+
+
+# A literal default in code: process.env.X ?? "v" or || 3102 in JavaScript, ${X:-v} in a shell
+# script. Each one the inventory finds must be written in backticks in that row's default cell.
+JS_DEFAULT = re.compile(
+    r"process\.env\.([A-Z][A-Z0-9_]+)\s*(?:\?\?|\|\|)\s*(?:\"([^\"]*)\"|'([^']*)'|(-?\d+(?:\.\d+)?))"
+)
+SHELL_DEFAULT = re.compile(r"\$\{([A-Z][A-Z0-9_]+):-([^}$\"']*)\}")
+
+
+def literal_defaults() -> dict[str, set[str]]:
+    wanted = config_inventory.inventory()
+    found: dict[str, set[str]] = {}
+    for path in config_inventory._web_files():
+        for m in JS_DEFAULT.finditer(path.read_text(encoding="utf-8")):
+            value = next((g for g in m.groups()[1:] if g is not None), "")
+            found.setdefault(m.group(1), set()).add(value)
+    for path in sorted((ROOT / "scripts").glob("*.sh")):
+        for name, value in SHELL_DEFAULT.findall(path.read_text(encoding="utf-8")):
+            found.setdefault(name, set()).add(value)
+    return {n: {v for v in vs if v} for n, vs in found.items() if n in wanted}
+
+
+def test_every_literal_default_in_code_is_the_one_in_its_row() -> None:
+    rows = config_rows()
+    checked = 0
+    for name, values in literal_defaults().items():
+        for value in values:
+            assert f"`{value}`" in rows[name][1], f"{name}: the code says {value!r}, {rows[name]}"
+            checked += 1
+    assert checked >= 10, "the reader found almost no default; has the code's shape changed?"
+
+
 def test_the_worker_secrets_are_named_and_their_values_are_not() -> None:
     secrets = section("Secrets")
     for name in ("QA_KEY", "EXPORT_TOKEN", "ANTHROPIC_API_KEY"):
