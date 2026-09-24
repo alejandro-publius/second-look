@@ -4,7 +4,7 @@ One row per promise this project makes. The command is the proof. If a command d
 what the row says, the promise is not kept, whatever any page claims.
 
 Run everything from the repository root. `make judge-check` runs the first five rows on its own,
-offline, with no API key, and prints a five line summary.
+offline, with no API key, with `make reproduce` (row 16) as well, and prints a six line summary.
 
 ## Setup, once
 
@@ -34,16 +34,17 @@ Nothing below needs an API key. Nothing below needs a network except the two row
 | 12 | Everything above, in one run | `make check` | `CHECK GREEN` |
 | 13 | The launch gate | `make preflight-launch` | `0 failed` |
 | 14 | The submission gate | `make submit-check` | every item except the video link and the repo being public |
-| 15 | One command for a judge | `make judge-check` | five lines, all PASS: the Python tests and the Worker's golden vector tests; the last HL7 validator run read from `results/fhir_validation.json` (it does not run the validator; row 3 does) and the golden Bundles checked against the emitter; the web build and the design check; the audit log; the secrets scan |
+| 15 | One command for a judge | `make judge-check` | six lines, all PASS: the Python tests and the Worker's golden vector tests; `make reproduce` (row 16); the last HL7 validator run read from `results/fhir_validation.json` (it does not run the validator; row 3 does) and the golden Bundles checked against the emitter; the web build and the design check; the audit log; the secrets scan |
+| 16 | Every AI number rebuilt from the raw replies | `make reproduce` | `reproduce: ... every one matches`: each number in `results/` from a paid run graded again from the replies in `evals/fixtures/raw/`, each synthetic result made again from its seed, no network and no key; what cannot be regraded is named with its reason |
 
 ## The gates that need a network or a browser
 
 | # | The promise | Command | What it prints when it holds |
 |---|---|---|---|
-| 16 | A person can finish the test on a phone | `cd apps/web && npx playwright test` | every spec passing on the 390 by 844 viewport, both arms |
-| 17 | The whole API works on the edge runtime | `make worker-e2e` | 9 sections green under `wrangler dev` |
-| 18 | The deployed site is the one we think it is | `DEPLOYED_URL=... DEPLOYED_API=... npx playwright test tests/deployed-smoke.spec.ts` | a whole sitting finished, and the counts endpoint did not move |
-| 19 | The landing page paints fast enough on a slow phone | `SITE_URL=... node apps/web/scripts/live-check.mjs` | load and largest paint under the 3 second line on a throttled 4G profile |
+| 17 | A person can finish the test on a phone | `cd apps/web && npx playwright test` | every spec passing on the 390 by 844 viewport, both arms |
+| 18 | The whole API works on the edge runtime | `make worker-e2e` | 9 sections green under `wrangler dev` |
+| 19 | The deployed site is the one we think it is | `DEPLOYED_URL=... DEPLOYED_API=... npx playwright test tests/deployed-smoke.spec.ts` | a whole sitting finished, and the counts endpoint did not move |
+| 20 | The landing page paints fast enough on a slow phone | `SITE_URL=... node apps/web/scripts/live-check.mjs` | load and largest paint under the 3 second line on a throttled 4G profile |
 
 ## The rules that are enforced by a test, not by a command
 

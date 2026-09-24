@@ -65,7 +65,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
   document. Chosen because no LaTeX, typst or weasyprint is installed here and these two tools
   already were.
 
-## Python packages (95, from uv.lock)
+## Python packages (107, from uv.lock)
 
 | Package | Version | License |
 |---|---|---|
@@ -81,6 +81,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | click | 8.5.0 | BSD-3-Clause |
 | colorama | 0.4.6 | not installed here |
 | contourpy | 1.4.0 | BSD-3-Clause |
+| coverage | 7.16.1 | Apache-2.0 |
 | cryptography | 50.0.1 | Apache-2.0 OR BSD-3-Clause |
 | cycler | 0.12.1 | BSD |
 | docstring-parser | 0.18.0 | MIT |
@@ -102,12 +103,18 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | jsonschema | 4.26.0 | MIT |
 | jsonschema-specifications | 2025.9.1 | MIT |
 | kiwisolver | 1.5.1 | BSD |
+| libcst | 1.9.0 | MIT |
 | librt | 0.15.0 | MIT |
+| linkify-it-py | 2.2.0 | MIT |
 | mako | 1.4.1 | MIT |
+| markdown-it-py | 4.2.0 | MIT |
 | markupsafe | 3.0.3 | BSD-3-Clause |
 | matplotlib | 3.11.2 | Python Software Foundation |
 | mcp | 2.2.0 | MIT |
 | mcp-types | 2.2.0 | MIT |
+| mdit-py-plugins | 0.6.1 | MIT |
+| mdurl | 0.1.2 | MIT |
+| mutmut | 3.8.0 | BSD-3-Clause |
 | mypy | 2.3.1 | MIT |
 | mypy-extensions | 1.1.0 | MIT |
 | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 |
@@ -118,6 +125,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | pandas-stubs | 3.0.5.260914 | BSD-3-Clause |
 | pathspec | 1.1.1 | Mozilla Public License 2.0 (MPL 2.0) |
 | pillow | 12.3.0 | MIT-CMU |
+| platformdirs | 4.11.12 | MIT |
 | pluggy | 1.6.0 | MIT |
 | psycopg | 3.3.6 | LGPL-3.0-only |
 | psycopg-binary | 3.3.6 | LGPL-3.0-only |
@@ -140,11 +148,14 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | python-multipart | 0.0.32 | Apache-2.0 |
 | pywin32 | 312 | not installed here |
 | pyyaml | 6.0.3 | MIT |
+| pyyaml-ft | 8.0.0 | not installed here |
 | referencing | 0.37.0 | MIT |
 | respx | 0.23.1 | BSD-3-Clause |
+| rich | 15.0.0 | MIT |
 | rpds-py | 2026.6.3 | MIT |
 | ruff | 0.16.8 | MIT |
 | scipy | 1.18.1 | BSD |
+| setproctitle | 1.3.7 | BSD-3-Clause |
 | six | 1.17.0 | MIT |
 | sniffio | 1.3.1 | MIT OR Apache-2.0 |
 | sortedcontainers | 2.4.0 | Apache 2.0 |
@@ -152,6 +163,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | sqlmodel | 0.0.42 | MIT |
 | sse-starlette | 3.4.11 | BSD-3-Clause |
 | starlette | 1.6.0 | BSD-3-Clause |
+| textual | 8.2.8 | MIT |
 | truststore | 0.10.4 | MIT |
 | types-pyyaml | 6.0.12.20260906 | Apache-2.0 |
 | types-requests | 2.33.0.20260906 | Apache-2.0 |
@@ -1015,4 +1027,4 @@ All dev: they draw the SVGs in docs/diagrams and do nothing else.
 | yocto-queue | 1.2.2 | MIT | yes |
 | zod | 3.25.76 | MIT | yes |
 
-Licenses not found for 5 Python and 0 npm packages; check those by hand before the repo goes public.
+Licenses not found for 6 Python and 0 npm packages; check those by hand before the repo goes public.

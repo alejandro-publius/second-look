@@ -19,6 +19,7 @@ import math
 import os
 import sys
 from collections.abc import Mapping, Sequence
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -254,6 +255,9 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
         ),
         "models": models,
         "cost_usd": round(sum(r.cost_usd for r in records), 6),
+        # Every answer with the reply it came from, so make reproduce can grade the run again
+        # (UPDATE_29 section 4). The two paid runs of Sep 24 kept only the counts above.
+        "answers": [asdict(r) for r in records],
     }
     if synthetic:
         doc["stamp"] = "SYNTHETIC"
