@@ -1,6 +1,6 @@
 """GET /api/inaturalist/{creek}: the context line reads the stored copy, withholds the sightings
-until the invasive plant question is answered, drops links that leave iNaturalist, and moves no
-number on the city view."""
+until a finished check on the creek has answered the invasive plant question, drops links that
+leave iNaturalist, and moves no number on the city view."""
 
 from __future__ import annotations
 

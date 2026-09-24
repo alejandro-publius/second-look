@@ -2,7 +2,7 @@
   "script": "scripts/api_inventory.py",
   "synthetic": false,
   "worker": {
-    "count": 26,
+    "count": 25,
     "routes": [
       {
         "method": "POST",
@@ -55,10 +55,6 @@
       {
         "method": "POST",
         "path": "/api/quick/{}"
-      },
-      {
-        "method": "any",
-        "path": "/api/skeleton"
       },
       {
         "method": "GET",

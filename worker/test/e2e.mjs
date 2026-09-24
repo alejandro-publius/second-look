@@ -16,10 +16,18 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worker = join(here, "..");
 const PORT = Number(process.env.E2E_PORT ?? 8791);
 const RAIN_PORT = PORT + 1;
+// A second, short lived Worker whose clock reads the data lock itself (review REVIEW_03 R52).
+const AFTER_PORT = PORT + 2;
 const QA_KEY = "e2e-qa-key-0123456789abcdef";
+const EXPORT_TOKEN = "e2e-export-token-0123456789abcdef";
 const BASE = `http://127.0.0.1:${PORT}`;
 const PERSIST = join(worker, ".wrangler", "e2e-state");
+const PERSIST_AFTER = join(worker, ".wrangler", "e2e-state-after-lock");
 const CONTENT = JSON.parse(readFileSync(join(worker, "src", "content.json"), "utf8"));
+// Judge mode's lock (core/lock.py). The main Worker's clock is fixed one second before it, the
+// second Worker's at it, so both sides of the lock run on every run, whatever today is.
+const LOCK = "2026-09-28T01:00:00Z";
+const JUST_BEFORE_LOCK = "2026-09-28T00:59:59Z";
 
 // Wrangler never gets a terminal here: no metrics prompt, no update check, no stdin to wait on,
 // and a hard time limit so a hang in CI fails with its output instead of eating the job. The
@@ -43,6 +51,79 @@ function wrangler(args, opts = {}) {
     throw new Error(`wrangler ${args.join(" ")} failed${result.error ? ` (${result.error.code})` : ""}`);
   }
   return result.stdout;
+}
+
+/** Rows from the local D1 the running Worker uses. */
+function d1(sql) {
+  const out = wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--json", "--command", sql]);
+  return JSON.parse(out)[0].results;
+}
+
+/** wrangler dev on a port, with its own state folder and vars. The caller kills it. */
+async function startDev(port, persist, vars) {
+  const args = [
+    "dev", "--local", "--port", String(port), "--persist-to", persist,
+    // The local runtime binary lags the edge; the date only has to be one this binary knows.
+    "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
+    "--show-interactive-dev-session=false",
+  ];
+  for (const [name, value] of Object.entries(vars)) args.push("--var", `${name}:${value}`);
+  const proc = spawn(process.execPath, wranglerArgs(args), { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV });
+  let log = "";
+  proc.stdout.on("data", (d) => (log += d));
+  proc.stderr.on("data", (d) => (log += d));
+  proc.on("exit", (code) => {
+    if (code !== null && code !== 0) console.error(`wrangler dev on ${port} exited with ${code}\n${log}`);
+  });
+  running.push(proc);
+  try {
+    await waitFor(`http://127.0.0.1:${port}/health`, 120_000);
+  } catch (err) {
+    console.error(log);
+    throw err;
+  }
+  return proc;
+}
+
+async function stopDev(proc) {
+  if (proc.exitCode !== null || proc.signalCode !== null) return;
+  proc.kill("SIGTERM");
+  await new Promise((resolve) => {
+    const hard = setTimeout(() => {
+      proc.kill("SIGKILL");
+      resolve();
+    }, 5000);
+    proc.on("exit", () => {
+      clearTimeout(hard);
+      resolve();
+    });
+  });
+}
+
+/** The files of a zip written without compression, as the Worker's export writes it. */
+function readStoredZip(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const files = {};
+  let at = 0;
+  while (at + 30 <= bytes.length && view.getUint32(at, true) === 0x04034b50) {
+    assert.equal(view.getUint16(at + 8, true), 0, "stored, not compressed");
+    const size = view.getUint32(at + 18, true);
+    const nameLength = view.getUint16(at + 26, true);
+    const extraLength = view.getUint16(at + 28, true);
+    const start = at + 30 + nameLength + extraLength;
+    const name = new TextDecoder().decode(bytes.slice(at + 30, at + 30 + nameLength));
+    files[name] = new TextDecoder().decode(bytes.slice(start, start + size));
+    at = start + size;
+  }
+  return files;
+}
+
+/** A column list from the Python API's export (apps/api/study.py), the schema the Worker must match. */
+function pythonColumns(name) {
+  const source = readFileSync(join(worker, "..", "apps", "api", "study.py"), "utf8");
+  const found = new RegExp(`^${name} = \\[([^\\]]*)\\]`, "m").exec(source);
+  assert.ok(found, `${name} in apps/api/study.py`);
+  return [...found[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
 }
 
 // Whatever happens, this process ends: a stuck request cannot hold the CI job open.
@@ -160,7 +241,7 @@ function jpegWithExif() {
   return new Uint8Array([0xff, 0xd8, ...app1, ...dqt, ...sos]);
 }
 
-let dev = null;
+const running = [];
 let rain = null;
 try {
   // 1. Fresh local state: schema, arms, the counter row.
@@ -177,29 +258,25 @@ try {
   });
   await new Promise((r) => rain.listen(RAIN_PORT, "127.0.0.1", r));
   at("start wrangler dev");
-  dev = spawn(
-    process.execPath,
-    wranglerArgs([
-      "dev", "--local", "--port", String(PORT), "--persist-to", PERSIST,
-      // The local runtime binary lags the edge; the date only has to be one this binary knows.
-      "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
-      "--var", `QA_KEY:${QA_KEY}`, "--var", `RAIN_URL:http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
-      "--show-interactive-dev-session=false",
-    ]),
-    { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV },
-  );
-  let devLog = "";
-  dev.stdout.on("data", (d) => (devLog += d));
-  dev.stderr.on("data", (d) => (devLog += d));
-  dev.on("exit", (code) => {
-    if (code !== null && code !== 0) console.error(`wrangler dev exited with ${code}\n${devLog}`);
+  await startDev(PORT, PERSIST, {
+    QA_KEY,
+    RAIN_URL: `http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
+    EXPORT_TOKEN,
+    E2E_NOW: JUST_BEFORE_LOCK,
   });
-  try {
-    await waitFor(`${BASE}/health`, 120_000);
-  } catch (err) {
-    console.error(devLog);
-    throw err;
-  }
+
+  // 2a. Before anyone checks a creek. /two has no visit of ours to show, so it shows the golden
+  // visit, which was made by hand, and says so (review REVIEW_03 R33). The first deploy's
+  // /api/skeleton is gone: it wrote a row on any request, a GET included (REVIEW_03 R02).
+  at("an empty store");
+  const empty = await api("GET", "/api/two");
+  assert.equal(empty.status, 200, JSON.stringify(empty.data));
+  assert.equal(empty.data.ours_example, true, "the golden visit is labelled an example");
+  assert.equal(empty.data.ours.id, "sl-obs-visit-0001-bank-type");
+  assert.equal(empty.data.ours_place, "Strawberry Creek, campus reach, spot 1", "the place by name, not Location/sl-loc-spot-1");
+  assert.equal((await api("GET", "/api/skeleton")).status, 404);
+  assert.equal((await api("POST", "/api/skeleton", {})).status, 404);
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM skeleton_ping"), [{ n: 0 }], "no request wrote a skeleton row");
 
   // 3. Two people who passed, one pipe, one quiet visit downstream.
   at("sessions and visits");
@@ -315,6 +392,10 @@ try {
   assert.equal(pair.status, 200);
   assert.equal(pair.data.theirs_status, "down");
   assert.equal(pair.data.ours.resourceType, "Observation");
+  // A stored visit now: a volunteer's answer, not the example, and its place by name.
+  assert.equal(pair.data.ours_example, false);
+  assert.ok(pair.data.ours.id.startsWith("sl-obs-visit-") && pair.data.ours.id !== "sl-obs-visit-0001-bank-type");
+  assert.ok(["Faculty Glade bridge", "Daylighted reach in the park"].includes(pair.data.ours_place), pair.data.ours_place);
   const query = { subject: "Location/Loc-Almyros", code: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu|dissolved-oxygen", _sort: "-date", _count: "1" };
   const key = `theirs-${createHash("sha256").update(JSON.stringify(query)).digest("hex").slice(0, 16)}`;
   const lab = JSON.stringify({ resourceType: "Observation", id: "lab-e2e", status: "final" }).replaceAll("'", "''");
@@ -379,19 +460,89 @@ try {
   assert.equal(onTestPin.data.status, "cached");
   assert.equal(onTestPin.data.shown, false, "a test pin does not open the line");
   assert.deepEqual(onTestPin.data.species, []);
+  // One finished check at the bridge that answers the question opens the line for that whole
+  // creek. The gate is per creek, not per person: this request carries no token and no check of
+  // its own, and it gets the sightings, as a later volunteer on the record page would (REVIEW_03
+  // R07). The words in inaturalist.ts, its Python twin and ADR 0011 say so.
+  await visit(null, { spot_id: bridge.spot_id }, GOOD_ANSWERS);
+  const freshViewer = await api("GET", `/api/inaturalist/${bridgeCreek}`);
+  assert.equal(freshViewer.data.shown, true, "one finished answer on the creek opens it for every viewer");
+  assert.deepEqual(freshViewer.data.species.map((s) => s.name), ["Himalayan blackberry"]);
   // Read only: the route answers GET and nothing else.
   assert.equal((await api("POST", "/api/inaturalist/strawberry-creek", {})).status, 404);
 
   // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
-  // sixteen answers would be the live test's key.
+  // sixteen answers would be the live test's key. This Worker's clock reads one second before
+  // the lock; a second Worker's reads the lock itself, where the route opens (REVIEW_03 R52).
   at("judge mode shut before the lock");
   const demo = await api("POST", "/api/demo/answer", { item_id: "t01", answer: "yes" });
-  if (Date.now() < Date.parse("2026-09-28T01:00:00Z")) {
-    assert.equal(demo.status, 403);
-    assert.equal(demo.data.detail, "Judge mode opens on Sep 28.");
-  } else {
-    assert.equal(demo.status, 200);
-  }
+  assert.equal(demo.status, 403);
+  assert.equal(demo.data.detail, "Judge mode opens on Sep 28.");
+
+  at("judge mode open at the lock");
+  spawnSync("rm", ["-rf", PERSIST_AFTER]);
+  const afterLock = await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: LOCK });
+  const judge = async (itemId, answer) => {
+    const res = await fetch(`http://127.0.0.1:${AFTER_PORT}/api/demo/answer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_id: itemId, answer }) });
+    return { status: res.status, data: await res.json() };
+  };
+  const t01 = CONTENT.test_items.find((i) => i.id === "t01");
+  const right = t01.gold === "present" ? "yes" : "no";
+  assert.deepEqual(await judge("t01", right), { status: 200, data: { correct: true } });
+  assert.deepEqual(await judge("t01", right === "yes" ? "no" : "yes"), { status: 200, data: { correct: false } });
+  assert.equal((await judge("t99", "yes")).status, 404);
+  await stopDev(afterLock);
+
+  // 8c. The public counts by source (review REVIEW_03 R48). Two real sittings, not marked as
+  // tests: one from the panel's link and one whose source is a panel id pasted into the link,
+  // which is not a label we keep and is stored as "other". Only finished real sittings count.
+  at("counts by source");
+  const finish = async (sourceLabel) => {
+    const s = await api("POST", "/api/test/session", {
+      consent_version: "v1",
+      content_hash: CONTENT.content_hash,
+      build_hash: "e2e",
+      source_label: sourceLabel,
+      hidden_field: "",
+      client_token_hash: `e2e-${Math.random().toString(16).slice(2)}-0123456789abcdef`,
+      ua_class: "phone",
+    });
+    assert.equal(s.status, 200, JSON.stringify(s.data));
+    let position = 0;
+    for (const itemId of s.data.item_order) {
+      assert.equal((await api("POST", "/api/test/response", { session_id: s.data.session_id, item_id: itemId, answer: "cant_tell", rt_ms: 900, position: position++ })).status, 200);
+    }
+    assert.equal((await api("POST", "/api/test/complete", { session_id: s.data.session_id, prior_experience: "no", answered_count: 16 })).status, 200);
+    return s.data.session_id;
+  };
+  const before = (await api("GET", "/api/test/counts")).data;
+  assert.deepEqual(before.by_source, { poster: 0, chat: 0, friends: 0, creek_group: 0, other: 0, panel: 0 }, "the e2e's own sittings are tests");
+  const panelSession = await finish("panel");
+  const pastedSession = await finish("PROLIFIC_PID=abc");
+  const counted = (await api("GET", "/api/test/counts")).data;
+  assert.equal(counted.by_source.panel, 1, "the panel label is kept");
+  assert.equal(counted.by_source.other, 1, "a label we do not keep is stored as other");
+  assert.equal(counted.by_arm.untrained.completed + counted.by_arm.trained.completed, 2);
+
+  // 8d. The anonymous export (review REVIEW_03 R20): without the token, or with a wrong one, the
+  // route answers 404 as if it did not exist; with it, the two files in the Python API's schema.
+  at("the export");
+  assert.equal((await api("GET", "/api/test/export")).status, 404);
+  assert.equal((await api("GET", "/api/test/export?token=wrong")).status, 404);
+  assert.equal((await api("GET", `/api/test/export?token=${EXPORT_TOKEN.replace(/.$/, "x")}`)).status, 404, "one character off");
+  const exported = await fetch(`${BASE}/api/test/export?token=${EXPORT_TOKEN}`);
+  assert.equal(exported.status, 200);
+  assert.equal(exported.headers.get("content-type"), "application/zip");
+  const files = readStoredZip(new Uint8Array(await exported.arrayBuffer()));
+  assert.deepEqual(Object.keys(files).sort(), ["responses.csv", "sessions.csv"]);
+  const sessionLines = files["sessions.csv"].trimEnd().split("\r\n");
+  const responseLines = files["responses.csv"].trimEnd().split("\r\n");
+  assert.deepEqual(sessionLines[0].split(","), pythonColumns("SESSIONS_COLUMNS"));
+  assert.deepEqual(responseLines[0].split(","), pythonColumns("RESPONSES_COLUMNS"));
+  const sourceOf = (id) => sessionLines.find((l) => l.startsWith(`${id},`)).split(",")[3];
+  assert.equal(sourceOf(panelSession), "panel");
+  assert.equal(sourceOf(pastedSession), "other");
+  assert.equal(responseLines.filter((l) => l.startsWith(`${panelSession},`)).length, 16);
 
   // 9. Bad input is a plain 422 or 404, never a 500.
   at("bad input");
@@ -403,18 +554,6 @@ try {
   console.log(`worker e2e: ${sections} sections passed against wrangler dev on port`, PORT);
 } finally {
   if (rain) rain.close();
-  if (dev) {
-    dev.kill("SIGTERM");
-    await new Promise((resolve) => {
-      const hard = setTimeout(() => {
-        dev.kill("SIGKILL");
-        resolve();
-      }, 5000);
-      dev.on("exit", () => {
-        clearTimeout(hard);
-        resolve();
-      });
-    });
-  }
+  for (const proc of running) await stopDev(proc);
   clearTimeout(watchdog);
 }

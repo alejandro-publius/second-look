@@ -21,7 +21,7 @@ import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
 import { isDemo, walkBundle } from "../src/core/walks";
-import { stripJpeg } from "../src/uploads";
+import { storeUpload, stripJpeg } from "../src/uploads";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
@@ -247,4 +247,25 @@ test("uploads: a JPEG that breaks the shape is refused, not copied with its meta
   assert.throws(() => stripJpeg(noEnd), /could not be read/);
   const cut = Uint8Array.from([...p.soi, 0xff, 0xe1, 0x40, 0x00, ...[..."Exif"].map((c) => c.charCodeAt(0))]);
   assert.throws(() => stripJpeg(cut), /could not be read/);
+});
+
+// Hard rule 8 on the Worker (review REVIEW_03 R20): an upload is deleted after 30 days by KV's own
+// expiry, set when the photo is stored, so nothing has to run to keep the promise.
+test("uploads: a stored photo is put in KV to expire after 30 days", async () => {
+  const p = jpegParts;
+  const puts: { key: string; options: { expirationTtl?: number } }[] = [];
+  const env = {
+    PHOTOS: {
+      put: async (key: string, _value: unknown, options: { expirationTtl?: number }) => {
+        puts.push({ key, options });
+      },
+    },
+    DB: { prepare: () => ({ bind: () => ({ run: async () => ({}) }) }) },
+  } as unknown as Parameters<typeof storeUpload>[0];
+  const form = new FormData();
+  form.append("file", new Blob([Uint8Array.from([...p.soi, ...p.app0, ...p.exif, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi])], { type: "image/jpeg" }), "photo.jpg");
+  const stored = await storeUpload(env, new Request("http://127.0.0.1/api/upload", { method: "POST", body: form }), "2026-09-24T10:00:00Z");
+  assert.equal(puts.length, 1);
+  assert.equal(puts[0].key, `photo:${stored.photo_id}`);
+  assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
 });

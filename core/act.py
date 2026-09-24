@@ -160,7 +160,10 @@ def findings_from_visits(
                 passed.append(token)
             visit_ids = row["visits"]
             assert isinstance(visit_ids, list)
-            visit_ids.append(v.visit_id)
+            # Two form items can name one feature (both pipe items are pipe_running), and one
+            # visit that answers both is still one visit (review REVIEW_03 R32, REVIEW_02 F82).
+            if v.visit_id not in visit_ids:
+                visit_ids.append(v.visit_id)
             first, last = row["first"], row["last"]
             assert isinstance(first, date) and isinstance(last, date)
             row["first"] = min(first, day)

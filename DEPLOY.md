@@ -108,7 +108,7 @@ deploys to https://depth.second-look-79t.pages.dev.
 | `session` | one two-minute test sitting |
 | `response` | one answer to one test photo in a sitting |
 | `observer` | a kept score, under a random contributor token, not linked to the sitting |
-| `skeleton_ping` | the first deploy's proof that a row can be written and read back |
+| `skeleton_ping` | the first deploy's proof that a row can be written and read back; no route writes it since Sep 24 |
 | `spot` | a place on a creek, with its reach and creek, coarse unless the person placed the pin |
 | `visit` | one creek check or quick check at a spot |
 | `check_result` | one follow-up question a visit asked, and the answer |
@@ -192,6 +192,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `PHOTOS` | the KV namespace for photos | `worker/src/index.ts` | where uploaded photo bytes live, each with a 30 day expiry |
 | `ALLOWED_ORIGIN` | not set, which means `*` | `worker/src/index.ts` | the Worker's CORS origin; the site calls it on its own origin, so CORS is not used there |
 | `RAIN_URL` | not set, which means Open-Meteo | `worker/src/index.ts` | where the Worker asks about rain; the e2e points it at a stub |
+| `E2E_NOW` | not set, which means the real clock | `worker/src/index.ts` | a fixed time for judge mode's lock, set only by `worker/test/e2e.mjs` on its local Workers so both sides of the lock are tested; never set on a deployed Worker (`scripts/tests/test_worker_lock.py`) |
 | `API` | the Worker `second-look-api` | `apps/web/functions/api/[[path]].js`, `apps/web/functions/health.js` | the Pages Functions' service binding (`apps/web/wrangler.jsonc`) |
 | `NEXT_PUBLIC_API_ORIGIN` | `http://localhost:8000` | `apps/web/lib/api.ts`, `apps/web/next.config.ts`, `apps/web/scripts/build-headers.mjs` | where the site calls the API; empty means the same origin. Baked in at build time |
 | `NEXT_PUBLIC_SITE_URL` | `https://second-look.example` | `apps/web/lib/session.ts`, `scripts/submit_check.py` | the site's own address, for share links |

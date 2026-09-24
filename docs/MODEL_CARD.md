@@ -187,6 +187,7 @@ and Haiku 4.5 on plants
 The gate's own tests throw arbitrary output at it, including huge numbers, deep nesting, a
 million candidates and every Unicode direction control
 (`core/tests/test_harden_gate_properties.py::test_the_gate_never_raises_and_leaves_its_inputs_as_they_were`,
+`core/tests/test_harden_gate_properties.py::test_a_note_with_any_unicode_direction_control_is_dropped`,
 `core/tests/test_harden_gate_properties.py::test_a_flood_of_a_million_drops_everything`). How the
 whole path works, step by step, is in the README under "The gate, the heart of it".
 

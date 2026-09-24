@@ -594,6 +594,17 @@ def act_vectors(
             findings("without the form mapping a pipe item is not a finding key", visits_two, None),
             findings("form item keys map to features, coarse spot apart", mixed, finding_key_for),
             findings(
+                "one visit answering both pipe items is one visit",
+                [
+                    visit(
+                        "v14",
+                        "alicetoken23456",
+                        answers={"draining_pipes": "present", "sewage_discharge": "present"},
+                    )
+                ],
+                finding_key_for,
+            ),
+            findings(
                 "absent and cant tell are not findings",
                 [
                     visit(

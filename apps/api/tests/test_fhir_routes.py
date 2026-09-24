@@ -120,6 +120,9 @@ def test_two_fetches_theirs_once_then_serves_the_cache(client: TestClient) -> No
     assert body["theirs"]["code"]["coding"][0]["code"] == "dissolved-oxygen"
     assert body["ours"]["resourceType"] == "Observation"
     assert body["ours"]["code"]["coding"][0]["system"] == SL_SYSTEM, "golden feature answer"
+    # No visit is stored, so ours is the hand-made golden visit, and the route says so (R33).
+    assert body["ours_example"] is True
+    assert body["ours_place"] == "Strawberry Creek, campus reach, spot 1"
     assert body["fetched_at"].endswith("Z")
     request = route.calls.last.request
     assert request.headers["User-Agent"] == (
@@ -160,8 +163,10 @@ def test_two_prefers_our_latest_stored_observation(client: TestClient) -> None:
         return_value=httpx.Response(200, json=search_bundle(their_observation()))
     )
     fhir_store.save_visit_bundle(make_visit("visit-0009", "spot-9"))
-    ours = client.get("/api/two").json()["ours"]
-    assert ours["id"] == "sl-obs-visit-0009-bank-type"
+    body = client.get("/api/two").json()
+    assert body["ours"]["id"] == "sl-obs-visit-0009-bank-type"
+    assert body["ours_example"] is False, "a stored visit is a volunteer's answer, not the example"
+    assert body["ours_place"] == "Strawberry Creek, campus reach, spot 1"
 
 
 @respx.mock

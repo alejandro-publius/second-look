@@ -36,7 +36,7 @@ export function TwoObservers() {
     <div className="stack">
       <FocusHeading>{t("two.title")}</FocusHeading>
       {lead ? <p>{lead}</p> : null}
-      <p>{t("two.intro")}</p>
+      <p>{data?.ours_example ? t("two.intro_example") : t("two.intro")}</p>
       {state === "loading" ? (
         <p role="status" className="muted">
           {t("spot.loading")}
@@ -53,7 +53,15 @@ export function TwoObservers() {
             <p className="small muted">{t("two.cached", { when: readableTime(data.fetched_at) || data.fetched_at })}</p>
           ) : null}
           {data.theirs ? <RecordCard observation={data.theirs} heading={t("two.theirs")} performer={t("two.performer_theirs")} /> : null}
-          <RecordCard observation={data.ours} heading={t("two.ours")} performer={t("two.performer_ours")} />
+          {/* With no creek check stored, the API sends the golden visit, which was made by hand,
+              and says so: it is labelled here and never passed off as a volunteer's answer. */}
+          <RecordCard
+            observation={data.ours}
+            heading={t("two.ours")}
+            performer={t("two.performer_ours")}
+            place={data.ours_place}
+            note={data.ours_example ? t("two.example") : undefined}
+          />
         </>
       ) : null}
     </div>

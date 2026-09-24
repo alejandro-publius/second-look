@@ -8,7 +8,7 @@ origin. The **Python API** (`apps/api/`, FastAPI) is the reference: the tests, t
 
 `scripts/api_inventory.py` reads both route lists out of the code, and
 `scripts/tests/test_api_docs.py` fails when a route has no row below, or a row has no route.
-The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->26<!--/v--> routes
+The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes
 and the Python API <!--v:results/api_inventory.json#/python/count-->26<!--/v-->
 (`results/api_inventory.json`).
 
@@ -25,7 +25,6 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | Method | Path | What it does | What it stores | Limit or lock |
 |---|---|---|---|---|
 | any | `/health` | Says the API is up. The landing page calls it to wake the Worker. | nothing | none |
-| any | `/api/skeleton` | The first deploy's proof: writes one row and reads it back with the row count. | one `skeleton_ping` row: a note and the time | none |
 | any | `/api/content/hash` | The hash of the test content the Worker serves. | nothing | none |
 | POST | `/api/test/session` | Starts a two-minute test sitting: takes the next pre-registered arm and a shuffled item order. | a `session` row (arm, item order, consent version, hashes, coarse device class, source label, a hash of a random browser token) | the `x-qa-key` header, when it matches `QA_KEY`, marks the sitting as a test so it never counts |
 | POST | `/api/test/response` | Stores one answer to one test photo. The first answer stays; a different second one gets 409. | a `response` row (item, yes, no or can't tell, timing, position) | none |
@@ -48,7 +47,7 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | any | `/api/fhir/validation` | The last HL7 validator run (`results/fhir_validation.json`). | nothing | none |
 | any | `/api/fhir/referral/{spot_id}` | A ServiceRequest for a pipe on the worth testing list, made on request from stored visits. | nothing | none |
 | any | `/api/fhir/referral/{spot_id}/example-result` | How a laboratory result would come back to that pipe. Tagged and labelled EXAMPLE. | nothing | none |
-| any | `/api/two` | One of our Observations beside one laboratory Observation from their sandbox, read from the copy `scripts/cache_their_records.py` stored. | nothing | none |
+| any | `/api/two` | One of our Observations beside one laboratory Observation from their sandbox, read from the copy `scripts/cache_their_records.py` stored. Ours is from the latest stored visit; with none stored, it is the golden visit, made by hand, and `ours_example` is true so the page labels it an example. `ours_place` names the place. | nothing | none |
 | GET | `/api/inaturalist/{creek}` | The iNaturalist context line for one creek: research-grade sightings of plants on the region's invasive list near its spots, read from the copy `scripts/cache_inaturalist.py` stored, with the fetch time. The sightings are withheld until the creek's record answers the invasive plant question. Context only: nothing counts it and nothing decides from it. | nothing | none |
 
 ## The Python API (reference)

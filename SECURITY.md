@@ -112,8 +112,7 @@ is Cloudflare's rate limiting rules at the edge, which never hand an address to 
 
 ## Known gaps
 
-- The Worker's routes are open to anyone, with no rate limit, as above. `GET /api/skeleton`, the
-  first deploy's proof, writes one small row each time it is called.
+- The Worker's routes are open to anyone, with no rate limit, as above.
 - Without `ALLOWED_ORIGIN` set, the Worker answers any origin for CORS. The site reaches it on its
   own origin, and nothing it serves needs a login, so CORS is not what protects it.
 - On the Python API, `/health`, `/api/skeleton/ping`, `/api/two` and the three FHIR record routes

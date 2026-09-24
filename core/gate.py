@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import math
+import unicodedata
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import Any
@@ -106,6 +107,7 @@ def _passed_features(pass_table: object, model_id: object) -> set[str] | None:
 BIDI_CONTROLS = "".join(
     chr(c)
     for c in (
+        0x061C,
         0x200E,
         0x200F,
         0x202A,
@@ -133,10 +135,17 @@ def _read_note(value: object) -> tuple[str | None, str | None]:
         return None, "note is empty"
     if len(note) > NOTE_MAX_CHARS:
         return None, f"note too long: {len(note)} characters, {NOTE_MAX_CHARS} at most"
-    if any(ch.isspace() and ch != " " for ch in note) or any(ord(ch) < 32 for ch in note):
+    # Every control character, DEL and the C1 range included, not only those below 32; then every
+    # invisible format character, which is where the text direction controls live (review
+    # REVIEW_03 R13). The direction controls keep their own reason, so a log says which it was.
+    if any(ch.isspace() and ch != " " for ch in note) or any(
+        unicodedata.category(ch) == "Cc" for ch in note
+    ):
         return None, "note has line breaks or control characters"
     if any(ch in note for ch in BIDI_CONTROLS):
         return None, "note has text direction controls"
+    if any(unicodedata.category(ch) == "Cf" for ch in note):
+        return None, "note has invisible format characters"
     if any(ch in note for ch in "<>"):
         return None, "note has angle brackets"
     return note, None

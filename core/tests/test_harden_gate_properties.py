@@ -583,10 +583,6 @@ def test_extra_keys_never_survive_and_kept_values_are_the_candidates_own(
         assert_flag_comes_from(flag, candidates[position - 1])
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="bug: the note check stops control characters below 32 only, so DEL and C1 pass",
-)
 def test_a_note_with_any_control_character_is_dropped() -> None:
     controls = [chr(c) for c in (*range(0x20), *range(0x7F, 0xA0))]
     assert all(unicodedata.category(ch) == "Cc" for ch in controls), "the whole Cc category"
@@ -594,10 +590,6 @@ def test_a_note_with_any_control_character_is_dropped() -> None:
     assert kept == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="bug: BIDI_CONTROLS lacks U+061C ARABIC LETTER MARK, so it reaches a person",
-)
 def test_a_note_with_any_unicode_direction_control_is_dropped() -> None:
     kept = [
         f"U+{code:04X}"

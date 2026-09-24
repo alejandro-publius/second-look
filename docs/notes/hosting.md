@@ -79,8 +79,9 @@ R2 was not used, because it asks for a card. Creek check photos go to KV after d
 
 ## P1, measured on the deployed site
 
-- One row written to the production database and read back: `GET /api/skeleton` returns what it
-  wrote plus the row count, out of D1.
+- One row written to the production database and read back: `GET /api/skeleton` returned what it
+  wrote plus the row count, out of D1. That probe was removed on Sep 24 (review REVIEW_03 R02): it
+  wrote a row on any request, a GET included, and counted the whole table each time.
 - First screen on a throttled 4G profile with a 4x slower CPU: **load 1428 ms, largest paint
   760 ms**, against a pass line of 3 seconds. Unthrottled time to first byte was 0.26 s cold and
   0.14 s warm over three tries.

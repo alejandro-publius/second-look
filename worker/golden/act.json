@@ -753,6 +753,91 @@
       "name": "form item keys map to features, coarse spot apart"
     },
     {
+      "expected": [
+        {
+          "feature": "pipe_running",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-22",
+          "observers": [
+            "alicetoken23456"
+          ],
+          "passed_observers": [
+            "alicetoken23456"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v14"
+          ]
+        }
+      ],
+      "input": {
+        "finding_key_for": {
+          "bank_type": "artificial_bank",
+          "draining_pipes": "pipe_running",
+          "invasive_species": "invasive_plant",
+          "invasive_which": "invasive_plant",
+          "sewage_discharge": "pipe_running"
+        },
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "draining_pipes": "present",
+              "sewage_discharge": "present"
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v14"
+          }
+        ]
+      },
+      "name": "one visit answering both pipe items is one visit"
+    },
+    {
       "expected": [],
       "input": {
         "finding_key_for": {

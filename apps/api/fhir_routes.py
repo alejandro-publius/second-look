@@ -152,21 +152,43 @@ def _observations(bundle: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
-def ours() -> dict[str, Any] | None:
-    """One of our Observations: a feature answer from the latest stored visit, else the golden."""
+def _place_of(bundle: dict[str, Any], obs: dict[str, Any] | None) -> str | None:
+    """The name of the Location an Observation is about, from the same Bundle, not its raw id."""
+    reference = str((obs or {}).get("subject", {}).get("reference", ""))
+    if not reference.startswith("Location/"):
+        return None
+    wanted = reference.removeprefix("Location/")
+    for e in bundle.get("entry", []):
+        r = e.get("resource", {})
+        if r.get("resourceType") == "Location" and r.get("id") == wanted:
+            name = r.get("name")
+            return name if isinstance(name, str) else None
+    return None
+
+
+def ours() -> tuple[dict[str, Any] | None, bool, str | None]:
+    """One of our Observations: a feature answer from the latest stored visit.
+
+    With no visit stored, the golden visit, which was made by hand for this demo. The second value
+    says so, so the page can label it and never pass it off as a volunteer's answer (review
+    REVIEW_03 R33). The third is the name of the place the Observation is about.
+    """
     bundle: dict[str, Any] | None = None
     latest = fhir_store.latest_visit_id()
     if latest:
         bundle = fhir_store.load_visit_bundle(latest)
+    example = bundle is None
     if bundle is None and GOLDEN_BUNDLE.exists():
         bundle = json.loads(GOLDEN_BUNDLE.read_text(encoding="utf-8"))
     if bundle is None:
-        return None
+        return None, example, None
     observations = _observations(bundle)
+    pick = observations[0] if observations else None
     for obs in observations:
         if obs.get("code", {}).get("coding", [{}])[0].get("system") == SL_SYSTEM:
-            return obs
-    return observations[0] if observations else None
+            pick = obs
+            break
+    return pick, example, _place_of(bundle, pick)
 
 
 @router.get("/api/spot/{spot_id}/fhir")
@@ -200,8 +222,11 @@ def validation() -> dict[str, Any]:
 def two() -> dict[str, Any]:
     """One volunteer Observation of ours beside one lab Observation from their sandbox."""
     their_observation, status, fetched_at = theirs()
+    observation, example, place = ours()
     return {
-        "ours": ours(),
+        "ours": observation,
+        "ours_example": example,
+        "ours_place": place,
         "theirs": their_observation,
         "theirs_status": status,
         "fetched_at": fetched_at.isoformat().replace("+00:00", "Z"),

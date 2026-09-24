@@ -310,6 +310,10 @@ export interface SpotPlace {
 
 export interface TwoOut {
   ours: FhirObservation;
+  /** True when no creek check is stored and `ours` is the golden visit, made by hand for the demo. */
+  ours_example?: boolean;
+  /** The name of the place `ours` is about, read from its record. */
+  ours_place?: string | null;
   theirs: FhirObservation | null;
   theirs_status: "ok" | "cached" | "down";
   fetched_at: string;

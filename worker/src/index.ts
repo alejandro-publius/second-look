@@ -26,6 +26,9 @@ export interface Env {
   // Where the dry pipe rule asks about rain. Open-Meteo by default; the e2e run points it at a
   // stub, because a question that depends on today's weather cannot be tested against the sky.
   RAIN_URL?: string;
+  // A fixed time for judge mode's lock, for the local e2e run only (worker/test/e2e.mjs), so both
+  // sides of the lock are tested on every run. No deployed config sets it; see lockClock.
+  E2E_NOW?: string;
 }
 
 const DATA_LOCK_UTC = Date.parse("2026-09-28T01:00:00Z");
@@ -448,15 +451,6 @@ export default {
 
     if (path === "/health") return json(env, { status: "ok" });
 
-    // P1's walking skeleton: one row written to the production database and read back.
-    if (path === "/api/skeleton") {
-      const note = `p1 ${nowIso()}`;
-      await env.DB.prepare("INSERT INTO skeleton_ping (note, created_at) VALUES (?, ?)").bind(note, nowIso()).run();
-      const back = await env.DB.prepare("SELECT id, note, created_at FROM skeleton_ping ORDER BY id DESC LIMIT 1").first();
-      const total = await env.DB.prepare("SELECT COUNT(*) AS n FROM skeleton_ping").first<{ n: number }>();
-      return json(env, { wrote: note, read_back: back, rows: Number(total?.n ?? 0) });
-    }
-
     if (path === "/api/content/hash") return json(env, { content_hash: CONTENT.content_hash, build_hash: "worker" });
 
     // The judge facing endpoints (Update 10 answer A3): the creek check, the record, the city view,
@@ -540,7 +534,7 @@ export default {
       if (path === "/api/demo/answer" && request.method === "POST") {
         // Shut until the data lock, as the page says (review finding F86): before it, sixteen of
         // these would hand anyone the live test's answer key.
-        if (Date.now() < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
+        if (lockClock(env) < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
         const gold = GOLD[String(body.item_id ?? "")];
         if (!gold) return json(env, { detail: "We do not know that test item." }, 404);
         // Only whether they were right. The gold label itself never leaves the server.
@@ -552,6 +546,16 @@ export default {
     return json(env, { detail: "Not found." }, 404);
   },
 };
+
+/** The time judge mode's lock is read against: the real clock, unless E2E_NOW holds a time. Only
+ *  worker/test/e2e.mjs sets it, on wrangler dev --local, so the shut side and the open side both
+ *  run on every e2e run, whatever the day (review REVIEW_03 R52). worker/wrangler.jsonc never sets
+ *  it, and scripts/tests/test_worker_lock.py fails if it does. The study's own post_lock mark in
+ *  createSession reads the real clock and is untouched. */
+function lockClock(env: Env): number {
+  const fixed = env.E2E_NOW === undefined ? Number.NaN : Date.parse(env.E2E_NOW);
+  return Number.isFinite(fixed) ? fixed : Date.now();
+}
 
 /** The plain errors the check code raises become the same answers the Python API gives. */
 function errorResponse(env: Env, err: unknown): Response {
