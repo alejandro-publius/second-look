@@ -86,7 +86,7 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 | D16 | Running locally with offline demo data, every `make` target it names real | CHECK | | | | `uv run python scripts/done_items.py run-locally` |
 | D17 | The tests paragraph with counts traced to `results/` | CHECK | | | | `uv run python scripts/done_items.py tests-paragraph && uv run python scripts/verify_claims.py --synthetic` |
 | D18 | `DEPLOY.md` and a configuration table whose settings a config or code file uses | CHECK | | | | `uv run python scripts/done_items.py deploy-doc` |
-| D19 | 8 to 10 ADRs in `docs/adr`, each with status, context, decision and consequences | CHECK | | | | `uv run python scripts/done_items.py adrs` |
+| D19 | 8 or more ADRs in `docs/adr` (UPDATE_24 asked 8 to 10; UPDATE_29 adds one), each with status, context, decision and consequences | CHECK | | | | `uv run python scripts/done_items.py adrs` |
 | D20 | Dependabot for Python, npm (`apps/web` and `worker`) and GitHub Actions | CHECK | | | | `uv run python scripts/done_items.py dependabot` |
 | D21 | pre-commit, running ruff and the dash check | CHECK | | | | `uv run python scripts/done_items.py precommit` |
 | D22 | Up to 12 topics on GitHub: 8 to 12 | CHECK | | | | `n=$(gh repo view alejandro-publius/second-look --json repositoryTopics --jq '.repositoryTopics \| length') && [ "$n" -ge 8 ] && [ "$n" -le 12 ]` |

@@ -649,7 +649,8 @@ def test_adrs_count_and_parts(repo: Path) -> None:
     assert has(di.check_adrs(repo), "7 numbered ADRs")
     for n in range(8, 12):
         write(repo, f"docs/adr/{n:04d}-decision-{n}.md", ADR.format(n=n))
-    assert has(di.check_adrs(repo), "11 numbered ADRs")
+    # Eleven is fine: UPDATE_29 adds the iNaturalist record to UPDATE_24's 8 to 10.
+    assert not has(di.check_adrs(repo), "numbered ADRs")
 
 
 def test_dependabot_covers_every_ecosystem_and_folder(repo: Path) -> None:
