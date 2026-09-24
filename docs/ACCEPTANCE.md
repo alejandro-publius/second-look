@@ -10,7 +10,7 @@ offline, with no API key, with `make reproduce` (row 16) as well, and prints a s
 
 ```
 uv sync
-cd apps/web && npm install && cd ../..
+(cd apps/web && npm ci && npx playwright install chromium) && (cd worker && npm ci) && (cd tools/diagrams && npm ci)
 export JAVA17_HOME=/opt/homebrew/opt/openjdk@17   # the FHIR validator needs Java 17
 ```
 

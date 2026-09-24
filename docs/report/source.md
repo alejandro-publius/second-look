@@ -23,7 +23,7 @@ answer can't tell when no stream is in view. On
 {{claim:results/footage_latest.json#/gate/candidates}} candidate flags, each on a feature that model
 had not passed. The HL7 validator found {{claim:results/fhir_validation.json#/errors}} errors in
 {{claim:results/fhir_validation.json#/files_validated}} records checked against OneAquaHealth's
-guide. No study with recruited people has been run, and this report makes no claim about people.
+guide. No person has taken the test yet, and this report makes no claim about people; a paid research panel may add sessions before the lock, and they would be reported once, after it.
 
 ## 1. The problem
 

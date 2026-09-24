@@ -13,8 +13,8 @@ It tells them this person noticed that feature four times out of four on known p
 Proof: README, Known weaknesses, where the numbers are checked against the file; `results/consensus_coarseness.json` and its table `results/consensus_coarseness.md`, both marked SYNTHETIC, written by `evals/consensus_coarseness.py` (`make consensus-check` reruns it); `docs/analysis_plan.md` item 11. This page quotes no number from them because this page cites real results only. The older `results/consensus_synthetic.json` used an earlier weighting rule that is biased on a set this small, so it is not the proof and we do not quote it.
 
 **3. Who set the right answers, and how do you know they are right?**
-One labeller, Alex Velazquez, from written definitions and from what each photo's own source says about it. No second labeller was available, so there is no agreement figure. That is listed as a weakness, not hidden.
-Proof: `docs/analysis_plan.md` item 3; `photos/manifest.csv` column `label_evidence`.
+The key came from the picks file Alex Velazquez wrote with the planner, a Claude chat (commit 81e62ed), with each photo's own source as evidence. There is one labeller and no blind label yet, so read every accuracy figure as agreement with this key; the models graded against it are Claude models. That is listed as a weakness and as a deviation, not hidden.
+Proof: `docs/DATA_CARD.md`; `docs/deviations.md`; `photos/manifest.csv` column `label_evidence`.
 
 **4. "Invasive" depends on where you are. Whose list?**
 The Bay Area list from the Cal-IPC Inventory. Every plant we call invasive is on it, and the region file is swappable per city.
@@ -62,7 +62,7 @@ Proof: `content/approved_sentences.yaml`; CLAUDE.md hard rule 5; `core/tests/tes
 ## Digital health and outreach
 
 **13. Did the lesson actually help people?**
-We do not know yet and we will not pretend. Recruitment was dropped. Sessions that arrive through the public link are reported as a description with their count, and nothing depends on them.
+We do not know yet and we will not pretend. The tagged plan did not plan recruitment; a paid research panel may add sessions before the lock on Sep 28 if Alex launches it, a logged deviation. After the lock the pre-registered analysis runs once: with at least 20 finished sessions per arm it makes its one confirmatory test, with fewer it reports a description with counts, and nothing else depends on them.
 Proof: `docs/analysis_plan.md` item 7; `docs/deviations.md`.
 
 **14. Is the health advice safe?**

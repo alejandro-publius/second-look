@@ -245,7 +245,10 @@ if (process.env.SKIP_TAP !== "1") {
   } else {
     const run = spawnSync("npx", ["playwright", "test", "tests/design.spec.ts", "--reporter=line"], { cwd: web, encoding: "utf8", env: { ...process.env, PW_REUSE: "1" } });
     const out = `${run.stdout}${run.stderr}`;
-    if (run.status !== 0) {
+    if (run.status !== 0 && /Executable doesn't exist|playwright install/.test(out)) {
+      // A missing browser is a setup step, not a failed measurement: say which one.
+      fails.push("apps/web:1 Playwright's Chromium is not installed: run (cd apps/web && npx playwright install chromium)");
+    } else if (run.status !== 0) {
       fails.push("apps/web/tests/design.spec.ts:1 tap target measurement failed");
       console.log(out.split("\n").filter((l) => l.trim()).slice(-25).join("\n"));
       tapNote = "FAILED";

@@ -9,7 +9,7 @@ Deadline: Wednesday Sep 30, 2026, 18:00 PDT. Repo public first, then the incogni
 | Check | What passes | Today |
 |---|---|---|
 | track_statement | The first line of README.md equals docs/track_statement.md word for word | pass |
-| five_headers | README.md has the organizers' five headers in order: The problem; How the solution aligns with OneAquaHealth; Innovation and practical value; Effective use of data, technology, AI, APIs and standards; A clear demonstration of what was built | pass |
+| five_headers | docs/devpost.md has the organizers' five headers in order, and README.md names each in its map line: The problem; How the solution aligns with OneAquaHealth; Innovation and practical value; Effective use of data, technology, AI, APIs and standards; A clear demonstration of what was built | pass |
 | video_link | A line with the word "video" and a link exists in README.md and docs/devpost.md | fails until the video is uploaded |
 | video_duration | With `--video path.mp4`, ffprobe says 180 to 300 seconds; skipped with a sentence when no file is given | skipped |
 | license | LICENSE exists and says MIT | pass |

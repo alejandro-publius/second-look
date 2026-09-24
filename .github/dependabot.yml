@@ -1,6 +1,7 @@
 # Weekly update pull requests for every package manager in the repository, a few at a time. Each
 # one runs the same make check as any other pull request and is merged by a person, never
-# automatically. DEPLOY.md, "Dependabot".
+# automatically. DEPLOY.md, "Dependabot". Minor and patch updates come as one pull request per
+# folder; major versions wait until judging ends on Oct 15, since each needs its own review.
 version: 2
 updates:
   - package-ecosystem: "uv"
@@ -8,21 +9,45 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/apps/web"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/worker"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

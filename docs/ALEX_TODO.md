@@ -26,7 +26,8 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
 
 3. **By Sat Sep 26 evening, 15 minutes: launch the panel study.** Make a researcher account on
    Prolific, add about 300 dollars, create the study from `docs/internal/PANEL_STUDY.md` (every
-   field is written out there, the link and the completion code too) and publish it. It runs by
+   field is written out there, the link and the completion code too) and publish it. The panel
+   asks about ethics approval: its step 3 says what to check first. It runs by
    itself; `make panel-status` shows how many have finished.
 
 4. **By Sat Sep 26, 2 minutes: the social preview.** On GitHub, Settings, General, Social preview,

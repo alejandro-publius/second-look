@@ -67,10 +67,18 @@ def library_entry(
                 "title": "Provenance of one mirrored visit on this server",
             }
         )
+    # Berkeley has not adopted the method: the project runs it there the way a follower city
+    # would (critic round 01, C04). The worked visit it mirrors is made by hand, and says so.
+    example = (
+        " The worked visit at Strawberry Creek among them is a hand-made example."
+        if n_records
+        else ""
+    )
     words = (
-        f"Second Look data set: citizen creek checks from Berkeley, a follower city, with the "
-        f"observer's per feature test score carried on every observation. {n_records} visit "
-        f"records mirrored to this server. The repository holds the code, the FSH and the tests."
+        f"Second Look data set: creek checks from Berkeley, run the way a follower city would, "
+        f"with the observer's per feature test score carried on every observation. {n_records} "
+        f"visit records mirrored to this server.{example} The repository holds the code, the FSH "
+        f"and the tests."
     )
     return {
         "resourceType": "Library",
@@ -98,7 +106,7 @@ def library_entry(
         },
         "date": today.isoformat(),
         "publisher": "Second Look project",
-        "author": [{"name": "Second Look project, Berkeley, a follower city"}],
+        "author": [{"name": "Second Look project, Berkeley"}],
         "description": words,
         "copyright": "Code MIT. Photos and copy CC BY 4.0. No personal data: observers are "
         "known only by a hash of a random token.",

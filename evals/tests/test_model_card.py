@@ -35,12 +35,28 @@ def fixture(tmp_path: Path, *, stamp: str = STAMP, real: bool = True) -> Path:
         json.dumps({"generated_at_utc": stamp, "real": real, "answers": answers})
     )
     lines = [
-        {"real": True, "purpose": "footage", "cost_usd": 0.25, "ts_utc": "2026-09-24T06:00:00Z"},
-        {"real": True, "purpose": "footage", "cost_usd": 0.5, "ts_utc": "2026-09-24T03:00:00Z"},
+        {
+            "real": True,
+            "purpose": "footage",
+            "cost_usd": 0.25,
+            "ts_utc": "2026-09-24T06:00:00Z",
+            "model": "m1",
+        },
+        {
+            "real": True,
+            "purpose": "footage",
+            "cost_usd": 0.5,
+            "ts_utc": "2026-09-24T03:00:00Z",
+            "model": "m1",
+        },
         {"real": True, "purpose": "benchmark", "cost_usd": 1.0, "ts_utc": "2026-09-24T04:00:00Z"},
         {"real": False, "purpose": "benchmark", "cost_usd": 9.0, "ts_utc": "2026-09-22T00:00:00Z"},
     ]
     (results / "cost_log.jsonl").write_text("".join(json.dumps(r) + "\n" for r in lines))
+    (tmp_path / "content").mkdir()
+    golds = ["present", "present", "absent", "absent", "absent"]
+    items = "".join(f"  - {{ id: t{i}, gold: {g} }}\n" for i, g in enumerate(golds))
+    (tmp_path / "content" / "test_items.yaml").write_text("items:\n" + items)
     return tmp_path
 
 
@@ -81,6 +97,8 @@ def test_only_real_calls_are_summed_and_the_fake_ones_are_counted_apart(tmp_path
     assert spent["first_real_call_utc"] == "2026-09-24T03:00:00Z"
     assert spent["last_real_call_utc"] == "2026-09-24T06:00:00Z"
     assert spent["log"] == "results/cost_log.jsonl"
+    # One footage call, by model, in cents: (0.25 + 0.5) / 2 dollars.
+    assert spent["footage_cents_per_call"] == {"m1": 37.5}
 
 
 def bench(real: bool, correct: int) -> dict[str, Any]:
@@ -93,6 +111,8 @@ def bench(real: bool, correct: int) -> dict[str, Any]:
             "m1": {
                 "all": {"correct": correct, "n": 12, "wilson_95": [0.552, 0.953]},
                 "pipe_running": {"correct": 0, "n": 12, "wilson_95": [0.0, 0.2425]},
+                "invasive_plant": {"correct": 0, "n": 12, "wilson_95": [0.0, 0.2425]},
+                "artificial_bank": {"correct": 9, "n": 12, "wilson_95": [0.5, 0.9]},
                 "cant_tell_share": 0.2708,
                 "malformed": 0,
             }
@@ -114,8 +134,13 @@ def test_the_newest_real_benchmark_is_copied_with_intervals_in_whole_percent(
     assert block["models"]["m1"] == {
         "all": {"correct": 10, "n": 12, "low_pct": 55, "high_pct": 95},
         "pipe_running": {"correct": 0, "n": 12, "low_pct": 0, "high_pct": 24},
+        "invasive_plant": {"correct": 0, "n": 12, "low_pct": 0, "high_pct": 24},
+        "artificial_bank": {"correct": 9, "n": 12, "low_pct": 50, "high_pct": 90},
         "cant_tell_pct": 27,
+        # Right answers on everything but the plant photos, and the floor of always answering No.
+        "without_plants": {"correct": 9, "n": 24},
     }
+    assert block["always_no"] == {"correct": 9, "n": 15}
 
 
 def test_no_real_benchmark_gives_none(tmp_path: Path) -> None:

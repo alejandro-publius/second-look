@@ -1,6 +1,6 @@
 # Judge scorecard
 
-The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
+The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin, as of 2026-09-24. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
 
 ## Impact and alignment with the OneAquaHealth mission (30%)
 
@@ -9,12 +9,12 @@ Our mark: strong. The per-feature score travels with every observation in their 
 
 | What to look at | Where |
 |---|---|
-| The problem, in the project lead's own words: volunteers miss built banks, dug-out channels and invasive plants | README, The problem |
+| The problem, in the project lead's own words: volunteers miss built banks, dug-out channels and invasive plants | the README's first lines; `docs/devpost.md`, The problem |
 | The score travels with every observation: the test sitting's QuestionnaireResponse holds it, a dated Practitioner qualification names the test, and Provenance links both to every Observation | `fhir/golden/visit-strawberry-creek-1.json`; `/spot` |
 | City actions are OneAquaHealth's own restoration measures, from their Policy Brief (2026), page 9 | `/city?creek=strawberry-creek`; README |
 | One action each for the person, the pet and the city, from approved sentences with sources | `content/approved_sentences.yaml`; the health card on `/spot` |
 
-Thin: no recruited study, so no measured effect of the lesson on people. Said in Known weaknesses.
+Thin: no person has taken the test yet, so there is no measured effect of the lesson on people. A paid research panel may add sessions before the data lock on Sep 28, if Alex launches it; they would count in the one pre-registered analysis, reported whatever it shows. Said in README, Known weaknesses.
 
 ## Innovation and creativity (20%)
 
@@ -23,16 +23,16 @@ Our mark: strong. Testing observers is old in professional surveys; doing it in 
 
 | What to look at | Where |
 |---|---|
-| A volunteer is tested per feature and the score is stored with the data, like a lab's quality checks | README, Innovation and practical value |
+| A volunteer is tested per feature and the score is stored with the data, like a lab's quality checks | README, Why trust a volunteer, and the AI?; `docs/devpost.md`, Innovation and practical value |
 | The AI takes the same test and may only speak on a feature it passed | `core/gate.py`; `results/model_pass_table.json` |
 | Follow-ups chosen by code from answers, scores and the weather, two at most | `core/followups.py`; `/check` |
 | The whole loop from a desk: a clip of a creek in another country, the same check, a record made on the phone and never stored | `/walk`; `core/walks.py`; `content/walks.yaml` |
 
-Thin: the model results arrive with the paid run (`uv run python evals/model_sweep.py --real`).
+Thin: the AI is held to the same test, and no model passed plants that do not belong, so the checker never speaks on plants; four photos per feature is a small test (README, Numbers at a glance; `docs/MODEL_CARD.md`).
 
 ## Technical implementation (20%)
 
-Our mark: strong, with the AI numbers still to come from the paid run.
+Our mark: strong. The paid model run is done and every AI number is graded again from its raw replies by `make reproduce`.
 
 
 | What to look at | Where |
@@ -53,7 +53,7 @@ Our mark: partial. English only, and the form's wording waits on a check against
 
 | What to look at | Where |
 |---|---|
-| Two minutes, no camera, any phone | https://second-look-79t.pages.dev |
+| No camera, any phone: the test takes about four minutes with its lesson | https://second-look-79t.pages.dev |
 | One question per screen at the creek | `/check` |
 | Reading age measured on every string in CI | `make readability` |
 | Tap targets and contrast measured in CI | `make design-check` |
@@ -67,7 +67,7 @@ Our mark: strong. Free to run, a follower city scaffolds in seconds, and a city 
 
 | What to look at | Where |
 |---|---|
-| OneAquaHealth's five steps for a follower city, run on Berkeley | README, Feasibility |
+| OneAquaHealth's five steps for a follower city, run the way a follower city would on Berkeley | README, How OneAquaHealth is used |
 | A second city scaffold, and a second plant list | `fhir/fsh/city-heraklion.fsh`; `content/regions/heraklion.yaml` |
 | Free to run on Cloudflare, no card | `docs/notes/hosting.md` |
 | The example offered back to their guide | `docs/ig_proposal.md` |

@@ -1,5 +1,9 @@
 {
   "benchmark": {
+    "always_no": {
+      "correct": 24,
+      "n": 48
+    },
     "file": "results/benchmark_20260924T054939Z.json",
     "interval": "Wilson score, 95 percent",
     "models": {
@@ -34,6 +38,10 @@
           "high_pct": 100,
           "low_pct": 76,
           "n": 12
+        },
+        "without_plants": {
+          "correct": 34,
+          "n": 36
         }
       },
       "claude-haiku-4-5-20251001": {
@@ -67,6 +75,10 @@
           "high_pct": 91,
           "low_pct": 47,
           "n": 12
+        },
+        "without_plants": {
+          "correct": 31,
+          "n": 36
         }
       },
       "claude-opus-5-5": {
@@ -100,6 +112,10 @@
           "high_pct": 100,
           "low_pct": 76,
           "n": 12
+        },
+        "without_plants": {
+          "correct": 33,
+          "n": 36
         }
       },
       "claude-sonnet-5": {
@@ -133,6 +149,10 @@
           "high_pct": 91,
           "low_pct": 47,
           "n": 12
+        },
+        "without_plants": {
+          "correct": 33,
+          "n": 36
         }
       }
     },
@@ -315,6 +335,13 @@
     "calls": 5065,
     "fake_calls": 48,
     "first_real_call_utc": "2026-09-24T03:04:49+00:00",
+    "footage_cents_per_call": {
+      "claude-fable-5-1": 2.32,
+      "claude-haiku-4-5-20251001": 0.22,
+      "claude-opus-5": 1.12,
+      "claude-opus-5-5": 0.96,
+      "claude-sonnet-5": 0.43
+    },
     "last_real_call_utc": "2026-09-24T06:05:39+00:00",
     "log": "results/cost_log.jsonl",
     "real_calls": 5017,

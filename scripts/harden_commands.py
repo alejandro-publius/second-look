@@ -95,10 +95,12 @@ SAFE_MAKE = {
     "done-check",
 }
 # The setup a judge types first. Each only installs into the clone, or installs the pre-commit tool.
-SETUP = re.compile(
-    r"(uv sync( --frozen)?|\(cd (apps/web|worker|tools/diagrams) && npm ci\))"
-    r"( && (uv sync( --frozen)?|\(cd (apps/web|worker|tools/diagrams) && npm ci\)))*"
+SETUP_PART = (
+    r"(uv sync( --frozen)?"
+    r"|\(cd apps/web && npm ci( && npx playwright install chromium)?\)"
+    r"|\(cd (worker|tools/diagrams) && npm ci\))"
 )
+SETUP = re.compile(SETUP_PART + r"( && " + SETUP_PART + r")*")
 PRE_COMMIT = "uv tool install pre-commit && pre-commit install"
 # A host that is down for a cause outside this repository, named with its evidence in the link
 # check: a command that calls it is listed as not run, with the reason, not as failed.

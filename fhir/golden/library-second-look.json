@@ -1,7 +1,7 @@
 {
   "author": [
     {
-      "name": "Second Look project, Berkeley, a follower city"
+      "name": "Second Look project, Berkeley"
     }
   ],
   "content": [
@@ -28,7 +28,7 @@
   ],
   "copyright": "Code MIT. Photos and copy CC BY 4.0. No personal data: observers are known only by a hash of a random token.",
   "date": "2026-09-21",
-  "description": "Second Look data set: citizen creek checks from Berkeley, a follower city, with the observer's per feature test score carried on every observation. 1 visit records mirrored to this server. The repository holds the code, the FSH and the tests.",
+  "description": "Second Look data set: creek checks from Berkeley, run the way a follower city would, with the observer's per feature test score carried on every observation. 1 visit records mirrored to this server. The worked visit at Strawberry Creek among them is a hand-made example. The repository holds the code, the FSH and the tests.",
   "extension": [
     {
       "url": "http://hl7.eu/fhir/ig/oah/StructureDefinition/library-size",
@@ -59,7 +59,7 @@
   "resourceType": "Library",
   "status": "active",
   "text": {
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look data set: citizen creek checks from Berkeley, a follower city, with the observer's per feature test score carried on every observation. 1 visit records mirrored to this server. The repository holds the code, the FSH and the tests.</p></div>",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look data set: creek checks from Berkeley, run the way a follower city would, with the observer's per feature test score carried on every observation. 1 visit records mirrored to this server. The worked visit at Strawberry Creek among them is a hand-made example. The repository holds the code, the FSH and the tests.</p></div>",
     "status": "generated"
   },
   "title": "Second Look: citizen creek checks with observer scores, Berkeley",

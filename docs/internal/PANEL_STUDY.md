@@ -11,7 +11,11 @@ before any participant (`prereg-v1`), and every session that ends before the dat
 1. Make an account at Prolific (https://www.prolific.com), as a researcher, and add funds: about
    300 dollars covers 80 people at the reward below plus the panel's fee, with room to spare.
 2. Create a new study and fill it from the fields below.
-3. Publish it. Nothing else is needed: the study runs itself. Watch it with `make panel-status`.
+3. The panel asks whether the study has ethics approval or an exemption. Answer truthfully. It is
+   an anonymous usability test of a training tool, but whether your university's rules count a
+   paid one as human subjects research is yours to check; if they need a review, do not launch,
+   and the analysis reports whatever arrived through the public link.
+4. Publish it. Nothing else is needed: the study runs itself. Watch it with `make panel-status`.
 
 ## The fields
 

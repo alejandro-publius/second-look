@@ -30,6 +30,8 @@ def test_the_setup_a_judge_types_runs_and_a_bare_npm_ci_does_not() -> None:
         "uv sync && (cd apps/web && npm ci) && (cd worker && npm ci)"
         " && (cd tools/diagrams && npm ci)",
         "uv tool install pre-commit && pre-commit install",
+        "uv sync && (cd apps/web && npm ci && npx playwright install chromium)"
+        " && (cd worker && npm ci) && (cd tools/diagrams && npm ci)",
     ):
         assert hc.policy(cmd) == "", cmd
     assert hc.policy("npm ci") == "not on the safe list"

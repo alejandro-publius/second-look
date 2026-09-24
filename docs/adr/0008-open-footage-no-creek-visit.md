@@ -8,8 +8,8 @@
 
 ## Context
 
-The demo video needed creek shots, and the plan had been for Alex to film at a creek. He was not
-going to. The AI evaluation on footage also needed real creek video that we may use.
+The demo video needed creek shots, and the plan had been to film at a creek. Filming was dropped
+for time. The AI evaluation on footage also needed real creek video that we may use.
 
 ## Decision
 

@@ -1,6 +1,6 @@
 # Proposal: carrying observer quality for citizen data in the OneAquaHealth guide
 
-For the authors of hl7-eu/oah. Written by the Second Look team (Berkeley, a follower city). One page, plain words. Alex opens the pull request; this file is the text behind it.
+For the authors of hl7-eu/oah. Written by the Second Look team in Berkeley. One page, plain words. Alex opens the pull request; this file is the text behind it.
 
 ## What we are actually asking, first
 
