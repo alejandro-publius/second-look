@@ -1,12 +1,12 @@
 {
-  "commit": "72a4136",
-  "ran_at_utc": "2026-09-24T15:00:44Z",
+  "commit": "49209af",
+  "ran_at_utc": "2026-09-24T15:58:00Z",
   "steps": [
     {
       "name": "tests",
       "ok": true,
-      "text": "python: 2010 passed, 1 skipped, 9 xfailed in 153.13s (0:02:33); worker: pass 15",
-      "seconds": 155
+      "text": "python: 2010 passed, 1 skipped, 9 xfailed in 153.14s (0:02:33); worker: pass 15",
+      "seconds": 156
     },
     {
       "name": "reproduce",
@@ -23,7 +23,7 @@
     {
       "name": "web",
       "ok": true,
-      "text": "next build ok; design-check: clean. 87 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.1s).",
+      "text": "next build ok; design-check: clean. 87 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s).",
       "seconds": 10
     },
     {
@@ -36,9 +36,9 @@
       "name": "secrets",
       "ok": true,
       "text": "working tree: nothing shaped like a live key; gitleaks: history clean",
-      "seconds": 7
+      "seconds": 6
     }
   ],
-  "seconds": 194,
+  "seconds": 193,
   "last": "judge-check: 6 of 6 steps passed, offline, with no key"
 }
