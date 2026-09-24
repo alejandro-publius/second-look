@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import re
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -101,6 +105,61 @@ def test_a_number_that_does_not_reproduce_fails_the_step_and_names_the_file(
         "make reproduce failed: reproduce: 1 of 2 files differ from the raw replies or seeds"
     )
     assert "FAIL results/b.json: 1 values regraded from a fixture" in step.lines
+
+
+def test_the_tests_step_shows_how_many_python_tests_passed(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # REVIEW_03 R47: pyproject.toml's addopts already hold -q, and one more -q hid the count, so
+    # the line read "python: .... [100%]". A real pytest runs here on the same addopts, with the
+    # arguments step_tests gives, in place of uv run.
+    pyproject = (judge_check.ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    addopts = next(ln for ln in pyproject.splitlines() if ln.startswith("addopts"))
+    (tmp_path / "pyproject.toml").write_text(f"[tool.pytest.ini_options]\n{addopts}\n")
+    (tmp_path / "test_one.py").write_text("def test_one():\n    assert True\n")
+
+    def real_pytest(argv: list[str], cwd: Path, env: dict[str, str]) -> tuple[int, str]:
+        assert argv[:3] == ["uv", "run", "pytest"]
+        proc = subprocess.run(
+            [sys.executable, "-m", "pytest", *argv[3:]],
+            cwd=cwd,
+            env={**os.environ, "PYTEST_ADDOPTS": ""},
+            capture_output=True,
+            text=True,
+        )
+        return proc.returncode, proc.stdout + proc.stderr
+
+    monkeypatch.setattr(judge_check, "run", real_pytest)
+    step = judge_check.step_tests(tmp_path, {})
+    assert step.ok, step.lines
+    assert re.fullmatch(r"python: 1 passed in [\d.]+s", step.lines[0]), step.lines
+
+
+def test_the_tests_step_runs_with_no_key_and_a_proxy_that_goes_nowhere(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # REVIEW_03 R56: the docstring promised a dead proxy, but only two flags nobody reads were set.
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "not-a-real-key")
+    monkeypatch.setenv("http_proxy", "http://proxy.example:8080")
+    seen: dict[str, dict[str, str]] = {}
+
+    def stand_in(root: Path, env: dict[str, str], *rest: object) -> judge_check.Step:
+        seen.setdefault("env", dict(env))
+        return judge_check.Step("stand in", lines=["ok"])
+
+    for name in ("tests", "reproduce", "fhir", "audit", "secrets"):
+        monkeypatch.setattr(judge_check, f"step_{name}", stand_in)
+    assert judge_check.main(["--quick"]) == 0
+    env = seen["env"]
+    assert "ANTHROPIC_API_KEY" not in env
+    # What a Python client in that environment would really use, read in a fresh interpreter.
+    code = "import json, urllib.request as u; print(json.dumps(u.getproxies()))"
+    out = subprocess.run(
+        [sys.executable, "-c", code], env=env, capture_output=True, text=True, check=True
+    ).stdout
+    proxies = json.loads(out)
+    assert proxies["http"] == proxies["https"] == "http://127.0.0.1:9"
+    assert set(proxies["no"].split(",")) == {"localhost", "127.0.0.1"}
 
 
 def test_judge_check_runs_the_reproduce_step_second(

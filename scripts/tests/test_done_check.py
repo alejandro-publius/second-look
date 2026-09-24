@@ -4,6 +4,9 @@ exact, a timeout is RED, a dated item waits for its date, and the exit code foll
 from __future__ import annotations
 
 import re
+import shutil
+import subprocess
+import sys
 import time
 from collections.abc import Mapping
 from datetime import UTC, datetime
@@ -134,6 +137,19 @@ def test_a_file_without_rows_is_refused() -> None:
         "test -f a &",
         "if test -f a; then echo y; fi",
         "x=1; if test -f a; then echo y; fi",
+        # REVIEW_03 R53: five shapes that passed the guard and pass with the file missing.
+        "test -f missing || test 1",
+        "test -f missing || [ 1 ]",
+        "test -f missing; test 1",
+        "(test -f missing; true)",
+        "grep -q else x; if test -f missing; then false; fi",
+        # and their near kin
+        "test -f a || test 'yes'",
+        'test -f a || [ "ok" ]',
+        "{ test -f a; true; }",
+        "(test -f a && :)",
+        "if a; then b; else c; fi; if test -f a; then false; fi",
+        "if test -f a; then false; elif test -f b; then false; fi",
     ],
 )
 def test_a_command_that_cannot_fail_is_refused(command: str) -> None:
@@ -159,6 +175,15 @@ def test_a_cause_test_that_cannot_fail_is_refused() -> None:
         "grep -q x a &>/dev/null",
         'grep -q "if " a',
         "if test -f a; then test -s a; else false; fi",
+        'n=$(wc -l < a) && [ "$n" -ge 8 ]',
+        'test -n "$x"',
+        '[ "$x" ]',
+        "(test -f a; test -f b)",
+        "(test -f a; true) && test -f b",
+        "grep -q else a",
+        # R53's sixth shape: `! true` never passes, so this is `! test -f missing`, which fails
+        # once the file exists, like `! test -f a` above.
+        "! test -f missing || ! true",
     ],
 )
 def test_ordinary_commands_are_accepted(command: str) -> None:
@@ -366,3 +391,41 @@ def test_the_real_checklist_keeps_the_order_of_update_27() -> None:
     kinds = [i.kind for i in dc.parse(head)]
     first_human = kinds.index("HUMAN")
     assert set(kinds[first_human:]) == {"HUMAN"}, "the human items come last"
+
+
+def run_cause_test(tmp_path: Path, name: str, lookup: str | None) -> int:
+    """The D41 cause test's exit code, run as done-check runs it, with lookup deciding what the
+    stand-in python3 does: None leaves python3 missing; "fails" raises socket.gaierror as for a
+    name that does not resolve; "works" returns an address. No lookup leaves this machine."""
+    items = {i.id: i for i in dc.parse(dc.DONE_FILE.read_text(encoding="utf-8"))}
+    command = items["D41"].cause_test
+    assert "sandbox.hl7europe.eu" in command
+    folder = tmp_path / name
+    (folder / "bin").mkdir(parents=True)
+    env = {"PATH": str(folder / "bin")}
+    if lookup is not None:
+        (folder / "bin" / "python3").symlink_to(sys.executable)
+        answer = (
+            "raise socket.gaierror(8, 'nodename nor servname provided, or not known')"
+            if lookup == "fails"
+            else "return [(2, 1, 6, '', ('192.0.2.1', 443))]"
+        )
+        (folder / "sitecustomize.py").write_text(
+            f"import socket\n\n\ndef getaddrinfo(*args, **kwargs):\n    {answer}\n\n\n"
+            "socket.getaddrinfo = getaddrinfo\n"
+        )
+        env["PYTHONPATH"] = str(folder)
+    bash = shutil.which("bash") or "/bin/bash"
+    proc = subprocess.run(
+        [bash, "-o", "pipefail", "-c", command], env=env, capture_output=True, timeout=60
+    )
+    return proc.returncode
+
+
+@pytest.mark.skipif(not INTERNAL.is_dir(), reason="the working notes were removed at go-public")
+def test_the_d41_cause_holds_only_while_the_name_does_not_resolve(tmp_path: Path) -> None:
+    # REVIEW_03 R59: the cause test began with !, which turned "python3: command not found" (127)
+    # into 0, so D41 would have stayed BLOCKED with no lookup made at all.
+    assert run_cause_test(tmp_path, "gone", "fails") == 0
+    assert run_cause_test(tmp_path, "back", "works") != 0
+    assert run_cause_test(tmp_path, "missing", None) != 0

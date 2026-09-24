@@ -161,3 +161,15 @@ def test_verify_audit_cli_expect_last_catches_a_cut_off_tail(
     args = ["--path", str(path), "--allow-test-kind", "--expect-last", posted]
     assert verify_audit.main(args) == 1
     assert "differs from the posted hash" in capsys.readouterr().out
+
+
+def test_verify_audit_cli_refuses_an_empty_log_unless_told_it_may_be(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # REVIEW_03 R57: an empty file printed "0 entries, chain intact" and passed.
+    path = tmp_path / "audit" / "log.jsonl"
+    path.parent.mkdir()
+    path.write_text("", encoding="utf-8")
+    assert verify_audit.main(["--path", str(path)]) == 1
+    assert "has no entries" in capsys.readouterr().out
+    assert verify_audit.main(["--path", str(path), "--allow-missing"]) == 0

@@ -87,13 +87,24 @@ class Step:
         self.lines.append(line)
 
 
+# The dead proxy make demo-offline gives its processes: port 9 on this machine takes nothing, so a
+# client that honours the proxy variables cannot reach another machine. Both spellings are set,
+# because some clients read only one, and Python's urllib lets the lower case one win.
+DEAD_PROXY = {
+    "HTTP_PROXY": "http://127.0.0.1:9",
+    "HTTPS_PROXY": "http://127.0.0.1:9",
+    "NO_PROXY": "localhost,127.0.0.1",
+}
+
+
 def offline_env() -> dict[str, str]:
     """The environment every step runs in: no key, and a proxy that goes nowhere."""
     env = dict(os.environ)
     for name in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "OPENAI_API_KEY"):
         env.pop(name, None)
-    env["SECOND_LOOK_OFFLINE"] = "1"
-    env["NO_NETWORK"] = "1"
+    for name, value in DEAD_PROXY.items():
+        env[name] = value
+        env[name.lower()] = value
     return env
 
 
@@ -109,7 +120,8 @@ def last_line(text: str) -> str:
 
 def step_tests(root: Path, env: dict[str, str]) -> Step:
     step = Step("tests")
-    rc, out = run(["uv", "run", "pytest", "-q"], root, env)
+    # No -q here: pyproject.toml already adds one, and a second hides the "N passed" line.
+    rc, out = run(["uv", "run", "pytest"], root, env)
     if rc != 0:
         step.fail(f"pytest failed: {last_line(out)}")
     else:

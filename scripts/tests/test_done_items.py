@@ -4,6 +4,8 @@ fails, naming the gap, on the same tree with the thing broken or missing."""
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
@@ -1144,3 +1146,236 @@ def test_the_panel_study_checks_codes_against_finished_sessions_before_paying(
     assert has(di.check_panel_prep(tmp_path), "the check of submitted codes against make panel")
     write(tmp_path, "docs/internal/PANEL_STUDY.md", study.replace("page source", "page"))
     assert has(di.check_panel_prep(tmp_path), "visible in the page source")
+
+
+# UPDATE_29: a tree that has every item, as block 23 and 24 have one (REVIEW_03 R51)
+
+OTS_MAGIC = b"\x00OpenTimestamps\x00\x00Proof\x00"
+UPDATE_29_README = """Track 3. What the model may do: [the model card](docs/MODEL_CARD.md).
+
+# Second Look
+
+The numbers cite results/mutation.json, and `make reproduce` grades every AI number again.
+The one real analysis: <!--v:results/usability_20260928.json#/primary/status-->x<!--/v-->.
+The trust table: `.venv/bin/ots verify proofs/audit-head-2026-09-24.ots`.
+An iNaturalist context line on each creek. The report: docs/REPORT.pdf.
+
+### Contributed back
+
+- https://github.com/hl7-eu/oah/pull/1
+- https://github.com/hl7-eu/oah/issues/2
+- https://github.com/hl7-eu/oah/issues/3
+- https://github.com/hl7-eu/oah/issues/4
+
+## Licence
+
+MIT.
+"""
+PANEL_STUDY = """# Panel study
+
+Study title: Second Look. Description for participants: a creek test.
+It takes 5 minutes, paid at the panel's minimum hourly rate.
+Screening: 18 or older, fluent in English. Device: a phone or a laptop.
+Target: 80 completed sessions. Link: https://second-look-79t.pages.dev/t?src=panel
+Watch with make panel-status, which reads /api/test/counts. Completion code: C1A2B3.
+"""
+UPDATE_29_MAKEFILE = (
+    "panel-status:\n\techo counts\n"
+    "report-pdf:\n\techo pdf\n"
+    "judge-check:  # its second step is make reproduce\n\tuv run python scripts/judge_check.py\n"
+    "reproduce:\n\t@echo reproduce: 1 file regraded\n"
+)
+JUDGE_CHECK = """def step_reproduce(root, env):
+    return run(["make", "--no-print-directory", "reproduce"], root, env)
+
+
+def main():
+    for make in (
+        lambda: step_tests(root, env),
+        lambda: step_reproduce(root, env),
+    ):
+        make()
+"""
+ANCHOR_JOB = """#!/usr/bin/env bash
+RUN="'$UV' run python scripts/anchor_audit_head.py; '$UV' run python scripts/ots_status.py"
+cat > "$PLIST" <<PLIST_END
+    <string>$RUN</string>
+PLIST_END
+"""
+THREAT_TESTS = [f"tests/test_{n}.py" for n in ("one", "two", "three", "four")]
+
+
+def git(root: Path, *args: str) -> str:
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    who = ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false"]
+    proc = subprocess.run(
+        ["git", *who, *args], cwd=root, env=env, capture_output=True, text=True, check=True
+    )
+    return proc.stdout.strip()
+
+
+@pytest.fixture
+def update29(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A small tree that has every UPDATE_29 item. gh is not asked: every issue reads open."""
+    root = tmp_path
+    monkeypatch.setattr(di, "github_state", lambda kind, number: "open")
+    write(root, "README.md", UPDATE_29_README)
+    write(root, "Makefile", UPDATE_29_MAKEFILE)
+    locale = {
+        "consent_panel": di.PANEL_SENTENCE,
+        "verify_what": "OpenTimestamps is a public timestamp service.",
+        "inat_none": "No recent sightings on record.",
+        "credits_inat": "Plant photos from iNaturalist.",
+    }
+    write(root, "content/locales/en.json", json.dumps(locale))
+    # panel-prep
+    write(root, "apps/web/lib/panel.ts", 'export const PANEL_COMPLETION_CODE = "C1A2B3";\n')
+    # Built from parts, as done_items builds them, so the go-public rewrite leaves them alone.
+    write(root, "/".join(("docs", "internal", "PANEL_STUDY.md")), PANEL_STUDY)
+    write(
+        root,
+        "apps/web/tests/panel.spec.ts",
+        "await page.goto(`/t?src=panel`); // consent-panel, panel-code, PROLIFIC_PID, not panel\n",
+    )
+    for rel in ("apps/api/study.py", "worker/src/index.ts", "apps/web/lib/session.ts"):
+        write(root, rel, 'SOURCE_LABELS = ["poster", "panel"]\n')
+    write(root, "docs/deviations.md", "- 2026-09-24: the panel study.\n")
+    # panel-analysis: the three tests it runs
+    for rel in (
+        "evals/tests/test_panel_source.py",
+        "evals/tests/test_usability_refusal.py",
+        "apps/api/tests/test_panel.py",
+    ):
+        write(root, rel, "def test_it():\n    assert True\n")
+    # human-row
+    real = {
+        "synthetic": False,
+        "generated_at_utc": "2026-09-28T02:00:00Z",
+        "primary": {"status": "descriptive"},
+    }
+    write(root, "results/usability_20260928.json", json.dumps(real))
+    # ots
+    for rel in ("prereg-v1.tag.ots", "analysis_plan.md.ots", "audit-head-2026-09-24.ots"):
+        (root / "proofs").mkdir(exist_ok=True)
+        (root / "proofs" / rel).write_bytes(OTS_MAGIC + b"\x01")
+    write(root, "scripts/install_anchor_job.sh", ANCHOR_JOB)
+    # verify-page
+    write(root, "apps/web/app/verify/page.tsx", "export default function Verify() {}\n")
+    # reproduce
+    write(root, "scripts/judge_check.py", JUDGE_CHECK)
+    write(root, "evals/fixtures/raw/sweep.jsonl", "{}\n")
+    # mutation and lighthouse-landing
+    modules = {t: {"score_percent": 90} for t in di.MUTATION_TARGETS}
+    write(root, "results/mutation.json", json.dumps({"modules": modules}))
+    scores = {"performance": 96, "accessibility": 100, "best-practices": 100, "seo": 100}
+    write(root, "results/lighthouse_landing.json", json.dumps({"median": {"scores": scores}}))
+    # model-card, threat-model, data-card, report-pdf
+    write(
+        root,
+        "docs/MODEL_CARD.md",
+        "# Model card\n\n## What it may do\n\n## What it may not do\n\n## The pass table\n\n"
+        "## The benchmark\n\n## Failure cases\n\n## Cost\n\n## The gate\n",
+    )
+    for rel in THREAT_TESTS:
+        write(root, rel, "def test_it():\n    pass\n")
+    named = ", ".join(f"`{t}`" for t in [*THREAT_TESTS, "apps/web/tests/panel.spec.ts"])
+    write(
+        root,
+        "docs/THREAT_MODEL.md",
+        "# Threat model\n\nAssets: the study table.\n\n"
+        f"Attackers: a participant, a competitor, a judge, the model.\n\nTests: {named}.\n",
+    )
+    write(root, "docs/DATA_CARD.md", "# Data card\n\n## Source\n\n## Licence\n\n## Labels\n")
+    (root / "docs" / "REPORT.pdf").write_bytes(b"%PDF-1.4\n" + b"/Type /Page\n" * 6)
+    write(root, "docs/devpost.md", "The report: docs/REPORT.pdf.\n")
+    # second-labeller
+    write(root, "photos/labels_alex.csv", "photo_id,label\n")
+    write(root, "photos/labels_rachel.csv", "photo_id,label\n")
+    write(root, "results/kappa.json", "{}\n")
+    # inaturalist
+    write(root, "docs/THIRD_PARTY.md", "iNaturalist's public API.\n")
+    write(root, "scripts/cache_inaturalist.py", "print('daily')\n")
+    write(root, "docs/adr/0011-inaturalist-context.md", "# iNaturalist context\n")
+    web = "apps/web/components"
+    write(root, f"{web}/InatContext.tsx", "export function InatContext({ creek }) {}\n")
+    write(root, f"{web}/CityView.tsx", "export function CityView() { return <InatContext />; }\n")
+    write(root, f"{web}/SpotRecord.tsx", "export function Spot() { return <InatContext />; }\n")
+    write(root, f"{web}/LocationStep.tsx", "export function L() { return 'coordinates'; }\n")
+    # rerun-after-update: each review, judge simulation and critic names a commit with the files
+    git(root, "init", "-q")
+    git(root, "add", *di.UPDATE_29_FILES)
+    git(root, "commit", "-q", "-m", "UPDATE_29 files")
+    sha = git(root, "rev-parse", "--short", "HEAD")
+    for name in ("REVIEW_01", "JUDGE_SIM_01", "CRITIC_01", "CRITIC_02"):
+        (reviews(root) / f"{name}.md").write_text(f"# {name}\n\nCommit: {sha}\n")
+    return root
+
+
+UPDATE_29 = [
+    "panel-prep",
+    "panel-analysis",
+    "human-row",
+    "contributed-back",
+    "ots",
+    "verify-page",
+    "reproduce",
+    "mutation",
+    "lighthouse-landing",
+    "model-card",
+    "threat-model",
+    "report-pdf",
+    "data-card",
+    "second-labeller",
+    "inaturalist",
+    "rerun-after-update",
+]
+
+
+@pytest.mark.parametrize("name", UPDATE_29)
+def test_each_update_29_check_passes_on_a_tree_that_has_the_thing(
+    update29: Path, name: str
+) -> None:
+    assert di.CHECKS[name](update29) == []
+
+
+@pytest.mark.parametrize("name", UPDATE_29)
+def test_each_update_29_check_fails_on_an_empty_tree(tmp_path: Path, name: str) -> None:
+    assert di.CHECKS[name](tmp_path)
+
+
+def test_every_check_is_called_by_a_test() -> None:
+    source = Path(__file__).read_text(encoding="utf-8")
+    listed = {*BLOCK_23_24, *UPDATE_29}
+    untested = [
+        name
+        for name, check in di.CHECKS.items()
+        if name not in listed and f"di.{check.__name__}(" not in source
+    ]
+    assert untested == []
+
+
+def test_inaturalist_needs_the_component_by_name_not_the_letters_inat(update29: Path) -> None:
+    # R51 mutation 1: the component gone and every word starting inat replaced. The check read
+    # "coordinates" in LocationStep.tsx as the context line.
+    (update29 / "apps/web/components/InatContext.tsx").unlink()
+    for page in ("CityView.tsx", "SpotRecord.tsx"):
+        write(update29, f"apps/web/components/{page}", "export function P() { return null; }\n")
+    problems = di.check_inaturalist(update29)
+    assert has(problems, "no component shows the iNaturalist context line")
+    assert has(problems, "CityView.tsx does not show") and has(problems, "SpotRecord.tsx does not")
+
+
+def test_ots_needs_the_anchor_in_the_jobs_command_not_the_letters_ots(update29: Path) -> None:
+    # R51 mutation 2: an installer that does nothing passed, because robots holds ots.
+    write(
+        update29, "scripts/install_anchor_job.sh", "# robots only: this job does nothing\nexit 0\n"
+    )
+    assert has(di.check_ots(update29), "does not anchor the audit head daily")
+
+
+def test_reproduce_needs_judge_check_to_call_its_step_not_a_comment(update29: Path) -> None:
+    # R51 mutation 3: the Makefile comment still says judge check's second step is make reproduce.
+    judge = update29 / "scripts" / "judge_check.py"
+    judge.write_text(judge.read_text().replace("lambda: step_reproduce(root, env),", ""))
+    assert "its second step is make reproduce" in (update29 / "Makefile").read_text()
+    assert has(di.check_reproduce_wired(update29), "does not run make reproduce")

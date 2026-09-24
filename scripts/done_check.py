@@ -24,8 +24,9 @@ and then one line exactly: RED: <n> BLOCKED: <n> HUMAN: <n>. It exits 1 when RED
 when the file cannot be read as a checklist, and 0 otherwise.
 
 A command that cannot fail is refused when the file is read: `true`, `|| true`, `|| echo ...`,
-`; echo ...` at the end, a trailing `&`, an `if` without `else`, `exit 0` and `set +o pipefail`
-never prove that anything was done.
+`; echo ...` at the end, `true` at the end of a `( )` or `{ }`, a `test` of one fixed word such
+as `test 1` or `[ 1 ]`, a trailing `&`, an `if` without its own `else`, `exit 0` and
+`set +o pipefail` never prove that anything was done.
 
   make done-check
   uv run python scripts/done_check.py --only D01,D07 --timeout 60 --jobs 1
@@ -65,16 +66,28 @@ NEVER_FAILS = (
         ),
         "a failure is turned into success",
     ),
-    (re.compile(r"(;|&&)\s*(true|:)\s*$"), "the command ends in `true`"),
+    # At the very end, or at the end of a ( ) or { } that ends the command.
+    (re.compile(r"(;|&&)\s*(true|:)\s*;?\s*(?:[)}]\s*)*$"), "the command ends in `true`"),
     (re.compile(r";\s*(?:\S*/)?(?:echo|printf)\b[^;&|]*$"), "the command ends in `echo`"),
     (re.compile(r"(?<![&>])&\s*$"), "the command runs in the background"),
+    # test or [ with one word and no variable in it: a word that is not empty is always true.
     (
-        re.compile(r"^(?!.*\belse\b)(?:.*[;&|(]\s*|\s*)if\s"),
-        "an `if` without `else` passes when its test fails",
+        re.compile(
+            r"(?:^|[;&|({]|\bthen\b|\belse\b)\s*"
+            r"(?:test\s+(?:\"[^\"$`\\]+\"|'[^']+'|[^\s$\"'`\\;&|()<>\[\]]+)"
+            r"|\[\s+(?:\"[^\"$`\\]+\"|'[^']+'|[^\s$\"'`\\;&|()<>\[\]]+)\s+\])"
+            r"\s*(?:$|[;&|)}])"
+        ),
+        "a `test` of one fixed word always passes",
     ),
     (re.compile(r"\bexit\s+0\b"), "the command says `exit 0`"),
     (re.compile(r"set\s+\+o\s+pipefail|set\s+\+e\b"), "the command switches its own checks off"),
 )
+# Each `if` needs an `else` of its own. Both are counted where a shell reads them as words of the
+# language, so the word else in a pattern, as in `grep -q else x`, is not an else.
+KEYWORD_IF = re.compile(r"(?:^|[;&|({\n]|\bthen\b|\belse\b|\bdo\b)\s*if\s")
+KEYWORD_ELSE = re.compile(r"[;\n]\s*else\b")
+IF_WITHOUT_ELSE = "an `if` without `else` passes when its test fails"
 DEFAULT_TIMEOUT = 120.0
 CAUSE_TIMEOUT = 30.0
 STATUSES = ("PASS", "RED", "BLOCKED", "HUMAN")
@@ -138,6 +151,8 @@ def never_fails(command: str) -> str | None:
     for pattern, why in NEVER_FAILS:
         if pattern.search(command):
             return why
+    if len(KEYWORD_IF.findall(command)) > len(KEYWORD_ELSE.findall(command)):
+        return IF_WITHOUT_ELSE
     return None
 
 

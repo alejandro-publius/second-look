@@ -88,3 +88,55 @@ def run2(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, readme: str, doc: dict
     (tmp_path / "README.md").write_text(readme)
     monkeypatch.setattr("sys.argv", ["verify_claims.py"])
     return vc.main()
+
+
+CITY_IMG = '<img src="docs/screens/city.webp" width="200" alt="{alt}">'
+
+
+def run_with_screens(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, readme: str, alt: str) -> int:
+    (tmp_path / "results").mkdir()
+    row = {"file": "docs/screens/city.webp", "alt": alt}
+    (tmp_path / "results" / "screens.json").write_text(json.dumps({"images": [row]}))
+    (tmp_path / "README.md").write_text(readme)
+    monkeypatch.setattr(vc, "ROOT", tmp_path)
+    monkeypatch.setattr(vc, "README", tmp_path / "README.md")
+    monkeypatch.setattr("sys.argv", ["verify_claims.py"])
+    return vc.main()
+
+
+def test_an_image_alt_that_matches_the_gallery_passes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    alt = "The city view before anyone has checked it: no visits yet."
+    assert run_with_screens(tmp_path, monkeypatch, CITY_IMG.format(alt=alt), alt) == 0
+
+
+def test_an_image_alt_that_differs_from_the_gallery_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # REVIEW_03 R27: the README said the city screenshot showed measures; it shows none.
+    readme = CITY_IMG.format(alt="The city view: what volunteers found and what to do.")
+    alt = "The city view before anyone has checked it: no visits yet."
+    assert run_with_screens(tmp_path, monkeypatch, readme, alt) == 1
+    assert "alt text drifted: docs/screens/city.webp" in capsys.readouterr().out
+
+
+def test_an_image_with_a_gallery_row_and_no_alt_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readme = '<img src="docs/screens/city.webp" width="200">'
+    assert run_with_screens(tmp_path, monkeypatch, readme, "The city view.") == 1
+
+
+def test_an_escaped_alt_is_compared_as_it_reads(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    readme = CITY_IMG.format(alt="Rain &amp; &quot;dry&quot; days.")
+    assert run_with_screens(tmp_path, monkeypatch, readme, 'Rain & "dry" days.') == 0
+
+
+def test_every_readme_image_alt_matches_the_gallery() -> None:
+    # The committed files: every README image with a gallery row, the GIF and lesson photos too.
+    compared, problems = vc.alt_problems(vc.README.read_text(encoding="utf-8"))
+    assert problems == []
+    assert compared >= 30

@@ -1480,7 +1480,10 @@ def check_ots(root: Path) -> list[str]:
             problems.append(f"{rel} is not an OpenTimestamps proof")
     if not list((root / "proofs").glob("audit-head-*.ots")):
         problems.append("no daily anchor of the audit chain head in proofs/")
-    if "ots" not in read(root / "scripts" / "install_anchor_job.sh"):
+    # The job's own command line, by name: the letters ots are in any word such as robots.
+    job = read(root / "scripts" / "install_anchor_job.sh")
+    run = re.search(r"^RUN=\"(.*)\"$", job, re.M)
+    if not run or "scripts/anchor_audit_head.py" not in run.group(1) or "$RUN" not in job:
         problems.append("scripts/install_anchor_job.sh does not anchor the audit head daily")
     return problems
 
@@ -1508,11 +1511,21 @@ def check_reproduce_wired(root: Path) -> list[str]:
     if proc.returncode != 0:
         tail = (proc.stdout + proc.stderr).strip().splitlines()[-1:]
         problems.append(f"make reproduce failed: {' '.join(tail)}")
+    # What judge check runs, read in scripts/judge_check.py: a comment in the Makefile that says
+    # so is not a step. step_reproduce must run make reproduce, and something must call it.
     makefile = read(root / "Makefile")
-    judge = next((ln for ln in makefile.splitlines() if ln.startswith("judge-check:")), "")
+    target = re.search(r"^judge-check:.*\n((?:\t.*\n?)+)", makefile, re.M)
+    judge = read(root / "scripts" / "judge_check.py")
+    step = re.search(r"^def step_reproduce\(.*?(?=^\S|\Z)", judge, re.M | re.S)
+    called = [
+        ln for ln in judge.splitlines() if "step_reproduce(" in ln and not ln.startswith("def ")
+    ]
     if (
-        "reproduce" not in judge
-        and "make reproduce" not in makefile.split("judge-check:", 1)[-1][:600]
+        not target
+        or "scripts/judge_check.py" not in target.group(1)
+        or not step
+        or '"reproduce"' not in step.group(0)
+        or not called
     ):
         problems.append("make judge-check does not run make reproduce")
     if "make reproduce" not in read(root / "README.md"):
@@ -1665,9 +1678,14 @@ def check_inaturalist(root: Path) -> list[str]:
     readme = read(root / "README.md")
     if "iNaturalist" not in readme:
         problems.append("the README's OneAquaHealth surfaces table does not name iNaturalist")
-    web = " ".join(read(p) for p in (root / "apps" / "web" / "components").glob("*.tsx"))
-    if "inat" not in web.lower():
+    # The component by its name, and where it is shown: the letters inat are in any word such as
+    # coordinates.
+    components = root / "apps" / "web" / "components"
+    if not re.search(r"export function InatContext\b", read(components / "InatContext.tsx")):
         problems.append("no component shows the iNaturalist context line")
+    for page in ("CityView.tsx", "SpotRecord.tsx"):
+        if not re.search(r"<InatContext\b", read(components / page)):
+            problems.append(f"{page} does not show the iNaturalist context line (InatContext)")
     if (
         "inaturalist"
         not in (read(root / "apps" / "web" / "app" / "credits" / "page.tsx") + locale).lower()

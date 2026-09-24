@@ -57,6 +57,10 @@ jobs:
       - if: hashFiles('worker/package-lock.json') != ''
         run: cd worker && npm ci
       - run: make check
+      # Every AI number in results/ graded again from the committed raw replies, and every
+      # synthetic result made again from its seed, with no key and no network. make check does not
+      # do this, so a synthetic p value flipped to significant would pass every step of it.
+      - run: make reproduce
       # The web end to end on a phone viewport with a mocked API: the test flow, judge mode, the
       # check, the walks, keyboard only, reflow and axe on every screen it reaches. The
       # /accessibility page says the build fails on a serious axe finding; this step is why.
