@@ -480,9 +480,18 @@ def readme_lines(root: Path) -> list[str]:
 
 
 def check_gate_steps(root: Path) -> list[str]:
-    found = section(readme_lines(root), r"\bgate\b")
+    # The first section about the gate that holds numbered steps; an earlier heading that only
+    # names the gate, such as a diagram's, does not hide it.
+    lines = readme_lines(root)
+    found = section(lines, r"\bgate\b")
     if not found:
         return ["README.md has no section about the gate"]
+    after = found[0].line
+    while not list_items(found[1], numbered_only=True):
+        nxt = section(lines, r"\bgate\b", after)
+        if nxt is None:
+            break
+        found, after = nxt, nxt[0].line
     heading, body = found
     steps = list_items(body, numbered_only=True)
     problems: list[str] = []
@@ -746,7 +755,7 @@ def check_deploy_doc(root: Path) -> list[str]:
     return problems
 
 
-ADR_NAME = re.compile(r"^\d{3,4}-[a-z0-9-]+\.md$")
+ADR_NAME = re.compile(r"^(adr-)?\d{3,4}-[a-z0-9-]+\.md$", re.I)
 
 
 def check_adrs(root: Path) -> list[str]:
@@ -760,7 +769,7 @@ def check_adrs(root: Path) -> list[str]:
     for p in adrs:
         text = read(p)
         for part in ("Status", "Context", "Decision", "Consequences"):
-            if not re.search(rf"^(#+\s*|\*\*){part}\b", text, re.M | re.I):
+            if not re.search(rf"^(#+\s*|\*\*)?{part}\b", text, re.M | re.I):
                 problems.append(f"docs/adr/{p.name} has no {part} part")
     return problems
 

@@ -530,6 +530,26 @@ def test_gate_steps_name_files_that_exist(repo: Path) -> None:
     assert has(di.check_gate_steps(repo), "2 numbered steps")
 
 
+def test_an_earlier_gate_heading_without_steps_does_not_hide_them(repo: Path) -> None:
+    edit(
+        repo,
+        "README.md",
+        "## Architecture\n",
+        "## Architecture\n\n### The gate as a diagram\n\nSee below.\n",
+    )
+    assert di.check_gate_steps(repo) == []
+    edit(repo, "README.md", "### The gate, the heart of it", "### The heart of it")
+    assert has(di.check_gate_steps(repo), "has 0 numbered steps")
+
+
+def test_adrs_may_carry_an_adr_prefix_and_a_plain_status_line(repo: Path) -> None:
+    folder = repo / "docs" / "adr"
+    for p in sorted(folder.glob("*.md")):
+        p.rename(folder / f"ADR-{p.name}")
+    edit(repo, "docs/adr/ADR-0001-decision-1.md", "## Status\n\nAccepted.", "Status: accepted")
+    assert di.check_adrs(repo) == []
+
+
 def test_gate_steps_must_name_the_gate_file(repo: Path) -> None:
     edit(repo, "README.md", "`core/gate.py` reads", "`core/followups.py` reads")
     assert has(di.check_gate_steps(repo), "never name core/gate.py")
