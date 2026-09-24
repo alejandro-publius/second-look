@@ -367,6 +367,18 @@ try {
   assert.equal(withheld.data.shown, false);
   assert.equal(withheld.data.status, "cached");
   assert.deepEqual(withheld.data.species, []);
+  // A check left unfinished there does not open it, even when it answers the question.
+  const unfinished = await api("POST", "/api/check/draft", { spot: { spot_id: bridge.spot_id }, answers: GOOD_ANSWERS, first_rating: "good", photo_ids: [] });
+  assert.equal(unfinished.status, 200, JSON.stringify(unfinished.data));
+  assert.equal((await api("GET", `/api/inaturalist/${bridgeCreek}`)).data.shown, false, "an unfinished check does not open the line");
+  // Nor does a finished check at a pin whose name reads like a test, which /city leaves out too.
+  const testPin = await visit(null, { new: { name: "test", latitude: 12.5, longitude: 12.5, coarse: false } }, GOOD_ANSWERS);
+  const testCreek = (await api("GET", `/api/spot/${testPin.spot_id}`)).data.spot.creek_id;
+  wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--command", `INSERT OR REPLACE INTO inaturalist_cache (creek, body, fetched_at) VALUES ('${testCreek}', '${summary}', '2026-09-24T07:45:00Z')`]);
+  const onTestPin = await api("GET", `/api/inaturalist/${testCreek}`);
+  assert.equal(onTestPin.data.status, "cached");
+  assert.equal(onTestPin.data.shown, false, "a test pin does not open the line");
+  assert.deepEqual(onTestPin.data.species, []);
   // Read only: the route answers GET and nothing else.
   assert.equal((await api("POST", "/api/inaturalist/strawberry-creek", {})).status, 404);
 
