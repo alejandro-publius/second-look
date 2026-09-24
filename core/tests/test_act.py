@@ -97,6 +97,17 @@ def test_one_person_visiting_twice_counts_once() -> None:
     assert f.first_seen == date(2026, 9, 22) and f.last_seen == date(2026, 9, 23)
 
 
+def test_one_visit_answering_both_pipe_items_is_one_visit() -> None:
+    """REVIEW_03 R32: both pipe items name pipe_running, and /city?walk=v02 showed "Checks that
+    saw it: 2" for one walk. The visit is evidence once, however many of its answers point at it."""
+    both = {"draining_pipes": "present", "sewage_discharge": "present"}
+    mapping = {"draining_pipes": "pipe_running", "sewage_discharge": "pipe_running"}
+    found = findings_from_visits([visit("v1", ALICE, answers=both), visit("v2", BOB)], mapping)
+    assert len(found) == 1
+    assert found[0].visit_ids == ("v1", "v2")
+    assert found[0].observers == (ALICE, BOB)
+
+
 def test_absent_is_not_a_finding() -> None:
     assert findings_from_visits([visit("v1", ALICE, answers={"pipe_running": "absent"})]) == []
     assert findings_from_visits([visit("v1", ALICE, answers={"pipe_running": "cant_tell"})]) == []

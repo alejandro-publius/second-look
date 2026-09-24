@@ -2157,7 +2157,7 @@ function findingsFromVisits(visits, findingKeyFor) {
       const token = v.observer.contributor_token;
       if (!row.observers.includes(token)) row.observers.push(token);
       if (!row.passed_observers.includes(token) && passedFeature(v, feature, day)) row.passed_observers.push(token);
-      row.visit_ids.push(v.visit_id);
+      if (!row.visit_ids.includes(v.visit_id)) row.visit_ids.push(v.visit_id);
       if (day < row.first_seen) row.first_seen = day;
       if (day > row.last_seen) row.last_seen = day;
     }
