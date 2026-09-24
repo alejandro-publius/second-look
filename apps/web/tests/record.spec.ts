@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { API_ORIGIN, assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
+import { API_ORIGIN, assertOnlyOurOrigins, exampleCity, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
 test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR view and curl", async ({ page }) => {
@@ -175,10 +175,54 @@ test("/city shows two lists decided by code, and no number without its records",
   await expect(page.getByText("Example", { exact: true })).toHaveCount(0);
 });
 
+// An empty list of measures blames approval only when no measure is approved (REVIEW_03 R28).
+for (const waiting of [false, true]) {
+  test(`/city with no measure to show, measures ${waiting ? "not yet approved" : "approved"}`, async ({ page }) => {
+    await mockApi(page);
+    // Registered after mockApi, so this answers the creek first.
+    await page.route(`${API_ORIGIN}/api/city/**`, (route) =>
+      route.fulfill({ contentType: "application/json", body: JSON.stringify({ ...exampleCity, needs: [], measures_waiting_for_approval: waiting }) }),
+    );
+    await page.goto("/city?creek=example");
+    await expect(page.getByRole("heading", { name: "What OneAquaHealth says to do" })).toBeVisible();
+    await expect(page.getByText("Find and fix leaking or wrongly connected sewers")).toHaveCount(0);
+    if (waiting) {
+      await expect(page.getByText("an empty list here means nobody has approved one")).toBeVisible();
+      await expect(page.getByText("No measure applies to what people have reported here so far.")).toHaveCount(0);
+    } else {
+      await expect(page.getByText("No measure applies to what people have reported here so far.")).toBeVisible();
+      await expect(page.getByText("nobody has approved")).toHaveCount(0);
+    }
+  });
+}
+
 test("/city with no creek says so rather than showing an empty page", async ({ page }) => {
   await mockApi(page);
   await page.goto("/city");
   await expect(page.getByText("Nobody has checked this creek yet.")).toBeVisible();
+});
+
+// /two shows a volunteer record beside a laboratory reading from another place, so the door must
+// not promise the same creek (REVIEW_03 R34).
+test("the judges' door names /two for what it shows", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  await expect(page.getByRole("link", { name: "A volunteer record in the viewer built for laboratory results" })).toHaveAttribute("href", "/two");
+  await expect(page.getByText("The same creek beside a laboratory result")).toHaveCount(0);
+});
+
+// The id is read in the browser, after the first paint, so the record must not ask for an empty
+// id first, and a link with no id says so (REVIEW_03 R43).
+test("/spot asks only for the id in the link, and says when the link names none", async ({ page }) => {
+  const calls = await mockApi(page);
+  const asked = () => calls.filter((c: { path: string }) => c.path.startsWith("/api/spot/")).map((c: { path: string }) => c.path);
+  await page.goto("/spot?id=example");
+  await expect(page.getByRole("heading", { name: "Footbridge below the library" })).toBeVisible();
+  expect(asked()).toEqual(["/api/spot/example"]);
+  await page.goto("/spot");
+  await expect(page.getByText("This link names no spot.")).toBeVisible();
+  await expect(page.getByText("No record for this spot.")).toHaveCount(0);
+  expect(asked()).toEqual(["/api/spot/example"]);
 });
 
 test("the judges' door links the creek by its readable slug", async ({ page }) => {

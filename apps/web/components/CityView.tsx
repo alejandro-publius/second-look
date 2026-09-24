@@ -182,11 +182,15 @@ export function CityView({ creekId }: { creekId: string }) {
         </a>
         .
       </p>
-      {view.needs.length === 0 ? (
+      {/* An empty list blames approval only when no measure is approved yet. With the measures
+          approved, it means nothing reported here calls for one (REVIEW_03 R28). */}
+      {view.needs.length === 0 && view.measures_waiting_for_approval ? (
         <div className="notice notice-warn">
           <Icon name="info" />
           <p>{t("city.needs_waiting")}</p>
         </div>
+      ) : view.needs.length === 0 ? (
+        <p className="muted">{t("city.needs_none")}</p>
       ) : (
         <div className="card">
           {view.needs.map((n) => (

@@ -3,7 +3,9 @@ import { t } from "@/lib/t";
 
 export const metadata: Metadata = { title: `${t("how.title")}: ${t("app.name")}` };
 
-const PLAN_TAG = process.env.NEXT_PUBLIC_PLAN_TAG || "prereg-v1 (not yet tagged)";
+// The plan was tagged prereg-v1 on 2026-09-21, before any participant, and a tag is never moved
+// (hard rules 13 and 15), so the page names it as made (REVIEW_03 R30).
+const PLAN_TAG = process.env.NEXT_PUBLIC_PLAN_TAG || "prereg-v1";
 
 export default function HowWeKnowPage() {
   return (

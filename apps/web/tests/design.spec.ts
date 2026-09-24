@@ -75,3 +75,18 @@ test("tap targets: consent, test item, lesson card and the end screen", async ({
   await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();
   await tapTargets(page, "end screen");
 });
+
+// /accessibility says buttons and links are at least 48 pixels tall. The judges' door is a list of
+// links a judge taps first, so each is held to that (REVIEW_03 R40).
+test("tap targets: every link on the judges' door is at least 48 pixels tall", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  await expect(page.getByRole("heading", { name: "For judges" })).toBeVisible();
+  const links = await page
+    .getByRole("navigation", { name: "For judges" })
+    .getByRole("link")
+    .evaluateAll((as) => as.map((a) => ({ name: (a.textContent ?? "").trim(), height: a.getBoundingClientRect().height })));
+  expect(links.length).toBeGreaterThanOrEqual(10);
+  const short = links.filter((l) => l.height < 48).map((l) => `${l.name}: ${Math.round(l.height)}`);
+  expect(short, "links under 48 pixels tall").toEqual([]);
+});

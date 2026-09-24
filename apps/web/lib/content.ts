@@ -242,3 +242,16 @@ export function shownPhotos(): Photo[] {
 export function walkById(id: string): Walk | undefined {
   return (content.walks ?? []).find((w) => w.id === id);
 }
+
+/**
+ * "Question n of total" for the form question at `index` of the questions on screen. A follow-up,
+ * such as "Which ones?" after a yes on invasive plants, belongs to the question before it and
+ * shares its number, so the total stays the same from the first question (REVIEW_03 R42).
+ */
+export function questionCount(shown: FormItem[], index: number): { n: number; total: number } {
+  const main = (item: FormItem) => !item.depends_on;
+  return {
+    n: Math.max(1, shown.slice(0, index + 1).filter(main).length),
+    total: content.form.items.filter(main).length,
+  };
+}

@@ -44,6 +44,37 @@ test("panel: identifiers stripped, the sentence on consent, the code after the s
   }
 });
 
+// The service worker caches every page it fetches (public/sw.js). Opened a second time, the panel's
+// link goes through it, and its cache key must not keep the panel's identifiers (REVIEW_03 R03).
+test.describe("with the service worker running", () => {
+  test.use({ serviceWorkers: "allow" });
+
+  test("a panel link opened twice leaves no panel identifier in any cache", async ({ page }) => {
+    await mockApi(page, { lessonFirst: true });
+    const link = "/t?src=panel&PROLIFIC_PID=pid5f3a9&STUDY_ID=study77&SESSION_ID=sess42";
+    await page.goto(link);
+    await expect(page.getByRole("heading", { name: "Before you start" })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null), { timeout: 30_000 }).toBe(true);
+    await page.goto(link);
+    await expect(page.getByRole("heading", { name: "Before you start" })).toBeVisible();
+    const cached = () =>
+      page.evaluate(async () => {
+        const urls: string[] = [];
+        for (const name of await caches.keys()) {
+          const cache = await caches.open(name);
+          for (const req of await cache.keys()) urls.push(`${name} ${req.url}`);
+        }
+        return urls;
+      });
+    // The second visit's page lands in the runtime cache, under some key for /t.
+    await expect.poll(async () => (await cached()).filter((u) => /-runtime \S+\/t(\?|$)/.test(u)).length, { timeout: 15_000 }).toBeGreaterThan(0);
+    const all = (await cached()).join(" ");
+    for (const id of ["pid5f3a9", "study77", "sess42", "PROLIFIC_PID", "STUDY_ID", "SESSION_ID"]) {
+      expect(all).not.toContain(id);
+    }
+  });
+});
+
 test("not panel: no sentence and no code, and other query parameters are stripped too", async ({ page }) => {
   const calls = await mockApi(page, { lessonFirst: true });
   await page.goto("/t?src=poster&utm_source=x");

@@ -1361,6 +1361,12 @@ def check_panel_prep(root: Path) -> list[str]:
         "the exact link": r"https://second-look-79t\.pages\.dev/t\?src=panel",
         "how to watch progress": r"make panel-status",
         "the counts endpoint": r"/api/test/counts",
+        # REVIEW_03 R06: the code is public, so the codes are checked against finished sessions.
+        "the check of submitted codes against make panel-status before paying": (
+            r"Before you approve any payment[\s\S]{0,200}?make panel-status"
+        ),
+        "that the code is visible in the page source": r"visible in the page source",
+        "that the analysis counts only finished sessions": r"counts only finished sessions",
     }
     for what, pattern in needs.items():
         if not re.search(pattern, study):

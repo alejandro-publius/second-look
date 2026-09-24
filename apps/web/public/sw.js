@@ -1,6 +1,7 @@
 /* Second Look service worker. Hand written, no packages.
  * - Precaches the lesson and test screens plus the placeholder photos listed in /precache.json.
- * - Same-origin pages: network first, cache fallback, then /offline.
+ * - Same-origin pages: network first, cache fallback, then /offline. A page is cached under its
+ *   path and src only, never the rest of its query (see pageKey).
  * - Same-origin static files: cache first, refreshed in the background.
  * - Never touches the API origin, /api/ or anything cross-origin. Never caches POST.
  * - On a "sync" event or a "flush" message it asks open pages to send the offline queue
@@ -8,7 +9,7 @@
  */
 // The cache name carries the content hash, so new photos and new copy replace the placeholders
 // on the next visit instead of hiding behind a stale cache. build-content.mjs rewrites this line.
-const VERSION = "sl-3436a125a9e7df63";
+const VERSION = "sl-a56095b8b499c495";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 
@@ -71,14 +72,24 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(networkFirst(req));
 });
 
+// The cache key of a page: its path, plus src when the link has one. A research panel adds its own
+// identifiers to our link, and nothing but src from a link may be kept (docs/internal/PANEL_STUDY.md).
+// Every page reads its query in the browser, so one copy per path and src serves any query.
+function pageKey(req) {
+  const url = new URL(req.url);
+  const src = url.searchParams.get("src");
+  return url.origin + url.pathname + (src === null ? "" : `?src=${encodeURIComponent(src)}`);
+}
+
 async function networkFirst(req) {
   const cache = await caches.open(RUNTIME);
+  const key = req.mode === "navigate" ? pageKey(req) : req;
   try {
     const res = await fetch(req);
-    if (res && res.ok) cache.put(req, res.clone()).catch(() => undefined);
+    if (res && res.ok) cache.put(key, res.clone()).catch(() => undefined);
     return res;
   } catch {
-    const hit = (await cache.match(req)) || (await caches.match(req));
+    const hit = (await cache.match(key)) || (await caches.match(key));
     if (hit) return hit;
     if (req.mode === "navigate") {
       const offline = await caches.match("/offline");

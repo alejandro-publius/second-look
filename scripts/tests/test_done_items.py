@@ -1131,3 +1131,16 @@ def test_the_invasive_list_counts_once_a_plant_with_a_taxon_id_is_approved(tmp_p
         "invasive_plants:\n  - latin_name: Arundo donax\n    inaturalist_taxon_id: 64017\n",
     )
     assert di.check_invasive_list(tmp_path) == []
+
+
+def test_the_panel_study_checks_codes_against_finished_sessions_before_paying(
+    tmp_path: Path,
+) -> None:
+    # REVIEW_03 R06: the completion code is in the page source, so a code alone proves nothing.
+    root = Path(__file__).resolve().parents[2]
+    assert di.check_panel_prep(root) == []
+    study = (root / "docs" / "internal" / "PANEL_STUDY.md").read_text(encoding="utf-8")
+    write(tmp_path, "docs/internal/PANEL_STUDY.md", study.replace("Before you approve", "Then"))
+    assert has(di.check_panel_prep(tmp_path), "the check of submitted codes against make panel")
+    write(tmp_path, "docs/internal/PANEL_STUDY.md", study.replace("page source", "page"))
+    assert has(di.check_panel_prep(tmp_path), "visible in the page source")

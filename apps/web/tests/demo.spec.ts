@@ -83,6 +83,9 @@ test("judge mode is shut before the lock and open after it", async ({ page }) =>
   await page.clock.install({ time: new Date("2026-09-24T12:00:00Z") });
   await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Judge mode opens on Sep 28" })).toBeVisible();
+  // One moment, said once in both zones, so the heading's Sep 28 and the Sep 27 below it agree
+  // (REVIEW_03 R44).
+  await expect(page.getByText("It opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.")).toBeVisible();
   // Shut means shut: no photo is fetched and no start button exists.
   await expect(page.locator("img.photo, img.photo-large")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start judge mode" })).toHaveCount(0);

@@ -512,6 +512,14 @@ figcaption {
   padding-top: var(--s1);
 }
 
+/* A row whose label is a link, as on the judges' door: the link is the whole tap target and is at
+   least as tall as /accessibility promises (REVIEW_03 R40). */
+.row-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+}
+
 /* Bottom sheet. */
 .sheet-scrim {
   position: fixed;

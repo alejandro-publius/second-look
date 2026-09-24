@@ -15,7 +15,13 @@ before any participant (`prereg-v1`), and every session that ends before the dat
    an anonymous usability test of a training tool, but whether your university's rules count a
    paid one as human subjects research is yours to check; if they need a review, do not launch,
    and the analysis reports whatever arrived through the public link.
-4. Publish it. Nothing else is needed: the study runs itself. Watch it with `make panel-status`.
+4. Publish it. The study runs itself. Watch it with `make panel-status`.
+5. Before you approve any payment, compare the number of completion codes the panel shows as
+   submitted with the completed `panel` sessions that `make panel-status` prints. The code is the
+   same for everyone and is visible in the page source, where anyone can read it, so a code alone
+   does not prove a finished session. The analysis counts only finished sessions. If the panel
+   shows more codes than finished sessions, stop and look before you approve: the extra codes did
+   not come from a finished test.
 
 ## The fields
 
@@ -45,7 +51,8 @@ What the privacy page and the analysis plan list: a random session id, the group
 the timings, a hash of a random token the browser makes, the device class, the consent version,
 and the source label `panel`. Nothing from the panel's link but `src` is stored or sent: the site
 rewrites the address before anything reads it (`apps/web/lib/session.ts`, tested in
-`apps/web/tests/panel.spec.ts`). One honest limit: the browser's first request for the page carries
+`apps/web/tests/panel.spec.ts`), and the service worker keeps a page in the phone's cache under its
+path and `src` only (`apps/web/public/sw.js`). One honest limit: the browser's first request for the page carries
 the whole link the panel used, so if the panel adds its own id, Cloudflare's edge sees that one
 request as any host would (`docs/DATA_HANDLING.md` says what the host logs).
 

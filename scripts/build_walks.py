@@ -76,6 +76,18 @@ def frame_seconds(photo_id: str) -> int:
     return int(photo_id.rsplit("-", 1)[1])
 
 
+# Country names that read with "the" after "in", like the United Kingdom (REVIEW_03 R41).
+THE_NAMES = {"Bahamas", "Gambia", "Maldives", "Netherlands", "Philippines"}
+THE_LAST_WORDS = {"Islands", "Kingdom", "Republic", "States"}
+
+
+def creek_name(country: str) -> str:
+    """A walk's creek name: A creek in Russia, A creek in the United Kingdom."""
+    words = country.split()
+    the = country in THE_NAMES or words[0] == "United" or words[-1] in THE_LAST_WORDS
+    return f"A creek in {'the ' if the else ''}{country}"
+
+
 def ranked_by_country(
     videos: list[dict[str, str]], frames: dict[str, list[str]]
 ) -> list[list[dict[str, str]]]:
@@ -357,7 +369,7 @@ def main(argv: list[str] | None = None) -> int:
             "license": license_code(v["license"]),
             "source_url": v["source_url"],
             "country": v["country"],
-            "creek_name": f"A creek in {v['country']}",
+            "creek_name": creek_name(v["country"]),
             "spot_name": "The stretch in the clip",
             "clip": {
                 "file": f"walks/{v['id']}.mp4",

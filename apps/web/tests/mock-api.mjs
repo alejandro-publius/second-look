@@ -223,7 +223,7 @@ export const exampleObservation = (performer, method, note) => ({
   note: note ? [{ text: note }] : undefined,
 });
 
-export const exampleValidation = { ran_at_utc: "2026-09-20T22:58:03+00:00", validator_version: "6.10.4", ig_commit: "b907cf0", fhir_version: "4.0.1", terminology_checks_ran: false, errors: 0, warnings: 15 };
+export const exampleValidation = { ran_at_utc: "2026-09-20T22:58:03+00:00", validator_version: "6.10.4", ig_commit: "b907cf0", fhir_version: "4.0.1", terminology_checks_ran: false, errors: 0, warnings: 15, files_validated: 14, walk_records_validated: 2 };
 
 /**
  * Registers the fake API on a page. Options: lessonFirst (bool), followups (array), theirsStatus,

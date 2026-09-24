@@ -15,3 +15,15 @@ export function useQueryParam(name: string): string {
     () => "",
   );
 }
+
+/**
+ * The same, but null until the browser has read the address, so a page can tell a link with no
+ * value ("") from one not read yet, and never asks the API about an empty id (REVIEW_03 R43).
+ */
+export function useQueryParamOrNull(name: string): string | null {
+  return useSyncExternalStore(
+    () => () => undefined,
+    () => new URLSearchParams(window.location.search).get(name) ?? "",
+    () => null,
+  );
+}
