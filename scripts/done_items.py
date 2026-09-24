@@ -65,6 +65,9 @@ VOICE_MIN_SECONDS = 120.0
 LOW_SEVERITY = {"none", "cosmetic"}
 SUBMIT_ALLOWED = {"video_link", "repo_public"}
 DEVPOST_RE = re.compile(r"https://devpost\.com/software/[A-Za-z0-9-]+")
+# The hackathon's own Devpost site (docs/notes/sources.md). A project page lists it under
+# "Submitted to" once the project is submitted there.
+HACKATHON = "oneaquahealth-ieee-hackathon.devpost.com"
 
 Check = Callable[[Path], list[str]]
 Fetch = Callable[[str], tuple[int, str]]
@@ -1220,12 +1223,29 @@ def devpost_link(root: Path) -> str | None:
     return m.group(0) if m else None
 
 
+def our_page(url: str, status: int, text: str) -> list[str]:
+    # Another team's project already answers at devpost.com/software/second-look, so a page that
+    # merely loads proves nothing. Ours was filled from docs/devpost.md, which links the live site.
+    if status != 200:
+        return [f"{url} answered {status or 'nothing'}, not 200"]
+    host = LIVE.split("//", 1)[1]
+    return [] if host in text else [f"{url} does not link {host}, so it is not our project page"]
+
+
 def check_devpost_page(root: Path, get: Fetch = fetch) -> list[str]:
     url = devpost_link(root)
     if url is None:
         return ["docs/devpost.md names no devpost.com/software page"]
-    status, _ = get(url)
-    return [] if status == 200 else [f"{url} answered {status or 'nothing'}, not 200"]
+    return our_page(url, *get(url))
+
+
+def submitted_to(text: str) -> str:
+    """The "Submitted to" part of a Devpost project page, up to the end of its list. The page marks
+    it id="submissions"; the words alone are the fallback, since a description may use them too."""
+    m = re.search(r"id=[\"']submissions[\"'](.*?)</ul>", text, re.S) or re.search(
+        r"submitted\s+to(.*?)</ul>", text, re.I | re.S
+    )
+    return m.group(1) if m else ""
 
 
 def check_devpost_submitted(root: Path, get: Fetch = fetch) -> list[str]:
@@ -1233,11 +1253,10 @@ def check_devpost_submitted(root: Path, get: Fetch = fetch) -> list[str]:
     if url is None:
         return ["docs/devpost.md names no devpost.com/software page"]
     status, text = get(url)
-    if status != 200:
-        return [f"{url} answered {status or 'nothing'}, not 200"]
-    return (
-        [] if re.search(r"submitted to", text, re.I) else [f"{url} does not say it was submitted"]
-    )
+    problems = our_page(url, status, text)
+    if status == 200 and HACKATHON not in submitted_to(text):
+        problems.append(f"{url} does not say it was submitted to {HACKATHON}")
+    return problems
 
 
 CHECKS: dict[str, Check] = {

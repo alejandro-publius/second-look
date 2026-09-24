@@ -965,14 +965,43 @@ def test_the_video_link_is_in_both_files_and_answers(tmp_path: Path) -> None:
     assert has(di.check_video_link(tmp_path, fake_get(404)), "answered 404")
 
 
+def devpost_page(hackathon: str, site: str = "https://second-look-79t.pages.dev") -> str:
+    """The shape of a real Devpost project page: links in the story, then the submissions list."""
+    return (
+        f'<div id="app-details-left"><a href="{site}">Try it out</a></div>'
+        '<div id="submissions" class="section"><h4>Submitted to</h4>'
+        f'<ul class="software-list-with-thumbnail"><li><a href="https://{hackathon}/">'
+        "A hackathon</a></li></ul></div>"
+        '<section id="app-team"><ul><li>A person</li></ul></section>'
+    )
+
+
+OURS = devpost_page("oneaquahealth-ieee-hackathon.devpost.com")
+# devpost.com/software/second-look is another team's "Second Look", submitted elsewhere.
+THEIRS = devpost_page("mac-a-thon-2026.devpost.com", site="https://github.com/someone/else")
+
+
 def test_devpost_page_and_submission(tmp_path: Path) -> None:
     write(tmp_path, "docs/devpost.md", "Paste from here.\n")
-    assert di.check_devpost_page(tmp_path, fake_get(200))
-    write(tmp_path, "docs/devpost.md", "Page: https://devpost.com/software/second-look\n")
-    assert di.check_devpost_page(tmp_path, fake_get(200)) == []
-    assert di.check_devpost_page(tmp_path, fake_get(404))
+    assert di.check_devpost_page(tmp_path, fake_get(200, OURS))
+    write(tmp_path, "docs/devpost.md", "Page: https://devpost.com/software/second-look-x1\n")
+    assert di.check_devpost_page(tmp_path, fake_get(200, OURS)) == []
+    assert di.check_devpost_page(tmp_path, fake_get(404, OURS))
+    assert has(di.check_devpost_page(tmp_path, fake_get(200, THEIRS)), "not our project page")
     assert has(di.check_devpost_submitted(tmp_path, fake_get(200, "Built with")), "not say")
-    assert di.check_devpost_submitted(tmp_path, fake_get(200, "Submitted to the hackathon")) == []
+    assert di.check_devpost_submitted(tmp_path, fake_get(200, OURS)) == []
+
+
+def test_a_page_submitted_to_another_hackathon_does_not_count(tmp_path: Path) -> None:
+    write(tmp_path, "docs/devpost.md", "Page: https://devpost.com/software/second-look\n")
+    assert has(di.check_devpost_submitted(tmp_path, fake_get(200, THEIRS)), "does not say")
+    assert has(di.check_devpost_submitted(tmp_path, fake_get(200, THEIRS)), "not our project")
+    # Our page, submitted elsewhere, with our hackathon named in the story above the list.
+    story = devpost_page("mac-a-thon-2026.devpost.com").replace(
+        "Try it out", "Built for oneaquahealth-ieee-hackathon.devpost.com"
+    )
+    problems = di.check_devpost_submitted(tmp_path, fake_get(200, story))
+    assert len(problems) == 1 and "does not say it was submitted to" in problems[0]
 
 
 def test_main_prints_the_first_gap_last_and_exits_1(

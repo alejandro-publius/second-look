@@ -49,7 +49,9 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 - **The voice** is a recording of at least 120 seconds in `~/second-look-media/voice/`, outside
   the repo (`SECOND_LOOK_MEDIA` moves the folder).
 - **Devpost.** Its project page link, `https://devpost.com/software/<name>`, goes in
-  `docs/devpost.md`.
+  `docs/devpost.md`. The page counts as ours only when it links the live site, because another
+  team's "Second Look" already answers at `devpost.com/software/second-look`. It counts as
+  submitted only when its "Submitted to" list links `oneaquahealth-ieee-hackathon.devpost.com`.
 
 ## UPDATE_22
 
