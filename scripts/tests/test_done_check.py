@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from scripts import done_check as dc
+from scripts import done_items
 
 ROOT = Path(__file__).resolve().parents[2]
 HEADER = (
@@ -304,3 +305,41 @@ def test_only_picks_items_and_refuses_an_unknown_id(
     assert code == 0 and lines[-1] == "RED: 0 BLOCKED: 0 HUMAN: 0"
     code, lines = run_main(tmp_path, capsys, text, "--only", "D09")
     assert code == 2
+
+
+# The real checklist
+
+
+INTERNAL = ROOT.joinpath("docs", "internal")
+
+
+@pytest.mark.skipif(not INTERNAL.is_dir(), reason="the working notes were removed at go-public")
+def test_the_real_checklist_reads_and_every_command_names_real_parts() -> None:
+    items = dc.parse(dc.DONE_FILE.read_text(encoding="utf-8"))
+    kinds = {i.kind for i in items}
+    assert kinds == set(dc.KINDS)
+    targets = done_items.make_targets(ROOT)
+    for it in items:
+        for cmd in (it.command, it.cause_test):
+            for name in re.findall(r"done_items\.py\s+([a-z-]+)", cmd):
+                assert name in done_items.CHECKS, (
+                    f"{it.id} runs a check that does not exist: {name}"
+                )
+            for target in re.findall(r"\bmake\s+(?:-n\s+)?([a-z][a-z0-9-]*)", cmd):
+                assert target in targets, f"{it.id} runs make {target}, which the Makefile lacks"
+            for path in re.findall(r"\b(scripts/[a-z_]+\.py|scripts/tests/[a-z_]+\.py)\b", cmd):
+                assert (ROOT / path).is_file(), f"{it.id} runs {path}, which does not exist"
+    humans = [i for i in items if i.kind == "HUMAN"]
+    assert len(humans) == done_items.human_count(ROOT) and humans
+
+
+@pytest.mark.skipif(not INTERNAL.is_dir(), reason="the working notes were removed at go-public")
+def test_the_real_checklist_keeps_the_order_of_update_27() -> None:
+    text = dc.DONE_FILE.read_text(encoding="utf-8")
+    groups = [ln[3:] for ln in text.splitlines() if ln.startswith("## ")]
+    wanted = ["UPDATE_22", "Block 23", "Block 24", "Hardening", "submission", "Dated", "Human"]
+    at = [next(i for i, g in enumerate(groups) if w.lower() in g.lower()) for w in wanted]
+    assert at == sorted(at)
+    kinds = [i.kind for i in dc.parse(text)]
+    first_human = kinds.index("HUMAN")
+    assert set(kinds[first_human:]) == {"HUMAN"}, "the human items come last"
