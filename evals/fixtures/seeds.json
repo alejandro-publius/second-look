@@ -1,0 +1,30 @@
+{
+  "about": "What make reproduce needs to make each synthetic result again from its seed. The seed is in each results file. The fake client's profiles are the ones evals/models.yaml held when these runs were made (from commit e0b2fdc to 88d4a29, before Opus 5.5 replaced Opus 5). A fake profile is a made-up chance of a right answer, not a measurement.",
+  "fake_profiles": {
+    "claude-haiku-4-5-20251001": {
+      "malformed_rate": 0.1,
+      "accuracy": {"artificial_bank": 0.6, "dug_out_channel": 0.5, "invasive_plant": 0.55, "pipe_running": 0.6}
+    },
+    "claude-sonnet-5": {
+      "malformed_rate": 0.03,
+      "accuracy": {"artificial_bank": 0.9, "dug_out_channel": 0.7, "invasive_plant": 0.6, "pipe_running": 0.95}
+    },
+    "claude-opus-5": {
+      "malformed_rate": 0.0,
+      "accuracy": {"artificial_bank": 1.0, "dug_out_channel": 0.95, "invasive_plant": 0.8, "pipe_running": 1.0}
+    }
+  },
+  "placeholder_pool": {
+    "about": "The benchmark pool of results/benchmark_20260921T001415Z.json: the 16 gray placeholders that stood in for the test photos on Sep 20, with the feature and the label each carried in photos/manifest.csv at commit 077ad59. The fake client needs only these three things, never the image.",
+    "rows": [
+      ["ph-test-01", "artificial_bank", "present"], ["ph-test-02", "artificial_bank", "present"],
+      ["ph-test-03", "artificial_bank", "absent"], ["ph-test-04", "artificial_bank", "absent"],
+      ["ph-test-05", "dug_out_channel", "present"], ["ph-test-06", "dug_out_channel", "present"],
+      ["ph-test-07", "dug_out_channel", "absent"], ["ph-test-08", "dug_out_channel", "absent"],
+      ["ph-test-09", "invasive_plant", "present"], ["ph-test-10", "invasive_plant", "present"],
+      ["ph-test-11", "invasive_plant", "absent"], ["ph-test-12", "invasive_plant", "absent"],
+      ["ph-test-13", "pipe_running", "present"], ["ph-test-14", "pipe_running", "present"],
+      ["ph-test-15", "pipe_running", "absent"], ["ph-test-16", "pipe_running", "absent"]
+    ]
+  }
+}

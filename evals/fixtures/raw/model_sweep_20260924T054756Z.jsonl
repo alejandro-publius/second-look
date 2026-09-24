@@ -1,0 +1,385 @@
+{"billing": "direct", "calls": 192, "cost_log": "results/cost_log.jsonl", "cost_log_lines": [2282, 2473], "fixture": "the raw model responses of one paid run, for make reproduce", "generated_at_utc": "2026-09-24T05:47:56+00:00", "kept": "every reply: the answer tool's input as sent, tokens, error", "prices_from": "evals/pricing.yaml at commit 8cecc38, the same as today", "prices_per_million": {"claude-fable-5-1": [10.0, 50.0], "claude-haiku-4-5-20251001": [1.0, 5.0], "claude-opus-5-5": [4.0, 20.0], "claude-sonnet-5": [2.0, 10.0]}, "run": "results/model_sweep_20260924T054756Z.json", "script": "evals/model_sweep.py", "written_by": "evals/extract_raw.py"}
+{"error": null, "input_tokens": 1902, "item_id": "t01", "model": "claude-haiku-4-5-20251001", "output_tokens": 97, "raw": {"answer": "yes", "note": "The stream banks are lined with concrete or stone structures set in concrete, visible as gray/white reinforced surfaces on both sides of the water channel."}, "run": 0}
+{"error": null, "input_tokens": 1395, "item_id": "t02", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "yes", "note": "The banks show clear evidence of artificial construction with concrete/cement structures visible on the left side and engineered sloped surfaces throughout."}, "run": 0}
+{"error": null, "input_tokens": 1746, "item_id": "t03", "model": "claude-haiku-4-5-20251001", "output_tokens": 98, "raw": {"answer": "no", "note": "The banks appear natural with exposed rock/shale cliff on the right and natural gravel/pebble beach. No concrete or artificial construction visible."}, "run": 0}
+{"error": null, "input_tokens": 1902, "item_id": "t04", "model": "claude-haiku-4-5-20251001", "output_tokens": 92, "raw": {"answer": "no", "note": "Banks appear natural with soil, grass, moss-covered logs, and tree roots. No visible concrete or artificial stone structures."}, "run": 0}
+{"error": null, "input_tokens": 1743, "item_id": "t05", "model": "claude-haiku-4-5-20251001", "output_tokens": 94, "raw": {"answer": "yes", "note": "The stream channel appears artificially straightened with uniform banks and a very straight course through the landscape, typical of engineered waterways."}, "run": 0}
+{"error": null, "input_tokens": 1899, "item_id": "t06", "model": "claude-haiku-4-5-20251001", "output_tokens": 99, "raw": {"answer": "yes", "note": "The stream channel appears notably straight and uniform in width, with clear banks and a linear path through the wooded area, suggesting artificial straightening or excavation."}, "run": 0}
+{"error": null, "input_tokens": 1743, "item_id": "t07", "model": "claude-haiku-4-5-20251001", "output_tokens": 103, "raw": {"answer": "no", "note": "The stream shows natural meandering curves and bends through the forest, with vegetation and trees growing naturally along its banks. No signs of straightening or artificial channelization visible."}, "run": 0}
+{"error": null, "input_tokens": 1899, "item_id": "t08", "model": "claude-haiku-4-5-20251001", "output_tokens": 95, "raw": {"answer": "no", "note": "Stream shows natural meandering curves with fallen logs and organic debris. Banks appear naturally vegetated without signs of artificial straightening or excavation."}, "run": 0}
+{"error": null, "input_tokens": 1901, "item_id": "t09", "model": "claude-haiku-4-5-20251001", "output_tokens": 98, "raw": {"answer": "cant_tell", "note": "Photo shows flowering plant with white flowers and green foliage, but this is not a stream. Cannot assess invasive species without stream context."}, "run": 0}
+{"error": null, "input_tokens": 1901, "item_id": "t10", "model": "claude-haiku-4-5-20251001", "output_tokens": 104, "raw": {"answer": "cant_tell", "note": "Photo shows a purple flower with fern-like foliage, but this is a close-up of vegetation without clear stream context or definitive identification of species origin."}, "run": 0}
+{"error": null, "input_tokens": 1901, "item_id": "t11", "model": "claude-haiku-4-5-20251001", "output_tokens": 165, "raw": {"answer": "cant_tell", "note": "This photo does not show a stream; it shows close-up flowering plants. Cannot assess stream-related invasive species."}, "run": 0}
+{"error": null, "input_tokens": 1745, "item_id": "t12", "model": "claude-haiku-4-5-20251001", "output_tokens": 233, "raw": {"answer": "cant_tell", "note": "Close-up vegetation visible but specific plant species cannot be identified with certainty from this angle and distance."}, "run": 0}
+{"error": null, "input_tokens": 1864, "item_id": "t13", "model": "claude-haiku-4-5-20251001", "output_tokens": 97, "raw": {"answer": "yes", "note": "A large orange/rust-colored pipe or drain outlet is clearly visible on the right side of the concrete structure, emptying into the creek below."}, "run": 0}
+{"error": null, "input_tokens": 1903, "item_id": "t14", "model": "claude-haiku-4-5-20251001", "output_tokens": 98, "raw": {"answer": "yes", "note": "A large circular pipe or drain outlet with a metal grate is clearly visible in the center of the image, emptying into the stream/creek below."}, "run": 0}
+{"error": null, "input_tokens": 1903, "item_id": "t15", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "no", "note": "The stream is visible with vegetation on both banks and fencing, but no visible pipe or drain outlet is apparent in this photo."}, "run": 0}
+{"error": null, "input_tokens": 1903, "item_id": "t16", "model": "claude-haiku-4-5-20251001", "output_tokens": 201, "raw": {"answer": "cant_tell", "note": "Stream visible with vegetation and trees, but no clear pipe or drain outlet is discernible in the image."}, "run": 0}
+{"error": null, "input_tokens": 1902, "item_id": "t01", "model": "claude-haiku-4-5-20251001", "output_tokens": 97, "raw": {"answer": "yes", "note": "The stream banks are lined with concrete or stone structures set in concrete, visible as gray/white reinforced surfaces on both sides of the water channel."}, "run": 1}
+{"error": null, "input_tokens": 1395, "item_id": "t02", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "yes", "note": "The banks show clear evidence of artificial construction with concrete/cement structures visible on the left side and engineered sloped surfaces throughout."}, "run": 1}
+{"error": null, "input_tokens": 1746, "item_id": "t03", "model": "claude-haiku-4-5-20251001", "output_tokens": 96, "raw": {"answer": "no", "note": "The banks appear natural with exposed rock/stone formations and vegetation. The right bank shows natural geological layering, not artificial concrete or set stones."}, "run": 1}
+{"error": null, "input_tokens": 1902, "item_id": "t04", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "no", "note": "Banks appear natural with soil, grass, fallen logs, and vegetation. No visible concrete or artificial stone structures lining the stream."}, "run": 1}
+{"error": null, "input_tokens": 1743, "item_id": "t05", "model": "claude-haiku-4-5-20251001", "output_tokens": 94, "raw": {"answer": "yes", "note": "The stream channel appears artificially straightened with uniform banks and a very straight course through the landscape, typical of engineered waterways."}, "run": 1}
+{"error": null, "input_tokens": 1899, "item_id": "t06", "model": "claude-haiku-4-5-20251001", "output_tokens": 99, "raw": {"answer": "yes", "note": "The stream channel appears notably straight and uniform in width, with clear banks and a linear path through the wooded area, suggesting artificial straightening or excavation."}, "run": 1}
+{"error": null, "input_tokens": 1743, "item_id": "t07", "model": "claude-haiku-4-5-20251001", "output_tokens": 102, "raw": {"answer": "no", "note": "The stream shows natural meandering curves and bends through the forest, with vegetation and trees growing naturally along its banks. No signs of straightening or artificial excavation visible."}, "run": 1}
+{"error": null, "input_tokens": 1899, "item_id": "t08", "model": "claude-haiku-4-5-20251001", "output_tokens": 96, "raw": {"answer": "no", "note": "Stream shows natural meandering curves and bends, fallen logs, and organic banks. No signs of straightening or artificial channelization visible."}, "run": 1}
+{"error": null, "input_tokens": 1901, "item_id": "t09", "model": "claude-haiku-4-5-20251001", "output_tokens": 98, "raw": {"answer": "cant_tell", "note": "Photo shows flowering plant with white flowers and green foliage, but this is not a stream. Cannot assess invasive species without stream context."}, "run": 1}
+{"error": null, "input_tokens": 1901, "item_id": "t10", "model": "claude-haiku-4-5-20251001", "output_tokens": 116, "raw": {"answer": "cant_tell", "note": "Photo shows a purple flower with fern-like foliage, but this is a close-up of vegetation without clear stream context or water visible. Cannot confirm if this is a stream photo or identify invasive species definitively."}, "run": 1}
+{"error": null, "input_tokens": 1901, "item_id": "t11", "model": "claude-haiku-4-5-20251001", "output_tokens": 165, "raw": {"answer": "cant_tell", "note": "This photo does not show a stream; it shows close-up flowering plants. Cannot assess stream-related invasive species."}, "run": 1}
+{"error": null, "input_tokens": 1745, "item_id": "t12", "model": "claude-haiku-4-5-20251001", "output_tokens": 234, "raw": {"answer": "cant_tell", "note": "Close-up vegetation visible but specific plant species cannot be reliably identified from this angle and distance to confirm invasive status."}, "run": 1}
+{"error": null, "input_tokens": 1864, "item_id": "t13", "model": "claude-haiku-4-5-20251001", "output_tokens": 97, "raw": {"answer": "yes", "note": "A large orange/rust-colored pipe or drain outlet is visible on the right side of the concrete structure, clearly emptying into the creek below."}, "run": 1}
+{"error": null, "input_tokens": 1903, "item_id": "t14", "model": "claude-haiku-4-5-20251001", "output_tokens": 98, "raw": {"answer": "yes", "note": "A large circular pipe or drain outlet with a metal grate is clearly visible in the center of the image, emptying into the stream/creek below."}, "run": 1}
+{"error": null, "input_tokens": 1903, "item_id": "t15", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "no", "note": "The stream is visible with vegetation on both banks and fencing, but no visible pipe or drain outlet is apparent in this photo."}, "run": 1}
+{"error": null, "input_tokens": 1903, "item_id": "t16", "model": "claude-haiku-4-5-20251001", "output_tokens": 201, "raw": {"answer": "cant_tell", "note": "Stream visible with vegetation and trees, but no clear pipe or drain outlet is discernible in the image."}, "run": 1}
+{"error": null, "input_tokens": 1902, "item_id": "t01", "model": "claude-haiku-4-5-20251001", "output_tokens": 97, "raw": {"answer": "yes", "note": "The stream banks are lined with concrete or stone structures set in concrete, visible as gray/white reinforced surfaces on both sides of the water channel."}, "run": 2}
+{"error": null, "input_tokens": 1395, "item_id": "t02", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "yes", "note": "The banks show clear evidence of artificial construction with concrete/cement structures visible on the left side and engineered sloped surfaces throughout."}, "run": 2}
+{"error": null, "input_tokens": 1746, "item_id": "t03", "model": "claude-haiku-4-5-20251001", "output_tokens": 96, "raw": {"answer": "no", "note": "The banks appear natural with exposed rock/stone formations and vegetation. The right bank shows natural geological layering, not artificial concrete or set stones."}, "run": 2}
+{"error": null, "input_tokens": 1902, "item_id": "t04", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "no", "note": "Banks appear natural with soil, grass, fallen logs, and vegetation. No visible concrete or artificial stone structures lining the stream."}, "run": 2}
+{"error": null, "input_tokens": 1743, "item_id": "t05", "model": "claude-haiku-4-5-20251001", "output_tokens": 94, "raw": {"answer": "yes", "note": "The stream channel appears artificially straightened with uniform banks and a very straight course through the landscape, typical of engineered waterways."}, "run": 2}
+{"error": null, "input_tokens": 1899, "item_id": "t06", "model": "claude-haiku-4-5-20251001", "output_tokens": 99, "raw": {"answer": "yes", "note": "The stream channel appears notably straight and uniform in width, with clear banks and a linear path through the wooded area, suggesting artificial straightening or excavation."}, "run": 2}
+{"error": null, "input_tokens": 1743, "item_id": "t07", "model": "claude-haiku-4-5-20251001", "output_tokens": 98, "raw": {"answer": "cant_tell", "note": "Stream shows natural meandering curves and vegetation, but cannot definitively determine if it was historically straightened or dug out from a single photo."}, "run": 2}
+{"error": null, "input_tokens": 1899, "item_id": "t08", "model": "claude-haiku-4-5-20251001", "output_tokens": 100, "raw": {"answer": "no", "note": "Stream shows natural meandering curves and bends with fallen logs and organic debris. Channel appears to follow natural topography without signs of straightening or artificial excavation."}, "run": 2}
+{"error": null, "input_tokens": 1901, "item_id": "t09", "model": "claude-haiku-4-5-20251001", "output_tokens": 99, "raw": {"answer": "cant_tell", "note": "This photo shows flowering plants with white flowers and green foliage, but does not show a stream. Cannot assess invasive species without stream context."}, "run": 2}
+{"error": null, "input_tokens": 1901, "item_id": "t10", "model": "claude-haiku-4-5-20251001", "output_tokens": 116, "raw": {"answer": "cant_tell", "note": "Photo shows a purple flower with fern-like foliage, but this is a close-up of vegetation without clear stream context or water visible. Cannot confirm if this is a stream photo or identify invasive species definitively."}, "run": 2}
+{"error": null, "input_tokens": 1901, "item_id": "t11", "model": "claude-haiku-4-5-20251001", "output_tokens": 165, "raw": {"answer": "cant_tell", "note": "This photo does not show a stream; it shows close-up flowering plants. Cannot assess stream-related invasive species."}, "run": 2}
+{"error": null, "input_tokens": 1745, "item_id": "t12", "model": "claude-haiku-4-5-20251001", "output_tokens": 230, "raw": {"answer": "cant_tell", "note": "Close-up vegetation visible but specific plant species cannot be identified with certainty from this angle and distance."}, "run": 2}
+{"error": null, "input_tokens": 1864, "item_id": "t13", "model": "claude-haiku-4-5-20251001", "output_tokens": 97, "raw": {"answer": "yes", "note": "A large orange/rust-colored pipe or drain outlet is clearly visible on the right side of the concrete structure, emptying into the creek below."}, "run": 2}
+{"error": null, "input_tokens": 1903, "item_id": "t14", "model": "claude-haiku-4-5-20251001", "output_tokens": 98, "raw": {"answer": "yes", "note": "A large circular pipe or drain outlet with a metal grate is clearly visible in the center of the image, emptying into the stream/creek below."}, "run": 2}
+{"error": null, "input_tokens": 1903, "item_id": "t15", "model": "claude-haiku-4-5-20251001", "output_tokens": 93, "raw": {"answer": "no", "note": "The stream is visible with vegetation on both banks and fencing, but no visible pipe or drain outlet is apparent in this photo."}, "run": 2}
+{"error": null, "input_tokens": 1903, "item_id": "t16", "model": "claude-haiku-4-5-20251001", "output_tokens": 168, "raw": {"answer": "cant_tell", "note": "Stream visible with dense vegetation and trees, but no clear pipe or drain outlet is discernible from this viewing angle."}, "run": 2}
+{"error": null, "input_tokens": 1841, "item_id": "t01", "model": "claude-sonnet-5", "output_tokens": 107, "raw": {"answer": "yes", "note": "Stream channel is lined with concrete slabs forming a straight, engineered drainage ditch with grassy slopes above."}, "run": 0}
+{"error": null, "input_tokens": 1334, "item_id": "t02", "model": "claude-sonnet-5", "output_tokens": 102, "raw": {"answer": "yes", "note": "Stream banks are lined with smooth concrete slopes and a concrete channel structure visible on both sides."}, "run": 0}
+{"error": null, "input_tokens": 1685, "item_id": "t03", "model": "claude-sonnet-5", "output_tokens": 116, "raw": {"answer": "no", "note": "Banks are natural eroded clay/soil cliff and gravel bar, with trees and vegetation, no concrete or artificial reinforcement visible."}, "run": 0}
+{"error": null, "input_tokens": 1841, "item_id": "t04", "model": "claude-sonnet-5", "output_tokens": 118, "raw": {"answer": "no", "note": "Banks are natural earth and grass, showing erosion and exposed soil, tree roots, and a fallen log\u2014no concrete or stone reinforcement visible."}, "run": 0}
+{"error": null, "input_tokens": 1676, "item_id": "t05", "model": "claude-sonnet-5", "output_tokens": 167, "raw": {"answer": "yes", "note": "Banks are straight, uniform, and evenly sloped with mown grass edges, suggesting an artificially channelized waterway rather than a natural meandering stream."}, "run": 0}
+{"error": null, "input_tokens": 1832, "item_id": "t06", "model": "claude-sonnet-5", "output_tokens": 111, "raw": {"answer": "yes", "note": "Channel has straight, uniform banks and consistent width typical of a dug/engineered watercourse rather than a natural meandering stream."}, "run": 0}
+{"error": null, "input_tokens": 1676, "item_id": "t07", "model": "claude-sonnet-5", "output_tokens": 171, "raw": {"answer": "no", "note": "Stream shows natural sinuous meanders and curves through the woods, with irregular eroded banks, no evidence of straight artificial channel dug out.\""}, "run": 0}
+{"error": null, "input_tokens": 1832, "item_id": "t08", "model": "claude-sonnet-5", "output_tokens": 158, "raw": {"answer": "no", "note": "Stream shows a natural sinuous curve with irregular banks, debris jams, and no straight artificial edges or dredged look.\""}, "run": 0}
+{"error": null, "input_tokens": 1834, "item_id": "t09", "model": "claude-sonnet-5", "output_tokens": 114, "raw": {"answer": "cant_tell", "note": "Photo shows blackberry/bramble flowers and leaves, not a stream; cannot assess invasive species in a waterway context.\"}"}, "run": 0}
+{"error": null, "input_tokens": 1834, "item_id": "t10", "model": "claude-sonnet-5", "output_tokens": 117, "raw": {"answer": "cant_tell", "note": "Photo shows a periwinkle (Vinca) flower and foliage, not a stream, so invasiveness/stream context can't be assessed.\""}, "run": 0}
+{"error": null, "input_tokens": 1834, "item_id": "t11", "model": "claude-sonnet-5", "output_tokens": 124, "raw": {"answer": "cant_tell", "note": "Photo shows yellow monkeyflower (Mimulus) close-up with green foliage background; no stream visible, and cannot determine plant nativity from image alone."}, "run": 0}
+{"error": null, "input_tokens": 1678, "item_id": "t12", "model": "claude-sonnet-5", "output_tokens": 108, "raw": {"answer": "cant_tell", "note": "Photo shows only dense green foliage/branches, no stream visible, and species identification isn't possible from this close-up."}, "run": 0}
+{"error": null, "input_tokens": 1801, "item_id": "t13", "model": "claude-sonnet-5", "output_tokens": 115, "raw": {"answer": "no", "note": "The structure is a concrete weir/grate outflow structure controlling stream flow, not a pipe or drain outlet emptying into the creek from the side.\""}, "run": 0}
+{"error": null, "input_tokens": 1840, "item_id": "t14", "model": "claude-sonnet-5", "output_tokens": 99, "raw": {"answer": "yes", "note": "A concrete culvert with a metal grate outlet is visible, emptying into the stream/pond."}, "run": 0}
+{"error": null, "input_tokens": 1840, "item_id": "t15", "model": "claude-sonnet-5", "output_tokens": 97, "raw": {"answer": "no", "note": "No pipe or drain outlet visible; only natural banks, grass, and trees line the stream."}, "run": 0}
+{"error": null, "input_tokens": 1840, "item_id": "t16", "model": "claude-sonnet-5", "output_tokens": 110, "raw": {"answer": "no", "note": "The photo shows a winding wooded creek with muddy banks, vegetation, and trees; no pipe or drain outlet is visible."}, "run": 0}
+{"error": null, "input_tokens": 1841, "item_id": "t01", "model": "claude-sonnet-5", "output_tokens": 99, "raw": {"answer": "yes", "note": "The stream channel has concrete-lined banks and bottom, forming an engineered drainage canal."}, "run": 1}
+{"error": null, "input_tokens": 1334, "item_id": "t02", "model": "claude-sonnet-5", "output_tokens": 99, "raw": {"answer": "yes", "note": "The stream channel has concrete-lined banks and sloped concrete embankments visible on both sides."}, "run": 1}
+{"error": null, "input_tokens": 1685, "item_id": "t03", "model": "claude-sonnet-5", "output_tokens": 105, "raw": {"answer": "no", "note": "Banks show natural eroded clay/soil cliff and gravel bar, no concrete or engineered stonework visible."}, "run": 1}
+{"error": null, "input_tokens": 1841, "item_id": "t04", "model": "claude-sonnet-5", "output_tokens": 134, "raw": {"answer": "no", "note": "Banks are natural earth with grass, exposed roots and eroded soil; no concrete or stonework visible."}, "run": 1}
+{"error": null, "input_tokens": 1676, "item_id": "t05", "model": "claude-sonnet-5", "output_tokens": 164, "raw": {"answer": "yes", "note": "Straight, uniform banks with even grassy slopes and consistent width suggest a man-made or dredged channel rather than a natural meandering stream.\""}, "run": 1}
+{"error": null, "input_tokens": 1832, "item_id": "t06", "model": "claude-sonnet-5", "output_tokens": 156, "raw": {"answer": "yes", "note": "The waterway has straight, uniform banks and consistent width, suggesting it's a man-made or straightened channel rather than a naturally meandering stream."}, "run": 1}
+{"error": null, "input_tokens": 1676, "item_id": "t07", "model": "claude-sonnet-5", "output_tokens": 164, "raw": {"answer": "no", "note": "Channel shows natural meandering curves with irregular banks and vegetation, no signs of straightening or excavation."}, "run": 1}
+{"error": null, "input_tokens": 1832, "item_id": "t08", "model": "claude-sonnet-5", "output_tokens": 164, "raw": {"answer": "no", "note": "Stream shows natural meandering curves, uneven banks with vegetation and woody debris, no signs of artificial straightening or dredging."}, "run": 1}
+{"error": null, "input_tokens": 1834, "item_id": "t09", "model": "claude-sonnet-5", "output_tokens": 115, "raw": {"answer": "cant_tell", "note": "Photo shows blackberry/bramble flowers and leaves, not a stream, so invasiveness/stream context cannot be assessed."}, "run": 1}
+{"error": null, "input_tokens": 1834, "item_id": "t10", "model": "claude-sonnet-5", "output_tokens": 263, "raw": {"answer": "yes", "note": "Photo shows periwinkle (Vinca), a known invasive groundcover in many regions; not a stream photo but this plant is present."}, "run": 1}
+{"error": null, "input_tokens": 1834, "item_id": "t11", "model": "claude-sonnet-5", "output_tokens": 124, "raw": {"answer": "cant_tell", "note": "Photo shows a yellow monkeyflower (Mimulus) close-up with green foliage; no stream visible and cannot assess invasiveness from this image alone."}, "run": 1}
+{"error": null, "input_tokens": 1678, "item_id": "t12", "model": "claude-sonnet-5", "output_tokens": 113, "raw": {"answer": "cant_tell", "note": "Photo shows dense leafy shrub/tree foliage with no stream visible, making species identification and invasive status impossible to determine.\""}, "run": 1}
+{"error": null, "input_tokens": 1801, "item_id": "t13", "model": "claude-sonnet-5", "output_tokens": 173, "raw": {"answer": "no", "note": "Concrete structure with metal grate appears to be a flow control/screening structure, not a pipe or drain outlet emptying into the creek."}, "run": 1}
+{"error": null, "input_tokens": 1840, "item_id": "t14", "model": "claude-sonnet-5", "output_tokens": 98, "raw": {"answer": "yes", "note": "A concrete culvert with a metal grate outlet is visible emptying into the creek/stream."}, "run": 1}
+{"error": null, "input_tokens": 1840, "item_id": "t15", "model": "claude-sonnet-5", "output_tokens": 102, "raw": {"answer": "no", "note": "No pipe or drain outlet visible; only grassy banks, trees, and fencing are seen along the stream."}, "run": 1}
+{"error": null, "input_tokens": 1840, "item_id": "t16", "model": "claude-sonnet-5", "output_tokens": 141, "raw": {"answer": "no", "note": "The photo shows a natural woodland stream with muddy banks, trees, and vegetation; no pipe or drain outlet is visible."}, "run": 1}
+{"error": null, "input_tokens": 1841, "item_id": "t01", "model": "claude-sonnet-5", "output_tokens": 100, "raw": {"answer": "yes", "note": "The channel banks are lined with poured concrete slabs forming a straight, engineered drainage canal."}, "run": 2}
+{"error": null, "input_tokens": 1334, "item_id": "t02", "model": "claude-sonnet-5", "output_tokens": 98, "raw": {"answer": "yes", "note": "Stream channel has concrete sloped banks/walls on both sides forming an engineered canal."}, "run": 2}
+{"error": null, "input_tokens": 1685, "item_id": "t03", "model": "claude-sonnet-5", "output_tokens": 111, "raw": {"answer": "no", "note": "Banks are natural eroded soil/clay cliff and gravel bar with vegetation, no concrete or man-made stone structures visible."}, "run": 2}
+{"error": null, "input_tokens": 1841, "item_id": "t04", "model": "claude-sonnet-5", "output_tokens": 130, "raw": {"answer": "no", "note": "Banks show natural eroded soil and grass with tree roots, no concrete or stone reinforcement visible."}, "run": 2}
+{"error": null, "input_tokens": 1676, "item_id": "t05", "model": "claude-sonnet-5", "output_tokens": 117, "raw": {"answer": "yes", "note": "Straight, uniform banks with regular grassy embankments suggest an artificial channel or dug/straightened waterway rather than a natural meandering stream."}, "run": 2}
+{"error": null, "input_tokens": 1832, "item_id": "t06", "model": "claude-sonnet-5", "output_tokens": 109, "raw": {"answer": "yes", "note": "The channel has uniform width, straight parallel banks, and a canal-like appearance typical of an engineered/dredged waterway."}, "run": 2}
+{"error": null, "input_tokens": 1676, "item_id": "t07", "model": "claude-sonnet-5", "output_tokens": 152, "raw": {"answer": "no", "note": "Stream shows natural sinuous meandering curves through the woods, not a straight dug channel."}, "run": 2}
+{"error": null, "input_tokens": 1832, "item_id": "t08", "model": "claude-sonnet-5", "output_tokens": 154, "raw": {"answer": "no", "note": "The stream shows a natural meandering channel with irregular banks, woody debris, and no signs of artificial straightening or dredging."}, "run": 2}
+{"error": null, "input_tokens": 1834, "item_id": "t09", "model": "claude-sonnet-5", "output_tokens": 139, "raw": {"answer": "cant_tell", "note": "Photo shows blackberry (Rubus) flowers in close-up, no stream visible, so stream context can't be assessed."}, "run": 2}
+{"error": null, "input_tokens": 1834, "item_id": "t10", "model": "claude-sonnet-5", "output_tokens": 112, "raw": {"answer": "cant_tell", "note": "Photo shows a purple periwinkle flower among green foliage, not a stream; cannot assess invasive species in a stream context.\""}, "run": 2}
+{"error": null, "input_tokens": 1834, "item_id": "t11", "model": "claude-sonnet-5", "output_tokens": 122, "raw": {"answer": "cant_tell", "note": "Photo shows yellow monkeyflower (Mimulus) and greenery; cannot determine invasiveness/nativity from image alone, no stream visible."}, "run": 2}
+{"error": null, "input_tokens": 1678, "item_id": "t12", "model": "claude-sonnet-5", "output_tokens": 172, "raw": {"answer": "cant_tell", "note": "Photo shows dense shrub/tree foliage with no stream visible; cannot identify species or determine if invasive.\""}, "run": 2}
+{"error": null, "input_tokens": 1801, "item_id": "t13", "model": "claude-sonnet-5", "output_tokens": 161, "raw": {"answer": "yes", "note": "Concrete culvert/drain structure with metal grate and rust staining discharges water into the creek from the bridge structure.\""}, "run": 2}
+{"error": null, "input_tokens": 1840, "item_id": "t14", "model": "claude-sonnet-5", "output_tokens": 95, "raw": {"answer": "yes", "note": "A concrete culvert with a metal grate is visible emptying into the creek/stream."}, "run": 2}
+{"error": null, "input_tokens": 1840, "item_id": "t15", "model": "claude-sonnet-5", "output_tokens": 97, "raw": {"answer": "no", "note": "No visible pipe or drain outlet; only natural banks, grass, and trees along the stream."}, "run": 2}
+{"error": null, "input_tokens": 1840, "item_id": "t16", "model": "claude-sonnet-5", "output_tokens": 112, "raw": {"answer": "no", "note": "The photo shows a wooded creek bend with muddy banks, vegetation, and tree roots; no pipe or drain outlet is visible."}, "run": 2}
+{"error": null, "input_tokens": 1775, "item_id": "t01", "model": "claude-opus-5-5", "output_tokens": 119, "raw": {"answer": "yes", "note": "The channel has a concrete lining with sloped concrete sides, and a block retaining wall runs along the left bank. Grassy slopes sit above the concrete."}, "run": 0}
+{"error": null, "input_tokens": 1268, "item_id": "t02", "model": "claude-opus-5-5", "output_tokens": 118, "raw": {"answer": "yes", "note": "The stream runs through a concrete-lined channel. The sloped banks, the low weir and the far wall are all concrete, with some grass growing on the right edge."}, "run": 0}
+{"error": null, "input_tokens": 1619, "item_id": "t03", "model": "claude-opus-5-5", "output_tokens": 118, "raw": {"answer": "no", "note": "Natural banks: a layered shale cliff on the right, a loose gravel bar, and banks covered in plants. No concrete or mortared stone anywhere."}, "run": 0}
+{"error": null, "input_tokens": 1775, "item_id": "t04", "model": "claude-opus-5-5", "output_tokens": 116, "raw": {"answer": "no", "note": "The banks are natural earth and grass with tree roots and some bare eroded soil. A fallen log lies in the water. No concrete or set stone is visible."}, "run": 0}
+{"error": null, "input_tokens": 1610, "item_id": "t05", "model": "claude-opus-5-5", "output_tokens": 454, "raw": {"answer": "yes", "note": "Long, fairly straight reach, same width throughout, with smooth, even, raised grassy banks. It looks like a man-made or reshaped channel, not a natural winding one."}, "run": 0}
+{"error": null, "input_tokens": 1766, "item_id": "t06", "model": "claude-opus-5-5", "output_tokens": 274, "raw": {"answer": "yes", "note": "The channel runs very straight, keeps the same width, has even banks and a squared-off end near the stone. It looks dug out, like a canal or moat."}, "run": 0}
+{"error": null, "input_tokens": 1610, "item_id": "t07", "model": "claude-opus-5-5", "output_tokens": 118, "raw": {"answer": "no", "note": "The stream loops through woodland in tight natural bends. It has a gravel bar, uneven undercut banks and a split channel, with no straight or engineered sections."}, "run": 0}
+{"error": null, "input_tokens": 1766, "item_id": "t08", "model": "claude-opus-5-5", "output_tokens": 193, "raw": {"answer": "no", "note": "The channel bends, has side channels, fallen wood and debris jams, and low, uneven grassy banks. I see no straight cut or dug-out, trapezoid shape."}, "run": 0}
+{"error": null, "input_tokens": 1768, "item_id": "t09", "model": "claude-opus-5-5", "output_tokens": 208, "raw": {"answer": "cant_tell", "note": "Close-up of blackberry flowers, possibly invasive Himalayan blackberry, but no stream is visible and the exact species and location are unclear."}, "run": 0}
+{"error": null, "input_tokens": 1768, "item_id": "t10", "model": "claude-opus-5-5", "output_tokens": 223, "raw": {"answer": "cant_tell", "note": "No stream visible, just a close-up of a purple 5-petal flower that looks like bigleaf periwinkle (Vinca major, often invasive), with ferns and leaves."}, "run": 0}
+{"error": null, "input_tokens": 1768, "item_id": "t11", "model": "claude-opus-5-5", "output_tokens": 226, "raw": {"answer": "cant_tell", "note": "Close-up of yellow monkeyflower with leaves, no stream visible. It's native or invasive depending on region, and the location is unknown."}, "run": 0}
+{"error": null, "input_tokens": 1612, "item_id": "t12", "model": "claude-opus-5-5", "output_tokens": 245, "raw": {"answer": "cant_tell", "note": "Photo shows only a close-up of dense shrub leaves (possibly buckthorn), but no stream is visible, and the species can't be confirmed."}, "run": 0}
+{"error": null, "input_tokens": 1735, "item_id": "t13", "model": "claude-opus-5-5", "output_tokens": 291, "raw": {"answer": "yes", "note": "A concrete headwall with a metal bar grate sits on the right bank. It looks like a drain outfall, with orange-tinted water flowing from it into the creek."}, "run": 0}
+{"error": null, "input_tokens": 1774, "item_id": "t14", "model": "claude-opus-5-5", "output_tokens": 115, "raw": {"answer": "yes", "note": "There's a round concrete culvert or pipe outlet with a metal grate set in a headwall at the edge of the water. It opens straight into the stream."}, "run": 0}
+{"error": null, "input_tokens": 1774, "item_id": "t15", "model": "claude-opus-5-5", "output_tokens": 259, "raw": {"answer": "no", "note": "Muddy creek with grassy, overgrown banks, trees and a fence. There's no pipe or drain outlet in view, though thick plants hide parts of the banks."}, "run": 0}
+{"error": null, "input_tokens": 1774, "item_id": "t16", "model": "claude-opus-5-5", "output_tokens": 124, "raw": {"answer": "no", "note": "A murky creek bends through woods with wild garlic on the banks, exposed tree roots and a muddy edge. I see no pipe, culvert or drain outlet anywhere."}, "run": 0}
+{"error": null, "input_tokens": 1775, "item_id": "t01", "model": "claude-opus-5-5", "output_tokens": 118, "raw": {"answer": "yes", "note": "The channel is lined with concrete slabs on both sides. On the left there is a stone/gabion retaining wall, and the upper slopes are mowed grass."}, "run": 1}
+{"error": null, "input_tokens": 1268, "item_id": "t02", "model": "claude-opus-5-5", "output_tokens": 118, "raw": {"answer": "yes", "note": "Both banks are sloped concrete walls. The channel has concrete aprons and a small concrete drop structure, with some grass growing on silt along the right edge."}, "run": 1}
+{"error": null, "input_tokens": 1619, "item_id": "t03", "model": "claude-opus-5-5", "output_tokens": 122, "raw": {"answer": "no", "note": "The banks look natural: a layered shale cliff on the right, a gravel bar in the middle, and a vegetated bank on the left. I see no concrete or mortared stone."}, "run": 1}
+{"error": null, "input_tokens": 1775, "item_id": "t04", "model": "claude-opus-5-5", "output_tokens": 109, "raw": {"answer": "no", "note": "The banks are natural: grass, bare eroded soil, tree roots and a fallen log. I can't see any concrete or stonework."}, "run": 1}
+{"error": null, "input_tokens": 1610, "item_id": "t05", "model": "claude-opus-5-5", "output_tokens": 350, "raw": {"answer": "yes", "note": "The channel is straight and the same width all along, with smooth, evenly sloped grassy banks and no bends or gravel bars. It looks engineered, but this is one view."}, "run": 1}
+{"error": null, "input_tokens": 1766, "item_id": "t06", "model": "claude-opus-5-5", "output_tokens": 221, "raw": {"answer": "yes", "note": "Channel runs dead straight into the distance with even width, regular banks and still water. It looks like a dug canal or ditch, not a natural winding stream."}, "run": 1}
+{"error": null, "input_tokens": 1610, "item_id": "t07", "model": "claude-opus-5-5", "output_tokens": 121, "raw": {"answer": "no", "note": "The stream winds in tight natural bends through woodland, with a gravel bar, undercut earth banks and mossy trees along the edge. No signs of straightening or digging."}, "run": 1}
+{"error": null, "input_tokens": 1766, "item_id": "t08", "model": "claude-opus-5-5", "output_tokens": 223, "raw": {"answer": "no", "note": "The channel curves naturally, has woody debris jams and side channels spilling onto a low floodplain, and its banks are irregular and vegetated. No sign of engineering."}, "run": 1}
+{"error": null, "input_tokens": 1768, "item_id": "t09", "model": "claude-opus-5-5", "output_tokens": 228, "raw": {"answer": "cant_tell", "note": "No stream visible, only a close-up of flowering blackberry (Rubus). It may be invasive Himalayan blackberry, but whether it's native can't be confirmed here."}, "run": 1}
+{"error": null, "input_tokens": 1768, "item_id": "t10", "model": "claude-opus-5-5", "output_tokens": 230, "raw": {"answer": "cant_tell", "note": "No stream visible, only a close-up of plants. The flower looks like bigleaf periwinkle (Vinca major), which is invasive in many areas, next to a fern."}, "run": 1}
+{"error": null, "input_tokens": 1768, "item_id": "t11", "model": "claude-opus-5-5", "output_tokens": 227, "raw": {"answer": "cant_tell", "note": "Close-up of yellow monkeyflower (likely Erythranthe guttata) with no stream visible. It's native or invasive depending on region, which is unknown."}, "run": 1}
+{"error": null, "input_tokens": 1612, "item_id": "t12", "model": "claude-opus-5-5", "output_tokens": 225, "raw": {"answer": "cant_tell", "note": "The photo shows only a close-up of a leafy shrub. No stream is visible, and I can't tell for sure from this photo what species the shrub is."}, "run": 1}
+{"error": null, "input_tokens": 1735, "item_id": "t13", "model": "claude-opus-5-5", "output_tokens": 316, "raw": {"answer": "yes", "note": "A concrete headwall on the right bank has a large barred grate over an opening, with orange-tinted water running from it into the creek. It looks like a drain outfall."}, "run": 1}
+{"error": null, "input_tokens": 1774, "item_id": "t14", "model": "claude-opus-5-5", "output_tokens": 116, "raw": {"answer": "yes", "note": "A round concrete culvert/pipe outlet with a metal grate sits at the water's edge, set in a concrete headwall, and drains into the creek."}, "run": 1}
+{"error": null, "input_tokens": 1774, "item_id": "t15", "model": "claude-opus-5-5", "output_tokens": 233, "raw": {"answer": "no", "note": "I see a muddy, bending stream with grassy banks, trees and fences, but no pipe or drain outlet. Thick plants hide parts of the banks."}, "run": 1}
+{"error": null, "input_tokens": 1774, "item_id": "t16", "model": "claude-opus-5-5", "output_tokens": 119, "raw": {"answer": "no", "note": "A murky, winding woodland stream with banks of wild garlic, tree roots and trees. I can't see any pipe, culvert or drain outlet anywhere."}, "run": 1}
+{"error": null, "input_tokens": 1775, "item_id": "t01", "model": "claude-opus-5-5", "output_tokens": 116, "raw": {"answer": "yes", "note": "The stream runs in a concrete-lined channel with sloped concrete sides. There is a block retaining wall on the left bank and grassy slopes above."}, "run": 2}
+{"error": null, "input_tokens": 1268, "item_id": "t02", "model": "claude-opus-5-5", "output_tokens": 114, "raw": {"answer": "yes", "note": "The banks are sloped concrete walls lining a channel, with a concrete weir/divider in the middle. There is only a little grass on the right bank."}, "run": 2}
+{"error": null, "input_tokens": 1619, "item_id": "t03", "model": "claude-opus-5-5", "output_tokens": 120, "raw": {"answer": "no", "note": "The banks look natural: a layered shale cliff on the right, a loose gravel bar, and a vegetated bank on the left. I see no concrete or mortared stone."}, "run": 2}
+{"error": null, "input_tokens": 1775, "item_id": "t04", "model": "claude-opus-5-5", "output_tokens": 116, "raw": {"answer": "no", "note": "The banks are natural. There are eroded earth banks, grass, tree roots and a fallen log, and I can't see any concrete or stonework anywhere."}, "run": 2}
+{"error": null, "input_tokens": 1610, "item_id": "t05", "model": "claude-opus-5-5", "output_tokens": 352, "raw": {"answer": "cant_tell", "note": "Wide, calm channel, even width, smooth grassy banks: could be straightened, but it bends gently and there's no clear sign like stone lining."}, "run": 2}
+{"error": null, "input_tokens": 1766, "item_id": "t06", "model": "claude-opus-5-5", "output_tokens": 221, "raw": {"answer": "yes", "note": "The channel runs dead straight into the distance with an even width, steep regular banks and still water. It looks dug, like a canal or drain."}, "run": 2}
+{"error": null, "input_tokens": 1610, "item_id": "t07", "model": "claude-opus-5-5", "output_tokens": 118, "raw": {"answer": "no", "note": "The stream winds in tight natural bends through woodland. It has a gravel bar and uneven, undercut earth banks, with no straight cut or engineered edges."}, "run": 2}
+{"error": null, "input_tokens": 1766, "item_id": "t08", "model": "claude-opus-5-5", "output_tokens": 219, "raw": {"answer": "no", "note": "The channel curves and splits into side channels, with woody debris jams and low, uneven vegetated banks. I see no straight cut or engineered banks."}, "run": 2}
+{"error": null, "input_tokens": 1768, "item_id": "t09", "model": "claude-opus-5-5", "output_tokens": 222, "raw": {"answer": "cant_tell", "note": "Close-up of a flowering blackberry (Rubus), possibly invasive Himalayan blackberry, but no stream is visible and the location is unknown."}, "run": 2}
+{"error": null, "input_tokens": 1768, "item_id": "t10", "model": "claude-opus-5-5", "output_tokens": 249, "raw": {"answer": "cant_tell", "note": "No stream visible, just a close-up of a flower. It looks like bigleaf periwinkle (Vinca major), often invasive, with ferns nearby."}, "run": 2}
+{"error": null, "input_tokens": 1768, "item_id": "t11", "model": "claude-opus-5-5", "output_tokens": 215, "raw": {"answer": "cant_tell", "note": "Close-up of yellow monkeyflower with red spots and green leaves. No stream visible. It's native or invasive depending on region, which is unknown."}, "run": 2}
+{"error": null, "input_tokens": 1612, "item_id": "t12", "model": "claude-opus-5-5", "output_tokens": 232, "raw": {"answer": "cant_tell", "note": "Only close-up shrub foliage is visible, with no stream in view. The oval leaves might be buckthorn, but I can't confirm the species from this photo."}, "run": 2}
+{"error": null, "input_tokens": 1735, "item_id": "t13", "model": "claude-opus-5-5", "output_tokens": 523, "raw": {"answer": "yes", "note": "A concrete headwall with a metal grate over an opening sits at the creek's edge. Orange-tinted water comes from it into the channel, likely a drain outfall."}, "run": 2}
+{"error": null, "input_tokens": 1774, "item_id": "t14", "model": "claude-opus-5-5", "output_tokens": 121, "raw": {"answer": "yes", "note": "A round concrete culvert or pipe outlet with a metal grate sits in a concrete headwall. It opens straight into the stream, and its reflection shows in the water."}, "run": 2}
+{"error": null, "input_tokens": 1774, "item_id": "t15", "model": "claude-opus-5-5", "output_tokens": 267, "raw": {"answer": "no", "note": "Muddy creek bend with grassy, vegetated banks, trees and fences. No pipe or drain outlet visible; a pale object on right bank looks like debris or stone."}, "run": 2}
+{"error": null, "input_tokens": 1774, "item_id": "t16", "model": "claude-opus-5-5", "output_tokens": 116, "raw": {"answer": "no", "note": "A winding, murky woodland creek with grassy banks, tree roots and trees. I can't see any pipe, culvert or drain outlet going into the water."}, "run": 2}
+{"error": null, "input_tokens": 1775, "item_id": "t01", "model": "claude-fable-5-1", "output_tokens": 119, "raw": {"answer": "yes", "note": "Channel is a concrete-lined trapezoidal ditch with a small central flow; grassy slopes above, chain-link fences on both sides in a residential area."}, "run": 0}
+{"error": null, "input_tokens": 1268, "item_id": "t02", "model": "claude-fable-5-1", "output_tokens": 116, "raw": {"answer": "yes", "note": "Both banks are smooth sloped concrete walls of an engineered channel, with concrete weir/spillway structures; only a small grass patch on the right."}, "run": 0}
+{"error": null, "input_tokens": 1619, "item_id": "t03", "model": "claude-fable-5-1", "output_tokens": 129, "raw": {"answer": "no", "note": "Banks are natural: a steep eroded shale/clay cliff on the right, a gravel-cobble bar in the foreground, and tree-lined soil banks on the left. No concrete seen."}, "run": 0}
+{"error": null, "input_tokens": 1775, "item_id": "t04", "model": "claude-fable-5-1", "output_tokens": 110, "raw": {"answer": "no", "note": "Banks are natural earth and grass with exposed soil, tree roots and a fallen log; no concrete, walls or set stones visible."}, "run": 0}
+{"error": null, "input_tokens": 1610, "item_id": "t05", "model": "claude-fable-5-1", "output_tokens": 410, "raw": {"answer": "yes", "note": "Channel has uniform width, smooth evenly sloped mown-grass banks with no gravel bars or meanders, giving an engineered canal-like cross-section."}, "run": 0}
+{"error": null, "input_tokens": 1766, "item_id": "t06", "model": "claude-fable-5-1", "output_tokens": 472, "raw": {"answer": "no", "note": "Channel curves gently with irregular, vegetated, tree-lined banks and a widened pool; no straight trapezoidal cut, spoil banks or fresh dredging visible."}, "run": 0}
+{"error": null, "input_tokens": 1610, "item_id": "t07", "model": "claude-fable-5-1", "output_tokens": 114, "raw": {"answer": "no", "note": "Channel is strongly meandering with tight natural bends, irregular undercut banks and trees on the banks; no straight sections or spoil heaps."}, "run": 0}
+{"error": null, "input_tokens": 1766, "item_id": "t08", "model": "claude-fable-5-1", "output_tokens": 655, "raw": {"answer": "cant_tell", "note": "Foreground reach looks fairly straight with even, steep banks, but the channel bends upstream and has natural woody debris and bars; signs are mixed, no clear evidence."}, "run": 0}
+{"error": null, "input_tokens": 1768, "item_id": "t09", "model": "claude-fable-5-1", "output_tokens": 244, "raw": {"answer": "cant_tell", "note": "Photo shows only a close-up of a flowering blackberry bramble (possibly Himalayan blackberry); no stream is visible, so I can't assess the stream site."}, "run": 0}
+{"error": null, "input_tokens": 1768, "item_id": "t10", "model": "claude-fable-5-1", "output_tokens": 439, "raw": {"answer": "cant_tell", "note": "Close-up of a periwinkle (Vinca) flower amid ferns; no stream is visible. Vinca is often invasive, but native status depends on location, which is unknown."}, "run": 0}
+{"error": null, "input_tokens": 1768, "item_id": "t11", "model": "claude-fable-5-1", "output_tokens": 389, "raw": {"answer": "cant_tell", "note": "Close-up of yellow monkeyflower (Erythranthe/Mimulus guttatus) with unidentifiable greenery; no stream visible and location unknown, so native status can't be judged."}, "run": 0}
+{"error": null, "input_tokens": 1612, "item_id": "t12", "model": "claude-fable-5-1", "output_tokens": 227, "raw": {"answer": "cant_tell", "note": "Close-up of dense shrub/tree foliage (alder-like leaves); no stream visible and species/native status cannot be confirmed from leaves alone."}, "run": 0}
+{"error": null, "input_tokens": 1735, "item_id": "t13", "model": "claude-fable-5-1", "output_tokens": 114, "raw": {"answer": "yes", "note": "A concrete culvert/outfall structure with a green metal grate and railing discharges into the stream; orange-stained water flows from behind the grate."}, "run": 0}
+{"error": null, "input_tokens": 1774, "item_id": "t14", "model": "claude-fable-5-1", "output_tokens": 117, "raw": {"answer": "yes", "note": "A round concrete culvert/pipe outlet with a metal grate sits in a concrete headwall at the water's edge, discharging into the shallow stream."}, "run": 0}
+{"error": null, "input_tokens": 1774, "item_id": "t15", "model": "claude-fable-5-1", "output_tokens": 114, "raw": {"answer": "no", "note": "Muddy stream bend with grassy banks, fences, trees and nettles; no pipe, culvert or drain outlet is visible along the banks."}, "run": 0}
+{"error": null, "input_tokens": 1774, "item_id": "t16", "model": "claude-fable-5-1", "output_tokens": 122, "raw": {"answer": "no", "note": "Wooded stream bend with murky water, exposed tree roots and wild garlic on banks; no pipe, culvert or drain outlet visible anywhere along the banks."}, "run": 0}
+{"error": null, "input_tokens": 1775, "item_id": "t01", "model": "claude-fable-5-1", "output_tokens": 124, "raw": {"answer": "yes", "note": "The stream runs in a concrete-lined trapezoidal channel with a narrow concrete flow path; grassy slopes and a retaining wall sit above the concrete banks."}, "run": 1}
+{"error": null, "input_tokens": 1268, "item_id": "t02", "model": "claude-fable-5-1", "output_tokens": 109, "raw": {"answer": "yes", "note": "The channel is lined with sloped concrete walls and a concrete weir/spillway; banks are clearly engineered, not natural."}, "run": 1}
+{"error": null, "input_tokens": 1619, "item_id": "t03", "model": "claude-fable-5-1", "output_tokens": 130, "raw": {"answer": "no", "note": "Banks are natural: a tall eroded shale/clay cliff on the right, a wide gravel/cobble bar in the foreground, and tree-lined earthen bank on the left. No concrete."}, "run": 1}
+{"error": null, "input_tokens": 1775, "item_id": "t04", "model": "claude-fable-5-1", "output_tokens": 110, "raw": {"answer": "no", "note": "Banks are natural earth and grass with exposed soil, tree roots and a fallen log; no concrete, walls or set stone visible."}, "run": 1}
+{"error": null, "input_tokens": 1610, "item_id": "t05", "model": "claude-fable-5-1", "output_tokens": 386, "raw": {"answer": "yes", "note": "Channel has uniform width and smooth, even trapezoidal grass banks on both sides with a gentle engineered curve, typical of a dug/straightened canal-like waterway."}, "run": 1}
+{"error": null, "input_tokens": 1766, "item_id": "t06", "model": "claude-fable-5-1", "output_tokens": 520, "raw": {"answer": "cant_tell", "note": "Upstream reach looks straight with even width and steep banks, but the near section widens and curves naturally; one photo can't confirm modification."}, "run": 1}
+{"error": null, "input_tokens": 1610, "item_id": "t07", "model": "claude-fable-5-1", "output_tokens": 117, "raw": {"answer": "no", "note": "Channel winds in tight natural meanders through the woodland with irregular undercut banks and vegetated bends; no straight cut or dredged spoil visible."}, "run": 1}
+{"error": null, "input_tokens": 1766, "item_id": "t08", "model": "claude-fable-5-1", "output_tokens": 209, "raw": {"answer": "no", "note": "Channel curves with an S-bend, has irregular vegetated banks, fallen branches and woody debris in the water; no straight trapezoidal or dug profile visible."}, "run": 1}
+{"error": null, "input_tokens": 1768, "item_id": "t09", "model": "claude-fable-5-1", "output_tokens": 377, "raw": {"answer": "cant_tell", "note": "Close-up of a flowering blackberry bramble (Rubus, possibly Himalayan blackberry); no stream is visible, so I cannot assess the stream site."}, "run": 1}
+{"error": null, "input_tokens": 1768, "item_id": "t10", "model": "claude-fable-5-1", "output_tokens": 371, "raw": {"answer": "cant_tell", "note": "Close-up of a periwinkle (Vinca) flower, a plant often non-native/invasive, among ferns and leaves; no stream is visible in the photo."}, "run": 1}
+{"error": null, "input_tokens": 1768, "item_id": "t11", "model": "claude-fable-5-1", "output_tokens": 339, "raw": {"answer": "cant_tell", "note": "Close-up of yellow monkeyflower (Erythranthe guttata) with blurred greenery; no stream clearly visible and native/invasive status depends on unknown location."}, "run": 1}
+{"error": null, "input_tokens": 1612, "item_id": "t12", "model": "claude-fable-5-1", "output_tokens": 243, "raw": {"answer": "cant_tell", "note": "Photo shows only dense shrub/tree foliage (alder- or willow-like leaves); no stream visible and species cannot be confidently identified as invasive."}, "run": 1}
+{"error": null, "input_tokens": 1735, "item_id": "t13", "model": "claude-fable-5-1", "output_tokens": 108, "raw": {"answer": "yes", "note": "A concrete culvert/outfall structure with a green metal grate and orange-stained water discharges directly into the small stream channel."}, "run": 1}
+{"error": null, "input_tokens": 1774, "item_id": "t14", "model": "claude-fable-5-1", "output_tokens": 114, "raw": {"answer": "yes", "note": "A round concrete culvert pipe with a metal grate sits in a headwall at the far bank, opening directly onto the shallow water of the stream."}, "run": 1}
+{"error": null, "input_tokens": 1774, "item_id": "t15", "model": "claude-fable-5-1", "output_tokens": 118, "raw": {"answer": "no", "note": "Muddy stream bend with grassy, vegetated banks and fence posts; no pipe, culvert, or drain outlet visible along the banks or in the water."}, "run": 1}
+{"error": null, "input_tokens": 1774, "item_id": "t16", "model": "claude-fable-5-1", "output_tokens": 122, "raw": {"answer": "no", "note": "Wooded stream bend with muddy banks, tree roots, wild garlic and murky water; no pipe, culvert or drain outlet visible anywhere along the banks."}, "run": 1}
+{"error": null, "input_tokens": 1775, "item_id": "t01", "model": "claude-fable-5-1", "output_tokens": 121, "raw": {"answer": "yes", "note": "The channel is a concrete-lined trapezoidal ditch with a narrow concrete flow channel; grassed slopes and fences above, clearly engineered banks."}, "run": 2}
+{"error": null, "input_tokens": 1268, "item_id": "t02", "model": "claude-fable-5-1", "output_tokens": 117, "raw": {"answer": "yes", "note": "The channel is lined with sloped concrete walls and a concrete weir/spillway; the banks are clearly engineered, with only small grass patches on the right."}, "run": 2}
+{"error": null, "input_tokens": 1619, "item_id": "t03", "model": "claude-fable-5-1", "output_tokens": 126, "raw": {"answer": "no", "note": "Banks are natural: an eroded shale/clay cliff on the right, a loose cobble gravel bar in the foreground, and tree-lined earth banks on the left. No concrete."}, "run": 2}
+{"error": null, "input_tokens": 1775, "item_id": "t04", "model": "claude-fable-5-1", "output_tokens": 107, "raw": {"answer": "no", "note": "Banks are natural earth and grass with exposed soil, tree roots and a fallen log; no concrete or set stone visible."}, "run": 2}
+{"error": null, "input_tokens": 1610, "item_id": "t05", "model": "claude-fable-5-1", "output_tokens": 350, "raw": {"answer": "yes", "note": "Uniform width, smooth even trapezoidal grass banks on both sides, gentle engineered curve, no gravel bars or natural meanders \u2014 looks like a dug/canalized channel."}, "run": 2}
+{"error": null, "input_tokens": 1766, "item_id": "t06", "model": "claude-fable-5-1", "output_tokens": 297, "raw": {"answer": "no", "note": "Channel curves with irregular, vegetated, natural-looking banks; no straight trapezoidal cut, spoil banks or uniform dredged profile visible."}, "run": 2}
+{"error": null, "input_tokens": 1610, "item_id": "t07", "model": "claude-fable-5-1", "output_tokens": 118, "raw": {"answer": "no", "note": "Channel winds in tight natural meanders through the woodland with irregular, undercut earthen banks; no straight sections or spoil heaps suggesting digging."}, "run": 2}
+{"error": null, "input_tokens": 1766, "item_id": "t08", "model": "claude-fable-5-1", "output_tokens": 309, "raw": {"answer": "no", "note": "Channel curves and meanders through the woodland, with irregular vegetated banks and fallen woody debris left in place; no straight cut, spoil banks or dredged profile."}, "run": 2}
+{"error": null, "input_tokens": 1768, "item_id": "t09", "model": "claude-fable-5-1", "output_tokens": 449, "raw": {"answer": "cant_tell", "note": "Close-up of a thorny blackberry (Rubus) with pink-white flowers; no stream visible and species/region can't be confirmed, so invasive status is uncertain."}, "run": 2}
+{"error": null, "input_tokens": 1768, "item_id": "t10", "model": "claude-fable-5-1", "output_tokens": 562, "raw": {"answer": "cant_tell", "note": "No stream is visible; close-up of a purple periwinkle (Vinca major-like, typically non-native) flower among ferns and shrubs, but stream context can't be confirmed."}, "run": 2}
+{"error": null, "input_tokens": 1768, "item_id": "t11", "model": "claude-fable-5-1", "output_tokens": 324, "raw": {"answer": "cant_tell", "note": "Close-up of yellow monkeyflower (native to western N. America) with unidentified small pink flowers behind; no stream or location visible, so cannot judge."}, "run": 2}
+{"error": null, "input_tokens": 1612, "item_id": "t12", "model": "claude-fable-5-1", "output_tokens": 121, "raw": {"answer": "cant_tell", "note": "Photo shows only dense shrub foliage (alder/willow-like leaves); no stream visible and species identity as native or invasive cannot be confirmed."}, "run": 2}
+{"error": null, "input_tokens": 1735, "item_id": "t13", "model": "claude-fable-5-1", "output_tokens": 117, "raw": {"answer": "yes", "note": "A concrete culvert/outfall structure with a green metal grate and railing discharges into the small stream; orange-stained water flows out from beneath the grate."}, "run": 2}
+{"error": null, "input_tokens": 1774, "item_id": "t14", "model": "claude-fable-5-1", "output_tokens": 118, "raw": {"answer": "yes", "note": "A round concrete culvert/pipe outlet with a metal grate sits in the far bank, with water and debris at its mouth flowing into the shallow stream."}, "run": 2}
+{"error": null, "input_tokens": 1774, "item_id": "t15", "model": "claude-fable-5-1", "output_tokens": 113, "raw": {"answer": "no", "note": "Muddy stream bend with grassy banks, fence and trees; no pipe, culvert or drain outlet visible anywhere along the banks."}, "run": 2}
+{"error": null, "input_tokens": 1774, "item_id": "t16", "model": "claude-fable-5-1", "output_tokens": 123, "raw": {"answer": "no", "note": "Wooded stream bend with muddy banks, wild garlic, tree roots and murky water; no pipe, culvert or drain outlet is visible anywhere along the banks."}, "run": 2}
+{"call": 2282, "input_tokens": 1743, "model": "claude-haiku-4-5-20251001", "output_tokens": 103}
+{"call": 2283, "input_tokens": 1902, "model": "claude-haiku-4-5-20251001", "output_tokens": 92}
+{"call": 2284, "input_tokens": 1899, "model": "claude-haiku-4-5-20251001", "output_tokens": 95}
+{"call": 2285, "input_tokens": 1899, "model": "claude-haiku-4-5-20251001", "output_tokens": 99}
+{"call": 2286, "input_tokens": 1395, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2287, "input_tokens": 1746, "model": "claude-haiku-4-5-20251001", "output_tokens": 98}
+{"call": 2288, "input_tokens": 1743, "model": "claude-haiku-4-5-20251001", "output_tokens": 94}
+{"call": 2289, "input_tokens": 1902, "model": "claude-haiku-4-5-20251001", "output_tokens": 97}
+{"call": 2290, "input_tokens": 1864, "model": "claude-haiku-4-5-20251001", "output_tokens": 97}
+{"call": 2291, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 104}
+{"call": 2292, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 98}
+{"call": 2293, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2294, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 98}
+{"call": 2295, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 165}
+{"call": 2296, "input_tokens": 1902, "model": "claude-haiku-4-5-20251001", "output_tokens": 97}
+{"call": 2297, "input_tokens": 1745, "model": "claude-haiku-4-5-20251001", "output_tokens": 233}
+{"call": 2298, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 201}
+{"call": 2299, "input_tokens": 1746, "model": "claude-haiku-4-5-20251001", "output_tokens": 96}
+{"call": 2300, "input_tokens": 1395, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2301, "input_tokens": 1743, "model": "claude-haiku-4-5-20251001", "output_tokens": 94}
+{"call": 2302, "input_tokens": 1902, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2303, "input_tokens": 1899, "model": "claude-haiku-4-5-20251001", "output_tokens": 99}
+{"call": 2304, "input_tokens": 1743, "model": "claude-haiku-4-5-20251001", "output_tokens": 102}
+{"call": 2305, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 98}
+{"call": 2306, "input_tokens": 1899, "model": "claude-haiku-4-5-20251001", "output_tokens": 96}
+{"call": 2307, "input_tokens": 1864, "model": "claude-haiku-4-5-20251001", "output_tokens": 97}
+{"call": 2308, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 98}
+{"call": 2309, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 165}
+{"call": 2310, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 116}
+{"call": 2311, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2312, "input_tokens": 1902, "model": "claude-haiku-4-5-20251001", "output_tokens": 97}
+{"call": 2313, "input_tokens": 1745, "model": "claude-haiku-4-5-20251001", "output_tokens": 234}
+{"call": 2314, "input_tokens": 1395, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2315, "input_tokens": 1746, "model": "claude-haiku-4-5-20251001", "output_tokens": 96}
+{"call": 2316, "input_tokens": 1902, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2317, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 201}
+{"call": 2318, "input_tokens": 1899, "model": "claude-haiku-4-5-20251001", "output_tokens": 99}
+{"call": 2319, "input_tokens": 1743, "model": "claude-haiku-4-5-20251001", "output_tokens": 94}
+{"call": 2320, "input_tokens": 1743, "model": "claude-haiku-4-5-20251001", "output_tokens": 98}
+{"call": 2321, "input_tokens": 1899, "model": "claude-haiku-4-5-20251001", "output_tokens": 100}
+{"call": 2322, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 99}
+{"call": 2323, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 116}
+{"call": 2324, "input_tokens": 1864, "model": "claude-haiku-4-5-20251001", "output_tokens": 97}
+{"call": 2325, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 98}
+{"call": 2326, "input_tokens": 1901, "model": "claude-haiku-4-5-20251001", "output_tokens": 165}
+{"call": 2327, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 93}
+{"call": 2328, "input_tokens": 1745, "model": "claude-haiku-4-5-20251001", "output_tokens": 230}
+{"call": 2329, "input_tokens": 1903, "model": "claude-haiku-4-5-20251001", "output_tokens": 168}
+{"call": 2330, "input_tokens": 1334, "model": "claude-sonnet-5", "output_tokens": 102}
+{"call": 2331, "input_tokens": 1685, "model": "claude-sonnet-5", "output_tokens": 116}
+{"call": 2332, "input_tokens": 1832, "model": "claude-sonnet-5", "output_tokens": 111}
+{"call": 2333, "input_tokens": 1841, "model": "claude-sonnet-5", "output_tokens": 118}
+{"call": 2334, "input_tokens": 1676, "model": "claude-sonnet-5", "output_tokens": 171}
+{"call": 2335, "input_tokens": 1841, "model": "claude-sonnet-5", "output_tokens": 107}
+{"call": 2336, "input_tokens": 1832, "model": "claude-sonnet-5", "output_tokens": 158}
+{"call": 2337, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 114}
+{"call": 2338, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 124}
+{"call": 2339, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 117}
+{"call": 2340, "input_tokens": 1678, "model": "claude-sonnet-5", "output_tokens": 108}
+{"call": 2341, "input_tokens": 1801, "model": "claude-sonnet-5", "output_tokens": 115}
+{"call": 2342, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 97}
+{"call": 2343, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 99}
+{"call": 2344, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 110}
+{"call": 2345, "input_tokens": 1841, "model": "claude-sonnet-5", "output_tokens": 99}
+{"call": 2346, "input_tokens": 1334, "model": "claude-sonnet-5", "output_tokens": 99}
+{"call": 2347, "input_tokens": 1685, "model": "claude-sonnet-5", "output_tokens": 105}
+{"call": 2348, "input_tokens": 1676, "model": "claude-sonnet-5", "output_tokens": 167}
+{"call": 2349, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 115}
+{"call": 2350, "input_tokens": 1676, "model": "claude-sonnet-5", "output_tokens": 164}
+{"call": 2351, "input_tokens": 1832, "model": "claude-sonnet-5", "output_tokens": 156}
+{"call": 2352, "input_tokens": 1676, "model": "claude-sonnet-5", "output_tokens": 164}
+{"call": 2353, "input_tokens": 1832, "model": "claude-sonnet-5", "output_tokens": 164}
+{"call": 2354, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 124}
+{"call": 2355, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 263}
+{"call": 2356, "input_tokens": 1841, "model": "claude-sonnet-5", "output_tokens": 134}
+{"call": 2357, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 98}
+{"call": 2358, "input_tokens": 1678, "model": "claude-sonnet-5", "output_tokens": 113}
+{"call": 2359, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 102}
+{"call": 2360, "input_tokens": 1801, "model": "claude-sonnet-5", "output_tokens": 173}
+{"call": 2361, "input_tokens": 1334, "model": "claude-sonnet-5", "output_tokens": 98}
+{"call": 2362, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 141}
+{"call": 2363, "input_tokens": 1685, "model": "claude-sonnet-5", "output_tokens": 111}
+{"call": 2364, "input_tokens": 1841, "model": "claude-sonnet-5", "output_tokens": 100}
+{"call": 2365, "input_tokens": 1841, "model": "claude-sonnet-5", "output_tokens": 130}
+{"call": 2366, "input_tokens": 1676, "model": "claude-sonnet-5", "output_tokens": 117}
+{"call": 2367, "input_tokens": 1832, "model": "claude-sonnet-5", "output_tokens": 109}
+{"call": 2368, "input_tokens": 1676, "model": "claude-sonnet-5", "output_tokens": 152}
+{"call": 2369, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 122}
+{"call": 2370, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 112}
+{"call": 2371, "input_tokens": 1834, "model": "claude-sonnet-5", "output_tokens": 139}
+{"call": 2372, "input_tokens": 1832, "model": "claude-sonnet-5", "output_tokens": 154}
+{"call": 2373, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 95}
+{"call": 2374, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 97}
+{"call": 2375, "input_tokens": 1678, "model": "claude-sonnet-5", "output_tokens": 172}
+{"call": 2376, "input_tokens": 1801, "model": "claude-sonnet-5", "output_tokens": 161}
+{"call": 2377, "input_tokens": 1840, "model": "claude-sonnet-5", "output_tokens": 112}
+{"call": 2378, "input_tokens": 1268, "model": "claude-opus-5-5", "output_tokens": 118}
+{"call": 2379, "input_tokens": 1775, "model": "claude-opus-5-5", "output_tokens": 116}
+{"call": 2380, "input_tokens": 1610, "model": "claude-opus-5-5", "output_tokens": 118}
+{"call": 2381, "input_tokens": 1775, "model": "claude-opus-5-5", "output_tokens": 119}
+{"call": 2382, "input_tokens": 1619, "model": "claude-opus-5-5", "output_tokens": 118}
+{"call": 2383, "input_tokens": 1766, "model": "claude-opus-5-5", "output_tokens": 193}
+{"call": 2384, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 208}
+{"call": 2385, "input_tokens": 1766, "model": "claude-opus-5-5", "output_tokens": 274}
+{"call": 2386, "input_tokens": 1610, "model": "claude-opus-5-5", "output_tokens": 454}
+{"call": 2387, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 226}
+{"call": 2388, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 223}
+{"call": 2389, "input_tokens": 1612, "model": "claude-opus-5-5", "output_tokens": 245}
+{"call": 2390, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 115}
+{"call": 2391, "input_tokens": 1268, "model": "claude-opus-5-5", "output_tokens": 118}
+{"call": 2392, "input_tokens": 1775, "model": "claude-opus-5-5", "output_tokens": 118}
+{"call": 2393, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 259}
+{"call": 2394, "input_tokens": 1775, "model": "claude-opus-5-5", "output_tokens": 109}
+{"call": 2395, "input_tokens": 1735, "model": "claude-opus-5-5", "output_tokens": 291}
+{"call": 2396, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 124}
+{"call": 2397, "input_tokens": 1619, "model": "claude-opus-5-5", "output_tokens": 122}
+{"call": 2398, "input_tokens": 1610, "model": "claude-opus-5-5", "output_tokens": 121}
+{"call": 2399, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 227}
+{"call": 2400, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 228}
+{"call": 2401, "input_tokens": 1766, "model": "claude-opus-5-5", "output_tokens": 223}
+{"call": 2402, "input_tokens": 1612, "model": "claude-opus-5-5", "output_tokens": 225}
+{"call": 2403, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 230}
+{"call": 2404, "input_tokens": 1610, "model": "claude-opus-5-5", "output_tokens": 350}
+{"call": 2405, "input_tokens": 1766, "model": "claude-opus-5-5", "output_tokens": 221}
+{"call": 2406, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 119}
+{"call": 2407, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 116}
+{"call": 2408, "input_tokens": 1775, "model": "claude-opus-5-5", "output_tokens": 116}
+{"call": 2409, "input_tokens": 1268, "model": "claude-opus-5-5", "output_tokens": 114}
+{"call": 2410, "input_tokens": 1775, "model": "claude-opus-5-5", "output_tokens": 116}
+{"call": 2411, "input_tokens": 1619, "model": "claude-opus-5-5", "output_tokens": 120}
+{"call": 2412, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 233}
+{"call": 2413, "input_tokens": 1735, "model": "claude-opus-5-5", "output_tokens": 316}
+{"call": 2414, "input_tokens": 1610, "model": "claude-opus-5-5", "output_tokens": 118}
+{"call": 2415, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 222}
+{"call": 2416, "input_tokens": 1766, "model": "claude-opus-5-5", "output_tokens": 219}
+{"call": 2417, "input_tokens": 1766, "model": "claude-opus-5-5", "output_tokens": 221}
+{"call": 2418, "input_tokens": 1610, "model": "claude-opus-5-5", "output_tokens": 352}
+{"call": 2419, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 249}
+{"call": 2420, "input_tokens": 1612, "model": "claude-opus-5-5", "output_tokens": 232}
+{"call": 2421, "input_tokens": 1768, "model": "claude-opus-5-5", "output_tokens": 215}
+{"call": 2422, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 121}
+{"call": 2423, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 116}
+{"call": 2424, "input_tokens": 1774, "model": "claude-opus-5-5", "output_tokens": 267}
+{"call": 2425, "input_tokens": 1735, "model": "claude-opus-5-5", "output_tokens": 523}
+{"call": 2426, "input_tokens": 1775, "model": "claude-fable-5-1", "output_tokens": 110}
+{"call": 2427, "input_tokens": 1268, "model": "claude-fable-5-1", "output_tokens": 116}
+{"call": 2428, "input_tokens": 1775, "model": "claude-fable-5-1", "output_tokens": 119}
+{"call": 2429, "input_tokens": 1619, "model": "claude-fable-5-1", "output_tokens": 129}
+{"call": 2430, "input_tokens": 1610, "model": "claude-fable-5-1", "output_tokens": 114}
+{"call": 2431, "input_tokens": 1610, "model": "claude-fable-5-1", "output_tokens": 410}
+{"call": 2432, "input_tokens": 1766, "model": "claude-fable-5-1", "output_tokens": 472}
+{"call": 2433, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 244}
+{"call": 2434, "input_tokens": 1735, "model": "claude-fable-5-1", "output_tokens": 114}
+{"call": 2435, "input_tokens": 1766, "model": "claude-fable-5-1", "output_tokens": 655}
+{"call": 2436, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 389}
+{"call": 2437, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 439}
+{"call": 2438, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 117}
+{"call": 2439, "input_tokens": 1612, "model": "claude-fable-5-1", "output_tokens": 227}
+{"call": 2440, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 122}
+{"call": 2441, "input_tokens": 1775, "model": "claude-fable-5-1", "output_tokens": 124}
+{"call": 2442, "input_tokens": 1268, "model": "claude-fable-5-1", "output_tokens": 109}
+{"call": 2443, "input_tokens": 1775, "model": "claude-fable-5-1", "output_tokens": 110}
+{"call": 2444, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 114}
+{"call": 2445, "input_tokens": 1619, "model": "claude-fable-5-1", "output_tokens": 130}
+{"call": 2446, "input_tokens": 1610, "model": "claude-fable-5-1", "output_tokens": 117}
+{"call": 2447, "input_tokens": 1610, "model": "claude-fable-5-1", "output_tokens": 386}
+{"call": 2448, "input_tokens": 1612, "model": "claude-fable-5-1", "output_tokens": 243}
+{"call": 2449, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 377}
+{"call": 2450, "input_tokens": 1766, "model": "claude-fable-5-1", "output_tokens": 520}
+{"call": 2451, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 339}
+{"call": 2452, "input_tokens": 1735, "model": "claude-fable-5-1", "output_tokens": 108}
+{"call": 2453, "input_tokens": 1766, "model": "claude-fable-5-1", "output_tokens": 209}
+{"call": 2454, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 114}
+{"call": 2455, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 118}
+{"call": 2456, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 122}
+{"call": 2457, "input_tokens": 1619, "model": "claude-fable-5-1", "output_tokens": 126}
+{"call": 2458, "input_tokens": 1268, "model": "claude-fable-5-1", "output_tokens": 117}
+{"call": 2459, "input_tokens": 1775, "model": "claude-fable-5-1", "output_tokens": 107}
+{"call": 2460, "input_tokens": 1775, "model": "claude-fable-5-1", "output_tokens": 121}
+{"call": 2461, "input_tokens": 1610, "model": "claude-fable-5-1", "output_tokens": 118}
+{"call": 2462, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 371}
+{"call": 2463, "input_tokens": 1610, "model": "claude-fable-5-1", "output_tokens": 350}
+{"call": 2464, "input_tokens": 1766, "model": "claude-fable-5-1", "output_tokens": 297}
+{"call": 2465, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 324}
+{"call": 2466, "input_tokens": 1612, "model": "claude-fable-5-1", "output_tokens": 121}
+{"call": 2467, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 449}
+{"call": 2468, "input_tokens": 1735, "model": "claude-fable-5-1", "output_tokens": 117}
+{"call": 2469, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 113}
+{"call": 2470, "input_tokens": 1768, "model": "claude-fable-5-1", "output_tokens": 562}
+{"call": 2471, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 118}
+{"call": 2472, "input_tokens": 1766, "model": "claude-fable-5-1", "output_tokens": 309}
+{"call": 2473, "input_tokens": 1774, "model": "claude-fable-5-1", "output_tokens": 123}
