@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: test-counts consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -72,6 +72,12 @@ verify-claims:
 
 render-readme:
 	$(PY) scripts/render_readme.py
+
+# The test counts the README cites (UPDATE_27 block 24): Python tests, Worker golden cases,
+# Playwright tests and the Worker e2e sections, into results/test_counts.json. Not in make check,
+# because every branch that adds a test would turn it red; run it last, before render-readme.
+test-counts:
+	$(PY) scripts/count_tests.py
 
 # UPDATE_22 section 1 answer 1: can four photos per feature weight a group's votes? A synthetic
 # simulation, about 15 seconds. It writes results/consensus_coarseness.json and the table
