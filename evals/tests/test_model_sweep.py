@@ -317,7 +317,22 @@ class StubSDK:
         )
         self.messages = SimpleNamespace(create=self._create, batches=batches)
 
-    def _create(self, **params: Any) -> SimpleNamespace:
+    def _create(
+        self,
+        *,
+        model: str,
+        max_tokens: int,
+        system: str,
+        messages: list[Any],
+        tools: list[Any],
+        tool_choice: dict[str, Any],
+        extra_body: dict[str, Any] | None = None,
+    ) -> SimpleNamespace:
+        # The same keyword arguments the real SDK's create() takes, so a stray one fails here.
+        params = dict(model=model, max_tokens=max_tokens, system=system, messages=messages)
+        params.update(tools=tools, tool_choice=tool_choice)
+        if extra_body is not None:
+            params["extra_body"] = extra_body
         self.requests.append(params)
         return message({"answer": "yes", "note": "single call"})
 
@@ -430,7 +445,7 @@ def test_single_answer_sends_temperature_only_where_accepted() -> None:
     )
     raw = client.answer(jpeg(), "Q?", "m")
     assert force_answer(raw.payload).answer == "yes"
-    assert sdk.requests[0]["temperature"] == 0.0
+    assert sdk.requests[0]["extra_body"] == {"temperature": 0.0}
     assert raw.cost_usd == pytest.approx((1300 * 2.0 + 40 * 10.0) / 1e6)
 
 

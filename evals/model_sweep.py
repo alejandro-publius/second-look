@@ -577,7 +577,12 @@ class RealClient:
 
     def answer(self, image_bytes: bytes, question: str, model_id: str) -> RawAnswer:
         self.check_ready(model_id)
-        msg = self._sdk.messages.create(**self.build_params(model_id, image_bytes, question))
+        params = self.build_params(model_id, image_bytes, question)
+        # The SDK's create() has no temperature argument; the API takes it in the body, the way
+        # a batch request carries it.
+        if "temperature" in params:
+            params["extra_body"] = {"temperature": params.pop("temperature")}
+        msg = self._sdk.messages.create(**params)
         raw = raw_from_message(msg, model_id)
         raw = RawAnswer(
             **{
