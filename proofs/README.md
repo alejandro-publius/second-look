@@ -30,6 +30,11 @@ confirmed, they show the plan and the tag existed no later than the confirming b
 `results/ots.json` records; data lock is 2026-09-28T01:00:00Z. They do not prove the tag's own
 date; the tag, the audit log and GitHub's copy of the repository speak to that.
 
+`ots verify` checks an audit head proof against its copy of the line here, in
+`audit-head-<date>`, and a rewrite of the log with fresh hashes still passes
+`scripts/verify_audit.py`. So `scripts/ots_status.py` and `/verify` also compare each stamped line
+with the same line of `audit/log.jsonl`, and call the proof broken when the log no longer has it.
+
 `scripts/anchor_audit_head.py` stamps the audit log's last hash, and
 `scripts/install_anchor_job.sh` runs it once a day on this Mac with launchd. It stamps nothing when
 the last hash has not changed since the newest proof. The audit log is a hash-chained audit log,
