@@ -118,13 +118,16 @@ def check_header(header: bytes, block_id: str, merkle_root: bytes) -> tuple[str 
     return None, int.from_bytes(header[68:72], "little")
 
 
-def stamped_line_gone(stamped: bytes, seq: int, root: Path = ROOT) -> str | None:
+def stamped_line_gone(
+    stamped: bytes, seq: int, root: Path = ROOT, log: Path | None = None
+) -> str | None:
     """Why audit/log.jsonl no longer holds the line an audit head proof stamped, or None.
 
     The proof is checked against its copy of the line in proofs/, which a rewrite of the log
-    leaves alone, and a rewritten log with fresh hashes passes scripts/verify_audit.py. So the
-    stamped text is compared with the log's own line at that seq."""
-    log = root / "audit" / "log.jsonl"
+    leaves alone, and a rewritten log with fresh hashes still walks as a chain. So the stamped
+    text is compared with the log's own line at that seq. scripts/verify_audit.py passes the log
+    it walks as log."""
+    log = log or root / "audit" / "log.jsonl"
     try:
         entries = audit_log.verified_entries(log)
     except audit_log.AuditError as e:

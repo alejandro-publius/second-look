@@ -24,7 +24,7 @@ from opentimestamps.core.op import OpAppend, OpSHA256
 from opentimestamps.core.serialize import StreamSerializationContext
 from opentimestamps.core.timestamp import DetachedTimestampFile, Timestamp
 
-from scripts import anchor_audit_head, audit_log, ots_status
+from scripts import anchor_audit_head, audit_log, ots_status, verify_audit
 
 ROOT = Path(__file__).resolve().parents[2]
 CALENDAR = "https://alice.btc.calendar.opentimestamps.org"
@@ -281,6 +281,39 @@ def test_an_audit_head_proof_is_broken_once_the_log_loses_the_line_it_stamped(
     log.write_text(log.read_text().replace('"key_frozen"', '"data_lock"', 1))
     row = ots_status.status_of(proof, root=root, fetch=None)
     assert row["status"] == "broken" and "does not hold together" in row["problem"]
+
+
+def test_verify_audit_fails_once_the_log_loses_a_line_a_proof_stamped(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # REVIEW_03 R57: a log cut back or rewritten after a stamp still walks as a chain, so
+    # verify_audit.py, and judge check's audit step with it, said ok.
+    root, proofs = repo(tmp_path)
+    log = chain(root, 3)
+    anchor_audit_head.anchor(log, proofs, day="2026-09-24", stamp=fake_stamp)
+    args = ["--path", str(log), "--proofs", str(proofs)]
+    assert verify_audit.main(args) == 0
+    assert "1 stamped line(s) still in place" in capsys.readouterr().out
+
+    whole = log.read_text()
+    log.write_text("".join(whole.splitlines(keepends=True)[:2]))
+    assert audit_log.verify(log) == 2
+    assert verify_audit.main(args) == 1
+    assert "no line 3, the line this proof stamped" in capsys.readouterr().out
+
+    log.write_text(whole)
+    rewrite_line(log, 3)
+    assert audit_log.verify(log) == 3
+    assert verify_audit.main(args) == 1
+    assert "line 3 of audit/log.jsonl is not the line this proof stamped" in capsys.readouterr().out
+
+
+def test_verify_audit_holds_this_repositorys_log_to_its_proofs(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert list((ROOT / "proofs").glob("audit-head-*.ots")), "no audit head proof committed"
+    assert verify_audit.main([]) == 0
+    assert "stamped line(s) still in place" in capsys.readouterr().out
 
 
 def test_a_block_whose_merkle_root_differs_is_broken(tmp_path: Path) -> None:
