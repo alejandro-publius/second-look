@@ -241,7 +241,14 @@ async function liveRun(browser) {
   await page.getByRole("button", { name: /^Next/ }).first().click();
   gallery("check-question", "/check", "live", await shoot(page), "The first question of the creek check, with the answers as big buttons.");
   gallery("quick", "/quick", "live", await visit("/quick"), "The quick check: water colour, smell and the pipe, in three taps.");
-  gallery("city", "/city?creek=strawberry-creek", "live", await visit("/city?creek=strawberry-creek"), "The city view of Strawberry Creek: what volunteers found there and what OneAquaHealth says to do.");
+  // The alt text says what the screen shows. Until somebody checks Strawberry Creek, the live
+  // page has no visits and no measure on it, so the alt text says that instead.
+  const cityShot = await visit("/city?creek=strawberry-creek");
+  const cityEmpty = await page.getByText(/^0 visits at /).first().isVisible().catch(() => false);
+  const cityAlt = cityEmpty
+    ? "The city view of Strawberry Creek before anyone has checked it: no visits yet, and no OneAquaHealth measure shown yet."
+    : "The city view of Strawberry Creek: what volunteers found there and what OneAquaHealth says to do.";
+  gallery("city", "/city?creek=strawberry-creek", "live", cityShot, cityAlt);
   gallery("two", "/two", "live", await visit("/two"), "Two kinds of observer: a volunteer record in the same viewer built for a laboratory result.");
   gallery("how-we-know", "/how-we-know", "live", await visit("/how-we-know"), "How we know: where each rule and each number comes from.");
   gallery("credits", "/credits", "live", await visit("/credits"), "Credits: every photo and clip with its author and licence.");
