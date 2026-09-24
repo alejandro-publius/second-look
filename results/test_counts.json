@@ -1,8 +1,8 @@
 {
   "script": "scripts/count_tests.py",
   "synthetic": false,
-  "generated_at_utc": "2026-09-24T13:40:04+00:00",
-  "measured_at_commit": "ea9c17c",
+  "generated_at_utc": "2026-09-24T14:53:02+00:00",
+  "measured_at_commit": "ca7dc10",
   "tree_had_changes": false,
   "python": {
     "tests": 2020,
@@ -15,7 +15,7 @@
     "node_tests": 15
   },
   "playwright": {
-    "tests": 104,
+    "tests": 107,
     "spec_files": 20,
     "command": "npx playwright test --list"
   },
