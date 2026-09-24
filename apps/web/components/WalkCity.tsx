@@ -6,7 +6,7 @@ import { Row } from "./ui/Row";
 import { content, featureById, walkById } from "@/lib/content";
 import { has, t } from "@/lib/t";
 import { reasonsThenSource } from "@/lib/text";
-import { demoCreek, savedWalkVisits } from "@/lib/walks";
+import { demoCreek, hasMeasure, savedWalkVisits } from "@/lib/walks";
 
 /**
  * A finding's name: a short label from the locale when the finding has one (city.finding_<key>),
@@ -47,8 +47,24 @@ export function WalkCity({ walkId }: { walkId: string }) {
           <section className="card stack" aria-label={t("city.walk_findings")}>
             <h2>{t("city.walk_findings")}</h2>
             {demo.findings.length === 0 ? <p className="muted">{t("city.walk_nothing")}</p> : null}
+            {/* A plant is listed like any finding, and says plainly that no measure answers it
+                (CRITIC_06 H01). */}
             {demo.findings.map((f) => (
-              <Row key={`${f.spot_id}-${f.feature}`} label={findingName(f.feature)} value={t("city.walk_seen", { n: f.visit_ids.length })} />
+              <Row
+                key={`${f.spot_id}-${f.feature}`}
+                label={findingName(f.feature)}
+                value={
+                  hasMeasure(f.feature) ? (
+                    t("city.walk_seen", { n: f.visit_ids.length })
+                  ) : (
+                    <>
+                      {t("city.walk_seen", { n: f.visit_ids.length })}
+                      <br />
+                      {t("city.walk_no_measure")}
+                    </>
+                  )
+                }
+              />
             ))}
           </section>
           <section className="card stack" aria-label={t("city.walk_needs")}>

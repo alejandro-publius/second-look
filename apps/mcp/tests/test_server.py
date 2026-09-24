@@ -27,6 +27,7 @@ from apps.api.tests.test_city import (
     GOOD_ANSWERS,
     NOW,
     PARK_PIN,
+    PLANT_ONLY,
     QUIET_ANSWERS,
     SOUTH_FORK_PIN,
     _dry,
@@ -162,6 +163,27 @@ async def test_list_findings_filters_by_feature_people_and_passing(records: dict
         "passed_only": False,
     }
     assert "at least 1" in await call_error(server, "list_findings", min_observers=0)
+
+
+async def test_list_findings_finds_a_plant_that_asks_for_no_measure(
+    client, monkeypatch, tmp_path: Path
+) -> None:
+    """CRITIC_06 H01: `feature=invasive_plant` could never return a row, because a plant made no
+    finding at all. Now it does, with the person's passing plant score, and no measure."""
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    made = a_visit(client, token=passing_session(client), spot=SOUTH_FORK_PIN, answers=PLANT_ONLY)
+    out = tmp_path / "export"
+    with Session(engine) as db:
+        export(db, out, now=datetime(2026, 9, 25, 15, 0, tzinfo=UTC))
+    server = build_server(ExportSource(out))
+    plants = await call(server, "list_findings", feature="invasive_plant", passed_only=True)
+    (plant,) = plants["findings"]
+    assert plant["creek"] == "strawberry-creek" and plant["feature"] == "invasive_plant"
+    assert plant["observers"] == 1 and plant["passed_observers"] == 1
+    assert plant["resource_ids"] == [f"Bundle/{made['visit_id']}"]
+    record = await call(server, "get_creek_record", creek="strawberry-creek")
+    assert record["needs"] == [], "OneAquaHealth has no measure for a plant"
 
 
 async def test_get_observer_score_by_visit_and_by_practitioner(records: dict[str, Any]) -> None:

@@ -196,6 +196,23 @@ for (const waiting of [false, true]) {
   });
 }
 
+// CRITIC_06 H01: a creek with checks and no finding says nothing has been reported yet, never that
+// nobody checked it, since the count at the top says otherwise. With no checks it still says that.
+for (const visits of [5, 0]) {
+  test(`/city with no finding after ${visits} visits says which of the two empty lines is true`, async ({ page }) => {
+    await mockApi(page);
+    await page.route(`${API_ORIGIN}/api/city/**`, (route) =>
+      route.fulfill({ contentType: "application/json", body: JSON.stringify({ ...exampleCity, visits, findings: [] }) }),
+    );
+    await page.goto("/city?creek=example");
+    await expect(page.getByRole("heading", { name: "What people reported" })).toBeVisible();
+    const reported = page.getByText("Nobody has reported a built bank, pipe, barrier or invasive plant here yet.");
+    const unchecked = page.getByText("Nobody has checked this creek yet.");
+    await expect(visits > 0 ? reported : unchecked).toBeVisible();
+    await expect(visits > 0 ? unchecked : reported).toHaveCount(0);
+  });
+}
+
 test("/city with no creek says so rather than showing an empty page", async ({ page }) => {
   await mockApi(page);
   await page.goto("/city");

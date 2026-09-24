@@ -230,7 +230,8 @@ def test_the_walk_city_view_names_barriers_by_a_short_label_with_one_stop_after_
         "walkCityRows("
         f"{{ content: {{ form: {{ items: {json.dumps(items)} }} }}, featureById: () => undefined,"
         " walkById: () => ({ creek_name: 'A creek' }) },"
-        " { savedWalkVisits: () => [], demoCreek: () => ({ visits: [{}],"
+        " { savedWalkVisits: () => [], hasMeasure: (f) => f === 'barriers',"
+        " demoCreek: () => ({ visits: [{}],"
         " findings: [{ spot_id: 's', feature: 'barriers', visit_ids: ['v1'] }],"
         f" needs: [{json.dumps(need)}] }}) }},"
         " 'v02')"
@@ -242,6 +243,29 @@ def test_the_walk_city_view_names_barriers_by_a_short_label_with_one_stop_after_
     seen_once = LOCALE["city.walk_seen"].replace("{n}", "1")
     assert [r["label"] for r in rows if r.get("value") == seen_once] == [label]
     assert question not in json.dumps(rows, ensure_ascii=False)
+    assert LOCALE["city.walk_no_measure"] not in json.dumps(rows, ensure_ascii=False)
+
+
+def test_the_walk_city_view_lists_a_plant_beside_a_line_that_no_measure_answers_it() -> None:
+    # CRITIC_06 H01: a walk that said yes to plants only read "Nothing was found that needs work."
+    # The plant is now listed with what the checks found, and the line beside it says that none
+    # of OneAquaHealth's measures answers it, which is why "what this creek needs" stays empty.
+    name = "Plants that do not belong"
+    rows = run(
+        "walkCityRows("
+        " { content: { form: { items: [] } }, featureById: (id) => ({ name: "
+        + json.dumps(name)
+        + " }), walkById: () => ({ creek_name: 'A creek' }) },"
+        " { savedWalkVisits: () => [], hasMeasure: (f) => f !== 'invasive_plant',"
+        " demoCreek: () => ({ visits: [{}],"
+        " findings: [{ spot_id: 's', feature: 'invasive_plant', visit_ids: ['v1'] }],"
+        " needs: [] }) },"
+        " 'v02')"
+    )
+    (plant,) = [r for r in rows if r.get("label") == name]
+    seen_once = LOCALE["city.walk_seen"].replace("{n}", "1")
+    parts = [p for p in plant["value"]["props"]["children"] if isinstance(p, str)]
+    assert parts == [seen_once, LOCALE["city.walk_no_measure"]]
 
 
 def test_a_walk_whose_checker_asked_says_so() -> None:

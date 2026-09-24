@@ -117,6 +117,33 @@ def test_a_pipe_needs_two_people_who_both_passed(client, monkeypatch):
     assert any(f["feature"] == "pipe_running" for f in after["findings"])
 
 
+# CRITIC_06 H01: a check that reported only a plant that does not belong made no finding at all,
+# so /city said "Nobody has checked this creek yet." over one visit. The yes and the list of which
+# plants are one answer about one feature, and "cant_tell" is a real answer to the list.
+PLANT_ONLY = {
+    **GOOD_ANSWERS,
+    "bank_type": "absent",
+    "draining_pipes": "absent",
+    "invasive_species": "present",
+    "invasive_which": ["cant_tell"],
+}
+
+
+def test_a_plant_is_a_finding_that_asks_the_city_for_no_measure(client, monkeypatch):
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    made = a_visit(client, token=None, spot=NEW_SPOT, answers=PLANT_ONLY)
+    view = client.get(f"/api/city/{creek_of(client, made['spot_id'])}").json()
+    assert view["visits"] == 1 and view["spots"] == 1
+    (plant,) = view["findings"]
+    assert plant["feature"] == "invasive_plant"
+    assert plant["feature_name"] == "Plants that do not belong"
+    assert plant["observers"] == 1 and plant["visit_ids"] == [made["visit_id"]]
+    assert plant["fhir"] == [f"/api/fhir/Bundle/{made['visit_id']}"]
+    # OneAquaHealth's four measures have none for a plant, and inventing one is not ours.
+    assert view["needs"] == [] and view["measures_waiting_for_approval"] is False
+
+
 def test_a_pin_that_reads_like_a_test_is_flagged_and_left_out_of_the_numbers(client, monkeypatch):
     monkeypatch.setattr(core_calls, "rain_status", _dry)
     freeze_now(NOW)
@@ -388,6 +415,29 @@ def test_a_finding_on_a_reach_adds_one_line_to_every_reach_below_it(client, monk
     glade = client.get(f"/api/spot/{upstream['spot_id']}").json()
     assert glade["place"]["reach_slug"] == "south-fork-campus"
     assert glade["downstream_notes"] == []
+
+
+def test_a_plant_on_a_reach_adds_a_line_below_it_and_asks_for_nothing(client, monkeypatch):
+    """CRITIC_06 H01. A plant is reported like anything else, so the reaches below hear of it,
+    in the same plain line that names who and when and nothing about what it means."""
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    made = a_visit(client, token=None, spot=SOUTH_FORK_PIN, answers=PLANT_ONLY)
+    view = client.get("/api/city/strawberry-creek").json()
+    notes = view["downstream_notes"]
+    assert [n["reach_slug"] for n in notes] == [
+        "campus-west",
+        "downtown-culvert",
+        "strawberry-creek-park",
+        "west-culvert",
+    ]
+    for n in notes:
+        assert n["feature"] == "invasive_plant" and n["visit_ids"] == [made["visit_id"]]
+        assert (
+            n["line"]
+            == "Upstream of here, one person reported plants that do not belong on Sep 25."
+        )
+    assert view["needs"] == []
 
 
 def test_the_generated_creek_id_and_the_slug_show_the_same_creek(client, monkeypatch):

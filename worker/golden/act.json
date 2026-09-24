@@ -561,6 +561,21 @@
           ]
         },
         {
+          "feature": "invasive_plant",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-22",
+          "observers": [
+            "alicetoken23456"
+          ],
+          "passed_observers": [
+            "alicetoken23456"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
           "feature": "pipe_running",
           "first_seen": "2026-09-22",
           "last_seen": "2026-09-22",
@@ -836,6 +851,287 @@
         ]
       },
       "name": "one visit answering both pipe items is one visit"
+    },
+    {
+      "expected": [
+        {
+          "feature": "invasive_plant",
+          "first_seen": "2026-09-22",
+          "last_seen": "2026-09-23",
+          "observers": [
+            "alicetoken23456",
+            "caroltoken2345"
+          ],
+          "passed_observers": [
+            "alicetoken23456"
+          ],
+          "spot_id": "spot-1",
+          "visit_ids": [
+            "v15",
+            "v16"
+          ]
+        }
+      ],
+      "input": {
+        "finding_key_for": {
+          "bank_type": "artificial_bank",
+          "draining_pipes": "pipe_running",
+          "invasive_species": "invasive_plant",
+          "invasive_which": "invasive_plant",
+          "sewage_discharge": "pipe_running"
+        },
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "invasive_species": "present",
+              "invasive_which": [
+                "cant_tell"
+              ]
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v15"
+          },
+          {
+            "answered_at": "2026-09-23T12:00:00Z",
+            "answers": {
+              "invasive_species": "present"
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "caroltoken2345",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 2,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v16"
+          }
+        ]
+      },
+      "name": "a plant is a finding, and which ones is not a second answer"
+    },
+    {
+      "expected": [],
+      "input": {
+        "finding_key_for": {
+          "bank_type": "artificial_bank",
+          "draining_pipes": "pipe_running",
+          "invasive_species": "invasive_plant",
+          "invasive_which": "invasive_plant",
+          "sewage_discharge": "pipe_running"
+        },
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "invasive_which": [
+                "cant_tell"
+              ]
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v18"
+          }
+        ]
+      },
+      "name": "which plants on its own, with no yes, is not a finding"
+    },
+    {
+      "expected": [],
+      "input": {
+        "finding_key_for": {
+          "bank_type": "artificial_bank",
+          "draining_pipes": "pipe_running",
+          "invasive_species": "invasive_plant",
+          "invasive_which": "invasive_plant",
+          "sewage_discharge": "pipe_running"
+        },
+        "visits": [
+          {
+            "answered_at": "2026-09-22T12:00:00Z",
+            "answers": {
+              "construction": "present",
+              "vegetation_cuts": "present"
+            },
+            "checks": [],
+            "final_rating": null,
+            "first_rating": null,
+            "observer": {
+              "contributor_token": "alicetoken23456",
+              "scores": [
+                {
+                  "correct": 4,
+                  "feature": "artificial_bank",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "dug_out_channel",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "invasive_plant",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                },
+                {
+                  "correct": 4,
+                  "feature": "pipe_running",
+                  "tested_on": "2026-09-23",
+                  "total": 4
+                }
+              ],
+              "test_sitting_id": null
+            },
+            "photo_ids": [],
+            "software_version": "0.1.0",
+            "spot": {
+              "coarse": false,
+              "creek_id": "strawberry-creek",
+              "creek_name": "Strawberry Creek",
+              "latitude": 37.8719,
+              "longitude": -122.2585,
+              "reach_id": "campus-reach",
+              "reach_name": "Strawberry Creek, campus reach",
+              "spot_id": "spot-1",
+              "spot_name": "Strawberry Creek, campus reach, spot 1"
+            },
+            "visit_id": "v17"
+          }
+        ]
+      },
+      "name": "a question that is no feature and asks for no measure is not a finding"
     },
     {
       "expected": [],
@@ -1322,6 +1618,21 @@
             ]
           },
           {
+            "feature": "invasive_plant",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          },
+          {
             "feature": "pipe_running",
             "first_seen": "2026-09-22",
             "last_seen": "2026-09-22",
@@ -1375,6 +1686,61 @@
       "input": {
         "findings": [
           {
+            "feature": "invasive_plant",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-23",
+            "observers": [
+              "alicetoken23456",
+              "caroltoken2345"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v15",
+              "v16"
+            ]
+          }
+        ],
+        "sentences": [
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "city_fix_sewers",
+            "source": "Policy Brief page 9",
+            "text": "Find and fix leaking sewers."
+          },
+          {
+            "approved": true,
+            "audience": "city",
+            "id": "city_replant_margins",
+            "source": "Policy Brief page 9",
+            "text": "Replant both margins."
+          },
+          {
+            "approved": false,
+            "audience": "city",
+            "id": "city_remove_barriers",
+            "source": "Policy Brief page 9",
+            "text": "Remove barriers."
+          },
+          {
+            "approved": true,
+            "audience": "person",
+            "id": "person_wash",
+            "source": "Factsheet",
+            "text": "Wash your hands."
+          }
+        ]
+      },
+      "name": "a plant finding asks for no measure"
+    },
+    {
+      "expected": [],
+      "input": {
+        "findings": [
+          {
             "feature": "artificial_bank",
             "first_seen": "2026-09-22",
             "last_seen": "2026-09-22",
@@ -1412,6 +1778,21 @@
               "alicetoken23456"
             ],
             "passed_observers": [],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          },
+          {
+            "feature": "invasive_plant",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
             "spot_id": "spot-1",
             "visit_ids": [
               "v4"
@@ -1963,6 +2344,54 @@
           ]
         },
         {
+          "feature": "invasive_plant",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported invasive plant on Sep 22.",
+          "observers": 1,
+          "reach_name": "Below the forks, west campus",
+          "reach_slug": "campus-west",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "invasive_plant",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported invasive plant on Sep 22.",
+          "observers": 1,
+          "reach_name": "Downtown culvert",
+          "reach_slug": "downtown-culvert",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "invasive_plant",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported invasive plant on Sep 22.",
+          "observers": 1,
+          "reach_name": "Strawberry Creek Park",
+          "reach_slug": "strawberry-creek-park",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
+          "feature": "invasive_plant",
+          "from_reach_name": "South Fork, central campus",
+          "from_reach_slug": "south-fork-campus",
+          "line": "Upstream of here, one person reported invasive plant on Sep 22.",
+          "observers": 1,
+          "reach_name": "West Berkeley culvert, to the Bay",
+          "reach_slug": "west-culvert",
+          "visit_ids": [
+            "v4"
+          ]
+        },
+        {
           "feature": "pipe_running",
           "from_reach_name": "South Fork, central campus",
           "from_reach_slug": "south-fork-campus",
@@ -2135,6 +2564,21 @@
               "alicetoken23456"
             ],
             "passed_observers": [],
+            "spot_id": "spot-1",
+            "visit_ids": [
+              "v4"
+            ]
+          },
+          {
+            "feature": "invasive_plant",
+            "first_seen": "2026-09-22",
+            "last_seen": "2026-09-22",
+            "observers": [
+              "alicetoken23456"
+            ],
+            "passed_observers": [
+              "alicetoken23456"
+            ],
             "spot_id": "spot-1",
             "visit_ids": [
               "v4"

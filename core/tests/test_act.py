@@ -17,7 +17,7 @@ from core.act import (
     notes_below,
     pipes_worth_testing,
 )
-from core.records import CheckResult, FeatureScore, Observer, Spot, VisitRecord
+from core.records import FEATURES, CheckResult, FeatureScore, Observer, Spot, VisitRecord
 from core.regions import Creek, Reach
 
 TODAY = date(2026, 9, 24)
@@ -117,6 +117,47 @@ def test_every_feature_with_a_measure_can_be_found() -> None:
     answers = dict.fromkeys(MEASURE_FOR_FEATURE, "present")
     found = findings_from_visits([visit("v1", ALICE, answers=answers)])
     assert {f.feature for f in found} == set(MEASURE_FOR_FEATURE)
+
+
+def test_every_tested_feature_is_a_finding_plants_included() -> None:
+    """CRITIC_06 H01. OneAquaHealth has no measure for a plant, and a person still reported it,
+    so the city sees the report even though it asks the city for nothing."""
+    assert "invasive_plant" not in MEASURE_FOR_FEATURE
+    found = findings_from_visits([visit("v1", ALICE, answers=dict.fromkeys(FEATURES, "present"))])
+    assert {f.feature for f in found} == set(FEATURES)
+
+
+def test_a_plant_finding_asks_the_city_for_no_measure() -> None:
+    every_city_measure = [
+        {"id": sid, "audience": "city", "text": sid, "source": "Policy Brief", "approved": True}
+        for sids in MEASURE_FOR_FEATURE.values()
+        for sid in sids
+    ]
+    plant = findings_from_visits([visit("v1", ALICE, answers={"invasive_plant": "present"})])
+    assert [f.feature for f in plant] == ["invasive_plant"]
+    assert needs_from_findings(plant, every_city_measure) == []
+    # Beside a pipe, the pipe's measure is the only one, and the plant is not one of its reasons.
+    both = {"invasive_plant": "present", "pipe_running": "present"}
+    needs = needs_from_findings(
+        findings_from_visits([visit("v1", ALICE, answers=both)]), every_city_measure
+    )
+    assert [(n.sentence_id, n.because) for n in needs] == [("city_fix_sewers", ("pipe_running",))]
+
+
+def test_which_plants_is_not_a_second_answer_and_never_breaks_the_count() -> None:
+    """The list of which plants maps to the plant feature too. A list is never present on its
+    own, and it must not stop the count: Python cannot look a list up in a set."""
+    mapping = {"invasive_species": "invasive_plant", "invasive_which": "invasive_plant"}
+    only_list = {"invasive_which": ["cant_tell"]}
+    assert findings_from_visits([visit("v1", ALICE, answers=only_list)], mapping) == []
+    both = {"invasive_species": "present", "invasive_which": ["cant_tell"]}
+    (f,) = findings_from_visits([visit("v1", ALICE, answers=both)], mapping)
+    assert f.feature == "invasive_plant" and f.visit_ids == ("v1",)
+
+
+def test_a_question_that_is_no_feature_and_asks_for_no_measure_is_not_a_finding() -> None:
+    quiet = {"construction": "present", "vegetation_cuts": "present"}
+    assert findings_from_visits([visit("v1", ALICE, answers=quiet)]) == []
 
 
 # What this creek needs -------------------------------------------------------------------------

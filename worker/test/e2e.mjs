@@ -471,6 +471,18 @@ try {
   // Read only: the route answers GET and nothing else.
   assert.equal((await api("POST", "/api/inaturalist/strawberry-creek", {})).status, 404);
 
+  // 8a2. A plant on the city view (CRITIC_06 H01). A check that reports only a plant that does not
+  // belong is a finding the city sees, and it asks for no OneAquaHealth measure. The list of which
+  // plants is no second answer. Made after /api/two, which shows the latest stored visit.
+  at("a plant on the city view");
+  const plantOnly = await visit(null, { new: { name: "Codornices Creek at the path", latitude: 37.89, longitude: -122.28, coarse: false } }, { ...QUIET_ANSWERS, invasive_species: "present", invasive_which: ["cant_tell"] });
+  const plantCreek = (await api("GET", `/api/spot/${plantOnly.spot_id}`)).data.spot.creek_id;
+  const plantCity = await api("GET", `/api/city/${plantCreek}`);
+  assert.equal(plantCity.status, 200, JSON.stringify(plantCity.data));
+  assert.equal(plantCity.data.visits, 1);
+  assert.deepEqual(plantCity.data.findings.map((f) => [f.feature, f.feature_name, f.observers, f.visit_ids]), [["invasive_plant", "Plants that do not belong", 1, [plantOnly.visit_id]]]);
+  assert.deepEqual(plantCity.data.needs, []);
+
   // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
   // sixteen answers would be the live test's key. This Worker's clock reads one second before
   // the lock; a second Worker's reads the lock itself, where the route opens (REVIEW_03 R52).

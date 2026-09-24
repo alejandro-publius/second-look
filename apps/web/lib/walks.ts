@@ -3,7 +3,7 @@
 // not to our store, not to the sandbox, not into any count. It lives in this tab's session
 // storage so /city can show it as a demo creek, and goes when the tab closes.
 import { checkBundle } from "../../../worker/src/core/fhir_emit";
-import { findingsFromVisits, needsFromFindings, type Finding, type Need } from "../../../worker/src/core/act";
+import { MEASURE_FOR_FEATURE, findingsFromVisits, needsFromFindings, type Finding, type Need } from "../../../worker/src/core/act";
 import { walkBundle, walkVisit, type WalkRef } from "../../../worker/src/core/walks";
 import type { AnswerValue, VisitRecord } from "../../../worker/src/core/types";
 // The approved sentences as the Worker's ports read them. core_content.json carries no gold key;
@@ -47,6 +47,11 @@ export function savedWalkVisits(): WalkVisitSaved[] {
   } catch {
     return [];
   }
+}
+
+/** True when one of OneAquaHealth's measures answers this finding. A plant has none (CRITIC_06 H01). */
+export function hasMeasure(feature: string): boolean {
+  return Object.prototype.hasOwnProperty.call(MEASURE_FOR_FEATURE, feature);
 }
 
 /** The demo creek for /city: what the walks made on this device found, and what the creek needs. */

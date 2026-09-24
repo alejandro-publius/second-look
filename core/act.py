@@ -43,6 +43,11 @@ MEASURE_FOR_FEATURE: dict[str, tuple[str, ...]] = {
     "barriers": ("city_remove_barriers",),
 }
 
+# What a finding can be about: every tested feature, plants included, and every form item a
+# measure asks for. Only the measures read MEASURE_FOR_FEATURE, so a plant is still something
+# people reported, and it simply asks the city for nothing (review CRITIC_06 H01).
+FINDING_KEYS: frozenset[str] = frozenset(FEATURES) | frozenset(MEASURE_FOR_FEATURE)
+
 DRY_PIPE_RULE = "dry_pipe"
 # Two different people, so one person cannot put a pipe on the list on their own.
 PIPE_OBSERVERS_NEEDED = 2
@@ -120,7 +125,13 @@ class PipeCase(Frozen):
 
 
 def _present(value: object) -> bool:
-    """Our answers say present or absent; a yes is the same thing from the quick check."""
+    """Our answers say present or absent; a yes is the same thing from the quick check.
+
+    A list, such as which plants, is never present on its own: the yes to the question before it
+    already says so. Checked first, because a list cannot be looked up in a set.
+    """
+    if isinstance(value, list | dict):
+        return False
     return value in {"present", "yes", True}
 
 
@@ -141,7 +152,7 @@ def findings_from_visits(
     for v in visits:
         for answer_key, value in v.answers.items():
             feature = lookup.get(answer_key, answer_key)
-            if feature not in MEASURE_FOR_FEATURE or not _present(value):
+            if feature not in FINDING_KEYS or not _present(value):
                 continue
             key = (v.spot.spot_id, feature)
             day = v.answered_at.date()

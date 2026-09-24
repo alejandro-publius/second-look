@@ -9,6 +9,9 @@ import { compareStrings, dayOf, daysBetween, scoreFor, type Spot, type VisitReco
 const FEATURES: readonly string[] = CONTENT.rules.features_in_order;
 const SCORE_VALID_DAYS: number = CONTENT.rules.score_valid_days;
 export const MEASURE_FOR_FEATURE: Record<string, string[]> = CONTENT.rules.measure_for_feature;
+/** core.act.FINDING_KEYS: every tested feature, plants included, and every form item a measure asks
+ *  for. Only the measures read MEASURE_FOR_FEATURE, so a plant finding asks for nothing (CRITIC_06 H01). */
+export const FINDING_KEYS: ReadonlySet<string> = new Set([...FEATURES, ...Object.keys(MEASURE_FOR_FEATURE)]);
 export const DRY_PIPE_RULE = "dry_pipe";
 export const PIPE_OBSERVERS_NEEDED: number = CONTENT.rules.pipe_observers_needed;
 export const SAME_SPOT_METRES: number = CONTENT.rules.same_spot_metres;
@@ -43,7 +46,8 @@ export interface PipeCase {
 }
 
 /** Our answers say present or absent; a yes is the same thing from the quick check. Python's set
- *  test also lets 1 through, because 1 == True there. */
+ *  test also lets 1 through, because 1 == True there. A list, such as which plants, is never
+ *  present on its own, as in Python. */
 function present(value: unknown): boolean {
   return value === "present" || value === "yes" || value === true || value === 1;
 }
@@ -61,7 +65,7 @@ export function findingsFromVisits(visits: VisitRecord[], findingKeyFor: Record<
   for (const v of visits) {
     for (const [answerKey, value] of Object.entries(v.answers)) {
       const feature = lookup[answerKey] ?? answerKey;
-      if (!(feature in MEASURE_FOR_FEATURE) || !present(value)) continue;
+      if (!FINDING_KEYS.has(feature) || !present(value)) continue;
       const key = `${v.spot.spot_id}\u0000${feature}`;
       const day = dayOf(v.answered_at);
       let row = seen.get(key);
