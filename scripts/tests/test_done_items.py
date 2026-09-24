@@ -1029,6 +1029,31 @@ def test_the_video_link_is_in_both_files_and_answers(tmp_path: Path) -> None:
     assert has(di.check_video_link(tmp_path, fake_get(404)), "answered 404")
 
 
+@pytest.mark.parametrize(
+    ("link", "asked"),
+    [
+        ("https://youtu.be/abc", "https://www.youtube.com/oembed?format=json&url=https%3A%2F%2Fyoutu.be%2Fabc"),
+        ("https://www.youtube.com/watch?v=abc", "https://www.youtube.com/oembed?format=json&url="),
+        ("https://m.youtube.com/watch?v=abc", "https://www.youtube.com/oembed?format=json&url="),
+        ("https://vimeo.com/123", "https://vimeo.com/123"),
+        ("https://notyoutube.com/abc", "https://notyoutube.com/abc"),
+    ],
+)  # fmt: skip
+def test_a_youtube_link_is_asked_through_oembed(tmp_path: Path, link: str, asked: str) -> None:
+    # YouTube's watch page answers 200 for a video that is not there; its oEmbed answers 400.
+    for rel in ("README.md", "docs/devpost.md"):
+        write(tmp_path, rel, f"Video: {link}\n")
+    seen: list[str] = []
+
+    def get(url: str) -> tuple[int, str]:
+        seen.append(url)
+        return (400, "") if "oembed" in url else (200, "")
+
+    problems = di.check_video_link(tmp_path, get)
+    assert len(seen) == 1 and seen[0].startswith(asked)
+    assert (problems == []) is ("oembed" not in asked)
+
+
 def devpost_page(hackathon: str, site: str = "https://second-look-79t.pages.dev") -> str:
     """The shape of a real Devpost project page: links in the story, then the submissions list."""
     return (

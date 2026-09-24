@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 import httpx
 import yaml
@@ -1246,10 +1246,20 @@ def check_video_link(root: Path, get: Fetch = fetch) -> list[str]:
             problems.append(f"{rel} has no line with the word video and a link")
         links += found
     if links:
-        status, _ = get(links[0])
+        status, _ = get(video_probe(links[0]))
         if status != 200:
             problems.append(f"the video link {links[0]} answered {status or 'nothing'}, not 200")
     return problems
+
+
+def video_probe(url: str) -> str:
+    """The address that says whether a video is there. YouTube answers 200 on its watch page even
+    for a video that does not exist or is private, so a YouTube link is asked through oEmbed,
+    which answers 400, 401 or 404 for those."""
+    host = urlsplit(url).netloc.lower().split(":")[0]
+    if host == "youtu.be" or host == "youtube.com" or host.endswith(".youtube.com"):
+        return "https://www.youtube.com/oembed?format=json&url=" + quote(url, safe="")
+    return url
 
 
 def devpost_link(root: Path) -> str | None:
