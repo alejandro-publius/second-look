@@ -40,6 +40,7 @@ dev = [
   "yt-dlp>=2026.1.1",
   "opencv-python-headless>=4.10,<5",
   "pyobjc-framework-Vision>=11; sys_platform == 'darwin'",
+  "opentimestamps-client>=0.7.2",
 ]
 
 [build-system]

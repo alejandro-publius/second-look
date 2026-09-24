@@ -79,6 +79,18 @@ DIAGRAMS = """## The diagram renderer
   are committed.
 """
 
+TIMESTAMPS = """## Timestamps
+
+- OpenTimestamps (https://opentimestamps.org), a public timestamp service, not our own chain,
+  through the `opentimestamps-client` package (a dev dependency, the `ots` command). `ots stamp`
+  sends only a SHA-256 hash to its public calendars (a.pool.opentimestamps.org,
+  b.pool.opentimestamps.org, a.pool.eternitywall.com, ots.btc.catallaxy.com), which gather many
+  hashes and write one summary of them into a Bitcoin transaction. No file, answer or name
+  leaves this Mac. The proofs are in `proofs/`. `scripts/ots_status.py` asks the calendars for
+  the finished proof and reads block headers from the public Blockstream explorer
+  (https://blockstream.info/api), read only, to check a confirmed proof without a Bitcoin node.
+"""
+
 
 def python_license(name: str) -> str:
     try:
@@ -190,6 +202,8 @@ def build(root: Path) -> str:
         REFERENCES.rstrip(),
         "",
         DIAGRAMS.rstrip(),
+        "",
+        TIMESTAMPS.rstrip(),
         "",
         f"## Python packages ({len(py)}, from uv.lock)",
         "",
