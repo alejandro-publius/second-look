@@ -184,7 +184,7 @@ A vision model can help a volunteer look again. It can never decide what is stor
 6. **The person answers again.** The model's note is shown only as "the checker noticed" ([`core/checker.py`](core/checker.py), [`apps/web/components/WalkFlow.tsx`](apps/web/components/WalkFlow.tsx)).
 7. **The record is built from human inputs only.** `build_record` in [`core/gate.py`](core/gate.py) has no parameter that could carry a flag, a model id or model text. [`core/fhir_emit.py`](core/fhir_emit.py) writes the record under OneAquaHealth's profiles with the person's score attached, and [`scripts/fhir_validate.py`](scripts/fhir_validate.py) checks it in CI.
 
-Where it runs today: nowhere a person sees yet. [`scripts/build_walks.py`](scripts/build_walks.py) sends the footage run's answers through the same gate when the video walks are built, and no flag on those clips passed it, so <!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of the <!--v:results/footage_pool.json#/walks-->3<!--/v--> walks shows a checker question. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called.
+Where it runs today: nowhere a person sees yet. [`scripts/build_walks.py`](scripts/build_walks.py) sends the footage run's answers through the same gate when the video walks are built, and no flag on those clips passed it, so <!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of the <!--v:results/footage_pool.json#/walks-->3<!--/v--> walks shows a checker question. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called. To see the gate act on the footage run, open [`examples/footage-flag/`](examples/footage-flag/README.md): one frame where it kept a model's flag, with the question that flag makes eligible, and one where it dropped a flag, with its reason in the gate's own words.
 
 ## Three properties that follow
 
@@ -587,6 +587,8 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 | What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so; the page a walk opens (`/city?walk=v02`) and `make demo-offline` show the full view. | `/city?creek=strawberry-creek`, [`docs/screens/city.webp`](docs/screens/city.webp) |
 
 You can run the same loop from your desk on a creek in another country: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
+
+The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/README.md) shows one frame of real creek footage where the gate kept a model's flag, with the question that flag makes eligible and the model's note labelled "the checker noticed", and one frame where the gate dropped the flag, because that model had not passed that feature. Each step quotes the model's answer as committed in [`evals/fixtures/raw/`](evals/fixtures/raw/), and [`evals/footage_example.py`](evals/footage_example.py) writes the page from committed files, so `make check` fails if it drifts. The checker is off on the live site, so this is the paid footage run's record, not something a volunteer saw.
 
 ## Known weaknesses
 

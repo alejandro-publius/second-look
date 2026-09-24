@@ -163,6 +163,15 @@ def model_agreement(
     return out
 
 
+def candidate_flag(feature: str, note: str) -> dict[str, Any]:
+    """The candidate flag a yes answer becomes before the gate sees it.
+
+    A forced answer carries no confidence, so every candidate gets 1.0. evals/footage_example.py
+    builds its two candidates with this same function, so the example and the run cannot differ.
+    """
+    return {"feature": feature, "confidence": 1.0, "note": note or "no note"}
+
+
 def gate_outcome(records: Sequence[AnswerRecord], pass_table: Mapping[str, Any]) -> dict[str, Any]:
     """Every yes becomes a candidate flag and goes through the real gate, with the real table."""
     kept = 0
@@ -175,7 +184,7 @@ def gate_outcome(records: Sequence[AnswerRecord], pass_table: Mapping[str, Any])
         if r.answer != "yes":
             not_candidates[f"answered {r.answer}, so no flag is proposed"] += 1
             continue
-        candidate = {"feature": r.feature, "confidence": 1.0, "note": r.note or "no note"}
+        candidate = candidate_flag(r.feature, r.note)
         flags, reasons = parse_flags(candidate, model_id=r.model, pass_table=pass_table)
         kept += len(flags)
         for reason in reasons:

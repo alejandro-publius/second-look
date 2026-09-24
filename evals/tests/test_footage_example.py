@@ -1,0 +1,163 @@
+"""The footage example is what the committed files give, and each step is the product's own code.
+
+examples/footage-flag/ shows one frame where the gate kept a model's flag and one where it dropped
+one. These tests work each step out again from the committed files, without the example's own
+helpers where they can, so a broken pick rule or a gate call that is not the real one turns red.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from core.content_loader import load_content
+from core.followups import SiteContext, select_followups
+from core.gate import parse_flags
+from evals import footage, footage_example
+from evals.reproduce import footage_records
+
+ROOT = Path(__file__).resolve().parents[2]
+LATEST = json.loads((ROOT / "results" / "footage_latest.json").read_text(encoding="utf-8"))
+TABLE = json.loads((ROOT / "results" / "model_pass_table.json").read_text(encoding="utf-8"))
+DOC: dict[str, Any] = json.loads((ROOT / footage_example.OUT_JSON).read_text(encoding="utf-8"))
+PAGE = (ROOT / footage_example.OUT_README).read_text(encoding="utf-8")
+
+
+def fixture() -> Path:
+    return ROOT / DOC["run"]["raw_answers"]
+
+
+def lines() -> list[str]:
+    return fixture().read_text(encoding="utf-8").split("\n")
+
+
+def gate(answer: dict[str, Any]) -> tuple[list[Any], list[str]]:
+    """The gate on one answer, the way evals/footage.py calls it."""
+    candidate = footage.candidate_flag(answer["feature"], answer["note"])
+    return parse_flags(candidate, model_id=answer["model"], pass_table=TABLE)
+
+
+def test_the_committed_files_are_what_the_script_writes() -> None:
+    assert DOC == footage_example.build(), "run: uv run python evals/footage_example.py"
+    assert footage_example.main(["--check"]) == 0
+
+
+def test_check_fails_when_the_page_drifts(monkeypatch: pytest.MonkeyPatch) -> None:
+    real = footage_example.readme
+    monkeypatch.setattr(footage_example, "readme", lambda doc: real(doc) + "one more line\n")
+    assert footage_example.main(["--check"]) == 1
+
+
+def test_the_run_is_the_latest_real_footage_run_and_its_table_came_first() -> None:
+    head = json.loads(lines()[0])
+    assert LATEST["real"] is True
+    assert head["generated_at_utc"] == LATEST["generated_at_utc"] == DOC["run"]["generated_at_utc"]
+    assert head["run"] == DOC["run"]["results"]
+    assert TABLE["generated_at_utc"] < LATEST["generated_at_utc"]
+
+
+def test_the_gate_over_the_whole_run_gives_the_committed_numbers() -> None:
+    """The table the example reads is the one the run's gate read: every number agrees."""
+    answers = [json.loads(x) for x in lines()[1:] if x.strip()]
+    got = footage.gate_outcome(footage_records(answers), TABLE)
+    assert got == LATEST["gate"]
+    assert DOC["gate_over_the_run"] == {k: got[k] for k in ("candidates", "kept", "dropped")}
+
+
+def test_the_two_frames_follow_the_pick_rule() -> None:
+    """First kept and first dropped, by frame id, then model, feature and run."""
+    rows: list[tuple[tuple[str, str, str, int], int, bool]] = []
+    for number, line in enumerate(lines(), start=1):
+        if number == 1 or not line.strip():
+            continue
+        a = json.loads(line)
+        if "frame" not in a or a["malformed"] or a["answer"] != "yes":
+            continue
+        flags, _reasons = gate(a)
+        rows.append(((a["frame"], a["model"], a["feature"], int(a["run"])), number, bool(flags)))
+    rows.sort()
+    first_kept = next(r for r in rows if r[2])
+    first_dropped = next(r for r in rows if not r[2])
+    for name, want in (("kept", first_kept), ("dropped", first_dropped)):
+        case = DOC[name]
+        assert (case["frame"], case["model"], case["feature"], case["run"]) == want[0]
+        assert case["raw_line"]["line_number"] == want[1]
+    assert DOC["kept"]["frame"] != DOC["dropped"]["frame"]
+    assert footage_example.PICK_RULE in PAGE
+
+
+def test_each_raw_line_is_the_committed_line_word_for_word() -> None:
+    committed = lines()
+    for name in ("kept", "dropped"):
+        raw = DOC[name]["raw_line"]
+        assert raw["file"] == DOC["run"]["raw_answers"]
+        assert committed[raw["line_number"] - 1] == raw["text"]
+        assert f"   {raw['text']}\n" in PAGE
+        a = json.loads(raw["text"])
+        assert (a["frame"], a["model"], a["feature"], a["run"], a["answer"]) == (
+            DOC[name]["frame"],
+            DOC[name]["model"],
+            DOC[name]["feature"],
+            DOC[name]["run"],
+            "yes",
+        )
+
+
+def test_the_dropped_reason_is_the_gates_own_words() -> None:
+    case = DOC["dropped"]
+    answer = json.loads(case["raw_line"]["text"])
+    flags, reasons = gate(answer)
+    assert flags == [] and case["gate"]["flags"] == [] and case["gate"]["kept"] is False
+    assert case["gate"]["drop_reasons"] == reasons
+    assert reasons == [f"flag 1: feature {answer['feature']} not passed by model {answer['model']}"]
+    # One of the reasons results/footage_latest.json counts, with the gate's "flag 1: " cut off.
+    assert reasons[0].split(": ", 1)[1] in LATEST["gate"]["drop_reasons"]
+    assert TABLE["models"][answer["model"]][answer["feature"]]["passed"] is False
+    assert f'"{reasons[0]}"' in PAGE
+    assert case["followup"]["eligible"] == []
+
+
+def test_the_kept_flag_makes_one_checker_question_eligible_and_only_with_the_checker_on() -> None:
+    case = DOC["kept"]
+    answer = json.loads(case["raw_line"]["text"])
+    flags, reasons = gate(answer)
+    assert reasons == [] and case["gate"]["drop_reasons"] == []
+    assert case["gate"]["flags"] == [f.model_dump(mode="json") for f in flags]
+    assert TABLE["models"][answer["model"]][answer["feature"]]["passed"] is True
+    content = load_content(ROOT)
+
+    def ask(checker_on: bool) -> list[dict[str, Any]]:
+        chosen = select_followups(
+            {},
+            SiteContext(rain="unknown"),
+            None,
+            flags,
+            content.followups,
+            form_items=content.form.get("items", []),
+            checker_enabled=checker_on,
+        )
+        return [f.model_dump(mode="json") for f in chosen]
+
+    eligible = ask(True)
+    assert case["followup"]["eligible"] == eligible
+    assert [f["rule_id"] for f in eligible] == ["checker_flag"]
+    assert eligible[0]["params"] == {"note": answer["note"], "feature": answer["feature"]}
+    assert case["followup"]["with_the_checker_off"] == ask(False) == []
+    # The model's note reaches the page only after "the checker noticed", never in the question.
+    screen = case["followup"]["on_screen"]
+    assert screen["label"] == content.locale["label.checker_noticed"] == "the checker noticed"
+    assert answer["note"] not in screen["question"]
+    assert f"   > {screen['label']}: {answer['note']}\n" in PAGE
+
+
+def test_the_page_says_the_checker_is_off_live_and_credits_each_frame() -> None:
+    assert footage_example.LIVE_SITE in PAGE
+    for name in ("kept", "dropped"):
+        row = DOC[name]["manifest_row"]
+        assert (ROOT / "photos" / row["file"]).is_file()
+        assert f"](../../photos/{row['file']})" in PAGE
+        for key in ("source_url", "author", "license"):
+            assert row[key] and row[key] in PAGE
