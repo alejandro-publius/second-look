@@ -1,5 +1,7 @@
 Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first.
 
+Model card: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md).
+
 # Second Look
 
 > **A creek observation should carry how well its observer sees.**
