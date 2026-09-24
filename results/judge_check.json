@@ -1,11 +1,11 @@
 {
-  "commit": "0326e78",
-  "ran_at_utc": "2026-09-24T17:13:15Z",
+  "commit": "da03eac",
+  "ran_at_utc": "2026-09-24T18:13:31Z",
   "steps": [
     {
       "name": "tests",
       "ok": true,
-      "text": "python: 2026 passed, 1 skipped, 9 xfailed in 155.67s (0:02:35); worker: pass 15",
+      "text": "python: 2029 passed, 1 skipped, 9 xfailed in 155.31s (0:02:35); worker: pass 15",
       "seconds": 158
     },
     {
@@ -23,7 +23,7 @@
     {
       "name": "web",
       "ok": true,
-      "text": "next build ok; design-check: clean. 87 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s).",
+      "text": "next build ok; design-check: clean. 87 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).",
       "seconds": 10
     },
     {
