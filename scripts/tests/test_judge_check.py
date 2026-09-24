@@ -135,6 +135,33 @@ def test_the_tests_step_shows_how_many_python_tests_passed(
     assert re.fullmatch(r"python: 1 passed in [\d.]+s", step.lines[0]), step.lines
 
 
+def test_the_tests_step_runs_with_no_key_and_a_proxy_that_goes_nowhere(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # REVIEW_03 R56: the docstring promised a dead proxy, but only two flags nobody reads were set.
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "not-a-real-key")
+    monkeypatch.setenv("http_proxy", "http://proxy.example:8080")
+    seen: dict[str, dict[str, str]] = {}
+
+    def stand_in(root: Path, env: dict[str, str], *rest: object) -> judge_check.Step:
+        seen.setdefault("env", dict(env))
+        return judge_check.Step("stand in", lines=["ok"])
+
+    for name in ("tests", "reproduce", "fhir", "audit", "secrets"):
+        monkeypatch.setattr(judge_check, f"step_{name}", stand_in)
+    assert judge_check.main(["--quick"]) == 0
+    env = seen["env"]
+    assert "ANTHROPIC_API_KEY" not in env
+    # What a Python client in that environment would really use, read in a fresh interpreter.
+    code = "import json, urllib.request as u; print(json.dumps(u.getproxies()))"
+    out = subprocess.run(
+        [sys.executable, "-c", code], env=env, capture_output=True, text=True, check=True
+    ).stdout
+    proxies = json.loads(out)
+    assert proxies["http"] == proxies["https"] == "http://127.0.0.1:9"
+    assert set(proxies["no"].split(",")) == {"localhost", "127.0.0.1"}
+
+
 def test_judge_check_runs_the_reproduce_step_second(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
