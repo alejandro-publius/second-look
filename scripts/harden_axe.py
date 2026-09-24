@@ -6,8 +6,8 @@ browser and listed, so no screen can write to production while it is checked. Ea
 first view of its route; the inner screens of the two-minute test need a POST to reach and are
 checked by the repo's own Playwright suite on a local build instead.
 
-Targets: production (built from main) for every route it serves, and the depth preview for the
-routes production does not serve yet. Viewports: phone 390 by 844 in light and dark, and desktop
+Target: production (built from main), which serves every route since 2026-09-24. Viewports:
+phone 390 by 844 in light and dark, and desktop
 1280 by 800. Rules: WCAG 2.0, 2.1 and 2.2 at A and AA, plus axe best practices. Writes
 results/harden/axe.json; docs/internal/reviews/A11Y_00.md is written from it.
 
@@ -27,7 +27,6 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 WEB_PKG = ROOT / "apps" / "web" / "package.json"
 PROD = "https://second-look-79t.pages.dev"
-PREVIEW = "https://depth.second-look-79t.pages.dev"
 PROD_PATHS = [
     "/",
     "/t",
@@ -44,8 +43,11 @@ PROD_PATHS = [
     "/credits",
     "/offline",
     "/share/12",
+    "/accessibility",
+    "/city?creek=strawberry-creek",
+    "/walk",
+    "/walk/v02",
 ]
-PREVIEW_ONLY = ["/city?creek=strawberry-creek"]  # /health there is API JSON, not a screen
 VIEWPORTS = [
     {"name": "phone", "width": 390, "height": 844, "dpr": 3, "mobile": True, "dark": False},
     {"name": "phone-dark", "width": 390, "height": 844, "dpr": 3, "mobile": True, "dark": True},
@@ -254,10 +256,7 @@ def main() -> int:
     if args.render_only:
         render(json.loads(args.out.read_text(encoding="utf-8")), args.md)
         return 0
-    targets = [
-        {"name": "production", "base": PROD, "paths": PROD_PATHS},
-        {"name": "depth preview", "base": PREVIEW, "paths": PREVIEW_ONLY},
-    ]
+    targets = [{"name": "production", "base": PROD, "paths": PROD_PATHS}]
     started = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     rows = run(targets, VIEWPORTS)
     commit = subprocess.run(

@@ -6,9 +6,8 @@ three times in a fresh headless Chrome and the run with the median performance s
 reported, because a single Lighthouse run moves by several points. The full reports stay outside the
 repo; results/harden/lighthouse.json keeps the numbers of every run and lighthouse.md the medians.
 
-Pages: production / and /judges; /city and one /walk only where they are deployed (the depth
-preview serves /city, nothing serves /walk yet). Lighthouse only loads pages, and the axe run
-showed which pages send anything but GET on load.
+Pages: every page of the web app on production, which serves them all since 2026-09-24. Lighthouse
+only loads pages, and the axe run showed which pages send anything but GET on load.
 
   uv run python scripts/harden_lighthouse.py --reports /tmp/somewhere
 """
@@ -29,14 +28,30 @@ import httpx
 ROOT = Path(__file__).resolve().parents[1]
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 LIGHTHOUSE = "lighthouse@13.5.0"
-PAGES = [
-    ("production /", "https://second-look-79t.pages.dev/"),
-    ("production /judges", "https://second-look-79t.pages.dev/judges"),
-    ("production /city", "https://second-look-79t.pages.dev/city"),
-    ("preview /city", "https://depth.second-look-79t.pages.dev/city?creek=strawberry-creek"),
-    ("production /walk", "https://second-look-79t.pages.dev/walk"),
-    ("preview /walk", "https://depth.second-look-79t.pages.dev/walk"),
+PROD = "https://second-look-79t.pages.dev"
+# Every page of the web app, the same list the axe run checks (scripts/harden_axe.py).
+PATHS = [
+    "/",
+    "/t",
+    "/demo",
+    "/judges",
+    "/check",
+    "/spot",
+    "/quick",
+    "/two",
+    "/poster",
+    "/how-we-know",
+    "/about",
+    "/privacy",
+    "/credits",
+    "/offline",
+    "/share/12",
+    "/accessibility",
+    "/city?creek=strawberry-creek",
+    "/walk",
+    "/walk/v02",
 ]
+PAGES = [(f"production {p}", PROD + p) for p in PATHS]
 AUDITS = {
     "first-contentful-paint": "FCP ms",
     "largest-contentful-paint": "LCP ms",
