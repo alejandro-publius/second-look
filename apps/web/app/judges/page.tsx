@@ -36,7 +36,15 @@ export default function JudgesPage() {
       <p>{t("judges.intro")}</p>
       <nav className="card" aria-label={t("judges.title")}>
         {DOORS.map((d) => (
-          <Row key={d.href} label={<Link href={d.href}>{t(d.label)}</Link>} value={d.note ? t(d.note) : undefined} />
+          <Row
+            key={d.href}
+            label={
+              <Link className="row-link" href={d.href}>
+                {t(d.label)}
+              </Link>
+            }
+            value={d.note ? t(d.note) : undefined}
+          />
         ))}
       </nav>
     </div>
