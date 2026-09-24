@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { Button, ButtonLink } from "./ui/Button";
 import { Icon } from "./ui/Icon";
+import { usePanel } from "@/lib/panel";
 import { t } from "@/lib/t";
 
 /**
@@ -15,6 +16,9 @@ export function Consent({ onStart }: { onStart: (hiddenField: string) => void })
   const [agree, setAgree] = useState(false);
   const [adult, setAdult] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // One extra sentence for the panel study only (UPDATE_29 section 1), read from the link or the
+  // label kept for the session.
+  const panel = usePanel();
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,6 +44,7 @@ export function Consent({ onStart }: { onStart: (hiddenField: string) => void })
       <p>{t("consent.stored")}</p>
       <p>{t("consent.not_advice")}</p>
       <p>{t("consent.hosts")}</p>
+      {panel ? <p data-testid="consent-panel">{t("consent.panel")}</p> : null}
       <p className="small muted">{t("consent.contact")}</p>
       <div className="hp" aria-hidden="true">
         <label htmlFor="website">{t("consent.website_label")}</label>

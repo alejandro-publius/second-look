@@ -1,0 +1,57 @@
+# The panel study: 80 strangers, paid by a research panel
+
+For Alex, about 15 minutes, by Saturday Sep 26 in the evening (UPDATE_29 section 1). Everything
+below goes into the panel's study form as written. Nobody is recruited by us: the panel shows the
+study to its own members, pays them, and checks the completion code. The analysis plan was tagged
+before any participant (`prereg-v1`), and every session that ends before the data lock,
+2026-09-28T01:00:00Z, is in the one pre-registered analysis.
+
+## The steps
+
+1. Make an account at Prolific (https://www.prolific.com), as a researcher, and add funds: about
+   300 dollars covers 80 people at the reward below plus the panel's fee, with room to spare.
+2. Create a new study and fill it from the fields below.
+3. Publish it. Nothing else is needed: the study runs itself. Watch it with `make panel-status`.
+
+## The fields
+
+| Field | What to put |
+|---|---|
+| Study title | Which creek is healthier? A two-minute photo test |
+| Description for participants | You will see photos of creeks and say, for each one, whether you can see one thing: a built bank, a dug-out channel, a plant that does not belong, or a pipe. Some people get a short lesson first. It takes about 5 minutes, needs no camera, and works on a phone or a laptop. At the end you see your score and a completion code to paste back here. The test is anonymous: we store your answers and timings, never your name, your panel id or your address. |
+| Link to the study | `https://second-look-79t.pages.dev/t?src=panel` |
+| Panel's own id in the link | Leave it off (on Prolific: do not add URL parameters). If it is on, the site removes it from the address before anything is stored or sent, and keeps only `src=panel`. |
+| Estimated time | 5 minutes |
+| Reward | 1.50 dollars (about 18 dollars an hour at 5 minutes), which is above the minimum hourly rate the panel shows when you set a reward. If the panel's minimum is higher on the day, use the minimum. |
+| Places | 80 completed sessions |
+| Who may take part | Adults (18 or older), fluent in English |
+| Devices | Phone, tablet or laptop: all work |
+| Completion code | `SLCREEK26` (shown on the end screen, after the score, only for this link) |
+
+## What a participant sees
+
+The same test as everyone, with two differences only for this link: one more sentence on the
+consent screen, "You are taking part through a research panel and will be paid by the panel;
+nothing about you is stored here.", and the completion code after the score. The test itself, its
+photos, its questions and its scoring do not change (`docs/deviations.md`, 2026-09-24).
+
+## What is stored
+
+What the privacy page and the analysis plan list: a random session id, the group, the answers,
+the timings, a hash of a random token the browser makes, the device class, the consent version,
+and the source label `panel`. Nothing from the panel's link but `src` is stored or sent: the site
+rewrites the address before anything reads it (`apps/web/lib/session.ts`, tested in
+`apps/web/tests/panel.spec.ts`). One honest limit: the browser's first request for the page carries
+the whole link the panel used, so if the panel adds its own id, Cloudflare's edge sees that one
+request as any host would (`docs/DATA_HANDLING.md` says what the host logs).
+
+## Watching it
+
+`make panel-status` prints completed sessions by source and by arm from the public counts
+endpoint, `https://second-look-79t.pages.dev/api/test/counts`, which leaves test sessions out.
+
+## After the data lock
+
+On Sep 28, after 2026-09-28T01:00:00Z, a session runs the pre-registered analysis once, exactly as
+tagged, and the README's human row reports what it shows, whatever that is. If the panel was not
+launched, the row stays as it is and says so.

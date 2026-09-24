@@ -24,19 +24,27 @@ Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.
    and invite Rachel to it. Pick the five gallery images it names. For the live judging, read
    `docs/submission/JUDGE_QA.md`: the 20 hardest questions with honest answers.
 
-4. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
+4. **By Sat Sep 26 evening, 15 minutes: launch the panel study.** Make a researcher account on
+   Prolific, add about 300 dollars, create the study from `docs/internal/PANEL_STUDY.md` (every
+   field is written out there, the link and the completion code too) and publish it. It runs by
+   itself; `make panel-status` shows how many have finished.
+
+5. **By Sat Sep 26, 2 minutes: the social preview.** On GitHub, Settings, General, Social preview,
+   upload `docs/social-preview.png`.
+
+6. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
    read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
 
-5. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
+7. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
    account, with the licence line from `docs/devpost.md` in its description (the video is
    CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
-6. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
+8. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
    `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
    makes the repository public. Then, 10 minutes, open the example pull request to their guide:
    in `~/second-look-depth`, `docs/internal/upstream/README.md` has every command.
 
-7. **Wed Sep 30, by 18:00: submit.**
+9. **Wed Sep 30, by 18:00: submit.**
 
 If you want to, and only you can decide it: their sandbox's name, `sandbox.hl7europe.eu`, stopped
 resolving on Sep 23 (their own nameserver answers that it does not exist). While it is gone, `/two`

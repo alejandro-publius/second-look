@@ -9,6 +9,7 @@ import { PhotoFrame } from "./ui/PhotoFrame";
 import type { FeatureScoreOut } from "@/lib/api";
 import type { WarmupItem } from "@/lib/content";
 import { content, featureById } from "@/lib/content";
+import { PANEL_COMPLETION_CODE, usePanel } from "@/lib/panel";
 import { siteUrl } from "@/lib/session";
 import { t } from "@/lib/t";
 
@@ -48,6 +49,8 @@ export function WarmupReveal({ pair = content.warmup }: { pair?: WarmupItem[] })
  */
 export function ScoreScreen({ scores, correctTotal, token, children }: { scores: FeatureScoreOut[]; correctTotal: number; token?: string; children?: React.ReactNode }) {
   const [copied, setCopied] = useState<"none" | "share" | "token" | "failed">("none");
+  // The panel study's completion code, after the score and for that source only (UPDATE_29).
+  const panel = usePanel();
   const total = scores.reduce((n, s) => n + s.total, 0) || 16;
   const shareText = t("end.share", { correct: correctTotal, total });
   const shareUrl = `${siteUrl()}/share/${correctTotal}?src=friends`;
@@ -85,6 +88,11 @@ export function ScoreScreen({ scores, correctTotal, token, children }: { scores:
           return <Row key={s.feature} label={name} end={<Gauge size="mark" value={s.correct} total={s.total} />} />;
         })}
       </div>
+      {panel ? (
+        <p className="card" role="status" data-testid="panel-code">
+          {t("end.panel_code", { code: PANEL_COMPLETION_CODE })}
+        </p>
+      ) : null}
       <WarmupReveal />
       <p>{t("end.score_for")}</p>
       <p>{t("end.last_line")}</p>

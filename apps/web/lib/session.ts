@@ -9,7 +9,7 @@ const SPOTS_KEY = "sl_saved_spots";
 const GUESS_KEY = "sl_landing_guess";
 const OPEN_KEY = "sl_open_session";
 
-export const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other"] as const;
+export const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other", "panel"] as const;
 
 function randomHex(bytes: number): string {
   const arr = new Uint8Array(bytes);
@@ -46,8 +46,29 @@ export function uaClass(): UaClass {
   return "desktop";
 }
 
+/**
+ * The query string with every parameter but src removed. A panel appends its own identifiers to
+ * the link (a participant id, a study id); none of them may ever be stored or sent anywhere.
+ */
+export function searchKeepingOnlySrc(search: string): string {
+  const src = new URLSearchParams(search).get("src");
+  return src ? `?src=${encodeURIComponent(src)}` : "";
+}
+
+/** Rewrites the address bar so only ?src= is left, before anything reads or stores the link. */
+export function stripQueryExceptSrc(): void {
+  try {
+    const { pathname, search, hash } = window.location;
+    const kept = searchKeepingOnlySrc(search);
+    if (kept !== search) window.history.replaceState(window.history.state, "", pathname + kept + hash);
+  } catch {
+    // no window or history: nothing to strip
+  }
+}
+
 /** Reads ?src= from a URL and keeps the coarse label for the session. Unknown values become "other". */
 export function captureSource(search: string): void {
+  stripQueryExceptSrc();
   const raw = new URLSearchParams(search).get("src");
   if (!raw) return;
   const label = (SOURCE_LABELS as readonly string[]).includes(raw) ? raw : "other";

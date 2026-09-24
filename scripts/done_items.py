@@ -1261,6 +1261,91 @@ def check_devpost_submitted(root: Path, get: Fetch = fetch) -> list[str]:
     )
 
 
+# ---------------------------------------------------------------------------------------------
+# UPDATE_29: the panel study
+
+
+PANEL_SENTENCE = (
+    "You are taking part through a research panel and will be paid by the panel; "
+    "nothing about you is stored here."
+)
+
+
+def check_panel_prep(root: Path) -> list[str]:
+    problems = []
+    panel_ts = read(root / "apps" / "web" / "lib" / "panel.ts")
+    m = re.search(r'PANEL_COMPLETION_CODE = "([A-Z0-9]+)"', panel_ts)
+    code = m.group(1) if m else ""
+    if not code:
+        problems.append("apps/web/lib/panel.ts sets no PANEL_COMPLETION_CODE")
+    study = read(root / "docs" / "internal" / "PANEL_STUDY.md")
+    if not study:
+        return [*problems, "docs/internal/PANEL_STUDY.md does not exist"]
+    needs = {
+        "the study title": r"Study title",
+        "a description for participants": r"Description for participants",
+        "the time, 5 minutes": r"\b5 minutes\b",
+        "the payment and the panel's minimum hourly rate": r"minimum hourly rate",
+        "the screening, adults": r"18 or older",
+        "the screening, English": r"English",
+        "the device note": r"[Pp]hone.*laptop",
+        "the target of 80": r"\b80\b",
+        "the exact link": r"https://second-look-79t\.pages\.dev/t\?src=panel",
+        "how to watch progress": r"make panel-status",
+        "the counts endpoint": r"/api/test/counts",
+    }
+    for what, pattern in needs.items():
+        if not re.search(pattern, study):
+            problems.append(f"PANEL_STUDY.md lacks {what}")
+    if code and code not in study:
+        problems.append(f"PANEL_STUDY.md does not give the completion code {code}")
+    locale = read(root / "content" / "locales" / "en.json")
+    if PANEL_SENTENCE not in locale:
+        problems.append("the consent sentence for the panel is not in en.json word for word")
+    spec = read(root / "apps" / "web" / "tests" / "panel.spec.ts")
+    for what, needle in (
+        ("the stripped link", "t?src=panel`"),
+        ("the consent sentence", "consent-panel"),
+        ("the completion code", "panel-code"),
+        ("no panel identifier sent", "PROLIFIC_PID"),
+        ("no sentence or code for another source", "not panel"),
+    ):
+        if needle not in spec:
+            problems.append(f"apps/web/tests/panel.spec.ts does not test {what}")
+    for rel in ("apps/api/study.py", "worker/src/index.ts", "apps/web/lib/session.ts"):
+        if not re.search(r"SOURCE_LABELS\s*=.*\"panel\"", read(root / rel)):
+            problems.append(f"{rel} does not keep the panel source label")
+    if "panel-status:" not in read(root / "Makefile"):
+        problems.append("the Makefile has no panel-status target")
+    if not re.search(r"panel", read(root / "docs" / "deviations.md"), re.I):
+        problems.append("docs/deviations.md logs no deviation for the panel study")
+    return problems
+
+
+def check_panel_analysis(root: Path) -> list[str]:
+    tests = [
+        "evals/tests/test_panel_source.py",
+        "evals/tests/test_usability_refusal.py",
+        "apps/api/tests/test_panel.py",
+    ]
+    missing = [t for t in tests if not (root / t).is_file()]
+    if missing:
+        return [f"{m} does not exist" for m in missing]
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", *tests],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=600,
+    )
+    if proc.returncode != 0:
+        return [
+            "the panel and lock tests fail: "
+            + " ".join((proc.stdout or proc.stderr).strip().splitlines()[-1:])
+        ]
+    return []
+
+
 CHECKS: dict[str, Check] = {
     "screens": check_screens,
     "gif": check_gif,
@@ -1299,6 +1384,8 @@ CHECKS: dict[str, Check] = {
     "video-link": check_video_link,
     "devpost-page": check_devpost_page,
     "devpost-submitted": check_devpost_submitted,
+    "panel-prep": check_panel_prep,
+    "panel-analysis": check_panel_analysis,
 }
 
 

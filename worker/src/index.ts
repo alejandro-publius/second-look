@@ -28,7 +28,8 @@ export interface Env {
 }
 
 const DATA_LOCK_UTC = Date.parse("2026-09-28T01:00:00Z");
-const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other"];
+// "panel" added on 2026-09-24 for the panel study (UPDATE_29 section 1, docs/deviations.md).
+const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other", "panel"];
 const UA_CLASSES = ["phone", "tablet", "desktop", "other"];
 const ANSWERS = ["yes", "no", "cant_tell"];
 const TOKEN_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"; // no 0, o, 1, l or i, so it can be read aloud
