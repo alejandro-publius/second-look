@@ -384,6 +384,22 @@ def act_vectors(
         visit("v11", "alicetoken23456", dry_days=5, tested_on=date(2026, 5, 1)),
         visit("v12", "bobtoken23456789", dry_days=5),
     ]
+    # CRITIC_06 H01: a plant is a finding like any tested feature. The list of which plants is not
+    # a second answer, and one person scored 2 of 4 on plants, so only one of the two passed.
+    plants = [
+        visit(
+            "v15",
+            "alicetoken23456",
+            answers={"invasive_species": "present", "invasive_which": ["cant_tell"]},
+        ),
+        visit(
+            "v16",
+            "caroltoken2345",
+            day=23,
+            answers={"invasive_species": "present"},
+            correct=(4, 4, 2, 4),
+        ),
+    ]
     approved = [s for s in sentences_approved]
 
     def findings(
@@ -403,6 +419,8 @@ def act_vectors(
         )
 
     found_mixed = act.findings_from_visits(mixed, finding_key_for)
+    found_plants = act.findings_from_visits(plants, finding_key_for)
+    assert [f.feature for f in found_plants] == ["invasive_plant"]
 
     # The downstream note (Update 10C): every reach below a finding gets one plain line.
     def reach(slug: str, flows_into: str | None) -> regions.Reach:
@@ -605,6 +623,27 @@ def act_vectors(
                 finding_key_for,
             ),
             findings(
+                "a plant is a finding, and which ones is not a second answer",
+                plants,
+                finding_key_for,
+            ),
+            findings(
+                "which plants on its own, with no yes, is not a finding",
+                [visit("v18", "alicetoken23456", answers={"invasive_which": ["cant_tell"]})],
+                finding_key_for,
+            ),
+            findings(
+                "a question that is no feature and asks for no measure is not a finding",
+                [
+                    visit(
+                        "v17",
+                        "alicetoken23456",
+                        answers={"construction": "present", "vegetation_cuts": "present"},
+                    )
+                ],
+                finding_key_for,
+            ),
+            findings(
                 "absent and cant tell are not findings",
                 [
                     visit(
@@ -621,6 +660,11 @@ def act_vectors(
                 "approved city sentences only",
                 {"findings": dump(found_mixed), "sentences": approved},
                 act.needs_from_findings(found_mixed, approved),
+            ),
+            case(
+                "a plant finding asks for no measure",
+                {"findings": dump(found_plants), "sentences": approved},
+                act.needs_from_findings(found_plants, approved),
             ),
             case(
                 "nothing approved",
