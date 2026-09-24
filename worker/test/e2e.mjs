@@ -457,6 +457,37 @@ try {
   assert.equal((await judge("t99", "yes")).status, 404);
   await stopDev(afterLock);
 
+  // 8c. The public counts by source (review REVIEW_03 R48). Two real sittings, not marked as
+  // tests: one from the panel's link and one whose source is a panel id pasted into the link,
+  // which is not a label we keep and is stored as "other". Only finished real sittings count.
+  at("counts by source");
+  const finish = async (sourceLabel) => {
+    const s = await api("POST", "/api/test/session", {
+      consent_version: "v1",
+      content_hash: CONTENT.content_hash,
+      build_hash: "e2e",
+      source_label: sourceLabel,
+      hidden_field: "",
+      client_token_hash: `e2e-${Math.random().toString(16).slice(2)}-0123456789abcdef`,
+      ua_class: "phone",
+    });
+    assert.equal(s.status, 200, JSON.stringify(s.data));
+    let position = 0;
+    for (const itemId of s.data.item_order) {
+      assert.equal((await api("POST", "/api/test/response", { session_id: s.data.session_id, item_id: itemId, answer: "cant_tell", rt_ms: 900, position: position++ })).status, 200);
+    }
+    assert.equal((await api("POST", "/api/test/complete", { session_id: s.data.session_id, prior_experience: "no", answered_count: 16 })).status, 200);
+    return s.data.session_id;
+  };
+  const before = (await api("GET", "/api/test/counts")).data;
+  assert.deepEqual(before.by_source, { poster: 0, chat: 0, friends: 0, creek_group: 0, other: 0, panel: 0 }, "the e2e's own sittings are tests");
+  const panelSession = await finish("panel");
+  const pastedSession = await finish("PROLIFIC_PID=abc");
+  const counted = (await api("GET", "/api/test/counts")).data;
+  assert.equal(counted.by_source.panel, 1, "the panel label is kept");
+  assert.equal(counted.by_source.other, 1, "a label we do not keep is stored as other");
+  assert.equal(counted.by_arm.untrained.completed + counted.by_arm.trained.completed, 2);
+
   // 9. Bad input is a plain 422 or 404, never a 500.
   at("bad input");
   assert.equal((await api("POST", "/api/check/draft", { spot: GLADE, answers: { nothing: "x" }, first_rating: "good", photo_ids: [] })).status, 422);
