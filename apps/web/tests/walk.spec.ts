@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { toPageTop } from "../scripts/gallery-view.mjs";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
@@ -221,4 +222,20 @@ test("a feelings slider nobody moved stays out of the walk's record", async ({ p
     if (moved) await expect(row.locator("strong")).toHaveText("Joy: 3, Fear: Not applicable");
     else await expect(row).toHaveCount(0);
   }
+});
+
+// CRITIC_06 H03: the gallery's shot of a walk's record opened on a line cut in half, with the page
+// title out of the frame, because the record showed wherever the form had left the page. The
+// gallery now goes to the top of the page first (scripts/gallery-view.mjs). This makes a record on
+// the gallery's phone size, takes the same step, and checks the title is whole on screen.
+test("the gallery's shot of a walk's record has the page title whole in view", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockApi(page, {});
+  await page.goto(`${BASE}/walk/${walks[0].id}`);
+  await page.getByRole("button", { name: "Start the check" }).click();
+  await answerWalk(page, () => page.getByRole("button", { name: "Next", exact: true }).click());
+  await toPageTop(page);
+  const box = (await page.getByRole("heading", { name: en["walk.done_title"], level: 1 }).boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(844);
 });
