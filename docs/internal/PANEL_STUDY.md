@@ -41,7 +41,8 @@ What the privacy page and the analysis plan list: a random session id, the group
 the timings, a hash of a random token the browser makes, the device class, the consent version,
 and the source label `panel`. Nothing from the panel's link but `src` is stored or sent: the site
 rewrites the address before anything reads it (`apps/web/lib/session.ts`, tested in
-`apps/web/tests/panel.spec.ts`). One honest limit: the browser's first request for the page carries
+`apps/web/tests/panel.spec.ts`), and the service worker keeps a page in the phone's cache under its
+path and `src` only (`apps/web/public/sw.js`). One honest limit: the browser's first request for the page carries
 the whole link the panel used, so if the panel adds its own id, Cloudflare's edge sees that one
 request as any host would (`docs/DATA_HANDLING.md` says what the host logs).
 
