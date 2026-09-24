@@ -19,7 +19,8 @@ The pick rule (PICK_RULE below): only candidates on a feature the creek check as
 with an item in content/form.yaml, in order by frame id, then model id, feature and run. The kept
 case is the first of them the gate kept, the dropped case the first it dropped (CRITIC_06 H02: a
 kept flag on the dug-out channel, which the check never asks about, is not an example of what a
-person would see). The files also say how many kept flags there are on each feature.
+person would see). The files also say how many kept flags there are on each feature, and
+whether a kept flag on it makes a question eligible at all.
 
 The kept flag then goes to core.followups.select_followups the way apps/api/check.py calls it,
 with this one flag, no answers, no test score, rain unknown and the checker switched on. The live
@@ -47,7 +48,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from core.checker import feature_passed
+from core.checker import NOTE_MAX_CHARS, feature_passed
 from core.content_loader import Content, load_content
 from core.followups import SiteContext, select_followups
 from core.gate import Flag, parse_flags
@@ -251,6 +252,17 @@ def followups(content: Content, flags: Sequence[Flag], *, checker_on: bool) -> l
     return [f.model_dump(mode="json") for f in chosen]
 
 
+def kept_flag_asks(content: Content, found: Sequence[Candidate]) -> dict[str, bool]:
+    """For each feature with a kept flag: does the first of them, in PICK_RULE order, make a
+    question eligible? core/followups.py asks only about a feature the creek check asks about."""
+    asks: dict[str, bool] = {}
+    for c in sorted(found, key=lambda c: c.order):
+        feature = str(c.answer["feature"])
+        if c.flags and feature not in asks:
+            asks[feature] = bool(followups(content, c.flags, checker_on=True))
+    return {f: asks[f] for f in FEATURES if f in asks}
+
+
 def on_screen(content: Content, followup: Mapping[str, Any]) -> dict[str, Any]:
     """The words the walk page shows for a checker question (apps/web/components/WalkFlow.tsx):
     the question with the feature's plain words, the flag's note after "the checker noticed",
@@ -386,6 +398,7 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         "gate_over_the_run": counts,
         "kept_by_feature": kept_by_feature(found),
         "features_the_check_asks_about": asked,
+        "a_kept_flag_asks": kept_flag_asks(content, found),
         "kept": case(kept, **common),
         "dropped": case(dropped, **common),
     }
@@ -465,6 +478,11 @@ def section(title: str, c: Mapping[str, Any], raw_kept: str) -> list[str]:
             f"   It kept it, as this Flag: `{json.dumps(flag, ensure_ascii=False)}`. The pass "
             f"table says `{c['model']}` passed `{c['feature']}`: {cell_words(cell)}",
         ]
+        if len(flag["note"]) == NOTE_MAX_CHARS:
+            lines[-1] += (
+                f" The note is {NOTE_MAX_CHARS} characters long, the most `force_answer` keeps, "
+                "so it is cut off there."
+            )
     else:
         reasons = "; ".join(f'"{r}"' for r in gate["drop_reasons"])
         lines += [
@@ -489,6 +507,10 @@ def section(title: str, c: Mapping[str, Any], raw_kept: str) -> list[str]:
             'plain words, then the model\'s note, and only there, after "the checker noticed". '
             "With the checker off, as on the live site today, the same call "
             f"{'asks nothing' if not fu['with_the_checker_off'] else 'still asks'}.",
+            "",
+            f"   The person taps {' or '.join(chr(34) + b + chr(34) for b in screen['buttons'])}, "
+            "and no stored answer changes: the question asks them to look again, and the "
+            "answers they gave before it stay as they were.",
         ]
     lines += [
         "5. **What every model answered on this frame and feature.** From the same file.",
@@ -548,7 +570,15 @@ def by_feature_words(doc: Mapping[str, Any]) -> str:
     )
     if unasked:
         words += f", and none for {and_list(unasked)}"
-    return words + "."
+    words += "."
+    asks = doc["a_kept_flag_asks"]
+    silent = [f for f in unasked if f in asks]
+    if silent and not any(asks[f] for f in silent):
+        words += (
+            f" So a kept flag on {and_list(silent)} makes no question eligible: `select_followups` "
+            f"in {link('core/followups.py')} asks only about a feature the check has an item for."
+        )
+    return words
 
 
 def and_list(features: Sequence[str]) -> str:

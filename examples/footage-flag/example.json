@@ -27,6 +27,10 @@
     "invasive_plant",
     "pipe_running"
   ],
+  "a_kept_flag_asks": {
+    "artificial_bank": true,
+    "dug_out_channel": false
+  },
   "kept": {
     "frame": "v06-00403",
     "manifest_row": {

@@ -186,6 +186,47 @@ def test_the_kept_flag_makes_one_checker_question_eligible_and_only_with_the_che
     assert f"   > {screen['label']}: {answer['note']}\n" in PAGE
 
 
+def test_a_kept_flag_asks_only_on_a_feature_the_check_asks_about() -> None:
+    """CRITIC_06 H02: the selector, called here on one kept flag per feature, asks nothing for a
+    dug-out channel and asks for built banks; the page says so, and says what the person can do."""
+    content = load_content(ROOT)
+    first: dict[str, Any] = {}
+    for number, line in enumerate(lines(), start=1):
+        if number == 1 or not line.strip():
+            continue
+        a = json.loads(line)
+        if "frame" not in a or a["malformed"] or a["answer"] != "yes":
+            continue
+        order = (a["frame"], a["model"], a["feature"], int(a["run"]))
+        flags, _reasons = gate(a)
+        if flags and (a["feature"] not in first or order < first[a["feature"]][0]):
+            first[a["feature"]] = (order, flags)
+    asks = {
+        feature: bool(
+            select_followups(
+                {},
+                SiteContext(rain="unknown"),
+                None,
+                flags,
+                content.followups,
+                form_items=content.form.get("items", []),
+                checker_enabled=True,
+            )
+        )
+        for feature, (_order, flags) in first.items()
+    }
+    assert asks == {"artificial_bank": True, "dug_out_channel": False}
+    assert DOC["a_kept_flag_asks"] == {f: asks[f] for f in FEATURES if f in asks}
+    assert (
+        "So a kept flag on `dug_out_channel` makes no question eligible: `select_followups` in "
+        "[`core/followups.py`](../../core/followups.py) asks only about a feature the check has "
+        "an item for."
+    ) in PAGE
+    looked, skip = content.locale["check.looked_again"], content.locale["check.skip"]
+    assert DOC["kept"]["followup"]["on_screen"]["buttons"] == [looked, skip]
+    assert f'   The person taps "{looked}" or "{skip}", and no stored answer changes' in PAGE
+
+
 def test_the_page_says_the_checker_is_off_live_and_credits_each_frame() -> None:
     assert footage_example.LIVE_SITE in PAGE
     for name in ("kept", "dropped"):

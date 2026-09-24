@@ -147,6 +147,34 @@ def test_no_real_benchmark_gives_none(tmp_path: Path) -> None:
     assert model_card.build(fixture(tmp_path))["benchmark"] is None
 
 
+def test_the_footage_runs_kept_flags_are_counted_by_feature_from_its_raw_answers() -> None:
+    """Critic round 06, H02: the split of the kept flags by feature, counted again here from the
+    raw file of the run results/footage_latest.json is, through the real gate."""
+    from core.gate import parse_flags
+    from evals.footage import candidate_flag
+
+    root = model_card.ROOT
+    latest = json.loads((root / "results" / "footage_latest.json").read_text(encoding="utf-8"))
+    table = json.loads((root / "results" / "model_pass_table.json").read_text(encoding="utf-8"))
+    doc = json.loads(model_card.OUT.read_text(encoding="utf-8"))["footage_kept"]
+    raw = (root / doc["raw_answers"]).read_text(encoding="utf-8").splitlines()
+    assert json.loads(raw[0])["generated_at_utc"] == latest["generated_at_utc"]
+    kept = {f: 0 for f in ("artificial_bank", "dug_out_channel", "invasive_plant", "pipe_running")}
+    for line in raw[1:]:
+        a = json.loads(line) if line.strip() else {}
+        if "frame" not in a or a["malformed"] or a["answer"] != "yes":
+            continue
+        candidate = candidate_flag(a["feature"], a["note"])
+        for flag in parse_flags(candidate, model_id=a["model"], pass_table=table)[0]:
+            kept[flag.feature] += 1
+    assert doc["by_feature"] == kept
+    assert doc["kept"] == sum(kept.values()) == latest["gate"]["kept"]
+
+
+def test_no_footage_run_gives_no_kept_flags(tmp_path: Path) -> None:
+    assert model_card.build(fixture(tmp_path))["footage_kept"] is None
+
+
 def test_check_fails_when_the_committed_file_is_stale(tmp_path: Path, monkeypatch: Any) -> None:
     stale = tmp_path / "model_card.json"
     stale.write_text("{}\n", encoding="utf-8")
