@@ -52,6 +52,10 @@ jobs:
       - if: hashFiles('worker/package-lock.json') != ''
         run: cd worker && npm ci
       - run: make check
+      # The web end to end on a phone viewport with a mocked API: the test flow, judge mode, the
+      # check, the walks, keyboard only, reflow and axe on every screen it reaches. The
+      # /accessibility page says the build fails on a serious axe finding; this step is why.
+      - run: make e2e
       # The Worker end to end under wrangler dev with a local D1 and KV, rain from a stub, no
       # login and no network beyond this runner (Update 10 answer A3). Wrangler 4.135 needs
       # Node 22; the web build above keeps its Node 20 pin (PLAN.md), so the switch comes last.

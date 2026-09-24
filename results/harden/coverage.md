@@ -1,16 +1,16 @@
 # Coverage
 
-Measured 2026-09-23T04:37:55Z at commit 92fa280 by `uv run python scripts/harden_coverage.py`. Before is commit 92fa280, the last commit without the harden tests. Line and branch coverage together, over the whole Python suite, with test files left out of the totals.
+Measured 2026-09-24T05:59:16Z at commit 8cecc38 by `uv run python scripts/harden_coverage.py`. Before is commit 92fa280, the last commit without the harden tests. Line and branch coverage together, over the whole Python suite, with test files left out of the totals.
 
-- Suite before: 656 passed, 2 skipped in 87.23s (0:01:27)
-- Suite after: 1023 passed, 1 skipped, 11 xfailed in 112.20s (0:01:52)
+- Suite before: 656 passed, 2 skipped in 92.43s (0:01:32)
+- Suite after: 1315 passed, 1 skipped, 11 xfailed in 156.66s (0:02:36)
 
 ## Python packages
 
 | Package | Before, percent | After, percent |
 |---|---|---|
-| core/ | 91.2 (1858 statements, 127 missed; 800 branches, 107 missed) | 99.7 (1858 statements, 4 missed; 800 branches, 5 missed) |
-| apps/api/ | 91.1 (1606 statements, 103 missed; 382 branches, 73 missed) | 91.1 (1606 statements, 103 missed; 382 branches, 73 missed) |
+| core/ | 91.2 (1858 statements, 127 missed; 800 branches, 107 missed) | 99.7 (1917 statements, 4 missed; 814 branches, 4 missed) |
+| apps/api/ | 91.1 (1606 statements, 103 missed; 382 branches, 73 missed) | 91.2 (1609 statements, 103 missed; 384 branches, 73 missed) |
 
 ## Core functions that were under 90 percent
 
@@ -79,14 +79,14 @@ Measured 2026-09-23T04:37:55Z at commit 92fa280 by `uv run python scripts/harden
 
 ## worker/src
 
-The golden tests, run under c8 with source maps: tests 9, pass 9. The harden run added no Worker test, so before and after are the same. Files marked not loaded are reached only by `make worker-e2e`, which drives wrangler dev over HTTP and is not instrumented.
+The golden tests, run under c8 with source maps: tests 12, pass 12. The harden run added no Worker test, so before and after are the same. Files marked not loaded are reached only by `make worker-e2e`, which drives wrangler dev over HTTP and is not instrumented.
 
 | File | Lines | Branches | Functions |
 |---|---|---|---|
 | worker/src/check.ts | not loaded | not loaded | not loaded |
 | worker/src/city.ts | not loaded | not loaded | not loaded |
 | worker/src/core/act.ts | 100 | 96.03 | 100 |
-| worker/src/core/fhir_emit.ts | 98.22 | 78.2 | 100 |
+| worker/src/core/fhir_emit.ts | 98.25 | 76.96 | 100 |
 | worker/src/core/fhir_referral.ts | 100 | 70.68 | 100 |
 | worker/src/core/followups.ts | 92.16 | 73.33 | 100 |
 | worker/src/core/healthcard.ts | 100 | 84.21 | 100 |
@@ -96,6 +96,7 @@ The golden tests, run under c8 with source maps: tests 9, pass 9. The harden run
 | worker/src/core/regions.ts | 95.78 | 86.04 | 100 |
 | worker/src/core/sha256.ts | 100 | 90 | 100 |
 | worker/src/core/types.ts | 98.24 | 75 | 100 |
+| worker/src/core/walks.ts | 100 | 83.33 | 100 |
 | worker/src/index.ts | not loaded | not loaded | not loaded |
 | worker/src/two.ts | not loaded | not loaded | not loaded |
 | worker/src/uploads.ts | not loaded | not loaded | not loaded |

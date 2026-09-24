@@ -1,9 +1,9 @@
 {
- "measured_utc": "2026-09-23T04:37:55Z",
- "commit": "92fa280",
+ "measured_utc": "2026-09-24T05:59:16Z",
+ "commit": "8cecc38",
  "before_ref": "92fa280",
- "suite_before": "656 passed, 2 skipped in 87.23s (0:01:27)",
- "suite_after": "1023 passed, 1 skipped, 11 xfailed in 112.20s (0:01:52)",
+ "suite_before": "656 passed, 2 skipped in 92.43s (0:01:32)",
+ "suite_after": "1315 passed, 1 skipped, 11 xfailed in 156.66s (0:02:36)",
  "totals": {
   "core/": {
    "before": {
@@ -14,10 +14,10 @@
     "percent": 91.2
    },
    "after": {
-    "statements": 1858,
+    "statements": 1917,
     "missing": 4,
-    "branches": 800,
-    "missing_branches": 5,
+    "branches": 814,
+    "missing_branches": 4,
     "percent": 99.7
    }
   },
@@ -30,11 +30,11 @@
     "percent": 91.1
    },
    "after": {
-    "statements": 1606,
+    "statements": 1609,
     "missing": 103,
-    "branches": 382,
+    "branches": 384,
     "missing_branches": 73,
-    "percent": 91.1
+    "percent": 91.2
    }
   }
  },
@@ -83,8 +83,8 @@
     "functions": 100
    },
    "worker/src/core/fhir_emit.ts": {
-    "lines": 98.22,
-    "branches": 78.2,
+    "lines": 98.25,
+    "branches": 76.96,
     "functions": 100
    },
    "worker/src/core/fhir_referral.ts": {
@@ -127,6 +127,11 @@
     "branches": 75,
     "functions": 100
    },
+   "worker/src/core/walks.ts": {
+    "lines": 100,
+    "branches": 83.33,
+    "functions": 100
+   },
    "worker/src/check.ts": {
     "lines": 0.0,
     "branches": 0.0,
@@ -164,6 +169,6 @@
     "not_loaded": 1
    }
   },
-  "tests": "tests 9, pass 9"
+  "tests": "tests 12, pass 12"
  }
 }

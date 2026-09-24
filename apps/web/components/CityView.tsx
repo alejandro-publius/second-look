@@ -145,15 +145,27 @@ export function CityView({ creekId }: { creekId: string }) {
     };
   }, [creekId]);
 
+  // Every state has the page's one level-one heading, the loading and empty ones too (axe
+  // page-has-heading-one on /city, docs/internal/reviews/A11Y_00.md).
   if (!creekId || error) {
     return (
-      <div className="notice notice-warn" role="status">
-        <Icon name="info" />
-        <p>{error ?? t("city.none")}</p>
+      <div className="stack">
+        <h1>{t("city.title")}</h1>
+        <div className="notice notice-warn" role="status">
+          <Icon name="info" />
+          <p>{error ?? t("city.none")}</p>
+        </div>
       </div>
     );
   }
-  if (!view) return <Skeleton label={t("city.title")} lines={3} photo={false} />;
+  if (!view) {
+    return (
+      <div className="stack">
+        <h1>{t("city.title")}</h1>
+        <Skeleton label={t("spot.loading")} lines={3} photo={false} />
+      </div>
+    );
+  }
 
   return (
     <div className="stack">

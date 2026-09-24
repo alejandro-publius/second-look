@@ -29,6 +29,20 @@ test("axe: consent and one test item", async ({ page }) => {
   await noSeriousViolations(page, "/t item");
 });
 
+test("axe: the accessibility page", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/accessibility");
+  await expect(page.getByRole("heading", { level: 1, name: "Accessibility" })).toBeVisible();
+  await noSeriousViolations(page, "/accessibility");
+});
+
+test("axe: /city has its level-one heading before the record loads", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/city");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await noSeriousViolations(page, "/city");
+});
+
 test("axe: demo", async ({ page }) => {
   await mockApi(page);
   await page.goto("/demo");
