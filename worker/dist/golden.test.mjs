@@ -994,17 +994,6 @@ var content_default = {
       approved_by: "Alex Velazquez",
       approved_on: "2026-09-21",
       audience: "person",
-      id: "person_no_swallow",
-      note: "Cited page fetched again on 2026-09-21. The draft said keep water out of open cuts; the page says stay out if you have one, so the sentence now says what the page says.",
-      source: "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html",
-      source_quote: "Don't swallow the water. Even if water looks clean, it can still have germs in it that could make you sick. Protect open cuts or wounds. Stay out if you have an open cut or wound (particularly from a surgery or piercing).",
-      text: "Do not swallow creek water, and stay out if you have an open cut or wound."
-    },
-    {
-      approved: true,
-      approved_by: "Alex Velazquez",
-      approved_on: "2026-09-21",
-      audience: "person",
       id: "person_avoid_pipes",
       note: "Cited page fetched again on 2026-09-21; the matching sentence is in source_quote.",
       source: "CDC, Healthy Swimming, Steps to Take: stay out if you see pipes. https://www.cdc.gov/healthy-swimming/prevention/index.html",
@@ -1983,17 +1972,6 @@ var core_content_default = {
       source: "CDC, Preventing Illness from Harmful Algal Blooms: rinse off immediately after touching water; CDC, Healthy Swimming, Steps to Take: wash your hands before eating. https://www.cdc.gov/harmful-algal-blooms/prevention/index.html and https://www.cdc.gov/healthy-swimming/prevention/index.html",
       source_quote: "If you do go in or touch water that may have a harmful algal bloom, rinse off immediately after. Use tap water from a sink, shower, hose, or outdoor spigot. (CDC, Harmful Algal Blooms, Prevention.) Wash your hands for 20 seconds before eating, especially if you have been playing in or touching sand. (CDC, Healthy Swimming, Prevention.)",
       text: "If you touch creek water, rinse your hands with tap water afterwards, and wash them before you eat."
-    },
-    {
-      approved: true,
-      approved_by: "Alex Velazquez",
-      approved_on: "2026-09-21",
-      audience: "person",
-      id: "person_no_swallow",
-      note: "Cited page fetched again on 2026-09-21. The draft said keep water out of open cuts; the page says stay out if you have one, so the sentence now says what the page says.",
-      source: "CDC, Healthy Swimming, Steps to Take: don't swallow the water; protect open cuts or wounds. https://www.cdc.gov/healthy-swimming/prevention/index.html",
-      source_quote: "Don't swallow the water. Even if water looks clean, it can still have germs in it that could make you sick. Protect open cuts or wounds. Stay out if you have an open cut or wound (particularly from a surgery or piercing).",
-      text: "Do not swallow creek water, and stay out if you have an open cut or wound."
     },
     {
       approved: true,
