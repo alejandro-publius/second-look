@@ -123,7 +123,7 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 | D38 | Data lock: the audit log records `data_lock` at or after the lock, and its chain holds | DATED | 2026-09-28T01:00:00Z | | | `uv run python scripts/verify_audit.py && uv run python scripts/done_items.py data-lock` |
 | D39 | The analysis run once on real data, as a description, after the lock | DATED | 2026-09-28T01:00:00Z | | | `uv run python scripts/done_items.py analysis-once` |
 | D40 | `/demo` opens on the live site on Sep 28 | DATED | 2026-09-28T01:00:00Z | | | `make demo-open-check` |
-| D41 | The sandbox re-push after the lock, when their name resolves | BLOCKED-IF | 2026-09-28T01:00:00Z | Their sandbox name sandbox.hl7europe.eu does not resolve (NXDOMAIN at their own nameserver since 2026-09-23) | `! python3 -c "import socket; socket.getaddrinfo('sandbox.hl7europe.eu', 443)" 2>/dev/null` | `uv run python scripts/done_items.py sandbox-repush` |
+| D41 | The sandbox re-push after the lock, when their name resolves | BLOCKED-IF | 2026-09-28T01:00:00Z | Their sandbox name sandbox.hl7europe.eu does not resolve (NXDOMAIN at their own nameserver since 2026-09-23) | `python3 -c $'import socket, sys\ntry:\n    socket.getaddrinfo("sandbox.hl7europe.eu", 443)\nexcept socket.gaierror:\n    sys.exit(0)\nsys.exit(1)' 2>/dev/null` | `uv run python scripts/done_items.py sandbox-repush` |
 
 ## Human items
 
