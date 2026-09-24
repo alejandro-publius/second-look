@@ -14,6 +14,7 @@ import { Invalid, NotFound, createDraft, finalize, latestBundleForSpot, loadVisi
 import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, referralView } from "./city";
 import { TooLarge, photoResponse, storeUpload } from "./uploads";
 import { two } from "./two";
+import { inaturalistView } from "./inaturalist";
 
 export interface Env {
   DB: D1Database;
@@ -494,6 +495,9 @@ export default {
       const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
       if (referral) return json(env, await referralView(checkEnv, decodeURIComponent(referral[1]), now));
       if (path === "/api/two") return json(env, await two(env));
+      // The iNaturalist context line for a creek, from the copy the Mac stored. Read only.
+      const inat = /^\/api\/inaturalist\/([^/]+)$/.exec(path);
+      if (inat && request.method === "GET") return json(env, await inaturalistView(env, decodeURIComponent(inat[1])));
     } catch (err) {
       return errorResponse(env, err);
     }

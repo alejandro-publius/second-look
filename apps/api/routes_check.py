@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from apps.api import check
+from apps.api import check, inaturalist
 from apps.api import city as city_mod
 from apps.api.deps import DB, Now
 from apps.api.security import READ_LIMIT, STUDY_LIMIT, UPLOAD_LIMIT, rate_limited
@@ -45,6 +45,12 @@ def creeks(db: DB) -> dict[str, Any]:
 def city(creek_id: str, db: DB, now: Now) -> dict[str, Any]:
     """The analyst's view. Every number in it carries the visit ids behind it."""
     return city_mod.city_view(db, creek_id, today=now.date())
+
+
+@router.get("/inaturalist/{creek_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])
+def inaturalist_context(creek_id: str, db: DB) -> dict[str, Any]:
+    """The iNaturalist context line for a creek, from the copy the Mac stored. Read only."""
+    return inaturalist.inaturalist_view(db, creek_id)
 
 
 @router.get("/fhir/referral/{spot_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])

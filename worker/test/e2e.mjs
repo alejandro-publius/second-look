@@ -324,6 +324,51 @@ try {
   assert.equal(stored.data.theirs.id, "lab-e2e");
   assert.equal(stored.data.fetched_at, "2026-09-23T07:30:00Z");
 
+  // 8a. The iNaturalist context line. The Worker never asks iNaturalist; it reads the copy
+  // scripts/cache_inaturalist.py stored. Nothing stored: status none, and the page says "no recent
+  // sightings on record". Stored: the sightings come back with their fetch time, but only on a
+  // creek whose record answers the invasive plant question, only with links to iNaturalist, and
+  // not one number on the city view moves.
+  at("iNaturalist context");
+  const inatBefore = await api("GET", "/api/inaturalist/strawberry-creek");
+  assert.equal(inatBefore.status, 200, JSON.stringify(inatBefore.data));
+  assert.equal(inatBefore.data.creek, "strawberry-creek");
+  assert.equal(inatBefore.data.shown, true, "every visit above answered the invasive plant question");
+  assert.equal(inatBefore.data.status, "none");
+  assert.equal(inatBefore.data.fetched_at, null);
+  assert.deepEqual(inatBefore.data.species, []);
+  assert.equal(inatBefore.data.terms, "https://www.inaturalist.org/pages/terms");
+  const cityBefore = await api("GET", "/api/city/strawberry-creek");
+  const summary = JSON.stringify({
+    since: "2023-09-24",
+    radius_m: 300,
+    species: [
+      { taxon_id: 61317, name: "Himalayan blackberry", latin_name: "Rubus armeniacus", count: 3, last_observed: "2025-12-11", url: "https://www.inaturalist.org/observations?id=1,2,3" },
+      { taxon_id: 1, name: "Not a link to iNaturalist", latin_name: "x", count: 1, last_observed: "2025-01-01", url: "https://example.org/" },
+    ],
+  }).replaceAll("'", "''");
+  wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--command", `INSERT OR REPLACE INTO inaturalist_cache (creek, body, fetched_at) VALUES ('strawberry-creek', '${summary}', '2026-09-24T07:45:00Z')`]);
+  const inat = await api("GET", "/api/inaturalist/strawberry-creek");
+  assert.equal(inat.data.status, "cached");
+  assert.equal(inat.data.fetched_at, "2026-09-24T07:45:00Z");
+  assert.equal(inat.data.radius_m, 300);
+  assert.deepEqual(inat.data.species.map((s) => [s.name, s.count, s.last_observed]), [["Himalayan blackberry", 3, "2025-12-11"]], "the link that leaves iNaturalist is dropped");
+  const byCreekId = await api("GET", `/api/inaturalist/${record.data.spot.creek_id}`);
+  assert.equal(byCreekId.data.creek, "strawberry-creek", "a stored creek id reads the same row as its slug");
+  const cityAfter = await api("GET", "/api/city/strawberry-creek");
+  assert.deepEqual(cityAfter.data, cityBefore.data, "the city view is the same with or without the sightings");
+  assert.equal(JSON.stringify(cityAfter.data).includes("Himalayan"), false);
+  // A creek nobody has asked about invasive plants: the sightings are withheld, even when stored.
+  const bridge = await visit(null, { new: { name: "Stone bridge", latitude: 35.3301, longitude: 25.1401, coarse: false } }, { channel_form: "u_shape" });
+  const bridgeCreek = (await api("GET", `/api/spot/${bridge.spot_id}`)).data.spot.creek_id;
+  wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--command", `INSERT OR REPLACE INTO inaturalist_cache (creek, body, fetched_at) VALUES ('${bridgeCreek}', '${summary}', '2026-09-24T07:45:00Z')`]);
+  const withheld = await api("GET", `/api/inaturalist/${bridgeCreek}`);
+  assert.equal(withheld.data.shown, false);
+  assert.equal(withheld.data.status, "cached");
+  assert.deepEqual(withheld.data.species, []);
+  // Read only: the route answers GET and nothing else.
+  assert.equal((await api("POST", "/api/inaturalist/strawberry-creek", {})).status, 404);
+
   // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
   // sixteen answers would be the live test's key.
   at("judge mode shut before the lock");

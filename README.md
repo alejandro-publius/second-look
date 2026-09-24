@@ -382,7 +382,7 @@ FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and buil
 
 ### API
 
-The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes, under `/api` on the site's own origin. The Python API in `apps/api/` is the reference, with <!--v:results/api_inventory.json#/python/count-->25<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in `docs/API.md`; a test fails when a route is added without a row there.
+The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->26<!--/v--> routes, under `/api` on the site's own origin. The Python API in `apps/api/` is the reference, with <!--v:results/api_inventory.json#/python/count-->26<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in `docs/API.md`; a test fails when a route is added without a row there.
 
 | Route | What it is for |
 |---|---|

@@ -115,6 +115,7 @@ deploys to https://depth.second-look-79t.pages.dev.
 | `fhir_bundle` | the validated FHIR Bundle of one finished visit, our store of record |
 | `upload` | one photo's id, a hash of its token, its type and size; the bytes are in KV |
 | `sandbox_cache` | the laboratory record `/two` shows, as `scripts/cache_their_records.py` fetched it |
+| `inaturalist_cache` | one creek's iNaturalist context line: per listed invasive plant, a count, the latest date and a link, as `scripts/cache_inaturalist.py` fetched it |
 
 ## Secrets
 

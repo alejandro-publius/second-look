@@ -2,7 +2,7 @@
   "script": "scripts/api_inventory.py",
   "synthetic": false,
   "worker": {
-    "count": 25,
+    "count": 26,
     "routes": [
       {
         "method": "POST",
@@ -43,6 +43,10 @@
       {
         "method": "any",
         "path": "/api/fhir/validation"
+      },
+      {
+        "method": "GET",
+        "path": "/api/inaturalist/{}"
       },
       {
         "method": "GET",
@@ -107,7 +111,7 @@
     ]
   },
   "python": {
-    "count": 25,
+    "count": 26,
     "routes": [
       {
         "method": "POST",
@@ -168,6 +172,12 @@
         "path": "/api/fhir/validation",
         "limit": null,
         "file": "apps/api/fhir_routes.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/inaturalist/{creek_id}",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
       },
       {
         "method": "GET",
@@ -260,7 +270,7 @@
         "file": "apps/api/main.py"
       }
     ],
-    "with_a_rate_limit": 19
+    "with_a_rate_limit": 20
   },
   "rate_limits": {
     "study": {
