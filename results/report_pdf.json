@@ -8,7 +8,7 @@
   "pages": 8,
   "pandoc": "pandoc 3.9.0.2",
   "pdf": "docs/REPORT.pdf",
-  "pdf_sha256": "0eed1ffe2710c7250799e9a7b857119248c41dd7566bdefab111af271d0878a3",
+  "pdf_sha256": "95984664515ac5c543f3dc66b544f1642b83fce6cd7f7d4496220273bea0fb4a",
   "playwright": "1.63.0",
   "sources": [
     "README.md",

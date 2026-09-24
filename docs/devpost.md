@@ -170,7 +170,7 @@ The video is released under CC BY-SA 4.0, because several of the creek clips in 
 1. `docs/screens/landing.webp`: the question every visitor meets.
 2. `docs/screens/score.webp`: the score per feature.
 3. `docs/screens/walk.webp`: a video walk, a creek in another country.
-4. `docs/screens/spot-record.webp`: an answer beside the observer's score (a sample record, from a local build).
+4. `docs/screens/spot-health.webp`: the health card, one action for the person, one for the pet and one for the city, each with its source (a sample record, from a local build).
 5. `docs/screens/walk-city.webp`: the creek a walk just checked, seen as a city would, with what it needs in OneAquaHealth's own measures and their source.
 
 ## Team

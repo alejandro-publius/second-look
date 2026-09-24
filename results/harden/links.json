@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-24T13:01:16Z",
- "commit": "87106f1",
+ "checked_utc": "2026-09-24T13:34:44Z",
+ "commit": "5e7dd5b",
  "files": 58,
  "rows": [
   {
@@ -2382,6 +2382,15 @@
   {
    "file": "README.md",
    "line": 515,
+   "kind": "relative",
+   "target": "results/judge_check.json",
+   "in_code": false,
+   "status": "ok",
+   "detail": "results/judge_check.json"
+  },
+  {
+   "file": "README.md",
+   "line": 515,
    "kind": "backtick",
    "target": "results/fhir_validation.json",
    "in_code": true,
@@ -2390,7 +2399,16 @@
   },
   {
    "file": "README.md",
-   "line": 527,
+   "line": 515,
+   "kind": "backtick",
+   "target": "results/judge_check.json",
+   "in_code": true,
+   "status": "ok",
+   "detail": "results/judge_check.json"
+  },
+  {
+   "file": "README.md",
+   "line": 535,
    "kind": "relative",
    "target": "scripts/seed_demo.py",
    "in_code": false,
@@ -2399,7 +2417,7 @@
   },
   {
    "file": "README.md",
-   "line": 527,
+   "line": 535,
    "kind": "url",
    "target": "http://localhost:3100",
    "in_code": false,
@@ -2408,7 +2426,7 @@
   },
   {
    "file": "README.md",
-   "line": 527,
+   "line": 535,
    "kind": "url",
    "target": "http://localhost:3100/city?creek=strawberry-creek",
    "in_code": false,
@@ -2417,7 +2435,7 @@
   },
   {
    "file": "README.md",
-   "line": 527,
+   "line": 535,
    "kind": "backtick",
    "target": "scripts/seed_demo.py",
    "in_code": true,
@@ -2426,7 +2444,7 @@
   },
   {
    "file": "README.md",
-   "line": 529,
+   "line": 537,
    "kind": "relative",
    "target": "DEPLOY.md",
    "in_code": false,
@@ -2435,7 +2453,7 @@
   },
   {
    "file": "README.md",
-   "line": 533,
+   "line": 541,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/t?src=other",
    "in_code": false,
@@ -2444,7 +2462,7 @@
   },
   {
    "file": "README.md",
-   "line": 533,
+   "line": 541,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/walk",
    "in_code": false,
@@ -2453,7 +2471,7 @@
   },
   {
    "file": "README.md",
-   "line": 533,
+   "line": 541,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/walk/v02",
    "in_code": false,
@@ -2462,7 +2480,7 @@
   },
   {
    "file": "README.md",
-   "line": 533,
+   "line": 541,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/city?creek=strawberry-creek",
    "in_code": false,
@@ -2471,7 +2489,7 @@
   },
   {
    "file": "README.md",
-   "line": 533,
+   "line": 541,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/two",
    "in_code": false,
@@ -2480,7 +2498,7 @@
   },
   {
    "file": "README.md",
-   "line": 533,
+   "line": 541,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/judges",
    "in_code": false,
@@ -2489,7 +2507,7 @@
   },
   {
    "file": "README.md",
-   "line": 539,
+   "line": 547,
    "kind": "relative",
    "target": "docs/ACCEPTANCE.md",
    "in_code": false,
@@ -2498,7 +2516,7 @@
   },
   {
    "file": "README.md",
-   "line": 539,
+   "line": 547,
    "kind": "backtick",
    "target": "docs/ACCEPTANCE.md",
    "in_code": true,
@@ -2507,7 +2525,7 @@
   },
   {
    "file": "README.md",
-   "line": 540,
+   "line": 548,
    "kind": "relative",
    "target": "fhir/golden/visit-strawberry-creek-1.json",
    "in_code": false,
@@ -2516,7 +2534,7 @@
   },
   {
    "file": "README.md",
-   "line": 540,
+   "line": 548,
    "kind": "backtick",
    "target": "fhir/golden/visit-strawberry-creek-1.json",
    "in_code": true,
@@ -2525,7 +2543,7 @@
   },
   {
    "file": "README.md",
-   "line": 541,
+   "line": 549,
    "kind": "relative",
    "target": "results/",
    "in_code": false,
@@ -2534,7 +2552,7 @@
   },
   {
    "file": "README.md",
-   "line": 542,
+   "line": 550,
    "kind": "relative",
    "target": "docs/ARCHITECTURE.md",
    "in_code": false,
@@ -2543,7 +2561,7 @@
   },
   {
    "file": "README.md",
-   "line": 542,
+   "line": 550,
    "kind": "backtick",
    "target": "docs/ARCHITECTURE.md",
    "in_code": true,
@@ -2552,7 +2570,7 @@
   },
   {
    "file": "README.md",
-   "line": 543,
+   "line": 551,
    "kind": "relative",
    "target": "docs/JUDGE_SCORECARD.md",
    "in_code": false,
@@ -2561,7 +2579,7 @@
   },
   {
    "file": "README.md",
-   "line": 543,
+   "line": 551,
    "kind": "backtick",
    "target": "docs/JUDGE_SCORECARD.md",
    "in_code": true,
@@ -2570,7 +2588,7 @@
   },
   {
    "file": "README.md",
-   "line": 544,
+   "line": 552,
    "kind": "relative",
    "target": "docs/video/SHOTLIST.md",
    "in_code": false,
@@ -2579,7 +2597,7 @@
   },
   {
    "file": "README.md",
-   "line": 544,
+   "line": 552,
    "kind": "relative",
    "target": "docs/video/VOICE_SCRIPT.md",
    "in_code": false,
@@ -2588,7 +2606,7 @@
   },
   {
    "file": "README.md",
-   "line": 544,
+   "line": 552,
    "kind": "backtick",
    "target": "docs/video/SHOTLIST.md",
    "in_code": true,
@@ -2597,7 +2615,7 @@
   },
   {
    "file": "README.md",
-   "line": 544,
+   "line": 552,
    "kind": "backtick",
    "target": "docs/video/VOICE_SCRIPT.md",
    "in_code": true,
@@ -2606,7 +2624,7 @@
   },
   {
    "file": "README.md",
-   "line": 550,
+   "line": 558,
    "kind": "relative",
    "target": "core/followups.py",
    "in_code": false,
@@ -2615,7 +2633,7 @@
   },
   {
    "file": "README.md",
-   "line": 550,
+   "line": 558,
    "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
@@ -2624,7 +2642,7 @@
   },
   {
    "file": "README.md",
-   "line": 555,
+   "line": 563,
    "kind": "relative",
    "target": "examples/mcp/README.md",
    "in_code": false,
@@ -2633,7 +2651,7 @@
   },
   {
    "file": "README.md",
-   "line": 555,
+   "line": 563,
    "kind": "backtick",
    "target": "examples/mcp/README.md",
    "in_code": true,
@@ -2642,7 +2660,7 @@
   },
   {
    "file": "README.md",
-   "line": 563,
+   "line": 571,
    "kind": "relative",
    "target": "fhir/golden/visit-strawberry-creek-1.json",
    "in_code": false,
@@ -2651,7 +2669,7 @@
   },
   {
    "file": "README.md",
-   "line": 563,
+   "line": 571,
    "kind": "backtick",
    "target": "fhir/golden/visit-strawberry-creek-1.json",
    "in_code": true,
@@ -2660,7 +2678,7 @@
   },
   {
    "file": "README.md",
-   "line": 565,
+   "line": 573,
    "kind": "relative",
    "target": "core/followups.py",
    "in_code": false,
@@ -2669,7 +2687,7 @@
   },
   {
    "file": "README.md",
-   "line": 565,
+   "line": 573,
    "kind": "relative",
    "target": "core/tests/test_followups.py",
    "in_code": false,
@@ -2678,7 +2696,7 @@
   },
   {
    "file": "README.md",
-   "line": 565,
+   "line": 573,
    "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
@@ -2687,7 +2705,7 @@
   },
   {
    "file": "README.md",
-   "line": 565,
+   "line": 573,
    "kind": "backtick",
    "target": "core/tests/test_followups.py",
    "in_code": true,
@@ -2696,7 +2714,7 @@
   },
   {
    "file": "README.md",
-   "line": 566,
+   "line": 574,
    "kind": "relative",
    "target": "results/fhir_validation.json",
    "in_code": false,
@@ -2705,7 +2723,7 @@
   },
   {
    "file": "README.md",
-   "line": 566,
+   "line": 574,
    "kind": "backtick",
    "target": "results/fhir_validation.json",
    "in_code": true,
@@ -2714,7 +2732,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 575,
    "kind": "relative",
    "target": "fhir/sandbox_ledger.jsonl",
    "in_code": false,
@@ -2723,7 +2741,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 575,
    "kind": "relative",
    "target": "docs/notes/sandbox_library.md",
    "in_code": false,
@@ -2732,7 +2750,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 575,
    "kind": "relative",
    "target": "docs/notes/sandbox-library.png",
    "in_code": false,
@@ -2741,7 +2759,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 575,
    "kind": "url",
    "target": "https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466",
    "in_code": true,
@@ -2750,7 +2768,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 575,
    "kind": "backtick",
    "target": "fhir/sandbox_ledger.jsonl",
    "in_code": true,
@@ -2759,7 +2777,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 575,
    "kind": "backtick",
    "target": "docs/notes/sandbox_library.md",
    "in_code": true,
@@ -2768,7 +2786,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 575,
    "kind": "backtick",
    "target": "docs/notes/sandbox-library.png",
    "in_code": true,
@@ -2777,7 +2795,7 @@
   },
   {
    "file": "README.md",
-   "line": 568,
+   "line": 576,
    "kind": "relative",
    "target": "docs/screens/walk-city.webp",
    "in_code": false,
@@ -2786,7 +2804,7 @@
   },
   {
    "file": "README.md",
-   "line": 568,
+   "line": 576,
    "kind": "backtick",
    "target": "docs/screens/walk-city.webp",
    "in_code": true,
@@ -2795,7 +2813,7 @@
   },
   {
    "file": "README.md",
-   "line": 572,
+   "line": 580,
    "kind": "relative",
    "target": "examples/footage-flag/README.md",
    "in_code": false,
@@ -2804,7 +2822,7 @@
   },
   {
    "file": "README.md",
-   "line": 572,
+   "line": 580,
    "kind": "relative",
    "target": "evals/fixtures/raw/",
    "in_code": false,
@@ -2813,7 +2831,7 @@
   },
   {
    "file": "README.md",
-   "line": 572,
+   "line": 580,
    "kind": "relative",
    "target": "evals/footage_example.py",
    "in_code": false,
@@ -2822,7 +2840,7 @@
   },
   {
    "file": "README.md",
-   "line": 572,
+   "line": 580,
    "kind": "backtick",
    "target": "examples/footage-flag/",
    "in_code": true,
@@ -2831,7 +2849,7 @@
   },
   {
    "file": "README.md",
-   "line": 572,
+   "line": 580,
    "kind": "backtick",
    "target": "evals/fixtures/raw/",
    "in_code": true,
@@ -2840,7 +2858,7 @@
   },
   {
    "file": "README.md",
-   "line": 572,
+   "line": 580,
    "kind": "backtick",
    "target": "evals/footage_example.py",
    "in_code": true,
@@ -2849,7 +2867,7 @@
   },
   {
    "file": "README.md",
-   "line": 576,
+   "line": 584,
    "kind": "relative",
    "target": "docs/DATA_CARD.md",
    "in_code": false,
@@ -2858,7 +2876,7 @@
   },
   {
    "file": "README.md",
-   "line": 576,
+   "line": 584,
    "kind": "relative",
    "target": "docs/deviations.md",
    "in_code": false,
@@ -2867,7 +2885,7 @@
   },
   {
    "file": "README.md",
-   "line": 576,
+   "line": 584,
    "kind": "backtick",
    "target": "docs/DATA_CARD.md",
    "in_code": true,
@@ -2876,7 +2894,7 @@
   },
   {
    "file": "README.md",
-   "line": 576,
+   "line": 584,
    "kind": "backtick",
    "target": "docs/deviations.md",
    "in_code": true,
@@ -2885,7 +2903,7 @@
   },
   {
    "file": "README.md",
-   "line": 577,
+   "line": 585,
    "kind": "relative",
    "target": "results/consensus_coarseness.json",
    "in_code": false,
@@ -2894,7 +2912,7 @@
   },
   {
    "file": "README.md",
-   "line": 577,
+   "line": 585,
    "kind": "backtick",
    "target": "results/consensus_coarseness.json",
    "in_code": true,
@@ -2903,7 +2921,7 @@
   },
   {
    "file": "README.md",
-   "line": 589,
+   "line": 597,
    "kind": "relative",
    "target": "WRITEUP.md",
    "in_code": false,
@@ -2912,7 +2930,7 @@
   },
   {
    "file": "README.md",
-   "line": 589,
+   "line": 597,
    "kind": "relative",
    "target": "DEPLOY.md",
    "in_code": false,
@@ -2921,7 +2939,7 @@
   },
   {
    "file": "README.md",
-   "line": 589,
+   "line": 597,
    "kind": "relative",
    "target": "docs/adr/README.md",
    "in_code": false,
@@ -2930,7 +2948,7 @@
   },
   {
    "file": "README.md",
-   "line": 589,
+   "line": 597,
    "kind": "backtick",
    "target": "docs/adr/",
    "in_code": true,
@@ -2939,7 +2957,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "relative",
    "target": "results/",
    "in_code": false,
@@ -2948,7 +2966,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "relative",
    "target": "docs/REPORT.pdf",
    "in_code": false,
@@ -2957,7 +2975,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "relative",
    "target": "docs/MODEL_CARD.md",
    "in_code": false,
@@ -2966,7 +2984,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "relative",
    "target": "docs/DATA_CARD.md",
    "in_code": false,
@@ -2975,7 +2993,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "relative",
    "target": "docs/THREAT_MODEL.md",
    "in_code": false,
@@ -2984,7 +3002,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "backtick",
    "target": "docs/REPORT.pdf",
    "in_code": true,
@@ -2993,7 +3011,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "backtick",
    "target": "docs/MODEL_CARD.md",
    "in_code": true,
@@ -3002,7 +3020,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "backtick",
    "target": "docs/DATA_CARD.md",
    "in_code": true,
@@ -3011,7 +3029,7 @@
   },
   {
    "file": "README.md",
-   "line": 591,
+   "line": 599,
    "kind": "backtick",
    "target": "docs/THREAT_MODEL.md",
    "in_code": true,
@@ -3020,7 +3038,7 @@
   },
   {
    "file": "README.md",
-   "line": 593,
+   "line": 601,
    "kind": "relative",
    "target": "docs/DATA_CARD.md",
    "in_code": false,
@@ -3029,7 +3047,7 @@
   },
   {
    "file": "README.md",
-   "line": 593,
+   "line": 601,
    "kind": "backtick",
    "target": "docs/DATA_CARD.md",
    "in_code": true,
@@ -3038,7 +3056,7 @@
   },
   {
    "file": "README.md",
-   "line": 597,
+   "line": 605,
    "kind": "relative",
    "target": "photos/manifest.csv",
    "in_code": false,
@@ -3047,7 +3065,7 @@
   },
   {
    "file": "README.md",
-   "line": 597,
+   "line": 605,
    "kind": "backtick",
    "target": "photos/manifest.csv",
    "in_code": true,
@@ -3056,7 +3074,7 @@
   },
   {
    "file": "README.md",
-   "line": 598,
+   "line": 606,
    "kind": "relative",
    "target": "docs/video/CREDITS.md",
    "in_code": false,
@@ -3065,7 +3083,7 @@
   },
   {
    "file": "README.md",
-   "line": 598,
+   "line": 606,
    "kind": "backtick",
    "target": "docs/video/CREDITS.md",
    "in_code": true,
@@ -3074,7 +3092,7 @@
   },
   {
    "file": "README.md",
-   "line": 600,
+   "line": 608,
    "kind": "relative",
    "target": "docs/THIRD_PARTY.md",
    "in_code": false,
@@ -3083,7 +3101,7 @@
   },
   {
    "file": "README.md",
-   "line": 600,
+   "line": 608,
    "kind": "backtick",
    "target": "docs/THIRD_PARTY.md",
    "in_code": true,
@@ -3092,7 +3110,7 @@
   },
   {
    "file": "README.md",
-   "line": 620,
+   "line": 628,
    "kind": "relative",
    "target": "LICENSE",
    "in_code": false,
@@ -3101,7 +3119,7 @@
   },
   {
    "file": "README.md",
-   "line": 620,
+   "line": 628,
    "kind": "relative",
    "target": "photos/manifest.csv",
    "in_code": false,
@@ -3110,7 +3128,7 @@
   },
   {
    "file": "README.md",
-   "line": 620,
+   "line": 628,
    "kind": "relative",
    "target": "videos/manifest.csv",
    "in_code": false,
@@ -3119,7 +3137,7 @@
   },
   {
    "file": "README.md",
-   "line": 620,
+   "line": 628,
    "kind": "relative",
    "target": "docs/THIRD_PARTY.md",
    "in_code": false,
@@ -3128,7 +3146,7 @@
   },
   {
    "file": "README.md",
-   "line": 620,
+   "line": 628,
    "kind": "backtick",
    "target": "photos/manifest.csv",
    "in_code": true,
@@ -3137,7 +3155,7 @@
   },
   {
    "file": "README.md",
-   "line": 620,
+   "line": 628,
    "kind": "backtick",
    "target": "videos/manifest.csv",
    "in_code": true,
@@ -3146,7 +3164,7 @@
   },
   {
    "file": "README.md",
-   "line": 620,
+   "line": 628,
    "kind": "backtick",
    "target": "docs/THIRD_PARTY.md",
    "in_code": true,
@@ -6336,8 +6354,8 @@
    "kind": "backtick",
    "target": "docs/screens/spot-health.webp",
    "in_code": true,
-   "status": "dead",
-   "detail": "docs/screens/spot-health.webp does not exist"
+   "status": "ok",
+   "detail": "docs/screens/spot-health.webp"
   },
   {
    "file": "docs/JUDGE_SCORECARD.md",
@@ -9043,10 +9061,10 @@
    "file": "docs/devpost.md",
    "line": 173,
    "kind": "backtick",
-   "target": "docs/screens/spot-record.webp",
+   "target": "docs/screens/spot-health.webp",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/screens/spot-record.webp"
+   "detail": "docs/screens/spot-health.webp"
   },
   {
    "file": "docs/devpost.md",
