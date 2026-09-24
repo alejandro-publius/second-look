@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AnswerLine } from "./AnswerLine";
 import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
 import { InatContext } from "./InatContext";
@@ -170,16 +171,12 @@ export function SpotRecord({ spotId }: { spotId: string }) {
               {answers.length === 0 ? <p className="small muted">{t("spot.no_passed_answers")}</p> : null}
               <div>
                 {answers.map((a) => (
-                  <div key={a.item_id} className="answer-line">
-                    <span>
-                      <span className="small muted">{a.text}</span>
-                      <br />
-                      <strong>{valueText(a)}</strong>
-                    </span>
-                    <span className="observer">
-                      {a.observer_label ?? (a.feature ? t("spot.no_score", { feature: featureById(a.feature)?.name ?? a.feature }) : t("spot.no_feature"))}
-                    </span>
-                  </div>
+                  <AnswerLine
+                    key={a.item_id}
+                    text={a.text}
+                    value={valueText(a)}
+                    score={a.observer_label ?? (a.feature ? t("spot.no_score", { feature: featureById(a.feature)?.name ?? a.feature }) : t("spot.no_feature"))}
+                  />
                 ))}
               </div>
               {v.checks.length > 0 ? (

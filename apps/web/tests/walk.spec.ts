@@ -93,3 +93,73 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
   await expect(page.getByRole("heading", { name: /Demo creek/ })).toBeVisible();
   await expect(page.getByText("Checks from this phone: 1")).toBeVisible();
 });
+
+// CRITIC_04 F01: the one record a judge can make listed no answer and no score. The record screen
+// now lists every answer the walk made, the way /spot lists a stored visit's, and where /spot shows
+// the observer's score it says the walk's observer was not tested on this phone, then points to
+// the example on /two, where a volunteer's score travels with the answer.
+const en: Record<string, string> = content.locale;
+const formItems: { id: string; text: string; feature: string | null }[] = content.form.items;
+
+test("the walk's record lists every answer the walk made, with not tested on this phone where /spot shows the score", async ({ page }) => {
+  await mockApi(page, {});
+  const w = walks[0];
+  await page.goto(`${BASE}/walk/${w.id}`);
+  await page.getByRole("button", { name: "Start the check" }).click();
+  // Each question answered, as the screen showed it: the question and the words of the answer.
+  const made: { question: string; answer: string }[] = [];
+  for (let i = 0; i < 40; i++) {
+    if (await page.getByRole("heading", { name: "Your record from the clip" }).isVisible()) break;
+    if (await page.getByRole("button", { name: "Finish" }).isVisible()) {
+      await page.getByRole("button", { name: "Finish" }).click();
+      continue;
+    }
+    const heading = page.locator("h1#question");
+    const question = (await heading.innerText()).trim();
+    const group = page.getByRole("main").getByRole("group").first();
+    const skip = page.getByRole("button", { name: "Skip" });
+    const none = page.getByRole("button", { name: "None of these" });
+    const choice = group.getByRole("button").first();
+    if (await skip.first().isVisible()) await skip.first().click();
+    else if (await none.isVisible()) await none.click();
+    else if (await choice.isVisible()) {
+      made.push({ question, answer: (await choice.innerText()).trim() });
+      await choice.click();
+    } else {
+      // The feelings sliders, sent as they start: every one at 0.
+      const names = await group.locator("label[for^='slider-']").allInnerTexts();
+      made.push({ question, answer: names.map((n) => `${n.trim()}: 0`).join(", ") });
+      await page.getByRole("button", { name: "Next", exact: true }).click();
+    }
+    // On to the next screen before the next look: the question on screen has changed or gone.
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.getByRole("heading", { name: "Your record from the clip" })).toBeVisible();
+
+  // Both kinds of question were answered, so both kinds of line are held.
+  const byText = (q: string) => formItems.find((it) => it.text === q);
+  expect(made.every((m) => byText(m.question))).toBe(true);
+  expect(made.some((m) => byText(m.question)!.feature)).toBe(true);
+  expect(made.some((m) => !byText(m.question)!.feature)).toBe(true);
+
+  const answers = page.getByTestId("walk-answers");
+  await expect(page.getByRole("heading", { name: en["walk.answers_title"], level: 2 })).toBeVisible();
+  const rows = answers.locator(".answer-line");
+  await expect(rows).toHaveCount(made.length);
+  for (const [i, m] of made.entries()) {
+    const row = rows.nth(i);
+    await expect(row.locator(".muted").first()).toHaveText(m.question);
+    await expect(row.locator("strong")).toHaveText(m.answer);
+    await expect(row.locator(".observer")).toHaveText(byText(m.question)!.feature ? en["walk.not_tested"] : en["spot.no_feature"]);
+  }
+  // No score is made up: nothing reads like a score line or a missing score.
+  await expect(answers).not.toContainText(/ of \d+ on |No test score/);
+
+  const note = page.getByTestId("walk-score-note");
+  await expect(note).toHaveText(en["walk.score_note"].replace("{link}", en["walk.score_link"]));
+  await expect(note.getByRole("link", { name: en["walk.score_link"], exact: true })).toHaveAttribute("href", "/two");
+
+  // WCAG 2.2 SC 1.4.10: the record with its answers still fits the phone width.
+  const viewport = page.viewportSize()!.width;
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport);
+});

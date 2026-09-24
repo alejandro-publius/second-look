@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { AnswerLine } from "./AnswerLine";
 import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
 import { FormQuestion } from "./FormQuestion";
 import { Photo } from "./Photo";
 import { Progress } from "./Progress";
+import { answerRows } from "@/lib/answers";
 import type { AnswerValue } from "@/lib/api";
 import { content, featureById, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
 import { t } from "@/lib/t";
@@ -157,6 +159,8 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     }
     case "record": {
       const { bundle, problems } = buildRecord(walk, answers as WalkAnswers, stage.answeredAt);
+      // The link sits inside the sentence, where the locale string says {link}.
+      const [scoreBefore, scoreAfter] = t("walk.score_note").split("{link}");
       return (
         <div className="stack">
           <FocusHeading>{t("walk.done_title")}</FocusHeading>
@@ -166,6 +170,22 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           <p className={problems.length === 0 ? "badge badge-ok" : "badge badge-bad"} data-testid="walk-structure">
             {problems.length === 0 ? t("walk.structure_ok") : t("walk.structure_bad", { n: problems.length })}
           </p>
+          {/* The answers, listed as /spot lists a stored visit's (CRITIC_04 F01). Where /spot shows
+              the observer's score, a walk has none: the record's observer carries no score, because
+              nobody took the test on this phone for it. A question with no feature is never tested. */}
+          <section className="stack" aria-labelledby="walk-answers-title">
+            <h2 id="walk-answers-title">{t("walk.answers_title")}</h2>
+            <div data-testid="walk-answers">
+              {answerRows(answers).map((row) => (
+                <AnswerLine key={row.item_id} text={row.text} value={row.label} score={row.feature ? t("walk.not_tested") : t("spot.no_feature")} />
+              ))}
+            </div>
+            <p className="small muted" data-testid="walk-score-note">
+              {scoreBefore}
+              <Link href="/two">{t("walk.score_link")}</Link>
+              {scoreAfter}
+            </p>
+          </section>
           <p className="small muted">{checkerLine(walk)}</p>
           <FhirView load={() => Promise.resolve(bundle)} curl={null} />
           <p>
