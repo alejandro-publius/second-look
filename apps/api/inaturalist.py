@@ -6,10 +6,14 @@ research-grade observations lay near the creek's spots, the latest date, and a l
 reads that copy back. It never asks iNaturalist itself. worker/src/inaturalist.ts is the same
 route on the Worker, and the two answer in the same shape.
 
-Context only, by construction. The summary is withheld until the creek's record holds an answer
-to the invasive plant question, so it cannot lead anyone's answer. Nothing counts it, and this
-module imports nothing that decides: not core/gate.py, not core/followups.py, not
-apps/api/check.py, which reaches both. scripts/tests/test_inaturalist.py checks that.
+Context only, by construction. The summary is withheld until a finished check at a real spot on
+the creek has answered the invasive plant question. The gate is per creek, not per person:
+nothing here knows who is asking, so once that first answer is in, anyone who opens the record
+page or /city sees the line, a later volunteer who has not checked this creek yet included. It
+keeps the line from leading the first answer on a creek, not every later one (review REVIEW_03
+R07, docs/DECISIONS.md). Nothing counts it, and this module imports nothing that decides: not
+core/gate.py, not core/followups.py, not apps/api/check.py, which reaches both.
+scripts/tests/test_inaturalist.py checks that.
 """
 
 from __future__ import annotations
@@ -135,7 +139,7 @@ def inaturalist_view(db: Session, creek_ref: str) -> dict[str, Any]:
         "fetched_at": _iso(row) if row is not None else None,
         "since": body.get("since"),
         "radius_m": body.get("radius_m"),
-        # Withheld until the invasive plant question is answered on this creek's record.
+        # Withheld until a finished check on this creek has answered the invasive plant question.
         "species": clean_species(body.get("species")) if shown else [],
         "source": SOURCE,
         "terms": TERMS,

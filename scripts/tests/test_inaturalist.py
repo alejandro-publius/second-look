@@ -183,3 +183,29 @@ def test_no_species_or_place_reaches_the_browser() -> None:
         assert set(got) == {"found", "research_grade", "in_california"}
     for p in doc["photos"]:
         assert p["taxon"] not in done.stdout and p["place_guess"] not in done.stdout
+
+
+def test_the_words_say_the_gate_is_per_creek_not_per_person() -> None:
+    """REVIEW_03 R07. The route opens the line for a creek once any finished check there has
+    answered the invasive plant question, and nothing checks who is looking, so a later volunteer
+    can see it before their own answer. The words must say that, and must not promise more.
+    worker/test/e2e.mjs proves the behaviour with a viewer that has checked nothing."""
+    flat = {
+        path: " ".join((ROOT / path).read_text(encoding="utf-8").split())
+        for path in (
+            "worker/src/inaturalist.ts",
+            "apps/api/inaturalist.py",
+            "docs/adr/0011-inaturalist-context.md",
+            "README.md",
+        )
+    }
+    for path, text in flat.items():
+        assert "lead anyone's answer" not in text, path
+        assert "never before the invasive plant question is answered" not in text, path
+    for path in ("worker/src/inaturalist.ts", "apps/api/inaturalist.py"):
+        assert "The gate is per creek, not per person" in flat[path], path
+        assert "a later volunteer who has not checked this creek yet included" in flat[path], path
+    assert "The gate opens once for the creek, not for each person" in flat[
+        "docs/adr/0011-inaturalist-context.md"
+    ]
+    assert "once a finished check on that creek has answered" in flat["README.md"]

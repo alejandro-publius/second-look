@@ -32,7 +32,11 @@ way their sandbox's DNS failure broke `/two` (ADR 0010).
   `scripts/cache_their_records.py` does. A failed creek stores nothing, so the last copy stays.
 - `GET /api/inaturalist/{creek}` on the Worker and on the Python API reads that copy and nothing
   else. It withholds the sightings until a finished visit on the creek has answered the invasive
-  plant question.
+  plant question. The gate opens once for the creek, not for each person: the route does not know
+  who is asking, so after that first finished answer anyone who opens the record page or `/city`
+  sees the line, a later volunteer who has not answered on that creek yet included. It keeps the
+  line from leading the first answer on a creek, not every later one (review REVIEW_03 R07;
+  `docs/DECISIONS.md` says why this stays).
 - `InatContext` shows the line on the record page and on `/city` only, below what people reported,
   with the fetch time and iNaturalist's terms. With no copy, or an empty one, it says "There are no
   recent sightings on record." If the route fails or withholds the sightings, it shows nothing.
@@ -49,6 +53,8 @@ way their sandbox's DNS failure broke `/two` (ADR 0010).
 ## Consequences
 
 - The page works whether or not iNaturalist answers, and says how old its copy is.
+- A later volunteer can read the line on a creek's record page before starting their own check
+  there, because the gate is per creek. The guided check itself never shows it.
 - Only plants on the approved region pack are asked about. Today that list is empty, so the job
   asks nothing and every creek says there are no recent sightings on record. The draft list in
   `content/drafts/regions/` carries a taxon id for each plant, so the line fills the day after

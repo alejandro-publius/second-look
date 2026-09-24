@@ -25,8 +25,9 @@ function sighting(s: InatSpecies): string {
  * One line of context per creek: plants on the region's invasive list that people saw near the
  * creek's spots on iNaturalist, from the copy scripts/cache_inaturalist.py stored with its fetch
  * time. Only the record page and /city show it. It is never in the guided check, never counted,
- * and never decides anything. The API withholds the sightings until the creek's record answers
- * the invasive plant question, and until then this shows nothing at all. If the route fails, it
+ * and never decides anything. The API withholds the sightings until a finished check on this
+ * creek answers the invasive plant question, for every viewer at once, and until then this shows
+ * nothing at all. If the route fails, it
  * shows nothing too: without the answer it cannot know the line may be shown.
  */
 export function InatContext({ creek }: { creek: string }) {

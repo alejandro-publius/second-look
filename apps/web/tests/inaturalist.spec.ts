@@ -3,8 +3,8 @@ import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 
 // The iNaturalist context line (UPDATE_29 section 8): on the record page and /city only, below
 // what people reported, with its fetch time, and "no recent sightings on record" when the stored
-// copy is missing or empty. Nothing shows when the API withholds it (the invasive plant question
-// is not answered yet) or when the route fails. The page never calls iNaturalist itself.
+// copy is missing or empty. Nothing shows when the API withholds it (no finished check on the
+// creek has answered the invasive plant question yet) or when the route fails. The page never calls iNaturalist itself.
 
 const region = (page: Page) => page.getByRole("region", { name: "iNaturalist, for context" });
 

@@ -3,10 +3,14 @@
 // two answer in the same shape. The Worker never asks iNaturalist itself: the Mac does, once a
 // day, at most one request a second, with a user agent that names this project.
 //
-// Context only, by construction. The sightings are withheld until the creek's record holds an
-// answer to the invasive plant question, so they cannot lead anyone's answer. Nothing counts them,
-// and this file imports nothing that decides: not ./check, which reaches the follow-up rules, and
-// not ./core/followups. scripts/tests/test_inaturalist.py walks the imports to prove it.
+// Context only, by construction. The sightings are withheld until a finished check at a real spot
+// on the creek has answered the invasive plant question. The gate is per creek, not per person:
+// nothing here knows who is asking, so once that first answer is in, anyone who opens the record
+// page or /city sees the line, a later volunteer who has not checked this creek yet included. It
+// keeps the line from leading the first answer on a creek, not every later one (review REVIEW_03
+// R07, docs/DECISIONS.md). Nothing counts the sightings, and this file imports nothing that
+// decides: not ./check, which reaches the follow-up rules, and not ./core/followups.
+// scripts/tests/test_inaturalist.py walks the imports to prove it.
 
 import { looksLikeATestName } from "./core/act";
 import { CREEKS, creekBySlug, placeSpot, type Creek } from "./core/regions";
@@ -128,7 +132,7 @@ export async function inaturalistView(env: InatEnv, creekRef: string) {
     fetched_at: row !== null ? row.fetched_at : null,
     since: body.since ?? null,
     radius_m: body.radius_m ?? null,
-    // Withheld until the invasive plant question is answered on this creek's record.
+    // Withheld until a finished check on this creek has answered the invasive plant question.
     species: shown ? cleanSpecies(body.species) : [],
     source: SOURCE,
     terms: TERMS,

@@ -460,6 +460,14 @@ try {
   assert.equal(onTestPin.data.status, "cached");
   assert.equal(onTestPin.data.shown, false, "a test pin does not open the line");
   assert.deepEqual(onTestPin.data.species, []);
+  // One finished check at the bridge that answers the question opens the line for that whole
+  // creek. The gate is per creek, not per person: this request carries no token and no check of
+  // its own, and it gets the sightings, as a later volunteer on the record page would (REVIEW_03
+  // R07). The words in inaturalist.ts, its Python twin and ADR 0011 say so.
+  await visit(null, { spot_id: bridge.spot_id }, GOOD_ANSWERS);
+  const freshViewer = await api("GET", `/api/inaturalist/${bridgeCreek}`);
+  assert.equal(freshViewer.data.shown, true, "one finished answer on the creek opens it for every viewer");
+  assert.deepEqual(freshViewer.data.species.map((s) => s.name), ["Himalayan blackberry"]);
   // Read only: the route answers GET and nothing else.
   assert.equal((await api("POST", "/api/inaturalist/strawberry-creek", {})).status, 404);
 
