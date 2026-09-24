@@ -8,9 +8,9 @@ with `RED: 0` and only BLOCKED and HUMAN items are left. Written 2026-09-24.
 Every item is one table row, in the order UPDATE_27 lists the work. `scripts/done_check.py` reads
 the rows and runs each command from the repo root under bash with pipefail, with a time limit of
 120 seconds. A command exits 0 only when the thing is really there; every one of them fails when
-the thing is missing. A command that cannot fail (`true`, `|| true`, `|| echo`, `exit 0`,
-`set +o pipefail`) is refused when the file is read. Inside a table a pipe is written `\|`; the
-checker reads it back as `|`.
+the thing is missing. A command that cannot fail (`true`, `|| true`, `|| echo`, `; echo` at the
+end, a trailing `&`, an `if` without `else`, `exit 0`, `set +o pipefail`) is refused when the file
+is read. Inside a table a pipe is written `\|`; the checker reads it back as `|`.
 
 The kinds:
 

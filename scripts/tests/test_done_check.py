@@ -124,6 +124,16 @@ def test_a_file_without_rows_is_refused() -> None:
         "test -f a; exit 0",
         "set +o pipefail; false | cat",
         "set +e; false",
+        "test -f a; echo checked",
+        "test -f a;echo",
+        "test -f a; printf ok",
+        "test -f a; /bin/echo done",
+        "test -f a || /usr/bin/true",
+        "test -f a || { :; }",
+        "test -f a || { true; }",
+        "test -f a &",
+        "if test -f a; then echo y; fi",
+        "x=1; if test -f a; then echo y; fi",
     ],
 )
 def test_a_command_that_cannot_fail_is_refused(command: str) -> None:
@@ -139,7 +149,17 @@ def test_a_cause_test_that_cannot_fail_is_refused() -> None:
 
 @pytest.mark.parametrize(
     "command",
-    ["test -f a", "! test -f a", "grep -q x a || grep -q y a", "make readability", "[ 1 -le 12 ]"],
+    [
+        "test -f a",
+        "! test -f a",
+        "grep -q x a || grep -q y a",
+        "make readability",
+        "[ 1 -le 12 ]",
+        "test -f a && echo ok",
+        "grep -q x a &>/dev/null",
+        'grep -q "if " a',
+        "if test -f a; then test -s a; else false; fi",
+    ],
 )
 def test_ordinary_commands_are_accepted(command: str) -> None:
     assert dc.parse(table(row("D01", command)))[0].command == command
