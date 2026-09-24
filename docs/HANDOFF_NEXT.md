@@ -1,28 +1,42 @@
-# Handoff: where Second Look stands, 2026-09-23
+# Handoff: where Second Look stands, 2026-09-24
 
-## UPDATE_19, the merge (19:12Z)
+## UPDATE_22, after the merge (Sep 24, 04:10Z)
 
-`depth` is merged into `main` and both are the same commit; keep working on `depth` and move `main`
-forward with a fast-forward. Production runs this commit: the Worker with the additive D1 tables,
-and the Pages site with the API on its own origin (`connect-src 'self'`). The QA key is set on the
-Worker and kept as `QA_KEY` in the ignored `.env` of both checkouts; load it with
-`set -a; . ./.env; set +a` before `apps/web/scripts/live-check.mjs`. Pull request #5 is closed and
-its files are on this branch; #1 is merged. Draft #8 (`harden`, another session's work in
-`~/second-look-harden`) targets `depth`, is red and is not based on the current `depth`: leave it to
-that session or Alex.
+`main` and `depth` are the same commit; keep working on `depth` and move `main` forward with a
+fast-forward. CI runs only on pushes to `main` and on pull requests, so a push to `depth` alone is
+not checked: run `make check` before moving `main`. Production runs `main`: the Worker (version
+4f4cee43) and Pages with the API on its own origin. Keys live only in the ignored `.env` files:
+`QA_KEY` in both checkouts, `ANTHROPIC_API_KEY` in `~/second-look-depth/.env`.
 
-- `/two` in production shows only our record: the Worker gets nothing from their sandbox, while the
-  same query from the Mac answers 200 in 0.6 seconds with 6 results. Not the user agent, not the
-  certificate chain. Next step: have `fetchTheirsLive` in `worker/src/two.ts` report the status it
-  saw, deploy, and read it. Beat 11 of the video waits on this.
-- The first screen is fast only with Early Hints. The landing page preloads two warm-up photos of
-  1.4 MB together; Pages stopped writing their Link headers once the project had Functions, and
-  the throttled first screen went to 8.5 seconds until `_headers` carried them again (d6c9d2b).
-  On a really slow link those bytes still cost seconds; making the photos smaller touches the test
-  flow and needs the planner.
-- The README's Known weaknesses line on weighting votes rests on the planner's simulation in
-  UPDATE_09, which is not in `results/`; the committed `results/consensus_synthetic.json` uses the
-  older rule and shows the opposite. Commit that simulation or soften the line.
+Done in this run: the two machine sittings marked as tests (counts read 0); the weighting
+simulation committed and the README saying what it shows; the paid AI run (6 of 12 features
+passed, 13.09 USD of the 40 dollar cap, `results/cost_log.jsonl`) and the README's AI table;
+smaller AVIF and WebP copies of the two warm-up photos; pull request #8 merged (3 of 21 patches);
+open creek footage in the rough cut, credited, and the creek trip removed from Alex's list.
+
+Still open, for a session:
+- Their sandbox's name, `sandbox.hl7europe.eu`, is NXDOMAIN at their own nameserver since Sep 23.
+  `/two` shows our record alone and says so; `scripts/cache_their_records.py` runs daily at 07:30
+  (launchd `com.secondlook.theirs`) and fills the cache the day the name resolves again. The
+  sandbox re-push job on Sep 28, Sep 30 and Oct 1 will fail the same way until then. This terminal
+  refused a fetch pinned to their last known address, so none was built.
+- Open review findings from pull request #8 (`docs/internal/reviews/REVIEW_02.md`): F86, POST
+  `/api/demo/answer` has no server lock check before Sep 28, so 16 POSTs reveal the gold key (the
+  fix touches the frozen study routes; low risk while nobody is recruited); F06 to F08, the
+  analysis can be run on real data before the lock through test flags (patch 04 applies cleanly
+  but was held back as a change to the lock guard); F85, `person_no_swallow` was drafted by a
+  session and carries Alex's name as approver (on Alex's list); F88, the gold key came from the
+  planner's picks, and patch 15 asks Alex to label the 16 test photos blind; F01, check the
+  Worker's JPEG stripper against REVIEW_02's four GPS photos; F04 and F12, the favicon's manifest
+  row and the IG package sha256.
+- The service worker precaches all ten warm-up copies on a first visit, though a phone shows two;
+  `apps/web/scripts/build-content.mjs` could leave them out of `public/precache.json`.
+- Beat 9 of the rough cut loops the 9 second extra check recording over 13 seconds, so the phone
+  never reaches the dry pipe question the words describe; record a longer clip with
+  `make video-clips` before the final cut.
+- After Alex records the voice: lay it over the rough cut in place of the scratch voice, keep every
+  credit line and the end card (CC BY-SA 4.0), and put the upload link in `docs/devpost.md` and the
+  README.
 
 ## Update 14 status, end of the prompt 15 run
 

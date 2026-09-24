@@ -85,3 +85,10 @@ Five lines per phase: what, proof, surprises, decisions, next.
 - Surprises: a judge answer in #5 cited a results file that says the opposite; the read-only check waited for a row /two no longer draws; Pages dropped the Early Hints when Functions arrived; their sandbox does not answer the Worker.
 - Decisions: the when-Alex-is-back list and the creek plan merged into depth's existing files; the throttled first screen restored through _headers, not by touching the test photos.
 - Next: docs/ALEX_TODO.md step 1, then the model run.
+
+## UPDATE_22, 2026-09-24 04:15Z
+- What: the machine sittings marked as tests; the weighting simulation and the README sentence; the paid AI run and the README's AI table; smaller warm-up photos; pull request #8 merged; /two reading a Mac-fed cache; open creek footage in the rough cut with credits; merged, deployed and checked.
+- Proof: `make check` CHECK GREEN on the merged tree (1291 passed, 47 README claims, 0 FHIR errors, no leaks); `live-check.mjs` with the QA key passed after the Worker and after Pages, stored as tests; `live-readonly.mjs` 11 of 11 with their lab record NOT YET; counts 0.
+- Surprises: the first paid sweep measured our YAML (the answer enum had become booleans); a network outage killed the batch poll and stalled three agents; their sandbox's name is gone from their DNS; the AVIF copies tripped the new video sniffer.
+- Decisions: see docs/DECISIONS.md for Sep 23 and 24.
+- Next: Alex's list in docs/ALEX_TODO.md; the open items at the top of docs/HANDOFF_NEXT.md.
