@@ -25,31 +25,47 @@ export function sniffImage(head: Uint8Array): "image/jpeg" | "image/png" | "imag
   return null;
 }
 
-/** JPEG: keep the picture, drop every APP1 to APP15 and COM segment (EXIF, XMP, ICC, comments).
- *  From the first scan onwards the bytes are copied as they are. */
+/** JPEG: keep the picture, drop every APP1 to APP15 and COM segment (EXIF, XMP, ICC, comments),
+ *  wherever they sit (review finding F01). Each scan's picture data runs to the next real marker
+ *  (0xFF followed by anything but a stuffed 0x00 or a restart marker), and the walk goes on after
+ *  it, so metadata between progressive scans is dropped too. Nothing after the end marker is kept:
+ *  phones put a second image with its own EXIF there. Fill bytes (extra 0xFF) before a marker are
+ *  allowed. A file that breaks this shape is refused rather than copied as it is. */
 export function stripJpeg(bytes: Uint8Array): Uint8Array {
+  const damaged = () => new Invalid("That photo could not be read. Send it again, or another one.");
   const out: Uint8Array[] = [bytes.slice(0, 2)];
   let i = 2;
-  while (i + 4 <= bytes.length) {
-    if (bytes[i] !== 0xff) break;
-    const marker = bytes[i + 1];
-    if (marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
-      out.push(bytes.slice(i, i + 2));
-      i += 2;
-      continue;
-    }
-    if (marker === 0xda || marker === 0xd9) {
-      out.push(bytes.slice(i));
+  while (i < bytes.length) {
+    if (bytes[i] !== 0xff) throw damaged();
+    let m = i + 1;
+    while (m < bytes.length && bytes[m] === 0xff) m += 1;
+    if (m >= bytes.length) throw damaged();
+    const marker = bytes[m];
+    i = m + 1;
+    if (marker === 0xd9) {
+      out.push(Uint8Array.of(0xff, 0xd9));
       return concat(out);
     }
-    const length = (bytes[i + 2] << 8) | bytes[i + 3];
-    const end = i + 2 + length;
+    if (marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+      out.push(Uint8Array.of(0xff, marker));
+      continue;
+    }
+    if (marker === 0x00 || i + 2 > bytes.length) throw damaged();
+    const length = (bytes[i] << 8) | bytes[i + 1];
+    const end = i + length;
+    if (length < 2 || end > bytes.length) throw damaged();
     const metadata = (marker >= 0xe1 && marker <= 0xef) || marker === 0xfe;
-    if (!metadata) out.push(bytes.slice(i, end));
+    if (!metadata) out.push(Uint8Array.of(0xff, marker), bytes.slice(i, end));
     i = end;
+    if (marker === 0xda) {
+      let j = i;
+      while (j + 1 < bytes.length && !(bytes[j] === 0xff && bytes[j + 1] !== 0x00 && !(bytes[j + 1] >= 0xd0 && bytes[j + 1] <= 0xd7))) j += 1;
+      if (j + 1 >= bytes.length) throw damaged();
+      out.push(bytes.slice(i, j));
+      i = j;
+    }
   }
-  out.push(bytes.slice(i));
-  return concat(out);
+  throw damaged();
 }
 
 const PNG_DROP = new Set(["tEXt", "zTXt", "iTXt", "eXIf", "tIME"]);

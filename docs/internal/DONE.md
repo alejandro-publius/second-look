@@ -158,3 +158,4 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 | D63 | A second labeller (optional): if a second label file exists, kappa per feature is reported | HUMAN | | | | `uv run python scripts/done_items.py second-labeller` |
 | D64 | iNaturalist context line on the record page and `/city`, cached in D1 by a daily Mac job, attributed, with an ADR, and degrading to "no recent sightings on record" | CHECK | | | | `uv run python scripts/done_items.py inaturalist` |
 | D65 | The loop again over everything new: the adversarial review, the six-judge simulation and the two clean critic rounds each read a commit that holds every UPDATE_29 file | CHECK | | | | `uv run python scripts/done_items.py rerun-after-update` |
+| D66 | Rachel approves the Bay Area invasive list (UPDATE_29 section 8), so the iNaturalist line can name sightings; until then it says there are none on record | HUMAN | | | | `uv run python scripts/done_items.py invasive-list` |

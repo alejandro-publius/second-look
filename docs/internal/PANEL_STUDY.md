@@ -32,7 +32,7 @@ before any participant (`prereg-v1`), and every session that ends before the dat
 
 The same test as everyone, with two differences only for this link: one more sentence on the
 consent screen, "You are taking part through a research panel and will be paid by the panel;
-nothing about you is stored here.", and the completion code after the score. The test itself, its
+nothing that identifies you is stored here." (the wording of UPDATE_29 with one word made exact, `docs/deviations.md`), and the completion code after the score. The test itself, its
 photos, its questions and its scoring do not change (`docs/deviations.md`, 2026-09-24).
 
 ## What is stored

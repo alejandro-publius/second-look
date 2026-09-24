@@ -47,6 +47,7 @@ PATHS = [
     "/offline",
     "/share/12",
     "/accessibility",
+    "/verify",
     "/city?creek=strawberry-creek",
     "/walk",
     "/walk/v02",

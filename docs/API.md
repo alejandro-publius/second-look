@@ -37,7 +37,7 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | POST | `/api/demo/answer` | Judge mode: says only whether an answer was right, never the gold label. | nothing | the data lock: 403 before 2026-09-28T01:00:00Z |
 | POST | `/api/check/draft` | A creek check's answers: makes the spot if it is new, asks Open-Meteo about rain, and picks at most two follow-up questions by code. | a `spot` row if new (a coarse point unless the person placed the pin), a draft `visit` row (coded answers, first rating, the questions asked, the contributor token if given) | none |
 | POST | `/api/check/finalize` | The answers to the follow-ups and the final rating; builds the FHIR Bundle. | `check_result` rows, the final rating, a `fhir_bundle` row | refuses an answer to a question it never asked |
-| POST | `/api/quick/{spot_id}` | The 20 second return check at a known spot: colour, smell, pipe running. | a `visit` row of kind quick | none |
+| POST | `/api/quick/{spot_id}` | The three-question return check at a known spot: colour, smell, pipe running. | a `visit` row of kind quick | none |
 | POST | `/api/upload` | A creek photo as the form field `file`. JPEG, PNG or WebP only. Camera metadata (EXIF, GPS, XMP, ICC, comments) is cut out. Returns the photo id and the one token that can read it. | the bytes in KV with a 30 day expiry; an `upload` row with a hash of the token | 8 MB at most |
 | GET | `/api/photo/{photo_id}` | One uploaded photo, served private and uncached. | nothing | `?t=` must be that photo's token, or the answer is 404 |
 | any | `/api/creeks` | Every creek with a record, with the visit ids behind each count. | nothing | none |
@@ -82,7 +82,7 @@ the table. The last column names the limit from the table above, then any lock.
 | POST | `/api/demo/answer` | Judge mode: right or not, never the label. Takes no database session. | nothing | demo; 403 before the data lock |
 | POST | `/api/check/draft` | A creek check's answers and the follow-up questions. | `spot` if new, a draft `visit` | study |
 | POST | `/api/check/finalize` | Follow-up answers and the final rating; writes the FHIR Bundle to the store folder. | `check_result` rows, a Bundle file under `FHIR_STORE_DIR` | study |
-| POST | `/api/quick/{spot_id}` | The 20 second return check. | a quick `visit` | study |
+| POST | `/api/quick/{spot_id}` | The three-question return check. | a quick `visit` | study |
 | POST | `/api/upload` | A creek photo. Re-encoded as a new JPEG of at most 1600 pixels, so no metadata survives. | a file under `UPLOAD_DIR`, an `upload` row with a hash of the token | upload; 8 MB at most |
 | GET | `/api/photo/{photo_id}` | One uploaded photo with its token. | nothing | read; `?t=` must be the token, or 404 |
 | GET | `/api/creeks` | Every creek with a record. | nothing | read |

@@ -52,7 +52,7 @@ measured: on the 16 test photos and on frames from open creek footage.
 | Ask first, or ask more than one question | follow-up selection is a pure function of the answers, the rain, the scores and the flags, with no model call inside it | `core/tests/test_harden_followups_properties.py::test_the_content_table_never_asks_more_than_two_questions_for_any_input`, `core/tests/test_harden_followups_properties.py::test_the_selector_runs_with_http_and_the_model_client_patched_to_raise` |
 | Put markup, line breaks or text direction tricks in front of a person | the gate drops such a note | `core/tests/test_gate.py::test_note_with_markup_or_a_direction_control_is_dropped` |
 | Flood the gate | more than 50 candidate flags at once drops them all | `core/tests/test_gate.py::test_a_flood_of_flags_drops_everything` |
-| Say anything about health or risk | every health or ecology sentence a person reads comes from `content/approved_sentences.yaml` with a source | `core/tests/test_labels.py` |
+| Say anything about health or risk | every health or ecology sentence a person reads comes from `content/approved_sentences.yaml` with a source | `core/tests/test_healthcard.py`, `core/tests/test_act.py` |
 | Write a file | the checker returns flags and nothing else | `core/tests/test_checker.py::test_checker_writes_nothing_in_the_working_directory` |
 
 ## The pass table
@@ -102,8 +102,9 @@ answer on
 <!--v:results/footage_latest.json#/agreement/dug_out_channel/pairs/claude-haiku-4-5-20251001 vs claude-fable-5-1/agree-->15<!--/v-->
 of <!--v:results/footage_latest.json#/agreement/dug_out_channel/frames-->46<!--/v--> frames for a dug-out
 channel. Four frames drawn by code, a white one, a black one, a room made of flat rectangles and a
-screenshot of text (`evals/fixtures/__init__.py`), got can't tell from every model on every
-feature (`results/footage_latest.json`, under `adversarial`).
+screenshot of text (`evals/fixtures/__init__.py`), got can't tell as each model's majority answer
+over three runs, on every feature (`results/footage_latest.json`, under `adversarial`; the run kept
+the majority answers, not each reply).
 
 ## Known failure modes
 

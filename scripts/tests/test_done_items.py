@@ -1116,3 +1116,18 @@ def test_main_prints_the_first_gap_last_and_exits_1(
     last = capsys.readouterr().out.strip().splitlines()[-1]
     assert last == "done-item gif: 1 missing, first: README.md shows no GIF"
     assert di.main(["--list"]) == 0
+
+
+def test_the_invasive_list_counts_once_a_plant_with_a_taxon_id_is_approved(tmp_path: Path) -> None:
+    pack = "content/regions/california-bay-area.yaml"
+    assert has(di.check_invasive_list(tmp_path), "no invasive plant")
+    write(tmp_path, pack, "region: california-bay-area\ninvasive_plants: []\n")
+    assert has(di.check_invasive_list(tmp_path), "no invasive plant")
+    write(tmp_path, pack, "invasive_plants:\n  - latin_name: Arundo donax\n")
+    assert has(di.check_invasive_list(tmp_path), "no invasive plant")
+    write(
+        tmp_path,
+        pack,
+        "invasive_plants:\n  - latin_name: Arundo donax\n    inaturalist_taxon_id: 64017\n",
+    )
+    assert di.check_invasive_list(tmp_path) == []

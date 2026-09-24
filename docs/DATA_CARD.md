@@ -69,7 +69,7 @@ licence changed (`scripts/tests/test_fetch_footage.py::test_a_changed_licence_do
 Every photo row names its licence at the exact version, and `make manifest-check` refuses one
 that is not on the allow list in `core/content_loader.py`
 (`core/tests/test_harden_content_loader.py::test_a_licence_off_the_allowlist_is_refused`).
-Every author is credited on `/credits` and in the manifest.
+Every author of a photo a visitor sees is credited on `/credits`, and every author is in the manifest.
 
 | Licence | Photo rows |
 |---|---|

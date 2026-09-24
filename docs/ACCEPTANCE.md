@@ -57,7 +57,7 @@ These are the ones worth arguing about, so each names the test that would go red
 | A synthetic pass table can never license a flag in production | `core/checker.py` | `core/tests/test_checker.py::test_synthetic_pass_table_never_licenses_a_flag_by_default` |
 | At most two follow-up questions, at most one of them from a model | `core/followups.py` | `core/tests/test_followups.py`, one test per rule plus the cap |
 | No model call inside follow-up selection | `core/followups.py` | the module imports nothing that can reach the network; `core/tests/test_followups.py` is pure |
-| Every health or ecology sentence comes from an approved sentence with a source | `content/approved_sentences.yaml`, `core/labels.py` | `core/tests/test_labels.py`; an unapproved sentence is absent and the page says why |
+| Every health or ecology sentence comes from an approved sentence with a source | `content/approved_sentences.yaml`, `core/healthcard.py`, `core/act.py` | `core/tests/test_healthcard.py`, `core/tests/test_act.py`; an unapproved sentence is absent and the page says why |
 | The analysis refuses real data before the lock | `core/lock.py`, `evals/usability_analysis.py` | `core/tests/test_lock.py`, one second either side of `2026-09-28T01:00:00Z` |
 | The analysis refuses a plan that differs from the tagged one | `evals/usability_analysis.py` | `evals/tests/test_usability_analysis.py` |
 | No identifier column ever leaves in an export | `apps/api/study.py` | `apps/api/tests/test_privacy.py` |

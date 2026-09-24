@@ -12,7 +12,7 @@ Usability test (the two-minute test at `/t`):
   the consent text version, the content hash and build hash, when consent was given, when the
   test started and finished, seconds spent on each lesson screen, a hash of a random browser
   token, a coarse device class (phone, tablet or desktop), a QA flag, the coarse source label
-  from the link (poster, chat, friends, creek_group or other), whether the hidden form field was
+  from the link (poster, chat, friends, creek_group, panel or other), whether the hidden form field was
   filled, whether the session started after data lock, the optional yes or no to "Have you ever
   assessed a stream before?", and the warm-up choice.
 - `response`: session id, item id, the answer (yes, no or can't tell), the reaction time in
@@ -34,6 +34,11 @@ Creek check (rung 2, `/check`):
   spots (a plant name, a count, the latest date and a link), with the time it was fetched. No
   observer's name, photo or exact position is stored.
 
+Who else gets a spot's position: Open-Meteo, for the rainfall lookup behind the dry pipe
+question, at 4 decimals; and iNaturalist, from the daily job on the Mac, which asks for sightings
+near each spot of a creek whose region has an approved plant list, at the precision the spot is
+stored (5 decimals for a placed pin, 2 otherwise). Neither gets a name, a token or an answer.
+
 Export: `GET /api/test/export?token=...` gives `sessions.csv` and `responses.csv` with the
 columns listed in docs/CONTRACTS.md. Neither file has a name, an address, a token or a time
 more precise than the second.
@@ -43,8 +48,10 @@ more precise than the second.
 - Names, emails, phone numbers, accounts or passwords. There are no accounts.
 - IP addresses or client addresses. The API runs with access logs off in production and a test
   fails if an address appears in the server log.
-- Free text from a person. Every field is a choice from a list. The official app's "Which ones?"
-  free text became a pick list plus "Not sure".
+- Free text from a person, with one exception: the name typed for a new spot when its pin is
+  placed. That name is stored and shown on the spot's public page, so it must not be a person's
+  name. Every other field is a choice from a list. The official app's "Which ones?" free text
+  became a pick list plus "Not sure".
 - Precise location, unless the person places the pin themselves. Otherwise the spot is coarse.
 - Photo EXIF (camera, time, GPS). Uploads and our own photos are stripped before storing;
   `scripts/ingest_photos.py` proves it with a test.
@@ -59,13 +66,19 @@ We do not control the hosting providers' own logs. Plainly:
 
 - Cloudflare Pages serves the web pages and Cloudflare Workers runs the API (Update 09
   section 2). Cloudflare sits in front of every request, so it sees and keeps its own edge
-  records: the client internet address, the requested path, the user agent, the time, the
-  response code and the country its network works out from the address. On the free plan these
+  records: the client internet address, the requested address with its query string, the user
+  agent, the time, the response code and the country its network works out from the address. So
+  if a research panel adds its own identifiers to its link, the first page request carries them
+  to Cloudflare's edge, before any of our code runs; the page then removes them from the address. On the free plan these
   are aggregate analytics plus short-lived operational logs; we cannot switch them off and we do
   not read, export or join them to anything of ours.
-- Cloudflare's Workers observability is on for the API, which keeps recent request traces for a
-  short retention window. Those traces hold the path and the response code. Our own code writes
-  no address into them, and we do not log request bodies.
+- Cloudflare's Workers observability is on for the API. Its logs hold each request's method and
+  full address, query string included, so they carry a photo's one-time token (`?t=`) and, on the
+  export route, the export token, with the response code and the timing, for up to 7 days. Our own
+  code writes no client address into them, and we do not log request bodies.
+- Cloudflare sends Network Error Logging headers with every page (`report-to` and `nel`, to
+  `a.nel.cloudflare.com`). A browser may then report a failed request to Cloudflare, and the report
+  names the address that failed. It is Cloudflare's own setting; we never see the reports.
 - D1 holds the study tables. Workers KV holds creek check photos after downsizing and EXIF
   stripping. Both sit in the same Cloudflare account.
 - GitHub hosts the code, the daily database backup as a private artifact, and the anonymous

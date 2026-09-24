@@ -8,7 +8,9 @@ read 0), the model ids and prices were confirmed and the paid AI run, four model
 in the README (its cost is logged in `results/cost_log.jsonl`), and the QA key is set on the Worker with a copy as `QA_KEY` in
 `~/second-look/.env` and `~/second-look-depth/.env`. Copy that key and your API key to your
 password manager when you can. Nobody films at a creek: the creek shots are open footage from
-Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.md`.
+Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.md`. Contributed
+back: hl7-eu/oah pull request 5 and issues 6, 7 and 8 are open under your account. Two daily jobs
+on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache (07:45).
 
 1. **By Fri Sep 25, 20 minutes: record your voice.** Run `make video-rough` and play
    `docs/video/rough_cut_scratch_voice.mp4` once: its scratch voice is there for the timing
@@ -18,8 +20,9 @@ Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.
    making the video.
 
 2. **By Sat Sep 26, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft
-   and invite Rachel to it. Pick the five gallery images it names. For the live judging, read
-   `docs/submission/JUDGE_QA.md`: the 20 hardest questions with honest answers.
+   and invite Rachel to it. Pick the five gallery images it names, and attach `docs/REPORT.pdf`
+   where Devpost takes a file. For the live judging, read `docs/submission/JUDGE_QA.md`: the 20
+   hardest questions with honest answers.
 
 3. **By Sat Sep 26 evening, 15 minutes: launch the panel study.** Make a researcher account on
    Prolific, add about 300 dollars, create the study from `docs/internal/PANEL_STUDY.md` (every
@@ -29,25 +32,33 @@ Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.
 4. **By Sat Sep 26, 2 minutes: the social preview.** On GitHub, Settings, General, Social preview,
    upload `docs/social-preview.png`.
 
-5. **Optional, by Sat Sep 26, 15 minutes, for Rachel: a second set of labels.** Rachel labels the
-   16 test photos blind: `uv run python scripts/label_photos.py --name rachel --roles test` opens a
-   local page and writes `photos/labels_rachel.csv`; commit it, or tell
+5. **Optional, by Sat Sep 26, 15 minutes each: blind labels.** The gold labels came from the
+   picks file you wrote with the planner, so they were not set blind to model output
+   (`docs/deviations.md`, Sep 24). You, Rachel or both can label the 16 test photos without
+   seeing the key: `uv run python scripts/label_photos.py --name alex --roles test` (or
+   `--name rachel`) opens a local page and writes `photos/labels_<name>.csv`; commit it, or tell
    us it is there.
 
-6. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
+6. **By Sat Sep 26, 10 minutes, for Rachel: approve the Bay Area invasive list.** The creek pages
+   and `/city` show iNaturalist sightings of listed invasive plants near each creek, but only of
+   plants on an approved list. The draft is `content/drafts/regions/california-bay-area.yaml`
+   (11 species, each with its iNaturalist taxon id). If Rachel agrees, move those entries into
+   `content/regions/california-bay-area.yaml`, keeping `inaturalist_taxon_id`, or say which ones
+   to move. Until then every creek says "There are no recent sightings on record."
+
+7. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
    read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
 
-7. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
+8. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
    account, with the licence line from `docs/devpost.md` in its description (the video is
    CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
-8. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
+9. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
    `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
    makes the repository public.
 
-9. **Wed Sep 30, by 18:00: submit.**
+10. **Wed Sep 30, by 18:00: submit.**
 
-If you want to, and only you can decide it: their sandbox's name, `sandbox.hl7europe.eu`, stopped
-resolving on Sep 23 (their own nameserver answers that it does not exist). While it is gone, `/two`
-shows our record alone, and the sandbox re-push on Sep 28 cannot run. Telling the OneAquaHealth
-team is your call.
+Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23 (their own nameserver
+answers that it does not exist); we reported it as hl7-eu/oah issue 8. While it is gone, `/two`
+shows our record alone, and the sandbox re-push on Sep 28 cannot run.

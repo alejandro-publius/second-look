@@ -21,6 +21,7 @@ import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
 import { isDemo, walkBundle } from "../src/core/walks";
+import { stripJpeg } from "../src/uploads";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
@@ -204,4 +205,46 @@ test("old Bundles: only ts- JSON files are deleted, and only the ones in that fo
 test("old Bundles: every ts- Bundle the validator will read was written by this run", () => {
   assert.ok(written.size > 0, "the tests above wrote Bundles");
   assert.deepEqual(tsBundles(instancesDir), [...written].sort());
+});
+
+// Review finding F01: camera metadata must go wherever it sits in a JPEG. Each probe carries the
+// words PROBE-GPS in an APP1 segment; the picture's own bytes must come out unchanged.
+const jpegParts = (() => {
+  const seg = (marker: number, payload: number[]) => [0xff, marker, (payload.length + 2) >> 8, (payload.length + 2) & 0xff, ...payload];
+  const text = (s: string) => [...s].map((c) => c.charCodeAt(0));
+  return {
+    soi: [0xff, 0xd8],
+    app0: seg(0xe0, [...text("JFIF"), 0, 1, 1, 0, 0, 1, 0, 1, 0, 0]),
+    exif: seg(0xe1, [...text("Exif"), 0, 0, ...text("PROBE-GPS 37.87 -122.26")]),
+    dqt: seg(0xdb, [0, 1, 2]),
+    sos: seg(0xda, [1, 1, 0, 0, 63, 0]),
+    scan: [0x12, 0xff, 0x00, 0x34, 0xff, 0xd0, 0x56],
+    eoi: [0xff, 0xd9],
+  };
+})();
+const has = (bytes: Uint8Array, words: string) => new TextDecoder("latin1").decode(bytes).includes(words);
+
+test("uploads: a JPEG keeps its picture and loses its metadata, wherever the metadata sits", () => {
+  const p = jpegParts;
+  const picture = [...p.soi, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi];
+  const plain = Uint8Array.from([...p.soi, ...p.app0, ...p.exif, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.deepEqual([...stripJpeg(plain)], picture);
+  const trailing = Uint8Array.from([...picture, ...p.soi, ...p.exif, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.deepEqual([...stripJpeg(trailing)], picture);
+  const betweenScans = Uint8Array.from([...p.soi, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.exif, ...p.sos, ...p.scan, ...p.eoi]);
+  const out = stripJpeg(betweenScans);
+  assert.equal(has(out, "PROBE-GPS"), false);
+  assert.deepEqual([...out], [...p.soi, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.sos, ...p.scan, ...p.eoi]);
+  const fill = Uint8Array.from([...p.soi, 0xff, ...p.exif, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.equal(has(stripJpeg(fill), "PROBE-GPS"), false);
+});
+
+test("uploads: a JPEG that breaks the shape is refused, not copied with its metadata", () => {
+  const p = jpegParts;
+  const stray = Uint8Array.from([...p.soi, 0x00, ...p.exif, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.throws(() => stripJpeg(stray), /could not be read/);
+  const noEnd = Uint8Array.from([...p.soi, ...p.exif, ...p.dqt, ...p.sos, ...p.scan]);
+  assert.throws(() => stripJpeg(noEnd), /could not be read/);
+  const cut = Uint8Array.from([...p.soi, 0xff, 0xe1, 0x40, 0x00, ...[..."Exif"].map((c) => c.charCodeAt(0))]);
+  assert.throws(() => stripJpeg(cut), /could not be read/);
 });

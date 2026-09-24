@@ -7,7 +7,7 @@ import { answerAllItems, BASE, finishLesson, passConsent, pickWarmup } from "./h
 // identifiers to the link; only src may survive, nothing else may be stored or sent, the consent
 // screen adds one sentence and the end screen shows the completion code, for that source only.
 const PANEL_SENTENCE =
-  "You are taking part through a research panel and will be paid by the panel; nothing about you is stored here.";
+  "You are taking part through a research panel and will be paid by the panel; nothing that identifies you is stored here.";
 
 async function toScore(page: Page) {
   await passConsent(page);

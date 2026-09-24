@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "c78d66bb4173c27a",
+  content_hash: "be6e65a755c383bb",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -3215,6 +3215,63 @@ function isDemo(bundle) {
   return tags.some((t) => t.system === DEMO_TAG_SYSTEM && t.code === DEMO_TAG_CODE);
 }
 
+// src/check.ts
+var Invalid = class extends Error {
+};
+var LOCALE = content_default.locale;
+var REGION_PLANTS = /* @__PURE__ */ new Set([...content_default.region_plants, "cant_tell"]);
+
+// src/uploads.ts
+var MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+var KEEP_DAYS = 30;
+var KEEP_SECONDS = KEEP_DAYS * 24 * 3600;
+function stripJpeg(bytes) {
+  const damaged = () => new Invalid("That photo could not be read. Send it again, or another one.");
+  const out = [bytes.slice(0, 2)];
+  let i = 2;
+  while (i < bytes.length) {
+    if (bytes[i] !== 255) throw damaged();
+    let m = i + 1;
+    while (m < bytes.length && bytes[m] === 255) m += 1;
+    if (m >= bytes.length) throw damaged();
+    const marker = bytes[m];
+    i = m + 1;
+    if (marker === 217) {
+      out.push(Uint8Array.of(255, 217));
+      return concat(out);
+    }
+    if (marker === 216 || marker >= 208 && marker <= 215 || marker === 1) {
+      out.push(Uint8Array.of(255, marker));
+      continue;
+    }
+    if (marker === 0 || i + 2 > bytes.length) throw damaged();
+    const length = bytes[i] << 8 | bytes[i + 1];
+    const end = i + length;
+    if (length < 2 || end > bytes.length) throw damaged();
+    const metadata = marker >= 225 && marker <= 239 || marker === 254;
+    if (!metadata) out.push(Uint8Array.of(255, marker), bytes.slice(i, end));
+    i = end;
+    if (marker === 218) {
+      let j = i;
+      while (j + 1 < bytes.length && !(bytes[j] === 255 && bytes[j + 1] !== 0 && !(bytes[j + 1] >= 208 && bytes[j + 1] <= 215))) j += 1;
+      if (j + 1 >= bytes.length) throw damaged();
+      out.push(bytes.slice(i, j));
+      i = j;
+    }
+  }
+  throw damaged();
+}
+function concat(parts) {
+  const total = parts.reduce((n, p) => n + p.length, 0);
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const p of parts) {
+    out.set(p, at);
+    at += p.length;
+  }
+  return out;
+}
+
 // test/golden.test.ts
 var here = dirname(fileURLToPath(import.meta.url));
 var root = join(here, "..", "..");
@@ -3371,4 +3428,41 @@ test("old Bundles: only ts- JSON files are deleted, and only the ones in that fo
 test("old Bundles: every ts- Bundle the validator will read was written by this run", () => {
   assert.ok(written.size > 0, "the tests above wrote Bundles");
   assert.deepEqual(tsBundles(instancesDir), [...written].sort());
+});
+var jpegParts = (() => {
+  const seg = (marker, payload) => [255, marker, payload.length + 2 >> 8, payload.length + 2 & 255, ...payload];
+  const text = (s) => [...s].map((c) => c.charCodeAt(0));
+  return {
+    soi: [255, 216],
+    app0: seg(224, [...text("JFIF"), 0, 1, 1, 0, 0, 1, 0, 1, 0, 0]),
+    exif: seg(225, [...text("Exif"), 0, 0, ...text("PROBE-GPS 37.87 -122.26")]),
+    dqt: seg(219, [0, 1, 2]),
+    sos: seg(218, [1, 1, 0, 0, 63, 0]),
+    scan: [18, 255, 0, 52, 255, 208, 86],
+    eoi: [255, 217]
+  };
+})();
+var has = (bytes, words) => new TextDecoder("latin1").decode(bytes).includes(words);
+test("uploads: a JPEG keeps its picture and loses its metadata, wherever the metadata sits", () => {
+  const p = jpegParts;
+  const picture = [...p.soi, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi];
+  const plain = Uint8Array.from([...p.soi, ...p.app0, ...p.exif, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.deepEqual([...stripJpeg(plain)], picture);
+  const trailing = Uint8Array.from([...picture, ...p.soi, ...p.exif, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.deepEqual([...stripJpeg(trailing)], picture);
+  const betweenScans = Uint8Array.from([...p.soi, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.exif, ...p.sos, ...p.scan, ...p.eoi]);
+  const out = stripJpeg(betweenScans);
+  assert.equal(has(out, "PROBE-GPS"), false);
+  assert.deepEqual([...out], [...p.soi, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.sos, ...p.scan, ...p.eoi]);
+  const fill2 = Uint8Array.from([...p.soi, 255, ...p.exif, ...p.app0, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.equal(has(stripJpeg(fill2), "PROBE-GPS"), false);
+});
+test("uploads: a JPEG that breaks the shape is refused, not copied with its metadata", () => {
+  const p = jpegParts;
+  const stray = Uint8Array.from([...p.soi, 0, ...p.exif, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi]);
+  assert.throws(() => stripJpeg(stray), /could not be read/);
+  const noEnd = Uint8Array.from([...p.soi, ...p.exif, ...p.dqt, ...p.sos, ...p.scan]);
+  assert.throws(() => stripJpeg(noEnd), /could not be read/);
+  const cut = Uint8Array.from([...p.soi, 255, 225, 64, 0, ...[..."Exif"].map((c) => c.charCodeAt(0))]);
+  assert.throws(() => stripJpeg(cut), /could not be read/);
 });

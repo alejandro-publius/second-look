@@ -205,11 +205,16 @@ image.
 **What we did.** `worker/src/uploads.ts` reads the real type from the first bytes, caps the size, and
 cuts the metadata segments out of the file: EXIF, XMP, ICC and comments from a JPEG, the text,
 time and EXIF chunks from a PNG, the EXIF and XMP chunks from a WebP. The picture's own bytes are
-copied as they are. The photo lives in Workers KV with a 30 day expiry, so the deletion promise
+copied as they are. A JPEG is walked marker by marker through every scan, so metadata between
+progressive scans goes too, and nothing after its end marker is kept, where phones put a second
+image with its own EXIF; a JPEG that cannot be walked is refused, not copied. A review on Sep 23
+found the first version missed those shapes (REVIEW_02 F01), and the fix came on Sep 24. The photo lives in Workers KV with a 30 day expiry, so the deletion promise
 needs no job to keep it, and it is served only with the one token given to the uploader.
 
 **Proof.** The Worker e2e section "quick check and upload" in `worker/test/e2e.mjs` uploads a JPEG
-with a GPS tag and checks the tag is gone; `apps/api/tests/test_upload.py::test_upload_strips_exif_downsizes_and_serves_only_with_the_token`.
+with a GPS tag and checks the tag is gone; `worker/test/golden.test.ts` runs the cut on a JPEG with
+metadata before the picture, after the end marker, between two scans and after a fill byte, and
+on three broken ones it must refuse; `apps/api/tests/test_upload.py::test_upload_strips_exif_downsizes_and_serves_only_with_the_token`.
 
 ## 11. A mock that refuses what the servers refuse
 

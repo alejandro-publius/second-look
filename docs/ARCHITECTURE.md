@@ -8,7 +8,7 @@ The loop is five verbs, and they line up with OneAquaHealth's own five pipeline 
 | Verb | Their stage | What happens |
 |---|---|---|
 | TRAIN | collection | A volunteer passes a two minute photo test. AI takes the same test. |
-| CHECK | collection | A guided creek check in the official app's own questions, and a 20 second return check. |
+| CHECK | collection | A guided creek check in the official app's own questions, and a three-question return check. |
 | VERIFY | transformation | Code picks at most two follow-up questions from the answers, the weather and the person's own score. AI may only ask, and only where it passed. |
 | RECORD | validation | Every visit becomes FHIR that validates against their guide, carries the observer's score, lands in our store and mirrors to their sandbox. |
 | ACT | aggregation and publication | The creek's record turns into what the creek needs and which pipes are worth testing, and into an answer any software agent can fetch with its evidence attached. |

@@ -1335,7 +1335,7 @@ def check_devpost_submitted(root: Path, get: Fetch = fetch) -> list[str]:
 
 PANEL_SENTENCE = (
     "You are taking part through a research panel and will be paid by the panel; "
-    "nothing about you is stored here."
+    "nothing that identifies you is stored here."
 )
 
 
@@ -1631,6 +1631,20 @@ def check_second_labeller(root: Path) -> list[str]:
     return []
 
 
+def check_invasive_list(root: Path) -> list[str]:
+    """Rachel's approval of the region's invasive plants: the iNaturalist job asks only about
+    plants on an approved list, so until then every creek says it has no recent sightings."""
+    pack = root / "content" / "regions" / "california-bay-area.yaml"
+    try:
+        doc = yaml.safe_load(read(pack)) or {}
+    except yaml.YAMLError:
+        return [f"{pack.relative_to(root)} is not YAML"]
+    plants = [p for p in doc.get("invasive_plants") or [] if isinstance(p, dict)]
+    if not any(isinstance(p.get("inaturalist_taxon_id"), int) for p in plants):
+        return ["the approved Bay Area pack lists no invasive plant with an iNaturalist taxon id"]
+    return []
+
+
 def check_inaturalist(root: Path) -> list[str]:
     problems = []
     locale = read(root / "content" / "locales" / "en.json")
@@ -1742,6 +1756,7 @@ CHECKS: dict[str, Check] = {
     "second-labeller": check_second_labeller,
     "inaturalist": check_inaturalist,
     "rerun-after-update": check_rerun_after_29,
+    "invasive-list": check_invasive_list,
 }
 
 

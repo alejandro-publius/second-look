@@ -95,7 +95,7 @@ function OnePhoto({ photo, onChange }: { photo: PickedPhoto | null; onChange: (p
 }
 
 /**
- * The 20 second return check for a saved spot: colour, smell, is the pipe running, then an
+ * The three-question return check for a saved spot: colour, smell, is the pipe running, then an
  * optional photo and Send. One question per screen, as in the test and the creek check.
  */
 export function QuickCheck({ spotId }: { spotId: string }) {
