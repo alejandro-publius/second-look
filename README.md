@@ -108,6 +108,9 @@ Professional surveyors fixed this long ago. In the UK's River Habitat Survey, "o
 
 Measure each volunteer, per feature, and store the measure with the data. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer, never a blended grade or a probability. Follow-up questions are chosen by code from the answers, the person's scores and the weather, two at most: "It has not rained here for N days. Is anything coming out of that pipe?" The AI takes the same test as the people and earns the right to ask one question, feature by feature.
 
+<details>
+<summary>Every risk, what stops it, and the test that proves it</summary>
+
 | What can go wrong | What stops it, by construction | Proof |
 |---|---|---|
 | A volunteer walks past a built bank | The lesson teaches the four features people miss, and the test measures each one; the score is stored with every answer | [`content/lessons/`](content/lessons/), [`core/scoring.py`](core/scoring.py), [`core/tests/test_scoring.py`](core/tests/test_scoring.py) |
@@ -124,6 +127,8 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | We fool ourselves with the statistics | The analysis plan is tagged before any data; every README number is checked against [`results/`](results/) in CI; a synthetic result is cited only where the sentence says it is a simulation | [`docs/analysis_plan.md`](docs/analysis_plan.md) at `prereg-v1`, [`scripts/verify_claims.py`](scripts/verify_claims.py) |
 | Judge mode leaks the answer key | Judge mode is shut until Sep 28 by a lock constant, and its answer route refuses before then on the Worker and in the Python API | [`core/lock.py`](core/lock.py), [`apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`](apps/api/tests/test_study.py), [`worker/test/e2e.mjs`](worker/test/e2e.mjs) |
 | A refresh loses a session | The session resumes from the server; the creek check queues offline and sends later | [`apps/web/lib/offline.ts`](apps/web/lib/offline.ts), [`apps/web/tests/`](apps/web/tests/) |
+
+</details>
 
 ## What the AI cannot do
 
@@ -465,11 +470,16 @@ OneAquaHealth calls a city that adopts the method a follower city. Berkeley has 
 
 ### One Digital Health and FAIR
 
+<details>
+<summary>The five dimensions and the FAIR principles, one line each</summary>
+
 Story: a student walks to Strawberry Creek, takes a two-minute test on her phone, and from then on every observation she makes carries how well she sees each kind of damage. A city analyst reads her record beside a lab result under the same profile and knows how much weight to give each. The health card tells her one thing for herself, one for her dog and one her city could do.
 
 Five dimensions, in words, because no script produces them: citizen engagement, strong; education, strong; human and veterinary healthcare, partial (approved sentences for the person and the pet, no diagnosis, no site risk); industry 4.0, partial (FHIR records, a gated vision model, an audit log); environment, strong.
 
 FAIR: findable through a Library entry in their sandbox and a public repository; accessible through a read-only FHIR endpoint; interoperable through their profiles, value sets and UCUM; reusable through MIT code, a pinned guide, Provenance on every record and a tagged analysis plan.
+
+</details>
 
 ## Evals
 
@@ -496,6 +506,9 @@ Every number is graded by code and written to [`results/`](results/); [`scripts/
 
 The full list, kept current, is [`docs/REAL_VS_SYNTHETIC.md`](docs/REAL_VS_SYNTHETIC.md). In short:
 
+<details>
+<summary>Each part, real or synthetic, and how you can tell</summary>
+
 | Thing | Status |
 |---|---|
 | The test flow, its scoring and the photos in it | real, openly licensed photos from several countries |
@@ -506,6 +519,8 @@ The full list, kept current, is [`docs/REAL_VS_SYNTHETIC.md`](docs/REAL_VS_SYNTH
 | The laboratory result coming back | example, tagged and labelled EXAMPLE everywhere |
 | The model pass table and the AI numbers | real, from paid calls on Sep 23, Pacific time (Sep 24 UTC): the sweep that set the pass table, a second set behind the right-answer counts, and the footage run ([`results/model_pass_table.json`](results/model_pass_table.json) says `"real": true`); the earlier fake runs stay in [`results/`](results/), stamped SYNTHETIC |
 | The simulation of weighted votes under Known weaknesses | synthetic by design: made-up people, stamped SYNTHETIC |
+
+</details>
 
 ## Security and privacy
 
@@ -586,6 +601,9 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 
 One worked visit to Strawberry Creek in Berkeley, from the golden record in this repository. It is an example, hand shaped, as the table of what is real and what is synthetic above says: no person has made a real record yet, because a record comes only from a person at a creek or in the test. The loop you can run live, today, is the walk at the end of this section, which builds your own record on your phone.
 
+<details>
+<summary>The worked visit, step by step, with where to check each step</summary>
+
 | Step | What happened | Where to check |
 |---|---|---|
 | The person | Took the test first. Their per-feature score is in the QuestionnaireResponse of their test sitting; their Practitioner record carries a dated qualification for the test, valid for 90 days. | [`fhir/golden/visit-strawberry-creek-1.json`](fhir/golden/visit-strawberry-creek-1.json), Practitioner |
@@ -594,6 +612,8 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 | What validated | The whole Bundle, against OneAquaHealth's guide at b907cf0 with terminology on. | [`results/fhir_validation.json`](results/fhir_validation.json), `make fhir-validate` |
 | What went to their sandbox | Every resource by conditional create, tagged as ours, with a ledger of ids, and a Library entry that points back here. | [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl); the read-back, [`docs/notes/sandbox_library.md`](docs/notes/sandbox_library.md), with its screenshot [`docs/notes/sandbox-library.png`](docs/notes/sandbox-library.png); when their name resolves again (hl7-eu/oah issue 8), `curl -H "Accept: application/fhir+json" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466` |
 | What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so; the page a walk opens (`/city?walk=v02`) shows what the creek needs, and `make demo-offline` shows the full view. | `/city?creek=strawberry-creek`, [`docs/screens/walk-city.webp`](docs/screens/walk-city.webp) |
+
+</details>
 
 You can run the same loop from your desk on a creek in another country: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
 
@@ -617,9 +637,14 @@ The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/RE
 
 The engineering challenges, each with the file and test that prove it: [`WRITEUP.md`](WRITEUP.md). How to deploy, with every setting: [`DEPLOY.md`](DEPLOY.md). Decisions as records: [`docs/adr/`](docs/adr/README.md).
 
-The technical report, <!--v:results/report_pdf.json#/pages-->8<!--/v--> pages built by `make report-pdf` from this README, the docs and [`results/`](results/): [`docs/REPORT.pdf`](docs/REPORT.pdf). What the checker may and may not do: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). Where the photos and footage come from and who labelled them: [`docs/DATA_CARD.md`](docs/DATA_CARD.md). Who might attack and what stops them: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
+<details>
+<summary>The tools, the people and the record of how it was made</summary>
+
+The technical report, <!--v:results/report_pdf.json#/pages-->7<!--/v--> pages built by `make report-pdf` from this README, the docs and [`results/`](results/): [`docs/REPORT.pdf`](docs/REPORT.pdf). What the checker may and may not do: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). Where the photos and footage come from and who labelled them: [`docs/DATA_CARD.md`](docs/DATA_CARD.md). Who might attack and what stops them: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
 
 AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos and their gold labels with the planner (the labels came from the picks file, commit 81e62ed; no second, blind labeller yet, [`docs/DATA_CARD.md`](docs/DATA_CARD.md)), froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
+
+</details>
 
 ## Credits
 

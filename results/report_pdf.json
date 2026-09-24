@@ -5,10 +5,10 @@
     "atkinson-hyperlegible-next": "5.3.0"
   },
   "generated_by": "make report-pdf: scripts/build_report.py",
-  "pages": 8,
+  "pages": 7,
   "pandoc": "pandoc 3.9.0.2",
   "pdf": "docs/REPORT.pdf",
-  "pdf_sha256": "ef6e1f2534f44dd428ddf3c90623f4417300fffb524243ce4dbb9aa9f402ddaf",
+  "pdf_sha256": "f303a001799d9d3e0695bd0b23834a5183495a2e52a5f778ff84aece4921c46b",
   "playwright": "1.63.0",
   "sources": [
     "README.md",
@@ -32,5 +32,5 @@
     "results/model_sweep_20260924T054756Z.json",
     "results/mutation.json"
   ],
-  "sources_sha256": "b38268c7b71757465cc5dd114a828381552d6b084ff669a423746ea1f7d0d01f"
+  "sources_sha256": "a539a55b1d8aff3696bbb8fd3eaeacf74475ab4f8b6962f857ab4ff95ef7cf8d"
 }

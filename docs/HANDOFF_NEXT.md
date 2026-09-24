@@ -11,7 +11,7 @@ order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA k
 `PLAN.md`, this file, `docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest
 `docs/internal/updates/`.
 
-Where it stands (Sep 24, 17:30Z): everything is merged, deployed and green on `main`. REVIEW_03's
+Where it stands (Sep 24, 16:26Z): everything is merged, deployed and green on `main`. REVIEW_03's
 59 findings are fixed with proofs; the six-judge rerun scored 7.33 against 5.73; critic rounds 01 to
 04 went blocker, blocker, major, minor, each worked through (the critic rounds in `docs/internal/reviews/`).
 Measured on the live site: axe clean on 60 views, Lighthouse 93 or more on all 20 pages, no dead
