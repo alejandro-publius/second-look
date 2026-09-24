@@ -3,9 +3,9 @@
   "committed": false,
   "voice": "scratch, macOS say (Samantha); Alex replaces it with his own voice",
   "video_licence": "CC BY-SA 4.0",
-  "length_s": 268.3,
-  "length_without_title_cards_s": 226.3,
-  "bytes": 44513600,
+  "length_s": 267.4,
+  "length_without_title_cards_s": 225.4,
+  "bytes": 44473124,
   "beats": 14,
   "recorded": [
     "01-landing",
@@ -137,13 +137,13 @@
     },
     {
       "time": "1:40",
-      "seconds": 20.89,
+      "seconds": 20.0,
       "voice_waits_s": 0,
       "parts": [
         {
           "clip": "screen",
           "from_s": 0.0,
-          "seconds": 20.89
+          "seconds": 20.0
         }
       ]
     },
