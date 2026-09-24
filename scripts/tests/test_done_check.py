@@ -134,6 +134,19 @@ def test_a_file_without_rows_is_refused() -> None:
         "test -f a &",
         "if test -f a; then echo y; fi",
         "x=1; if test -f a; then echo y; fi",
+        # REVIEW_03 R53: five shapes that passed the guard and pass with the file missing.
+        "test -f missing || test 1",
+        "test -f missing || [ 1 ]",
+        "test -f missing; test 1",
+        "(test -f missing; true)",
+        "grep -q else x; if test -f missing; then false; fi",
+        # and their near kin
+        "test -f a || test 'yes'",
+        'test -f a || [ "ok" ]',
+        "{ test -f a; true; }",
+        "(test -f a && :)",
+        "if a; then b; else c; fi; if test -f a; then false; fi",
+        "if test -f a; then false; elif test -f b; then false; fi",
     ],
 )
 def test_a_command_that_cannot_fail_is_refused(command: str) -> None:
@@ -159,6 +172,15 @@ def test_a_cause_test_that_cannot_fail_is_refused() -> None:
         "grep -q x a &>/dev/null",
         'grep -q "if " a',
         "if test -f a; then test -s a; else false; fi",
+        'n=$(wc -l < a) && [ "$n" -ge 8 ]',
+        'test -n "$x"',
+        '[ "$x" ]',
+        "(test -f a; test -f b)",
+        "(test -f a; true) && test -f b",
+        "grep -q else a",
+        # R53's sixth shape: `! true` never passes, so this is `! test -f missing`, which fails
+        # once the file exists, like `! test -f a` above.
+        "! test -f missing || ! true",
     ],
 )
 def test_ordinary_commands_are_accepted(command: str) -> None:
