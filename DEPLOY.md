@@ -200,7 +200,8 @@ a row names something the code no longer reads, or when a default below differs 
 | `NEXT_PUBLIC_PLAN_TAG` | `prereg-v1 (not yet tagged)` | `apps/web/app/how-we-know/page.tsx` | the tag the "how we know" page names |
 | `NEXT_EXPORT` | not set | `apps/web/next.config.ts` | `1` builds the static export for Pages; `npm run export` sets it |
 | `NODE_ENV` | set by Next | `apps/web/next.config.ts`, `apps/web/components/SwRegister.tsx` | development relaxes the policy and skips the service worker |
-| `CI` | set by GitHub Actions | `apps/web/playwright.config.ts` | one retry for a Playwright test in CI |
+| `CI` | set by GitHub Actions | `apps/web/playwright.config.ts` | one retry for a Playwright test in CI, and a test that passes only on its retry still fails the run |
+| `PW_REUSE` | not set | `apps/web/playwright.config.ts`, `apps/web/scripts/design-check.mjs` | `1` lets Playwright use the server already on 3100; only the design check sets it, for the build it has just started there |
 | `SITE_URL` | none, must be set (the live site for `make panel-status`) | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs`, `scripts/panel_status.py` | the deployed site the phone checks drive, and the one whose counts `make panel-status` reads |
 | `GALLERY_LIVE_URL` | `https://second-look-79t.pages.dev` | `apps/web/scripts/gallery.mjs` | the live site `make screens` photographs, reading only |
 | `GALLERY_LOCAL_URL` | `http://127.0.0.1:3217` | `apps/web/scripts/gallery.mjs` | the local build with the mock API for the test flow's screens |
