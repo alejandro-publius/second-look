@@ -7,9 +7,10 @@ apps/web/public/_headers, npm test rewrites worker/dist) can touch the worktree.
 - the Worker golden tests (esbuild, then node --test with the JUnit reporter);
 - the Worker end to end (wrangler dev with local D1 and KV) on a port from 8900 to 8999;
 - with --web, the web end to end (Playwright on the phone viewport), only when ports 3100 and 8100
-  are free, because its config reuses any server already on 3100 and would test somebody else's
-  build. It is off by default: while another session uses 3100 on the same machine, binding it
-  would get in that session's way.
+  are free, because its config starts this clone's own build on 3100 and stops with a port in use
+  error when something else answers there. It is off by default: while another session uses 3100
+  on the same machine, binding it would get in that session's way. CI is set empty, so there is
+  no retry and each outcome is the first try's.
 
 A test is flaky when its outcome differs between runs. Writes results/harden/flaky.md and
 results/harden/flaky.json.
