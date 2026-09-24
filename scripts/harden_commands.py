@@ -396,6 +396,11 @@ def main() -> int:
         else:
             env = {"E2E_PORT": "8971"} if "worker-e2e" in cmd else {}
             r = run(cmd, tree, env=env)
+            if cmd.startswith("make new-city"):
+                # It scaffolds a city into the clone: put the clone back, so every later command
+                # sees the committed tree (an extra city adds a record to validate, for one).
+                restore = run("git checkout -- . && git clean -fdq -- fhir content docs", tree)
+                r["tail"] += f" (clone restored: exit {restore['code']})"
         result = "pass" if r["code"] == 0 else "fail"
         rows.append(
             {
