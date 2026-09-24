@@ -11,7 +11,13 @@ before any participant (`prereg-v1`), and every session that ends before the dat
 1. Make an account at Prolific (https://www.prolific.com), as a researcher, and add funds: about
    300 dollars covers 80 people at the reward below plus the panel's fee, with room to spare.
 2. Create a new study and fill it from the fields below.
-3. Publish it. Nothing else is needed: the study runs itself. Watch it with `make panel-status`.
+3. Publish it. The study runs itself. Watch it with `make panel-status`.
+4. Before you approve any payment, compare the number of completion codes the panel shows as
+   submitted with the completed `panel` sessions that `make panel-status` prints. The code is the
+   same for everyone and is visible in the page source, where anyone can read it, so a code alone
+   does not prove a finished session. The analysis counts only finished sessions. If the panel
+   shows more codes than finished sessions, stop and look before you approve: the extra codes did
+   not come from a finished test.
 
 ## The fields
 
