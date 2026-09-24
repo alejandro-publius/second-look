@@ -1163,8 +1163,13 @@ def check_analysis_once(root: Path) -> list[str]:
     when = parse_utc(doc.get("generated_at_utc"))
     if when is None or when < DATA_LOCK_UTC:
         problems.append(f"{path.name} was made at {doc.get('generated_at_utc')}, before the lock")
+    # The three things evals/usability_analysis.py can say. With nobody in an arm, which is likely
+    # while nobody is recruited, it says "not computed: an arm is empty"; that run is still the
+    # one run, and a second run could never make this item pass.
     status = (doc.get("primary") or {}).get("status")
-    if status not in ("descriptive", "confirmatory"):
+    if not isinstance(status, str) or not (
+        status in ("descriptive", "confirmatory") or status.startswith("not computed:")
+    ):
         problems.append(f"{path.name} does not say whether it is a description or a test")
     return problems
 

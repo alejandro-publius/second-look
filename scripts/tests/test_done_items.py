@@ -969,6 +969,31 @@ def test_the_analysis_runs_once_on_real_data_after_the_lock(tmp_path: Path) -> N
     assert has(di.check_analysis_once(tmp_path), "2 real analysis results")
 
 
+@pytest.mark.parametrize(
+    ("status", "ok"),
+    [
+        ("descriptive", True),
+        ("confirmatory", True),
+        ("not computed: an arm is empty", True),
+        (None, False),
+        ("", False),
+        ("significant", False),
+    ],
+)
+def test_the_analysis_says_what_kind_of_result_it_is(
+    tmp_path: Path, status: str | None, ok: bool
+) -> None:
+    doc = json.loads(analysis("2026-09-28T02:00:00Z"))
+    doc["primary"] = {} if status is None else {"status": status}
+    write(tmp_path, "results/usability_20260928.json", json.dumps(doc))
+    problems = di.check_analysis_once(tmp_path)
+    assert (problems == []) is ok, problems
+    if not ok:
+        assert problems == [
+            "usability_20260928.json does not say whether it is a description or a test"
+        ]
+
+
 def test_the_sandbox_repush_needs_a_push_after_the_lock(tmp_path: Path) -> None:
     old = {"ts_utc": "2026-09-21T06:53:46Z", "action": "create"}
     write(tmp_path, "fhir/sandbox_ledger.jsonl", json.dumps(old) + "\n")
