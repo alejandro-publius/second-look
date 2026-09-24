@@ -101,3 +101,29 @@ def test_the_words_point_at_the_creek_on_screen_the_honest_way() -> None:
     assert "creeks like this one" in spoken
     assert "a creek like this one" in spoken
     assert "Strawberry Creek" in spoken
+
+
+# UPDATE_22 6.7: nobody visits the creek for the video any more, so nothing Alex or a judge reads
+# may still promise that trip, or the real check he was to file there.
+ALEX_READS = (
+    "README.md",
+    "docs/ALEX_TODO.md",
+    "docs/SUBMISSION_CHECKLIST.md",
+    "docs/video/SHOTLIST.md",
+    "docs/video/VOICE_SCRIPT.md",
+    "docs/video/RECORD_AT_THE_CREEK.md",
+)
+TRIP = (
+    "visit to the creek arrives",
+    "minutes at the creek",
+    "minutes at strawberry creek",
+    "while you are there",
+    "person filmed at the creek",
+)
+
+
+def test_nothing_alex_reads_still_promises_the_creek_trip() -> None:
+    for name in ALEX_READS:
+        text = " ".join((ROOT / name).read_text(encoding="utf-8").lower().split())
+        for phrase in TRIP:
+            assert phrase not in text, (name, phrase)

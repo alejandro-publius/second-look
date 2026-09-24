@@ -268,7 +268,7 @@ Every number is graded by code and written to `results/`; `scripts/verify_claims
 
 ### See it work
 
-One worked visit to Strawberry Creek in Berkeley, from the golden record in this repository. When Alex's own visit to the creek arrives, it replaces this one.
+One worked visit to Strawberry Creek in Berkeley, from the golden record in this repository. It is an example, hand shaped, as the table of what is real and what is synthetic below says.
 
 | Step | What happened | Where to check |
 |---|---|---|
