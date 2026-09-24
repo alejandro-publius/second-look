@@ -1,0 +1,16 @@
+{
+  "name": "second-look-diagrams",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Renders docs/diagrams/*.mmd to SVG with a pinned Mermaid CLI, in the Chromium that Playwright installs for apps/web.",
+  "scripts": {
+    "render": "node render.mjs",
+    "check": "node render.mjs --check"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "11.17.0",
+    "playwright-core": "1.63.0",
+    "puppeteer": "24.43.1"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "theme": "neutral",
+  "deterministicIds": true,
+  "deterministicIDSeed": "second-look",
+  "fontFamily": "arial, 'Liberation Sans', helvetica, sans-serif",
+  "htmlLabels": false,
+  "flowchart": {
+    "htmlLabels": false,
+    "wrappingWidth": 2000,
+    "curve": "basis",
+    "useMaxWidth": true
+  },
+  "sequence": {
+    "wrap": false,
+    "useMaxWidth": true,
+    "mirrorActors": false
+  }
+}
