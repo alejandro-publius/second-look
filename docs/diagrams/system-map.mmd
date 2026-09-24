@@ -1,0 +1,73 @@
+flowchart TB
+  accTitle: The system map, by the five verbs Train, Check, Verify, Record and Act
+  accDescr: A volunteer takes the photo test on /t and the Worker keeps the per-feature score in D1. Vision models take the same test, and the pass table says which features each may flag. On /check the Worker hands the answers, the dry days and the person's score to the follow-up selector, which returns at most two questions. The finished visit becomes a record of human answers only, then a FHIR Bundle stored in D1, checked by the HL7 validator in CI and mirrored to their sandbox. From the stored visits, core/act.py works out what the creek needs and which pipes are worth testing, a pipe becomes a ServiceRequest, and the read only MCP server hands any agent the same records with their ids.
+  subgraph TRAIN["TRAIN: collection"]
+    TPAGE["/t, the photo test<br/>apps/web/app/t"]
+    SWEEP["Vision models take the same test<br/>evals/model_sweep.py"]
+    PASS["Pass table<br/>results/model_pass_table.json"]
+  end
+  subgraph CHECK["CHECK: collection"]
+    CPAGE["/check, the guided creek check<br/>apps/web/app/check"]
+    QPAGE["/quick, the return check<br/>apps/web/app/quick"]
+    WPAGE["/walk, a creek from your desk<br/>apps/web/app/walk"]
+  end
+  WORKER["The Worker, every /api route<br/>worker/src/index.ts on Cloudflare"]
+  D1[("D1 database<br/>sessions, observers, visits, Bundles")]
+  KV[("KV<br/>uploaded photos")]
+  METEO["Open-Meteo"]
+  subgraph VERIFY["VERIFY: transformation"]
+    RAIN["Dry days<br/>core/rainfall.py"]
+    FOLLOW["Follow-up selector, pure<br/>core/followups.py"]
+    GATE["The gate<br/>core/gate.py"]
+    CHECKER["Vision checker, off on the live site<br/>core/checker.py"]
+    WALKS["Walk builder<br/>scripts/build_walks.py"]
+  end
+  subgraph RECORD["RECORD: validation"]
+    BUILD["Record builder<br/>build_record in core/gate.py"]
+    EMIT["FHIR emitter<br/>core/fhir_emit.py"]
+    VALID["HL7 validator, their guide at b907cf0<br/>scripts/fhir_validate.py in CI"]
+    LIB["Our Library entry<br/>core/fhir_library.py"]
+    MIRROR["Sandbox mirror<br/>scripts/repush_sandbox.py"]
+  end
+  SANDBOX["Their sandbox<br/>OneAquaHealth FHIR server"]
+  subgraph ACT["ACT: aggregation and publication"]
+    REGIONS["Creek and reach of each spot<br/>core/regions.py"]
+    ACTF["What the creek needs, pipes worth testing<br/>core/act.py"]
+    REFER["Referral<br/>core/fhir_referral.py"]
+    VIEWS["/spot, /city and /two<br/>apps/web/app"]
+    MCP["Read only MCP server<br/>apps/mcp"]
+  end
+  CLIENT["An agent or a city's software"]
+  TPAGE -- "each answer,<br/>then keep my score" --> WORKER
+  WORKER -- "sessions, answers,<br/>the score if kept" --> D1
+  SWEEP -- "passed or not,<br/>per model and feature" --> PASS
+  PASS -- "which features<br/>a model may flag" --> GATE
+  PASS -- "which features<br/>it may ask about" --> CHECKER
+  CPAGE -- "answers, the spot,<br/>then follow-up answers" --> WORKER
+  QPAGE -- "colour, smell, pipe" --> WORKER
+  WORKER -- "photos, metadata cut out,<br/>deleted after 30 days" --> KV
+  METEO -- "rain at the spot" --> RAIN
+  RAIN -- "dry, wet or unknown" --> FOLLOW
+  WORKER <-- "answers and the score in,<br/>at most two questions out" --> FOLLOW
+  CHECKER -- "a clean yes,<br/>as a candidate flag" --> GATE
+  GATE -. "a flag makes one<br/>question eligible,<br/>none on the live check" .-> FOLLOW
+  WALKS -- "the footage run's<br/>yes answers" --> GATE
+  GATE -- "flags or drop reasons" --> WALKS
+  WALKS -- "the clip and at most<br/>one question, in<br/>content/walks.yaml" --> WPAGE
+  WORKER -- "human answers,<br/>ratings, follow-up answers" --> BUILD
+  BUILD -- "a visit record" --> EMIT
+  EMIT -- "one Bundle per visit" --> D1
+  WPAGE -- "answers, as a demo Bundle<br/>on the phone, never sent" --> EMIT
+  EMIT -- "sample Bundles from<br/>both emitters" --> VALID
+  EMIT -- "visit Bundles as<br/>conditional creates" --> MIRROR
+  LIB -- "what our data set is<br/>and where it lives" --> MIRROR
+  MIRROR -- "our tag on every resource,<br/>ids kept in a ledger" --> SANDBOX
+  SANDBOX -- "one lab Observation of theirs,<br/>read once a day from the Mac" --> D1
+  D1 -- "stored visits and<br/>follow-up answers" --> ACTF
+  REGIONS -- "creek and reach<br/>of each spot" --> ACTF
+  ACTF -- "a pipe two people who passed<br/>saw running after dry days" --> REFER
+  ACTF -- "needs, pipes worth testing,<br/>downstream notes" --> VIEWS
+  REFER -- "a ServiceRequest Bundle" --> VIEWS
+  D1 -- "the record, its Bundle,<br/>their cached record" --> VIEWS
+  WORKER -- "creeks, city views,<br/>records, Bundles" --> MCP
+  MCP -- "answers with their<br/>visit ids and Bundle links" --> CLIENT

@@ -1,0 +1,36 @@
+sequenceDiagram
+  accTitle: The AI gate, step by step
+  accDescr: The volunteer answers every question first. Only then may a vision model answer one question about one photo, and only for a feature it passed on the same test the volunteers take. The gate turns that answer into a flag or drops it. A flag can make one follow-up question eligible. The follow-up selector, which calls no model, picks at most two questions. The person answers them, and the record is built from the person's answers alone.
+  autonumber
+  actor V as Volunteer
+  participant App as The app and its API
+  participant C as core/checker.py
+  participant P as Pass table<br/>results/model_pass_table.json
+  participant M as Vision model
+  participant G as core/gate.py
+  participant F as core/followups.py
+  participant R as build_record<br/>core/gate.py
+  V->>App: Answers every question in the creek check first
+  App->>C: check_photo: one photo, one feature
+  C->>P: feature_passed: is the table from a real run, and did this model pass this feature?
+  alt The checker is off, or the answer is no
+    C-->>App: No flag. The model is never asked.
+  else Yes
+    C->>M: The feature's question, from content/features.yaml
+    M-->>C: yes, no or cant_tell, and a note
+    C->>C: force_answer: anything but a clean yes stops here
+    C->>G: parse_flags: the yes as a candidate flag
+    G->>P: Reads the table again: real run, feature passed by this model
+    G->>G: Checks the feature, the confidence and a short plain note
+    G-->>C: A Flag, or a reason it was dropped
+    C-->>App: At most one Flag
+  end
+  App->>F: select_followups: answers, dry days, the person's score, flags
+  F->>F: Rules in order: dry pipe, rating check, checker flag, low score
+  Note over F: A flag can make only the checker flag question eligible. No model call in here.
+  F-->>App: At most two questions, and at most one of them from a flag
+  App->>V: Look again? The model's note is shown as "the checker noticed"
+  V->>App: The person's own answer
+  App->>R: Answers, ratings, follow-up answers and photo ids
+  Note over R: No parameter takes a flag, a model id or model text
+  R-->>App: The visit record, human answers only
