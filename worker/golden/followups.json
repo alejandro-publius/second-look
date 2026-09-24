@@ -29,6 +29,7 @@
           "sewage_discharge": "present"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": null,
         "site": {
           "dry_days": 5,
@@ -59,6 +60,7 @@
           "sewage_discharge": "present"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": null,
         "site": {
           "dry_days": 0,
@@ -75,6 +77,7 @@
           "draining_pipes": "present"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": null,
         "site": {
           "dry_days": null,
@@ -91,6 +94,7 @@
           "draining_pipes": "present"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": null,
         "site": {
           "dry_days": 0,
@@ -117,6 +121,7 @@
           "sewage_discharge": "present"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": null,
         "site": {
           "dry_days": 5,
@@ -134,6 +139,7 @@
           "overall_rating": "good"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": null,
         "site": {
           "dry_days": 0,
@@ -165,6 +171,7 @@
           "overall_rating": "moderate"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": {
           "contributor_token": "weaktoken2345678",
           "scores": [
@@ -212,6 +219,7 @@
           "overall_rating": "moderate"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": {
           "contributor_token": "strongtoken23456",
           "scores": [
@@ -279,6 +287,7 @@
           "sewage_discharge": "present"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": {
           "contributor_token": "weaktoken2345678",
           "scores": [
@@ -322,6 +331,7 @@
       "input": {
         "answers": {},
         "checker_enabled": false,
+        "flags": [],
         "observer": null,
         "site": {
           "dry_days": null,
@@ -339,6 +349,7 @@
           "invasive_species": "present"
         },
         "checker_enabled": false,
+        "flags": [],
         "observer": {
           "contributor_token": "weaktoken2345678",
           "scores": [
@@ -376,6 +387,308 @@
         }
       },
       "name": "present answers do not ask for a photo"
+    },
+    {
+      "expected": [
+        {
+          "kind": "look_again",
+          "params": {
+            "feature": "artificial_bank",
+            "note": "a stone wall along the left bank"
+          },
+          "question_key": "followup.checker_flag",
+          "rule_id": "checker_flag"
+        }
+      ],
+      "input": {
+        "answers": {},
+        "checker_enabled": true,
+        "flags": [
+          {
+            "confidence": 0.6,
+            "feature": "artificial_bank",
+            "note": "a stone wall along the left bank",
+            "region": null
+          }
+        ],
+        "observer": null,
+        "site": {
+          "dry_days": null,
+          "mm_in_window": null,
+          "rain": "unknown"
+        }
+      },
+      "name": "a flag on built banks asks one look again question"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {},
+        "checker_enabled": true,
+        "flags": [
+          {
+            "confidence": 1.0,
+            "feature": "dug_out_channel",
+            "note": "a straight dug channel",
+            "region": null
+          }
+        ],
+        "observer": null,
+        "site": {
+          "dry_days": null,
+          "mm_in_window": null,
+          "rain": "unknown"
+        }
+      },
+      "name": "a flag on a dug-out channel asks nothing: the check has no item for it"
+    },
+    {
+      "expected": [
+        {
+          "kind": "look_again",
+          "params": {
+            "feature": "invasive_plant",
+            "note": "a stand of tall reed"
+          },
+          "question_key": "followup.checker_flag",
+          "rule_id": "checker_flag"
+        }
+      ],
+      "input": {
+        "answers": {},
+        "checker_enabled": true,
+        "flags": [
+          {
+            "confidence": 1.0,
+            "feature": "dug_out_channel",
+            "note": "a straight dug channel",
+            "region": null
+          },
+          {
+            "confidence": 0.6,
+            "feature": "artificial_bank",
+            "note": "a stone wall along the left bank",
+            "region": null
+          },
+          {
+            "confidence": 0.8,
+            "feature": "invasive_plant",
+            "note": "a stand of tall reed",
+            "region": null
+          }
+        ],
+        "observer": null,
+        "site": {
+          "dry_days": null,
+          "mm_in_window": null,
+          "rain": "unknown"
+        }
+      },
+      "name": "the surest flag on a feature the check asks about, past a surer dug-out one"
+    },
+    {
+      "expected": [
+        {
+          "kind": "look_again",
+          "params": {
+            "feature": "artificial_bank",
+            "note": "a stone wall along the left bank"
+          },
+          "question_key": "followup.checker_flag",
+          "rule_id": "checker_flag"
+        }
+      ],
+      "input": {
+        "answers": {},
+        "checker_enabled": true,
+        "flags": [
+          {
+            "confidence": 0.6,
+            "feature": "artificial_bank",
+            "note": "a stone wall along the left bank",
+            "region": null
+          },
+          {
+            "confidence": 0.6,
+            "feature": "invasive_plant",
+            "note": "a stand of tall reed",
+            "region": null
+          }
+        ],
+        "observer": null,
+        "site": {
+          "dry_days": null,
+          "mm_in_window": null,
+          "rain": "unknown"
+        }
+      },
+      "name": "equal confidence keeps the first flag, as max does"
+    },
+    {
+      "expected": [],
+      "input": {
+        "answers": {},
+        "checker_enabled": false,
+        "flags": [
+          {
+            "confidence": 0.6,
+            "feature": "artificial_bank",
+            "note": "a stone wall along the left bank",
+            "region": null
+          }
+        ],
+        "observer": null,
+        "site": {
+          "dry_days": null,
+          "mm_in_window": null,
+          "rain": "unknown"
+        }
+      },
+      "name": "with the checker off a flag asks nothing"
+    },
+    {
+      "expected": [
+        {
+          "kind": "yesno",
+          "params": {
+            "days": 5
+          },
+          "question_key": "followup.dry_pipe",
+          "rule_id": "dry_pipe"
+        },
+        {
+          "kind": "look_again",
+          "params": {
+            "feature": "invasive_plant",
+            "note": "a stand of tall reed"
+          },
+          "question_key": "followup.checker_flag",
+          "rule_id": "checker_flag"
+        }
+      ],
+      "input": {
+        "answers": {
+          "bank_type": "absent",
+          "draining_pipes": "present"
+        },
+        "checker_enabled": true,
+        "flags": [
+          {
+            "confidence": 1.0,
+            "feature": "dug_out_channel",
+            "note": "a straight dug channel",
+            "region": null
+          },
+          {
+            "confidence": 0.8,
+            "feature": "invasive_plant",
+            "note": "a stand of tall reed",
+            "region": null
+          }
+        ],
+        "observer": {
+          "contributor_token": "weaktoken2345678",
+          "scores": [
+            {
+              "correct": 2,
+              "feature": "artificial_bank",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "dug_out_channel",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 1,
+              "feature": "invasive_plant",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 2,
+              "feature": "pipe_running",
+              "tested_on": "2026-09-23",
+              "total": 4
+            }
+          ],
+          "test_sitting_id": null
+        },
+        "site": {
+          "dry_days": 5,
+          "mm_in_window": 0.0,
+          "rain": "dry"
+        }
+      },
+      "name": "the checker question takes the second slot, after the dry pipe"
+    },
+    {
+      "expected": [
+        {
+          "kind": "photo",
+          "params": {
+            "correct": 2,
+            "feature": "artificial bank",
+            "feature_id": "artificial_bank",
+            "item_id": "bank_type"
+          },
+          "question_key": "followup.low_score",
+          "rule_id": "low_score"
+        }
+      ],
+      "input": {
+        "answers": {
+          "bank_type": "absent",
+          "overall_rating": "moderate"
+        },
+        "checker_enabled": true,
+        "flags": [
+          {
+            "confidence": 1.0,
+            "feature": "dug_out_channel",
+            "note": "a straight dug channel",
+            "region": null
+          }
+        ],
+        "observer": {
+          "contributor_token": "weaktoken2345678",
+          "scores": [
+            {
+              "correct": 2,
+              "feature": "artificial_bank",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 4,
+              "feature": "dug_out_channel",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 1,
+              "feature": "invasive_plant",
+              "tested_on": "2026-09-23",
+              "total": 4
+            },
+            {
+              "correct": 2,
+              "feature": "pipe_running",
+              "tested_on": "2026-09-23",
+              "total": 4
+            }
+          ],
+          "test_sitting_id": null
+        },
+        "site": {
+          "dry_days": 0,
+          "mm_in_window": 7.2,
+          "rain": "wet"
+        }
+      },
+      "name": "a dug-out flag leaves the slot to the low score photo"
     }
   ],
   "function": "core.followups.select_followups",

@@ -75,8 +75,10 @@ test("helpers: sha256, Python rounding, fhir_id", () => {
 
 test("followups: the selector, over the repository's own table and form", () => {
   const doc = golden("followups");
+  // CRITIC_06 H02: the vectors hold checker flags, among them one on a feature with no form item.
+  assert.ok(doc.cases.some((c: { input: { flags: unknown[] } }) => c.input.flags.length > 0), "no vector carries a flag");
   for (const c of doc.cases) {
-    const chosen = selectFollowups(c.input.answers, c.input.site, c.input.observer, [], CONTENT.followups, CONTENT.form_items, c.input.checker_enabled);
+    const chosen = selectFollowups(c.input.answers, c.input.site, c.input.observer, c.input.flags, CONTENT.followups, CONTENT.form_items, c.input.checker_enabled);
     same(chosen, c.expected, c.name);
   }
 });

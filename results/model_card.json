@@ -353,6 +353,16 @@
       "smoke": 0.0024
     }
   },
+  "footage_kept": {
+    "by_feature": {
+      "artificial_bank": 3,
+      "dug_out_channel": 32,
+      "invasive_plant": 0,
+      "pipe_running": 0
+    },
+    "kept": 35,
+    "raw_answers": "evals/fixtures/raw/footage_20260924T060539Z.jsonl"
+  },
   "real": true,
   "script": "evals/model_card.py",
   "sweep": "results/model_sweep_20260924T054756Z.json",

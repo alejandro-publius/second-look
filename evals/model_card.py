@@ -1,6 +1,6 @@
 """The counts behind docs/MODEL_CARD.md that no other results file holds.
 
-Three things, all read from committed files with no model call and no network:
+What it counts, all read from committed files with no model call and no network:
 
 1. How each model answered, per feature, in the sweep that wrote the pass table. The sweep is
    found by its time stamp, which must equal the pass table's. It shows, for example, how many
@@ -11,6 +11,9 @@ Three things, all read from committed files with no model call and no network:
    each model's right answers on the photos that are not plants, and the score a checker would
    get by always answering No, from the answer key, so the counts can be read (critic round 01).
 4. What one footage call cost, by model, in cents: one model answering about one frame.
+5. How many of the flags the gate kept on the footage run are on each feature, worked out again
+   from the run's raw answers through the gate (evals/footage_example.py load_run), because the
+   creek check asks about only some of them (critic round 06, H02).
 
 Run: uv run python evals/model_card.py            writes results/model_card.json
      uv run python evals/model_card.py --check    fails unless the committed file is what it writes
@@ -26,6 +29,8 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+
+from evals import footage_example
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results" / "model_card.json"
@@ -148,6 +153,22 @@ def always_no(root: Path, runs: int) -> dict[str, int]:
     return {"correct": runs * golds.count("absent"), "n": runs * len(golds)}
 
 
+def footage_kept(root: Path) -> dict[str, Any] | None:
+    """The footage run's kept flags by feature, from its raw file through the gate, or None when
+    results/ holds no real footage run."""
+    latest = root / footage_example.LATEST
+    if not latest.is_file():
+        return None
+    if json.loads(latest.read_text(encoding="utf-8")).get("real") is not True:
+        return None
+    run = footage_example.load_run(root)
+    return {
+        "raw_answers": run.fixture.relative_to(root).as_posix(),
+        "kept": run.counts["kept"],
+        "by_feature": footage_example.kept_by_feature(run.found),
+    }
+
+
 def build(root: Path = ROOT) -> dict[str, Any]:
     results = root / "results"
     table = json.loads((results / "model_pass_table.json").read_text(encoding="utf-8"))
@@ -172,6 +193,7 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         },
         "cost": cost(results / "cost_log.jsonl"),
         "benchmark": benchmark(root),
+        "footage_kept": footage_kept(root),
     }
 
 

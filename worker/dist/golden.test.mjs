@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "2d8e6fbcfd1a13e4",
+  content_hash: "a953f457fbf9fdc4",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -3062,6 +3062,27 @@ function ratingCheck(rule, answers, formItems) {
     params: { issues: issues.join(", "), first_rating: BEST_RATING }
   };
 }
+function askedFeatures(formItems) {
+  const asked = /* @__PURE__ */ new Set();
+  for (const item of formItems) if (typeof item.feature === "string" && FEATURES3.includes(item.feature)) asked.add(item.feature);
+  return asked;
+}
+function checkerFlag(rule, flags, checkerEnabled, formItems) {
+  if (!checkerEnabled) return null;
+  const asked = askedFeatures(formItems);
+  let chosen = null;
+  for (const flag of flags) {
+    if (!asked.has(flag.feature)) continue;
+    if (chosen === null || flag.confidence > chosen.confidence) chosen = flag;
+  }
+  if (chosen === null) return null;
+  return {
+    rule_id: "checker_flag",
+    kind: "look_again",
+    question_key: String(rule.question_key ?? "followup.checker_flag"),
+    params: { note: chosen.note, feature: chosen.feature }
+  };
+}
 function lowScore(rule, answers, observer, formItems) {
   if (observer === null) return null;
   let best = null;
@@ -3117,7 +3138,7 @@ function selectFollowups(answers, site, observer, flags, table, formItems, check
         followup = ratingCheck(rule, answers, formItems);
         break;
       case "checker_flag":
-        followup = checkerEnabled && flags.length > 0 ? null : null;
+        followup = checkerFlag(rule, flags, checkerEnabled, formItems);
         break;
       case "low_score":
         followup = lowScore(rule, answers, observer, formItems);
@@ -3379,8 +3400,9 @@ test("helpers: sha256, Python rounding, fhir_id", () => {
 });
 test("followups: the selector, over the repository's own table and form", () => {
   const doc = golden("followups");
+  assert.ok(doc.cases.some((c) => c.input.flags.length > 0), "no vector carries a flag");
   for (const c of doc.cases) {
-    const chosen = selectFollowups(c.input.answers, c.input.site, c.input.observer, [], content_default.followups, content_default.form_items, c.input.checker_enabled);
+    const chosen = selectFollowups(c.input.answers, c.input.site, c.input.observer, c.input.flags, content_default.followups, content_default.form_items, c.input.checker_enabled);
     same(chosen, c.expected, c.name);
   }
 });

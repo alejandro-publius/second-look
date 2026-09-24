@@ -2,7 +2,8 @@
 
 select_followups is a pure function of the human's answers, the site context (rain), the
 observer's test scores, the gate's Flags and the priority table from content/followups.yaml.
-Two questions at most. No model call. A Flag can only make the checker_flag question eligible.
+Two questions at most. No model call. A Flag can only make the checker_flag question eligible,
+and only when the creek check has a question for its feature (an item in content/form.yaml).
 
 Pure. No file or network I/O.
 """
@@ -126,12 +127,27 @@ def _rating_check(
     )
 
 
+def _asked_features(form_items: Sequence[Mapping[str, Any]]) -> set[str]:
+    """The features the creek check asks about: each one that a form item names."""
+    return {str(item.get("feature")) for item in form_items if item.get("feature") in FEATURES}
+
+
 def _checker_flag(
-    rule: Mapping[str, Any], flags: Sequence[Flag], checker_enabled: bool
+    rule: Mapping[str, Any],
+    flags: Sequence[Flag],
+    checker_enabled: bool,
+    form_items: Sequence[Mapping[str, Any]],
 ) -> Followup | None:
-    if not checker_enabled or not flags:
+    if not checker_enabled:
         return None
-    chosen = max(flags, key=lambda f: f.confidence)
+    # A flag on a feature the check has no question for (the dug-out channel today) makes nothing
+    # eligible: the person was never asked about it, so there is nothing to look at again
+    # (CRITIC_06 H02).
+    asked = _asked_features(form_items)
+    usable = [f for f in flags if f.feature in asked]
+    if not usable:
+        return None
+    chosen = max(usable, key=lambda f: f.confidence)
     return Followup(
         rule_id="checker_flag",
         kind="look_again",
@@ -211,7 +227,7 @@ def select_followups(
         elif rule_id == "rating_check":
             followup = _rating_check(rule, answers, form_items)
         elif rule_id == "checker_flag":
-            followup = _checker_flag(rule, flags, checker_enabled)
+            followup = _checker_flag(rule, flags, checker_enabled, form_items)
         elif rule_id == "low_score":
             followup = _low_score(rule, answers, observer, form_items)
         else:

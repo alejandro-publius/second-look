@@ -9,42 +9,45 @@ This page and [`example.json`](example.json) are written by [`evals/footage_exam
 - The run: [`results/footage_20260924T060539Z.json`](../../results/footage_20260924T060539Z.json), made at 2026-09-24T06:05:39+00:00. Its answers are in [`evals/fixtures/raw/footage_20260924T060539Z.jsonl`](../../evals/fixtures/raw/footage_20260924T060539Z.jsonl).
 - The pass table its gate read: [`results/model_pass_table.json`](../../results/model_pass_table.json), made at 2026-09-24T05:47:56+00:00, before the run.
 - In that run, 64 answers were yes, so 64 candidate flags went through the gate: 35 kept and 29 dropped. These are the gate numbers in [`results/footage_latest.json`](../../results/footage_latest.json); the script stops if they differ.
-- How the two frames were picked, by a fixed rule. Every yes answer in the run is a candidate flag. The candidates are put in order by frame id, then model id, feature and run. The kept case is the first candidate the gate kept, and the dropped case is the first candidate the gate dropped.
+- The 35 kept flags by feature: `artificial_bank` 3, `dug_out_channel` 32, `invasive_plant` 0, `pipe_running` 0. The creek check has an item in [`content/form.yaml`](../../content/form.yaml) for `artificial_bank`, `invasive_plant` and `pipe_running`, and none for `dug_out_channel`. So a kept flag on `dug_out_channel` makes no question eligible: `select_followups` in [`core/followups.py`](../../core/followups.py) asks only about a feature the check has an item for.
+- How the two frames were picked, by a fixed rule. Every yes answer in the run is a candidate flag. Only the candidates on a feature the creek check asks about, one with an item in content/form.yaml, are picked from. They are put in order by frame id, then model id, feature and run. The kept case is the first of them the gate kept, and the dropped case is the first of them the gate dropped.
 
-## Kept: frame `v02-00127`
+## Kept: frame `v06-00403`
 
-![Frame v02-00127, a still from a creek video filmed in Russia](../../photos/benchmark/v02-00127.jpg)
+![Frame v06-00403, a still from a creek video filmed in United States](../../photos/benchmark/v06-00403.jpg)
 
-Frame `v02-00127` from https://www.youtube.com/watch?v=vN5ArGGmdUY, by Красота Приморского края и не только, licence CC-BY-3.0. File [`photos/benchmark/v02-00127.jpg`](../../photos/benchmark/v02-00127.jpg), with its row in [`photos/manifest.csv`](../../photos/manifest.csv).
+Frame `v06-00403` from https://www.youtube.com/watch?v=CsayzeejVzY, by OkState Ag, licence CC-BY-3.0. File [`photos/benchmark/v06-00403.jpg`](../../photos/benchmark/v06-00403.jpg), with its row in [`photos/manifest.csv`](../../photos/manifest.csv).
 
-1. **What the model was asked.** `claude-haiku-4-5-20251001` was asked the frozen question for `dug_out_channel` from [`content/features.yaml`](../../content/features.yaml): "Has this channel been straightened or dug out?" This is its answer from run 0 (the runs are numbered from 0).
-2. **What the model answered.** Line 55 of [`evals/fixtures/raw/footage_20260924T060539Z.jsonl`](../../evals/fixtures/raw/footage_20260924T060539Z.jsonl), exactly as committed:
+1. **What the model was asked.** `claude-haiku-4-5-20251001` was asked the frozen question for `artificial_bank` from [`content/features.yaml`](../../content/features.yaml): "Are the banks artificial, such as concrete or stones set in concrete?" This is its answer from run 0 (the runs are numbered from 0).
+2. **What the model answered.** Line 126 of [`evals/fixtures/raw/footage_20260924T060539Z.jsonl`](../../evals/fixtures/raw/footage_20260924T060539Z.jsonl), exactly as committed:
 
    ```json
-   {"answer": "yes", "feature": "dug_out_channel", "frame": "v02-00127", "malformed": false, "model": "claude-haiku-4-5-20251001", "note": "Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering.", "run": 0}
+   {"answer": "yes", "feature": "artificial_bank", "frame": "v06-00403", "malformed": false, "model": "claude-haiku-4-5-20251001", "note": "The stream bed shows carefully arranged stones/rocks that appear to be deliberately placed and set, characteristic of artificial bank construction rather than n", "run": 0}
    ```
 
    The fixture's first line says what it holds: "every answer as the run kept it (after forcing), and every call with its pass". So this is the answer after `force_answer` in [`core/checker.py`](../../core/checker.py) made it yes, no or can't tell with a short note, not the reply exactly as the model sent it.
-3. **What the gate did.** The answer yes became the candidate flag `{"feature": "dug_out_channel", "confidence": 1.0, "note": "Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering."}` (`candidate_flag` in [`evals/footage.py`](../../evals/footage.py)), and `parse_flags` in [`core/gate.py`](../../core/gate.py) read it with the model's name and [`results/model_pass_table.json`](../../results/model_pass_table.json).
+3. **What the gate did.** The answer yes became the candidate flag `{"feature": "artificial_bank", "confidence": 1.0, "note": "The stream bed shows carefully arranged stones/rocks that appear to be deliberately placed and set, characteristic of artificial bank construction rather than n"}` (`candidate_flag` in [`evals/footage.py`](../../evals/footage.py)), and `parse_flags` in [`core/gate.py`](../../core/gate.py) read it with the model's name and [`results/model_pass_table.json`](../../results/model_pass_table.json).
 
-   It kept it, as this Flag: `{"feature": "dug_out_channel", "confidence": 1.0, "note": "Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering.", "region": null}`. The pass table says `claude-haiku-4-5-20251001` passed `dug_out_channel`: it got all 4 photos of that feature right in 2 of 3 runs. The rule is: all 4 items of a feature right in at least 2 of 3 runs (docs/analysis_plan.md item 8).
+   It kept it, as this Flag: `{"feature": "artificial_bank", "confidence": 1.0, "note": "The stream bed shows carefully arranged stones/rocks that appear to be deliberately placed and set, characteristic of artificial bank construction rather than n", "region": null}`. The pass table says `claude-haiku-4-5-20251001` passed `artificial_bank`: it got all 4 photos of that feature right in 3 of 3 runs. The rule is: all 4 items of a feature right in at least 2 of 3 runs (docs/analysis_plan.md item 8). The note is 160 characters long, the most `force_answer` keeps, so it is cut off there.
 4. **What a person would then be asked.** `select_followups` in [`core/followups.py`](../../core/followups.py), called the way [`apps/api/check.py`](../../apps/api/check.py) calls it, with no answers, no test score, rain unknown, the rules in [`content/followups.yaml`](../../content/followups.yaml) and the checker switched on, and this one flag, makes one question eligible: `checker_flag`. It is a pure function: it reads no file, calls no model and uses no network.
 
-   > **The checker noticed something that may be a channel that was deepened or straightened. Want to look again?**
+   > **The checker noticed something that may be concrete walls and other built banks. Want to look again?**
    >
-   > the checker noticed: Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering.
+   > the checker noticed: The stream bed shows carefully arranged stones/rocks that appear to be deliberately placed and set, characteristic of artificial bank construction rather than n
    >
    > [I looked again] [Skip]
 
    Those are the words the walk page shows for a checker question ([`apps/web/components/WalkFlow.tsx`](../../apps/web/components/WalkFlow.tsx)): the question with the feature's plain words, then the model's note, and only there, after "the checker noticed". With the checker off, as on the live site today, the same call asks nothing.
+
+   The person taps "I looked again" or "Skip", and no stored answer changes: the question asks them to look again, and the answers they gave before it stay as they were.
 5. **What every model answered on this frame and feature.** From the same file.
 
    | Model | Passed this feature on the 16-photo test | Its answers, run by run |
    |---|---|---|
-   | `claude-haiku-4-5-20251001` | yes | yes, cant_tell, yes |
-   | `claude-sonnet-5` | yes | no, no, no |
-   | `claude-opus-5-5` | yes | no, no, no |
-   | `claude-fable-5-1` | no | no, no, no |
+   | `claude-haiku-4-5-20251001` | yes | yes, yes, yes |
+   | `claude-sonnet-5` | yes | cant_tell, cant_tell, cant_tell |
+   | `claude-opus-5-5` | yes | cant_tell, cant_tell, cant_tell |
+   | `claude-fable-5-1` | yes | cant_tell, cant_tell, cant_tell |
 
    Only a yes becomes a candidate flag. A no or a can't tell proposes nothing.
 

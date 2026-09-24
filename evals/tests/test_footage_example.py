@@ -12,10 +12,12 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 from core.content_loader import load_content
 from core.followups import SiteContext, select_followups
 from core.gate import parse_flags
+from core.records import FEATURES
 from evals import footage, footage_example
 from evals.reproduce import footage_records
 
@@ -24,6 +26,11 @@ LATEST = json.loads((ROOT / "results" / "footage_latest.json").read_text(encodin
 TABLE = json.loads((ROOT / "results" / "model_pass_table.json").read_text(encoding="utf-8"))
 DOC: dict[str, Any] = json.loads((ROOT / footage_example.OUT_JSON).read_text(encoding="utf-8"))
 PAGE = (ROOT / footage_example.OUT_README).read_text(encoding="utf-8")
+FORM_ITEMS: list[dict[str, Any]] = yaml.safe_load(
+    (ROOT / "content" / "form.yaml").read_text(encoding="utf-8")
+)["items"]
+# The features the creek check asks about, read from the form here and not by the example's code.
+ASKED = {item["feature"] for item in FORM_ITEMS if item.get("feature")}
 
 
 def fixture() -> Path:
@@ -68,13 +75,17 @@ def test_the_gate_over_the_whole_run_gives_the_committed_numbers() -> None:
 
 
 def test_the_two_frames_follow_the_pick_rule() -> None:
-    """First kept and first dropped, by frame id, then model, feature and run."""
+    """On a feature the check asks about, first kept and first dropped, by frame id, then model,
+    feature and run (CRITIC_06 H02)."""
+    assert "dug_out_channel" not in ASKED and "artificial_bank" in ASKED
     rows: list[tuple[tuple[str, str, str, int], int, bool]] = []
     for number, line in enumerate(lines(), start=1):
         if number == 1 or not line.strip():
             continue
         a = json.loads(line)
         if "frame" not in a or a["malformed"] or a["answer"] != "yes":
+            continue
+        if a["feature"] not in ASKED:
             continue
         flags, _reasons = gate(a)
         rows.append(((a["frame"], a["model"], a["feature"], int(a["run"])), number, bool(flags)))
@@ -87,6 +98,28 @@ def test_the_two_frames_follow_the_pick_rule() -> None:
         assert case["raw_line"]["line_number"] == want[1]
     assert DOC["kept"]["frame"] != DOC["dropped"]["frame"]
     assert footage_example.PICK_RULE in PAGE
+    assert DOC["kept"]["feature"] in ASKED and DOC["dropped"]["feature"] in ASKED
+    assert DOC["features_the_check_asks_about"] == [f for f in FEATURES if f in ASKED]
+
+
+def test_the_kept_flags_by_feature_are_counted_again_from_the_raw_answers() -> None:
+    """CRITIC_06 H02: how many kept flags are on each feature, worked out here from the raw file
+    through the gate, every feature named, and on the page in the same words."""
+    kept: dict[str, int] = dict.fromkeys(FEATURES, 0)
+    for number, line in enumerate(lines(), start=1):
+        if number == 1 or not line.strip():
+            continue
+        a = json.loads(line)
+        if "frame" not in a or a["malformed"] or a["answer"] != "yes":
+            continue
+        flags, _reasons = gate(a)
+        for f in flags:
+            kept[f.feature] += 1
+    assert DOC["kept_by_feature"] == kept
+    assert sum(kept.values()) == LATEST["gate"]["kept"] == DOC["gate_over_the_run"]["kept"]
+    split = ", ".join(f"`{f}` {n}" for f, n in kept.items())
+    assert f"- The {LATEST['gate']['kept']} kept flags by feature: {split}. " in PAGE
+    assert "and none for `dug_out_channel`." in PAGE
 
 
 def test_each_raw_line_is_the_committed_line_word_for_word() -> None:
@@ -151,6 +184,47 @@ def test_the_kept_flag_makes_one_checker_question_eligible_and_only_with_the_che
     assert screen["label"] == content.locale["label.checker_noticed"] == "the checker noticed"
     assert answer["note"] not in screen["question"]
     assert f"   > {screen['label']}: {answer['note']}\n" in PAGE
+
+
+def test_a_kept_flag_asks_only_on_a_feature_the_check_asks_about() -> None:
+    """CRITIC_06 H02: the selector, called here on one kept flag per feature, asks nothing for a
+    dug-out channel and asks for built banks; the page says so, and says what the person can do."""
+    content = load_content(ROOT)
+    first: dict[str, Any] = {}
+    for number, line in enumerate(lines(), start=1):
+        if number == 1 or not line.strip():
+            continue
+        a = json.loads(line)
+        if "frame" not in a or a["malformed"] or a["answer"] != "yes":
+            continue
+        order = (a["frame"], a["model"], a["feature"], int(a["run"]))
+        flags, _reasons = gate(a)
+        if flags and (a["feature"] not in first or order < first[a["feature"]][0]):
+            first[a["feature"]] = (order, flags)
+    asks = {
+        feature: bool(
+            select_followups(
+                {},
+                SiteContext(rain="unknown"),
+                None,
+                flags,
+                content.followups,
+                form_items=content.form.get("items", []),
+                checker_enabled=True,
+            )
+        )
+        for feature, (_order, flags) in first.items()
+    }
+    assert asks == {"artificial_bank": True, "dug_out_channel": False}
+    assert DOC["a_kept_flag_asks"] == {f: asks[f] for f in FEATURES if f in asks}
+    assert (
+        "So a kept flag on `dug_out_channel` makes no question eligible: `select_followups` in "
+        "[`core/followups.py`](../../core/followups.py) asks only about a feature the check has "
+        "an item for."
+    ) in PAGE
+    looked, skip = content.locale["check.looked_again"], content.locale["check.skip"]
+    assert DOC["kept"]["followup"]["on_screen"]["buttons"] == [looked, skip]
+    assert f'   The person taps "{looked}" or "{skip}", and no stored answer changes' in PAGE
 
 
 def test_the_page_says_the_checker_is_off_live_and_credits_each_frame() -> None:

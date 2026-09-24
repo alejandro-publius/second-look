@@ -29,8 +29,11 @@ Haiku 4.5 (`claude-haiku-4-5-20251001`), Claude Sonnet 5 (`claude-sonnet-5`), Cl
 - Answer one feature question about one photo.
 - Raise at most one flag, and only on a feature that model passed on the same 16-photo test the
   volunteers take, and only after the person has answered.
-- Make one follow-up question eligible with that flag. Code picks the questions
-  (`core/followups.py`): two at most, the model's at most one.
+- Make one follow-up question eligible with that flag, and only for a feature the creek check
+  asks about (an item in `content/form.yaml`), so a flag on a dug-out channel asks nothing. Code
+  picks the questions (`core/followups.py`): two at most, the model's at most one.
+- Ask the person to look again, and nothing more. They tap "I looked again" or "Skip" (Yes, No or
+  Can't tell in the creek check), and no stored answer changes.
 - Show its note to the person, labelled "the checker noticed", cut to 160 characters.
 
 Where it runs today: on the live site the checker is off (`CHECKER_ENABLED`), so both servers
@@ -183,6 +186,13 @@ times, Fable 5.1 on dug-out channels
 <!--v:results/footage_latest.json#/gate/drop_reasons/feature dug_out_channel not passed by model claude-fable-5-1-->3<!--/v-->
 and Haiku 4.5 on plants
 <!--v:results/footage_latest.json#/gate/drop_reasons/feature invasive_plant not passed by model claude-haiku-4-5-20251001-->2<!--/v-->.
+
+The kept flags by feature, counted again from the run's raw answers (`results/model_card.json`):
+built banks <!--v:results/model_card.json#/footage_kept/by_feature/artificial_bank-->3<!--/v-->, dug-out channel
+<!--v:results/model_card.json#/footage_kept/by_feature/dug_out_channel-->32<!--/v-->, plants
+<!--v:results/model_card.json#/footage_kept/by_feature/invasive_plant-->0<!--/v--> and pipes
+<!--v:results/model_card.json#/footage_kept/by_feature/pipe_running-->0<!--/v-->; the check has no question for a dug-out
+channel, so a flag there asks nothing.
 
 The gate's own tests throw arbitrary output at it, including huge numbers, deep nesting, a
 million candidates and every Unicode direction control
