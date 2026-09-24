@@ -34,12 +34,18 @@ def test_no_deployed_config_sets_the_test_clock() -> None:
         ROOT / "worker" / "wrangler.jsonc",
         ROOT / "apps" / "web" / "wrangler.jsonc",
         ROOT / "scripts" / "deploy.sh",
-        ROOT / "DEPLOY.md",
     ]
     deployed += sorted((ROOT / ".github" / "workflows").glob("*.yml"))
     for path in deployed:
         if path.exists():
             assert "E2E_NOW" not in path.read_text(encoding="utf-8"), path.relative_to(ROOT)
+    # DEPLOY.md lists every setting the code reads; its row for this one says it is never set.
+    row = next(
+        line
+        for line in (ROOT / "DEPLOY.md").read_text(encoding="utf-8").splitlines()
+        if line.startswith("| `E2E_NOW` |")
+    )
+    assert "never set on a deployed Worker" in row
 
 
 def test_only_the_e2e_run_sets_the_test_clock() -> None:
