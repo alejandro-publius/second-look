@@ -15,7 +15,7 @@ from scripts import check_diagrams
 
 REPO = Path(__file__).resolve().parents[2]
 TOOL = REPO / "tools" / "diagrams"
-NAMES = ("system-map", "fhir-graph", "ai-gate")
+NAMES = ("system-map", "fhir-graph", "ai-gate", "loop")
 
 
 def _copy_diagrams(tmp_path: Path) -> Path:
@@ -27,7 +27,7 @@ def test_the_repository_passes() -> None:
     assert check_diagrams.main(root=REPO) == 0
 
 
-def test_the_three_diagrams_are_there_with_their_svgs() -> None:
+def test_the_diagrams_are_there_with_their_svgs() -> None:
     folder = REPO / "docs" / "diagrams"
     assert sorted(p.stem for p in folder.glob("*.mmd")) == sorted(NAMES)
     for name in NAMES:

@@ -1,27 +1,28 @@
 {
   "script": "scripts/count_tests.py",
   "synthetic": false,
-  "generated_at_utc": "2026-09-24T09:13:06+00:00",
-  "measured_at_commit": "95f1c50",
-  "tree_had_changes": false,
+  "generated_at_utc": "2026-09-24T11:06:34+00:00",
+  "measured_at_commit": "950ccad",
+  "tree_had_changes": true,
   "python": {
-    "tests": 1906,
-    "files": 113,
+    "tests": 2003,
+    "files": 117,
     "command": "uv run pytest --collect-only -q"
   },
   "worker_golden": {
-    "cases": 113,
+    "cases": 114,
     "files": 8,
-    "node_tests": 12
+    "node_tests": 15
   },
   "playwright": {
-    "tests": 78,
+    "tests": 94,
     "spec_files": 18,
     "command": "npx playwright test --list"
   },
   "worker_e2e": {
-    "sections": 9,
+    "sections": 13,
     "names": [
+      "an empty store",
       "sessions and visits",
       "the record",
       "the city",
@@ -30,6 +31,9 @@
       "two observers",
       "iNaturalist context",
       "judge mode shut before the lock",
+      "judge mode open at the lock",
+      "counts by source",
+      "the export",
       "bad input"
     ]
   }

@@ -5,15 +5,17 @@
     "atkinson-hyperlegible-next": "5.3.0"
   },
   "generated_by": "make report-pdf: scripts/build_report.py",
-  "pages": 7,
+  "pages": 8,
   "pandoc": "pandoc 3.9.0.2",
   "pdf": "docs/REPORT.pdf",
-  "pdf_sha256": "14ceed5357a723d9f9a848ae6f073c09d794f7bf607a8d06b10f3fb5f0852a4f",
+  "pdf_sha256": "c48b78ccd02540a1071eb3b2c97c92ae62150ecc5e5273b68a96fdf312e8a437",
   "playwright": "1.63.0",
   "sources": [
     "README.md",
     "apps/web/scripts/print-report.mjs",
     "docs/MODEL_CARD.md",
+    "docs/diagrams/ai-gate.svg",
+    "docs/diagrams/fhir-graph.svg",
     "docs/fhir_mapping.md",
     "docs/report/report.css",
     "docs/report/source.md",
@@ -30,5 +32,5 @@
     "results/model_sweep_20260924T054756Z.json",
     "results/mutation.json"
   ],
-  "sources_sha256": "13e2393e5a56ca5a985e37a89ed9cf4d6d3d950bda1bc69aa2d265bbb1854ea7"
+  "sources_sha256": "abcebac5ae18b5c06acaed5a1fd083d3ff1e211b8cdbf18f3fd507a645788a63"
 }
