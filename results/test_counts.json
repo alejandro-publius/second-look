@@ -1,12 +1,12 @@
 {
   "script": "scripts/count_tests.py",
   "synthetic": false,
-  "generated_at_utc": "2026-09-24T07:26:32+00:00",
-  "measured_at_commit": "c5c5411",
-  "tree_had_changes": true,
+  "generated_at_utc": "2026-09-24T08:43:35+00:00",
+  "measured_at_commit": "7071588",
+  "tree_had_changes": false,
   "python": {
-    "tests": 1698,
-    "files": 96,
+    "tests": 1901,
+    "files": 113,
     "command": "uv run pytest --collect-only -q"
   },
   "worker_golden": {
@@ -15,12 +15,12 @@
     "node_tests": 12
   },
   "playwright": {
-    "tests": 61,
-    "spec_files": 16,
+    "tests": 77,
+    "spec_files": 18,
     "command": "npx playwright test --list"
   },
   "worker_e2e": {
-    "sections": 8,
+    "sections": 9,
     "names": [
       "sessions and visits",
       "the record",
@@ -28,6 +28,7 @@
       "the referral",
       "quick check and upload",
       "two observers",
+      "iNaturalist context",
       "judge mode shut before the lock",
       "bad input"
     ]
