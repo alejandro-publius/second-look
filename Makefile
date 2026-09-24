@@ -90,6 +90,9 @@ verify-claims:
 	$(PY) scripts/api_inventory.py --check
 	$(PY) scripts/verify_claims.py --file docs/API.md
 	$(PY) scripts/verify_claims.py --file docs/MCP.md
+	$(PY) scripts/verify_claims.py --file WRITEUP.md
+	$(PY) scripts/verify_claims.py --file SECURITY.md
+	$(PY) scripts/verify_claims.py --file DEPLOY.md
 
 render-readme:
 	$(PY) scripts/render_readme.py
