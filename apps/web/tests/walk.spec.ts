@@ -92,6 +92,13 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
   await page.getByRole("link", { name: "See this creek as a city would" }).click();
   await expect(page.getByRole("heading", { name: /Demo creek/ })).toBeVisible();
   await expect(page.getByText("Checks from this phone: 1")).toBeVisible();
+  // CRITIC_04 F04: the walk said yes to barriers, and the finding and the reason carry the short
+  // label, never the form's whole question.
+  const barriers = formItems.find((it) => it.id === "barriers")!.text;
+  // The finding's row: its label, then the count, which textContent joins across the <br>.
+  await expect(page.getByRole("main")).toContainText(`${en["city.finding_barriers"]}${en["city.walk_seen"].replace("{n}", "1")}`);
+  await expect(page.getByRole("main")).toContainText(`${en["city.finding_barriers"]}. OneAquaHealth Policy Brief`);
+  await expect(page.getByRole("main")).not.toContainText(barriers);
 });
 
 // CRITIC_04 F01: the one record a judge can make listed no answer and no score. The record screen
