@@ -467,13 +467,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--clips", type=Path, default=None, help="default: MEDIA/clips")
     parser.add_argument("--manifest", type=Path, default=FETCHED)
     args = parser.parse_args(argv)
-    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
-        print("cut-footage: needs ffmpeg and ffprobe")
-        return 1
     media = args.media.expanduser()
     clips = (args.clips or media / "clips").expanduser()
+    # Where the clips go is checked first: refusing the repository needs no ffmpeg, and CI has none.
     if clips.resolve().is_relative_to(ROOT.resolve()):
         print(f"cut-footage: {clips} is inside the repository; clips must stay outside it")
+        return 1
+    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
+        print("cut-footage: needs ffmpeg and ffprobe")
         return 1
     clips.mkdir(parents=True, exist_ok=True)
     fetched = json.loads(args.manifest.read_text(encoding="utf-8"))
