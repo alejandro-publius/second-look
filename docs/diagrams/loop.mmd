@@ -1,0 +1,12 @@
+flowchart LR
+  accTitle: The loop in five verbs, Train, Check, Verify, Record and Act
+  accDescr: A volunteer trains and takes the photo test, and its per-feature score comes out. On a creek check they answer first, with at most two follow-up questions chosen by code. The answers, with the score, become a FHIR record checked against OneAquaHealth's guide. The records say what the creek needs, in OneAquaHealth's own measures, and which pipes are worth a lab test. A model may raise a question only on a feature it passed on the same test.
+  TRAIN["TRAIN<br/>the two-minute photo test"]
+  CHECK["CHECK<br/>the guided creek check"]
+  VERIFY["VERIFY<br/>follow-ups and the gate"]
+  RECORD["RECORD<br/>FHIR under their guide"]
+  ACT["ACT<br/>what the creek needs"]
+  TRAIN -- "a score<br/>per feature" --> CHECK
+  CHECK -- "the person's<br/>answers" --> VERIFY
+  VERIFY -- "answers,<br/>score, flags" --> RECORD
+  RECORD -- "records<br/>by creek" --> ACT

@@ -200,6 +200,26 @@ The hard parts of building this, and how each is proved, are in [`WRITEUP.md`](W
 
 The deep version, with every file named, is [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The loop is five verbs: Train, Check, Verify, Record, Act. Each diagram below is a source in [`docs/diagrams/`](docs/diagrams/), drawn as an SVG next to it by the Mermaid CLI pinned in [`tools/diagrams`](tools/diagrams). `make diagrams` draws each one again, in CI too. It fails when a drawing is stale, was edited by hand, or has an edge that does not say what flows along it.
 
+**The loop.** The five verbs in one line; the full system map under it names every part and what flows between them.
+
+```mermaid
+flowchart LR
+  accTitle: The loop in five verbs, Train, Check, Verify, Record and Act
+  accDescr: A volunteer trains and takes the photo test, and its per-feature score comes out. On a creek check they answer first, with at most two follow-up questions chosen by code. The answers, with the score, become a FHIR record checked against OneAquaHealth's guide. The records say what the creek needs, in OneAquaHealth's own measures, and which pipes are worth a lab test. A model may raise a question only on a feature it passed on the same test.
+  TRAIN["TRAIN<br/>the two-minute photo test"]
+  CHECK["CHECK<br/>the guided creek check"]
+  VERIFY["VERIFY<br/>follow-ups and the gate"]
+  RECORD["RECORD<br/>FHIR under their guide"]
+  ACT["ACT<br/>what the creek needs"]
+  TRAIN -- "a score<br/>per feature" --> CHECK
+  CHECK -- "the person's<br/>answers" --> VERIFY
+  VERIFY -- "answers,<br/>score, flags" --> RECORD
+  RECORD -- "records<br/>by creek" --> ACT
+```
+
+<details>
+<summary><b>The full system map</b>: wide, so GitHub's diagram viewer zooms it, or open <a href="docs/diagrams/system-map.svg">the SVG</a></summary>
+
 **The system map.** Every edge says what flows. Where a part is a [`core/`](core/) file, the live site runs its TypeScript port in [`worker/src/core/`](worker/src/core/), held equal to the Python by golden vectors.
 
 ```mermaid
@@ -277,6 +297,8 @@ flowchart TB
   WORKER -- "creeks, city views,<br/>records, Bundles" --> MCP
   MCP -- "answers with their<br/>visit ids and Bundle links" --> CLIENT
 ```
+
+</details>
 
 Why this architecture matters:
 
@@ -553,7 +575,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 
 ### See it work
 
-One worked visit to Strawberry Creek in Berkeley, from the golden record in this repository. It is an example, hand shaped, as the table of what is real and what is synthetic below says.
+One worked visit to Strawberry Creek in Berkeley, from the golden record in this repository. It is an example, hand shaped, as the table of what is real and what is synthetic below says: no person has made a real record yet, because a record comes only from a person at a creek or in the test. The loop you can run live, today, is the walk at the end of this section, which builds your own record on your phone.
 
 | Step | What happened | Where to check |
 |---|---|---|
