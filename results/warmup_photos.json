@@ -1,0 +1,452 @@
+{
+  "runs": {
+    "before": {
+      "commit": "0ba8a74",
+      "dpr": {
+        "1": {
+          "tries": [
+            {
+              "load_ms": 8438,
+              "lcp_ms": 6884,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            },
+            {
+              "load_ms": 8452,
+              "lcp_ms": 6900,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            },
+            {
+              "load_ms": 8437,
+              "lcp_ms": 6884,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            }
+          ],
+          "median_lcp_ms": 6884,
+          "median_load_ms": 8438,
+          "median_first_screen_bytes": 1647359,
+          "median_photo_bytes": 1459038,
+          "median_later_script_bytes": 40546
+        },
+        "2": {
+          "tries": [
+            {
+              "load_ms": 8439,
+              "lcp_ms": 6884,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            },
+            {
+              "load_ms": 8448,
+              "lcp_ms": 6896,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            },
+            {
+              "load_ms": 8445,
+              "lcp_ms": 6892,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            }
+          ],
+          "median_lcp_ms": 6892,
+          "median_load_ms": 8445,
+          "median_first_screen_bytes": 1647359,
+          "median_photo_bytes": 1459038,
+          "median_later_script_bytes": 40546
+        },
+        "3": {
+          "tries": [
+            {
+              "load_ms": 8469,
+              "lcp_ms": 6916,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            },
+            {
+              "load_ms": 8448,
+              "lcp_ms": 6892,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            },
+            {
+              "load_ms": 8439,
+              "lcp_ms": 6884,
+              "lcp_element": "ph-warmup-03.jpg",
+              "first_screen_bytes": 1647359,
+              "first_screen_requests": 12,
+              "photo_bytes": 1459038,
+              "later_script_bytes": 40546,
+              "photos_fetched": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ],
+              "photos_shown": [
+                "ph-warmup-03.jpg",
+                "ph-warmup-04.jpg"
+              ]
+            }
+          ],
+          "median_lcp_ms": 6892,
+          "median_load_ms": 8448,
+          "median_first_screen_bytes": 1647359,
+          "median_photo_bytes": 1459038,
+          "median_later_script_bytes": 40546
+        }
+      },
+      "measured_at_utc": "2026-09-24T03:22:25Z",
+      "profile": {
+        "browser": "chromium 153.0.8010.12",
+        "viewport": "390x844",
+        "densities": [
+          3,
+          2,
+          1
+        ],
+        "tries": 3,
+        "download_bytes_per_s": 209715.2,
+        "upload_bytes_per_s": 96000,
+        "latency_ms": 150,
+        "cpu_slowdown": 4,
+        "http_cache": "off",
+        "service_worker": "blocked",
+        "early_hints": "none"
+      }
+    },
+    "after": {
+      "commit": "dcb2069",
+      "dpr": {
+        "1": {
+          "tries": [
+            {
+              "load_ms": 1747,
+              "lcp_ms": 1056,
+              "lcp_element": "ph-warmup-03-480.avif",
+              "first_screen_bytes": 275900,
+              "first_screen_requests": 12,
+              "photo_bytes": 86947,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-480.avif",
+                "ph-warmup-04-480.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-480.avif",
+                "ph-warmup-04-480.avif"
+              ]
+            },
+            {
+              "load_ms": 1751,
+              "lcp_ms": 1076,
+              "lcp_element": "ph-warmup-03-480.avif",
+              "first_screen_bytes": 275900,
+              "first_screen_requests": 12,
+              "photo_bytes": 86947,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-480.avif",
+                "ph-warmup-04-480.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-480.avif",
+                "ph-warmup-04-480.avif"
+              ]
+            },
+            {
+              "load_ms": 1758,
+              "lcp_ms": 1084,
+              "lcp_element": "ph-warmup-03-480.avif",
+              "first_screen_bytes": 275900,
+              "first_screen_requests": 12,
+              "photo_bytes": 86947,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-480.avif",
+                "ph-warmup-04-480.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-480.avif",
+                "ph-warmup-04-480.avif"
+              ]
+            }
+          ],
+          "median_lcp_ms": 1076,
+          "median_load_ms": 1751,
+          "median_first_screen_bytes": 275900,
+          "median_photo_bytes": 86947,
+          "median_later_script_bytes": 40894
+        },
+        "2": {
+          "tries": [
+            {
+              "load_ms": 2496,
+              "lcp_ms": 2140,
+              "lcp_element": "ph-warmup-03-800.avif",
+              "first_screen_bytes": 442362,
+              "first_screen_requests": 12,
+              "photo_bytes": 253409,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-800.avif",
+                "ph-warmup-04-800.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-800.avif",
+                "ph-warmup-04-800.avif"
+              ]
+            },
+            {
+              "load_ms": 2517,
+              "lcp_ms": 2120,
+              "lcp_element": "ph-warmup-03-800.avif",
+              "first_screen_bytes": 442362,
+              "first_screen_requests": 12,
+              "photo_bytes": 253409,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-800.avif",
+                "ph-warmup-04-800.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-800.avif",
+                "ph-warmup-04-800.avif"
+              ]
+            },
+            {
+              "load_ms": 2504,
+              "lcp_ms": 2144,
+              "lcp_element": "ph-warmup-03-800.avif",
+              "first_screen_bytes": 442362,
+              "first_screen_requests": 12,
+              "photo_bytes": 253409,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-800.avif",
+                "ph-warmup-04-800.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-800.avif",
+                "ph-warmup-04-800.avif"
+              ]
+            }
+          ],
+          "median_lcp_ms": 2140,
+          "median_load_ms": 2504,
+          "median_first_screen_bytes": 442362,
+          "median_photo_bytes": 253409,
+          "median_later_script_bytes": 40894
+        },
+        "3": {
+          "tries": [
+            {
+              "load_ms": 3556,
+              "lcp_ms": 3332,
+              "lcp_element": "ph-warmup-03-1200.avif",
+              "first_screen_bytes": 620207,
+              "first_screen_requests": 12,
+              "photo_bytes": 431254,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-1200.avif",
+                "ph-warmup-04-1200.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-1200.avif",
+                "ph-warmup-04-1200.avif"
+              ]
+            },
+            {
+              "load_ms": 3556,
+              "lcp_ms": 3332,
+              "lcp_element": "ph-warmup-03-1200.avif",
+              "first_screen_bytes": 620207,
+              "first_screen_requests": 12,
+              "photo_bytes": 431254,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-1200.avif",
+                "ph-warmup-04-1200.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-1200.avif",
+                "ph-warmup-04-1200.avif"
+              ]
+            },
+            {
+              "load_ms": 3554,
+              "lcp_ms": 3332,
+              "lcp_element": "ph-warmup-03-1200.avif",
+              "first_screen_bytes": 620207,
+              "first_screen_requests": 12,
+              "photo_bytes": 431254,
+              "later_script_bytes": 40894,
+              "photos_fetched": [
+                "ph-warmup-03-1200.avif",
+                "ph-warmup-04-1200.avif"
+              ],
+              "photos_shown": [
+                "ph-warmup-03-1200.avif",
+                "ph-warmup-04-1200.avif"
+              ]
+            }
+          ],
+          "median_lcp_ms": 3332,
+          "median_load_ms": 3556,
+          "median_first_screen_bytes": 620207,
+          "median_photo_bytes": 431254,
+          "median_later_script_bytes": 40894
+        }
+      },
+      "measured_at_utc": "2026-09-24T03:23:17Z",
+      "profile": {
+        "browser": "chromium 153.0.8010.12",
+        "viewport": "390x844",
+        "densities": [
+          3,
+          2,
+          1
+        ],
+        "tries": 3,
+        "download_bytes_per_s": 209715.2,
+        "upload_bytes_per_s": 96000,
+        "latency_ms": 150,
+        "cpu_slowdown": 4,
+        "http_cache": "off",
+        "service_worker": "blocked",
+        "early_hints": "none"
+      }
+    }
+  },
+  "generated_at_utc": "2026-09-24T03:23:17Z",
+  "script": "apps/web/scripts/first-screen.mjs",
+  "what": "The landing page's first screen on a phone, loaded from a static build served with its _headers file and without Early Hints. first_screen_bytes counts what the page's HTML and stylesheet ask for, and every photo, read once all of it has arrived. later_script_bytes is what the page's scripts fetch afterwards: the router's prefetch of linked pages and the call that wakes the API.",
+  "profile": {
+    "browser": "chromium 153.0.8010.12",
+    "viewport": "390x844",
+    "densities": [
+      3,
+      2,
+      1
+    ],
+    "tries": 3,
+    "download_bytes_per_s": 209715.2,
+    "upload_bytes_per_s": 96000,
+    "latency_ms": 150,
+    "cpu_slowdown": 4,
+    "http_cache": "off",
+    "service_worker": "blocked",
+    "early_hints": "none"
+  },
+  "photos": {
+    "ph-warmup-03": {
+      "jpeg_bytes": 566076,
+      "copies": {
+        "avif-1200": 191199,
+        "avif-480": 29926,
+        "webp-480": 33104,
+        "avif-800": 86681,
+        "webp-800": 98194
+      }
+    },
+    "ph-warmup-04": {
+      "jpeg_bytes": 891652,
+      "copies": {
+        "avif-1200": 238745,
+        "avif-480": 55713,
+        "webp-480": 70660,
+        "avif-800": 165419,
+        "webp-800": 204380
+      }
+    }
+  }
+}
