@@ -103,12 +103,12 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
 
 // CRITIC_04 F01: the one record a judge can make listed no answer and no score. The record screen
 // now lists every answer the walk made, the way /spot lists a stored visit's, and where /spot shows
-// the observer's score it says the walk's observer was not tested on this phone, then points to
-// the example on /two, where a volunteer's score travels with the answer.
+// the observer's score it says "No score in a demo record" (walk.not_tested), then points to the
+// example on /two, where a volunteer's score travels with the answer.
 const en: Record<string, string> = content.locale;
 const formItems: { id: string; text: string; feature: string | null }[] = content.form.items;
 
-test("the walk's record lists every answer the walk made, with not tested on this phone where /spot shows the score", async ({ page }) => {
+test("the walk's record lists every answer the walk made, with No score in a demo record where /spot shows the score", async ({ page }) => {
   await mockApi(page, {});
   const w = walks[0];
   await page.goto(`${BASE}/walk/${w.id}`);
