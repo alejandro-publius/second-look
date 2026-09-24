@@ -4,9 +4,13 @@ import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 
 // Playwright runs specs as CommonJS, so paths come from __dirname and the ES modules under test
-// are loaded with a dynamic import of a file URL.
+// are loaded with a dynamic import of a file URL. The two Functions are .js files in a package
+// without "type": "module", which Playwright's loader on Node 20 (CI) reads as CommonJS, so they
+// are imported from their own source as a data URL, always an ES module. Neither imports anything.
 const web = join(__dirname, "..");
 const load = (relative: string) => import(pathToFileURL(join(web, relative)).href);
+const loadFunction = (relative: string) =>
+  import(`data:text/javascript;base64,${readFileSync(join(web, relative)).toString("base64")}`);
 
 // Update 10 answer A1: the API sits behind /api/* on the Pages origin. Two small facts keep that
 // honest without a network: the routes file sends /api/* and /health to the Function and keeps
@@ -30,7 +34,7 @@ test("the Pages Function forwards the request unchanged to the API service bindi
     },
   };
   for (const file of ["functions/api/[[path]].js", "functions/health.js"]) {
-    const mod = await load(file);
+    const mod = await loadFunction(file);
     const request = new Request("https://depth.second-look-79t.pages.dev/api/test/counts", {
       method: "POST",
       headers: { "content-type": "application/json", "x-qa-key": "abc" },
