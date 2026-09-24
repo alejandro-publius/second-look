@@ -61,6 +61,24 @@ test("the judges' doors give the test about four minutes and the walk its clip, 
   await expect(page.getByText(/two minute test/i)).toHaveCount(0);
 });
 
+// CRITIC_03 E05 and E06: the /two door says what the page shows while the OneAquaHealth sandbox
+// is down, and the footage door starts from the committed answer, which is the answer after
+// force_answer, not the reply as the model sent it.
+test("the /two door says our record shows alone while their sandbox is down, and the footage door starts from the committed answer", async ({
+  page,
+}) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  const nav = page.getByRole("navigation", { name: "For judges" });
+  const door = (name: string) => nav.locator(".row").filter({ has: page.getByRole("link", { name, exact: true }) });
+  await expect(door("A volunteer record in the viewer built for laboratory results")).toContainText(
+    "While the OneAquaHealth sandbox is down, our record shows alone.",
+  );
+  const footage = door("The checker at work on real creek footage");
+  await expect(footage).toContainText("from the model's committed answer to the question a person would be asked");
+  await expect(nav).not.toContainText("raw reply");
+});
+
 test("About links the judges' door", async ({ page }) => {
   await mockApi(page);
   await page.goto("/about");
