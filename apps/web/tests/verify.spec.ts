@@ -16,6 +16,10 @@ const ots: { proofs: OtsProof[] } = JSON.parse(readFileSync(join(REPO, "results"
 
 test("verify: the browser checks the chain and shows every receipt in order", async ({ page }) => {
   const urls = watchRequests(page);
+  const csp: string[] = [];
+  page.on("console", (m) => {
+    if (m.text().includes("Content Security Policy")) csp.push(m.text());
+  });
   await mockApi(page);
   await page.goto("/verify");
   await expect(page.getByRole("heading", { level: 1, name: "Check our records" })).toBeVisible();
@@ -30,6 +34,7 @@ test("verify: the browser checks the chain and shows every receipt in order", as
   await expect(page.locator("body")).not.toContainText("[missing:");
   // Checked here, on this machine: the page asks nothing of any other origin to do it.
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
+  expect(csp).toEqual([]);
 });
 
 test("verify: says what OpenTimestamps is, and shows each proof's status from results/ots.json", async ({ page }) => {
