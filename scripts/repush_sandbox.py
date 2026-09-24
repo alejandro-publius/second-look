@@ -367,7 +367,7 @@ def _write_evidence(path: Path, *, base: str, ref: str, action: str, back: httpx
     except ValueError:
         body = back.text[:2000]
     shown = json.dumps(body, indent=2, ensure_ascii=False) if not isinstance(body, str) else body
-    screenshot = path.parent.parent / "screens" / "sandbox-library.png"
+    screenshot = path.parent / "sandbox-library.png"
     shot = screenshot.relative_to(ROOT) if screenshot.is_relative_to(ROOT) else screenshot
     lines = [
         "# Sandbox evidence: the Library entry",

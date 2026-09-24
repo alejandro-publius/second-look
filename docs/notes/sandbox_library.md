@@ -6,7 +6,7 @@ Written by `scripts/repush_sandbox.py --library` at 2026-09-21T06:53:47Z. The le
 - Server: `https://sandbox.hl7europe.eu/oneaquahealth/fhir`
 - Library: `Library/466` (create)
 - Read back: HTTP 200
-- Screenshot: `docs/screens/sandbox-library.png`
+- Screenshot: `docs/notes/sandbox-library.png`
 - GET it yourself: `curl -H 'Accept: application/fhir+json' https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466`
 
 ## The Library as the sandbox returned it

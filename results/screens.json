@@ -391,8 +391,8 @@
       "blind": false
     },
     {
-      "name": "lesson-photo-built-bank",
-      "file": "docs/screens/lesson-photo-built-bank.webp",
+      "name": "lesson-built-bank-marks",
+      "file": "docs/lessons/lesson-built-bank-marks.webp",
       "route": "/t",
       "source": "local mock",
       "bytes": 80774,
@@ -409,8 +409,8 @@
       "blind": false
     },
     {
-      "name": "lesson-photo-pipe",
-      "file": "docs/screens/lesson-photo-pipe.webp",
+      "name": "lesson-pipe-marks",
+      "file": "docs/lessons/lesson-pipe-marks.webp",
       "route": "/t",
       "source": "local mock",
       "bytes": 143450,

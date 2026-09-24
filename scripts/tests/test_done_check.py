@@ -340,6 +340,9 @@ def test_the_real_checklist_keeps_the_order_of_update_27() -> None:
     wanted = ["UPDATE_22", "Block 23", "Block 24", "Hardening", "submission", "Dated", "Human"]
     at = [next(i for i, g in enumerate(groups) if w.lower() in g.lower()) for w in wanted]
     assert at == sorted(at)
-    kinds = [i.kind for i in dc.parse(text)]
+    # UPDATE_29 asks for its lines at the end of the file, after the human items, as a last block
+    # of its own; within UPDATE_27's part the human items still come last.
+    head = text.split("\n## UPDATE_29", 1)[0]
+    kinds = [i.kind for i in dc.parse(head)]
     first_human = kinds.index("HUMAN")
     assert set(kinds[first_human:]) == {"HUMAN"}, "the human items come last"

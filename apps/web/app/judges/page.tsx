@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FocusHeading } from "@/components/FocusHeading";
 import { Row } from "@/components/ui/Row";
+import { content } from "@/lib/content";
 import { t } from "@/lib/t";
 
 export const metadata: Metadata = { title: `${t("judges.title")}: ${t("app.name")}` };
@@ -15,7 +16,9 @@ const DOORS: { href: string; label: string; note?: string }[] = [
   { href: "/t?src=other", label: "judges.take_test", note: "judges.take_test_note" },
   { href: "/check", label: "judges.check" },
   { href: "/walk", label: "judges.walks" },
-  { href: "/spot?id=example", label: "judges.record" },
+  // No stored record answers to a sample id on the live site, so the sample record is the one a
+  // video walk makes on the phone, with View as FHIR at its end.
+  { href: `/walk/${content.walks[0]?.id ?? ""}`, label: "judges.record" },
   { href: "/two", label: "judges.two" },
   { href: "/city?creek=strawberry-creek", label: "nav.city" },
   { href: "/how-we-know", label: "judges.how" },

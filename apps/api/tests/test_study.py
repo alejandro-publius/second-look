@@ -282,7 +282,15 @@ def test_counts_return_counts_only(client):
     assert set(body["by_arm"]["trained"]) == {"randomized", "completed"}
     assert sum(a["randomized"] for a in body["by_arm"].values()) == 2  # QA session left out
     assert sum(a["completed"] for a in body["by_arm"].values()) == 1
-    assert body["by_source"] == {"poster": 1, "chat": 0, "friends": 0, "creek_group": 0, "other": 0}
+    # "panel" joined the labels on 2026-09-24 (docs/deviations.md, the panel study).
+    assert body["by_source"] == {
+        "poster": 1,
+        "chat": 0,
+        "friends": 0,
+        "creek_group": 0,
+        "other": 0,
+        "panel": 0,
+    }
     assert body["post_lock"] == 0
 
 

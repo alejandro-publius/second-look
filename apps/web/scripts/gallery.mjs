@@ -105,7 +105,8 @@ async function localRun(browser) {
   await frame(900, { keepScroll: true });
   await button(page, "I agree, start").click();
   await page.getByRole("heading", { name: "Which creek is healthier?" }).waitFor();
-  await frame(1400);
+  const warmup = await frame(1400);
+  gallery("warmup", "/t", "local mock", warmup, "The warm-up: which creek is healthier, asked once before the test and answered at the end.");
   await button(page, "This creek, on the left").click();
 
   const lessons = Object.keys(content.lessons).length;
@@ -129,7 +130,7 @@ async function localRun(browser) {
       await settle(page);
       await marked.screenshot({ path: join(RAW, file), animations: "disabled" });
       const featureName = content.features.find((x) => x.id === feature)?.name ?? feature;
-      captures.lesson_photos.push({ name: `lesson-photo-${LESSON_PHOTOS[feature]}`, feature, feature_name: featureName, photo_id: photoId, file });
+      captures.lesson_photos.push({ name: `lesson-${LESSON_PHOTOS[feature]}-marks`, feature, feature_name: featureName, photo_id: photoId, file });
       console.log(`gallery: lesson photo ${photoId}`);
     }
     await button(page, "Next photo").click();
@@ -247,6 +248,9 @@ async function liveRun(browser) {
   gallery("privacy", "/privacy", "live", await visit("/privacy"), "Privacy: what is stored and what is not.");
   gallery("about", "/about", "live", await visit("/about"), "About: what Second Look is and who made it.");
   gallery("poster", "/poster", "live", await visit("/poster"), "The poster to print and put up by a creek, with its QR code.");
+  gallery("accessibility", "/accessibility", "live", await visit("/accessibility"), "Accessibility: what we aim for and how each part is checked.");
+  gallery("offline", "/offline", "live", await visit("/offline"), "The page a phone shows when it has no signal: what still works.");
+  gallery("share", "/share/12", "live", await visit("/share/12"), "The page a shared score opens: the score card and a link to take the test.");
   await context.close();
 }
 

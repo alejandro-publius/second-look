@@ -49,6 +49,9 @@ def gallery(tmp_path: Path) -> Path:
     for rel in ["results/screens.json", "photos/manifest.csv", "docs/social-preview.png"]:
         (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / rel, tmp_path / rel)
+    for path in (ROOT / "docs" / "lessons").glob("*.webp"):
+        (tmp_path / "docs" / "lessons").mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, tmp_path / "docs" / "lessons" / path.name)
     for path in (ROOT / "docs" / "screens").glob("*"):
         if path.suffix in {".webp", ".gif"}:
             (tmp_path / "docs" / "screens").mkdir(parents=True, exist_ok=True)
@@ -186,13 +189,13 @@ def test_every_image_has_alt_text(gallery: Path) -> None:
 
 
 def test_a_photo_without_a_manifest_row_fails(gallery: Path) -> None:
-    edit(gallery, lambda d: row_named(d, "lesson-photo-pipe").update(photos=["ph-nowhere"]))
+    edit(gallery, lambda d: row_named(d, "lesson-pipe-marks").update(photos=["ph-nowhere"]))
     assert says(check(gallery), "shows ph-nowhere, which has no row in photos/manifest.csv")
 
 
 def test_a_photo_with_faces_fails(gallery: Path) -> None:
     manifest = gallery / "photos" / "manifest.csv"
-    photo = row_named(doc_of(gallery), "lesson-photo-pipe")["photos"][0]
+    photo = row_named(doc_of(gallery), "lesson-pipe-marks")["photos"][0]
     lines = manifest.read_text(encoding="utf-8").splitlines(keepends=True)
     changed = [
         line.replace(",false,false,", ",false,true,", 1) if line.startswith(f"{photo},") else line
@@ -204,10 +207,10 @@ def test_a_photo_with_faces_fails(gallery: Path) -> None:
 
 
 def test_the_credit_must_be_the_manifest_credit(gallery: Path) -> None:
-    edit(gallery, lambda d: row_named(d, "lesson-photo-pipe").update(credit="Photo: someone"))
+    edit(gallery, lambda d: row_named(d, "lesson-pipe-marks").update(credit="Photo: someone"))
     edit(gallery, lambda d: row_named(d, "social-preview").update(credit="two photos"))
     problems = check(gallery)
-    assert says(problems, "lesson-photo-pipe: its credit does not name")
+    assert says(problems, "lesson-pipe-marks: its credit does not name")
     assert says(problems, "social-preview: its credit does not name")
 
 

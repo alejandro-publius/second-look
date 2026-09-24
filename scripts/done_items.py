@@ -1346,6 +1346,280 @@ def check_panel_analysis(root: Path) -> list[str]:
     return []
 
 
+def check_human_row(root: Path) -> list[str]:
+    """After the lock: the README's human row cites the one real analysis result."""
+    problems = check_analysis_once(root)
+    if problems:
+        return problems
+    readme = read(root / "README.md")
+    if not re.search(r"(claim:|<!--v:)results/usability_\d{8}\.json#", readme):
+        problems.append("the README cites no number from the real analysis in results/")
+    return problems
+
+
+HL7_REPO = "hl7-eu/oah"
+
+
+def github_state(kind: str, number: int) -> str | None:
+    """The state of a pull request or issue on hl7-eu/oah, read with gh, or None."""
+    endpoint = "pulls" if kind == "pull" else "issues"
+    proc = subprocess.run(
+        ["gh", "api", f"repos/{HL7_REPO}/{endpoint}/{number}", "--jq", ".state"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    return proc.stdout.strip() if proc.returncode == 0 and proc.stdout.strip() else None
+
+
+def check_contributed_back(root: Path) -> list[str]:
+    readme = read(root / "README.md")
+    m = re.search(r"^### Contributed back\n(.*?)(?=^#{2,3} |\Z)", readme, re.S | re.M)
+    if not m:
+        return ["README.md has no Contributed back section"]
+    body = m.group(1)
+    pulls = sorted(set(int(n) for n in re.findall(rf"github\.com/{HL7_REPO}/pull/(\d+)", body)))
+    issues = sorted(set(int(n) for n in re.findall(rf"github\.com/{HL7_REPO}/issues/(\d+)", body)))
+    problems = []
+    if not pulls:
+        problems.append("Contributed back links no pull request on hl7-eu/oah")
+    if len(issues) < 3:
+        problems.append(f"Contributed back links {len(issues)} issues on hl7-eu/oah, not 3")
+    for kind, numbers in (("pull", pulls), ("issue", issues)):
+        for n in numbers:
+            if github_state(kind, n) is None:
+                problems.append(f"hl7-eu/oah {kind} {n} could not be read with gh")
+    return problems
+
+
+OTS_PROOFS = ("proofs/prereg-v1.tag.ots", "proofs/analysis_plan.md.ots")
+
+
+def check_ots(root: Path) -> list[str]:
+    problems = []
+    for rel in OTS_PROOFS:
+        path = root / rel
+        if not path.is_file():
+            problems.append(f"{rel} is missing")
+            continue
+        if not path.read_bytes().startswith(b"\x00OpenTimestamps\x00\x00Proof\x00"):
+            problems.append(f"{rel} is not an OpenTimestamps proof")
+    if not list((root / "proofs").glob("audit-head-*.ots")):
+        problems.append("no daily anchor of the audit chain head in proofs/")
+    if "ots" not in read(root / "scripts" / "install_anchor_job.sh"):
+        problems.append("scripts/install_anchor_job.sh does not anchor the audit head daily")
+    return problems
+
+
+def check_verify_page(root: Path) -> list[str]:
+    problems = []
+    if not (root / "apps" / "web" / "app" / "verify" / "page.tsx").is_file():
+        problems.append("the web app has no /verify page")
+    locale = read(root / "content" / "locales" / "en.json")
+    if "OpenTimestamps" not in locale or "public timestamp service" not in locale:
+        problems.append("/verify does not say what OpenTimestamps is, a public timestamp service")
+    readme = read(root / "README.md")
+    if "ots verify" not in readme:
+        problems.append("the README's trust table has no row with the command ots verify")
+    return problems
+
+
+def check_reproduce_wired(root: Path) -> list[str]:
+    problems = []
+    if "reproduce:" not in read(root / "Makefile"):
+        return ["the Makefile has no reproduce target"]
+    proc = subprocess.run(
+        ["make", "reproduce"], cwd=root, capture_output=True, text=True, timeout=1800
+    )
+    if proc.returncode != 0:
+        tail = (proc.stdout + proc.stderr).strip().splitlines()[-1:]
+        problems.append(f"make reproduce failed: {' '.join(tail)}")
+    makefile = read(root / "Makefile")
+    judge = next((ln for ln in makefile.splitlines() if ln.startswith("judge-check:")), "")
+    if (
+        "reproduce" not in judge
+        and "make reproduce" not in makefile.split("judge-check:", 1)[-1][:600]
+    ):
+        problems.append("make judge-check does not run make reproduce")
+    if "make reproduce" not in read(root / "README.md"):
+        problems.append("the README's Evals section does not name make reproduce")
+    if not any((root / "evals" / "fixtures" / "raw").glob("*.json*")):
+        problems.append("no raw model responses committed under evals/fixtures/raw")
+    return problems
+
+
+MUTATION_TARGETS = ("core/gate.py", "core/followups.py", "core/scoring.py", "core/fhir_emit.py")
+
+
+def check_mutation(root: Path) -> list[str]:
+    doc = load_json(root / "results" / "mutation.json")
+    if not isinstance(doc, dict):
+        return ["results/mutation.json is missing or is not JSON"]
+    problems = []
+    modules = doc.get("modules") or {}
+    for target in MUTATION_TARGETS:
+        score = (modules.get(target) or {}).get("score_percent")
+        if not isinstance(score, (int, float)) or score < 85:
+            problems.append(f"{target}: mutation score {score}, under 85")
+    if "results/mutation.json" not in read(root / "README.md"):
+        problems.append("the README's numbers do not cite results/mutation.json")
+    return problems
+
+
+def check_lighthouse_landing(root: Path) -> list[str]:
+    doc = load_json(root / "results" / "lighthouse_landing.json")
+    if not isinstance(doc, dict):
+        return ["results/lighthouse_landing.json is missing or is not JSON"]
+    scores = (doc.get("median") or {}).get("scores") or {}
+    return [
+        f"the landing page: {c} {scores.get(c)}, under 95"
+        for c in ("performance", "accessibility", "best-practices", "seo")
+        if not isinstance(scores.get(c), (int, float)) or scores[c] < 95
+    ]
+
+
+def has_sections(text: str, words: tuple[str, ...]) -> list[str]:
+    heads = " ".join(h.title.lower() for h in headings(text.splitlines()))
+    return [w for w in words if w not in heads]
+
+
+def check_model_card(root: Path) -> list[str]:
+    text = read(root / "docs" / "MODEL_CARD.md")
+    if not text:
+        return ["docs/MODEL_CARD.md does not exist"]
+    problems = [
+        f"MODEL_CARD.md has no section on {w}"
+        for w in has_sections(
+            text, ("may", "may not", "pass table", "benchmark", "failure", "cost", "gate")
+        )
+    ]
+    top = "\n".join(read(root / "README.md").splitlines()[:12])
+    if "docs/MODEL_CARD.md" not in top:
+        problems.append("the README's track statement lines do not link docs/MODEL_CARD.md")
+    return problems
+
+
+ATTACKERS = ("participant", "competitor", "judge", "model")
+
+
+def check_threat_model(root: Path) -> list[str]:
+    text = read(root / "docs" / "THREAT_MODEL.md")
+    if not text:
+        return ["docs/THREAT_MODEL.md does not exist"]
+    problems = [
+        f"THREAT_MODEL.md names no attacker who is a {a}"
+        for a in ATTACKERS
+        if a not in text.lower()
+    ]
+    if "asset" not in text.lower():
+        problems.append("THREAT_MODEL.md lists no assets")
+    tests = set(re.findall(r"`([\w./-]+(?:test|spec)[\w./-]*\.(?:py|ts|mjs))(?:::\w+)?`", text))
+    if len(tests) < 5:
+        problems.append(f"THREAT_MODEL.md names {len(tests)} tests, fewer than 5")
+    problems += [
+        f"THREAT_MODEL.md names {t}, which does not exist"
+        for t in sorted(tests)
+        if not (root / t).is_file()
+    ]
+    return problems
+
+
+def pdf_pages(path: Path) -> int:
+    return len(re.findall(rb"/Type\s*/Page(?!s)", path.read_bytes()))
+
+
+def check_report_pdf(root: Path) -> list[str]:
+    path = root / "docs" / "REPORT.pdf"
+    if not path.is_file():
+        return ["docs/REPORT.pdf does not exist"]
+    problems = []
+    pages = pdf_pages(path)
+    if not 4 <= pages <= 10:
+        problems.append(f"docs/REPORT.pdf has {pages} pages, not about six")
+    if "report-pdf:" not in read(root / "Makefile"):
+        problems.append("no make report-pdf target builds it with pandoc")
+    for rel in ("README.md", "docs/devpost.md"):
+        if "REPORT.pdf" not in read(root / rel):
+            problems.append(f"{rel} does not link docs/REPORT.pdf")
+    return problems
+
+
+def check_data_card(root: Path) -> list[str]:
+    text = read(root / "docs" / "DATA_CARD.md")
+    if not text:
+        return ["docs/DATA_CARD.md does not exist"]
+    return [
+        f"DATA_CARD.md has no section on {w}"
+        for w in has_sections(text, ("source", "licence", "label"))
+    ]
+
+
+def check_second_labeller(root: Path) -> list[str]:
+    labels = sorted((root / "photos").glob("labels_*.csv"))
+    if len(labels) < 2:
+        return [f"{len(labels)} label files in photos/, not 2"]
+    if not isinstance(load_json(root / "results" / "kappa.json"), dict):
+        return ["results/kappa.json is missing: no Cohen's kappa per feature"]
+    return []
+
+
+def check_inaturalist(root: Path) -> list[str]:
+    problems = []
+    locale = read(root / "content" / "locales" / "en.json")
+    if "no recent sightings on record" not in locale.lower():
+        problems.append("no 'no recent sightings on record' line for when iNaturalist is down")
+    if "inaturalist" not in read(root / "docs" / "THIRD_PARTY.md").lower():
+        problems.append("docs/THIRD_PARTY.md does not attribute iNaturalist")
+    if not (root / "scripts" / "cache_inaturalist.py").is_file():
+        problems.append("no scripts/cache_inaturalist.py daily job")
+    if not any("inaturalist" in p.name.lower() for p in (root / "docs" / "adr").glob("*.md")):
+        problems.append("no ADR on iNaturalist in docs/adr")
+    readme = read(root / "README.md")
+    if "iNaturalist" not in readme:
+        problems.append("the README's OneAquaHealth surfaces table does not name iNaturalist")
+    web = " ".join(read(p) for p in (root / "apps" / "web" / "components").glob("*.tsx"))
+    if "inat" not in web.lower():
+        problems.append("no component shows the iNaturalist context line")
+    if (
+        "inaturalist"
+        not in (read(root / "apps" / "web" / "app" / "credits" / "page.tsx") + locale).lower()
+    ):
+        problems.append("the credits page does not credit iNaturalist")
+    return problems
+
+
+UPDATE_29_FILES = (
+    "docs/MODEL_CARD.md",
+    "docs/THREAT_MODEL.md",
+    "docs/internal/PANEL_STUDY.md",
+    "docs/DATA_CARD.md",
+)
+
+
+def check_rerun_after_29(root: Path) -> list[str]:
+    problems = []
+    folder = root.joinpath(*REVIEWS)
+    picks = []
+    for prefix, count in (("REVIEW", 1), ("JUDGE_SIM", 1), ("CRITIC", 2)):
+        found = numbered(folder, prefix)
+        if len(found) < count:
+            problems.append(f"no {prefix} file to hold to UPDATE_29")
+        picks += [p for _, p in found[-count:]]
+    for path in picks:
+        m = re.search(r"\bcommit:?\s+`?([0-9a-f]{7,40})\b", read(path), re.I)
+        if not m:
+            problems.append(f"{path.name} names no commit")
+            continue
+        for rel in UPDATE_29_FILES:
+            proc = subprocess.run(
+                ["git", "cat-file", "-e", f"{m.group(1)}:{rel}"], cwd=root, capture_output=True
+            )
+            if proc.returncode != 0:
+                problems.append(f"{path.name} read {m.group(1)}, which has no {rel}")
+                break
+    return problems
+
+
 CHECKS: dict[str, Check] = {
     "screens": check_screens,
     "gif": check_gif,
@@ -1386,6 +1660,20 @@ CHECKS: dict[str, Check] = {
     "devpost-submitted": check_devpost_submitted,
     "panel-prep": check_panel_prep,
     "panel-analysis": check_panel_analysis,
+    "human-row": check_human_row,
+    "contributed-back": check_contributed_back,
+    "ots": check_ots,
+    "verify-page": check_verify_page,
+    "reproduce": check_reproduce_wired,
+    "mutation": check_mutation,
+    "lighthouse-landing": check_lighthouse_landing,
+    "model-card": check_model_card,
+    "threat-model": check_threat_model,
+    "report-pdf": check_report_pdf,
+    "data-card": check_data_card,
+    "second-labeller": check_second_labeller,
+    "inaturalist": check_inaturalist,
+    "rerun-after-update": check_rerun_after_29,
 }
 
 

@@ -197,7 +197,10 @@ a row names something the code no longer reads, or when a default below differs 
 | `NEXT_EXPORT` | not set | `apps/web/next.config.ts` | `1` builds the static export for Pages; `npm run export` sets it |
 | `NODE_ENV` | set by Next | `apps/web/next.config.ts`, `apps/web/components/SwRegister.tsx` | development relaxes the policy and skips the service worker |
 | `CI` | set by GitHub Actions | `apps/web/playwright.config.ts` | one retry for a Playwright test in CI |
-| `SITE_URL` | none, must be set | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs` | the deployed site the phone checks drive |
+| `SITE_URL` | none, must be set (the live site for `make panel-status`) | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs`, `scripts/panel_status.py` | the deployed site the phone checks drive, and the one whose counts `make panel-status` reads |
+| `GALLERY_LIVE_URL` | `https://second-look-79t.pages.dev` | `apps/web/scripts/gallery.mjs` | the live site `make screens` photographs, reading only |
+| `GALLERY_LOCAL_URL` | `http://127.0.0.1:3217` | `apps/web/scripts/gallery.mjs` | the local build with the mock API for the test flow's screens |
+| `GALLERY_RAW` | `apps/web/screens/gallery` | `apps/web/scripts/gallery.mjs` | where the raw captures go before `scripts/make_gallery.py` frames them |
 | `API_URL` | the Worker's own address, or the site | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs` | where the phone checks read the counts |
 | `WALK_ID` | empty | `apps/web/scripts/live-readonly.mjs` | one walk to check by id |
 | `REQUIRE_THEIRS` | not set | `apps/web/scripts/live-readonly.mjs` | `1` fails the read only check when their record is missing |

@@ -34,7 +34,9 @@ The tidy park on the left hides a concrete channel. The messy bend on the right 
 
 **[Take the two-minute test](https://second-look-79t.pages.dev/t?src=other)** | **[Judges start here](https://second-look-79t.pages.dev/judges)** | **[Walk a creek from your desk](https://second-look-79t.pages.dev/walk)**
 
-<!-- GIF -->
+<p align="center"><img src="docs/screens/two-minute-test.gif" width="300" alt="The two-minute test on a phone, from the consent screen through the four lessons and the sixteen photos to the score screen."></p>
+
+The two-minute test from consent to the score screen: <!--v:results/screens.json#/gif/frames-->32<!--/v--> frames over <!--v:results/screens.json#/gif/seconds-->32.8<!--/v--> seconds. It was made from a local build with the mock API, so it added no session anywhere, and no frame shows a chosen answer on a test photo.
 
 How this answers the organizers' five headers: *The problem* and *Innovation and practical value* are under Why trust a volunteer, and the AI?; *How the solution aligns with OneAquaHealth* under How OneAquaHealth is used; *Effective use of data, technology, AI, APIs and standards* under Architecture and Evals; *A clear demonstration of what was built* under For judges. The Devpost text keeps the five headers as they are.
 
@@ -66,9 +68,61 @@ No recruited study. The two-minute test stays live as the volunteer's own calibr
 
 ## Gallery
 
-| The question | The test | Your score | What the creek needs |
-|---|---|---|---|
-| ![Landing page with two creek photos](docs/screens/01-landing.png) | ![A test item with Yes, No and Can't tell](docs/screens/05-test-item.png) | ![Four gauges, one per feature](docs/screens/06-end-score.png) | ![The city view listing OneAquaHealth measures](docs/screens/10-city-needs.png) |
+<!--v:results/screens.json#/screen_count-->26<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->20<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->6<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and `results/screens.json` lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
+
+<table>
+<tr>
+<td align="center"><img src="docs/screens/landing.webp" width="200" alt="The first screen: the question Which creek is healthier? above two creek photos."><br>Landing<br><code>/</code></td>
+<td align="center"><img src="docs/screens/landing-guess.webp" width="200" alt="The same screen after a tap on the left photo: the guess is kept on the phone until the person agrees to take part."><br>The guess<br><code>/</code></td>
+<td align="center"><img src="docs/screens/consent.webp" width="200" alt="The consent screen: what the test is, what is stored, and two boxes to tick."><br>Consent<br><code>/t</code> (mock)</td>
+<td align="center"><img src="docs/screens/lesson-card.webp" width="200" alt="A lesson card on built banks: a concrete channel with two numbered marks, and what each mark points at."><br>A lesson card with its marks<br><code>/t</code> (mock)</td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screens/test-item.webp" width="200" alt="A test item: one creek photo, the question, and the buttons Yes, No and Can't tell."><br>A test item<br><code>/t</code> (mock)</td>
+<td align="center"><img src="docs/screens/score.webp" width="200" alt="The score screen: the total and a score for each of the four features."><br>The score<br><code>/t</code> (mock)</td>
+<td align="center"><img src="docs/screens/judge-mode.webp" width="200" alt="Judge mode today: it opens on Sep 28, when the data locks."><br>Judge mode today<br><code>/demo</code></td>
+<td align="center"><img src="docs/screens/judges.webp" width="200" alt="The page for judges: every part of Second Look, in order."><br>For judges<br><code>/judges</code></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screens/walks.webp" width="200" alt="Check a creek from your desk: one short clip of a creek for each country."><br>Walks<br><code>/walk</code></td>
+<td align="center"><img src="docs/screens/walk.webp" width="200" alt="A walk: the clip of a creek, with its credit, and a button to start the check."><br>A walk<br><code>/walk/v02</code></td>
+<td align="center"><img src="docs/screens/walk-in-progress.webp" width="200" alt="A walk in progress: a question about the creek in the clip, with a progress count."><br>A walk in progress<br><code>/walk/v02</code></td>
+<td align="center"><img src="docs/screens/walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it: a demo creek built from the record on this phone."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
+<td align="center"><img src="docs/screens/check-start.webp" width="200" alt="The creek check: what it asks and a button to start."><br>Creek check<br><code>/check</code></td>
+<td align="center"><img src="docs/screens/check-location.webp" width="200" alt="The creek check asks where you are: use the phone's location or drop a pin."><br>Where are you?<br><code>/check</code></td>
+<td align="center"><img src="docs/screens/check-question.webp" width="200" alt="The first question of the creek check, with the answers as big buttons."><br>First question<br><code>/check</code></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screens/quick.webp" width="200" alt="The quick check: water colour, smell and the pipe, in three taps."><br>Quick check<br><code>/quick</code></td>
+<td align="center"><img src="docs/screens/spot-record.webp" width="200" alt="A sample creek record: what the volunteer saw, and the observer score that goes with it."><br>A sample record<br><code>/spot?id=example</code> (mock)</td>
+<td align="center"><img src="docs/screens/spot-fhir.webp" width="200" alt="The same record opened with View as FHIR: the Observation the record is stored as."><br>View as FHIR<br><code>/spot?id=example</code> (mock)</td>
+<td align="center"><img src="docs/screens/city.webp" width="200" alt="The city view of Strawberry Creek: what volunteers found there and what OneAquaHealth says to do."><br>City view<br><code>/city?creek=strawberry-creek</code></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screens/two.webp" width="200" alt="Two kinds of observer: a volunteer record in the same viewer built for a laboratory result."><br>Two kinds of observer<br><code>/two</code></td>
+<td align="center"><img src="docs/screens/how-we-know.webp" width="200" alt="How we know: where each rule and each number comes from."><br>How we know<br><code>/how-we-know</code></td>
+<td align="center"><img src="docs/screens/credits.webp" width="200" alt="Credits: every photo and clip with its author and licence."><br>Credits<br><code>/credits</code></td>
+<td align="center"><img src="docs/screens/privacy.webp" width="200" alt="Privacy: what is stored and what is not."><br>Privacy<br><code>/privacy</code></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screens/about.webp" width="200" alt="About: what Second Look is and who made it."><br>About<br><code>/about</code></td>
+<td align="center"><img src="docs/screens/poster.webp" width="200" alt="The poster to print and put up by a creek, with its QR code."><br>Poster<br><code>/poster</code></td>
+</tr>
+</table>
+
+Two lesson photos with their marks, as a person sees them on the lesson cards:
+
+<p>
+<img src="docs/lessons/lesson-built-bank-marks.webp" width="360" alt="A lesson photo on built banks, with its numbered marks, what each one points at, and the photo credit.">
+<img src="docs/lessons/lesson-pipe-marks.webp" width="360" alt="A lesson photo on pipes and drain outlets, with its numbered marks, what each one points at, and the photo credit.">
+</p>
+
+Photos: Laurie Avocado, CC BY 2.0, and Jonathan Hutchins, CC BY-SA 2.0, both from Wikimedia Commons.
+
+For the licence section: the screenshots, the GIF and the social preview show photos by other people under their own licences (CC BY and CC BY-SA, credited on /credits and in photos/manifest.csv). The social preview and the pipe lesson photo are shared under CC BY-SA 4.0 because their photos are CC BY-SA.
 
 ## Why trust a volunteer, and the AI?
 
@@ -452,7 +506,7 @@ make demo-offline
 
 ## For judges
 
-A 45 second path: [the test](https://second-look-79t.pages.dev/t?src=other), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record](https://second-look-79t.pages.dev/spot?id=example), [what the city sees](https://second-look-79t.pages.dev/city?creek=strawberry-creek), [lab and volunteer side by side](https://second-look-79t.pages.dev/two). Every door is on [/judges](https://second-look-79t.pages.dev/judges).
+A 45 second path: [the test](https://second-look-79t.pages.dev/t?src=other), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02), [what the city sees](https://second-look-79t.pages.dev/city?creek=strawberry-creek), [lab and volunteer side by side](https://second-look-79t.pages.dev/two). Every door is on [/judges](https://second-look-79t.pages.dev/judges).
 
 See *Quickstart* above for `make judge-check`, the one command that needs no key and no network.
 
@@ -487,7 +541,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 | What code asked next | The follow-up selector chose the questions from the answers, the weather and the person's score. No model call is in that path. | `core/followups.py`, `core/tests/test_followups.py` |
 | What validated | The whole Bundle, against OneAquaHealth's guide at b907cf0 with terminology on. | `results/fhir_validation.json`, `make fhir-validate` |
 | What went to their sandbox | Every resource by conditional create, tagged as ours, with a ledger of ids, and a Library entry that points back here. | `fhir/sandbox_ledger.jsonl`, `docs/notes/sandbox_library.md`, `curl -H "Accept: application/fhir+json" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466` |
-| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. | `/city?creek=strawberry-creek`, `docs/screens/10-city-needs.png` |
+| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. | `/city?creek=strawberry-creek`, `docs/screens/city.webp` |
 
 You can run the same loop from your desk on a creek in another country: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
 

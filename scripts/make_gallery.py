@@ -6,7 +6,7 @@ site (read only pages) or a local build with the mock API (the test flow and the
 
 Out:
 - docs/screens/<name>.webp: every screen in the same drawn device frame, each under 400 KB.
-- docs/screens/lesson-photo-<name>.webp: two lesson photos with their marks, cropped from the lesson
+- docs/lessons/lesson-<name>-marks.webp: two lesson photos with their marks, cropped from the lesson
   card, with the photo's author and licence printed under it.
 - docs/screens/two-minute-test.gif: consent to the score screen, under 3 MB, in the same frame.
 - docs/social-preview.png: 1280 by 640, under 1 MB, the two warm-up photos and the site's own font.
@@ -35,6 +35,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "apps" / "web" / "screens" / "gallery"
 # Where the outputs go, relative to the repository.
 SCREENS = Path("docs/screens")
+# The two lesson photos are crops from a lesson card, not screens, so they live apart from them.
+LESSONS = Path("docs/lessons")
 SOCIAL = Path("docs/social-preview.png")
 RESULTS = Path("results/screens.json")
 MANIFEST = Path("photos/manifest.csv")
@@ -331,7 +333,8 @@ def build(raw: Path, out_root: Path = ROOT) -> dict[str, Any]:
         with Image.open(raw / lesson["file"]) as im:
             sheet = lesson_sheet(im, credit_for(photo))
         data, quality = webp_under(sheet, SCREEN_MAX_BYTES, lesson["name"])
-        path = SCREENS / f"{lesson['name']}.webp"
+        LESSONS.mkdir(parents=True, exist_ok=True)
+        path = LESSONS / f"{lesson['name']}.webp"
         outputs[path] = data
         feature = str(lesson.get("feature_name") or lesson["feature"]).lower()
         rows.append(

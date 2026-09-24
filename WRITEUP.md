@@ -25,9 +25,9 @@ the answers, the weather, the person's score and the flags, and asks two questio
 id or model text.
 
 On the footage run, the gate dropped
-<!--v:results/footage_latest.json#/gate/dropped-->30<!--/v--> of
-<!--v:results/footage_latest.json#/gate/candidates-->63<!--/v--> candidate flags, every one for a feature
-that model had not passed, and kept <!--v:results/footage_latest.json#/gate/kept-->33<!--/v-->.
+<!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of
+<!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags, every one for a feature
+that model had not passed, and kept <!--v:results/footage_latest.json#/gate/kept-->35<!--/v-->.
 
 **Proof.** `core/tests/test_gate.py::test_fuzz_model_output_never_reaches_answers_or_labels`,
 `core/tests/test_gate.py::test_build_record_signature_carries_human_inputs_only`,

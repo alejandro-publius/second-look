@@ -330,7 +330,7 @@ def test_register_library_lists_the_ledgers_provenances_and_saves_the_evidence(
     assert lines[-1] == "library: create Library/900, read back 200, 1 records"
     text = evidence.read_text()
     assert "Library: `Library/900` (create)" in text
-    assert "docs/screens/sandbox-library.png" in text
+    assert "docs/notes/sandbox-library.png" in text
     assert '"resourceType": "Library"' in text
 
 

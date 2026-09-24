@@ -87,7 +87,7 @@ in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid 
 - **Update 13** (2026-09-21). Fourteen sentences are approved in `content/approved_sentences.yaml`
   with the approver, the date and the source quotes; `/city` shows what the creek needs from
   OneAquaHealth's own measures and the health card shows one action each for the person, the pet
-  and the city (`docs/screens/10-city-needs.png`, `11-spot-health-card.png`). The source of the
+  and the city (`docs/screens/city.webp`, `11-spot-health-card.png`). The source of the
   city actions is named on `/city` and in the README. The proposal mentions the `morophology`
   spelling. Hosting is Cloudflare only: `fly.toml` is gone and `scripts/deploy.sh` deploys the
   Worker and the Pages site from `main` in the merge order. The planning notes live in
@@ -133,7 +133,7 @@ in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid 
   `fhir/sandbox_ledger.jsonl`. Our Library entry under their LibraryOah profile is `Library/466`
   there: it names the repository, the read only endpoint, the golden visit and `Provenance/465`.
   `docs/notes/sandbox_library.md` holds what the sandbox returned plus the by tag searches, and
-  `docs/screens/sandbox-library.png` is the screenshot. `scripts/repush_sandbox.py` gained
+  `docs/notes/sandbox-library.png` is the screenshot. `scripts/repush_sandbox.py` gained
   `--bundle`, `--library` and `--evidence`, and mirrors visit Bundles only: a referral, an example
   or a transaction file is refused by name and skipped in a folder.
 - **The MCP server** (`apps/mcp/`, Update 10 tier 2 item 2). Read only, local over stdio,
