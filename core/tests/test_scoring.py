@@ -83,6 +83,14 @@ def test_unknown_feature_in_key_is_an_error():
         score_sitting({}, bad, DAY)
 
 
+def test_the_error_names_the_item_to_fix_in_the_key():
+    """Found by make mutation: the message must say which of the 16 items is wrong."""
+    bad = [*ITEMS[:3], {"id": "t04", "feature": "sky_colour", "gold": "absent"}]
+    with pytest.raises(ValueError) as caught:
+        score_sitting({}, bad, DAY)
+    assert str(caught.value) == "test item t04 has unknown feature 'sky_colour'"
+
+
 def test_total_follows_the_key_not_a_constant():
     scores = {s.feature: s for s in score_sitting({}, ITEMS[:2], DAY)}
     assert scores["artificial_bank"].total == 2
