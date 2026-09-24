@@ -1,9 +1,10 @@
 {
- "measured_utc": "2026-09-23T04:45:24Z",
- "commit": "5474757",
+ "measured_utc": "2026-09-24T11:37:55Z",
+ "commit": "198af9b",
  "setup": {
   "uv sync": 0,
-  "worker npm ci": 0
+  "worker npm ci": 0,
+  "web npm ci": 0
  },
  "runs": [
   {
@@ -11,31 +12,34 @@
    "suites": {
     "pytest": {
      "code": 0,
-     "seconds": 117.6,
+     "seconds": 193.7,
      "counts": {
-      "passed": 1022,
+      "passed": 1993,
       "skipped": 2,
-      "xfail": 11
+      "xfail": 9
      }
     },
     "worker golden": {
      "code": 0,
-     "seconds": 0.2,
+     "seconds": 0.3,
      "counts": {
-      "passed": 9
+      "passed": 15
      }
     },
     "worker e2e": {
      "code": 0,
-     "seconds": 9.0,
+     "seconds": 15.6,
      "counts": {
       "passed": 1
      }
     },
     "web e2e": {
-     "code": null,
-     "seconds": 0,
-     "counts": {}
+     "code": 0,
+     "seconds": 53.2,
+     "counts": {
+      "passed": 92,
+      "skipped": 2
+     }
     }
    }
   },
@@ -44,31 +48,34 @@
    "suites": {
     "pytest": {
      "code": 0,
-     "seconds": 81.7,
+     "seconds": 152.3,
      "counts": {
-      "passed": 1022,
+      "passed": 1993,
       "skipped": 2,
-      "xfail": 11
+      "xfail": 9
      }
     },
     "worker golden": {
      "code": 0,
      "seconds": 0.2,
      "counts": {
-      "passed": 9
+      "passed": 15
      }
     },
     "worker e2e": {
      "code": 0,
-     "seconds": 8.5,
+     "seconds": 13.2,
      "counts": {
       "passed": 1
      }
     },
     "web e2e": {
-     "code": null,
-     "seconds": 0,
-     "counts": {}
+     "code": 0,
+     "seconds": 48.2,
+     "counts": {
+      "passed": 92,
+      "skipped": 2
+     }
     }
    }
   },
@@ -77,31 +84,34 @@
    "suites": {
     "pytest": {
      "code": 0,
-     "seconds": 79.8,
+     "seconds": 148.7,
      "counts": {
-      "passed": 1022,
+      "passed": 1993,
       "skipped": 2,
-      "xfail": 11
+      "xfail": 9
      }
     },
     "worker golden": {
      "code": 0,
-     "seconds": 0.3,
+     "seconds": 0.2,
      "counts": {
-      "passed": 9
+      "passed": 15
      }
     },
     "worker e2e": {
      "code": 0,
-     "seconds": 9.7,
+     "seconds": 13.0,
      "counts": {
       "passed": 1
      }
     },
     "web e2e": {
-     "code": null,
-     "seconds": 0,
-     "counts": {}
+     "code": 0,
+     "seconds": 47.4,
+     "counts": {
+      "passed": 92,
+      "skipped": 2
+     }
     }
    }
   }
