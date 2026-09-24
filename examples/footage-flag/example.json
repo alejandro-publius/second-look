@@ -1,0 +1,209 @@
+{
+  "what": "One frame of the paid footage run where core/gate.py kept a model's flag, and one where it dropped one, with the question the kept flag makes eligible",
+  "written_by": "evals/footage_example.py",
+  "live_site": "On the live site the checker is off today (CHECKER_ENABLED), so no volunteer has seen a checker question. This is the paid footage run's record, not something a volunteer saw.",
+  "run": {
+    "results": "results/footage_20260924T060539Z.json",
+    "generated_at_utc": "2026-09-24T06:05:39+00:00",
+    "raw_answers": "evals/fixtures/raw/footage_20260924T060539Z.jsonl",
+    "raw_answers_kept": "every answer as the run kept it (after forcing), and every call with its pass",
+    "pass_table": "results/model_pass_table.json",
+    "pass_table_generated_at_utc": "2026-09-24T05:47:56+00:00"
+  },
+  "pick_rule": "Every yes answer in the run is a candidate flag. The candidates are put in order by frame id, then model id, feature and run. The kept case is the first candidate the gate kept, and the dropped case is the first candidate the gate dropped.",
+  "gate_over_the_run": {
+    "candidates": 64,
+    "kept": 35,
+    "dropped": 29
+  },
+  "kept": {
+    "frame": "v02-00127",
+    "manifest_row": {
+      "id": "v02-00127",
+      "file": "benchmark/v02-00127.jpg",
+      "source_url": "https://www.youtube.com/watch?v=vN5ArGGmdUY",
+      "author": "Красота Приморского края и не только",
+      "license": "CC-BY-3.0",
+      "coarse_location": "Russia",
+      "gold_label": ""
+    },
+    "model": "claude-haiku-4-5-20251001",
+    "feature": "dug_out_channel",
+    "run": 0,
+    "question_asked": "Has this channel been straightened or dug out?",
+    "raw_line": {
+      "file": "evals/fixtures/raw/footage_20260924T060539Z.jsonl",
+      "line_number": 55,
+      "text": "{\"answer\": \"yes\", \"feature\": \"dug_out_channel\", \"frame\": \"v02-00127\", \"malformed\": false, \"model\": \"claude-haiku-4-5-20251001\", \"note\": \"Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering.\", \"run\": 0}"
+    },
+    "candidate_flag": {
+      "feature": "dug_out_channel",
+      "confidence": 1.0,
+      "note": "Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering."
+    },
+    "gate": {
+      "kept": true,
+      "flags": [
+        {
+          "feature": "dug_out_channel",
+          "confidence": 1.0,
+          "note": "Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering.",
+          "region": null
+        }
+      ],
+      "drop_reasons": []
+    },
+    "pass_table_cell": {
+      "passed": true,
+      "runs": 3,
+      "runs_with_every_photo_right": 2,
+      "photos_per_run": 4,
+      "pass_rule": "all 4 items of a feature right in at least 2 of 3 runs (docs/analysis_plan.md item 8)"
+    },
+    "followup": {
+      "called_with": "core.followups.select_followups, called the way apps/api/check.py calls it, with the flags shown here, no answers, no test score, rain unknown, the rules in content/followups.yaml, the form in content/form.yaml and the checker switched on",
+      "eligible": [
+        {
+          "rule_id": "checker_flag",
+          "kind": "look_again",
+          "question_key": "followup.checker_flag",
+          "params": {
+            "note": "Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering.",
+            "feature": "dug_out_channel"
+          }
+        }
+      ],
+      "with_the_checker_off": [],
+      "on_screen": {
+        "question": "The checker noticed something that may be a channel that was deepened or straightened. Want to look again?",
+        "label": "the checker noticed",
+        "note": "Stream shows straightened channel with cleared, uniform banks on right side, indicating human modification rather than natural meandering.",
+        "buttons": [
+          "I looked again",
+          "Skip"
+        ]
+      }
+    },
+    "same_frame_and_feature": [
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "passed_this_feature": true,
+        "answers_by_run": [
+          "yes",
+          "cant_tell",
+          "yes"
+        ]
+      },
+      {
+        "model": "claude-sonnet-5",
+        "passed_this_feature": true,
+        "answers_by_run": [
+          "no",
+          "no",
+          "no"
+        ]
+      },
+      {
+        "model": "claude-opus-5-5",
+        "passed_this_feature": true,
+        "answers_by_run": [
+          "no",
+          "no",
+          "no"
+        ]
+      },
+      {
+        "model": "claude-fable-5-1",
+        "passed_this_feature": false,
+        "answers_by_run": [
+          "no",
+          "no",
+          "no"
+        ]
+      }
+    ]
+  },
+  "dropped": {
+    "frame": "v02-00143",
+    "manifest_row": {
+      "id": "v02-00143",
+      "file": "benchmark/v02-00143.jpg",
+      "source_url": "https://www.youtube.com/watch?v=vN5ArGGmdUY",
+      "author": "Красота Приморского края и не только",
+      "license": "CC-BY-3.0",
+      "coarse_location": "Russia",
+      "gold_label": ""
+    },
+    "model": "claude-haiku-4-5-20251001",
+    "feature": "pipe_running",
+    "run": 0,
+    "question_asked": "Can you see a pipe or drain outlet that empties into this creek?",
+    "raw_line": {
+      "file": "evals/fixtures/raw/footage_20260924T060539Z.jsonl",
+      "line_number": 61,
+      "text": "{\"answer\": \"yes\", \"feature\": \"pipe_running\", \"frame\": \"v02-00143\", \"malformed\": false, \"model\": \"claude-haiku-4-5-20251001\", \"note\": \"A dark pipe or drain outlet is visible on the right side of the stream, appearing to empty into the water.\", \"run\": 0}"
+    },
+    "candidate_flag": {
+      "feature": "pipe_running",
+      "confidence": 1.0,
+      "note": "A dark pipe or drain outlet is visible on the right side of the stream, appearing to empty into the water."
+    },
+    "gate": {
+      "kept": false,
+      "flags": [],
+      "drop_reasons": [
+        "flag 1: feature pipe_running not passed by model claude-haiku-4-5-20251001"
+      ]
+    },
+    "pass_table_cell": {
+      "passed": false,
+      "runs": 3,
+      "runs_with_every_photo_right": 0,
+      "photos_per_run": 4,
+      "pass_rule": "all 4 items of a feature right in at least 2 of 3 runs (docs/analysis_plan.md item 8)"
+    },
+    "followup": {
+      "called_with": "core.followups.select_followups, called the way apps/api/check.py calls it, with the flags shown here, no answers, no test score, rain unknown, the rules in content/followups.yaml, the form in content/form.yaml and the checker switched on",
+      "eligible": [],
+      "with_the_checker_off": []
+    },
+    "same_frame_and_feature": [
+      {
+        "model": "claude-haiku-4-5-20251001",
+        "passed_this_feature": false,
+        "answers_by_run": [
+          "yes",
+          "yes",
+          "yes"
+        ]
+      },
+      {
+        "model": "claude-sonnet-5",
+        "passed_this_feature": false,
+        "answers_by_run": [
+          "no",
+          "no",
+          "no"
+        ]
+      },
+      {
+        "model": "claude-opus-5-5",
+        "passed_this_feature": true,
+        "answers_by_run": [
+          "no",
+          "no",
+          "no"
+        ]
+      },
+      {
+        "model": "claude-fable-5-1",
+        "passed_this_feature": true,
+        "answers_by_run": [
+          "no",
+          "no",
+          "no"
+        ]
+      }
+    ]
+  }
+}
