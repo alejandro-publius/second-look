@@ -40,12 +40,12 @@ Professional surveyors fixed this long ago. In the UK's River Habitat Survey, on
 
 ## How the solution aligns with OneAquaHealth
 
-784 characters
+825 characters
 
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 
 ```text
-OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their score per feature, stored as a dated Practitioner qualification and linked through Provenance to every Observation they make.
+OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their score per feature, stored in the record of their test sitting beside a dated Practitioner qualification, and linked through Provenance to every Observation they make.
 
 The four features are the ones the project lead named. The creek check follows the official Citizen Science App's items in its order. The health card ends in one action each for the person, the pet and the city, and the city actions are OneAquaHealth's own restoration measures from the OneAquaHealth Policy Brief (2026), page 9. Every record validates against their implementation guide at commit b907cf0 with zero errors.
 ```
@@ -83,7 +83,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-832 characters
+923 characters
 
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->

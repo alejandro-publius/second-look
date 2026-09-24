@@ -10,7 +10,7 @@ Our mark: strong. The per-feature score travels with every observation in their 
 | What to look at | Where |
 |---|---|
 | The problem, in the project lead's own words: volunteers miss built banks, dug-out channels and invasive plants | README, The problem |
-| The score travels with every observation, as a Practitioner qualification under their profiles | `fhir/golden/visit-strawberry-creek-1.json`; `/spot` |
+| The score travels with every observation: the test sitting's QuestionnaireResponse holds it, a dated Practitioner qualification names the test, and Provenance links both to every Observation | `fhir/golden/visit-strawberry-creek-1.json`; `/spot` |
 | City actions are OneAquaHealth's own restoration measures, from their Policy Brief (2026), page 9 | `/city?creek=strawberry-creek`; README |
 | One action each for the person, the pet and the city, from approved sentences with sources | `content/approved_sentences.yaml`; the health card on `/spot` |
 

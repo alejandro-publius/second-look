@@ -72,7 +72,7 @@ And one Library under your `LibraryOah` profile, your own FAIR pattern: it names
 
 ## Why that shape
 
-- The score belongs to the person, not to the observation, so it lives on the Practitioner as a dated qualification. A reader who finds any Observation follows `performer` to the Practitioner and sees the qualification and its period. When the period ends the score is expired and the volunteer retakes the test.
+- The score belongs to the person, not to the observation. It lives in the QuestionnaireResponse of the test sitting, and the Practitioner carries a dated qualification for the test. A reader who finds any Observation follows `performer` to the Practitioner and sees the qualification and its period, and follows Provenance to the test sitting and its score. When the period ends the score is expired and the volunteer retakes the test.
 - The raw numbers live in the test sitting QuestionnaireResponse, so nothing is a blended grade or a probability. A city can decide its own threshold.
 - Provenance is the path from an answer to the evidence for it: the visit response (what was asked and answered) and the test sitting (how well this person sees this feature). The software that assembled the record is named as an agent, so a reader knows no model wrote the answers.
 - Your codes wherever they exist: `present`, `absent`, the indicator groups (`morophology`, `hydrology`, `invasiveOrganisms`, `foam`, `LandUse`, `riparianVegetation`) and the vegetation types. Ours only where you have none: the four feature codes, `cant-tell`, and the coded form answers (channel form, flow, habitats, debris, overall rating). Your `preferred` binding on `Observation.code` lets a local code through with an information note, which is exactly right for a follower city.

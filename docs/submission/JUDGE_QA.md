@@ -33,7 +33,7 @@ Because `Observation.performer` has no better fit in R4 and the guide has no pro
 Proof: `docs/ig_proposal.md`, "What we are actually asking, first", item 2.
 
 **7. Where does the score live, and does it expire?**
-On the Practitioner, as a qualification with a period of 90 days from the test date. Every Observation links to it through `performer` and through Provenance.
+The score per feature is in the QuestionnaireResponse of the test sitting. The Practitioner carries a qualification for the test with a period of 90 days from the test date. Every Observation links to the Practitioner through `performer`, and through Provenance to the test sitting.
 Proof: `core/records.py` (`SCORE_VALID_DAYS = 90`), used in `core/fhir_emit.py`; `fhir/golden/visit-strawberry-creek-1.json`.
 
 **8. Did you write anything to their server you should not have?**

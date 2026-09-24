@@ -6,7 +6,7 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 >
 > People walk past concrete banks, dug-out channels, plants that do not belong and pipes. A two-minute photo test measures who does, per feature. The score travels with every observation, in OneAquaHealth's own FHIR profiles.
 >
-> Second Look teaches a volunteer the four kinds of creek damage people usually miss, tests them on 16 real photos, and stores their per-feature score as a dated qualification linked by Provenance to every Observation they later make. A vision model takes the same test and may only ever raise one question, on a feature it passed, after the person has answered. A city analyst reads each answer beside the score of the person who gave it.
+> Second Look teaches a volunteer the four kinds of creek damage people usually miss, tests them on 16 real photos, and stores their per-feature score in the record of their test sitting, with a dated qualification for the test, both linked by Provenance to every Observation they later make. A vision model takes the same test and may only ever raise one question, on a feature it passed, after the person has answered. A city analyst reads each answer beside the score of the person who gave it.
 >
 > **Train. Check. Verify. Record. Act.**
 
@@ -401,7 +401,7 @@ The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_
 
 ## How OneAquaHealth is used
 
-OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored as a dated Practitioner qualification and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in their order. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete.
+OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored in the record of their test sitting beside a dated Practitioner qualification for the test, and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in their order. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete.
 
 | Their surface | What we use it for | Where |
 |---|---|---|
@@ -536,7 +536,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 
 | Step | What happened | Where to check |
 |---|---|---|
-| The person | Took the test first. Their per-feature score is stored as a dated qualification on their Practitioner record, valid for 90 days. | `fhir/golden/visit-strawberry-creek-1.json`, Practitioner |
+| The person | Took the test first. Their per-feature score is in the QuestionnaireResponse of their test sitting; their Practitioner record carries a dated qualification for the test, valid for 90 days. | `fhir/golden/visit-strawberry-creek-1.json`, Practitioner |
 | What they reported | A U shaped channel, a built bank present, a pipe they could not judge, the water height, a plant that does not belong. | the five Observations in the same file |
 | What code asked next | The follow-up selector chose the questions from the answers, the weather and the person's score. No model call is in that path. | `core/followups.py`, `core/tests/test_followups.py` |
 | What validated | The whole Bundle, against OneAquaHealth's guide at b907cf0 with terminology on. | `results/fhir_validation.json`, `make fhir-validate` |
