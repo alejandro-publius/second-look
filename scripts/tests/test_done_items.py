@@ -1217,7 +1217,8 @@ def update29(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     write(root, "content/locales/en.json", json.dumps(locale))
     # panel-prep
     write(root, "apps/web/lib/panel.ts", 'export const PANEL_COMPLETION_CODE = "C1A2B3";\n')
-    write(root, "docs/internal/PANEL_STUDY.md", PANEL_STUDY)
+    # Built from parts, as done_items builds them, so the go-public rewrite leaves them alone.
+    write(root, "/".join(("docs", "internal", "PANEL_STUDY.md")), PANEL_STUDY)
     write(
         root,
         "apps/web/tests/panel.spec.ts",
@@ -1293,7 +1294,7 @@ def update29(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     git(root, "commit", "-q", "-m", "UPDATE_29 files")
     sha = git(root, "rev-parse", "--short", "HEAD")
     for name in ("REVIEW_01", "JUDGE_SIM_01", "CRITIC_01", "CRITIC_02"):
-        write(root, f"docs/internal/reviews/{name}.md", f"# {name}\n\nCommit: {sha}\n")
+        (reviews(root) / f"{name}.md").write_text(f"# {name}\n\nCommit: {sha}\n")
     return root
 
 
