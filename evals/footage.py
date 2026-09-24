@@ -67,6 +67,7 @@ from evals.model_sweep import (
     prepared_images,
     record_from,
     stamp,
+    sync_mode,
     write_json,
 )
 
@@ -324,14 +325,20 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
             purpose="footage",
         )
 
-    # The adversarial pass is paid for like the footage frames, so the cap counts it too.
+    # The adversarial pass is paid for like the footage frames, so the cap counts it too. Direct
+    # calls (EVALS_SYNC=1) cost the full price, so the estimate uses it.
+    batched = not (args.real and sync_mode(env))
     per_model = {
-        m: estimate_cost([m], images, pricing, config.settings, runs=runs)["expected_usd"]
+        m: estimate_cost([m], images, pricing, config.settings, runs=runs, batch=batched)[
+            "expected_usd"
+        ]
         for m in model_ids
     }
     adv_images = adversarial_images()
     adv_per_model = {
-        m: estimate_cost([m], adv_images, pricing, config.settings, runs=runs)["expected_usd"]
+        m: estimate_cost([m], adv_images, pricing, config.settings, runs=runs, batch=batched)[
+            "expected_usd"
+        ]
         for m in model_ids
     }
     # Cheapest first, so a cap that bites stops the dearest model, not the cheapest.

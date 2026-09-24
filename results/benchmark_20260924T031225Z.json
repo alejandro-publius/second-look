@@ -1,0 +1,190 @@
+{
+  "cost_usd": 0.979423,
+  "generated_at_utc": "2026-09-24T03:12:25+00:00",
+  "interval": "Wilson score, 95 percent",
+  "models": {
+    "claude-haiku-4-5-20251001": {
+      "all": {
+        "accuracy": 0.6458,
+        "correct": 31,
+        "n": 48,
+        "wilson_95": [
+          0.5044,
+          0.7657
+        ]
+      },
+      "artificial_bank": {
+        "accuracy": 1.0,
+        "correct": 12,
+        "n": 12,
+        "wilson_95": [
+          0.7575,
+          1.0
+        ]
+      },
+      "cant_tell_share": 0.3542,
+      "dug_out_channel": {
+        "accuracy": 0.8333,
+        "correct": 10,
+        "n": 12,
+        "wilson_95": [
+          0.552,
+          0.953
+        ]
+      },
+      "invasive_plant": {
+        "accuracy": 0.0,
+        "correct": 0,
+        "n": 12,
+        "wilson_95": [
+          0.0,
+          0.2425
+        ]
+      },
+      "malformed": 0,
+      "pipe_running": {
+        "accuracy": 0.75,
+        "correct": 9,
+        "n": 12,
+        "wilson_95": [
+          0.4677,
+          0.9111
+        ]
+      }
+    },
+    "claude-opus-5": {
+      "all": {
+        "accuracy": 0.6875,
+        "correct": 33,
+        "n": 48,
+        "wilson_95": [
+          0.5467,
+          0.8005
+        ]
+      },
+      "artificial_bank": {
+        "accuracy": 0.9167,
+        "correct": 11,
+        "n": 12,
+        "wilson_95": [
+          0.6461,
+          0.9851
+        ]
+      },
+      "cant_tell_share": 0.2083,
+      "dug_out_channel": {
+        "accuracy": 0.75,
+        "correct": 9,
+        "n": 12,
+        "wilson_95": [
+          0.4677,
+          0.9111
+        ]
+      },
+      "invasive_plant": {
+        "accuracy": 0.25,
+        "correct": 3,
+        "n": 12,
+        "wilson_95": [
+          0.0889,
+          0.5323
+        ]
+      },
+      "malformed": 1,
+      "pipe_running": {
+        "accuracy": 0.8333,
+        "correct": 10,
+        "n": 12,
+        "wilson_95": [
+          0.552,
+          0.953
+        ]
+      }
+    },
+    "claude-sonnet-5": {
+      "all": {
+        "accuracy": 0.75,
+        "correct": 36,
+        "n": 48,
+        "wilson_95": [
+          0.6122,
+          0.8508
+        ]
+      },
+      "artificial_bank": {
+        "accuracy": 1.0,
+        "correct": 12,
+        "n": 12,
+        "wilson_95": [
+          0.7575,
+          1.0
+        ]
+      },
+      "cant_tell_share": 0.1875,
+      "dug_out_channel": {
+        "accuracy": 1.0,
+        "correct": 12,
+        "n": 12,
+        "wilson_95": [
+          0.7575,
+          1.0
+        ]
+      },
+      "invasive_plant": {
+        "accuracy": 0.25,
+        "correct": 3,
+        "n": 12,
+        "wilson_95": [
+          0.0889,
+          0.5323
+        ]
+      },
+      "malformed": 0,
+      "pipe_running": {
+        "accuracy": 0.75,
+        "correct": 9,
+        "n": 12,
+        "wilson_95": [
+          0.4677,
+          0.9111
+        ]
+      }
+    }
+  },
+  "pool": {
+    "by_feature": {
+      "artificial_bank": 4,
+      "dug_out_channel": 4,
+      "invasive_plant": 4,
+      "pipe_running": 4
+    },
+    "n_photos": 16,
+    "n_placeholders": 0,
+    "photo_ids": [
+      "ph-bank-01",
+      "ph-bank-02",
+      "ph-bank-03",
+      "ph-bank-04",
+      "ph-channel-01",
+      "ph-channel-02",
+      "ph-channel-03",
+      "ph-channel-04",
+      "ph-plant-01",
+      "ph-plant-02",
+      "ph-plant-03",
+      "ph-plant-04",
+      "ph-pipe-01",
+      "ph-pipe-02",
+      "ph-pipe-03",
+      "ph-pipe-04"
+    ],
+    "skipped_unlabelled": 0,
+    "unlabelled_video_frames_left_to_evals_footage": 46
+  },
+  "real": true,
+  "runs": 3,
+  "script": "evals/benchmark.py",
+  "seed": null,
+  "small_set_note": "16 photos is a small set. Read the intervals, not the point estimates.",
+  "synthetic": false
+}

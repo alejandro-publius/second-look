@@ -57,7 +57,9 @@ prompt:
       properties:
         answer:
           type: string
-          enum: [yes, no, cant_tell]
+          # Quoted: unquoted yes and no are booleans in YAML, and the API was once sent
+          # [true, false, "cant_tell"] as the answers allowed (2026-09-23).
+          enum: ["yes", "no", "cant_tell"]
         note:
           type: string
           maxLength: 160
