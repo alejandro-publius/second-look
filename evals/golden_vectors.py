@@ -28,6 +28,7 @@ from core import act, followups, healthcard, labels, regions, walks
 from core.content_loader import load_content
 from core.fhir_emit import check_bundle, emit_visit, fhir_id
 from core.fhir_referral import example_lab_result, referral_bundle
+from core.gate import Flag
 from core.records import (
     FEATURES,
     CheckResult,
@@ -138,10 +139,22 @@ def visit(
 
 def followup_vectors(table: dict[str, Any], form_items: list[dict[str, Any]]) -> dict[str, Any]:
     def run(
-        name: str, answers: dict[str, Any], site: followups.SiteContext, obs: Observer | None
+        name: str,
+        answers: dict[str, Any],
+        site: followups.SiteContext,
+        obs: Observer | None,
+        flags: tuple[Flag, ...] = (),
+        *,
+        checker_enabled: bool = False,
     ) -> dict[str, Any]:
         chosen = followups.select_followups(
-            answers, site, obs, [], table, form_items=form_items, checker_enabled=False
+            answers,
+            site,
+            obs,
+            flags,
+            table,
+            form_items=form_items,
+            checker_enabled=checker_enabled,
         )
         return case(
             name,
@@ -149,7 +162,8 @@ def followup_vectors(table: dict[str, Any], form_items: list[dict[str, Any]]) ->
                 "answers": answers,
                 "site": dump(site),
                 "observer": dump(obs),
-                "checker_enabled": False,
+                "flags": dump(list(flags)),
+                "checker_enabled": checker_enabled,
             },
             chosen,
         )
@@ -167,6 +181,11 @@ def followup_vectors(table: dict[str, Any], form_items: list[dict[str, Any]]) ->
     }
     weak = observer("weaktoken2345678", 2, 4, 1, 2)
     strong = observer("strongtoken23456", 4, 4, 4, 4)
+    # CRITIC_06 H02: the check asks about built banks, pipes and plants, and has no item for a
+    # dug-out channel, so a flag on the dug-out channel makes nothing eligible.
+    bank = Flag(feature="artificial_bank", confidence=0.6, note="a stone wall along the left bank")
+    plant = Flag(feature="invasive_plant", confidence=0.8, note="a stand of tall reed")
+    dug = Flag(feature="dug_out_channel", confidence=1.0, note="a straight dug channel")
     return {
         "function": "core.followups.select_followups",
         "cases": [
@@ -210,6 +229,62 @@ def followup_vectors(table: dict[str, Any], form_items: list[dict[str, Any]]) ->
                 {"bank_type": "present", "invasive_species": "present"},
                 wet,
                 weak,
+            ),
+            run(
+                "a flag on built banks asks one look again question",
+                {},
+                unknown,
+                None,
+                (bank,),
+                checker_enabled=True,
+            ),
+            run(
+                "a flag on a dug-out channel asks nothing: the check has no item for it",
+                {},
+                unknown,
+                None,
+                (dug,),
+                checker_enabled=True,
+            ),
+            run(
+                "the surest flag on a feature the check asks about, past a surer dug-out one",
+                {},
+                unknown,
+                None,
+                (dug, bank, plant),
+                checker_enabled=True,
+            ),
+            run(
+                "equal confidence keeps the first flag, as max does",
+                {},
+                unknown,
+                None,
+                (bank, plant.model_copy(update={"confidence": 0.6})),
+                checker_enabled=True,
+            ),
+            run(
+                "with the checker off a flag asks nothing",
+                {},
+                unknown,
+                None,
+                (bank,),
+                checker_enabled=False,
+            ),
+            run(
+                "the checker question takes the second slot, after the dry pipe",
+                {"draining_pipes": "present", "bank_type": "absent"},
+                dry,
+                weak,
+                (dug, plant),
+                checker_enabled=True,
+            ),
+            run(
+                "a dug-out flag leaves the slot to the low score photo",
+                {"bank_type": "absent", "overall_rating": "moderate"},
+                wet,
+                weak,
+                (dug,),
+                checker_enabled=True,
             ),
         ],
     }

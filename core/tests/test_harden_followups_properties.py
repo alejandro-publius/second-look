@@ -39,6 +39,10 @@ KIND_OF_RULE = {
     "low_score": "photo",
 }
 FORM_IDS = [item["id"] for item in FORM_ITEMS]
+# The features the creek check has a question for: a checker flag on any other asks nothing.
+ASKED: frozenset[str] = frozenset(
+    item["feature"] for item in FORM_ITEMS if item.get("feature") in FEATURES
+)
 TESTED_ON = date(2026, 9, 21)
 WET = SiteContext(rain="wet", dry_days=0, mm_in_window=12.0)
 BIG_CAP = 10
@@ -167,6 +171,9 @@ stray_flags = st.builds(
     feature=st.sampled_from(["not_a_feature", "", "Artificial_Bank", "dug out channel"]),
     confidence=st.floats(0, 1),
     note=notes,
+)
+asked_flags = st.builds(
+    Flag, feature=st.sampled_from(sorted(ASKED)), confidence=st.floats(0, 1), note=notes
 )
 any_flag = gate_flags | stray_flags
 flag_lists: st.SearchStrategy[list[Flag]] = st.one_of(
@@ -380,10 +387,12 @@ def test_flag_order_changes_nothing_unless_the_surest_flags_tie(
     reordered = run(answers, site, obs, shuffled, enabled=enabled)
     assert rule_ids(original) == rule_ids(reordered)
     assert not_checker(original) == not_checker(reordered)
-    if not flags:
+    usable = [f for f in flags if f.feature in ASKED]
+    if not usable:
+        assert "checker_flag" not in rule_ids(original) + rule_ids(reordered)
         return
-    top = max(f.confidence for f in flags)
-    surest = {(f.note, f.feature) for f in flags if f.confidence == top}
+    top = max(f.confidence for f in usable)
+    surest = {(f.note, f.feature) for f in usable if f.confidence == top}
     for chosen in (original, reordered):
         for question in chosen:
             if question.rule_id == "checker_flag":
@@ -462,7 +471,8 @@ def test_with_the_checker_ranked_last_adding_flags_never_removes_a_question(
     answers=answer_sets,
     site=sites,
     obs=observers,
-    first=st.lists(any_flag, min_size=1, max_size=4),
+    asked=asked_flags,
+    rest=st.lists(any_flag, max_size=3),
     more=flag_lists,
     cap=caps,
 )
@@ -470,10 +480,13 @@ def test_once_there_is_a_flag_more_flags_can_only_change_the_checker_note(
     answers: Answers,
     site: SiteContext,
     obs: Observer | None,
-    first: list[Flag],
+    asked: Flag,
+    rest: list[Flag],
     more: list[Flag],
     cap: int,
 ) -> None:
+    # "A flag" here is one on a feature the check asks about; any other makes nothing eligible.
+    first = [*rest, asked]
     table = with_cap(cap)
     some = run(answers, site, obs, first, table=table, enabled=True)
     many = run(answers, site, obs, first + more, table=table, enabled=True)
@@ -553,12 +566,33 @@ def test_the_selector_and_what_it_imports_load_no_network_or_model_library() -> 
         assert not roots & forbidden, module
 
 
-def test_a_flag_for_a_feature_with_no_form_item_still_asks_one_question_at_most() -> None:
+def test_a_flag_for_a_feature_with_no_form_item_asks_nothing() -> None:
+    """CRITIC_06 H02: the check has no item for a dug-out channel, so the person was never asked
+    about it and a look-again question could change nothing; the flag makes nothing eligible."""
     dug: FeatureId = "dug_out_channel"
+    assert dug not in ASKED
     flags = [
         Flag(feature=dug, confidence=0.7, note="a straight dug channel"),
         stray_flag("not_a_feature", 0.9, "something odd"),
     ] * 5
-    chosen = run({"draining_pipes": "present"}, WET, every_feature(0), flags, enabled=True)
-    assert rule_ids(chosen) == ["checker_flag"]
-    assert chosen[0].params["note"] in {f.note for f in flags}
+    cases: list[Answers] = [{"draining_pipes": "present"}, {"bank_type": "absent"}]
+    for answers in cases:
+        chosen = run(answers, WET, every_feature(0), flags, enabled=True)
+        assert "checker_flag" not in rule_ids(chosen)
+        assert chosen == run(answers, WET, every_feature(0), [], enabled=True)
+
+
+@SETTINGS
+@given(answers=answer_sets, site=sites, obs=observers, flags=flag_lists, cap=caps)
+def test_the_checker_question_is_only_ever_about_a_feature_the_check_asks_about(
+    answers: Answers, site: SiteContext, obs: Observer | None, flags: list[Flag], cap: int
+) -> None:
+    chosen = run(answers, site, obs, flags, table=with_cap(cap), enabled=True)
+    for question in chosen:
+        if question.rule_id == "checker_flag":
+            assert question.params["feature"] in ASKED
+    unasked = [f for f in flags if f.feature not in ASKED]
+    table = with_cap(cap)
+    assert run(answers, site, obs, unasked, table=table, enabled=True) == run(
+        answers, site, obs, [], table=table, enabled=True
+    )

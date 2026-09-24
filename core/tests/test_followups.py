@@ -162,6 +162,34 @@ def test_checker_flag_is_at_most_one_and_takes_the_surest_flag() -> None:
     assert chosen[0].params["note"] == "a stand of tall reed"
 
 
+def test_a_flag_on_a_feature_the_check_does_not_ask_about_makes_nothing_eligible() -> None:
+    """CRITIC_06 H02: content/form.yaml has no item for a dug-out channel, so a person who taps
+    "I looked again" could record nothing. The checker's question comes only for a feature the
+    creek check asks about."""
+    asked = {item["feature"] for item in FORM_ITEMS if item.get("feature")}
+    assert "dug_out_channel" not in asked and "artificial_bank" in asked
+    dug = Flag(feature="dug_out_channel", confidence=1.0, note="a straight dug channel")
+    assert run({}, WET, flags=(dug,), checker_enabled=True) == []
+    assert run({"draining_pipes": "present"}, DRY, flags=(dug,), checker_enabled=True) == run(
+        {"draining_pipes": "present"}, DRY
+    )
+    # A surer flag on a feature the check does not ask about never hides one on a feature it does.
+    chosen = run({}, WET, flags=(dug, FLAG), checker_enabled=True)
+    assert chosen == [
+        Followup(
+            rule_id="checker_flag",
+            kind="look_again",
+            question_key="followup.checker_flag",
+            params={"note": FLAG.note, "feature": "artificial_bank"},
+        )
+    ]
+    # The rule reads the form: give it an item for the dug-out channel and the same flag asks.
+    items = [*FORM_ITEMS, {"id": "channel_dug", "feature": "dug_out_channel", "type": "single"}]
+    chosen = run({}, WET, flags=(dug,), checker_enabled=True, form_items=items)
+    assert rule_ids(chosen) == ["checker_flag"]
+    assert chosen[0].params == {"note": dug.note, "feature": "dug_out_channel"}
+
+
 def test_checker_flag_uses_one_of_the_two_slots() -> None:
     chosen = run(
         {"draining_pipes": "present", "bank_type": "absent"},
@@ -304,5 +332,7 @@ def test_flags_only_ever_add_the_checker_question(
     assert len(checker) <= 1
     if checker:
         assert enabled and flags
+        asked = {item["feature"] for item in FORM_ITEMS if item.get("feature")}
+        assert checker[0].params["feature"] in asked
     rest = [c for c in with_flags if c.rule_id != "checker_flag"]
     assert rest == without[: len(rest)]

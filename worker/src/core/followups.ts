@@ -1,7 +1,8 @@
 // core/followups.py: follow-up questions chosen by code and never by a model (hard rule 3). A pure
-// function of the human's answers, the site context, the observer's scores and the priority
-// table. Two questions at most. The checker is not wired on the Worker, so flags are always
-// empty and checker_flag never fires; the rule is kept so the priority order is the same.
+// function of the human's answers, the site context, the observer's scores, the gate's flags and
+// the priority table. Two questions at most. The checker is not wired on the Worker, so it passes
+// no flags and checker_flag never fires there; the rule is ported whole so the golden vectors
+// hold it to the Python, including that a flag on a feature the form has no item for asks nothing.
 
 import CONTENT from "./core_content.json";
 import { scoreFor, type AnswerValue, type FormItem, type Observer } from "./types";
@@ -29,6 +30,14 @@ export interface Followup {
   kind: FollowupKind;
   question_key: string;
   params: Record<string, string | number>;
+}
+
+/** A Flag from core/gate.py, as the gate returns it. Only the gate makes one. */
+export interface Flag {
+  feature: string;
+  confidence: number;
+  note: string;
+  region?: [number, number, number, number] | null;
 }
 
 type Answers = Record<string, AnswerValue>;
@@ -84,6 +93,34 @@ function ratingCheck(rule: Rule, answers: Answers, formItems: FormItem[]): Follo
   };
 }
 
+/** The features the creek check asks about: each one that a form item names. */
+function askedFeatures(formItems: FormItem[]): Set<string> {
+  const asked = new Set<string>();
+  for (const item of formItems) if (typeof item.feature === "string" && FEATURES.includes(item.feature)) asked.add(item.feature);
+  return asked;
+}
+
+function checkerFlag(rule: Rule, flags: Flag[], checkerEnabled: boolean, formItems: FormItem[]): Followup | null {
+  if (!checkerEnabled) return null;
+  // A flag on a feature the check has no question for (the dug-out channel today) makes nothing
+  // eligible: the person was never asked about it, so there is nothing to look at again
+  // (CRITIC_06 H02).
+  const asked = askedFeatures(formItems);
+  let chosen: Flag | null = null;
+  for (const flag of flags) {
+    if (!asked.has(flag.feature)) continue;
+    // Python's max() keeps the first of equal confidences, so only a surer flag replaces it.
+    if (chosen === null || flag.confidence > chosen.confidence) chosen = flag;
+  }
+  if (chosen === null) return null;
+  return {
+    rule_id: "checker_flag",
+    kind: "look_again",
+    question_key: String(rule.question_key ?? "followup.checker_flag"),
+    params: { note: chosen.note, feature: chosen.feature },
+  };
+}
+
 function lowScore(rule: Rule, answers: Answers, observer: Observer | null, formItems: FormItem[]): Followup | null {
   if (observer === null) return null;
   let best: [number, number, string, string] | null = null;
@@ -132,7 +169,7 @@ export function selectFollowups(
   answers: Answers,
   site: SiteContext,
   observer: Observer | null,
-  flags: unknown[],
+  flags: Flag[],
   table: Record<string, unknown>,
   formItems: FormItem[],
   checkerEnabled = false,
@@ -151,8 +188,8 @@ export function selectFollowups(
         followup = ratingCheck(rule, answers, formItems);
         break;
       case "checker_flag":
-        // A Flag can only make this question eligible, and the Worker has no flags.
-        followup = checkerEnabled && flags.length > 0 ? null : null;
+        // A Flag can only make this question eligible. The Worker passes none today.
+        followup = checkerFlag(rule, flags, checkerEnabled, formItems);
         break;
       case "low_score":
         followup = lowScore(rule, answers, observer, formItems);
