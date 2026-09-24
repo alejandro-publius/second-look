@@ -275,8 +275,8 @@ def test_an_image_in_the_wrong_format_fails(gallery: Path) -> None:
 
 def test_a_lesson_photo_over_400_kb_fails(gallery: Path) -> None:
     noise = Image.effect_noise((780, 1033), 120).convert("RGB")
-    replace_image(gallery, "lesson-photo-pipe", noise, "WEBP", quality=100)
-    assert (gallery / "docs/screens/lesson-photo-pipe.webp").stat().st_size > 400_000
+    replace_image(gallery, "lesson-pipe-marks", noise, "WEBP", quality=100)
+    assert (gallery / "docs/lessons/lesson-pipe-marks.webp").stat().st_size > 400_000
     assert says(check(gallery), "over the lesson_photo limit of 400000")
 
 
@@ -290,7 +290,7 @@ def test_the_gif_and_the_preview_are_held_to_the_blind_rule(gallery: Path) -> No
 
 def test_a_synthetic_photo_fails(gallery: Path) -> None:
     manifest = gallery / "photos" / "manifest.csv"
-    photo = row_named(doc_of(gallery), "lesson-photo-pipe")["photos"][0]
+    photo = row_named(doc_of(gallery), "lesson-pipe-marks")["photos"][0]
     with manifest.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         fields = list(reader.fieldnames or [])
