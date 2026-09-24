@@ -93,6 +93,8 @@ SAFE_MAKE = {
     "reproduce",
     "panel-status",
     "done-check",
+    "mutation",
+    "report-pdf",
 }
 # The setup a judge types first. Each only installs into the clone, or installs the pre-commit tool.
 SETUP_PART = (
