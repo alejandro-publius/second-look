@@ -52,8 +52,13 @@ const watchdog = setTimeout(() => {
 }, 10 * 60_000);
 watchdog.unref();
 let step = "start";
+// The steps that only set up the database and start wrangler dev are not sections: the count
+// printed at the end is the route sections, the same number scripts/count_tests.py writes.
+const SETUP_STEPS = new Set(["apply schema and arms", "start wrangler dev"]);
+let sections = 0;
 const at = (name) => {
   step = name;
+  if (!SETUP_STEPS.has(name)) sections += 1;
   console.log(`worker e2e: ${name}`);
 };
 
@@ -337,7 +342,7 @@ try {
   assert.equal((await api("POST", "/api/check/finalize", { draft_id: "visit-nowhere", followup_answers: {}, final_rating: "good" })).status, 404);
   assert.equal((await api("POST", "/api/check/draft", { contributor_token: "unknowntoken123", spot: GLADE, answers: {}, first_rating: null, photo_ids: [] })).status, 404);
 
-  console.log("worker e2e: 9 sections passed against wrangler dev on port", PORT);
+  console.log(`worker e2e: ${sections} sections passed against wrangler dev on port`, PORT);
 } finally {
   if (rain) rain.close();
   if (dev) {

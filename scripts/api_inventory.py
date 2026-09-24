@@ -10,6 +10,11 @@ Python routes come from apps/api/*.py, read with ast: every @router.<method>("..
 The limits are the RateLimiter(...) constants in apps/api/security.py. MCP tools are the
 functions under @server.tool(...) in apps/mcp/server.py, with their parameters.
 
+The reader fails closed. A Worker route written in any other form (path.startsWith, a switch, a
+match on .pathname, or routing in another file under worker/src) and a Python route added by
+add_api_route, api_route, mount or an include_router prefix stop it with an error, rather than
+leave a route that answers with no row in docs/API.md.
+
 scripts/tests/test_api_docs.py compares the same reading with the tables in docs/API.md and
 docs/MCP.md, so a route or a tool added without a row fails the tests. The file this writes
 holds the counts and limits the docs quote through claim markers (hard rule 12).
@@ -32,12 +37,21 @@ WORKER_INDEX = ROOT / "worker" / "src" / "index.ts"
 API_DIR = ROOT / "apps" / "api"
 SECURITY = API_DIR / "security.py"
 MCP_SERVER = ROOT / "apps" / "mcp" / "server.py"
-HTTP_METHODS = ("get", "post", "put", "patch", "delete")
+HTTP_METHODS = ("get", "post", "put", "patch", "delete", "head", "options", "trace")
 ANY = "any"
 
 LITERAL_RE = re.compile(r'path === "([^"]+)"(?:\s*&&\s*request\.method === "([A-Z]+)")?')
 PATTERN_RE = re.compile(r"const (\w+) = /\^(.+?)\$/\.exec\(path\);")
 PARAM_GROUP = "([^/]+)"
+# The one line that makes the request path. Every other use of `path` or `.pathname` must be a
+# LITERAL_RE or PATTERN_RE match, or the reader stops: a route written as path.startsWith(...),
+# a switch, or a match on url.pathname would otherwise be answered and never listed.
+PATH_DECLARATION = "const path = url.pathname;"
+PATH_USE_RE = re.compile(r"\bpath\b|\.pathname\b")
+# FastAPI calls that add routes in a way the decorator reader below does not see.
+ROUTE_CALLS = frozenset(
+    {"add_api_route", "api_route", "add_route", "mount", "websocket", "add_api_websocket_route"}
+)
 
 
 class InventoryError(RuntimeError):
@@ -66,8 +80,40 @@ def _pattern_to_path(pattern: str) -> str:
     return path
 
 
+def unread_path_uses(text: str) -> list[str]:
+    """Lines that use the request path in a form worker_routes does not read.
+
+    Whole comment lines are skipped. Anything else that names `path` or `.pathname` outside the
+    one declaration, a `path === "..."` test or a `/^...$/.exec(path)` pattern is returned.
+    """
+    covered: set[int] = set()
+    for rx in (LITERAL_RE, PATTERN_RE):
+        for m in rx.finditer(text):
+            covered.update(range(m.start(), m.end()))
+    start = text.find(PATH_DECLARATION)
+    if start != -1:
+        covered.update(range(start, start + len(PATH_DECLARATION)))
+    unread: list[str] = []
+    for m in PATH_USE_RE.finditer(text):
+        if m.start() in covered:
+            continue
+        line_start = text.rfind("\n", 0, m.start()) + 1
+        line_end = text.find("\n", m.start())
+        line = text[line_start : line_end if line_end != -1 else len(text)].strip()
+        if line.startswith(("//", "*", "/*")):
+            continue
+        unread.append(line)
+    return unread
+
+
 def worker_routes(text: str) -> list[Route]:
     """Every route worker/src/index.ts answers, with the method it checks or "any"."""
+    unread = unread_path_uses(text)
+    if unread:
+        raise InventoryError(
+            "worker/src/index.ts uses the request path in a way this reader does not read, so a "
+            f"route could go unlisted: {unread[0]}"
+        )
     routes: set[Route] = set()
     for m in LITERAL_RE.finditer(text):
         routes.add(Route(m.group(1), m.group(2) or ANY, source="worker/src/index.ts"))
@@ -126,11 +172,38 @@ def _prefixes(tree: ast.Module) -> dict[str, str]:
     return out
 
 
+def _unread_route_calls(tree: ast.Module, name: str) -> list[str]:
+    """Calls that add a route, or a prefix, where the decorator reader cannot see it."""
+    found: list[str] = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)):
+            continue
+        attr = node.func.attr
+        if attr in ROUTE_CALLS:
+            found.append(f"{name}:{node.lineno}: .{attr}(...)")
+        elif attr == "include_router" and any(kw.arg == "prefix" for kw in node.keywords):
+            found.append(f"{name}:{node.lineno}: include_router(..., prefix=...)")
+    return found
+
+
+def _api_modules(api_dir: Path) -> list[Path]:
+    """Every Python file of the API, in subfolders too, but not its tests or migrations."""
+    skip = {"tests", "migrations", "__pycache__"}
+    return sorted(
+        p for p in api_dir.rglob("*.py") if not skip & set(p.relative_to(api_dir).parts[:-1])
+    )
+
+
 def python_routes(api_dir: Path = API_DIR) -> list[Route]:
     """Every route the FastAPI app in apps/api defines, with its rate limiter."""
     routes: list[Route] = []
-    for path in sorted(api_dir.glob("*.py")):
+    for path in _api_modules(api_dir):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        unread = _unread_route_calls(tree, path.name)
+        if unread:
+            raise InventoryError(
+                f"a route this reader does not read, so it could go unlisted: {unread[0]}"
+            )
         prefixes = _prefixes(tree)
         for node in ast.walk(tree):
             if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
@@ -225,7 +298,23 @@ def mcp_tools(server: Path = MCP_SERVER) -> list[dict[str, Any]]:
     return sorted(tools, key=lambda t: str(t["name"]))
 
 
+def worker_routing_elsewhere(src_dir: Path | None = None) -> list[str]:
+    """Worker files other than index.ts that read a URL's path, which would mean they route."""
+    src_dir = src_dir or WORKER_INDEX.parent
+    return sorted(
+        p.relative_to(src_dir).as_posix()
+        for p in src_dir.rglob("*.ts")
+        if p.name != WORKER_INDEX.name or p.parent != src_dir
+        if re.search(r"\.pathname\b", p.read_text(encoding="utf-8"))
+    )
+
+
 def inventory() -> dict[str, Any]:
+    elsewhere = worker_routing_elsewhere()
+    if elsewhere:
+        raise InventoryError(
+            f"worker/src/{elsewhere[0]} reads a request path; routes live in worker/src/index.ts"
+        )
     worker = worker_routes(WORKER_INDEX.read_text(encoding="utf-8"))
     python = python_routes()
     tools = mcp_tools()

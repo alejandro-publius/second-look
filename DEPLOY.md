@@ -20,7 +20,7 @@ record of why the hosting looks like this is `docs/notes/hosting.md`; the decisi
 | Command | What runs | Network | Data |
 |---|---|---|---|
 | `make dev` | the Python API on port 8000 with reload, and the site in dev mode on http://localhost:3100 | the creek check asks Open-Meteo about rain, and `/two` asks their sandbox; both fail closed when offline | `data/local.db` and `data/fhir_store`, empty at first |
-| `make demo-offline` | the same two servers on the same ports, after `scripts/seed_demo.py` fills `data/demo` | none: the seed refuses every socket to another machine and fails if one was tried; the servers get a proxy that goes nowhere | three made up creek checks on Strawberry Creek by two people who passed, one pipe worth testing, two test sittings that never count |
+| `make demo-offline` | the same two servers on the same ports, after `scripts/seed_demo.py` fills `data/demo` | none: the seed refuses every socket to another machine and fails if one was tried; the servers get a proxy that goes nowhere | three made up creek checks on Strawberry Creek, two of them by people who passed the test and one with no score; one pipe worth testing; two test sittings that never count |
 | `docker compose up` | Postgres, the API and the web server, as in `docker-compose.yml` | as `make dev` | a Postgres volume |
 
 `make demo-offline` needs no key: `ANTHROPIC_API_KEY` is removed before the seed and set empty for
@@ -129,8 +129,9 @@ Names only. No value is in the repository: `.env.example` is tracked and `.env` 
 | `CLOUDFLARE_D1_READ_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets, not yet set | let `.github/workflows/backup.yml` export D1; the workflow runs by hand only until they exist |
 | `wrangler login` (not a variable) | wrangler's own store on the Mac | deploys, the D1 backup and the daily cache job |
 
-A secret shorter than 16 characters, or left at the placeholder in `.env.example`, is treated as
-not set by both servers (`apps/api/settings.py`, `sameSecret` in `worker/src/index.ts`).
+Both servers treat a secret shorter than 16 characters as not set (`apps/api/settings.py`,
+`sameSecret` in `worker/src/index.ts`). The Python API also refuses the placeholder in
+`.env.example`; the Worker does not check for it, so never set a Worker secret to that value.
 
 ## Jobs on the Mac
 
@@ -161,7 +162,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `API_ORIGIN` | `http://localhost:8000` | `apps/api/settings.py`, `scripts/smoke.py` | where the API is, for the compose smoke test |
 | `RAINFALL_DRY_MM` | `2.5` | `apps/api/settings.py` | rain in the window, in millimetres, at or under which it counts as dry |
 | `RAINFALL_WINDOW_HOURS` | `72` | `apps/api/settings.py` | how far back the rain lookup looks |
-| `CHECKER_ENABLED` | `false` | `apps/api/settings.py` | lets the vision checker raise its one question; off unless set |
+| `CHECKER_ENABLED` | `false` | `apps/api/settings.py` | passed to the follow-up selector; the Python API passes it no flags, so even `true` asks no model question today |
 | `SANDBOX_BASE_URL` | `https://sandbox.hl7europe.eu/oneaquahealth/fhir` | `apps/api/settings.py`, `apps/api/fhir_routes.py`, `scripts/repush_sandbox.py` | their shared FHIR sandbox |
 | `SANDBOX_MIRROR_ENABLED` | `false` | `apps/api/settings.py`, `scripts/repush_sandbox.py` | the mirror writes nothing unless this is `true` |
 | `REPO_URL` | `https://github.com/alejandro-publius/second-look` | `apps/api/settings.py`, `scripts/repush_sandbox.py`, `scripts/sandbox_write_test.sh` | named in the user agent and our identifiers |
@@ -193,7 +194,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `NEXT_PUBLIC_SITE_URL` | `https://second-look.example` | `apps/web/lib/session.ts`, `scripts/submit_check.py` | the site's own address, for share links |
 | `NEXT_PUBLIC_BUILD_HASH` | `dev` | `apps/web/lib/session.ts` | the commit, sent with each sitting |
 | `NEXT_PUBLIC_QA_KEY` | empty | `apps/web/lib/api.ts` | set only on a dry-run build, so every sitting it starts is a test; the launch build leaves it empty |
-| `NEXT_PUBLIC_PLAN_TAG` | a line saying the plan is not tagged yet | `apps/web/app/how-we-know/page.tsx` | the tag the "how we know" page names |
+| `NEXT_PUBLIC_PLAN_TAG` | `prereg-v1 (not yet tagged)` | `apps/web/app/how-we-know/page.tsx` | the tag the "how we know" page names |
 | `NEXT_EXPORT` | not set | `apps/web/next.config.ts` | `1` builds the static export for Pages; `npm run export` sets it |
 | `NODE_ENV` | set by Next | `apps/web/next.config.ts`, `apps/web/components/SwRegister.tsx` | development relaxes the policy and skips the service worker |
 | `CI` | set by GitHub Actions | `apps/web/playwright.config.ts` | one retry for a Playwright test in CI |
@@ -201,7 +202,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `GALLERY_LIVE_URL` | `https://second-look-79t.pages.dev` | `apps/web/scripts/gallery.mjs` | the live site `make screens` photographs, reading only |
 | `GALLERY_LOCAL_URL` | `http://127.0.0.1:3217` | `apps/web/scripts/gallery.mjs` | the local build with the mock API for the test flow's screens |
 | `GALLERY_RAW` | `apps/web/screens/gallery` | `apps/web/scripts/gallery.mjs` | where the raw captures go before `scripts/make_gallery.py` frames them |
-| `API_URL` | the Worker's own address, or the site | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs` | where the phone checks read the counts |
+| `API_URL` | `https://second-look-api.thealexschroeder.workers.dev` in live-check; the site itself in live-readonly | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs` | where the phone checks read the counts |
 | `WALK_ID` | empty | `apps/web/scripts/live-readonly.mjs` | one walk to check by id |
 | `REQUIRE_THEIRS` | not set | `apps/web/scripts/live-readonly.mjs` | `1` fails the read only check when their record is missing |
 | `DEPLOYED_URL`, `DEPLOYED_API` | empty, so the spec skips | `apps/web/tests/deployed-smoke.spec.ts` | point the deployed smoke spec at a site |

@@ -26,7 +26,9 @@ The model's note reaches a person only labelled "the checker noticed", cut to a 
 - The model has no path to the store. Fuzz tests throw arbitrary output at the gate and check that
   nothing reaches an answer or a label.
 - Any change to the gate ships with a test in the same commit.
-- The checker is off unless `CHECKER_ENABLED` is set, and even then it speaks only on features in
-  the pass table (`docs/adr/0004-pass-table-per-feature.md`).
+- Neither server calls the checker on a creek check today: both pass the follow-up selector no
+  flags, whatever `CHECKER_ENABLED` says. The model's flags reach people only in the video walks,
+  where `scripts/build_walks.py` sends them through the same gate at build time, and only on
+  features in the pass table (`docs/adr/0004-pass-table-per-feature.md`).
 - A model that is right more often than a person still cannot overrule them. That is the point:
   the record says what the person saw, next to how well they see it.

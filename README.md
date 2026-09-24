@@ -449,9 +449,9 @@ Every number is graded by code and written to `results/`; `scripts/verify_claims
 
 `make check` runs everything below except the browser suite and the Worker end to end, and prints `CHECK GREEN`. The counts are taken by `scripts/count_tests.py` into `results/test_counts.json`.
 
-- **Python:** <!--v:results/test_counts.json#/python/tests-->1604<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
+- **Python:** <!--v:results/test_counts.json#/python/tests-->1698<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
 - **Ports:** <!--v:results/test_counts.json#/worker_golden/cases-->113<!--/v--> golden cases written by the Python reference, which the TypeScript Worker must reproduce exactly, in <!--v:results/test_counts.json#/worker_golden/node_tests-->12<!--/v--> tests (`make worker-check`).
-- **Browser:** <!--v:results/test_counts.json#/playwright/tests-->59<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->15<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
+- **Browser:** <!--v:results/test_counts.json#/playwright/tests-->61<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->16<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
 - **Worker end to end:** <!--v:results/test_counts.json#/worker_e2e/sections-->8<!--/v--> sections that drive the real Worker's routes under `wrangler dev` with a local D1 and KV (`make worker-e2e`, in CI).
 - **Records:** the HL7 validator checks every emitted Bundle, from Python and from the Worker, against OneAquaHealth's guide: <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`make fhir-validate`).
 

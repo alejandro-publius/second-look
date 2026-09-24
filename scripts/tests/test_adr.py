@@ -14,6 +14,16 @@ RECORDS = sorted(ADR.glob("[0-9][0-9][0-9][0-9]-*.md"))
 PARTS = ("## Context", "## Decision", "## Consequences", "- **Date:**", "- **Carried by:**")
 
 
+def commits_named(text: str) -> list[str]:
+    """Every sha after the word commit, also when the line wraps between them."""
+    return re.findall(r"\bcommit\s+([0-9a-f]{7,40})\b", text)
+
+
+def test_the_reader_sees_a_sha_wrapped_onto_the_next_line() -> None:
+    text = "commit 2f61b23 (one) and commit\n  1fcc8ec (two), and a commit message"
+    assert commits_named(text) == ["2f61b23", "1fcc8ec"]
+
+
 def test_the_records_are_numbered_from_0001_with_no_gap() -> None:
     numbers = [int(p.name[:4]) for p in RECORDS]
     assert len(numbers) >= 8
@@ -42,7 +52,7 @@ def test_each_record_has_context_decision_consequences_date_and_carrier(record: 
 @pytest.mark.parametrize("record", RECORDS, ids=lambda p: p.name)
 def test_every_commit_a_record_names_is_in_this_history(record: Path) -> None:
     carried = record.read_text(encoding="utf-8").split("- **Carried by:**", 1)[1].split("\n## ")[0]
-    commits = re.findall(r"commit ([0-9a-f]{7,40})\b", carried)
+    commits = commits_named(carried)
     assert commits, f"{record.name} names no commit"
     for sha in commits:
         done = subprocess.run(
