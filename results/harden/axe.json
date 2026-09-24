@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-23T04:58:26Z",
- "commit": "5474757",
+ "checked_utc": "2026-09-24T09:59:35Z",
+ "commit": "c7455cb",
  "tags": [
   "wcag2a",
   "wcag2aa",
@@ -22,8 +22,7 @@
    "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -98,8 +97,7 @@
    "passes": 32,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -111,7 +109,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 37,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -126,11 +124,10 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 32,
+   "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -158,6 +155,21 @@
    "violations": [],
    "incomplete": [],
    "passes": 34,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/verify",
+   "viewport": "phone",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 44,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -201,8 +213,14 @@
    "status": 200,
    "error": "",
    "violations": [],
-   "incomplete": [],
-   "passes": 32,
+   "incomplete": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 12
+    }
+   ],
+   "passes": 34,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -239,37 +257,69 @@
    ]
   },
   {
-   "target": "depth preview",
-   "base": "https://depth.second-look-79t.pages.dev",
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/accessibility",
+   "viewport": "phone",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 34,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
    "path": "/city?creek=strawberry-creek",
    "viewport": "phone",
    "status": 200,
    "error": "",
-   "violations": [
-    {
-     "id": "page-has-heading-one",
-     "impact": "moderate",
-     "help": "Page should contain a level-one heading",
-     "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/page-has-heading-one?application=playwright",
-     "tags": [
-      "cat.semantics",
-      "best-practice"
-     ],
-     "nodes": 1,
-     "examples": [
-      {
-       "target": "html",
-       "html": "<html lang=\"en\" class=\"hyperlegible_24a72635-module__oD5WOq__variable hyperlegiblemono_d023b146-module__jwjKNq__variable\">",
-       "summary": "Fix all of the following:\n  Page must have a level-one heading"
-      }
-     ]
-    }
-   ],
+   "violations": [],
    "incomplete": [],
-   "passes": 30,
+   "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://depth.second-look-79t.pages.dev"
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/walk",
+   "viewport": "phone",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 35,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/walk/v02",
+   "viewport": "phone",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [
+    {
+     "id": "video-caption",
+     "impact": "critical",
+     "nodes": 1
+    }
+   ],
+   "passes": 37,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -284,8 +334,7 @@
    "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -360,8 +409,7 @@
    "passes": 32,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -373,7 +421,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 37,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -388,11 +436,10 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 32,
+   "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -420,6 +467,21 @@
    "violations": [],
    "incomplete": [],
    "passes": 34,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/verify",
+   "viewport": "phone-dark",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 44,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -463,8 +525,14 @@
    "status": 200,
    "error": "",
    "violations": [],
-   "incomplete": [],
-   "passes": 32,
+   "incomplete": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 12
+    }
+   ],
+   "passes": 34,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -501,37 +569,69 @@
    ]
   },
   {
-   "target": "depth preview",
-   "base": "https://depth.second-look-79t.pages.dev",
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/accessibility",
+   "viewport": "phone-dark",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 34,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
    "path": "/city?creek=strawberry-creek",
    "viewport": "phone-dark",
    "status": 200,
    "error": "",
-   "violations": [
-    {
-     "id": "page-has-heading-one",
-     "impact": "moderate",
-     "help": "Page should contain a level-one heading",
-     "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/page-has-heading-one?application=playwright",
-     "tags": [
-      "cat.semantics",
-      "best-practice"
-     ],
-     "nodes": 1,
-     "examples": [
-      {
-       "target": "html",
-       "html": "<html lang=\"en\" class=\"hyperlegible_24a72635-module__oD5WOq__variable hyperlegiblemono_d023b146-module__jwjKNq__variable\">",
-       "summary": "Fix all of the following:\n  Page must have a level-one heading"
-      }
-     ]
-    }
-   ],
+   "violations": [],
    "incomplete": [],
-   "passes": 30,
+   "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://depth.second-look-79t.pages.dev"
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/walk",
+   "viewport": "phone-dark",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 35,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/walk/v02",
+   "viewport": "phone-dark",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [
+    {
+     "id": "video-caption",
+     "impact": "critical",
+     "nodes": 1
+    }
+   ],
+   "passes": 37,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -546,8 +646,7 @@
    "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -622,8 +721,7 @@
    "passes": 32,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -635,7 +733,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 37,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -650,11 +748,10 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 32,
+   "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://second-look-79t.pages.dev",
-    "https://second-look-api.thealexschroeder.workers.dev"
+    "https://second-look-79t.pages.dev"
    ]
   },
   {
@@ -682,6 +779,21 @@
    "violations": [],
    "incomplete": [],
    "passes": 34,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/verify",
+   "viewport": "desktop",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 44,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -725,8 +837,14 @@
    "status": 200,
    "error": "",
    "violations": [],
-   "incomplete": [],
-   "passes": 32,
+   "incomplete": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 2
+    }
+   ],
+   "passes": 34,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -763,37 +881,69 @@
    ]
   },
   {
-   "target": "depth preview",
-   "base": "https://depth.second-look-79t.pages.dev",
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/accessibility",
+   "viewport": "desktop",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 34,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
    "path": "/city?creek=strawberry-creek",
    "viewport": "desktop",
    "status": 200,
    "error": "",
-   "violations": [
-    {
-     "id": "page-has-heading-one",
-     "impact": "moderate",
-     "help": "Page should contain a level-one heading",
-     "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/page-has-heading-one?application=playwright",
-     "tags": [
-      "cat.semantics",
-      "best-practice"
-     ],
-     "nodes": 1,
-     "examples": [
-      {
-       "target": "html",
-       "html": "<html lang=\"en\" class=\"hyperlegible_24a72635-module__oD5WOq__variable hyperlegiblemono_d023b146-module__jwjKNq__variable\">",
-       "summary": "Fix all of the following:\n  Page must have a level-one heading"
-      }
-     ]
-    }
-   ],
+   "violations": [],
    "incomplete": [],
-   "passes": 30,
+   "passes": 36,
    "blocked_writes": [],
    "origins": [
-    "https://depth.second-look-79t.pages.dev"
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/walk",
+   "viewport": "desktop",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 35,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/walk/v02",
+   "viewport": "desktop",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [
+    {
+     "id": "video-caption",
+     "impact": "critical",
+     "nodes": 1
+    }
+   ],
+   "passes": 37,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
    ]
   }
  ]
