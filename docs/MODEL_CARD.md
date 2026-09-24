@@ -123,8 +123,9 @@ feature (`results/footage_latest.json`, under `adversarial`).
   says to answer can't tell when the photo does not show a stream. The notes show it: several name
   the plant, for example "possibly invasive Himalayan blackberry, but no stream is visible", and
   still answer can't tell. So this result measures our photos and our instruction as much as the
-  models. Both are frozen with the tagged analysis plan, so they stay as they are; changing either
-  would be a deviation.
+  models. The photos and the question wording are frozen with the tagged analysis plan, so
+  changing them would be a deviation. The instruction is not in the plan: it is ours, in
+  `evals/models.yaml`, and changing it would need a new paid run and a new pass table.
 - **Can't tell is common.** Answers per feature in that sweep, all four models together:
 
   | Feature | Answers | Yes | No | Can't tell | Right |
