@@ -491,6 +491,7 @@ REQUIRED_SCREENS = frozenset(
         "demo",
         "warmup",
         "accessibility",
+        "verify",
         "offline",
         "share",
         "judges",

@@ -1,16 +1,16 @@
 {
- "checked_utc": "2026-09-24T09:06:44Z",
- "commit": "7f3dda2",
+ "checked_utc": "2026-09-24T09:25:34Z",
+ "commit": "21f6db0",
  "files": 57,
  "rows": [
   {
    "file": "README.md",
    "line": 1,
-   "kind": "relative",
-   "target": "docs/MODEL_CARD.md",
+   "kind": "url",
+   "target": "https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md",
    "in_code": false,
-   "status": "ok",
-   "detail": "docs/MODEL_CARD.md"
+   "status": "private",
+   "detail": "exists on origin/main; public from Sep 30"
   },
   {
    "file": "README.md",
@@ -158,7 +158,7 @@
   },
   {
    "file": "README.md",
-   "line": 138,
+   "line": 139,
    "kind": "backtick",
    "target": "docs/notes/sources.md",
    "in_code": true,
@@ -167,7 +167,7 @@
   },
   {
    "file": "README.md",
-   "line": 144,
+   "line": 145,
    "kind": "backtick",
    "target": "content/lessons/",
    "in_code": true,
@@ -176,7 +176,7 @@
   },
   {
    "file": "README.md",
-   "line": 144,
+   "line": 145,
    "kind": "backtick",
    "target": "core/scoring.py",
    "in_code": true,
@@ -185,7 +185,7 @@
   },
   {
    "file": "README.md",
-   "line": 144,
+   "line": 145,
    "kind": "backtick",
    "target": "core/tests/test_scoring.py",
    "in_code": true,
@@ -194,7 +194,7 @@
   },
   {
    "file": "README.md",
-   "line": 145,
+   "line": 146,
    "kind": "backtick",
    "target": "content/test_items.yaml",
    "in_code": true,
@@ -203,7 +203,7 @@
   },
   {
    "file": "README.md",
-   "line": 145,
+   "line": 146,
    "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
@@ -212,7 +212,7 @@
   },
   {
    "file": "README.md",
-   "line": 146,
+   "line": 147,
    "kind": "backtick",
    "target": "content/followups.yaml",
    "in_code": true,
@@ -221,7 +221,7 @@
   },
   {
    "file": "README.md",
-   "line": 146,
+   "line": 147,
    "kind": "backtick",
    "target": "core/tests/test_followups.py",
    "in_code": true,
@@ -230,7 +230,7 @@
   },
   {
    "file": "README.md",
-   "line": 147,
+   "line": 148,
    "kind": "backtick",
    "target": "core/rainfall.py",
    "in_code": true,
@@ -239,7 +239,7 @@
   },
   {
    "file": "README.md",
-   "line": 147,
+   "line": 148,
    "kind": "backtick",
    "target": "core/tests/test_rainfall.py",
    "in_code": true,
@@ -248,7 +248,7 @@
   },
   {
    "file": "README.md",
-   "line": 148,
+   "line": 149,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -257,7 +257,7 @@
   },
   {
    "file": "README.md",
-   "line": 148,
+   "line": 149,
    "kind": "backtick",
    "target": "core/tests/test_gate.py",
    "in_code": true,
@@ -266,7 +266,7 @@
   },
   {
    "file": "README.md",
-   "line": 149,
+   "line": 150,
    "kind": "backtick",
    "target": "results/model_pass_table.json",
    "in_code": true,
@@ -275,7 +275,7 @@
   },
   {
    "file": "README.md",
-   "line": 149,
+   "line": 150,
    "kind": "backtick",
    "target": "core/tests/test_checker.py",
    "in_code": true,
@@ -284,7 +284,7 @@
   },
   {
    "file": "README.md",
-   "line": 150,
+   "line": 151,
    "kind": "backtick",
    "target": "core/act.py",
    "in_code": true,
@@ -293,7 +293,7 @@
   },
   {
    "file": "README.md",
-   "line": 150,
+   "line": 151,
    "kind": "backtick",
    "target": "core/tests/test_act.py",
    "in_code": true,
@@ -302,7 +302,7 @@
   },
   {
    "file": "README.md",
-   "line": 151,
+   "line": 152,
    "kind": "backtick",
    "target": "scripts/fhir_validate.py",
    "in_code": true,
@@ -311,7 +311,7 @@
   },
   {
    "file": "README.md",
-   "line": 151,
+   "line": 152,
    "kind": "backtick",
    "target": "worker/test/golden.test.ts",
    "in_code": true,
@@ -320,7 +320,7 @@
   },
   {
    "file": "README.md",
-   "line": 152,
+   "line": 153,
    "kind": "backtick",
    "target": "scripts/verify_audit.py",
    "in_code": true,
@@ -329,7 +329,7 @@
   },
   {
    "file": "README.md",
-   "line": 154,
+   "line": 155,
    "kind": "backtick",
    "target": "docs/analysis_plan.md",
    "in_code": true,
@@ -338,7 +338,7 @@
   },
   {
    "file": "README.md",
-   "line": 154,
+   "line": 155,
    "kind": "backtick",
    "target": "proofs/README.md",
    "in_code": true,
@@ -347,7 +347,7 @@
   },
   {
    "file": "README.md",
-   "line": 155,
+   "line": 156,
    "kind": "backtick",
    "target": "docs/analysis_plan.md",
    "in_code": true,
@@ -356,7 +356,7 @@
   },
   {
    "file": "README.md",
-   "line": 155,
+   "line": 156,
    "kind": "backtick",
    "target": "scripts/verify_claims.py",
    "in_code": true,
@@ -365,7 +365,7 @@
   },
   {
    "file": "README.md",
-   "line": 156,
+   "line": 157,
    "kind": "backtick",
    "target": "core/lock.py",
    "in_code": true,
@@ -374,7 +374,7 @@
   },
   {
    "file": "README.md",
-   "line": 156,
+   "line": 157,
    "kind": "backtick",
    "target": "worker/test/e2e.mjs",
    "in_code": true,
@@ -383,7 +383,7 @@
   },
   {
    "file": "README.md",
-   "line": 157,
+   "line": 158,
    "kind": "backtick",
    "target": "apps/web/lib/offline.ts",
    "in_code": true,
@@ -392,7 +392,7 @@
   },
   {
    "file": "README.md",
-   "line": 157,
+   "line": 158,
    "kind": "backtick",
    "target": "apps/web/tests/",
    "in_code": true,
@@ -401,7 +401,7 @@
   },
   {
    "file": "README.md",
-   "line": 163,
+   "line": 164,
    "kind": "backtick",
    "target": "core/tests/test_gate.py",
    "in_code": true,
@@ -410,7 +410,7 @@
   },
   {
    "file": "README.md",
-   "line": 164,
+   "line": 165,
    "kind": "backtick",
    "target": "core/checker.py",
    "in_code": true,
@@ -419,7 +419,7 @@
   },
   {
    "file": "README.md",
-   "line": 164,
+   "line": 165,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -428,7 +428,7 @@
   },
   {
    "file": "README.md",
-   "line": 166,
+   "line": 167,
    "kind": "backtick",
    "target": "core/tests/test_followups.py",
    "in_code": true,
@@ -437,7 +437,7 @@
   },
   {
    "file": "README.md",
-   "line": 167,
+   "line": 168,
    "kind": "backtick",
    "target": "core/checker.py",
    "in_code": true,
@@ -446,7 +446,7 @@
   },
   {
    "file": "README.md",
-   "line": 167,
+   "line": 168,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -455,7 +455,7 @@
   },
   {
    "file": "README.md",
-   "line": 168,
+   "line": 169,
    "kind": "backtick",
    "target": "content/approved_sentences.yaml",
    "in_code": true,
@@ -464,7 +464,7 @@
   },
   {
    "file": "README.md",
-   "line": 168,
+   "line": 169,
    "kind": "backtick",
    "target": "core/tests/test_labels.py",
    "in_code": true,
@@ -473,30 +473,12 @@
   },
   {
    "file": "README.md",
-   "line": 174,
+   "line": 175,
    "kind": "backtick",
    "target": "content/form.yaml",
    "in_code": true,
    "status": "ok",
    "detail": "content/form.yaml"
-  },
-  {
-   "file": "README.md",
-   "line": 175,
-   "kind": "backtick",
-   "target": "core/checker.py",
-   "in_code": true,
-   "status": "ok",
-   "detail": "core/checker.py"
-  },
-  {
-   "file": "README.md",
-   "line": 175,
-   "kind": "backtick",
-   "target": "results/model_pass_table.json",
-   "in_code": true,
-   "status": "ok",
-   "detail": "results/model_pass_table.json"
   },
   {
    "file": "README.md",
@@ -509,7 +491,25 @@
   },
   {
    "file": "README.md",
+   "line": 176,
+   "kind": "backtick",
+   "target": "results/model_pass_table.json",
+   "in_code": true,
+   "status": "ok",
+   "detail": "results/model_pass_table.json"
+  },
+  {
+   "file": "README.md",
    "line": 177,
+   "kind": "backtick",
+   "target": "core/checker.py",
+   "in_code": true,
+   "status": "ok",
+   "detail": "core/checker.py"
+  },
+  {
+   "file": "README.md",
+   "line": 178,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -518,7 +518,7 @@
   },
   {
    "file": "README.md",
-   "line": 178,
+   "line": 179,
    "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
@@ -527,7 +527,7 @@
   },
   {
    "file": "README.md",
-   "line": 178,
+   "line": 179,
    "kind": "backtick",
    "target": "core/rainfall.py",
    "in_code": true,
@@ -536,7 +536,7 @@
   },
   {
    "file": "README.md",
-   "line": 178,
+   "line": 179,
    "kind": "backtick",
    "target": "content/followups.yaml",
    "in_code": true,
@@ -545,7 +545,7 @@
   },
   {
    "file": "README.md",
-   "line": 179,
+   "line": 180,
    "kind": "backtick",
    "target": "core/checker.py",
    "in_code": true,
@@ -554,7 +554,7 @@
   },
   {
    "file": "README.md",
-   "line": 179,
+   "line": 180,
    "kind": "backtick",
    "target": "apps/web/components/WalkFlow.tsx",
    "in_code": true,
@@ -563,7 +563,7 @@
   },
   {
    "file": "README.md",
-   "line": 180,
+   "line": 181,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -572,7 +572,7 @@
   },
   {
    "file": "README.md",
-   "line": 180,
+   "line": 181,
    "kind": "backtick",
    "target": "core/fhir_emit.py",
    "in_code": true,
@@ -581,7 +581,7 @@
   },
   {
    "file": "README.md",
-   "line": 180,
+   "line": 181,
    "kind": "backtick",
    "target": "scripts/fhir_validate.py",
    "in_code": true,
@@ -590,7 +590,7 @@
   },
   {
    "file": "README.md",
-   "line": 182,
+   "line": 183,
    "kind": "backtick",
    "target": "scripts/build_walks.py",
    "in_code": true,
@@ -599,7 +599,7 @@
   },
   {
    "file": "README.md",
-   "line": 192,
+   "line": 193,
    "kind": "backtick",
    "target": "docs/adr/",
    "in_code": true,
@@ -608,7 +608,7 @@
   },
   {
    "file": "README.md",
-   "line": 196,
+   "line": 197,
    "kind": "backtick",
    "target": "docs/ARCHITECTURE.md",
    "in_code": true,
@@ -617,7 +617,7 @@
   },
   {
    "file": "README.md",
-   "line": 196,
+   "line": 197,
    "kind": "backtick",
    "target": "docs/diagrams/",
    "in_code": true,
@@ -626,7 +626,7 @@
   },
   {
    "file": "README.md",
-   "line": 196,
+   "line": 197,
    "kind": "backtick",
    "target": "tools/diagrams",
    "in_code": true,
@@ -635,7 +635,7 @@
   },
   {
    "file": "README.md",
-   "line": 198,
+   "line": 199,
    "kind": "backtick",
    "target": "worker/src/core/",
    "in_code": true,
@@ -644,7 +644,7 @@
   },
   {
    "file": "README.md",
-   "line": 282,
+   "line": 283,
    "kind": "backtick",
    "target": "fhir/golden/",
    "in_code": true,
@@ -653,7 +653,7 @@
   },
   {
    "file": "README.md",
-   "line": 327,
+   "line": 328,
    "kind": "backtick",
    "target": "core/checker.py",
    "in_code": true,
@@ -662,7 +662,7 @@
   },
   {
    "file": "README.md",
-   "line": 327,
+   "line": 328,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -671,7 +671,7 @@
   },
   {
    "file": "README.md",
-   "line": 327,
+   "line": 328,
    "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
@@ -680,7 +680,7 @@
   },
   {
    "file": "README.md",
-   "line": 327,
+   "line": 328,
    "kind": "backtick",
    "target": "scripts/build_walks.py",
    "in_code": true,
@@ -689,7 +689,7 @@
   },
   {
    "file": "README.md",
-   "line": 368,
+   "line": 369,
    "kind": "backtick",
    "target": "docs/diagrams/system-map.svg",
    "in_code": true,
@@ -698,7 +698,7 @@
   },
   {
    "file": "README.md",
-   "line": 368,
+   "line": 369,
    "kind": "backtick",
    "target": "docs/diagrams/fhir-graph.svg",
    "in_code": true,
@@ -707,7 +707,7 @@
   },
   {
    "file": "README.md",
-   "line": 368,
+   "line": 369,
    "kind": "backtick",
    "target": "docs/diagrams/ai-gate.svg",
    "in_code": true,
@@ -716,7 +716,7 @@
   },
   {
    "file": "README.md",
-   "line": 388,
+   "line": 389,
    "kind": "backtick",
    "target": "apps/api/",
    "in_code": true,
@@ -725,7 +725,7 @@
   },
   {
    "file": "README.md",
-   "line": 388,
+   "line": 389,
    "kind": "backtick",
    "target": "docs/API.md",
    "in_code": true,
@@ -734,7 +734,7 @@
   },
   {
    "file": "README.md",
-   "line": 401,
+   "line": 402,
    "kind": "backtick",
    "target": "apps/mcp/server.py",
    "in_code": true,
@@ -743,7 +743,7 @@
   },
   {
    "file": "README.md",
-   "line": 401,
+   "line": 402,
    "kind": "backtick",
    "target": "docs/MCP.md",
    "in_code": true,
@@ -752,7 +752,7 @@
   },
   {
    "file": "README.md",
-   "line": 401,
+   "line": 402,
    "kind": "backtick",
    "target": "examples/mcp/transcript.md",
    "in_code": true,
@@ -761,7 +761,7 @@
   },
   {
    "file": "README.md",
-   "line": 413,
+   "line": 414,
    "kind": "url",
    "target": "https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf",
    "in_code": false,
@@ -770,30 +770,12 @@
   },
   {
    "file": "README.md",
-   "line": 417,
+   "line": 418,
    "kind": "backtick",
    "target": "content/form.yaml",
    "in_code": true,
    "status": "ok",
    "detail": "content/form.yaml"
-  },
-  {
-   "file": "README.md",
-   "line": 418,
-   "kind": "backtick",
-   "target": "core/fhir_emit.py",
-   "in_code": true,
-   "status": "ok",
-   "detail": "core/fhir_emit.py"
-  },
-  {
-   "file": "README.md",
-   "line": 418,
-   "kind": "backtick",
-   "target": "docs/fhir_mapping.md",
-   "in_code": true,
-   "status": "ok",
-   "detail": "docs/fhir_mapping.md"
   },
   {
    "file": "README.md",
@@ -806,7 +788,25 @@
   },
   {
    "file": "README.md",
+   "line": 419,
+   "kind": "backtick",
+   "target": "docs/fhir_mapping.md",
+   "in_code": true,
+   "status": "ok",
+   "detail": "docs/fhir_mapping.md"
+  },
+  {
+   "file": "README.md",
    "line": 420,
+   "kind": "backtick",
+   "target": "core/fhir_emit.py",
+   "in_code": true,
+   "status": "ok",
+   "detail": "core/fhir_emit.py"
+  },
+  {
+   "file": "README.md",
+   "line": 421,
    "kind": "backtick",
    "target": "fhir/fsh/",
    "in_code": true,
@@ -815,7 +815,7 @@
   },
   {
    "file": "README.md",
-   "line": 421,
+   "line": 422,
    "kind": "backtick",
    "target": "core/regions.py",
    "in_code": true,
@@ -824,7 +824,7 @@
   },
   {
    "file": "README.md",
-   "line": 421,
+   "line": 422,
    "kind": "backtick",
    "target": "content/regions/",
    "in_code": true,
@@ -833,7 +833,7 @@
   },
   {
    "file": "README.md",
-   "line": 422,
+   "line": 423,
    "kind": "backtick",
    "target": "scripts/fhir_validate.py",
    "in_code": true,
@@ -842,7 +842,7 @@
   },
   {
    "file": "README.md",
-   "line": 422,
+   "line": 423,
    "kind": "backtick",
    "target": "fhir/ig.lock",
    "in_code": true,
@@ -851,7 +851,7 @@
   },
   {
    "file": "README.md",
-   "line": 423,
+   "line": 424,
    "kind": "backtick",
    "target": "scripts/repush_sandbox.py",
    "in_code": true,
@@ -860,7 +860,7 @@
   },
   {
    "file": "README.md",
-   "line": 423,
+   "line": 424,
    "kind": "backtick",
    "target": "fhir/sandbox_ledger.jsonl",
    "in_code": true,
@@ -869,7 +869,7 @@
   },
   {
    "file": "README.md",
-   "line": 424,
+   "line": 425,
    "kind": "backtick",
    "target": "content/approved_sentences.yaml",
    "in_code": true,
@@ -878,7 +878,7 @@
   },
   {
    "file": "README.md",
-   "line": 426,
+   "line": 427,
    "kind": "backtick",
    "target": "scripts/new_city.py",
    "in_code": true,
@@ -887,7 +887,7 @@
   },
   {
    "file": "README.md",
-   "line": 426,
+   "line": 427,
    "kind": "backtick",
    "target": "docs/cities/",
    "in_code": true,
@@ -896,7 +896,7 @@
   },
   {
    "file": "README.md",
-   "line": 427,
+   "line": 428,
    "kind": "backtick",
    "target": "core/fhir_referral.py",
    "in_code": true,
@@ -905,16 +905,16 @@
   },
   {
    "file": "README.md",
-   "line": 428,
+   "line": 429,
    "kind": "url",
    "target": "https://www.inaturalist.org/pages/terms",
    "in_code": false,
-   "status": "ok",
-   "detail": "200"
+   "status": "blocked",
+   "detail": "403, the site refuses scripts"
   },
   {
    "file": "README.md",
-   "line": 428,
+   "line": 429,
    "kind": "backtick",
    "target": "scripts/cache_inaturalist.py",
    "in_code": true,
@@ -923,7 +923,7 @@
   },
   {
    "file": "README.md",
-   "line": 428,
+   "line": 429,
    "kind": "backtick",
    "target": "docs/adr/0011-inaturalist-context.md",
    "in_code": true,
@@ -932,7 +932,7 @@
   },
   {
    "file": "README.md",
-   "line": 434,
+   "line": 435,
    "kind": "url",
    "target": "https://github.com/hl7-eu/oah/pull/5",
    "in_code": false,
@@ -941,7 +941,7 @@
   },
   {
    "file": "README.md",
-   "line": 435,
+   "line": 436,
    "kind": "backtick",
    "target": "docs/ig_proposal.md",
    "in_code": true,
@@ -950,7 +950,7 @@
   },
   {
    "file": "README.md",
-   "line": 436,
+   "line": 437,
    "kind": "url",
    "target": "https://github.com/hl7-eu/oah/issues/6",
    "in_code": false,
@@ -959,7 +959,7 @@
   },
   {
    "file": "README.md",
-   "line": 437,
+   "line": 438,
    "kind": "url",
    "target": "https://github.com/hl7-eu/oah/issues/7",
    "in_code": false,
@@ -968,7 +968,7 @@
   },
   {
    "file": "README.md",
-   "line": 438,
+   "line": 439,
    "kind": "url",
    "target": "https://github.com/hl7-eu/oah/issues/8",
    "in_code": false,
@@ -977,7 +977,7 @@
   },
   {
    "file": "README.md",
-   "line": 439,
+   "line": 440,
    "kind": "backtick",
    "target": "examples/mcp/README.md",
    "in_code": true,
@@ -986,7 +986,7 @@
   },
   {
    "file": "README.md",
-   "line": 455,
+   "line": 456,
    "kind": "backtick",
    "target": "scripts/verify_claims.py",
    "in_code": true,
@@ -995,7 +995,7 @@
   },
   {
    "file": "README.md",
-   "line": 457,
+   "line": 458,
    "kind": "backtick",
    "target": "evals/model_sweep.py",
    "in_code": true,
@@ -1004,7 +1004,7 @@
   },
   {
    "file": "README.md",
-   "line": 457,
+   "line": 458,
    "kind": "backtick",
    "target": "evals/benchmark.py",
    "in_code": true,
@@ -1013,7 +1013,7 @@
   },
   {
    "file": "README.md",
-   "line": 458,
+   "line": 459,
    "kind": "backtick",
    "target": "evals/footage.py",
    "in_code": true,
@@ -1022,7 +1022,7 @@
   },
   {
    "file": "README.md",
-   "line": 458,
+   "line": 459,
    "kind": "backtick",
    "target": "evals/footage_pool.py",
    "in_code": true,
@@ -1031,7 +1031,7 @@
   },
   {
    "file": "README.md",
-   "line": 459,
+   "line": 460,
    "kind": "backtick",
    "target": "evals/ablation.py",
    "in_code": true,
@@ -1040,7 +1040,7 @@
   },
   {
    "file": "README.md",
-   "line": 460,
+   "line": 461,
    "kind": "backtick",
    "target": "evals/usability_analysis.py",
    "in_code": true,
@@ -1049,7 +1049,7 @@
   },
   {
    "file": "README.md",
-   "line": 461,
+   "line": 462,
    "kind": "backtick",
    "target": "results/cost_log.jsonl",
    "in_code": true,
@@ -1058,7 +1058,7 @@
   },
   {
    "file": "README.md",
-   "line": 461,
+   "line": 462,
    "kind": "backtick",
    "target": "results/cost_log_fake.jsonl",
    "in_code": true,
@@ -1067,7 +1067,7 @@
   },
   {
    "file": "README.md",
-   "line": 462,
+   "line": 463,
    "kind": "backtick",
    "target": "evals/fixtures/raw/",
    "in_code": true,
@@ -1076,7 +1076,7 @@
   },
   {
    "file": "README.md",
-   "line": 466,
+   "line": 467,
    "kind": "backtick",
    "target": "scripts/count_tests.py",
    "in_code": true,
@@ -1085,7 +1085,7 @@
   },
   {
    "file": "README.md",
-   "line": 466,
+   "line": 467,
    "kind": "backtick",
    "target": "results/test_counts.json",
    "in_code": true,
@@ -1094,7 +1094,7 @@
   },
   {
    "file": "README.md",
-   "line": 476,
+   "line": 477,
    "kind": "backtick",
    "target": "docs/REAL_VS_SYNTHETIC.md",
    "in_code": true,
@@ -1103,7 +1103,7 @@
   },
   {
    "file": "README.md",
-   "line": 486,
+   "line": 487,
    "kind": "backtick",
    "target": "results/model_pass_table.json",
    "in_code": true,
@@ -1112,7 +1112,7 @@
   },
   {
    "file": "README.md",
-   "line": 497,
+   "line": 498,
    "kind": "backtick",
    "target": "docs/DATA_HANDLING.md",
    "in_code": true,
@@ -1121,7 +1121,7 @@
   },
   {
    "file": "README.md",
-   "line": 502,
+   "line": 503,
    "kind": "url",
    "target": "https://github.com/alejandro-publius/second-look",
    "in_code": true,
@@ -1130,7 +1130,7 @@
   },
   {
    "file": "README.md",
-   "line": 507,
+   "line": 508,
    "kind": "backtick",
    "target": "results/fhir_validation.json",
    "in_code": true,
@@ -1139,7 +1139,7 @@
   },
   {
    "file": "README.md",
-   "line": 519,
+   "line": 520,
    "kind": "url",
    "target": "http://localhost:3100",
    "in_code": false,
@@ -1148,7 +1148,7 @@
   },
   {
    "file": "README.md",
-   "line": 519,
+   "line": 520,
    "kind": "url",
    "target": "http://localhost:3100/city?creek=strawberry-creek",
    "in_code": false,
@@ -1157,7 +1157,7 @@
   },
   {
    "file": "README.md",
-   "line": 519,
+   "line": 520,
    "kind": "backtick",
    "target": "scripts/seed_demo.py",
    "in_code": true,
@@ -1166,7 +1166,7 @@
   },
   {
    "file": "README.md",
-   "line": 525,
+   "line": 526,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/t?src=other",
    "in_code": false,
@@ -1175,7 +1175,7 @@
   },
   {
    "file": "README.md",
-   "line": 525,
+   "line": 526,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/walk",
    "in_code": false,
@@ -1184,7 +1184,7 @@
   },
   {
    "file": "README.md",
-   "line": 525,
+   "line": 526,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/walk/v02",
    "in_code": false,
@@ -1193,7 +1193,7 @@
   },
   {
    "file": "README.md",
-   "line": 525,
+   "line": 526,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/city?creek=strawberry-creek",
    "in_code": false,
@@ -1202,7 +1202,7 @@
   },
   {
    "file": "README.md",
-   "line": 525,
+   "line": 526,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/two",
    "in_code": false,
@@ -1211,7 +1211,7 @@
   },
   {
    "file": "README.md",
-   "line": 525,
+   "line": 526,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/judges",
    "in_code": false,
@@ -1220,7 +1220,7 @@
   },
   {
    "file": "README.md",
-   "line": 531,
+   "line": 532,
    "kind": "backtick",
    "target": "docs/ACCEPTANCE.md",
    "in_code": true,
@@ -1229,7 +1229,7 @@
   },
   {
    "file": "README.md",
-   "line": 532,
+   "line": 533,
    "kind": "backtick",
    "target": "fhir/golden/visit-strawberry-creek-1.json",
    "in_code": true,
@@ -1238,7 +1238,7 @@
   },
   {
    "file": "README.md",
-   "line": 534,
+   "line": 535,
    "kind": "backtick",
    "target": "docs/ARCHITECTURE.md",
    "in_code": true,
@@ -1247,7 +1247,7 @@
   },
   {
    "file": "README.md",
-   "line": 535,
+   "line": 536,
    "kind": "backtick",
    "target": "docs/JUDGE_SCORECARD.md",
    "in_code": true,
@@ -1256,7 +1256,7 @@
   },
   {
    "file": "README.md",
-   "line": 536,
+   "line": 537,
    "kind": "backtick",
    "target": "docs/video_script.md",
    "in_code": true,
@@ -1265,7 +1265,7 @@
   },
   {
    "file": "README.md",
-   "line": 542,
+   "line": 543,
    "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
@@ -1274,7 +1274,7 @@
   },
   {
    "file": "README.md",
-   "line": 547,
+   "line": 548,
    "kind": "backtick",
    "target": "examples/mcp/README.md",
    "in_code": true,
@@ -1283,7 +1283,7 @@
   },
   {
    "file": "README.md",
-   "line": 555,
+   "line": 556,
    "kind": "backtick",
    "target": "fhir/golden/visit-strawberry-creek-1.json",
    "in_code": true,
@@ -1292,7 +1292,7 @@
   },
   {
    "file": "README.md",
-   "line": 557,
+   "line": 558,
    "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
@@ -1301,7 +1301,7 @@
   },
   {
    "file": "README.md",
-   "line": 557,
+   "line": 558,
    "kind": "backtick",
    "target": "core/tests/test_followups.py",
    "in_code": true,
@@ -1310,7 +1310,7 @@
   },
   {
    "file": "README.md",
-   "line": 558,
+   "line": 559,
    "kind": "backtick",
    "target": "results/fhir_validation.json",
    "in_code": true,
@@ -1319,7 +1319,7 @@
   },
   {
    "file": "README.md",
-   "line": 559,
+   "line": 560,
    "kind": "url",
    "target": "https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466",
    "in_code": true,
@@ -1328,7 +1328,7 @@
   },
   {
    "file": "README.md",
-   "line": 559,
+   "line": 560,
    "kind": "backtick",
    "target": "fhir/sandbox_ledger.jsonl",
    "in_code": true,
@@ -1337,7 +1337,7 @@
   },
   {
    "file": "README.md",
-   "line": 559,
+   "line": 560,
    "kind": "backtick",
    "target": "docs/notes/sandbox_library.md",
    "in_code": true,
@@ -1346,7 +1346,7 @@
   },
   {
    "file": "README.md",
-   "line": 560,
+   "line": 561,
    "kind": "backtick",
    "target": "docs/screens/city.webp",
    "in_code": true,
@@ -1355,7 +1355,7 @@
   },
   {
    "file": "README.md",
-   "line": 567,
+   "line": 568,
    "kind": "backtick",
    "target": "results/consensus_coarseness.json",
    "in_code": true,
@@ -1364,7 +1364,7 @@
   },
   {
    "file": "README.md",
-   "line": 579,
+   "line": 580,
    "kind": "relative",
    "target": "WRITEUP.md",
    "in_code": false,
@@ -1373,7 +1373,7 @@
   },
   {
    "file": "README.md",
-   "line": 579,
+   "line": 580,
    "kind": "relative",
    "target": "DEPLOY.md",
    "in_code": false,
@@ -1382,7 +1382,7 @@
   },
   {
    "file": "README.md",
-   "line": 579,
+   "line": 580,
    "kind": "relative",
    "target": "docs/adr/README.md",
    "in_code": false,
@@ -1391,7 +1391,7 @@
   },
   {
    "file": "README.md",
-   "line": 579,
+   "line": 580,
    "kind": "backtick",
    "target": "docs/adr/",
    "in_code": true,
@@ -1400,7 +1400,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "relative",
    "target": "docs/REPORT.pdf",
    "in_code": false,
@@ -1409,7 +1409,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "relative",
    "target": "docs/MODEL_CARD.md",
    "in_code": false,
@@ -1418,7 +1418,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "relative",
    "target": "docs/DATA_CARD.md",
    "in_code": false,
@@ -1427,7 +1427,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "relative",
    "target": "docs/THREAT_MODEL.md",
    "in_code": false,
@@ -1436,7 +1436,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "backtick",
    "target": "docs/REPORT.pdf",
    "in_code": true,
@@ -1445,7 +1445,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "backtick",
    "target": "docs/MODEL_CARD.md",
    "in_code": true,
@@ -1454,7 +1454,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "backtick",
    "target": "docs/DATA_CARD.md",
    "in_code": true,
@@ -1463,7 +1463,7 @@
   },
   {
    "file": "README.md",
-   "line": 581,
+   "line": 582,
    "kind": "backtick",
    "target": "docs/THREAT_MODEL.md",
    "in_code": true,
@@ -1472,7 +1472,16 @@
   },
   {
    "file": "README.md",
-   "line": 587,
+   "line": 584,
+   "kind": "backtick",
+   "target": "docs/DATA_CARD.md",
+   "in_code": true,
+   "status": "ok",
+   "detail": "docs/DATA_CARD.md"
+  },
+  {
+   "file": "README.md",
+   "line": 588,
    "kind": "backtick",
    "target": "photos/manifest.csv",
    "in_code": true,
@@ -1481,7 +1490,7 @@
   },
   {
    "file": "README.md",
-   "line": 588,
+   "line": 589,
    "kind": "backtick",
    "target": "docs/video/CREDITS.md",
    "in_code": true,
@@ -1490,7 +1499,7 @@
   },
   {
    "file": "README.md",
-   "line": 590,
+   "line": 591,
    "kind": "backtick",
    "target": "docs/THIRD_PARTY.md",
    "in_code": true,
@@ -1499,7 +1508,7 @@
   },
   {
    "file": "README.md",
-   "line": 610,
+   "line": 611,
    "kind": "backtick",
    "target": "photos/manifest.csv",
    "in_code": true,
@@ -1508,7 +1517,7 @@
   },
   {
    "file": "README.md",
-   "line": 610,
+   "line": 611,
    "kind": "backtick",
    "target": "videos/manifest.csv",
    "in_code": true,
@@ -1517,7 +1526,7 @@
   },
   {
    "file": "README.md",
-   "line": 610,
+   "line": 611,
    "kind": "backtick",
    "target": "docs/THIRD_PARTY.md",
    "in_code": true,
@@ -3470,6 +3479,15 @@
   },
   {
    "file": "docs/DATA_CARD.md",
+   "line": 25,
+   "kind": "backtick",
+   "target": "photos/benchmark/",
+   "in_code": true,
+   "status": "ok",
+   "detail": "photos/benchmark"
+  },
+  {
+   "file": "docs/DATA_CARD.md",
    "line": 36,
    "kind": "backtick",
    "target": "scripts/find_open_photos.py",
@@ -4919,7 +4937,16 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 151,
+   "line": 128,
+   "kind": "backtick",
+   "target": "evals/models.yaml",
+   "in_code": true,
+   "status": "ok",
+   "detail": "evals/models.yaml"
+  },
+  {
+   "file": "docs/MODEL_CARD.md",
+   "line": 152,
    "kind": "backtick",
    "target": "results/cost_log.jsonl",
    "in_code": true,
@@ -4928,7 +4955,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 171,
+   "line": 172,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -5355,8 +5382,8 @@
    "kind": "url",
    "target": "https://www.inaturalist.org/pages/terms",
    "in_code": false,
-   "status": "ok",
-   "detail": "200"
+   "status": "blocked",
+   "detail": "403, the site refuses scripts"
   },
   {
    "file": "docs/THIRD_PARTY.md",
@@ -5364,8 +5391,8 @@
    "kind": "url",
    "target": "https://www.inaturalist.org/pages/api+recommended+practices",
    "in_code": false,
-   "status": "ok",
-   "detail": "200"
+   "status": "blocked",
+   "detail": "403, the site refuses scripts"
   },
   {
    "file": "docs/THIRD_PARTY.md",
@@ -5492,15 +5519,6 @@
    "in_code": true,
    "status": "ok",
    "detail": "scripts/ots_status.py"
-  },
-  {
-   "file": "docs/THIRD_PARTY.md",
-   "line": 90,
-   "kind": "url",
-   "target": "https://blockstream.info/api",
-   "in_code": false,
-   "status": "dead",
-   "detail": "TooManyRedirects"
   },
   {
    "file": "docs/THREAT_MODEL.md",
@@ -6907,6 +6925,33 @@
    "detail": "apps/web/tests/panel.spec.ts"
   },
   {
+   "file": "docs/deviations.md",
+   "line": 13,
+   "kind": "backtick",
+   "target": "docs/DATA_CARD.md",
+   "in_code": true,
+   "status": "ok",
+   "detail": "docs/DATA_CARD.md"
+  },
+  {
+   "file": "docs/deviations.md",
+   "line": 13,
+   "kind": "backtick",
+   "target": "scripts/merge_labels.py",
+   "in_code": true,
+   "status": "ok",
+   "detail": "scripts/merge_labels.py"
+  },
+  {
+   "file": "docs/deviations.md",
+   "line": 15,
+   "kind": "backtick",
+   "target": "results/inat_photos.json",
+   "in_code": true,
+   "status": "ok",
+   "detail": "results/inat_photos.json"
+  },
+  {
    "file": "docs/devpost.md",
    "line": 92,
    "kind": "url",
@@ -6966,8 +7011,8 @@
    "kind": "url",
    "target": "https://github.com/alejandro-publius/second-look/blob/main/docs/REPORT.pdf",
    "in_code": false,
-   "status": "dead",
-   "detail": "docs/REPORT.pdf is not on main"
+   "status": "private",
+   "detail": "exists on origin/main; public from Sep 30"
   },
   {
    "file": "docs/devpost.md",
@@ -8591,7 +8636,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 39,
+   "line": 40,
    "kind": "backtick",
    "target": "docs/analysis_plan.md",
    "in_code": true,
@@ -8600,7 +8645,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 40,
+   "line": 41,
    "kind": "backtick",
    "target": "results/key_hash.json",
    "in_code": true,
@@ -8609,7 +8654,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 49,
+   "line": 50,
    "kind": "backtick",
    "target": "content/walks.yaml",
    "in_code": true,
@@ -8618,7 +8663,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 58,
+   "line": 60,
    "kind": "backtick",
    "target": "scripts/verify_claims.py",
    "in_code": true,
@@ -8627,7 +8672,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 80,
+   "line": 82,
    "kind": "backtick",
    "target": "docs/fhir_mapping.md",
    "in_code": true,
@@ -8636,7 +8681,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 91,
+   "line": 93,
    "kind": "backtick",
    "target": "docs/DATA_CARD.md",
    "in_code": true,
@@ -8645,7 +8690,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 116,
+   "line": 118,
    "kind": "backtick",
    "target": "docs/MODEL_CARD.md",
    "in_code": true,
@@ -8654,7 +8699,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 117,
+   "line": 119,
    "kind": "backtick",
    "target": "docs/DATA_CARD.md",
    "in_code": true,
@@ -8663,7 +8708,7 @@
   },
   {
    "file": "docs/report/source.md",
-   "line": 117,
+   "line": 119,
    "kind": "backtick",
    "target": "docs/THREAT_MODEL.md",
    "in_code": true,
@@ -8988,11 +9033,11 @@
   {
    "file": "docs/track_statement.md",
    "line": 1,
-   "kind": "relative",
-   "target": "docs/MODEL_CARD.md",
+   "kind": "url",
+   "target": "https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md",
    "in_code": false,
-   "status": "dead",
-   "detail": "docs/docs/MODEL_CARD.md does not exist"
+   "status": "private",
+   "detail": "exists on origin/main; public from Sep 30"
   },
   {
    "file": "docs/video/CREDITS.md",

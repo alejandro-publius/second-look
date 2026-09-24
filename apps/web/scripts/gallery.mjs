@@ -256,6 +256,7 @@ async function liveRun(browser) {
   gallery("about", "/about", "live", await visit("/about"), "About: what Second Look is and who made it.");
   gallery("poster", "/poster", "live", await visit("/poster"), "The poster to print and put up by a creek, with its QR code.");
   gallery("accessibility", "/accessibility", "live", await visit("/accessibility"), "Accessibility: what we aim for and how each part is checked.");
+  gallery("verify", "/verify", "live", await visit("/verify"), "Check a record: its receipt, its place in the audit log and the OpenTimestamps proof.");
   gallery("offline", "/offline", "live", await visit("/offline"), "The page a phone shows when it has no signal: what still works.");
   gallery("share", "/share/12", "live", await visit("/share/12"), "The page a shared score opens: the score card and a link to take the test.");
   await context.close();

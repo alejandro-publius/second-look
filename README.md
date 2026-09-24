@@ -69,7 +69,7 @@ No recruited study. The two-minute test stays live as the volunteer's own calibr
 
 ## Gallery
 
-<!--v:results/screens.json#/screen_count-->30<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->23<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->7<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and `results/screens.json` lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
+<!--v:results/screens.json#/screen_count-->31<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->24<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->7<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and `results/screens.json` lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
 
 <table>
 <tr>
@@ -111,6 +111,7 @@ No recruited study. The two-minute test stays live as the volunteer's own calibr
 <tr>
 <td align="center"><img src="docs/screens/about.webp" width="200" alt="About: what Second Look is and who made it."><br>About<br><code>/about</code></td>
 <td align="center"><img src="docs/screens/poster.webp" width="200" alt="The poster to print and put up by a creek, with its QR code."><br>Poster<br><code>/poster</code></td>
+<td align="center"><img src="docs/screens/verify.webp" width="200" alt="Check a record: its receipt, its place in the audit log and the OpenTimestamps proof."><br>Check a record<br><code>/verify</code></td>
 </tr>
 <tr>
 <td align="center"><img src="docs/screens/warmup.webp" width="200" alt="The warm-up: which creek is healthier, asked once before the test and answered at the end."><br>The warm-up<br><code>/t</code> (mock)</td>
