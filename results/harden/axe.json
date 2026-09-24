@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-24T09:59:35Z",
- "commit": "c7455cb",
+ "checked_utc": "2026-09-24T12:23:17Z",
+ "commit": "6f40364",
  "tags": [
   "wcag2a",
   "wcag2aa",
@@ -154,7 +154,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 34,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -213,13 +213,7 @@
    "status": 200,
    "error": "",
    "violations": [],
-   "incomplete": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 12
-    }
-   ],
+   "incomplete": [],
    "passes": 34,
    "blocked_writes": [],
    "origins": [
@@ -280,7 +274,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 36,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -466,7 +460,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 34,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -525,13 +519,7 @@
    "status": 200,
    "error": "",
    "violations": [],
-   "incomplete": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 12
-    }
-   ],
+   "incomplete": [],
    "passes": 34,
    "blocked_writes": [],
    "origins": [
@@ -592,7 +580,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 36,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -778,7 +766,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 34,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -837,13 +825,7 @@
    "status": 200,
    "error": "",
    "violations": [],
-   "incomplete": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 2
-    }
-   ],
+   "incomplete": [],
    "passes": 34,
    "blocked_writes": [],
    "origins": [
@@ -904,7 +886,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 36,
+   "passes": 35,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
