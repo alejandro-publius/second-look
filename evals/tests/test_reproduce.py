@@ -137,6 +137,53 @@ def test_a_feature_count_and_its_accuracy_changed_together_are_still_caught(
     assert any("wilson_95" in p for p in found), found
 
 
+def test_a_model_cut_from_the_pass_table_is_caught(tmp_path: Path) -> None:
+    """A number deleted is a number that differs: the gate would read a table the replies do not
+    give, so the regrade must not pass it just because what is left still matches."""
+    root = stand_in(tmp_path, results=("model_pass_table.json",))
+    edit_json(
+        root / "results" / "model_pass_table.json",
+        lambda doc: doc["models"].pop("claude-haiku-4-5-20251001"),
+    )
+    found = problems_of(reproduce.paid_checks(root), "results/model_pass_table.json")
+    assert any(
+        "/models/claude-haiku-4-5-20251001/artificial_bank/passed: regraded True, committed has "
+        "nothing there" in p
+        for p in found
+    ), found
+
+
+def test_a_drop_reason_cut_from_the_footage_is_caught(tmp_path: Path) -> None:
+    name = f"{LATEST_FOOTAGE}.json"
+    root = stand_in(tmp_path, results=(name,))
+    cut = "feature dug_out_channel not passed by model claude-fable-5-1"
+
+    def drop(doc: Any) -> None:
+        del doc["gate"]["drop_reasons"][cut]
+
+    edit_json(root / "results" / name, drop)
+    found = problems_of(reproduce.paid_checks(root), f"results/{name}")
+    assert f"/gate/drop_reasons/{cut}: regraded 3, committed has nothing there" in found, found
+
+
+def test_a_model_or_a_cell_cut_from_the_benchmark_is_caught(tmp_path: Path) -> None:
+    """The two paid benchmarks kept counts only, so their cells are checked for being all there."""
+    name = f"{LATEST_BENCHMARK}.json"
+    root = stand_in(tmp_path, results=(name,))
+    edit_json(root / "results" / name, lambda doc: doc["models"].pop("claude-fable-5-1"))
+    found = problems_of(reproduce.paid_checks(root), f"results/{name}")
+    assert any(p.startswith("/models (the models with calls in the cost log)") for p in found)
+
+    (tmp_path / "cell").mkdir()
+    root = stand_in(tmp_path / "cell", results=(name,))
+    edit_json(
+        root / "results" / name,
+        lambda doc: doc["models"]["claude-sonnet-5"].pop("malformed"),
+    )
+    found = problems_of(reproduce.paid_checks(root), f"results/{name}")
+    assert any(p.startswith("/models/claude-sonnet-5 (its cells)") for p in found), found
+
+
 def test_a_gate_count_changed_in_the_footage_is_caught(tmp_path: Path) -> None:
     name = f"{LATEST_FOOTAGE}.json"
     root = stand_in(tmp_path, results=(name,))

@@ -98,13 +98,16 @@ class Check:
 
     def compare(self, committed: object, regraded: object, *, skip: Sequence[str] = ()) -> None:
         """Every value of the committed document must be in the regraded one, at the same place,
-        of the same type and equal. Pointers matching a skip pattern are left out: timestamps and
-        the paths of this machine, never a number."""
+        of the same type and equal, and every regraded value must be in the committed one: a
+        number deleted from a results file is a number that differs. Pointers matching a skip
+        pattern are left out: timestamps and the paths of this machine, never a number."""
         mine = dict(leaves(as_written(regraded)))
         patterns = [re.compile(s) for s in skip]
+        seen: set[str] = set()
         for pointer, value in leaves(committed):
             if any(p.fullmatch(pointer) for p in patterns):
                 continue
+            seen.add(pointer)
             if is_graded(value):
                 self.values += 1
             if pointer not in mine:
@@ -113,6 +116,10 @@ class Check:
             got = mine[pointer]
             if type(got) is not type(value) or got != value:
                 self.problems.append(f"{pointer}: committed {value!r}, regraded {got!r}")
+        for pointer, got in mine.items():
+            if pointer in seen or any(p.fullmatch(pointer) for p in patterns):
+                continue
+            self.problems.append(f"{pointer}: regraded {got!r}, committed has nothing there")
 
     def expect(self, what: str, committed: object, regraded: object) -> None:
         if is_graded(committed):
@@ -490,7 +497,16 @@ def check_benchmark(run: Any, root: Path, log: Sequence[dict[str, Any]]) -> Chec
         check.compare(doc["models"], per_feature_accuracy(records, list(doc["models"])))
         return check
     runs = int(doc["runs"])
+    # Every model that was called has its cells, no other model does, and each has the cells
+    # evals/benchmark.py writes, so a model or a cell cut from the file is caught too.
+    check.expect(
+        "/models (the models with calls in the cost log)",
+        sorted(doc["models"]),
+        sorted({c["model"] for c in calls}),
+    )
+    shape = sorted(per_feature_accuracy([], ["any"])["any"])
     for model, cells in doc["models"].items():
+        check.expect(f"/models/{model} (its cells)", sorted(cells), shape)
         n_calls = sum(1 for c in calls if c["model"] == model)
         check.expect(f"/models/{model}/all/n (calls in the cost log)", cells["all"]["n"], n_calls)
         total_right = 0
@@ -501,8 +517,9 @@ def check_benchmark(run: Any, root: Path, log: Sequence[dict[str, Any]]) -> Chec
             total_right += cell["correct"]
         check.compare(cells["all"], accuracy_cell(total_right, n_calls))
     check.notes.append(
-        "the right-answer counts per feature are as recorded: the run kept counts, not answers, "
-        "so no reply is left to grade them from; the accuracies, intervals and cost are regraded"
+        "the right-answer counts per feature, the share of cant_tell answers and the count of "
+        "malformed replies are as recorded: the run kept counts, not answers, so no reply is left "
+        "to grade them from; the accuracies, intervals and cost are regraded"
     )
     return check
 
@@ -722,9 +739,12 @@ def synthetic_footage(rel: str, root: Path, table: Mapping[str, Any]) -> Check:
     # A fake run spends nothing; its estimates used the prices of Sep 22.
     prices = pricing_from(PRICES_BEFORE_OPUS_5_5)
     estimates = expected_costs(doc["models"], prices, int(doc["runs"]), True, root)
+    # evals/footage.py began to write the adversarial estimate at commit c49ba50, after this fake
+    # run was made, so the file has none to compare.
     check.compare(
         doc["cost"],
         {"usd": 0.0, "per_100_frames_usd": 0.0, **estimates},
+        skip=(r"/expected_adversarial_usd_by_model/.*",),
     )
     return check
 
@@ -755,11 +775,19 @@ def synthetic_analyses(root: Path, sweep_001651: Sequence[Any]) -> list[Check]:
         usability = load("results/usability_synthetic.json", root)
         check = Check("results/usability_synthetic.json", f"plan seed {PLAN_SEED}")
         # The photo behind each item was renamed when the real photos came in; the item is the
-        # same, and so is every number.
+        # same, and so is every number. run() adds the paths it wrote to after writing, and the
+        # hash of the plan went into the file at commit 8b4b939, after this one was made.
         check.compare(
             usability,
             result,
-            skip=(*STAMP_ONLY, r"/input", r"/per_item/t\d+/photo_id", r"/outputs/.*"),
+            skip=(
+                *STAMP_ONLY,
+                r"/input",
+                r"/per_item/t\d+/photo_id",
+                r"/outputs/.*",
+                r"/paths/.*",
+                r"/plan_sha256",
+            ),
         )
         checks.append(check)
 
