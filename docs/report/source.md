@@ -31,6 +31,8 @@ guide. No person has taken the test yet, and this report makes no claim about pe
 
 ## 2. Method
 
+{{figure:docs/diagrams/ai-gate.svg|How a model's answer becomes a flag, or nothing}}
+
 ### 2.1 The test
 
 Sixteen photos, four per feature, two with the feature and two without, in a new random order for
@@ -76,6 +78,8 @@ against the text by `scripts/verify_claims.py` in CI. Failed runs stay in `resul
 {{section:docs/MODEL_CARD.md#Cost}}
 
 ## 4. The FHIR mapping
+
+{{figure:docs/diagrams/fhir-graph.svg|The records one visit makes, and how the score reaches every Observation}}
 
 {{section:README.md#How OneAquaHealth is used}}
 

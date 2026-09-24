@@ -85,7 +85,14 @@ blockquote {
 code {
   font-family: "Atkinson Hyperlegible Mono", Menlo, monospace;
   font-size: 0.88em;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  max-height: 5in;
+  margin: 4pt auto;
 }
 
 a {
@@ -107,7 +114,7 @@ td {
   padding: 2pt 4pt;
   text-align: left;
   vertical-align: top;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 th {

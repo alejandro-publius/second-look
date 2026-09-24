@@ -203,3 +203,21 @@ def test_pages_are_counted_from_page_objects_not_the_page_tree(tmp_path: Path) -
     path = tmp_path / "x.pdf"
     path.write_bytes(b"%PDF-1.4\n<< /Type /Pages /Count 2 >>\n<< /Type /Page >>\n<</Type/Page>>\n")
     assert br.pdf_pages(path) == 2
+
+
+def test_a_figure_is_the_committed_drawing_itself_with_its_caption(tmp_path: Path) -> None:
+    svg = tmp_path / "docs" / "diagrams" / "x.svg"
+    svg.parent.mkdir(parents=True)
+    svg.write_text("<svg xmlns='http://www.w3.org/2000/svg'/>", encoding="utf-8")
+    inputs: set[str] = set()
+    md = br.figure(tmp_path, "docs/diagrams/x.svg", "A caption", inputs)
+    assert md.startswith("![A caption](data:image/svg+xml;base64,")
+    assert "*Figure: A caption.*" in md
+    assert inputs == {"docs/diagrams/x.svg"}, "a changed drawing must make the report stale"
+    with pytest.raises(br.ReportError):
+        br.figure(tmp_path, "docs/diagrams/missing.svg", "x", inputs)
+
+
+def test_code_breaks_only_after_a_slash() -> None:
+    html = br.breakable_code("<p><code>core/fhir_emit.py</code> and a/b</p>")
+    assert html == "<p><code>core/<wbr>fhir_emit.py</code> and a/b</p>"

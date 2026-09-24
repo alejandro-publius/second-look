@@ -24,6 +24,7 @@ PDF was built turns make check red until `make report-pdf` runs again.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import re
@@ -60,7 +61,10 @@ RENDERED_RE = re.compile(r"<!--v:([\w./-]+)#([\w/. -]+)-->(.*?)<!--/v-->", re.S)
 CLAIM_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+)#([\w/.-]+)\s*(?:=\s*([^\s]+))?\s*-->")
 TOKEN_RE = re.compile(r"\{\{claim:([\w./-]+)#([\w/. -]+)\}\}")
 COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
-LOCAL_LINK_RE = re.compile(r"\[([^\]]+)\]\((?!https?://|#|mailto:)([^)\s]+)\)")
+LOCAL_LINK_RE = re.compile(r"\[([^\]]+)\]\((?!https?://|#|mailto:|data:)([^)\s]+)\)")
+# {{figure:docs/diagrams/x.svg|caption}} on a line of its own: a committed SVG, put in the page as
+# a data address, so the PDF needs no file beside it and the source hash covers the drawing.
+FIGURE_RE = re.compile(r"^\{\{figure:([\w./-]+\.svg)\|([^}]+)\}\}$")
 DASHES = (chr(0x2013), chr(0x2014))
 
 
@@ -141,6 +145,26 @@ def github_links(text: str) -> str:
     return LOCAL_LINK_RE.sub(lambda m: f"[{m.group(1)}]({REPO_URL}{m.group(2)})", text)
 
 
+def figure(root: Path, rel: str, caption: str, inputs: set[str]) -> str:
+    path = root / rel
+    if not path.is_file():
+        raise ReportError(f"{SOURCE} names the figure {rel}, which does not exist")
+    inputs.add(rel)
+    data = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"![{caption}](data:image/svg+xml;base64,{data})\n\n*Figure: {caption}.*"
+
+
+def breakable_code(fragment: str) -> str:
+    """A line may break after a slash inside code, and nowhere else in a word: a file name wraps
+    as core/ fhir_emit.py, never as core/fhir_emit.p y (critic round 01, C19)."""
+    return re.sub(
+        r"<code>(.*?)</code>",
+        lambda m: "<code>" + m.group(1).replace("/", "/<wbr>") + "</code>",
+        fragment,
+        flags=re.S,
+    )
+
+
 def assemble(root: Path = ROOT) -> Assembled:
     """The report's Markdown with every section and number put in. Pure: reads files only."""
     source_path = root / SOURCE
@@ -149,6 +173,10 @@ def assemble(root: Path = ROOT) -> Assembled:
     inputs: set[str] = {SOURCE.as_posix()}
     out: list[str] = []
     for line in COMMENT_RE.sub("", source_path.read_text(encoding="utf-8")).splitlines():
+        fig = FIGURE_RE.match(line.strip())
+        if fig:
+            out.append(figure(root, fig.group(1), fig.group(2), inputs))
+            continue
         m = SECTION_RE.match(line.strip())
         if not m:
             out.append(line)
@@ -259,7 +287,7 @@ def page_html(root: Path, fragment: str) -> str:
     html = (
         template.replace("@@FONTS@@", font_faces(root))
         .replace("@@CSS@@", css)
-        .replace("@@BODY@@", fragment)
+        .replace("@@BODY@@", breakable_code(fragment))
     )
     if any(d in html for d in DASHES):
         raise ReportError("the report's HTML has an em or en dash (hard rule 18)")
