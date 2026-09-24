@@ -16,7 +16,8 @@ observation the person later makes, in OneAquaHealth's own FHIR profiles. Vision
 same test. A model may only ask a volunteer to look again, on a feature it passed, after the person
 has answered; code, never the model, writes the record. Four Claude models took the test three
 times each. Every model passed built banks, and no model passed plants that do not belong, where
-almost every answer was "can't tell" because the plant photos show no water. On
+almost every answer was "can't tell": the plant photos show no water, and the instruction says to
+answer can't tell when no stream is in view. On
 {{claim:results/footage_pool.json#/frames_kept}} frames of open creek footage the gate dropped
 {{claim:results/footage_latest.json#/gate/dropped}} of
 {{claim:results/footage_latest.json#/gate/candidates}} candidate flags, each on a feature that model
@@ -38,7 +39,7 @@ kept per feature, out of 4, and stored in the record of the test sitting; a date
 for the test and a Provenance link carry it to every Observation the person makes. The question
 wording and the analysis were written into `docs/analysis_plan.md` and tagged `prereg-v1`, and
 the key was frozen as a hash in `results/key_hash.json`, on Sep 21, the day the test opened, before
-the first paid model run on Sep 24.
+the first paid model run on Sep 23. The dates here are Pacific time.
 
 ### 2.2 The gate
 
@@ -46,7 +47,8 @@ the first paid model run on Sep 24.
 
 In the build measured here, {{claim:results/footage_pool.json#/walks_with_a_checker_question}} of
 the {{claim:results/footage_pool.json#/walks}} walks carries a checker question: the gate kept no
-flag on the frames the walks use (`content/walks.yaml`).
+flag on the frames the walks use (`content/walks.yaml`). So today no model flag reaches a person,
+in the walks or on the live site.
 
 ### 2.3 What the AI cannot do
 
@@ -103,7 +105,7 @@ figure here as agreement with this key.
 3. **Measurement that shows its failures.** The pass table, the benchmark with its intervals, the
    run that measured our own config, and the plant photos that no model could judge are all in
    `results/`, with the cost of every call.
-4. **Open work, and work given back.** The code is MIT. What we sent back to OneAquaHealth:
+4. **Open work, and work given back.** The code is MIT. What we contributed back, as the README lists it:
 
 {{section:README.md#Contributed back}}
 

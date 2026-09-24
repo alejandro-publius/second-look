@@ -49,6 +49,18 @@ def test_the_pdf_was_built_from_the_current_sources() -> None:
     assert br.stamp_problems(ROOT) == []
 
 
+def test_the_pdf_is_tagged_with_its_language_and_an_outline() -> None:
+    """A screen reader needs the tags and the language; the outline lets a reader jump to a part.
+
+    Chromium writes an untagged PDF unless the print script asks for tags (hard rule 17).
+    """
+    pdf = (ROOT / br.PDF).read_bytes()
+    assert b"/StructTreeRoot" in pdf, "docs/REPORT.pdf has no tags; print it with tagged: true"
+    assert re.search(rb"/MarkInfo\s*<<[^>]*/Marked\s+true", pdf), "the PDF is not marked tagged"
+    assert re.search(rb"/Lang\s*\(en\)", pdf), "the PDF does not say it is in English"
+    assert b"/Outlines" in pdf, "docs/REPORT.pdf has no outline; print it with outline: true"
+
+
 def test_the_readme_and_the_devpost_text_link_the_report() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     built = br.section_body(readme, "How this was built", "README.md")

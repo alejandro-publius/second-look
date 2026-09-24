@@ -21,8 +21,8 @@ what the manifests say (`evals/tests/test_data_card.py::test_the_committed_file_
 In all, `photos/manifest.csv` has <!--v:results/data_card.json#/photos/rows-->84<!--/v--> rows, one per
 image, and `make manifest-check` fails when an image under `photos/` has no row or its hash does
 not match. The smaller AVIF and WebP copies of the two warm-up photos have their own rows in
-`photos/derived/manifest.csv`. No media file from the footage set is committed: videos stay in a
-cache outside the repository.
+`photos/derived/manifest.csv`. No video file is committed: the videos stay in a cache outside the
+repository, and only the stills cut from them are committed, in `photos/benchmark/`.
 
 ## Sources
 

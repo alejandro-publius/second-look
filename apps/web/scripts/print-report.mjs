@@ -52,6 +52,10 @@ try {
       headerTemplate: "<span></span>",
       footerTemplate: FOOTER,
       margin: { top: "15mm", bottom: "16mm", left: "16mm", right: "16mm" },
+      // Tagged, so a screen reader can read the headings, lists and tables in order, and with an
+      // outline of the headings, so a reader can jump between sections (hard rule 17).
+      tagged: true,
+      outline: true,
     });
     console.log(JSON.stringify({ browser: `Chromium ${browser.version()}` }));
   }
