@@ -15,57 +15,85 @@ The loop is five verbs, and they line up with OneAquaHealth's own five pipeline 
 
 ## The whole system
 
+Every edge says what flows along it. Where a part is a `core/` file, the live site runs its
+TypeScript port in `worker/src/core/`, held equal to the Python by golden vectors. The same
+diagram as an image: [`docs/diagrams/system-map.svg`](diagrams/system-map.svg), drawn from
+[`docs/diagrams/system-map.mmd`](diagrams/system-map.mmd) by `make diagrams-render`.
+
 ```mermaid
 flowchart TB
+  accTitle: The system map, by the five verbs Train, Check, Verify, Record and Act
+  accDescr: A volunteer takes the photo test on /t and the Worker keeps the per-feature score in D1. Vision models take the same test, and the pass table says which features each may flag. On /check the Worker hands the answers, the dry days and the person's score to the follow-up selector, which returns at most two questions. The finished visit becomes a record of human answers only, then a FHIR Bundle stored in D1, checked by the HL7 validator in CI and mirrored to their sandbox. From the stored visits, core/act.py works out what the creek needs and which pipes are worth testing, a pipe becomes a ServiceRequest, and the read only MCP server hands any agent the same records with their ids.
   subgraph TRAIN["TRAIN: collection"]
-    L["Two minute photo lesson<br/>content/lessons.yaml"]
-    T["16 item test<br/>core/scoring.py"]
-    M["The same 16 items, three models<br/>evals/model_sweep.py"]
-    P["Pass table<br/>results/model_pass_table.json"]
-    L --> T
-    M --> P
+    TPAGE["/t, the photo test<br/>apps/web/app/t"]
+    SWEEP["Vision models take the same test<br/>evals/model_sweep.py"]
+    PASS["Pass table<br/>results/model_pass_table.json"]
   end
   subgraph CHECK["CHECK: collection"]
-    F["Guided creek check<br/>content/form.yaml"]
-    Q["20 second return check<br/>core/quick.py"]
-    W["A walk from your desk<br/>content/walks.yaml"]
-    U["Photo upload, metadata cut out<br/>worker/src/uploads.ts"]
+    CPAGE["/check, the guided creek check<br/>apps/web/app/check"]
+    QPAGE["/quick, the return check<br/>apps/web/app/quick"]
+    WPAGE["/walk, a creek from your desk<br/>apps/web/app/walk"]
   end
+  WORKER["The Worker, every /api route<br/>worker/src/index.ts on Cloudflare"]
+  D1[("D1 database<br/>sessions, observers, visits, Bundles")]
+  KV[("KV<br/>uploaded photos")]
+  METEO["Open-Meteo"]
   subgraph VERIFY["VERIFY: transformation"]
-    R["Rainfall, Open-Meteo<br/>core/rainfall.py"]
-    S["Follow-up selector, pure<br/>core/followups.py"]
-    G["The gate<br/>core/gate.py"]
-    C["Vision checker<br/>core/checker.py"]
-    C --> G
-    P --> G
-    G --> S
-    R --> S
+    RAIN["Dry days<br/>core/rainfall.py"]
+    FOLLOW["Follow-up selector, pure<br/>core/followups.py"]
+    GATE["The gate<br/>core/gate.py"]
+    CHECKER["Vision checker, off on the live site<br/>core/checker.py"]
+    WALKS["Walk builder<br/>scripts/build_walks.py"]
   end
   subgraph RECORD["RECORD: validation"]
-    E["FHIR emitter<br/>core/fhir_emit.py"]
-    V["HL7 validator, their guide at b907cf0<br/>scripts/fhir_validate.py"]
-    O["Our store<br/>data/fhir_store"]
-    X["Their sandbox, conditional creates<br/>scripts/repush_sandbox.py"]
-    E --> V --> O --> X
+    BUILD["Record builder<br/>build_record in core/gate.py"]
+    EMIT["FHIR emitter<br/>core/fhir_emit.py"]
+    VALID["HL7 validator, their guide at b907cf0<br/>scripts/fhir_validate.py in CI"]
+    LIB["Our Library entry<br/>core/fhir_library.py"]
+    MIRROR["Sandbox mirror<br/>scripts/repush_sandbox.py"]
   end
+  SANDBOX["Their sandbox<br/>OneAquaHealth FHIR server"]
   subgraph ACT["ACT: aggregation and publication"]
-    A["What the creek needs, pipes worth testing<br/>core/act.py"]
-    D["Downstream note by reach<br/>core/regions.py"]
-    Y["Referral as a ServiceRequest<br/>core/fhir_referral.py"]
-    Z["Read only MCP server<br/>apps/mcp"]
+    REGIONS["Creek and reach of each spot<br/>core/regions.py"]
+    ACTF["What the creek needs, pipes worth testing<br/>core/act.py"]
+    REFER["Referral<br/>core/fhir_referral.py"]
+    VIEWS["/spot, /city and /two<br/>apps/web/app"]
+    MCP["Read only MCP server<br/>apps/mcp"]
   end
-  T --> SC["The person's per-feature score"]
-  SC --> S
-  SC --> E
-  F --> S
-  Q --> S
-  W --> S
-  U --> E
-  S --> E
-  O --> A
-  A --> D
-  A --> Y
-  O --> Z
+  CLIENT["An agent or a city's software"]
+  TPAGE -- "each answer,<br/>then keep my score" --> WORKER
+  WORKER -- "sessions, answers,<br/>the score if kept" --> D1
+  SWEEP -- "passed or not,<br/>per model and feature" --> PASS
+  PASS -- "which features<br/>a model may flag" --> GATE
+  PASS -- "which features<br/>it may ask about" --> CHECKER
+  CPAGE -- "answers, the spot,<br/>then follow-up answers" --> WORKER
+  QPAGE -- "colour, smell, pipe" --> WORKER
+  WORKER -- "photos, metadata cut out,<br/>deleted after 30 days" --> KV
+  METEO -- "rain at the spot" --> RAIN
+  RAIN -- "dry, wet or unknown" --> FOLLOW
+  WORKER <-- "answers and the score in,<br/>at most two questions out" --> FOLLOW
+  CHECKER -- "a clean yes,<br/>as a candidate flag" --> GATE
+  GATE -. "a flag makes one<br/>question eligible,<br/>none on the live check" .-> FOLLOW
+  WALKS -- "the footage run's<br/>yes answers" --> GATE
+  GATE -- "flags or drop reasons" --> WALKS
+  WALKS -- "the clip and at most<br/>one question, in<br/>content/walks.yaml" --> WPAGE
+  WORKER -- "human answers,<br/>ratings, follow-up answers" --> BUILD
+  BUILD -- "a visit record" --> EMIT
+  EMIT -- "one Bundle per visit" --> D1
+  WPAGE -- "answers, as a demo Bundle<br/>on the phone, never sent" --> EMIT
+  EMIT -- "sample Bundles from<br/>both emitters" --> VALID
+  EMIT -- "visit Bundles as<br/>conditional creates" --> MIRROR
+  LIB -- "what our data set is<br/>and where it lives" --> MIRROR
+  MIRROR -- "our tag on every resource,<br/>ids kept in a ledger" --> SANDBOX
+  SANDBOX -- "one lab Observation of theirs,<br/>read once a day from the Mac" --> D1
+  D1 -- "stored visits and<br/>follow-up answers" --> ACTF
+  REGIONS -- "creek and reach<br/>of each spot" --> ACTF
+  ACTF -- "a pipe two people who passed<br/>saw running after dry days" --> REFER
+  ACTF -- "needs, pipes worth testing,<br/>downstream notes" --> VIEWS
+  REFER -- "a ServiceRequest Bundle" --> VIEWS
+  D1 -- "the record, its Bundle,<br/>their cached record" --> VIEWS
+  WORKER -- "creeks, city views,<br/>records, Bundles" --> MCP
+  MCP -- "answers with their<br/>visit ids and Bundle links" --> CLIENT
 ```
 
 ### Why this architecture matters
@@ -92,36 +120,53 @@ flowchart TB
 
 ## The FHIR resources, and how they point at each other
 
+Every arrow is a reference in the emitted JSON, named by its FHIR path, and each one was read
+off `fhir/golden/visit-strawberry-creek-1.json` and `fhir/golden/referral-strawberry-creek-1.json`.
+The Practitioner's qualification carries the test and its dates; the numbers of the score sit in
+the test sitting's QuestionnaireResponse, which the Provenance names as a source of every
+Observation. The image: [`docs/diagrams/fhir-graph.svg`](diagrams/fhir-graph.svg).
+
 ```mermaid
-flowchart LR
-  PR["Practitioner<br/>the volunteer, pseudonymous<br/>qualification = per-feature score"]
-  PRL["PractitionerRole"]
-  ORG["Organization<br/>Second Look"]
-  QR["QuestionnaireResponse<br/>the creek check, their form"]
-  QN["Questionnaire<br/>mirrors the official app"]
-  OBS["Observation<br/>one per feature<br/>ObservationIndicatorsOah"]
-  LOC["Location<br/>the spot, LocationOah<br/>nested: reach, creek, city"]
-  PROV["Provenance<br/>who, when, with what score"]
-  SR["ServiceRequest<br/>this pipe is worth testing"]
-  SPEC["Specimen, SpecimenOah<br/>EXAMPLE only"]
-  LIB["Library<br/>our entry on their sandbox"]
-  BUN["Bundle<br/>one visit, one transaction"]
-  PR --> PRL --> ORG
-  QR --> QN
-  QR --> LOC
-  OBS --> LOC
-  OBS --> PR
-  PROV --> OBS
-  PROV --> QR
-  PROV --> PR
-  SR --> LOC
-  SR --> OBS
-  SPEC --> SR
-  BUN --> QR
-  BUN --> OBS
-  BUN --> LOC
-  BUN --> PROV
-  LIB --> PROV
+flowchart TB
+  accTitle: The FHIR resources of one creek visit, and how they point at each other
+  accDescr: One creek visit is emitted as a collection Bundle by core/fhir_emit.py. Its Observations sit on the spot, which is part of a reach, which is part of a creek. Each Observation names the volunteer as performer and the creek check answers as its source. The volunteer is a pseudonymous Practitioner whose dated qualification is issued by Second Look, and the test sitting with the per-feature score is authored by the same Practitioner. One Provenance ties every Observation to the volunteer, the software and both sets of answers. A pipe worth testing becomes a ServiceRequest made on request by core/fhir_referral.py, and our Library entry on their sandbox lists the mirrored Provenance.
+  subgraph VISIT["Bundle, type collection: one creek visit, from core/fhir_emit.py"]
+    ORG["Organization<br/>Second Look"]
+    DEV["Device<br/>the Second Look web app"]
+    PRAC["Practitioner, the volunteer<br/>known by a hash of a random token<br/>qualification: the Second Look test,<br/>from the test day until it lapses"]
+    QRT["QuestionnaireResponse<br/>the test sitting: each feature's score"]
+    QRV["QuestionnaireResponse<br/>the creek check: every answer"]
+    OBS["Observation, one per answered item<br/>profile ObservationIndicatorsOah<br/>value: a coded answer or a quantity"]
+    PROV["Provenance<br/>one per visit"]
+    subgraph NEST["Location nest, profile LocationOah"]
+      SPOT["Location: the spot"]
+      REACH["Location: the reach"]
+      CREEK["Location: the creek"]
+    end
+  end
+  subgraph REFER["Referral, core/fhir_referral.py"]
+    SR["ServiceRequest, intent proposal<br/>test the water coming out of this pipe<br/>made on request, never stored"]
+  end
+  subgraph SANDBOX["Their sandbox, our copies sent by scripts/repush_sandbox.py"]
+    LIB["Library, profile LibraryOah<br/>our data set, from core/fhir_library.py"]
+  end
+  SPOT -- "partOf" --> REACH
+  REACH -- "partOf" --> CREEK
+  PRAC -- "qualification.issuer" --> ORG
+  QRT -- "author" --> PRAC
+  QRV -- "author" --> PRAC
+  OBS -- "subject" --> SPOT
+  OBS -- "performer" --> PRAC
+  OBS -- "derivedFrom" --> QRV
+  PROV -- "target: every Observation" --> OBS
+  PROV -- "agent, author" --> PRAC
+  PROV -- "agent, assembler" --> DEV
+  PROV -- "entity, source: the answers" --> QRV
+  PROV -- "entity, source: the score" --> QRT
+  SR -- "subject: the pipe's spot" --> SPOT
+  SR -- "reasonReference:<br/>the pipe Observations" --> OBS
+  SR -- "requester" --> ORG
+  LIB -- "content: each mirrored<br/>Provenance, by its id there" --> PROV
 ```
 
 Their profiles are used where they exist and ours only where they do not. Feature answers are
@@ -131,29 +176,49 @@ the values. `docs/fhir_mapping.md` has every field.
 
 ## The AI gate, step by step
 
+Every arrow is a call in `core/checker.py`, `core/gate.py` or `core/followups.py`. On the live
+creek check the checker is off: `apps/api/settings.py` has `checker_enabled` false and the
+Worker passes no flags, so no model is in that request path. The walks run the same gate at
+build time in `scripts/build_walks.py` and ask their one question after the person has
+answered. The image: [`docs/diagrams/ai-gate.svg`](diagrams/ai-gate.svg).
+
 ```mermaid
 sequenceDiagram
-  participant Person
-  participant App as Web app
-  participant Checker as core/checker.py
-  participant Model as Vision model
-  participant Gate as core/gate.py
-  participant Follow as core/followups.py
-  participant Store as FHIR store
-  Person->>App: Files a creek check, or opens a walk
-  App->>Checker: Photo or frame, and the features to look at
-  Checker->>Checker: Refuse any feature this model did not pass
-  Checker->>Model: One photo, one question, forced answer
-  Model-->>Checker: yes, no or cant_tell, and a note
-  Checker->>Gate: Proposed flag
-  Gate->>Gate: Shape, feature, pass table, note length, one flag per feature
-  Gate-->>Follow: At most one eligible question, or nothing
-  Follow->>Follow: Answers, weather and the person's score decide. No model call here.
-  Follow-->>App: At most two questions, the model's at most one of them
-  App->>Person: "One more look", with the reason in one line
-  Person-->>App: The person answers. The model's note is shown as "the checker noticed".
-  App->>Store: The record, built from human answers only
-  Note over Model,Store: The model never reaches the store. It has no path to it.
+  accTitle: The AI gate, step by step
+  accDescr: The volunteer answers every question first. Only then may a vision model answer one question about one photo, and only for a feature it passed on the same test the volunteers take. The gate turns that answer into a flag or drops it. A flag can make one follow-up question eligible. The follow-up selector, which calls no model, picks at most two questions. The person answers them, and the record is built from the person's answers alone.
+  autonumber
+  actor V as Volunteer
+  participant App as The app and its API
+  participant C as core/checker.py
+  participant P as Pass table<br/>results/model_pass_table.json
+  participant M as Vision model
+  participant G as core/gate.py
+  participant F as core/followups.py
+  participant R as build_record<br/>core/gate.py
+  V->>App: Answers every question in the creek check first
+  App->>C: check_photo: one photo, one feature
+  C->>P: feature_passed: is the table from a real run, and did this model pass this feature?
+  alt The checker is off, or the answer is no
+    C-->>App: No flag. The model is never asked.
+  else Yes
+    C->>M: The feature's question, from content/features.yaml
+    M-->>C: yes, no or cant_tell, and a note
+    C->>C: force_answer: anything but a clean yes stops here
+    C->>G: parse_flags: the yes as a candidate flag
+    G->>P: Reads the table again: real run, feature passed by this model
+    G->>G: Checks the feature, the confidence and a short plain note
+    G-->>C: A Flag, or a reason it was dropped
+    C-->>App: At most one Flag
+  end
+  App->>F: select_followups: answers, dry days, the person's score, flags
+  F->>F: Rules in order: dry pipe, rating check, checker flag, low score
+  Note over F: A flag can make only the checker flag question eligible. No model call in here.
+  F-->>App: At most two questions, and at most one of them from a flag
+  App->>V: Look again? The model's note is shown as "the checker noticed"
+  V->>App: The person's own answer
+  App->>R: Answers, ratings, follow-up answers and photo ids
+  Note over R: No parameter takes a flag, a model id or model text
+  R-->>App: The visit record, human answers only
 ```
 
 Three rules hold that shape in place, and each has a test in the same commit as the code:
