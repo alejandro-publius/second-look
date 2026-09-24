@@ -22,6 +22,7 @@ DOCS = [
     ROOT / "docs" / "MCP.md",
     ROOT / "docs" / "DATA_CARD.md",
     ROOT / "docs" / "MODEL_CARD.md",
+    ROOT / "docs" / "THREAT_MODEL.md",
     *sorted((ROOT / "docs" / "adr").glob("*.md")),
 ]
 PATH_RE = re.compile(r"`([A-Za-z0-9_.\[\]-]+(?:/[A-Za-z0-9_.\[\]-]+)+/?)(?:::(\w+))?`")

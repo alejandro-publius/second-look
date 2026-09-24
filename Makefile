@@ -109,10 +109,11 @@ verify-claims:
 	$(PY) scripts/verify_claims.py --file DEPLOY.md
 	$(PY) scripts/verify_claims.py --file docs/DATA_CARD.md
 	$(PY) scripts/verify_claims.py --file docs/MODEL_CARD.md
+	$(PY) scripts/verify_claims.py --file docs/THREAT_MODEL.md
 
 # The README and every other doc whose numbers verify-claims checks, so a new result or a new
 # test count is written everywhere it is quoted, not only in the README.
-RENDERED_DOCS := WRITEUP.md SECURITY.md DEPLOY.md docs/API.md docs/MCP.md docs/DATA_CARD.md docs/MODEL_CARD.md
+RENDERED_DOCS := WRITEUP.md SECURITY.md DEPLOY.md docs/API.md docs/MCP.md docs/DATA_CARD.md docs/MODEL_CARD.md docs/THREAT_MODEL.md
 render-readme:
 	$(PY) scripts/render_readme.py
 	@for doc in $(RENDERED_DOCS); do $(PY) scripts/render_readme.py --readme $$doc || exit 1; done
