@@ -1178,6 +1178,8 @@ It takes 5 minutes, paid at the panel's minimum hourly rate.
 Screening: 18 or older, fluent in English. Device: a phone or a laptop.
 Target: 80 completed sessions. Link: https://second-look-79t.pages.dev/t?src=panel
 Watch with make panel-status, which reads /api/test/counts. Completion code: C1A2B3.
+Before you approve any payment, compare the codes with make panel-status. The code is
+visible in the page source, and the analysis counts only finished sessions.
 """
 UPDATE_29_MAKEFILE = (
     "panel-status:\n\techo counts\n"
