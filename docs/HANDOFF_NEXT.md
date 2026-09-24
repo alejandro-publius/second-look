@@ -1,5 +1,29 @@
 # Handoff: where Second Look stands, 2026-09-24
 
+## UPDATE_27 and UPDATE_29, the loop to RED: 0 (Sep 24, 08:00Z)
+
+The definition of done is `docs/internal/DONE.md`; `make done-check` prints PASS, RED, BLOCKED or
+HUMAN per line and ends with `RED: <n> BLOCKED: <n> HUMAN: <n>`. The plan to get there is
+`docs/internal/PLAN_TO_DONE.md`. Work on `depth` (or a `p27/`/`p29/` branch merged into it), run
+`make check`, then fast-forward `main`, deploy in the order of `docs/notes/hosting.md`, and run the
+phone checks. Reading order for a fresh session: `CLAUDE.md`, `PLAN.md`, this file,
+`docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest `docs/internal/updates/`.
+
+Where it stands: every block 23 and 24 item passes (screenshots and the GIF, the three diagrams,
+the judge-first README, the Tideline sections, ADRs, Dependabot, pre-commit, topics); the panel
+study's software side is live (`docs/internal/PANEL_STUDY.md`, Alex launches it by Sep 26);
+contributed back as hl7-eu/oah pull request 5 and issues 6 to 8; the four-model AI run is in the
+README. In progress: UPDATE_29's documents, `make reproduce` and mutation testing, OpenTimestamps
+and `/verify` with Lighthouse on the landing page, and the iNaturalist context line (branches
+`p29/*`); then the second review, the six-judge rerun and the critic rounds against Alex's
+tideline and blackbox-datahub READMEs, then the measurements again on the final deploy (axe,
+Lighthouse, flaky runs, README commands, links).
+
+Traps: after any change to `content/locales/en.json`, run `scripts/build_worker_content.py`, or
+`make check` fails at worker-check (it happened three times today). The web build rewrites the
+tracked `apps/web/public/_headers` with the build's API origin; restore it before committing.
+CI runs on `main` and pull requests only.
+
 ## UPDATE_22, after the merge (Sep 24, 04:10Z)
 
 `main` and `depth` are the same commit; keep working on `depth` and move `main` forward with a
