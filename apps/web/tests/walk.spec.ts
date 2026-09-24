@@ -1,6 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { toPageTop } from "../scripts/gallery-view.mjs";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
@@ -113,12 +114,12 @@ const featureNames: Record<string, string> = Object.fromEntries(content.features
 
 // CRITIC_04 F01: the one record a judge can make listed no answer and no score. The record screen
 // now lists every answer the walk made, the way /spot lists a stored visit's, and where /spot shows
-// the observer's score it says the walk's observer was not tested on this phone, then points to
-// the example on /two, where a volunteer's score travels with the answer.
+// the observer's score it says "No score in a demo record" (walk.not_tested), then points to the
+// example on /two, where a volunteer's score travels with the answer.
 const en: Record<string, string> = content.locale;
 const formItems: { id: string; text: string; feature: string | null }[] = content.form.items;
 
-test("the walk's record lists every answer the walk made, with not tested on this phone where /spot shows the score", async ({ page }) => {
+test("the walk's record lists every answer the walk made, with No score in a demo record where /spot shows the score", async ({ page }) => {
   await mockApi(page, {});
   const w = walks[0];
   await page.goto(`${BASE}/walk/${w.id}`);
@@ -143,9 +144,8 @@ test("the walk's record lists every answer the walk made, with not tested on thi
       made.push({ question, answer: (await choice.innerText()).trim() });
       await choice.click();
     } else {
-      // The feelings sliders, sent as they start: every one at 0.
-      const names = await group.locator("label[for^='slider-']").allInnerTexts();
-      made.push({ question, answer: names.map((n) => `${n.trim()}: 0`).join(", ") });
+      // The feelings sliders, left where they start: a slider nobody moved is not an answer, so
+      // the question makes no line (CRITIC_06 H03).
       await page.getByRole("button", { name: "Next", exact: true }).click();
     }
     // On to the next screen before the next look: the question on screen has changed or gone.
@@ -179,4 +179,73 @@ test("the walk's record lists every answer the walk made, with not tested on thi
   // WCAG 2.2 SC 1.4.10: the record with its answers still fits the phone width.
   const viewport = page.viewportSize()!.width;
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport);
+});
+
+/** Goes through a walk's questions the quick way, as the gallery does, until its record shows:
+ * Skip, None of these, the first choice, or Next. The feelings screen is left to onFeelings. */
+async function answerWalk(page: Page, onFeelings: () => Promise<void>) {
+  const feelings = formItems.find((it) => it.id === "feelings")!.text;
+  for (let i = 0; i < 40; i++) {
+    if (await page.getByRole("heading", { name: en["walk.done_title"] }).isVisible()) return;
+    if (await page.getByRole("button", { name: "Finish" }).isVisible()) {
+      await page.getByRole("button", { name: "Finish" }).click();
+      continue;
+    }
+    const question = (await page.locator("h1#question").innerText()).trim();
+    const skip = page.getByRole("button", { name: "Skip" });
+    const none = page.getByRole("button", { name: "None of these" });
+    const choice = page.getByRole("main").getByRole("group").first().getByRole("button");
+    if (question === feelings) await onFeelings();
+    else if (await skip.first().isVisible()) await skip.first().click();
+    else if (await none.isVisible()) await none.click();
+    else if (await choice.first().isVisible()) await choice.first().click();
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.getByRole("heading", { name: en["walk.done_title"] })).toBeVisible();
+}
+
+// CRITIC_06 H03: every feelings slider starts at 0, and one nobody moved was kept as 0, so a person
+// who went on past the screen was recorded as feeling none of the four. A slider is an answer only
+// once it is moved or marked Not applicable; the rest stay out of the answers and the record.
+test("a feelings slider nobody moved stays out of the walk's record", async ({ page }) => {
+  await mockApi(page, {});
+  const feelings = formItems.find((it) => it.id === "feelings")!.text;
+  for (const moved of [false, true]) {
+    await page.goto(`${BASE}/walk/${walks[0].id}`);
+    await page.getByRole("button", { name: "Start the check" }).click();
+    await answerWalk(page, async () => {
+      const shown = page.locator("output[for^='slider-']");
+      // No slider shows a number before it is moved.
+      await expect(shown).toHaveText(["", "", "", ""]);
+      if (moved) {
+        await page.getByLabel("Joy").fill("3");
+        await page.locator(".card", { hasText: "Fear" }).getByLabel("Not applicable").check();
+        // Ticked and then unticked again is not an answer either.
+        await page.locator(".card", { hasText: "Serenity" }).getByLabel("Not applicable").check();
+        await page.locator(".card", { hasText: "Serenity" }).getByLabel("Not applicable").uncheck();
+        await expect(shown).toHaveText(["3", "", "", ""]);
+      }
+      await page.getByRole("button", { name: "Next", exact: true }).click();
+    });
+    const row = page.getByTestId("walk-answers").locator(".answer-line").filter({ hasText: feelings });
+    if (moved) await expect(row.locator("strong")).toHaveText("Joy: 3, Fear: Not applicable");
+    else await expect(row).toHaveCount(0);
+  }
+});
+
+// CRITIC_06 H03: the gallery's shot of a walk's record opened on a line cut in half, with the page
+// title out of the frame, because the record showed wherever the form had left the page. The
+// gallery now goes to the top of the page first (scripts/gallery-view.mjs). This makes a record on
+// the gallery's phone size, takes the same step, and checks the title is whole on screen.
+test("the gallery's shot of a walk's record has the page title whole in view", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockApi(page, {});
+  await page.goto(`${BASE}/walk/${walks[0].id}`);
+  await page.getByRole("button", { name: "Start the check" }).click();
+  await answerWalk(page, () => page.getByRole("button", { name: "Next", exact: true }).click());
+  await toPageTop(page);
+  const box = (await page.getByRole("heading", { name: en["walk.done_title"], level: 1 }).boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(844);
 });

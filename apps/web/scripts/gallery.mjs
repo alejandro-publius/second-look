@@ -16,6 +16,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { API_ORIGIN, BUILT_IN_DEFAULT, goldFor, mockApi } from "../tests/mock-api.mjs";
 import { liveRequestAllowed, localRequestAllowed } from "./gallery-guard.mjs";
+import { toPageTop } from "./gallery-view.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const RAW = resolve(process.env.GALLERY_RAW || join(here, "..", "screens", "gallery"));
@@ -243,6 +244,8 @@ async function liveRun(browser) {
       else await button(page, "Next").click();
     }
     await page.getByRole("heading", { name: "Your record from the clip" }).waitFor();
+    // From the top of the page, with the title in view, never from where the form left off.
+    await toPageTop(page);
     gallery("walk-record", route, "live", await shoot(page), "The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out.");
     await page.getByRole("link", { name: "See this creek as a city would" }).click();
     await page.waitForURL(/\/city/);

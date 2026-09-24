@@ -499,3 +499,14 @@ def test_the_gallery_script_routes_every_request_through_the_guard() -> None:
     # A refused request fails the run instead of passing quietly.
     assert "if (refused.length)" in source
     assert "process.exit(1)" in source
+
+
+def test_the_walk_record_shot_is_taken_from_the_top_of_the_page() -> None:
+    # CRITIC_06 H03: the shot opened on a line cut in half, with the page title out of the frame.
+    # The step itself is tested in apps/web/tests/walk.spec.ts; this checks the gallery takes it
+    # after the record shows and before the shot.
+    source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
+    assert 'import { toPageTop } from "./gallery-view.mjs";' in source
+    record = source.index('getByRole("heading", { name: "Your record from the clip" }).waitFor()')
+    shot = source.index('gallery("walk-record"')
+    assert "await toPageTop(page);" in source[record:shot]
