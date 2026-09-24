@@ -103,7 +103,7 @@ in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid 
 |---|---|
 | Site | https://second-look-79t.pages.dev (from `main`, d6c9d2b), API on the same origin under `/api` |
 | Preview of `depth` | https://depth.second-look-79t.pages.dev, API on the same origin, `make deploy-preview` |
-| API | https://second-look-api.thealexschroeder.workers.dev |
+| API | https://second-look-api.thealexschroeder.workers.dev/health (the bare address answers 404 by design) |
 | Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
 
 ## What is done on `depth`

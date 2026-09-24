@@ -1071,7 +1071,15 @@ def check_links(root: Path) -> list[str]:
     rows = [r for r in doc.get("rows") or [] if isinstance(r, dict)]
     if not rows:
         problems.append("links.json checked no link")
-    dead = [r for r in rows if r.get("status") == "dead"]
+    # What a reader of the public repository sees: go-public removes docs/internal, whose dated
+    # updates, reviews and reports cite files as they were then. The two live checklists stay in.
+    live = ("docs/internal/DONE.md", "docs/internal/PLAN_TO_DONE.md")
+    dead = [
+        r
+        for r in rows
+        if r.get("status") == "dead"
+        and (not str(r.get("file", "")).startswith("docs/internal/") or r.get("file") in live)
+    ]
     for r in dead[:10]:
         problems.append(f"dead link {r.get('target')} in {r.get('file')}:{r.get('line')}")
     if len(dead) > 10:

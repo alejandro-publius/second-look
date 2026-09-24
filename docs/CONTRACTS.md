@@ -78,7 +78,7 @@ Every file in `results/` is JSON or CSV or PNG, written by a script in `evals/` 
 
 - `results/model_pass_table.json` (W6): `{"real": bool, "generated_at_utc", "synthetic": bool, "models": {"<model_id>": {"<feature>": {"passed": bool, "runs": [[bool, bool, bool, bool], ...]}}}}`. `core.gate` reads `models[model][feature].passed`.
 - `results/cost_log.jsonl` (W6): one line per call `{ts_utc, model, purpose, input_tokens, output_tokens, cost_usd, real}`.
-- `results/power.json` (W2), `results/usability_<stamp>.json`, `results/consensus_<stamp>.json`, `results/examples.json`, `results/key_agreement.json` (W7 merge_labels), `results/fhir_validation.json` (exists).
+- `results/power.json` (W2), `results/usability_<stamp>.json`, `results/consensus_<stamp>.json`, `results/examples.json`, results/key_agreement.json (W7 merge_labels, written only once a second labeller's file exists), `results/fhir_validation.json` (exists).
 
 ## Audit log (W7 writes the module, everyone appends through it)
 

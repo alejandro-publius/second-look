@@ -198,7 +198,7 @@ bundle, which we can add on our side, and an extensible binding on
 `Location.type` where a SNOMED creek code is not in a value set of health care
 delivery sites, which the binding itself permits.
 
-No `docs/ig_gap_report.md` is written, because the verdict is not FAIL.
+No ig_gap_report.md is written, because the verdict is not FAIL.
 
 ## 5. Two honest caveats, neither of them a fail
 

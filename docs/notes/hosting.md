@@ -19,7 +19,7 @@ and produces a static `out/` for Pages. Four things had to change:
   `generateStaticParams`, so all seventeen score cards are written as files at build time.
 - `/demo` stopped reading server search params and reads the query in the browser.
 - The security headers moved. `apps/web/security-headers.mjs` is now the single definition, and
-  `scripts/build-headers.mjs` writes `public/_headers` from it for Pages while `next.config.ts`
+  `apps/web/scripts/build-headers.mjs` writes `apps/web/public/_headers` from it for Pages while `next.config.ts`
   uses it for the server build. A static export gets no headers from Next at all, so without this
   the strict policy would have silently vanished on deploy. It is verified live below.
 
@@ -71,7 +71,7 @@ Production keeps its dashboard configuration until `main` deploys with this file
 |---|---|
 | Site | https://second-look-79t.pages.dev (production, from `main`) |
 | Preview of `depth` | https://depth.second-look-79t.pages.dev (API on the same origin) |
-| API | https://second-look-api.thealexschroeder.workers.dev |
+| API | https://second-look-api.thealexschroeder.workers.dev/health (the bare address answers 404 by design) |
 | Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
 | Photo store | Workers KV `PHOTOS`, id `221e06ab5b54434ab5b4322712128ef3` |
 

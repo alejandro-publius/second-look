@@ -1,6 +1,6 @@
 # Devpost: every field, ready to paste
 
-UPDATE_14 section 8 item 1. Each field is one code block, so one tap copies it; the count is characters, spaces included. The text is the paste kit from pull request #5 (`docs/submission/DEVPOST_PASTE.md` there, not copied), brought up to date: the video walks and the creek footage are added, and every number carries a claim marker checked against `results/` by `uv run python scripts/verify_claims.py --file docs/devpost.md`. This file is the one to paste from.
+UPDATE_14 section 8 item 1. Each field is one code block, so one tap copies it; the count is characters, spaces included. The text is the paste kit from pull request #5 (its DEVPOST_PASTE.md, not copied), brought up to date: the video walks and the creek footage are added, and every number carries a claim marker checked against `results/` by `uv run python scripts/verify_claims.py --file docs/devpost.md`. This file is the one to paste from.
 
 The video link is a slot on purpose. The paid model run happened on Sep 23 and 24; its numbers live in the README's AI table, checked against `results/`, and this text states the pass table only in words.
 

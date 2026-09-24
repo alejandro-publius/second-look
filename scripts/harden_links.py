@@ -212,6 +212,24 @@ def repo_link(url: str) -> Result:
     return Result(url, "url", "dead", f"{path} is not on {ref}")
 
 
+# Hosts that are down for a cause outside this repository, named with the date and the evidence.
+# A link to one is listed as blocked, not dead. Only a named host: a blanket rule for any name that
+# does not resolve would hide a misspelled host.
+OUTSIDE_DOWN = {
+    "sandbox.hl7europe.eu": "the name does not resolve (NXDOMAIN at their own nameserver since "
+    "2026-09-23; hl7-eu/oah issue 8)",
+}
+
+
+# Addresses that are a base, not a page, quoted inside a verbatim copy of a resource: the route
+# needs an id after them. Listed by the full address, with where the route is.
+BASES = {
+    "https://second-look-api.thealexschroeder.workers.dev/api/fhir/Bundle": "a base inside the "
+    "copy of our sandbox Library entry; the route is /api/fhir/Bundle/<visit id> "
+    "(worker/src/index.ts)",
+}
+
+
 async def check_urls(urls: list[str]) -> dict[str, Result]:
     results: dict[str, Result] = {}
     todo: list[str] = []
@@ -225,6 +243,8 @@ async def check_urls(urls: list[str]) -> dict[str, Result]:
             results[url] = Result(url, "url", "skipped", "hard rule 9: never called")
         elif host in LOCAL or host.endswith(".local"):
             results[url] = Result(url, "url", "skipped", "local or example address")
+        elif url in BASES:
+            results[url] = Result(url, "url", "skipped", BASES[url])
         elif "{" in url or "<" in url or host.isupper() or "SITE_URL" in url:
             results[url] = Result(url, "url", "skipped", "template, not a real address")
         else:
@@ -251,7 +271,10 @@ async def check_urls(urls: list[str]) -> dict[str, Result]:
                 else:
                     results[url] = Result(url, "url", "dead", str(code))
             except httpx.HTTPError as exc:
-                results[url] = Result(url, "url", "dead", type(exc).__name__)
+                if host in OUTSIDE_DOWN:
+                    results[url] = Result(url, "url", "blocked", OUTSIDE_DOWN[host])
+                else:
+                    results[url] = Result(url, "url", "dead", type(exc).__name__)
 
     headers = {"User-Agent": UA, "Accept": "text/html,application/json;q=0.9,*/*;q=0.8"}
     async with httpx.AsyncClient(timeout=20.0, follow_redirects=True, headers=headers) as client:
