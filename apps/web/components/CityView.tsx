@@ -249,8 +249,10 @@ export function CityView({ creekId }: { creekId: string }) {
       ) : null}
 
       <h2>{t("city.findings_title")}</h2>
+      {/* A creek with checks and nothing reported says so, and never that nobody checked it; the
+          count at the top would say otherwise (CRITIC_06 H01). */}
       {view.findings.length === 0 ? (
-        <p className="muted">{t("city.none")}</p>
+        <p className="muted">{t(view.visits === 0 ? "city.none" : "city.findings_none")}</p>
       ) : (
         <div className="card">
           {view.findings.map((f) => (

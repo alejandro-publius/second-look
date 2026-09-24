@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "0de91b51d8ae721d",
+  content_hash: "2d8e6fbcfd1a13e4",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -2126,6 +2126,7 @@ function placeSpot(spot, creeks = CREEKS) {
 var FEATURES = core_content_default.rules.features_in_order;
 var SCORE_VALID_DAYS2 = core_content_default.rules.score_valid_days;
 var MEASURE_FOR_FEATURE = core_content_default.rules.measure_for_feature;
+var FINDING_KEYS = /* @__PURE__ */ new Set([...FEATURES, ...Object.keys(MEASURE_FOR_FEATURE)]);
 var DRY_PIPE_RULE = "dry_pipe";
 var PIPE_OBSERVERS_NEEDED = core_content_default.rules.pipe_observers_needed;
 var SAME_SPOT_METRES = core_content_default.rules.same_spot_metres;
@@ -2146,7 +2147,7 @@ function findingsFromVisits(visits, findingKeyFor) {
   for (const v of visits) {
     for (const [answerKey, value] of Object.entries(v.answers)) {
       const feature = lookup[answerKey] ?? answerKey;
-      if (!(feature in MEASURE_FOR_FEATURE) || !present(value)) continue;
+      if (!FINDING_KEYS.has(feature) || !present(value)) continue;
       const key = `${v.spot.spot_id}\0${feature}`;
       const day = dayOf(v.answered_at);
       let row = seen.get(key);

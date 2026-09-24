@@ -99,7 +99,17 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
   await expect(page.getByRole("main")).toContainText(`${en["city.finding_barriers"]}${en["city.walk_seen"].replace("{n}", "1")}`);
   await expect(page.getByRole("main")).toContainText(`${en["city.finding_barriers"]}. OneAquaHealth Policy Brief`);
   await expect(page.getByRole("main")).not.toContainText(barriers);
+  // CRITIC_06 H01: the walk said yes to plants as well. The plant is listed with what the checks
+  // found, beside a plain line that no OneAquaHealth measure answers it; barriers, which has a
+  // measure, carries no such line, and no measure names the plant.
+  const found = page.getByRole("region", { name: en["city.walk_findings"] });
+  const plant = found.locator(".row").filter({ hasText: featureNames["invasive_plant"] });
+  await expect(plant).toHaveText(`${featureNames["invasive_plant"]}${en["city.walk_seen"].replace("{n}", "1")}${en["city.walk_no_measure"]}`);
+  await expect(found.locator(".row").filter({ hasText: en["city.finding_barriers"] })).not.toContainText(en["city.walk_no_measure"]);
+  await expect(page.getByRole("region", { name: en["city.walk_needs"] })).not.toContainText(featureNames["invasive_plant"]);
 });
+
+const featureNames: Record<string, string> = Object.fromEntries(content.features.map((f: { id: string; name: string }) => [f.id, f.name]));
 
 // CRITIC_04 F01: the one record a judge can make listed no answer and no score. The record screen
 // now lists every answer the walk made, the way /spot lists a stored visit's, and where /spot shows
