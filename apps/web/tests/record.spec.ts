@@ -194,6 +194,20 @@ test("the judges' door names /two for what it shows", async ({ page }) => {
   await expect(page.getByText("The same creek beside a laboratory result")).toHaveCount(0);
 });
 
+// The id is read in the browser, after the first paint, so the record must not ask for an empty
+// id first, and a link with no id says so (REVIEW_03 R43).
+test("/spot asks only for the id in the link, and says when the link names none", async ({ page }) => {
+  const calls = await mockApi(page);
+  const asked = () => calls.filter((c: { path: string }) => c.path.startsWith("/api/spot/")).map((c: { path: string }) => c.path);
+  await page.goto("/spot?id=example");
+  await expect(page.getByRole("heading", { name: "Footbridge below the library" })).toBeVisible();
+  expect(asked()).toEqual(["/api/spot/example"]);
+  await page.goto("/spot");
+  await expect(page.getByText("This link names no spot.")).toBeVisible();
+  await expect(page.getByText("No record for this spot.")).toHaveCount(0);
+  expect(asked()).toEqual(["/api/spot/example"]);
+});
+
 test("the judges' door links the creek by its readable slug", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");

@@ -168,6 +168,7 @@
   "spot.title": "Creek record",
   "spot.loading": "Loading the record",
   "spot.not_found": "No record for this spot.",
+  "spot.no_id": "This link names no spot.",
   "spot.quick_link": "Quick check",
   "spot.full_check_link": "Creek check",
   "spot.only_passed": "Only show answers from people who passed the test for that feature",
