@@ -11,15 +11,13 @@ order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA k
 `PLAN.md`, this file, `docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest
 `docs/internal/updates/`.
 
-Where it stands: UPDATE_29 is merged and live (documents, `make reproduce`, mutation testing,
-OpenTimestamps confirmed in block 968372 with `/verify`, the iNaturalist line, the panel study's
-software side). REVIEW_03 found 59 things at 3fa942f and all 59 are fixed with proofs
-(`docs/internal/reviews/REVIEW_03.md`). The six-judge rerun scored a weighted 7.33 against 5.73
-(`JUDGE_SIM_01_after.md`). Critic round 01 (`CRITIC_01.md`, 22 findings, four blockers) is worked
-through; round 02 reads 3b905a8. Measured on the live site today: axe clean on 60 views, Lighthouse
-94 or more on all 20 pages and 96, 100, 100, 100 on the landing page, no dead link. Still to do:
-the flaky runs and the README command run (they share port 3100), two clean critic rounds, then
-`make done-check` to RED: 0.
+Where it stands (Sep 24, 17:30Z): everything is merged, deployed and green on `main`. REVIEW_03's
+59 findings are fixed with proofs; the six-judge rerun scored 7.33 against 5.73; critic rounds 01 to
+04 went blocker, blocker, major, minor, each worked through (`docs/internal/reviews/CRITIC_*.md`).
+Measured on the live site: axe clean on 60 views, Lighthouse 93 or more on all 20 pages, no dead
+link, every README command runs in a fresh clone, no flaky test over three runs. `make done-check`
+is RED only on D24, which needs the two newest critic rounds at cosmetic or below; round 05 is out.
+The rest is BLOCKED (dated Sep 28, and their sandbox) or HUMAN (`docs/ALEX_TODO.md`).
 
 Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamps) and
 `com.secondlook.inaturalist` (07:45; it asks nothing until Rachel approves the Bay Area plant
