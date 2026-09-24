@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-24T12:45:44Z",
- "commit": "8e9663c",
+ "checked_utc": "2026-09-24T13:09:22Z",
+ "commit": "3c14b51",
  "branch": "HEAD",
  "setup": {
   "uv sync --frozen": 0,
@@ -16,7 +16,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 152.9,
+   "seconds": 143.9,
    "detail": "uv run python scripts/mutation.py\ncore/gate.py: 226 of 229 changes caught, 3 survived, 0 timed out, 98.7 percent\ncore/followups.py: 319 of 324 changes caught, 5 survived, 0 timed out, 98.5 percent\ncore/scoring.py: 53 of 53 changes caught, 0 survived, 0 timed out, 100.0 percent\ncore/fhir_emit.py: 1477 of 1543 changes caught, 66 survived, 0 timed out, 95.7 percent\nmutation: every module at 85 percent or more; wrote /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/results/mutation.json\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
@@ -26,7 +26,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 165.4,
+   "seconds": 159.4,
    "detail": "0m16 |\u001b[0m \u001b[36mfunction\u001b[0m readResult(path: string): unknown {\n\u001b[33m\u001b[1m>\u001b[0m \u001b[90m17 |\u001b[0m   \u001b[36mconst\u001b[0m full = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m18 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m19 |\u001b[0m }\n  \u001b[90m20 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
@@ -36,7 +36,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 0.6,
+   "seconds": 0.7,
    "detail": "audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
@@ -46,7 +46,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 1.9,
+   "seconds": 1.6,
    "detail": "ots-status: proofs/analysis_plan.md.ots confirmed at block 968372\nots-status: proofs/audit-head-2026-09-24.ots confirmed at block 968372\nots-status: proofs/prereg-v1.tag.ots confirmed at block 968372\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
@@ -66,16 +66,18 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 3.7,
-   "detail": "uv run python scripts/check_diagrams.py\ndiagrams: 8 Mermaid block(s) parse, by the structural check; 4 source(s) in docs/diagrams have labelled edges and an SVG drawn from them as they are now\ncd tools/diagrams && node --test render.test.mjs && node render.mjs --check\n\u2714 positions and sizes are set aside (1.041833ms)\n\u2714 a label that changed is not set aside (0.087625ms)\n\u2714 a digit in a label is kept (0.060959ms)\n\u2714 a class or an element that changed is not set aside (0.069292ms)\n\u2714 the stamp names the source, the config, the renderer and the drawing (0.403666ms)\n\u2714 the drawing's sha256 in the stamp gives away a hand edit (0.150833ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 433.647125\ndiagrams: ai-gate.svg: the same bytes as a fresh render\ndiagrams: fhir-graph.svg: the same bytes as a fresh render\ndiagrams: loop.svg: the same bytes as a fresh render\ndiagrams: system-map.svg: the same bytes as a fresh render\ndiagrams: 4 diagram(s) match a fresh render, @mermaid-js/mermaid-cli 11.17.0, mermaid 11.17.2\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "seconds": 3.4,
+   "detail": "uv run python scripts/check_diagrams.py\ndiagrams: 8 Mermaid block(s) parse, by the structural check; 4 source(s) in docs/diagrams have labelled edges and an SVG drawn from them as they are now\ncd tools/diagrams && node --test render.test.mjs && node render.mjs --check\n\u2714 positions and sizes are set aside (1.002542ms)\n\u2714 a label that changed is not set aside (0.086166ms)\n\u2714 a digit in a label is kept (0.058541ms)\n\u2714 a class or an element that changed is not set aside (0.067334ms)\n\u2714 the stamp names the source, the config, the renderer and the drawing (0.391458ms)\n\u2714 the drawing's sha256 in the stamp gives away a hand edit (0.146667ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 476.56075\ndiagrams: ai-gate.svg: the same bytes as a fresh render\ndiagrams: fhir-graph.svg: the same bytes as a fresh render\ndiagrams: loop.svg: the same bytes as a fresh render\ndiagrams: system-map.svg: the same bytes as a fresh render\ndiagrams: 4 diagram(s) match a fresh render, @mermaid-js/mermaid-cli 11.17.0, mermaid 11.17.2\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "README.md",
    "line": 372,
    "command": "make check",
-   "ran": false,
-   "result": "not run",
-   "detail": "serves on port 3100 (and mocks the API on 8100), and another process holds one"
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 303.7,
+   "detail": " = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m18 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m19 |\u001b[0m }\n  \u001b[90m20 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mUnknown SCM platform. Use --platform to include links in findings.\u001b[0m \u001b[36mhost=\u001b[0m\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1m372 commits scanned.\u001b[0m\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mscanned ~18103705 bytes (18.10 MB) in 3.47s\u001b[0m\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mno leaks found\u001b[0m\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "README.md",
@@ -84,8 +86,8 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 0.4,
-   "detail": "uv run python scripts/new_city.py --name \"Aarhus\" --country \"Denmark\" --lat 56.1629 --lon 10.2039\nnew-city: wrote content/regions/aarhus.yaml\nnew-city: wrote fhir/fsh/city-aarhus.fsh\nnew-city: wrote docs/cities/aarhus/poster.html\nnew-city: wrote docs/cities/aarhus/CHECKLIST.md\nnew-city: wrote docs/cities/TIMES.md\nnew-city: no claim was made; the checklist says what the city fills in by hand\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "seconds": 0.3,
+   "detail": "uv run python scripts/new_city.py --name \"Aarhus\" --country \"Denmark\" --lat 56.1629 --lon 10.2039\nnew-city: wrote content/regions/aarhus.yaml\nnew-city: wrote fhir/fsh/city-aarhus.fsh\nnew-city: wrote docs/cities/aarhus/poster.html\nnew-city: wrote docs/cities/aarhus/CHECKLIST.md\nnew-city: wrote docs/cities/TIMES.md\nnew-city: no claim was made; the checklist says what the city fills in by hand\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n (clone restored: exit 0)"
   },
   {
    "doc": "README.md",
@@ -102,7 +104,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 30.5,
+   "seconds": 22.1,
    "detail": "60922T054932Z.json: 82 values regraded from seed 20260920 and the fake profiles in evals/fixtures/seeds.json\nok   results/footage_20260922T184011Z.json: 3443 values regraded from seed 20260920 and the fake profiles in evals/fixtures/seeds.json\nok   results/usability_synthetic.json: 323 values regraded from plan seed 20260920\nok   results/examples.json: 10 values regraded from the regraded usability analysis and results/model_sweep_20260921T001651Z.json\nok   results/power.json: 26 values regraded from plan seed 20260920\nok   results/consensus_coarseness.json: 851 values regraded from its seed, by make consensus-check\nskip results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has\nskip results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file\nskip results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has\nreproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
@@ -112,8 +114,8 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 221.3,
-   "detail": "files regraded from raw replies and seeds, with no network and no key; every one matches\n  ok   fhir: last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4\n  ok   web: next build ok\n  ok   web: design-check: clean. 84 source files and 25 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s).\n  ok   audit log: audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\n  ok   secrets: working tree: nothing shaped like a live key\n  ok   secrets: gitleaks: history clean\n\nPASS  tests      180.6s  python: 2003 passed, 2 skipped, 9 xfailed in 177.03s (0:02:57)\nPASS  reproduce   21.3s  reproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches\nPASS  fhir         0.6s  last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4\nPASS  web         11.3s  next build ok\nPASS  audit log    0.2s  audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\nPASS  secrets      7.2s  working tree: nothing shaped like a live key\njudge-check: 6 of 6 steps passed, offline, with no key\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "seconds": 201.1,
+   "detail": "files regraded from raw replies and seeds, with no network and no key; every one matches\n  ok   fhir: last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4\n  ok   web: next build ok\n  ok   web: design-check: clean. 84 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.4s).\n  ok   audit log: audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\n  ok   secrets: working tree: nothing shaped like a live key\n  ok   secrets: gitleaks: history clean\n\nPASS  tests      159.7s  python: 2004 passed, 1 skipped, 9 xfailed in 157.36s (0:02:37)\nPASS  reproduce   22.8s  reproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches\nPASS  fhir         0.5s  last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4\nPASS  web         10.6s  next build ok\nPASS  audit log    0.2s  audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\nPASS  secrets      7.1s  working tree: nothing shaped like a live key\njudge-check: 6 of 6 steps passed, offline, with no key\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "README.md",
@@ -122,8 +124,8 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 153.5,
-   "detail": ".......................................... [ 46%]\n........................................................................ [ 50%]\n........................................................................ [ 53%]\n........................................................................ [ 57%]\n........................................................................ [ 60%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 78%]\n........................................................................ [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 89%]\n........................................................................ [ 92%]\n....................................................................s... [ 96%]\n......................................................................   [100%]\n2003 passed, 2 skipped, 9 xfailed in 151.50s (0:02:31)\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "seconds": 152.6,
+   "detail": ".......................................... [ 46%]\n........................................................................ [ 50%]\n........................................................................ [ 53%]\n........................................................................ [ 57%]\n........................................................................ [ 60%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 78%]\n........................................................................ [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 89%]\n........................................................................ [ 92%]\n....................................................................s... [ 96%]\n......................................................................   [100%]\n2004 passed, 1 skipped, 9 xfailed in 150.54s (0:02:30)\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "README.md",
@@ -133,7 +135,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 1.8,
-   "detail": ", the same pick for the same seed (0.946083ms)\n\u2714 act: findings, needs, pipes worth testing, and both pin guards (2.31725ms)\n\u2714 act: the downstream note, only where flows_into is set (0.608291ms)\n\u2714 regions: placement on a creek and a reach, and the reaches below (0.33ms)\n\u2714 fhir_emit: the same Bundle as Python, and it passes the structural check (5.181792ms)\n\u2714 fhir_referral: the ServiceRequest and the example result, the same as Python (2.747708ms)\n\u2714 walks: the same demo Bundle as Python, tagged on every resource, and structurally sound (1.754583ms)\n\u2714 old Bundles: only ts- JSON files are deleted, and only the ones in that folder (1.245291ms)\n\u2714 old Bundles: every ts- Bundle the validator will read was written by this run (0.10675ms)\n\u2714 uploads: a JPEG keeps its picture and loses its metadata, wherever the metadata sits (0.462625ms)\n\u2714 uploads: a JPEG that breaks the shape is refused, not copied with its metadata (0.30475ms)\n\u2714 uploads: a stored photo is put in KV to expire after 30 days (34.973125ms)\n\u2139 tests 15\n\u2139 suites 0\n\u2139 pass 15\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 148.739334\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "he same pick for the same seed (1.038708ms)\n\u2714 act: findings, needs, pipes worth testing, and both pin guards (2.960834ms)\n\u2714 act: the downstream note, only where flows_into is set (0.729125ms)\n\u2714 regions: placement on a creek and a reach, and the reaches below (0.353292ms)\n\u2714 fhir_emit: the same Bundle as Python, and it passes the structural check (5.651792ms)\n\u2714 fhir_referral: the ServiceRequest and the example result, the same as Python (2.711958ms)\n\u2714 walks: the same demo Bundle as Python, tagged on every resource, and structurally sound (1.50375ms)\n\u2714 old Bundles: only ts- JSON files are deleted, and only the ones in that folder (1.723583ms)\n\u2714 old Bundles: every ts- Bundle the validator will read was written by this run (0.113709ms)\n\u2714 uploads: a JPEG keeps its picture and loses its metadata, wherever the metadata sits (0.519042ms)\n\u2714 uploads: a JPEG that breaks the shape is refused, not copied with its metadata (0.306ms)\n\u2714 uploads: a stored photo is put in KV to expire after 30 days (38.678375ms)\n\u2139 tests 15\n\u2139 suites 0\n\u2139 pass 15\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 161.744917\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "README.md",
@@ -142,7 +144,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 53.5,
+   "seconds": 55.4,
    "detail": "./apps/web/lib/how-data.ts:17:16\n[WebServer] Warning: Dynamic filesystem access causes tracing of the whole project\n[WebServer]   15 |\n[WebServer]   16 | function readResult(path: string): unknown {\n[WebServer] > 17 |   const full = join(REPO, path);\n[WebServer]      |                ^^^^^^^^^^^^^^^^\n[WebServer]   18 |   return existsSync(full) ? JSON.parse(readFileSync(full, \"utf8\")) : null;\n[WebServer]   19 | }\n[WebServer]   20 |\n[WebServer] \n[WebServer] Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.\n[WebServer] This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\n[WebServer] This can slow down deployments or lead to failures when size limits are exceeded.\n[WebServer] To resolve this, you can\n[WebServer] - make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n[WebServer] - only use them in development, or\n[WebServer] - opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n[WebServer] - remove them.\n[WebServer] \n[WebServer] Import trace:\n[WebServer]   Server Component:\n[WebServer]     ./apps/web/lib/how-data.ts\n[WebServer]     ./apps/web/app/how-we-know/page.tsx\n[WebServer] \n[WebServer] \n[WebServer] \u26a0 \"next start\" does not work with \"output: standalone\" configuration. Use \"node .next/standalone/server.js\" instead.\n"
   },
   {
@@ -152,8 +154,8 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 15.5,
-   "detail": "lete 200 OK (4ms)\n[wrangler:info] POST /api/test/session 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/complete 200 OK (4ms)\n[wrangler:info] GET /api/test/counts 200 OK (5ms)\n[wrangler:info] GET /api/test/export 404 Not Found (2ms)\n[wrangler:info] GET /api/test/export 404 Not Found (1ms)\n[wrangler:info] GET /api/test/export 404 Not Found (2ms)\n[wrangler:info] GET /api/test/export 200 OK (3ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/finalize 404 Not Found (2ms)\n[wrangler:info] POST /api/check/draft 404 Not Found (1ms)\n\n"
+   "seconds": 15.1,
+   "detail": "lete 200 OK (4ms)\n[wrangler:info] POST /api/test/session 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (4ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/complete 200 OK (2ms)\n[wrangler:info] GET /api/test/counts 200 OK (2ms)\n[wrangler:info] GET /api/test/export 404 Not Found (0ms)\n[wrangler:info] GET /api/test/export 404 Not Found (0ms)\n[wrangler:info] GET /api/test/export 404 Not Found (1ms)\n[wrangler:info] GET /api/test/export 200 OK (3ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/finalize 404 Not Found (3ms)\n[wrangler:info] POST /api/check/draft 404 Not Found (2ms)\n\n"
   },
   {
    "doc": "README.md",
@@ -162,8 +164,8 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 53.5,
-   "detail": "/cmds/tree/fhir/build/instances/ts-sl-referral-bundle-spot-1.json\n 00:00.027\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json\n 00:00.045\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-visit-0001.json\n 00:00.036\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json\n 00:00.028\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-walk-4116f9ddf7b8b451.json\n 00:00.045\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-walk-d2ef0549e6f251c4.json\n 00:00.039\nDone. Times: Loading: 00:11.221, validation: 00:01.636 (#15). Memory = 428Mb\n\nDone. Times: Loading: 00:11.221, validation: 00:01.636 (#15). Max Memory = 3Gb\nfhir-validate: 15 file(s), 0 error(s), 66 warning(s), terminology checks ran; details in results/fhir_validation.json\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "seconds": 42.5,
+   "detail": "ad/cmds/tree/fhir/build/instances/ts-sl-referral-bundle-spot-1.json\n 00:00.039\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json\n 00:00.066\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-visit-0001.json\n 00:00.054\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json\n 00:00.040\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-walk-4116f9ddf7b8b451.json\n 00:00.058\n  Validate /private/tmp/claude-501/-Users-alexvintera/69877729-e72a-4745-9745-aef366e01347/scratchpad/cmds/tree/fhir/build/instances/ts-sl-visit-walk-d2ef0549e6f251c4.json\n 00:00.078\nDone. Times: Loading: 00:11.218, validation: 00:02.067 (#14). Memory = 1Gb\n\nDone. Times: Loading: 00:11.218, validation: 00:02.067 (#14). Max Memory = 3Gb\nfhir-validate: 14 file(s), 0 error(s), 58 warning(s), terminology checks ran; details in results/fhir_validation.json\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "README.md",
@@ -172,8 +174,8 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 15.6,
-   "detail": "\nadded 382 packages, and audited 383 packages in 6s\n\n146 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 43 packages, and audited 44 packages in 2s\n\n7 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 261 packages, and audited 262 packages in 6s\n\n21 packages are looking for funding\n  run `npm fund` for details\n\n4 high severity vulnerabilities\n\nTo address all issues (including breaking changes), run:\n  npm audit fix --force\n\nRun `npm audit` for details.\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nResolved 117 packages in 4ms\nChecked 111 packages in 14ms\nnpm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.\n"
+   "seconds": 15.5,
+   "detail": "\nadded 382 packages, and audited 383 packages in 5s\n\n146 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 43 packages, and audited 44 packages in 2s\n\n7 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 261 packages, and audited 262 packages in 7s\n\n21 packages are looking for funding\n  run `npm fund` for details\n\n4 high severity vulnerabilities\n\nTo address all issues (including breaking changes), run:\n  npm audit fix --force\n\nRun `npm audit` for details.\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nResolved 117 packages in 4ms\nChecked 111 packages in 14ms\nnpm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.\n"
   },
   {
    "doc": "README.md",
@@ -182,7 +184,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 6.2,
+   "seconds": 8.2,
    "detail": "API answered: True; web answered: True. ports 8000 or 3100 are taken by another process on this machine, so the same two servers ran on 8962 and 8963"
   },
   {
@@ -202,7 +204,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 0.4,
+   "seconds": 0.3,
    "detail": "pre-commit installed at .git/hooks/pre-commit\n`pre-commit` is already installed\n"
   },
   {
@@ -218,30 +220,30 @@
    "line": 576,
    "command": "make report-pdf",
    "ran": true,
-   "result": "fail",
-   "exit": 2,
-   "seconds": 0.2,
-   "detail": "uv run python scripts/build_report.py\nreport-pdf: README.md shows 14 for results/fhir_validation.json#/files_validated, but results/ says 15; run make render-readme first\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [report-pdf] Error 1\n"
+   "result": "pass",
+   "exit": 0,
+   "seconds": 1.4,
+   "detail": "uv run python scripts/build_report.py\nreport-pdf: docs/REPORT.pdf, 8 pages, stamp in results/report_pdf.json\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
    "line": 23,
    "command": "make test",
    "ran": true,
-   "result": "fail",
-   "exit": 2,
-   "seconds": 152.9,
-   "detail": "ppend(checked_numbers(body, root, rel, inputs))\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nscripts/build_report.py:136: in checked_numbers\n    return CLAIM_RE.sub(marker, RENDERED_RE.sub(rendered, text))\n                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nm = <re.Match object; span=(8120, 8185), match='<!--v:results/fhir_validation.json#/files_validat>\n\n    def rendered(m: re.Match[str]) -> str:\n        rel, pointer, shown = m.group(1), m.group(2), m.group(3)\n        now = display(value_of(root, rel, pointer, inputs))\n        if now != shown:\n>           raise ReportError(\n                f\"{where} shows {shown} for {rel}#{pointer}, but results/ says {now}; \"\n                \"run make render-readme first\"\n            )\nE           scripts.build_report.ReportError: README.md shows 14 for results/fhir_validation.json#/files_validated, but results/ says 15; run make render-readme first\n\nscripts/build_report.py:123: ReportError\n=========================== short test summary info ============================\nFAILED scripts/tests/test_report_pdf.py::test_the_pdf_was_built_from_the_current_sources\n1 failed, 2003 passed, 1 skipped, 9 xfailed in 150.76s (0:02:30)\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [test] Error 1\n"
+   "result": "pass",
+   "exit": 0,
+   "seconds": 153.0,
+   "detail": ".......................................... [ 46%]\n........................................................................ [ 50%]\n........................................................................ [ 53%]\n........................................................................ [ 57%]\n........................................................................ [ 60%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 78%]\n........................................................................ [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 89%]\n........................................................................ [ 92%]\n....................................................................s... [ 96%]\n......................................................................   [100%]\n2004 passed, 1 skipped, 9 xfailed in 150.95s (0:02:30)\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
    "line": 26,
    "command": "make verify-claims",
    "ran": true,
-   "result": "fail",
-   "exit": 2,
-   "seconds": 0.1,
-   "detail": "uv run python scripts/verify_claims.py --synthetic\nrendered number drifted: results/fhir_validation.json#/files_validated README shows 14, results say 15; run scripts/render_readme.py\nverify-claims: 1 problem(s)\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [verify-claims] Error 1\n"
+   "result": "pass",
+   "exit": 0,
+   "seconds": 0.9,
+   "detail": "venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -290,8 +292,8 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 5.3,
-   "detail": "cd apps/web && node scripts/design-check.mjs\ndesign-check: clean. 84 source files and 25 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).\n"
+   "seconds": 5.0,
+   "detail": "cd apps/web && node scripts/design-check.mjs\ndesign-check: clean. 84 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.1s).\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -310,7 +312,7 @@
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 40.0,
+   "seconds": 38.9,
    "detail": "second_labels: no second label for test photo ph-bank-01\n  NOTE   second_labels: no second label for test photo ph-bank-02\n  NOTE   second_labels: no second label for test photo ph-bank-03\n  NOTE   second_labels: no second label for test photo ph-bank-04\n  NOTE   second_labels: no second label for test photo ph-channel-01\n  NOTE   second_labels: no second label for test photo ph-channel-02\n  NOTE   second_labels: no second label for test photo ph-channel-03\n  NOTE   second_labels: no second label for test photo ph-channel-04\n  NOTE   second_labels: no second label for test photo ph-plant-01\n  NOTE   second_labels: no second label for test photo ph-plant-02\n  NOTE   second_labels: no second label for test photo ph-plant-03\n  NOTE   second_labels: no second label for test photo ph-plant-04\n  NOTE   second_labels: no second label for test photo ph-pipe-01\n  NOTE   second_labels: no second label for test photo ph-pipe-02\n  NOTE   second_labels: no second label for test photo ph-pipe-03\n  NOTE   second_labels: no second label for test photo ph-pipe-04\n  NOTE   key_agreement: one labeller set the whole key, so no agreement figure is reported: named in docs/analysis_plan.md and under Known weaknesses\n\nchecks: 17 run, 15 passed, 0 failed, 17 notes\npreflight: 0 failed, of which 0 need a human\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
   },
   {
@@ -320,8 +322,8 @@
    "ran": true,
    "result": "fail",
    "exit": 2,
-   "seconds": 4.7,
-   "detail": "uv run python scripts/submit_check.py\nPASS  track_statement\nPASS  five_headers\nFAIL  video_link\n      README.md has no line with the word video and a link\n      docs/devpost.md has no line with the word video and a link\nPASS  video_duration  (no --video file given, so the 3 to 5 minute check was skipped)\nPASS  license\nPASS  demo_url  (NEXT_PUBLIC_SITE_URL unset and no demo link in docs/devpost.md; skipped)\nPASS  secrets_scan  (gitleaks: history clean)\nFAIL  verify_claims\n      verify_claims without --synthetic failed: verify-claims: 1 problem(s)\nPASS  audit_log  (3 entries, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3)\nFAIL  repo_public\n      cannot tell if the repo is public (gh said: none of the git remotes configured for this repository point to a known GitHub host. To tell gh about a new GitHub host, please use `gh auth login`)\nsubmit-check: 3 failed: video_link, verify_claims, repo_public\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [submit-check] Error 1\n"
+   "seconds": 4.6,
+   "detail": "uv run python scripts/submit_check.py\nPASS  track_statement\nPASS  five_headers\nFAIL  video_link\n      README.md has no line with the word video and a link\n      docs/devpost.md has no line with the word video and a link\nPASS  video_duration  (no --video file given, so the 3 to 5 minute check was skipped)\nPASS  license\nPASS  demo_url  (NEXT_PUBLIC_SITE_URL unset and no demo link in docs/devpost.md; skipped)\nPASS  secrets_scan  (gitleaks: history clean)\nPASS  verify_claims\nPASS  audit_log  (3 entries, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3)\nFAIL  repo_public\n      cannot tell if the repo is public (gh said: none of the git remotes configured for this repository point to a known GitHub host. To tell gh about a new GitHub host, please use `gh auth login`)\nsubmit-check: 2 failed: video_link, repo_public\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-int27/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [submit-check] Error 1\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
