@@ -57,6 +57,9 @@ async function settle(page) {
 
 /** One viewport screenshot. Returns the raw file name. */
 async function shoot(page) {
+  // The pointer rests in the corner, so the button tapped last does not show its hover colour and
+  // look chosen.
+  await page.mouse.move(0, 0);
   await settle(page);
   shots += 1;
   const file = `raw-${String(shots).padStart(3, "0")}.png`;
