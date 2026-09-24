@@ -1,0 +1,194 @@
+{
+  "by_feature": {
+    "artificial_bank": {
+      "answers": 48,
+      "cant_tell": 0,
+      "correct": 48,
+      "malformed": 0,
+      "no": 24,
+      "yes": 24
+    },
+    "dug_out_channel": {
+      "answers": 48,
+      "cant_tell": 4,
+      "correct": 42,
+      "malformed": 0,
+      "no": 24,
+      "yes": 20
+    },
+    "invasive_plant": {
+      "answers": 48,
+      "cant_tell": 47,
+      "correct": 1,
+      "malformed": 0,
+      "no": 0,
+      "yes": 1
+    },
+    "pipe_running": {
+      "answers": 48,
+      "cant_tell": 3,
+      "correct": 43,
+      "malformed": 0,
+      "no": 23,
+      "yes": 22
+    }
+  },
+  "by_model_and_feature": {
+    "claude-fable-5-1": {
+      "artificial_bank": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 12,
+        "malformed": 0,
+        "no": 6,
+        "yes": 6
+      },
+      "dug_out_channel": {
+        "answers": 12,
+        "cant_tell": 2,
+        "correct": 8,
+        "malformed": 0,
+        "no": 7,
+        "yes": 3
+      },
+      "invasive_plant": {
+        "answers": 12,
+        "cant_tell": 12,
+        "correct": 0,
+        "malformed": 0,
+        "no": 0,
+        "yes": 0
+      },
+      "pipe_running": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 12,
+        "malformed": 0,
+        "no": 6,
+        "yes": 6
+      }
+    },
+    "claude-haiku-4-5-20251001": {
+      "artificial_bank": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 12,
+        "malformed": 0,
+        "no": 6,
+        "yes": 6
+      },
+      "dug_out_channel": {
+        "answers": 12,
+        "cant_tell": 1,
+        "correct": 11,
+        "malformed": 0,
+        "no": 5,
+        "yes": 6
+      },
+      "invasive_plant": {
+        "answers": 12,
+        "cant_tell": 12,
+        "correct": 0,
+        "malformed": 0,
+        "no": 0,
+        "yes": 0
+      },
+      "pipe_running": {
+        "answers": 12,
+        "cant_tell": 3,
+        "correct": 9,
+        "malformed": 0,
+        "no": 3,
+        "yes": 6
+      }
+    },
+    "claude-opus-5-5": {
+      "artificial_bank": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 12,
+        "malformed": 0,
+        "no": 6,
+        "yes": 6
+      },
+      "dug_out_channel": {
+        "answers": 12,
+        "cant_tell": 1,
+        "correct": 11,
+        "malformed": 0,
+        "no": 6,
+        "yes": 5
+      },
+      "invasive_plant": {
+        "answers": 12,
+        "cant_tell": 12,
+        "correct": 0,
+        "malformed": 0,
+        "no": 0,
+        "yes": 0
+      },
+      "pipe_running": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 12,
+        "malformed": 0,
+        "no": 6,
+        "yes": 6
+      }
+    },
+    "claude-sonnet-5": {
+      "artificial_bank": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 12,
+        "malformed": 0,
+        "no": 6,
+        "yes": 6
+      },
+      "dug_out_channel": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 12,
+        "malformed": 0,
+        "no": 6,
+        "yes": 6
+      },
+      "invasive_plant": {
+        "answers": 12,
+        "cant_tell": 11,
+        "correct": 1,
+        "malformed": 0,
+        "no": 0,
+        "yes": 1
+      },
+      "pipe_running": {
+        "answers": 12,
+        "cant_tell": 0,
+        "correct": 10,
+        "malformed": 0,
+        "no": 8,
+        "yes": 4
+      }
+    }
+  },
+  "cost": {
+    "calls": 5065,
+    "fake_calls": 48,
+    "first_real_call_utc": "2026-09-24T03:04:49+00:00",
+    "last_real_call_utc": "2026-09-24T06:05:39+00:00",
+    "log": "results/cost_log.jsonl",
+    "real_calls": 5017,
+    "real_usd": 41.1059,
+    "real_usd_by_purpose": {
+      "benchmark": 3.1976,
+      "footage": 34.1902,
+      "model_sweep": 3.7158,
+      "smoke": 0.0024
+    }
+  },
+  "real": true,
+  "script": "evals/model_card.py",
+  "sweep": "results/model_sweep_20260924T054756Z.json",
+  "sweep_generated_at_utc": "2026-09-24T05:47:56+00:00",
+  "synthetic": false
+}
