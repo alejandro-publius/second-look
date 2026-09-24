@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { anchorFor, hashedText, parseLog, sha256Hex, verifyChain, type AuditEntry, type OtsProof } from "../lib/chain";
+import { anchorFor, hashedText, headsAgainstLog, parseLog, sha256Hex, verifyChain, type AuditEntry, type OtsProof } from "../lib/chain";
 import { anchorText, proofName, proofStatus } from "../lib/verify-text";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
@@ -60,6 +60,9 @@ test("verify: says what OpenTimestamps is, and shows each proof's status from re
   const shown = page.getByTestId(`anchor-${last.seq}`);
   if (anchor!.status === "confirmed") await expect(shown).toContainText(`In Bitcoin block ${anchor!.bitcoin!.block_height}`);
   else await expect(shown).toContainText("Waiting for a Bitcoin block.");
+  // The committed log still has the line each audit head proof stamped, so none shows as broken.
+  await expect(page.getByTestId("proof-audit_head").first()).toBeVisible();
+  await expect(page.getByTestId("proof-audit_head").filter({ hasText: "This proof does not match its file." })).toHaveCount(0);
   await expect(page.getByText("uv run ots verify proofs/prereg-v1.tag.ots")).toBeVisible();
 });
 
@@ -134,6 +137,30 @@ test("chain rule: a timestamp proof covers a line only when it stamped this chai
   const unchecked: OtsProof = { ...head, proof: "proofs/audit-head-2026-09-26.ots", status: "unchecked", bitcoin: { block_height: 914000 } };
   expect(anchorFor(1, log, [unchecked, confirmed])).toBe(confirmed);
   expect(anchorFor(1, log, [{ ...head, status: "broken" }])).toBeNull();
+});
+
+test("chain rule: a stamp of a line this log no longer has shows as broken", async () => {
+  const last = log[log.length - 1];
+  const head: OtsProof = { proof: "proofs/audit-head-2026-09-24.ots", what: "audit_head", status: "pending", audit_seq: last.seq, file_sha256: last.hash };
+  const plan: OtsProof = { proof: "proofs/prereg-v1.tag.ots", what: "prereg_tag", status: "pending" };
+  expect(headsAgainstLog([plan, head], log)).toEqual([head]);
+  // Line added later: the stamped line is still there, so the stamp still counts.
+  const longer = [...log, { ...last, seq: last.seq + 1, prev_hash: last.hash, hash: "ef".repeat(32) }];
+  expect(headsAgainstLog([head], longer)).toEqual([head]);
+
+  // The stamped line rewritten with a fresh hash: the chain holds on its own, so only the stamp
+  // can tell, and results/ots.json may not have caught up with the log.
+  const rewritten = log.map((e) => ({ ...e }));
+  rewritten[rewritten.length - 1].payload_sha256 = "0".repeat(64);
+  rewritten[rewritten.length - 1].hash = await sha256Hex(hashedText(rewritten[rewritten.length - 1]));
+  expect((await verifyChain(rewritten)).ok).toBe(true);
+  const shown = headsAgainstLog([plan, head], rewritten);
+  expect(shown).toEqual([{ ...head, status: "broken" }]);
+  expect(proofStatus(shown[0])).toBe("This proof does not match its file.");
+  expect(anchorFor(last.seq, rewritten, shown)).toBeNull();
+
+  // Cut short, past the stamped line.
+  expect(headsAgainstLog([head], log.slice(0, -1))[0].status).toBe("broken");
 });
 
 test("status words: every OpenTimestamps status, including those the committed file has not reached", () => {

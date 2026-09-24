@@ -77,6 +77,10 @@ def fake_stamp(target: Path) -> None:
     write_proof(target, target.with_name(target.name + ".ots"))
 
 
+def entries(log: Path) -> list[dict]:
+    return [json.loads(line) for line in log.read_text().splitlines() if line.strip()]
+
+
 def chain(tmp_path: Path, n: int) -> Path:
     log = tmp_path / "audit" / "log.jsonl"
     for i in range(n):
@@ -213,7 +217,8 @@ def test_the_plan_proof_is_checked_against_the_plan_in_docs(tmp_path: Path) -> N
 
 def test_a_finished_proof_is_confirmed_with_its_block_height_and_time(tmp_path: Path) -> None:
     root, proofs = repo(tmp_path)
-    (proofs / "audit-head-2026-09-24").write_text("3|t|plan_tagged|p|h")
+    log = chain(root, 3)
+    (proofs / "audit-head-2026-09-24").write_text(audit_log.hashed_text(entries(log)[-1]))
     root_msg = write_proof(
         proofs / "audit-head-2026-09-24", proofs / "audit-head-2026-09-24.ots", block=915000
     )
@@ -231,6 +236,51 @@ def test_a_finished_proof_is_confirmed_with_its_block_height_and_time(tmp_path: 
     assert row["bitcoin"]["block_hash"] == block_id
     assert row["bitcoin"]["block_time_utc"] == "2026-09-23T21:46:40Z"
     assert row["what"] == "audit_head" and row["audit_seq"] == 3
+
+
+def rewrite_line(log: Path, seq: int) -> None:
+    """Rewrite one line of a log with a fresh hash, and relink every line after it, so the
+    rewritten log holds together on its own, as a careful forger would leave it."""
+    rows = entries(log)
+    rows[seq - 1]["payload_sha256"] = "0" * 64
+    prev = rows[seq - 2]["hash"] if seq > 1 else audit_log.GENESIS
+    for row in rows[seq - 1 :]:
+        row["prev_hash"] = prev
+        row["hash"] = hashlib.sha256(audit_log.hashed_text(row).encode()).hexdigest()
+        prev = row["hash"]
+    log.write_text("".join(json.dumps(r, separators=(",", ":")) + "\n" for r in rows))
+
+
+def test_an_audit_head_proof_is_broken_once_the_log_loses_the_line_it_stamped(
+    tmp_path: Path,
+) -> None:
+    root, proofs = repo(tmp_path)
+    log = chain(root, 3)
+    anchor_audit_head.anchor(log, proofs, day="2026-09-24", stamp=fake_stamp)
+    proof = proofs / "audit-head-2026-09-24.ots"
+    assert ots_status.status_of(proof, root=root, fetch=None)["status"] == "pending"
+    # A line added later leaves the stamped line where it was: the proof still counts.
+    audit_log.append("data_lock", {"n": 1}, path=log)
+    assert ots_status.status_of(proof, root=root, fetch=None)["status"] == "pending"
+
+    # The stamped line rewritten, the chain relinked: verify_audit.py passes, the proof matches
+    # its copy in proofs/, and only the comparison with the log notices.
+    rewrite_line(log, 3)
+    assert audit_log.verify(log) == 4
+    row = ots_status.status_of(proof, root=root, fetch=None)
+    assert row["status"] == "broken" and "line 3 of audit/log.jsonl" in row["problem"]
+    doc = ots_status.report(proofs, root=root, upgrade=None, fetch=None)
+    assert doc["counts"]["broken"] == 1
+
+    # Cut back to before the stamped line: gone.
+    log.write_text("".join(log.read_text().splitlines(keepends=True)[:2]))
+    row = ots_status.status_of(proof, root=root, fetch=None)
+    assert row["status"] == "broken" and "no line 3" in row["problem"]
+
+    # A log that does not hold together is no base for the proof either.
+    log.write_text(log.read_text().replace('"key_frozen"', '"data_lock"', 1))
+    row = ots_status.status_of(proof, root=root, fetch=None)
+    assert row["status"] == "broken" and "does not hold together" in row["problem"]
 
 
 def test_a_block_whose_merkle_root_differs_is_broken(tmp_path: Path) -> None:
