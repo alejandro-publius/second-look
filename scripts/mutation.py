@@ -1,4 +1,4 @@
-"""make mutation: do the tests notice when the code that decides is broken? (UPDATE_29 section 4)
+"""make mutation: do the tests notice when four deciding modules are broken? (UPDATE_29 section 4)
 
 mutmut changes core/gate.py, core/followups.py, core/scoring.py and core/fhir_emit.py one small
 change at a time (a < becomes <=, an and becomes an or, a word in a message changes, a line goes)

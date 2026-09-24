@@ -135,6 +135,24 @@ def test_mutmut_is_told_to_change_exactly_these_modules(module: str) -> None:
     assert len(config["only_mutate"]) == len(mutation.MODULES)
 
 
+def test_the_readme_names_the_four_modules_the_run_changes_and_no_more() -> None:
+    """REVIEW_03 R14: the README called these "the code that decides", but the checker and the rain
+    rule decide too and are not in the run. Its row names the four modules the run changes."""
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    row = next(line for line in readme.splitlines() if "`make mutation`" in line)
+    assert "the code that decides" not in row
+    names = {
+        "core/gate.py": "the gate",
+        "core/followups.py": "the follow-up selector",
+        "core/scoring.py": "scoring",
+        "core/fhir_emit.py": "the FHIR emitter",
+    }
+    assert set(mutation.MODULES) == set(names)
+    assert "four modules, " + ", ".join(list(names.values())[:3]) + " and the FHIR emitter" in row
+    for left_out in ("`core/checker.py`", "`core/rainfall.py`"):
+        assert left_out in row and "not in this run" in row
+
+
 def test_a_run_starts_from_an_empty_folder_with_no_key(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
