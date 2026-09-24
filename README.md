@@ -179,7 +179,7 @@ A vision model can help a volunteer look again. It can never decide what is stor
 6. **The person answers again.** The model's note is shown only as "the checker noticed" (`core/checker.py`, `apps/web/components/WalkFlow.tsx`).
 7. **The record is built from human inputs only.** `build_record` in `core/gate.py` has no parameter that could carry a flag, a model id or model text. `core/fhir_emit.py` writes the record under OneAquaHealth's profiles with the person's score attached, and `scripts/fhir_validate.py` checks it in CI.
 
-Where it runs today: the model's flags reach a person in the video walks, where `scripts/build_walks.py` sends the footage run's answers through the same gate at build time. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called.
+Where it runs today: nowhere a person sees yet. `scripts/build_walks.py` sends the footage run's answers through the same gate when the video walks are built, and no flag on those clips passed it, so <!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of the <!--v:results/footage_pool.json#/walks-->3<!--/v--> walks shows a checker question. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called.
 
 ## Three properties that follow
 
@@ -504,7 +504,7 @@ uv sync && (cd apps/web && npm ci) && (cd worker && npm ci) && (cd tools/diagram
 make judge-check
 ```
 
-`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests. It reads the result of the last HL7 validator run from `results/fhir_validation.json` and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets, then prints five lines.
+`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests, then grades every AI number in `results/` again from the committed raw model replies (`make reproduce`). It reads the result of the last HL7 validator run from `results/fhir_validation.json` and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets: six steps, each printed with ok or FAIL.
 
 ### Running locally
 
@@ -578,9 +578,9 @@ You can run the same loop from your desk on a creek in another country: **`/walk
 
 The engineering challenges, each with the file and test that prove it: [`WRITEUP.md`](WRITEUP.md). How to deploy, with every setting: [`DEPLOY.md`](DEPLOY.md). Decisions as records: [`docs/adr/`](docs/adr/README.md).
 
-The technical report, <!--v:results/report_pdf.json#/pages-->7<!--/v--> pages built by `make report-pdf` from this README, the docs and `results/`: [`docs/REPORT.pdf`](docs/REPORT.pdf). What the checker may and may not do: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). Where the photos and footage come from and who labelled them: [`docs/DATA_CARD.md`](docs/DATA_CARD.md). Who might attack and what stops them: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
+The technical report, <!--v:results/report_pdf.json#/pages-->6<!--/v--> pages built by `make report-pdf` from this README, the docs and `results/`: [`docs/REPORT.pdf`](docs/REPORT.pdf). What the checker may and may not do: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). Where the photos and footage come from and who labelled them: [`docs/DATA_CARD.md`](docs/DATA_CARD.md). Who might attack and what stops them: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
 
-AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos, set every gold label alone, froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
+AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos and their gold labels with the planner (the labels came from the picks file, commit 81e62ed; no second, blind labeller yet, `docs/DATA_CARD.md`), froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
 
 ## Credits
 
