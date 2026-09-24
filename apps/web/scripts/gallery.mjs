@@ -172,6 +172,24 @@ async function localRun(browser) {
   await button(page, "View as FHIR").first().click();
   await page.getByText("passed the HL7 validator against guide commit").first().waitFor();
   gallery("spot-fhir", "/spot?id=example", "local mock", await shoot(page), "The same record opened with View as FHIR: the Observation the record is stored as.");
+  // The health card, the record's last card: one thing to do for the person, one for the pet and
+  // one for the city, each an approved sentence with its source. It renders only on a stored
+  // record, and the live site has none under this id, so it comes from the mock (CRITIC_03 E01).
+  // Opened again so View as FHIR is closed, then scrolled until the card's heading is at the top.
+  await page.goto(`${LOCAL}/spot?id=example`);
+  const health = page.getByRole("heading", { name: content.locale["spot.health_title"], exact: true });
+  await health.waitFor();
+  await health.evaluate((el) => {
+    el.scrollIntoView({ block: "start" });
+    window.scrollBy(0, -16);
+  });
+  gallery(
+    "spot-health",
+    "/spot?id=example",
+    "local mock",
+    await shoot(page),
+    "The end of the sample record: the What you can do card, with one thing to do for you, one for your pet and one for the city, and the source of each.",
+  );
   await context.close();
 }
 

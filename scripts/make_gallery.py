@@ -505,6 +505,8 @@ REQUIRED_SCREENS = frozenset(
         "quick",
         "spot-record",
         "spot-fhir",
+        # The health card, the entry's answer on human and animal health (CRITIC_03 E01).
+        "spot-health",
         "city",
         "two",
         "how-we-know",

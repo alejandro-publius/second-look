@@ -49,5 +49,6 @@ The phone screens of Second Look, in one drawn frame, captured by `make screens`
 <td align="center"><img src="accessibility.webp" width="200" alt="Accessibility: what we aim for and how each part is checked."><br>Accessibility<br><code>/accessibility</code></td>
 <td align="center"><img src="offline.webp" width="200" alt="The page a phone shows when it has no signal: what still works."><br>Offline<br><code>/offline</code></td>
 <td align="center"><img src="share.webp" width="200" alt="The page a shared score opens: the score card and a link to take the test."><br>A shared score<br><code>/share/12</code></td>
+<td align="center"><img src="spot-health.webp" width="200" alt="The end of the sample record: the What you can do card, with one thing to do for you, one for your pet and one for the city, and the source of each."><br>The health card<br><code>/spot?id=example</code> (mock)</td>
 </tr>
 </table>
