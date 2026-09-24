@@ -129,6 +129,20 @@ def test_benchmark_main_synthetic_writes_a_stamped_file(tmp_path: Path, capsys: 
     assert (tmp_path / "cost_log.jsonl").exists()
 
 
+def test_the_benchmark_keeps_every_answer_with_its_reply(tmp_path: Path) -> None:
+    """make reproduce grades a benchmark again from its replies, so the run must keep them."""
+    assert benchmark.main(["--synthetic", "--seed", "3", "--results-dir", str(tmp_path)]) == 0
+    doc = json.loads(next(tmp_path.glob("benchmark_*.json")).read_text())
+    answers = doc["answers"]
+    assert len(answers) == 16 * len(MODEL_IDS)
+    for model_id, cells in doc["models"].items():
+        mine = [a for a in answers if a["model"] == model_id]
+        assert sum(a["correct"] for a in mine) == cells["all"]["correct"]
+    first = answers[0]
+    assert {"raw", "input_tokens", "output_tokens", "custom_id", "error"} <= set(first)
+    assert first["raw"] is not None
+
+
 def test_benchmark_real_refuses_without_a_key(tmp_path: Path, capsys: Any) -> None:
     code = benchmark.main(
         ["--real", "--env-file", str(tmp_path / "none.env"), "--results-dir", str(tmp_path)],
