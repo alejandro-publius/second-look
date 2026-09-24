@@ -41,8 +41,7 @@ Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.
 
 8. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
    `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
-   makes the repository public. Then, 10 minutes, open the example pull request to their guide:
-   in `~/second-look-depth`, `docs/internal/upstream/README.md` has every command.
+   makes the repository public.
 
 9. **Wed Sep 30, by 18:00: submit.**
 

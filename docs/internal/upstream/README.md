@@ -1,3 +1,5 @@
+**Done on 2026-09-24** (UPDATE_29 section 2): pull request https://github.com/hl7-eu/oah/pull/5 from the fork alejandro-publius/oah, branch `second-look-citizen-observer`, and issues 6, 7 and 8 on hl7-eu/oah. The steps below are how it was done.
+
 # Contribution to hl7-eu/oah, ready for when our repo is public
 
 Our FSH example and the pull request text for the OneAquaHealth implementation guide. Open it only after `make go-public GO=yes` on Sep 30, because the pull request links to our repository.

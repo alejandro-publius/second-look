@@ -425,8 +425,13 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 
 ### Contributed back
 
-- A proposal for carrying observer quality in their guide, with three gaps our validator runs found: no profile for the person or the trail from an answer to them; a volunteer modelled as a Practitioner for want of a better fit; `SpecimenOah.collection.collector` allowing only a PractitionerRole. Its FSH builds inside their guide in CI. `docs/ig_proposal.md`.
-- A friendly note that their temporary code system spells one code `morophology`. We kept their spelling so our records validate.
+Sent to OneAquaHealth's implementation guide on 2026-09-24, in the open:
+
+- [hl7-eu/oah pull request 5](https://github.com/hl7-eu/oah/pull/5): our citizen observer example, five FSH files that build inside their guide with SUSHI 3.20.1 at no errors, and the proposal as a page. It asks which resource should stand for a citizen observer.
+- The proposal in that pull request, for carrying observer quality in their guide, with three gaps our validator runs found: no profile for the person or the trail from an answer to them; a volunteer modelled as a Practitioner for want of a better fit; `SpecimenOah.collection.collector` allowing only a PractitionerRole. Its FSH builds inside their guide in CI. `docs/ig_proposal.md`.
+- [hl7-eu/oah issue 6](https://github.com/hl7-eu/oah/issues/6): their temporary code system spells one code `morophology`. We kept their spelling so our records validate.
+- [hl7-eu/oah issue 7](https://github.com/hl7-eu/oah/issues/7): `SpecimenOah.collection.collector` allows only a PractitionerRole, which leaves out a laboratory and a volunteer who takes a sample.
+- [hl7-eu/oah issue 8](https://github.com/hl7-eu/oah/issues/8): their sandbox's name stopped resolving on 2026-09-23, with the evidence from their own nameserver.
 - A read only MCP server over our own records, so any software agent can ask for a creek's records with the resource ids behind every answer. `examples/mcp/README.md`.
 
 ### Feasibility: Berkeley as a follower city
