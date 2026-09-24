@@ -88,7 +88,7 @@ Yes: `make judge-check` runs the tests, grades the AI numbers in `results/` agai
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**
-Answer on the day from the Actions tab. It was red on Sep 21 and 22 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had); pull requests #2 and #3 fixed both, and it has been green since.
+Answer on the day from the Actions tab. It was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's); `main` has been green since fb3ff24 on Sep 24.
 Proof: https://github.com/alejandro-publius/second-look/actions
 
 ## Blockchain

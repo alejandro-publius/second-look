@@ -20,8 +20,8 @@ value sets and UCUM units) and base FHIR R4 4.0.1 elsewhere. The volunteer is a 
 known only by a hash of a random contributor token, with one qualification: the Second Look test,
 dated, valid for 90 days, issued by our Organization. The test sitting's per-feature score is a
 QuestionnaireResponse, and a `Provenance` ties every Observation to the person and to that sitting.
-The guide is pinned to hl7-eu/oah b907cf0 in `fhir/ig.lock`, and every emitted resource is checked
-by the HL7 validator in CI, terminology on.
+The guide is pinned to hl7-eu/oah b907cf0 in `fhir/ig.lock`, and sample records from both emitters
+are checked by the HL7 validator in CI, terminology on; golden vectors hold the live emitter to them.
 
 ## Consequences
 

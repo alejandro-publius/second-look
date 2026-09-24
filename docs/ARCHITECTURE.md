@@ -10,7 +10,7 @@ The loop is five verbs, and they line up with OneAquaHealth's own five pipeline 
 | TRAIN | collection | A volunteer passes a two minute photo test. AI takes the same test. |
 | CHECK | collection | A guided creek check in the official app's own questions, and a three-question return check. |
 | VERIFY | transformation | Code picks at most two follow-up questions from the answers, the weather and the person's own score. AI may only ask, and only where it passed. |
-| RECORD | validation | Every visit becomes FHIR that validates against their guide, carries the observer's score, lands in our store and mirrors to their sandbox. |
+| RECORD | validation | Every visit becomes FHIR under their guide, carries the observer's score and lands in our store; sample records from both emitters are validated against the guide in CI, golden vectors hold the live emitter to them, and the store mirrors to their sandbox when it answers. |
 | ACT | aggregation and publication | The creek's record turns into what the creek needs and which pipes are worth testing, and into an answer any software agent can fetch with its evidence attached. |
 
 ## The loop, in five boxes
@@ -130,9 +130,9 @@ flowchart TB
   `Practitioner` carries a dated `qualification` for the test, and the `Provenance` on every
   `Observation` names the test sitting as a source, so an analyst who receives one observation
   receives the trust mark with it.
-- **Validation is a gate, not a report.** `make check` fails if any emitted resource does not
-  validate against the OneAquaHealth guide at the pinned commit. A record that their systems
-  could not read never leaves this repository.
+- **Validation is a gate, not a report.** `make check` fails if any of the sample records from
+  both emitters does not validate against the OneAquaHealth guide at the pinned commit, and the
+  golden vectors fail it if the live emitter's output moves away from them.
 - **Every number has one road.** `evals/` write `results/`, `scripts/verify_claims.py` checks
   every number in the README against `results/`, and CI runs it. A number cannot be typed by hand.
 - **Two runtimes, one reference.** Python is the reference implementation and the toolchain.

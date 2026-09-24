@@ -272,6 +272,9 @@ Why this architecture matters:
 
 **One creek visit as FHIR.** Every arrow is a reference in the emitted JSON, named by its FHIR path, read off [`fhir/golden/`](fhir/golden/). The Practitioner's qualification carries the test and its dates. The score itself is in the test sitting's QuestionnaireResponse, which the Provenance names as a source of every Observation.
 
+<details>
+<summary>The FHIR records one visit makes, as a diagram</summary>
+
 ```mermaid
 flowchart TB
   accTitle: The FHIR resources of one creek visit, and how they point at each other
@@ -315,7 +318,12 @@ flowchart TB
   LIB -- "content: each mirrored<br/>Provenance, by its id there" --> PROV
 ```
 
+</details>
+
 **The AI gate.** Every arrow is a call in [`core/checker.py`](core/checker.py), [`core/gate.py`](core/gate.py) or [`core/followups.py`](core/followups.py). On the live creek check the checker is off and the Worker passes no flags, so no model is in that request path. The walks run the same gate when they are built, in [`scripts/build_walks.py`](scripts/build_walks.py).
+
+<details>
+<summary>The gate, call by call, as a diagram</summary>
 
 ```mermaid
 sequenceDiagram
@@ -355,6 +363,8 @@ sequenceDiagram
   Note over R: No parameter takes a flag, a model id or model text
   R-->>App: The visit record, human answers only
 ```
+
+</details>
 
 The same four as images, for places that do not draw Mermaid: [`docs/diagrams/loop.svg`](docs/diagrams/loop.svg), [`docs/diagrams/system-map.svg`](docs/diagrams/system-map.svg), [`docs/diagrams/fhir-graph.svg`](docs/diagrams/fhir-graph.svg), [`docs/diagrams/ai-gate.svg`](docs/diagrams/ai-gate.svg).
 
@@ -431,7 +441,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | The five One Digital Health dimensions and FAIR | Stated in words below | this section |
 | The follower city recipe | `make new-city NAME=Aarhus COUNTRY=Denmark LAT=56.1629 LON=10.2039` scaffolds a new city in seconds; Heraklion was made that way, as a dry example | [`scripts/new_city.py`](scripts/new_city.py), [`docs/cities/`](docs/cities/) |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | [`core/fhir_referral.py`](core/fhir_referral.py) |
-| Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek on the record page and `/city`: research grade sightings of the region's listed invasive plants near its spots, with the fetch time, from a daily copy. Never in the guided check, shown only once a finished check on that creek has answered the invasive plant question (then to anyone who opens the page, a later volunteer included), counted in no number, deciding nothing. The iNaturalist plant photos are credited by author and licence on `/credits` | [`scripts/cache_inaturalist.py`](scripts/cache_inaturalist.py), [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) The Bay Area plant list waits on a check, so until then the line reports no recent sightings. |
+| Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek on the record page and `/city`: research grade sightings of the region's listed invasive plants near its spots, with the fetch time, from a daily copy. Never in the guided check, shown only once a finished check on that creek has answered the invasive plant question (then to anyone who opens the page, a later volunteer included), counted in no number, deciding nothing. The iNaturalist plant photos are credited by author and licence on `/credits` The Bay Area plant list waits on a check, so until then the line reports no recent sightings. | [`scripts/cache_inaturalist.py`](scripts/cache_inaturalist.py), [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) |
 
 ### Contributed back
 
@@ -465,7 +475,7 @@ Every number is graded by code and written to [`results/`](results/); [`scripts/
 - The ablation (rules only, context only, vision only, all three): [`evals/ablation.py`](evals/ablation.py).
 - The pre-registered analysis of the two-minute test, written and tested on synthetic data before the tag: [`evals/usability_analysis.py`](evals/usability_analysis.py). It runs once, after the lock: with at least 20 finished sessions per arm it makes its one confirmatory test, and with fewer it reports a description with counts.
 - Cost is logged per call in [`results/cost_log.jsonl`](results/cost_log.jsonl). A fake run logs to [`results/cost_log_fake.jsonl`](results/cost_log_fake.jsonl) and spends nothing.
-- `make reproduce` grades every AI number in [`results/`](results/) again, with no network and no key: the pass table, the item accuracy, the benchmark accuracies and intervals, the footage agreement, what the gate stopped and every cost, from the raw model replies of the paid runs committed in [`evals/fixtures/raw/`](evals/fixtures/raw/), and the synthetic results from their seeds. It fails if one committed number differs or is missing. It names what it cannot regrade and why: the two paid benchmark runs kept counts, not answers, so their counts of right, can't tell and malformed answers stand as recorded; the footage runs kept only the majority answer on the adversarial frames; and three early synthetic files (the ablation, the old consensus file and the Sep 20 label agreement) were made from gray placeholders or a dropped rule, so they are left as they are. `make judge-check` runs it, and so does CI after `make check`.
+- `make reproduce` grades every AI number in [`results/`](results/) again from the committed raw replies in [`evals/fixtures/raw/`](evals/fixtures/raw/) and the seeds, with no network and no key, fails if one differs, and names what it cannot regrade and why. `make judge-check` and CI run it; the Quickstart shows its line.
 
 ### Tests
 
@@ -557,8 +567,8 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 - `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` replays one fixed path.
 - `/check`: the guided creek check, one question per screen, with follow-ups chosen by [`core/followups.py`](core/followups.py), working offline.
 - `/walk`: a creek from your desk, a clip from another country, the same check, a demo record made on the phone.
-- `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card. It needs a stored record, so on the live site today it is empty; the gallery shows it on a local build.
-- `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach.
+- `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card. It needs a stored record, so on the live site today it is empty; [`docs/screens/`](docs/screens/README.md) shows it on a local build.
+- `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach. It is empty until the first real check; `make demo-offline` shows it full.
 - `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so. `/quick`, `/poster`, `/judges`, `/credits`.
 - A read only MCP server over our own records: [`examples/mcp/README.md`](examples/mcp/README.md).
 
@@ -573,7 +583,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 | What code asked next | The follow-up selector chose the questions from the answers, the weather and the person's score. No model call is in that path. | [`core/followups.py`](core/followups.py), [`core/tests/test_followups.py`](core/tests/test_followups.py) |
 | What validated | The whole Bundle, against OneAquaHealth's guide at b907cf0 with terminology on. | [`results/fhir_validation.json`](results/fhir_validation.json), `make fhir-validate` |
 | What went to their sandbox | Every resource by conditional create, tagged as ours, with a ledger of ids, and a Library entry that points back here. | [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl); the read-back, [`docs/notes/sandbox_library.md`](docs/notes/sandbox_library.md), with its screenshot [`docs/notes/sandbox-library.png`](docs/notes/sandbox-library.png); when their name resolves again (hl7-eu/oah issue 8), `curl -H "Accept: application/fhir+json" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466` |
-| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so; the page a walk opens (`/city?walk=v02`) and `make demo-offline` show the full view. | `/city?creek=strawberry-creek`, [`docs/screens/walk-city.webp`](docs/screens/walk-city.webp) |
+| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so; the page a walk opens (`/city?walk=v02`) shows what the creek needs, and `make demo-offline` shows the full view. | `/city?creek=strawberry-creek`, [`docs/screens/walk-city.webp`](docs/screens/walk-city.webp) |
 
 You can run the same loop from your desk on a creek in another country: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
 
@@ -582,7 +592,7 @@ The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/RE
 ## Known weaknesses
 
 - One labeller. The gold labels came from the picks file Alex wrote with the planner, a Claude chat (commit 81e62ed), and no second, blind label exists yet, so read every accuracy as agreement with this key ([`docs/DATA_CARD.md`](docs/DATA_CARD.md), [`docs/deviations.md`](docs/deviations.md)).
-- Four photos per feature is coarse. It shows a person what to practise and flags an answer worth a second look. It is too coarse to weight votes by feature. In our simulation with made-up people ([`results/consensus_coarseness.json`](results/consensus_coarseness.json)), for groups of <!--v:results/consensus_coarseness.json#/summary/at_headline_size/group_size-->5<!--/v-->, a plain majority was best in <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_plain_is_best-->3<!--/v--> of <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns-->5<!--/v--> skill patterns, and weights from each feature's own photos did worse than a plain majority in all <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_feature_only_clearly_loses-->5<!--/v-->, by <!--v:results/consensus_coarseness.json#/summary/at_headline_size/feature_only_loss_points_min-->12.1<!--/v--> to <!--v:results/consensus_coarseness.json#/summary/at_headline_size/feature_only_loss_points_max-->20.6<!--/v--> points. Weights that also use a person's whole score did better in <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_a_weighted_method_clearly_beats_plain-->1<!--/v--> pattern, where a third of people guessed, by at most <!--v:results/consensus_coarseness.json#/summary/at_headline_size/largest_weighted_gain_over_plain_points-->1.1<!--/v--> points. Leaving out low scorers did better in <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_passers_only_clearly_beats_plain-->2<!--/v-->, by at most <!--v:results/consensus_coarseness.json#/summary/at_headline_size/largest_passers_only_gain_points-->2.2<!--/v--> points.
+- Four photos per feature is coarse: it shows a person what to practise and flags an answer worth a second look, but it is too coarse to weight votes by feature. In our simulation with made-up people ([`results/consensus_coarseness.json`](results/consensus_coarseness.json)), weights from each feature's own photos did worse than a plain majority in all <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_feature_only_clearly_loses-->5<!--/v--> skill patterns.
 - The photos come from open collections in several countries and seasons, not from the creeks a Berkeley visitor will stand in.
 - The footage labels come from the videos' own descriptions, and almost no openly licensed description names a feature, so the footage result leans on agreement between models, which is not accuracy.
 - The citizen observer is modelled as a FHIR Practitioner, for want of a better fit in the guide; our proposal says so.
