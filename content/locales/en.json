@@ -424,5 +424,8 @@
   "city.walk_nothing": "Nothing was found that needs work.",
   "credits.footage_title": "Creek footage",
   "credits.footage_intro": "The video walks and their stills are cut from these openly licensed videos.",
-  "city.walk_seen": "Checks that saw it: {n}"
+  "city.walk_seen": "Checks that saw it: {n}",
+  "credits.video_title": "Footage in our video",
+  "credits.video_intro": "The creek clips and photos in our video are not ours. They come from Wikimedia Commons. Each one is listed here with the person who made it and its licence. Some of them are CC BY-SA, so our video is shared under that kind of licence too.",
+  "credits.video_licence": "Our video's licence: {licence}"
 }

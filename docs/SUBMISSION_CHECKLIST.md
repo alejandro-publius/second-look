@@ -38,7 +38,9 @@ Anything else failing is our fault and gets fixed first.
       Every number came from results/ through verify_claims. No hand-edited numbers.
 - [ ] docs/deviations.md: every change after `prereg-v1` is listed with a date and reason, and
       the README shows the deviation count.
-- [ ] Release form signed by the person filmed at the creek (docs/release_form.md).
+- [ ] Nobody is filmed: the creek shots are open footage, each with its credit line on screen and
+      in docs/video/CREDITS.md, and the video's description says it is CC BY-SA 4.0. If a person
+      ever is filmed, they sign docs/release_form.md first.
 - [ ] docs/THIRD_PARTY.md regenerated (`uv run python scripts/third_party.py`) and the licenses
       it could not find checked by hand.
 - [ ] `make check` green on main; CI green; no em or en dashes (`scripts/check_dashes.py`).

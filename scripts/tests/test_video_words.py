@@ -49,5 +49,55 @@ def test_the_spoken_words_fit_three_minutes_forty_five() -> None:
 
 def test_no_beat_says_what_a_pipe_means_or_what_most_people_pick() -> None:
     spoken = " ".join(w for _, w in shotlist_beats()).lower()
-    for phrase in ("sewage", "most people", "polluted", "unsafe"):
+    for phrase in (
+        "sewage",
+        "sewer",
+        "most people",
+        "polluted",
+        "unsafe",
+        "contaminat",
+        "toxic",
+        "waste water",
+        "wastewater",
+    ):
         assert phrase not in spoken, phrase
+
+
+# UPDATE_22 6.5: the creek footage is open footage from Wikimedia Commons, never our own.
+OUR_OWN = (
+    "our visit",
+    "we visited",
+    "our trip",
+    "we went",
+    "we filmed",
+    "i filmed",
+    "we shot",
+    "our footage",
+    "our own footage",
+    "our video of",
+    "our record of",
+    "our photos of",
+    "at the creek,",
+)
+
+
+def test_no_beat_calls_the_open_footage_ours() -> None:
+    spoken = " ".join(w for _, w in shotlist_beats()).lower()
+    for phrase in OUR_OWN:
+        assert phrase not in spoken, phrase
+
+
+def test_the_outfall_is_never_called_sewage_anywhere_in_the_video_files() -> None:
+    # Not in the words, and not in what is on screen, the notes or the footage table either.
+    for name in ("SHOTLIST.md", "VOICE_SCRIPT.md", "teleprompter.html", "CREDITS.md"):
+        text = (VIDEO / name).read_text(encoding="utf-8").lower()
+        assert "sewage" not in text, name
+
+
+def test_the_words_point_at_the_creek_on_screen_the_honest_way() -> None:
+    # A creek on screen is "a creek like this one" or is named; the Strawberry Creek photos are
+    # named as Strawberry Creek.
+    spoken = " ".join(w for _, w in shotlist_beats())
+    assert "creeks like this one" in spoken
+    assert "a creek like this one" in spoken
+    assert "Strawberry Creek" in spoken

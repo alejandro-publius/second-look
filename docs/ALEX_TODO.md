@@ -30,30 +30,29 @@ is done. Times are Pacific.
    it to your password manager when you can. With it, the full phone sitting against production
    runs as a test: `set -a; . ./.env; set +a; SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-check.mjs`.
 
-4. **By Thu Sep 24, 40 minutes: the creek visit.** 30 minutes at Strawberry Creek with the shot list in
-   `docs/video/RECORD_AT_THE_CREEK.md`. Anyone on camera signs `docs/release_form.md` first. File
-   one real creek check with `/check` while you are there; it replaces the worked example in the
-   README.
+4. **By Fri Sep 25, 20 minutes: your voice. This is the only video step left for you.** Nobody
+   films at a creek: the creek shots are open footage from Wikimedia Commons, already in the rough
+   cut and credited in `docs/video/CREDITS.md`. Fill beat 7's slot from the model run first. Run
+   `make video-rough` and play `docs/video/rough_cut_scratch_voice.mp4` once: its scratch voice is
+   there for the timing only. Then record your voice against it, reading
+   `docs/video/teleprompter.html` in a browser (space pauses, the arrows change speed). The words
+   are the ones in `docs/video/VOICE_SCRIPT.md` and `docs/video/SHOTLIST.md`.
 
-5. **By Fri Sep 25, 20 minutes: your voice.** Fill beat 7's slot from the model run first. Open
-   `docs/video/teleprompter.html` in a browser (space pauses, the arrows change speed) and read
-   the words in `docs/video/VOICE_SCRIPT.md`, the same words as `docs/video/SHOTLIST.md`. The rough
-   cut (`make video-rough`, then play `docs/video/rough_cut_scratch_voice.mp4`) has a scratch voice
-   for timing only.
-
-6. **By Sat Sep 26, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft and invite
+5. **By Sat Sep 26, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft and invite
    Rachel to it. Pick the five gallery images it names. For the live judging, read
    `docs/submission/JUDGE_QA.md`: the 20 hardest questions with honest answers.
 
-7. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
+6. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
    read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
 
-8. **By Tue Sep 29: the video.** Cut your voice and creek footage into the rough cut, upload it,
+7. **By Tue Sep 29: the upload.** A session lays your voice over the rough cut in place of the
+   scratch voice, keeping every credit line and the end card. You upload it from your account,
+   with the licence line from `docs/devpost.md` in its description (the video is CC BY-SA 4.0),
    and put the link in `docs/devpost.md` and the README.
 
-9. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
+8. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
    `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
    makes the repository public. Then, 10 minutes, open the example pull request to their guide:
    in `~/second-look-depth`, `docs/internal/upstream/README.md` has every command.
 
-10. **Wed Sep 30, by 18:00: submit.**
+9. **Wed Sep 30, by 18:00: submit.**

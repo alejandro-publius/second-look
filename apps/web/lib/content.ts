@@ -122,6 +122,7 @@ export interface Content {
   photos: Record<string, Photo>;
   walks: Walk[];
   footage_credits: FootageCredit[];
+  video_credits: VideoCredits;
 }
 
 /** A video walk (Update 14 3.7), from content/walks.yaml via scripts/build_walks.py. */
@@ -149,6 +150,14 @@ export interface FootageCredit {
   license: string;
   source_url: string;
   country: string;
+}
+
+/** The open creek footage and photos in the video (UPDATE_22 6.6), from content/video_credits.yaml. */
+export interface VideoCredits {
+  /** The video's own licence, CC BY-SA 4.0 because several clips are CC BY-SA. */
+  licence: string;
+  licence_url: string;
+  items: { title: string; author: string; license: string; license_url: string; source_url: string }[];
 }
 
 export interface WarmupItem {

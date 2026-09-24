@@ -155,6 +155,8 @@ https://github.com/alejandro-publius/second-look
 [VIDEO LINK: paste the upload URL here on the day]
 ```
 
+The video is released under CC BY-SA 4.0, because several of the creek clips in it are CC BY-SA. The creek footage and photos are openly licensed files from Wikimedia Commons, not our own; each one is credited on screen, in `docs/video/CREDITS.md` and on the app's `/credits` page. Put the same licence line in the video's description where it is uploaded. This paragraph has no link on purpose: `make submit-check` looks for a line with the word video and a link, and only the real upload link may pass it.
+
 ## Gallery images, in this order
 
 1. `docs/screens/01-landing.png`: the question every visitor meets.
