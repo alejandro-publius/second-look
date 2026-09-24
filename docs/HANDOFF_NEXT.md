@@ -1,35 +1,36 @@
 # Handoff: where Second Look stands, 2026-09-24
 
-## UPDATE_27 and UPDATE_29, the loop to RED: 0 (Sep 24, 08:00Z)
+## UPDATE_27 and UPDATE_29, the loop to RED: 0 (Sep 24, 14:00Z)
 
 The definition of done is `docs/internal/DONE.md`; `make done-check` prints PASS, RED, BLOCKED or
-HUMAN per line and ends with `RED: <n> BLOCKED: <n> HUMAN: <n>`. The plan to get there is
-`docs/internal/PLAN_TO_DONE.md`. Work on `depth` (or a `p27/`/`p29/` branch merged into it), run
-`make check`, then fast-forward `main`, deploy in the order of `docs/notes/hosting.md`, and run the
-phone checks. Reading order for a fresh session: `CLAUDE.md`, `PLAN.md`, this file,
-`docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest `docs/internal/updates/`.
+HUMAN per line and ends with `RED: <n> BLOCKED: <n> HUMAN: <n>`. The plan is
+`docs/internal/PLAN_TO_DONE.md`. Work on `p29/integrate` (worktree `~/second-look-int27`), run
+`make check`, `make e2e` and the Worker e2e, then fast-forward `depth` and `main`, deploy in the
+order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA key, Pages from
+`~/second-look`, then `live-readonly.mjs`). Reading order for a fresh session: `CLAUDE.md`,
+`PLAN.md`, this file, `docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest
+`docs/internal/updates/`.
 
-Where it stands: every block 23 and 24 item passes (screenshots and the GIF, the three diagrams,
-the judge-first README, the Tideline sections, ADRs, Dependabot, pre-commit, topics); the panel
-study's software side is live (`docs/internal/PANEL_STUDY.md`, Alex launches it by Sep 26);
-contributed back as hl7-eu/oah pull request 5 and issues 6 to 8; the four-model AI run is in the
-README. In progress: UPDATE_29's documents, `make reproduce` and mutation testing, OpenTimestamps
-and `/verify` with Lighthouse on the landing page, and the iNaturalist context line (branches
-`p29/*`); then the second review, the six-judge rerun and the critic rounds against Alex's
-tideline and blackbox-datahub READMEs, then the measurements again on the final deploy (axe,
-Lighthouse, flaky runs, README commands, links).
+Where it stands: UPDATE_29 is merged and live (documents, `make reproduce`, mutation testing,
+OpenTimestamps confirmed in block 968372 with `/verify`, the iNaturalist line, the panel study's
+software side). REVIEW_03 found 59 things at 3fa942f and all 59 are fixed with proofs
+(`docs/internal/reviews/REVIEW_03.md`). The six-judge rerun scored a weighted 7.33 against 5.73
+(`JUDGE_SIM_01_after.md`). Critic round 01 (`CRITIC_01.md`, 22 findings, four blockers) is worked
+through; round 02 reads 3b905a8. Measured on the live site today: axe clean on 60 views, Lighthouse
+94 or more on all 20 pages and 96, 100, 100, 100 on the landing page, no dead link. Still to do:
+the flaky runs and the README command run (they share port 3100), two clean critic rounds, then
+`make done-check` to RED: 0.
 
-Done since (08:40Z): the link check reads the public files only and is clean but for the four
-UPDATE_29 documents still on `p29/docs`; `make go-public`'s test passes again; axe and Lighthouse
-list every page (axe on production: 57 views, no violation); the README command check runs every
-command a judge could type; CI on `main` was red at 5ac66b0 (the diagrams lockfile, fixed on
-`depth` at 08b98ee, which `main` gets at the next fast-forward).
+Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamps) and
+`com.secondlook.inaturalist` (07:45; it asks nothing until Rachel approves the Bay Area plant
+list, D66). Their logs are in `~/second-look-backups/logs/`.
 
-Traps: after any change to `content/locales/en.json`, run `scripts/build_worker_content.py`, or
-`make check` fails at worker-check (it happened three times today). The web build rewrites the
-tracked `apps/web/public/_headers` with the build's API origin; restore it before committing.
-CI runs on pushes to `main` and `depth` and on pull requests. A lockfile written by the Mac's
-npm 11 can fail CI's npm 10 (`tools/diagrams`); write lockfiles with `npx -y npm@10`.
+Traps: after any change to `content/locales/en.json`, run `scripts/build_worker_content.py`. The
+web build rewrites the tracked `apps/web/public/_headers`; restore it before committing. A change
+to a README section the report quotes needs `make report-pdf`, and the README cites the report's
+page count, so render and rebuild until both settle. A lockfile written by the Mac's npm 11 can
+fail CI's npm 10; write lockfiles with `npx -y npm@10`. CI runs on pushes to `main` and `depth`.
+Only one process may hold port 3100 (Playwright, the design gate, the flaky and command runs).
 
 ## UPDATE_22, after the merge (Sep 24, 04:10Z)
 
