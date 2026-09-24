@@ -108,7 +108,7 @@ deploys to https://depth.second-look-79t.pages.dev.
 | `session` | one two-minute test sitting |
 | `response` | one answer to one test photo in a sitting |
 | `observer` | a kept score, under a random contributor token, not linked to the sitting |
-| `skeleton_ping` | the first deploy's proof that a row can be written and read back |
+| `skeleton_ping` | the first deploy's proof that a row can be written and read back; no route writes it since Sep 24 |
 | `spot` | a place on a creek, with its reach and creek, coarse unless the person placed the pin |
 | `visit` | one creek check or quick check at a spot |
 | `check_result` | one follow-up question a visit asked, and the answer |

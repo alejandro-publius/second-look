@@ -451,15 +451,6 @@ export default {
 
     if (path === "/health") return json(env, { status: "ok" });
 
-    // P1's walking skeleton: one row written to the production database and read back.
-    if (path === "/api/skeleton") {
-      const note = `p1 ${nowIso()}`;
-      await env.DB.prepare("INSERT INTO skeleton_ping (note, created_at) VALUES (?, ?)").bind(note, nowIso()).run();
-      const back = await env.DB.prepare("SELECT id, note, created_at FROM skeleton_ping ORDER BY id DESC LIMIT 1").first();
-      const total = await env.DB.prepare("SELECT COUNT(*) AS n FROM skeleton_ping").first<{ n: number }>();
-      return json(env, { wrote: note, read_back: back, rows: Number(total?.n ?? 0) });
-    }
-
     if (path === "/api/content/hash") return json(env, { content_hash: CONTENT.content_hash, build_hash: "worker" });
 
     // The judge facing endpoints (Update 10 answer A3): the creek check, the record, the city view,

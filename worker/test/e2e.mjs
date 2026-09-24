@@ -52,6 +52,12 @@ function wrangler(args, opts = {}) {
   return result.stdout;
 }
 
+/** Rows from the local D1 the running Worker uses. */
+function d1(sql) {
+  const out = wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--json", "--command", sql]);
+  return JSON.parse(out)[0].results;
+}
+
 /** wrangler dev on a port, with its own state folder and vars. The caller kills it. */
 async function startDev(port, persist, vars) {
   const args = [
@@ -230,6 +236,13 @@ try {
     RAIN_URL: `http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
     E2E_NOW: JUST_BEFORE_LOCK,
   });
+
+  // 2a. Before anyone checks a creek. The first deploy's /api/skeleton is gone: it wrote a row on
+  // any request, a GET included (review REVIEW_03 R02).
+  at("an empty store");
+  assert.equal((await api("GET", "/api/skeleton")).status, 404);
+  assert.equal((await api("POST", "/api/skeleton", {})).status, 404);
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM skeleton_ping"), [{ n: 0 }], "no request wrote a skeleton row");
 
   // 3. Two people who passed, one pipe, one quiet visit downstream.
   at("sessions and visits");
