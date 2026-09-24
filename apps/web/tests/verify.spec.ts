@@ -1,0 +1,148 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { anchorFor, hashedText, parseLog, sha256Hex, verifyChain, type AuditEntry, type OtsProof } from "../lib/chain";
+import { anchorText, proofName, proofStatus } from "../lib/verify-text";
+import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
+import { BASE } from "./helpers";
+
+// /verify (UPDATE_29 section 3): each line of the audit log with its receipt and its place in the
+// chain, the chain checked in the browser by the rule in lib/chain.ts, and the OpenTimestamps
+// status from results/ots.json, after a plain sentence on what OpenTimestamps is.
+const REPO = join(__dirname, "..", "..", "..");
+const log: AuditEntry[] = parseLog(readFileSync(join(REPO, "audit", "log.jsonl"), "utf8"));
+const ots: { proofs: OtsProof[] } = JSON.parse(readFileSync(join(REPO, "results", "ots.json"), "utf8"));
+
+test("verify: the browser checks the chain and shows every receipt in order", async ({ page }) => {
+  const urls = watchRequests(page);
+  await mockApi(page);
+  await page.goto("/verify");
+  await expect(page.getByRole("heading", { level: 1, name: "Check our records" })).toBeVisible();
+  const status = page.getByTestId("chain-status");
+  await expect(status).toHaveAttribute("data-checked", "browser");
+  await expect(status).toHaveText(`The chain holds. Your browser just checked all ${log.length} lines, and each receipt matches its line and the line before it.`);
+  for (const e of log) {
+    const line = page.locator(`#line-${e.seq}`);
+    await expect(line.getByRole("heading", { name: `Line ${e.seq} of ${log.length}` })).toBeVisible();
+    await expect(page.getByTestId(`receipt-${e.seq}`)).toHaveText(e.hash);
+  }
+  await expect(page.locator("body")).not.toContainText("[missing:");
+  // Checked here, on this machine: the page asks nothing of any other origin to do it.
+  expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
+});
+
+test("verify: says what OpenTimestamps is, and shows each proof's status from results/ots.json", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/verify");
+  await expect(page.getByText("OpenTimestamps is a public timestamp service. It is not ours, and it is not our own chain.", { exact: false })).toBeVisible();
+  // Hard rule 20: ours is an audit log. The one mention of a blockchain says it is not one.
+  const text = await page.locator("main").innerText();
+  expect(text.match(/blockchain/gi) ?? []).toHaveLength(1);
+  expect(text).toContain("This is an audit log, not a blockchain.");
+  for (const what of ["prereg_tag", "analysis_plan"]) {
+    const p = ots.proofs.find((x) => x.what === what);
+    expect(p, `results/ots.json has no ${what} proof`).toBeTruthy();
+    const card = page.getByTestId(`proof-${what}`);
+    if (p!.status === "confirmed") await expect(card).toContainText(`Confirmed in Bitcoin block ${p!.bitcoin!.block_height}`);
+    else if (p!.status === "pending") await expect(card).toContainText("Waiting for a Bitcoin block.");
+    await expect(card).toContainText(p!.proof);
+  }
+  // The newest audit head proof covers the last line, and the line says how far it has got.
+  const last = log[log.length - 1];
+  const anchor = anchorFor(last.seq, log, ots.proofs);
+  expect(anchor, "no audit head proof covers the last line of the audit log").not.toBeNull();
+  const shown = page.getByTestId(`anchor-${last.seq}`);
+  if (anchor!.status === "confirmed") await expect(shown).toContainText(`In Bitcoin block ${anchor!.bitcoin!.block_height}`);
+  else await expect(shown).toContainText("Waiting for a Bitcoin block.");
+  await expect(page.getByText("uv run ots verify proofs/prereg-v1.tag.ots")).toBeVisible();
+});
+
+test("verify: a receipt from the address finds its line, and an unknown one says so", async ({ page }) => {
+  await mockApi(page);
+  const second = log[1] ?? log[0];
+  await page.goto(`/verify?receipt=${second.hash.toUpperCase()}`);
+  await expect(page.getByTestId("lookup-result")).toContainText(`Found. This receipt belongs to line ${second.seq} of ${log.length}.`);
+  await expect(page.locator(`#line-${second.seq}`)).toHaveAttribute("aria-current", "true");
+  await expect(page.locator('[aria-current="true"]')).toHaveCount(1);
+
+  await page.goto(`/verify?receipt=${"ab".repeat(32)}`);
+  await expect(page.getByTestId("lookup-result")).toHaveText("No line in the audit log has this receipt.");
+  await expect(page.locator('[aria-current="true"]')).toHaveCount(0);
+
+  // The form is a plain GET to this page, so it works the same way.
+  await page.goto("/verify");
+  await page.getByLabel("Look up a receipt").fill(log[0].payload_sha256);
+  await page.getByRole("button", { name: "Find it" }).click();
+  await expect(page).toHaveURL(new RegExp(`/verify\\?receipt=${log[0].payload_sha256}$`));
+  await expect(page.getByTestId("lookup-result")).toContainText(`This is the hash of what line 1 of ${log.length} recorded.`);
+});
+
+test("verify: fits a phone and has no serious accessibility problem", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/verify");
+  await expect(page.getByTestId("chain-status")).toHaveAttribute("data-checked", "browser");
+  const { scroll, viewport } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: window.innerWidth }));
+  expect(scroll).toBeLessThanOrEqual(viewport);
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+  const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+  expect(serious.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+});
+
+// The rule itself, run here in Node with the same Web Crypto the browser uses.
+test("chain rule: the committed log holds, and each kind of tampering breaks it at its line", async () => {
+  const ok = await verifyChain(log);
+  expect(ok).toEqual({ ok: true, length: log.length, last: log[log.length - 1].hash });
+  const copy = () => log.map((e) => ({ ...e }));
+
+  const edited = copy();
+  edited[0].ts_utc = "2026-09-20T00:00:00Z";
+  expect(await verifyChain(edited)).toEqual({ ok: false, line: 1, reason: "hash" });
+
+  const kind = copy();
+  kind[1].kind = "test_only";
+  expect(await verifyChain(kind)).toEqual({ ok: false, line: 2, reason: "kind" });
+
+  const missing = copy();
+  missing.splice(1, 1);
+  expect(await verifyChain(missing)).toEqual({ ok: false, line: 2, reason: "seq" });
+
+  // A line rewritten with a fresh, self-consistent hash still breaks the next line's link.
+  const relinked = copy();
+  relinked[0].payload_sha256 = "0".repeat(64);
+  relinked[0].hash = await sha256Hex(hashedText(relinked[0]));
+  expect(await verifyChain(relinked)).toEqual({ ok: false, line: 2, reason: "prev" });
+});
+
+test("chain rule: a timestamp proof covers a line only when it stamped this chain's hash", () => {
+  const head: OtsProof = { proof: "proofs/audit-head-2026-09-24.ots", what: "audit_head", status: "pending", audit_seq: log.length, file_sha256: log[log.length - 1].hash };
+  expect(anchorFor(1, log, [head])).toBe(head);
+  expect(anchorFor(log.length, log, [head])).toBe(head);
+  expect(anchorFor(1, log, [{ ...head, file_sha256: "cd".repeat(32) }])).toBeNull();
+  // A proof of an earlier line covers that line and those before it, never a later one.
+  const earlier: OtsProof = { ...head, audit_seq: log.length - 1, file_sha256: log[log.length - 2].hash };
+  expect(anchorFor(log.length - 1, log, [earlier])).toBe(earlier);
+  expect(anchorFor(log.length, log, [earlier])).toBeNull();
+  const confirmed: OtsProof = { ...head, proof: "proofs/audit-head-2026-09-25.ots", status: "confirmed", bitcoin: { block_height: 915000 } };
+  expect(anchorFor(1, log, [head, confirmed])).toBe(confirmed);
+  // A checked block beats an unchecked one, even an earlier one.
+  const unchecked: OtsProof = { ...head, proof: "proofs/audit-head-2026-09-26.ots", status: "unchecked", bitcoin: { block_height: 914000 } };
+  expect(anchorFor(1, log, [unchecked, confirmed])).toBe(confirmed);
+  expect(anchorFor(1, log, [{ ...head, status: "broken" }])).toBeNull();
+});
+
+test("status words: every OpenTimestamps status, including those the committed file has not reached", () => {
+  const base: OtsProof = { proof: "proofs/prereg-v1.tag.ots", what: "prereg_tag", status: "pending" };
+  const block = { block_height: 915000, block_time_utc: "2026-09-24T21:46:40Z" };
+  expect(proofName(base)).toBe("The tag prereg-v1, which fixes the analysis plan in git");
+  expect(proofName({ ...base, what: "audit_head", audit_seq: 3 })).toBe("The audit log up to line 3");
+  expect(proofStatus(base)).toBe("Waiting for a Bitcoin block. That takes a few hours after a stamp.");
+  expect(proofStatus({ ...base, status: "confirmed", bitcoin: block })).toBe("Confirmed in Bitcoin block 915000, 2026-09-24.");
+  expect(proofStatus({ ...base, status: "unchecked", bitcoin: block })).toBe("Named in Bitcoin block 915000, not checked yet.");
+  expect(proofStatus({ ...base, status: "broken", bitcoin: block })).toBe("This proof does not match its file.");
+  const head: OtsProof = { proof: "proofs/audit-head-2026-09-24.ots", what: "audit_head", status: "pending", audit_seq: 3 };
+  expect(anchorText(null)).toBe("Not stamped yet.");
+  expect(anchorText(head)).toBe("Stamped on 2026-09-24. Waiting for a Bitcoin block.");
+  expect(anchorText({ ...head, status: "confirmed", bitcoin: block })).toBe("In Bitcoin block 915000, 2026-09-24.");
+  expect(anchorText({ ...head, status: "unchecked", bitcoin: block })).toBe("Named in Bitcoin block 915000, not checked yet.");
+});
