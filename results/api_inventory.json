@@ -1,0 +1,352 @@
+{
+  "script": "scripts/api_inventory.py",
+  "synthetic": false,
+  "worker": {
+    "count": 25,
+    "routes": [
+      {
+        "method": "POST",
+        "path": "/api/check/draft"
+      },
+      {
+        "method": "POST",
+        "path": "/api/check/finalize"
+      },
+      {
+        "method": "any",
+        "path": "/api/city/{}"
+      },
+      {
+        "method": "any",
+        "path": "/api/content/hash"
+      },
+      {
+        "method": "any",
+        "path": "/api/creeks"
+      },
+      {
+        "method": "POST",
+        "path": "/api/demo/answer"
+      },
+      {
+        "method": "any",
+        "path": "/api/fhir/Bundle/{}"
+      },
+      {
+        "method": "any",
+        "path": "/api/fhir/referral/{}"
+      },
+      {
+        "method": "any",
+        "path": "/api/fhir/referral/{}/example-result"
+      },
+      {
+        "method": "any",
+        "path": "/api/fhir/validation"
+      },
+      {
+        "method": "GET",
+        "path": "/api/photo/{}"
+      },
+      {
+        "method": "POST",
+        "path": "/api/quick/{}"
+      },
+      {
+        "method": "any",
+        "path": "/api/skeleton"
+      },
+      {
+        "method": "GET",
+        "path": "/api/spot/{}"
+      },
+      {
+        "method": "any",
+        "path": "/api/spot/{}/fhir"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/complete"
+      },
+      {
+        "method": "any",
+        "path": "/api/test/counts"
+      },
+      {
+        "method": "any",
+        "path": "/api/test/export"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/lesson-done"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/response"
+      },
+      {
+        "method": "any",
+        "path": "/api/test/resume"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/session"
+      },
+      {
+        "method": "any",
+        "path": "/api/two"
+      },
+      {
+        "method": "POST",
+        "path": "/api/upload"
+      },
+      {
+        "method": "any",
+        "path": "/health"
+      }
+    ]
+  },
+  "python": {
+    "count": 25,
+    "routes": [
+      {
+        "method": "POST",
+        "path": "/api/check/draft",
+        "limit": "study",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/check/finalize",
+        "limit": "study",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/city/{creek_id}",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/content/hash",
+        "limit": "read",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/creeks",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/demo/answer",
+        "limit": "demo",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/fhir/Bundle/{visit_id}",
+        "limit": null,
+        "file": "apps/api/fhir_routes.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/fhir/referral/{spot_id}",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/fhir/referral/{spot_id}/example-result",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/fhir/validation",
+        "limit": null,
+        "file": "apps/api/fhir_routes.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/photo/{photo_id}",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/quick/{spot_id}",
+        "limit": "study",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/skeleton/ping",
+        "limit": null,
+        "file": "apps/api/main.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/spot/{spot_id}",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/spot/{spot_id}/fhir",
+        "limit": null,
+        "file": "apps/api/fhir_routes.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/complete",
+        "limit": "study",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/test/counts",
+        "limit": "read",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/test/export",
+        "limit": "read",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/lesson-done",
+        "limit": "study",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/response",
+        "limit": "study",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/test/resume",
+        "limit": "study",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/test/session",
+        "limit": "study",
+        "file": "apps/api/routes_study.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/two",
+        "limit": null,
+        "file": "apps/api/fhir_routes.py"
+      },
+      {
+        "method": "POST",
+        "path": "/api/upload",
+        "limit": "upload",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
+        "path": "/health",
+        "limit": null,
+        "file": "apps/api/main.py"
+      }
+    ],
+    "with_a_rate_limit": 19
+  },
+  "rate_limits": {
+    "study": {
+      "limit": 60,
+      "window_seconds": 10
+    },
+    "demo": {
+      "limit": 30,
+      "window_seconds": 10
+    },
+    "read": {
+      "limit": 60,
+      "window_seconds": 10
+    },
+    "upload": {
+      "limit": 12,
+      "window_seconds": 60
+    }
+  },
+  "mcp": {
+    "count": 5,
+    "tools": [
+      {
+        "name": "explain_number",
+        "params": [
+          {
+            "name": "creek",
+            "type": "str",
+            "default": null
+          },
+          {
+            "name": "path",
+            "type": "str",
+            "default": null
+          }
+        ]
+      },
+      {
+        "name": "get_creek_record",
+        "params": [
+          {
+            "name": "creek",
+            "type": "str",
+            "default": null
+          }
+        ]
+      },
+      {
+        "name": "get_observer_score",
+        "params": [
+          {
+            "name": "observer",
+            "type": "str",
+            "default": null
+          }
+        ]
+      },
+      {
+        "name": "list_creeks",
+        "params": []
+      },
+      {
+        "name": "list_findings",
+        "params": [
+          {
+            "name": "creek",
+            "type": "str | None",
+            "default": "None"
+          },
+          {
+            "name": "feature",
+            "type": "str | None",
+            "default": "None"
+          },
+          {
+            "name": "min_observers",
+            "type": "int",
+            "default": "1"
+          },
+          {
+            "name": "passed_only",
+            "type": "bool",
+            "default": "False"
+          }
+        ]
+      }
+    ]
+  }
+}
