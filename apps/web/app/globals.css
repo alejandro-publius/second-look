@@ -919,6 +919,36 @@ pre.code {
   font-weight: 700;
 }
 
+/* /verify: a receipt is 64 letters with no space, so it must wrap anywhere on a phone. */
+.hash {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+
+.verify-lines,
+.verify-proofs {
+  list-style: none;
+  padding: 0;
+}
+
+.verify-lines > li[aria-current="true"] {
+  border: var(--border) solid var(--flag);
+}
+
+.verify-fields {
+  margin: 0;
+}
+
+.verify-fields dt {
+  font-weight: 700;
+  margin-top: var(--s2);
+}
+
+.verify-fields dd {
+  margin: 0;
+}
+
 .share-card {
   width: 100%;
   height: auto;

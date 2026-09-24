@@ -65,7 +65,18 @@ no brand colour, name, logo or font was taken. They informed structure and restr
   document. Chosen because no LaTeX, typst or weasyprint is installed here and these two tools
   already were.
 
-## Python packages (107, from uv.lock)
+## Timestamps
+
+- OpenTimestamps (https://opentimestamps.org), a public timestamp service, not our own chain,
+  through the `opentimestamps-client` package (a dev dependency, the `ots` command). `ots stamp`
+  sends only a SHA-256 hash to its public calendars (a.pool.opentimestamps.org,
+  b.pool.opentimestamps.org, a.pool.eternitywall.com, ots.btc.catallaxy.com), which gather many
+  hashes and write one summary of them into a Bitcoin transaction. No file, answer or name
+  leaves this Mac. The proofs are in `proofs/`. `scripts/ots_status.py` asks the calendars for
+  the finished proof and reads block headers from the public Blockstream explorer
+  (https://blockstream.info/api), read only, to check a confirmed proof without a Bitcoin node.
+
+## Python packages (116, from uv.lock)
 
 | Package | Version | License |
 |---|---|---|
@@ -74,6 +85,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | annotated-types | 0.8.0 | MIT |
 | anthropic | 1.7.0 | MIT |
 | anyio | 4.15.1 | MIT |
+| appdirs | 1.4.4 | MIT |
 | ast-serialize | 0.11.2 | MIT |
 | attrs | 26.1.0 | MIT |
 | certifi | 2026.7.22 | MPL-2.0 |
@@ -88,6 +100,8 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | duckdb | 1.5.5 | MIT |
 | fastapi | 0.141.1 | MIT |
 | fonttools | 4.65.0 | MIT |
+| gitdb | 4.0.12 | BSD License |
+| gitpython | 3.1.62 | BSD-3-Clause |
 | greenlet | 3.5.6 | not installed here |
 | h11 | 0.16.0 | MIT |
 | httpcore | 1.0.9 | BSD-3-Clause |
@@ -120,6 +134,8 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | numpy | 2.5.3 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 |
 | opencv-python-headless | 4.14.0.94 | Apache 2.0 |
 | opentelemetry-api | 1.44.0 | Apache-2.0 |
+| opentimestamps | 0.4.5 | LGPL3 |
+| opentimestamps-client | 0.7.2 | LGPL3 |
 | packaging | 26.3 | Apache-2.0 OR BSD-2-Clause |
 | pandas | 3.0.6 | BSD |
 | pandas-stubs | 3.0.5.260914 | BSD-3-Clause |
@@ -130,6 +146,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | psycopg | 3.3.6 | LGPL-3.0-only |
 | psycopg-binary | 3.3.6 | LGPL-3.0-only |
 | pycparser | 3.0 | BSD-3-Clause |
+| pycryptodomex | 3.23.0 | BSD, Public Domain |
 | pydantic | 2.13.5 | MIT |
 | pydantic-core | 2.46.5 | MIT |
 | pydantic-settings | 2.15.0 | MIT |
@@ -141,8 +158,10 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | pyobjc-framework-quartz | 12.2.2 | MIT |
 | pyobjc-framework-vision | 12.2.2 | MIT |
 | pyparsing | 3.3.3 | MIT |
+| pysocks | 1.7.1 | BSD |
 | pytest | 9.1.1 | MIT |
 | pytest-asyncio | 1.4.0 | Apache-2.0 |
+| python-bitcoinlib | 0.12.2 | GNU Lesser General Public License v3 or later (LGPLv3+) |
 | python-dateutil | 2.9.0.post0 | Dual License |
 | python-dotenv | 1.2.3 | BSD-3-Clause |
 | python-multipart | 0.0.32 | Apache-2.0 |
@@ -157,6 +176,7 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 | scipy | 1.18.1 | BSD |
 | setproctitle | 1.3.7 | BSD-3-Clause |
 | six | 1.17.0 | MIT |
+| smmap | 5.0.3 | BSD-3-Clause |
 | sniffio | 1.3.1 | MIT OR Apache-2.0 |
 | sortedcontainers | 2.4.0 | Apache 2.0 |
 | sqlalchemy | 2.0.54 | MIT |
@@ -749,7 +769,7 @@ All dev: the toolchain that type checks, tests and runs the Worker locally. The 
 | youch | 4.1.0-beta.10 | MIT | yes |
 | youch-core | 0.3.3 | MIT | yes |
 
-## Diagram tool packages (271, from tools/diagrams/package-lock.json)
+## Diagram tool packages (272, from tools/diagrams/package-lock.json)
 
 All dev: they draw the SVGs in docs/diagrams and do nothing else.
 
@@ -972,6 +992,7 @@ All dev: they draw the SVGs in docs/diagrams and do nothing else.
 | path-data-parser | 0.1.0 | MIT | yes |
 | pend | 1.2.0 | MIT | yes |
 | picocolors | 1.1.1 | ISC | yes |
+| playwright-core | 1.57.0 | Apache-2.0 | yes |
 | playwright-core | 1.63.0 | Apache-2.0 | yes |
 | points-on-curve | 0.2.0 | MIT | yes |
 | points-on-path | 0.2.1 | MIT | yes |

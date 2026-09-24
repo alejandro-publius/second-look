@@ -22,6 +22,7 @@ const DOORS: { href: string; label: string; note?: string }[] = [
   { href: "/two", label: "judges.two" },
   { href: "/city?creek=strawberry-creek", label: "nav.city" },
   { href: "/how-we-know", label: "judges.how" },
+  { href: "/verify", label: "judges.verify" },
   { href: "/credits", label: "nav.credits" },
 ];
 

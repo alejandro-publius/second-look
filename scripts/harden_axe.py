@@ -38,6 +38,7 @@ PROD_PATHS = [
     "/two",
     "/poster",
     "/how-we-know",
+    "/verify",
     "/about",
     "/privacy",
     "/credits",

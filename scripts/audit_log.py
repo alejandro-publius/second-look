@@ -39,9 +39,24 @@ class AuditError(Exception):
     """A break in the chain, or a misuse of the module. The message says which line."""
 
 
+def hashed_text(entry: dict[str, Any]) -> str:
+    """The exact text an entry's hash is the SHA-256 of. scripts/anchor_audit_head.py stamps it."""
+    return (
+        f"{entry['seq']}|{entry['ts_utc']}|{entry['kind']}|{entry['payload_sha256']}|"
+        f"{entry['prev_hash']}"
+    )
+
+
 def _hash(seq: int, ts_utc: str, kind: str, payload_sha256: str, prev_hash: str) -> str:
-    text = f"{seq}|{ts_utc}|{kind}|{payload_sha256}|{prev_hash}"
+    fields = {"seq": seq, "ts_utc": ts_utc, "kind": kind, "payload_sha256": payload_sha256}
+    text = hashed_text({**fields, "prev_hash": prev_hash})
     return hashlib.sha256(text.encode()).hexdigest()
+
+
+def verified_entries(path: Path = LOG) -> list[dict[str, Any]]:
+    """Every entry in the log, oldest first. Raises AuditError first if the chain is broken."""
+    verify(path)
+    return _entries(path)
 
 
 def _entries(path: Path) -> list[dict[str, Any]]:
