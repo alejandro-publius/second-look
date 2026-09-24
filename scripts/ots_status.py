@@ -6,9 +6,12 @@ Run: uv run python scripts/ots_status.py              ots upgrade, then read and
 OpenTimestamps is a public timestamp service, not our own chain. A new proof is pending: the
 calendars hold the hash and promise to put it in Bitcoin. `ots upgrade` asks them for the finished
 proof, which ends in one Bitcoin block, and saves it in place. This script runs that, then reads
-each proof with the same library `ots info` uses and checks three things:
+each proof with the same library `ots info` uses and checks four things:
 
 - the proof is for the file it names: the file's SHA-256 is the hash the proof starts from;
+- for an audit head proof, the audit log still holds the line it stamped. The proof matches the
+  copy of that line in proofs/, and a log rewritten after the stamp, last line included, still
+  holds together on its own, so only this comparison notices the rewrite;
 - for a finished proof, the block: the header at that height, from the public Blockstream
   explorer, holds the Merkle root the proof arrives at, hashes to the block's id, and carries
   the proof of work its own difficulty asks for. `ots verify` does this with a local Bitcoin
@@ -16,8 +19,8 @@ each proof with the same library `ots info` uses and checks three things:
 - nothing else. The calendars only ever see a hash.
 
 Status per proof: pending (calendars only), confirmed (with the block height and time), unchecked
-(a block is named but its header could not be read, for example offline), or broken (the file or
-the block does not match). Exit 1 only when a proof is broken.
+(a block is named but its header could not be read, for example offline), or broken (the file,
+the audit log line or the block does not match). Exit 1 only when a proof is broken.
 """
 
 from __future__ import annotations
@@ -38,6 +41,7 @@ from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, PendingAtt
 from opentimestamps.core.serialize import StreamDeserializationContext
 from opentimestamps.core.timestamp import DetachedTimestampFile
 
+from scripts import audit_log
 from scripts.anchor_audit_head import PREFIX, ots_command
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -114,6 +118,24 @@ def check_header(header: bytes, block_id: str, merkle_root: bytes) -> tuple[str 
     return None, int.from_bytes(header[68:72], "little")
 
 
+def stamped_line_gone(stamped: bytes, seq: int, root: Path = ROOT) -> str | None:
+    """Why audit/log.jsonl no longer holds the line an audit head proof stamped, or None.
+
+    The proof is checked against its copy of the line in proofs/, which a rewrite of the log
+    leaves alone, and a rewritten log with fresh hashes passes scripts/verify_audit.py. So the
+    stamped text is compared with the log's own line at that seq."""
+    log = root / "audit" / "log.jsonl"
+    try:
+        entries = audit_log.verified_entries(log)
+    except audit_log.AuditError as e:
+        return f"audit/log.jsonl does not hold together: {e}"
+    if len(entries) < seq:
+        return f"audit/log.jsonl has no line {seq}, the line this proof stamped"
+    if audit_log.hashed_text(entries[seq - 1]).encode("utf-8") != stamped:
+        return f"line {seq} of audit/log.jsonl is not the line this proof stamped"
+    return None
+
+
 def status_of(proof: Path, *, root: Path = ROOT, fetch: HeaderFetch | None = fetch_header) -> dict:
     """One proof's row for results/ots.json. fetch=None reads no header (offline)."""
     detached = read_proof(proof)
@@ -139,6 +161,10 @@ def status_of(proof: Path, *, root: Path = ROOT, fetch: HeaderFetch | None = fet
         return row
     if row["what"] == "audit_head":  # the text the audit log hashed, which starts with its seq
         row["audit_seq"] = int(target.read_text(encoding="utf-8").split("|", 1)[0])
+        gone = stamped_line_gone(target.read_bytes(), row["audit_seq"], root)
+        if gone:
+            row.update(status="broken", problem=gone)
+            return row
     blocks = []
     for msg, attestation in detached.timestamp.all_attestations():
         if isinstance(attestation, PendingAttestation):
