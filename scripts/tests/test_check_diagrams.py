@@ -40,7 +40,19 @@ def test_an_edge_needs_a_label() -> None:
     assert check_diagrams.unlabelled_edges(head + "  A -->|water| B\n") == []
     assert check_diagrams.unlabelled_edges(head + '  A -. "maybe" .-> B\n') == []
     assert check_diagrams.unlabelled_edges(head + '  A <-- "both ways" --> B\n') == []
-    for bare in ("  A --> B\n", '  A -- "" --> B\n', "  A ~~~ B\n", '  A -- "x" --> B --> A\n'):
+    assert check_diagrams.unlabelled_edges(head + '  A -- "ends in a circle" --o B\n') == []
+    assert check_diagrams.unlabelled_edges(head + "  A --x|ends in a cross| B\n") == []
+    for bare in (
+        "  A --> B\n",
+        '  A -- "" --> B\n',
+        "  A ~~~ B\n",
+        '  A -- "x" --> B --> A\n',
+        "  A --o B\n",
+        "  A --x B\n",
+        "  A o--o B\n",
+        "  A x--x B\n",
+        "  A ==o B\n",
+    ):
         problems = check_diagrams.unlabelled_edges(head + bare)
         assert len(problems) == 1 and problems[0].startswith("line 4:"), bare
 

@@ -56,11 +56,12 @@ ARROWS = ("-->", "---", "-.->", "==>", "->>", "-->>", "->", "--)", "--x")
 # A flowchart edge with its label, in the two spellings Mermaid knows:
 #   A -- "what flows" --> B    (also -. "x" .-> B, == "x" ==> B, A <-- "x" --> B)
 #   A -->|what flows| B
+#   An edge may also end in a circle or a cross (A --o B, A x--x B), so those ends count too.
 LABELLED_EDGE = re.compile(
-    r'^\w+\s*<?(?:--|-\.|==)\s*"[^"]*\S[^"]*"\s*(?:-->|\.->|==>|---)\s*\w+$'
-    r"|^\w+\s*<?(?:-->|-\.->|==>|---)\s*\|[^|]*\S[^|]*\|\s*\w+$"
+    r'^\w+\s*[<ox]?(?:--|-\.|==)\s*"[^"]*\S[^"]*"\s*(?:-->|\.->|==>|---|[-.=][-=][ox])\s*\w+$'
+    r"|^\w+\s*[<ox]?(?:-->|-\.->|==>|---|[-.=][-=][ox])\s*\|[^|]*\S[^|]*\|\s*\w+$"
 )
-EDGE_TOKENS = ("-->", ".->", "==>", "---", "~~~", "-.-")
+EDGE_TOKENS = ("-->", ".->", "==>", "---", "~~~", "-.-", "--o", "--x", "==o", "==x", ".-o", ".-x")
 NOT_EDGES = ("subgraph ", "accTitle", "accDescr", "classDef ", "class ", "style ", "linkStyle ")
 STAMP = re.compile(
     r"^<!-- Drawn by make diagrams from docs/diagrams/(\S+)\.mmd \(sha256 ([0-9a-f]{64})\)"
