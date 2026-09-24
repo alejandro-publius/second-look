@@ -21,13 +21,12 @@ walks:
   - v02-00059
   - v02-00063
   checker:
-    pass_table_real: false
+    pass_table_real: true
     kept: {}
     dropped: 0
     drop_reasons: {}
     question: null
-    footage_run: synthetic
-    reason: the footage run is synthetic, so no flag is taken
+    footage_run: real
 - id: v03
   title: River walk - St John's Town of Dalry to Glenlee
   author: Stravaiging with Andy
@@ -47,13 +46,13 @@ walks:
   - v03-00283
   - v03-00287
   checker:
-    pass_table_real: false
+    pass_table_real: true
     kept: {}
-    dropped: 0
-    drop_reasons: {}
+    dropped: 1
+    drop_reasons:
+      feature pipe_running not passed by model claude-haiku-4-5-20251001: 1
     question: null
-    footage_run: synthetic
-    reason: the footage run is synthetic, so no flag is taken
+    footage_run: real
 - id: v07
   title: 'Evaluating Stream Restoration in the Oregon Coast Range: Karnowsky Creek in 2026'
   author: geomorphdog
@@ -72,10 +71,9 @@ walks:
   - v07-00111
   - v07-00127
   checker:
-    pass_table_real: false
+    pass_table_real: true
     kept: {}
     dropped: 0
     drop_reasons: {}
     question: null
-    footage_run: synthetic
-    reason: the footage run is synthetic, so no flag is taken
+    footage_run: real

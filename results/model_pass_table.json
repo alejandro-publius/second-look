@@ -1,49 +1,49 @@
 {
-  "generated_at_utc": "2026-09-22T05:49:16+00:00",
+  "generated_at_utc": "2026-09-24T03:11:28+00:00",
   "models": {
     "claude-haiku-4-5-20251001": {
       "artificial_bank": {
-        "passed": false,
+        "passed": true,
         "runs": [
           [
-            false,
-            false,
-            false,
-            false
-          ],
-          [
-            false,
             true,
             true,
-            false
+            true,
+            true
           ],
           [
             true,
-            false,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
             true,
             true
           ]
         ]
       },
       "dug_out_channel": {
-        "passed": false,
+        "passed": true,
         "runs": [
           [
-            false,
-            false,
-            false,
+            true,
+            true,
+            true,
             true
           ],
           [
             true,
             true,
-            false,
+            true,
             true
           ],
           [
-            false,
-            false,
-            false,
+            true,
+            true,
+            true,
             true
           ]
         ]
@@ -58,15 +58,15 @@
             false
           ],
           [
-            true,
+            false,
             false,
             false,
             false
           ],
           [
-            true,
             false,
-            true,
+            false,
+            false,
             false
           ]
         ]
@@ -77,20 +77,20 @@
           [
             true,
             true,
-            false,
-            true
-          ],
-          [
-            false,
             true,
-            true,
-            true
+            false
           ],
           [
             true,
-            false,
             true,
-            true
+            true,
+            false
+          ],
+          [
+            true,
+            true,
+            true,
+            false
           ]
         ]
       }
@@ -120,25 +120,25 @@
         ]
       },
       "dug_out_channel": {
-        "passed": true,
+        "passed": false,
         "runs": [
           [
             true,
             true,
             true,
-            true
+            false
           ],
           [
             true,
             true,
             true,
-            true
+            false
           ],
           [
             true,
-            false,
             true,
-            true
+            true,
+            false
           ]
         ]
       },
@@ -147,21 +147,21 @@
         "runs": [
           [
             false,
-            true,
-            true,
-            true
+            false,
+            false,
+            false
           ],
           [
-            true,
-            true,
-            true,
-            true
+            false,
+            false,
+            false,
+            false
           ],
           [
             false,
             true,
-            true,
-            true
+            false,
+            false
           ]
         ]
       },
@@ -175,7 +175,7 @@
             true
           ],
           [
-            true,
+            false,
             true,
             true,
             true
@@ -208,21 +208,15 @@
           [
             true,
             true,
-            false,
+            true,
             true
           ]
         ]
       },
       "dug_out_channel": {
-        "passed": false,
+        "passed": true,
         "runs": [
           [
-            false,
-            true,
-            false,
-            true
-          ],
-          [
             true,
             true,
             true,
@@ -230,9 +224,15 @@
           ],
           [
             true,
-            false,
-            false,
-            false
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true
           ]
         ]
       },
@@ -240,42 +240,42 @@
         "passed": false,
         "runs": [
           [
-            true,
             false,
             false,
-            false
-          ],
-          [
-            true,
-            true,
             false,
             false
           ],
           [
             false,
+            true,
             false,
+            false
+          ],
+          [
+            false,
+            true,
             false,
             false
           ]
         ]
       },
       "pipe_running": {
-        "passed": true,
+        "passed": false,
         "runs": [
           [
-            true,
-            true,
-            true,
-            false
-          ],
-          [
-            true,
+            false,
             true,
             true,
             true
           ],
           [
+            false,
             true,
+            true,
+            true
+          ],
+          [
+            false,
             true,
             true,
             true
@@ -285,8 +285,7 @@
     }
   },
   "pass_rule": "all 4 items of a feature right in at least 2 of 3 runs (docs/analysis_plan.md item 8)",
-  "real": false,
+  "real": true,
   "script": "evals/model_sweep.py",
-  "stamp": "SYNTHETIC",
-  "synthetic": true
+  "synthetic": false
 }
