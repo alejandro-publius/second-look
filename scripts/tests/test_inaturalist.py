@@ -205,7 +205,8 @@ def test_the_words_say_the_gate_is_per_creek_not_per_person() -> None:
     for path in ("worker/src/inaturalist.ts", "apps/api/inaturalist.py"):
         assert "The gate is per creek, not per person" in flat[path], path
         assert "a later volunteer who has not checked this creek yet included" in flat[path], path
-    assert "The gate opens once for the creek, not for each person" in flat[
-        "docs/adr/0011-inaturalist-context.md"
-    ]
+    assert (
+        "The gate opens once for the creek, not for each person"
+        in flat["docs/adr/0011-inaturalist-context.md"]
+    )
     assert "once a finished check on that creek has answered" in flat["README.md"]

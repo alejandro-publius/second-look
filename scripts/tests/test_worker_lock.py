@@ -44,8 +44,9 @@ def test_no_deployed_config_sets_the_test_clock() -> None:
 
 def test_only_the_e2e_run_sets_the_test_clock() -> None:
     setters = []
+    kinds = {".ts", ".mjs", ".js", ".json", ".jsonc", ".sh"}
     for path in sorted((ROOT / "worker").rglob("*")):
-        if not path.is_file() or path.suffix not in {".ts", ".mjs", ".js", ".json", ".jsonc", ".sh"}:
+        if not path.is_file() or path.suffix not in kinds:
             continue
         rel = path.relative_to(ROOT).as_posix()
         if rel.startswith(("worker/node_modules/", "worker/.wrangler/", "worker/dist/")):
