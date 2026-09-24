@@ -79,6 +79,28 @@ test("the /two door says our record shows alone while their sandbox is down, and
   await expect(nav).not.toContainText("raw reply");
 });
 
+// CRITIC_04 F04: /judges and /about opened with the landing page's frozen line, "Two minutes
+// teaching and testing you ...", two lines above the door that says about four minutes. Both now
+// open with a line that names no time. The landing page keeps its frozen line.
+test("/judges and /about open with a line that names no time, and the landing page keeps its frozen line", async ({ page }) => {
+  await mockApi(page);
+  const locale: Record<string, string> = content.locale;
+  // "Second Look" is a name, not a time, so a second counts only after a number.
+  const noTime = /\bminutes?\b|\bhours?\b|\d+\s*seconds?\b/i;
+  for (const [path, key] of [
+    ["/judges", "judges.intro"],
+    ["/about", "about.lead"],
+  ]) {
+    await page.goto(path);
+    const main = page.getByRole("main");
+    await expect(main.locator("p").first()).toHaveText(locale[key]);
+    expect(locale[key]).not.toMatch(noTime);
+    await expect(main).not.toContainText(locale["app.one_sentence"]);
+  }
+  await page.goto("/");
+  await expect(page.getByRole("main").getByText(locale["app.one_sentence"])).toBeVisible();
+});
+
 test("About links the judges' door", async ({ page }) => {
   await mockApi(page);
   await page.goto("/about");

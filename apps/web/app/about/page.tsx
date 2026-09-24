@@ -8,7 +8,10 @@ export default function AboutPage() {
   return (
     <article className="stack">
       <h1>{t("about.title")}</h1>
-      <p>{t("app.one_sentence")}</p>
+      {/* Not the landing page's line, which is frozen with the test flow and says two minutes: the
+          test takes about four with its lesson, so this page's first line names no time at all
+          (CRITIC_04 F04). */}
+      <p>{t("about.lead")}</p>
       <p>{t("about.p1")}</p>
       <p>{t("about.p2")}</p>
       <p>{t("about.p3")}</p>

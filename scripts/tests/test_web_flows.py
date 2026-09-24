@@ -198,13 +198,18 @@ def test_the_reasons_then_the_source_take_one_stop_and_never_one_after_a_questio
         assert line.endswith("removal of barriers."), line
 
 
-def test_the_walk_city_view_puts_no_stop_after_the_barriers_question() -> None:
-    # CRITIC_03 E06: the walk's city view read "barriers?. OneAquaHealth Policy Brief". The real
-    # form question and the real approved sentence, through the component itself.
+def test_the_walk_city_view_names_barriers_by_a_short_label_with_one_stop_after_it() -> None:
+    # CRITIC_03 E06: the walk's city view read "barriers?. OneAquaHealth Policy Brief". CRITIC_04
+    # F04: it then titled the finding with the raw form question, next to "Pipes and drain
+    # outlets". It now names both the finding and the reason with the short label in the locale,
+    # city.finding_barriers, and the creek check still asks its own question. The real form
+    # question and the real approved sentence, through the component itself.
     form = yaml.safe_load((ROOT / "content" / "form.yaml").read_text(encoding="utf-8"))
     items = [{"id": i["id"], "text": i["text"]} for i in form["items"]]
     question = next(i["text"] for i in items if i["id"] == "barriers")
     assert question.endswith("?")
+    label = LOCALE["city.finding_barriers"]
+    assert label and label != question and not label.endswith((".", "?", "!"))
     approved = yaml.safe_load(
         (ROOT / "content" / "approved_sentences.yaml").read_text(encoding="utf-8")
     )
@@ -225,14 +230,18 @@ def test_the_walk_city_view_puts_no_stop_after_the_barriers_question() -> None:
         "walkCityRows("
         f"{{ content: {{ form: {{ items: {json.dumps(items)} }} }}, featureById: () => undefined,"
         " walkById: () => ({ creek_name: 'A creek' }) },"
-        " { savedWalkVisits: () => [], demoCreek: () => ({ visits: [{}], findings: [],"
+        " { savedWalkVisits: () => [], demoCreek: () => ({ visits: [{}],"
+        " findings: [{ spot_id: 's', feature: 'barriers', visit_ids: ['v1'] }],"
         f" needs: [{json.dumps(need)}] }}) }},"
         " 'v02')"
     )
     values = [r["value"] for r in rows if r.get("label") == sentence["text"]]
     source = re.sub(r"\s*https?://\S+", "", sentence["source"]).strip()
-    assert values == [f"{question} {source}"], values
+    assert values == [f"{label}. {source}"], values
     assert "?." not in values[0]
+    seen_once = LOCALE["city.walk_seen"].replace("{n}", "1")
+    assert [r["label"] for r in rows if r.get("value") == seen_once] == [label]
+    assert question not in json.dumps(rows, ensure_ascii=False)
 
 
 def test_a_walk_whose_checker_asked_says_so() -> None:

@@ -336,6 +336,11 @@ figcaption {
   border: var(--hairline) solid var(--line);
 }
 
+/* A still from a video, shown whole: 16 by 9, the way it was filmed, like .walk-clip below. */
+.photo-wide {
+  aspect-ratio: 16 / 9;
+}
+
 /* A video walk: the clip and its credit, with none of the browser's default figure margin. */
 .walk-figure {
   margin: 0;

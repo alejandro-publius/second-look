@@ -46,9 +46,9 @@ export default function JudgesPage() {
   return (
     <div className="stack">
       <FocusHeading>{t("judges.title")}</FocusHeading>
-      {/* The point of the product comes first, in body size and ink: a judge with two minutes
-          reads the heading, the first paragraph and the first link. */}
-      <p>{t("app.one_sentence")}</p>
+      {/* The first paragraph gives no duration. The landing page's line, frozen with the test flow,
+          says two minutes, while the doors below say about four for the test with its lesson, so
+          this page opens with its own line instead (CRITIC_04 F04). */}
       <p>{t("judges.intro")}</p>
       <nav className="card" aria-label={t("judges.title")}>
         {DOORS.map((d) => (

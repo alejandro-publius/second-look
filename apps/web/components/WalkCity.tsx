@@ -4,12 +4,19 @@ import { useMemo, useSyncExternalStore } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { Row } from "./ui/Row";
 import { content, featureById, walkById } from "@/lib/content";
-import { t } from "@/lib/t";
+import { has, t } from "@/lib/t";
 import { reasonsThenSource } from "@/lib/text";
 import { demoCreek, savedWalkVisits } from "@/lib/walks";
 
-/** The same name the city view gives a finding: the feature's name, else the form question. */
+/**
+ * A finding's name: a short label from the locale when the finding has one (city.finding_<key>),
+ * else the feature's name, else the form question. A finding from a question with no feature, such
+ * as barriers, would otherwise be titled with the whole question beside "Pipes and drain outlets"
+ * (CRITIC_04 F04); the creek check itself still asks the question.
+ */
 function findingName(key: string): string {
+  const short = `city.finding_${key}`;
+  if (has(short)) return t(short);
   return featureById(key)?.name ?? content.form.items.find((i) => i.id === key)?.text ?? key;
 }
 
