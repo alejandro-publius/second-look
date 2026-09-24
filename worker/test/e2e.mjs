@@ -319,6 +319,17 @@ try {
   assert.equal(stored.data.theirs.id, "lab-e2e");
   assert.equal(stored.data.fetched_at, "2026-09-23T07:30:00Z");
 
+  // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
+  // sixteen answers would be the live test's key.
+  at("judge mode shut before the lock");
+  const demo = await api("POST", "/api/demo/answer", { item_id: "t01", answer: "yes" });
+  if (Date.now() < Date.parse("2026-09-28T01:00:00Z")) {
+    assert.equal(demo.status, 403);
+    assert.equal(demo.data.detail, "Judge mode opens on Sep 28.");
+  } else {
+    assert.equal(demo.status, 200);
+  }
+
   // 9. Bad input is a plain 422 or 404, never a 500.
   at("bad input");
   assert.equal((await api("POST", "/api/check/draft", { spot: GLADE, answers: { nothing: "x" }, first_rating: "good", photo_ids: [] })).status, 422);

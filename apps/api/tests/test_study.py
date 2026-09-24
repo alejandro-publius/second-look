@@ -470,7 +470,22 @@ def test_the_confirmed_answer_is_scored_and_the_trail_is_stored(client):
 # Demo -------------------------------------------------------------------------------------------
 
 
+AFTER_LOCK = datetime(2026, 9, 28, 1, 0, 1, tzinfo=UTC)
+
+
+def test_demo_answer_is_shut_before_the_lock(client):
+    # Review finding F86: before the lock, sixteen answers would be the live test's key.
+    freeze_now(AFTER_LOCK - timedelta(seconds=2))
+    shut = client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"})
+    assert shut.status_code == 403
+    assert shut.json() == {"detail": "Judge mode opens on Sep 28."}
+    freeze_now(AFTER_LOCK)
+    open_ = client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"})
+    assert open_.status_code == 200
+
+
 def test_demo_answer_stores_nothing(client):
+    freeze_now(AFTER_LOCK)
     before = {m: _count(m) for m in (StudySession, ItemResponse, ObserverRow)}
     with Session(engine) as db:
         counter_before = must(db.get(RandomizationCounter, 1)).next_position

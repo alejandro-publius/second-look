@@ -533,6 +533,9 @@ export default {
         return await exportZip(env);
       }
       if (path === "/api/demo/answer" && request.method === "POST") {
+        // Shut until the data lock, as the page says (review finding F86): before it, sixteen of
+        // these would hand anyone the live test's answer key.
+        if (Date.now() < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
         const gold = GOLD[String(body.item_id ?? "")];
         if (!gold) return json(env, { detail: "We do not know that test item." }, 404);
         // Only whether they were right. The gold label itself never leaves the server.
