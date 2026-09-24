@@ -4,11 +4,15 @@ Claims are written in the README as `<!-- claim: <results-file>#<json-pointer> -
 before the number, or inline as `{{claim:<file>#<pointer>}}` markers replaced by
 scripts/render_readme.py. Stage 1 (Phase 0): the README has no claims, so this passes when
 no claim markers exist and no bare result-like numbers appear inside the results table.
+
+An image is a claim too: each <img> whose file has a row in results/screens.json must carry that
+row's alt text word for word, so the text cannot say a screenshot shows something it does not.
 """
 
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import sys
@@ -24,6 +28,9 @@ UNRENDERED_RE = re.compile(r"\{\{claim:[^}]*\}\}")
 # Simulations by design: made-up people, never a stand-in for real data, and the README says so
 # where it quotes them. These may be cited without --synthetic. Any other synthetic file may not.
 SIMULATIONS = frozenset({"results/consensus_coarseness.json"})
+SCREENS = "results/screens.json"
+IMG_RE = re.compile(r"<img\b[^>]*>", re.I)
+ATTR_RE = re.compile(r'\b(src|alt)="([^"]*)"')
 
 
 def display(value: object) -> str:
@@ -45,6 +52,31 @@ def resolve_pointer(doc: object, pointer: str) -> object:
         else:
             raise KeyError(pointer)
     return cur
+
+
+def alt_problems(text: str) -> tuple[int, list[str]]:
+    """How many <img> tags name a file in results/screens.json, and each whose alt text differs."""
+    screens = ROOT / SCREENS
+    if not screens.exists():
+        return 0, []
+    rows = json.loads(screens.read_text(encoding="utf-8")).get("images", [])
+    alts = {str(r.get("file")): str(r.get("alt", "")) for r in rows}
+    compared = 0
+    problems: list[str] = []
+    for tag in IMG_RE.findall(text):
+        attrs = dict(ATTR_RE.findall(tag))
+        src = attrs.get("src", "")
+        if src not in alts:
+            continue
+        compared += 1
+        if "alt" not in attrs:
+            problems.append(f"alt text missing: {src} has no alt, {SCREENS} says {alts[src]!r}")
+        elif html.unescape(attrs["alt"]) != alts[src]:
+            problems.append(
+                f"alt text drifted: {src} says {html.unescape(attrs['alt'])!r}, "
+                f"{SCREENS} says {alts[src]!r}"
+            )
+    return compared, problems
 
 
 def main() -> int:
@@ -106,11 +138,14 @@ def main() -> int:
         checked += 1
     for token in UNRENDERED_RE.findall(text):
         problems.append(f"unrendered token {token}; run scripts/render_readme.py")
+    alts, drifted = alt_problems(text)
+    problems.extend(drifted)
     if problems:
         print("\n".join(problems))
         print(f"verify-claims: {len(problems)} problem(s)")
         return 1
-    print(f"verify-claims: {checked} claim(s) checked, all match results/")
+    images = f", {alts} alt text(s)" if alts else ""
+    print(f"verify-claims: {checked} claim(s){images} checked, all match results/")
     return 0
 
 
