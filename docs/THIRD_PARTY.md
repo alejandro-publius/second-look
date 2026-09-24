@@ -1,6 +1,6 @@
 # Third party dependencies
 
-Generated on 2026-09-22 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
+Generated on 2026-09-24 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json`, `worker/package-lock.json` and `tools/diagrams/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
 
 ## External services
 
@@ -41,6 +41,18 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 - Phosphor Icons, MIT, through `@phosphor-icons/core` (a devDependency). Regular weight only.
   `apps/web/scripts/build-icons.mjs` generates `components/ui/Icon.tsx` from its SVG assets, so
   there is no icon runtime in the bundle and no second icon family can appear.
+
+## The diagram renderer
+
+- `tools/diagrams` draws the diagrams in `docs/diagrams/*.mmd` as SVG for `make diagrams`
+  and `make diagrams-render` (UPDATE_27 block 23). It pins the Mermaid CLI (MIT), which loads
+  Mermaid (MIT) and drives a browser through Puppeteer (Apache-2.0). Puppeteer downloads no
+  browser of its own (`tools/diagrams/.puppeteerrc.cjs`): `playwright-core` (Apache-2.0), at the
+  same version as apps/web's, finds the Chromium that `npx playwright install chromium` already
+  installed, so a render needs no network. Chosen over a hosted renderer because it runs offline
+  in CI, and over `npx @mermaid-js/mermaid-cli` because that fetches whatever version is newest.
+  Nothing from these packages is served or shipped; only the SVGs they draw from our own sources
+  are committed.
 
 ## Python packages (95, from uv.lock)
 
@@ -714,4 +726,282 @@ All dev: the toolchain that type checks, tests and runs the Worker locally. The 
 | youch | 4.1.0-beta.10 | MIT | yes |
 | youch-core | 0.3.3 | MIT | yes |
 
-Licenses not found for 5 Python and 0 web and worker packages; check those by hand before the repo goes public.
+## Diagram tool packages (271, from tools/diagrams/package-lock.json)
+
+All dev: they draw the SVGs in docs/diagrams and do nothing else.
+
+| Package | Version | License | dev |
+|---|---|---|---|
+| @antfu/install-pkg | 2.1.0 | MIT | yes |
+| @babel/code-frame | 7.29.7 | MIT | yes |
+| @babel/helper-validator-identifier | 7.29.7 | MIT | yes |
+| @braintree/sanitize-url | 7.1.2 | MIT | yes |
+| @chevrotain/types | 11.1.2 | Apache-2.0 | yes |
+| @floating-ui/core | 1.8.0 | MIT | yes |
+| @floating-ui/dom | 1.8.0 | MIT | yes |
+| @floating-ui/react | 0.26.28 | MIT | yes |
+| @floating-ui/react | 0.27.20 | MIT | yes |
+| @floating-ui/react-dom | 2.1.9 | MIT | yes |
+| @floating-ui/utils | 0.2.12 | MIT | yes |
+| @fortawesome/fontawesome-free | 7.3.1 | (CC-BY-4.0 AND OFL-1.1 AND MIT) | yes |
+| @headlessui/react | 2.2.10 | MIT | yes |
+| @headlessui/tailwindcss | 0.2.2 | MIT | yes |
+| @iconify/types | 2.0.0 | MIT | yes |
+| @iconify/utils | 3.1.7 | MIT | yes |
+| @internationalized/date | 3.12.4 | Apache-2.0 | yes |
+| @internationalized/number | 3.6.8 | Apache-2.0 | yes |
+| @internationalized/string | 3.2.10 | Apache-2.0 | yes |
+| @mermaid-js/layout-elk | 0.2.3 | MIT | yes |
+| @mermaid-js/layout-tidy-tree | 0.2.2 | MIT | yes |
+| @mermaid-js/mermaid-cli | 11.17.0 | MIT | yes |
+| @mermaid-js/mermaid-zenuml | 0.2.3 | MIT | yes |
+| @mermaid-js/parser | 1.2.1 | MIT | yes |
+| @napi-rs/canvas | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-android-arm64 | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-darwin-arm64 | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-darwin-x64 | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-linux-arm-gnueabihf | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-linux-arm64-gnu | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-linux-arm64-musl | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-linux-riscv64-gnu | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-linux-x64-gnu | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-linux-x64-musl | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-win32-arm64-msvc | 0.1.100 | MIT | yes |
+| @napi-rs/canvas-win32-x64-msvc | 0.1.100 | MIT | yes |
+| @puppeteer/browsers | 2.13.2 | Apache-2.0 | yes |
+| @react-aria/focus | 3.22.1 | Apache-2.0 | yes |
+| @react-aria/interactions | 3.28.1 | Apache-2.0 | yes |
+| @react-types/shared | 3.36.1 | Apache-2.0 | yes |
+| @swc/helpers | 0.5.23 | Apache-2.0 | yes |
+| @tanstack/react-virtual | 3.14.13 | MIT | yes |
+| @tanstack/virtual-core | 3.17.11 | MIT | yes |
+| @tootallnate/quickjs-emscripten | 0.23.0 | MIT | yes |
+| @types/d3 | 7.4.3 | MIT | yes |
+| @types/d3-array | 3.2.2 | MIT | yes |
+| @types/d3-axis | 3.0.6 | MIT | yes |
+| @types/d3-brush | 3.0.6 | MIT | yes |
+| @types/d3-chord | 3.0.6 | MIT | yes |
+| @types/d3-color | 3.1.3 | MIT | yes |
+| @types/d3-contour | 3.0.6 | MIT | yes |
+| @types/d3-delaunay | 6.0.4 | MIT | yes |
+| @types/d3-dispatch | 3.0.7 | MIT | yes |
+| @types/d3-drag | 3.0.7 | MIT | yes |
+| @types/d3-dsv | 3.0.7 | MIT | yes |
+| @types/d3-ease | 3.0.2 | MIT | yes |
+| @types/d3-fetch | 3.0.7 | MIT | yes |
+| @types/d3-force | 3.0.10 | MIT | yes |
+| @types/d3-format | 3.0.4 | MIT | yes |
+| @types/d3-geo | 3.1.1 | MIT | yes |
+| @types/d3-hierarchy | 3.1.7 | MIT | yes |
+| @types/d3-interpolate | 3.0.4 | MIT | yes |
+| @types/d3-path | 3.1.1 | MIT | yes |
+| @types/d3-polygon | 3.0.2 | MIT | yes |
+| @types/d3-quadtree | 3.0.6 | MIT | yes |
+| @types/d3-random | 3.0.4 | MIT | yes |
+| @types/d3-scale | 4.0.9 | MIT | yes |
+| @types/d3-scale-chromatic | 3.1.0 | MIT | yes |
+| @types/d3-selection | 3.0.12 | MIT | yes |
+| @types/d3-shape | 3.2.0 | MIT | yes |
+| @types/d3-time | 3.0.4 | MIT | yes |
+| @types/d3-time-format | 4.0.3 | MIT | yes |
+| @types/d3-timer | 3.0.2 | MIT | yes |
+| @types/d3-transition | 3.0.9 | MIT | yes |
+| @types/d3-zoom | 3.0.8 | MIT | yes |
+| @types/geojson | 7946.0.16 | MIT | yes |
+| @types/node | 26.6.2 | MIT | yes |
+| @types/trusted-types | 2.0.7 | MIT | yes |
+| @types/yauzl | 2.10.3 | MIT | yes |
+| @upsetjs/venn.js | 2.0.0 | MIT | yes |
+| @zenuml/core | 3.50.1 | MIT | yes |
+| agent-base | 7.1.4 | MIT | yes |
+| ansi-regex | 5.0.1 | MIT | yes |
+| ansi-styles | 4.3.0 | MIT | yes |
+| antlr4 | 4.11.0 | BSD-3-Clause | yes |
+| argparse | 2.0.1 | Python-2.0 | yes |
+| aria-hidden | 1.2.6 | MIT | yes |
+| ast-types | 0.13.4 | MIT | yes |
+| b4a | 1.9.0 | Apache-2.0 | yes |
+| bare-events | 2.9.2 | Apache-2.0 | yes |
+| bare-fs | 4.8.1 | Apache-2.0 | yes |
+| bare-path | 3.1.2 | Apache-2.0 | yes |
+| bare-stream | 2.13.4 | Apache-2.0 | yes |
+| bare-url | 2.5.4 | Apache-2.0 | yes |
+| basic-ftp | 5.3.1 | MIT | yes |
+| buffer-crc32 | 0.2.13 | MIT | yes |
+| callsites | 3.1.0 | MIT | yes |
+| chalk | 5.6.2 | MIT | yes |
+| chromium-bidi | 14.0.0 | Apache-2.0 | yes |
+| class-variance-authority | 0.7.1 | Apache-2.0 | yes |
+| cliui | 8.0.1 | ISC | yes |
+| clsx | 2.1.1 | MIT | yes |
+| color-convert | 2.0.1 | MIT | yes |
+| color-name | 1.1.4 | MIT | yes |
+| color-name | 2.1.1 | MIT | yes |
+| color-string | 2.1.4 | MIT | yes |
+| commander | 13.1.0 | MIT | yes |
+| commander | 7.2.0 | MIT | yes |
+| commander | 8.3.0 | MIT | yes |
+| cose-base | 1.0.3 | MIT | yes |
+| cose-base | 2.2.0 | MIT | yes |
+| cosmiconfig | 9.0.2 | MIT | yes |
+| cytoscape | 3.34.3 | MIT | yes |
+| cytoscape-cose-bilkent | 4.1.0 | MIT | yes |
+| cytoscape-fcose | 2.2.0 | MIT | yes |
+| d3 | 7.9.0 | ISC | yes |
+| d3-array | 2.12.1 | BSD-3-Clause | yes |
+| d3-array | 3.2.4 | ISC | yes |
+| d3-axis | 3.0.0 | ISC | yes |
+| d3-brush | 3.0.0 | ISC | yes |
+| d3-chord | 3.0.1 | ISC | yes |
+| d3-color | 3.1.0 | ISC | yes |
+| d3-contour | 4.0.2 | ISC | yes |
+| d3-delaunay | 6.0.4 | ISC | yes |
+| d3-dispatch | 3.0.1 | ISC | yes |
+| d3-drag | 3.0.0 | ISC | yes |
+| d3-dsv | 3.0.1 | ISC | yes |
+| d3-ease | 3.0.1 | BSD-3-Clause | yes |
+| d3-fetch | 3.0.1 | ISC | yes |
+| d3-force | 3.0.0 | ISC | yes |
+| d3-format | 3.1.2 | ISC | yes |
+| d3-geo | 3.1.1 | ISC | yes |
+| d3-hierarchy | 3.1.2 | ISC | yes |
+| d3-interpolate | 3.0.1 | ISC | yes |
+| d3-path | 1.0.9 | BSD-3-Clause | yes |
+| d3-path | 3.1.0 | ISC | yes |
+| d3-polygon | 3.0.1 | ISC | yes |
+| d3-quadtree | 3.0.1 | ISC | yes |
+| d3-random | 3.0.1 | ISC | yes |
+| d3-sankey | 0.12.3 | BSD-3-Clause | yes |
+| d3-scale | 4.0.2 | ISC | yes |
+| d3-scale-chromatic | 3.1.0 | ISC | yes |
+| d3-selection | 3.0.0 | ISC | yes |
+| d3-shape | 1.3.7 | BSD-3-Clause | yes |
+| d3-shape | 3.2.0 | ISC | yes |
+| d3-time | 3.1.0 | ISC | yes |
+| d3-time-format | 4.1.0 | ISC | yes |
+| d3-timer | 3.0.1 | ISC | yes |
+| d3-transition | 3.0.1 | ISC | yes |
+| d3-zoom | 3.0.0 | ISC | yes |
+| dagre-d3-es | 7.0.14 | MIT | yes |
+| data-uri-to-buffer | 6.0.2 | MIT | yes |
+| dayjs | 1.11.23 | MIT | yes |
+| debug | 4.4.3 | MIT | yes |
+| degenerator | 5.0.1 | MIT | yes |
+| delaunator | 5.1.0 | ISC | yes |
+| devtools-protocol | 0.0.1608973 | BSD-3-Clause | yes |
+| dompurify | 3.4.16 | (MPL-2.0 OR Apache-2.0) | yes |
+| elkjs | 0.9.3 | EPL-2.0 | yes |
+| emoji-regex | 8.0.0 | MIT | yes |
+| end-of-stream | 1.4.5 | MIT | yes |
+| env-paths | 2.2.1 | MIT | yes |
+| error-ex | 1.3.4 | MIT | yes |
+| es-toolkit | 1.52.0 | MIT | yes |
+| escalade | 3.2.0 | MIT | yes |
+| escodegen | 2.1.0 | BSD-2-Clause | yes |
+| esprima | 4.0.1 | BSD-2-Clause | yes |
+| estraverse | 5.3.0 | BSD-2-Clause | yes |
+| esutils | 2.0.3 | BSD-2-Clause | yes |
+| events-universal | 1.0.1 | Apache-2.0 | yes |
+| extract-zip | 2.0.1 | BSD-2-Clause | yes |
+| fast-fifo | 1.3.2 | MIT | yes |
+| fastdom | 1.0.12 | MIT | yes |
+| fd-slicer | 1.1.0 | MIT | yes |
+| get-caller-file | 2.0.5 | ISC | yes |
+| get-stream | 5.2.0 | MIT | yes |
+| get-uri | 6.0.5 | MIT | yes |
+| hachure-fill | 0.5.2 | MIT | yes |
+| highlight.js | 11.12.0 | BSD-3-Clause | yes |
+| html-to-image | 1.11.13 | MIT | yes |
+| http-proxy-agent | 7.0.2 | MIT | yes |
+| https-proxy-agent | 7.0.6 | MIT | yes |
+| iconv-lite | 0.6.3 | MIT | yes |
+| import-fresh | 3.3.1 | MIT | yes |
+| import-meta-resolve | 4.2.0 | MIT | yes |
+| internmap | 1.0.1 | ISC | yes |
+| internmap | 2.0.3 | ISC | yes |
+| ip-address | 10.7.2 | MIT | yes |
+| is-arrayish | 0.2.1 | MIT | yes |
+| is-fullwidth-code-point | 3.0.0 | MIT | yes |
+| jotai | 2.20.3 | MIT | yes |
+| js-tokens | 4.0.0 | MIT | yes |
+| js-yaml | 4.3.2 | MIT | yes |
+| json-parse-even-better-errors | 2.3.1 | MIT | yes |
+| katex | 0.16.47 | MIT | yes |
+| khroma | 2.1.0 | MIT (from its license file) | yes |
+| layout-base | 1.0.2 | MIT | yes |
+| layout-base | 2.0.1 | MIT | yes |
+| lines-and-columns | 1.2.4 | MIT | yes |
+| lodash-es | 4.18.1 | MIT | yes |
+| lru-cache | 7.18.3 | ISC | yes |
+| marked | 16.4.2 | MIT | yes |
+| marked | 4.3.0 | MIT | yes |
+| mermaid | 11.17.2 | MIT | yes |
+| mitt | 3.0.1 | MIT | yes |
+| ms | 2.1.3 | MIT | yes |
+| netmask | 2.1.1 | MIT | yes |
+| once | 1.4.0 | ISC | yes |
+| p-limit | 6.2.0 | MIT | yes |
+| pac-proxy-agent | 7.2.0 | MIT | yes |
+| pac-resolver | 7.0.1 | MIT | yes |
+| package-manager-detector | 1.8.0 | MIT | yes |
+| parent-module | 1.0.1 | MIT | yes |
+| parse-json | 5.2.0 | MIT | yes |
+| path-data-parser | 0.1.0 | MIT | yes |
+| pend | 1.2.0 | MIT | yes |
+| picocolors | 1.1.1 | ISC | yes |
+| playwright-core | 1.63.0 | Apache-2.0 | yes |
+| points-on-curve | 0.2.0 | MIT | yes |
+| points-on-path | 0.2.1 | MIT | yes |
+| progress | 2.0.3 | MIT | yes |
+| proxy-agent | 6.5.0 | MIT | yes |
+| proxy-from-env | 1.1.0 | MIT | yes |
+| pump | 3.0.4 | MIT | yes |
+| puppeteer | 24.43.1 | Apache-2.0 | yes |
+| puppeteer-core | 24.43.1 | Apache-2.0 | yes |
+| react | 19.3.0 | MIT | yes |
+| react-aria | 3.52.1 | Apache-2.0 | yes |
+| react-dom | 19.3.0 | MIT | yes |
+| react-stately | 3.50.0 | Apache-2.0 | yes |
+| require-directory | 2.1.1 | MIT | yes |
+| resolve-from | 4.0.0 | MIT | yes |
+| robust-predicates | 3.0.3 | Unlicense | yes |
+| roughjs | 4.6.6 | MIT | yes |
+| rw | 1.3.3 | BSD-3-Clause | yes |
+| safer-buffer | 2.1.2 | MIT | yes |
+| scheduler | 0.28.0 | MIT | yes |
+| semver | 7.8.5 | ISC | yes |
+| smart-buffer | 4.2.0 | MIT | yes |
+| socks | 2.8.10 | MIT | yes |
+| socks-proxy-agent | 8.0.5 | MIT | yes |
+| source-map | 0.6.1 | BSD-3-Clause | yes |
+| streamx | 2.28.1 | MIT | yes |
+| strictdom | 1.0.1 | MIT | yes |
+| string-width | 4.2.3 | MIT | yes |
+| strip-ansi | 6.0.1 | MIT | yes |
+| stylis | 4.4.0 | MIT | yes |
+| tabbable | 6.5.0 | MIT | yes |
+| tailwind-merge | 3.7.0 | MIT | yes |
+| tailwindcss | 4.3.3 | MIT | yes |
+| tar-fs | 3.1.3 | MIT | yes |
+| tar-stream | 3.2.1 | MIT | yes |
+| teex | 1.0.1 | MIT | yes |
+| text-decoder | 1.2.7 | Apache-2.0 | yes |
+| tinyexec | 1.3.1 | MIT | yes |
+| ts-dedent | 2.3.0 | MIT | yes |
+| tslib | 2.8.1 | 0BSD | yes |
+| typed-query-selector | 2.12.2 | MIT | yes |
+| undici-types | 8.9.0 | MIT | yes |
+| use-sync-external-store | 1.7.0 | MIT | yes |
+| uuid | 14.0.2 | MIT | yes |
+| webdriver-bidi-protocol | 0.4.1 | Apache-2.0 | yes |
+| wrap-ansi | 7.0.0 | MIT | yes |
+| wrappy | 1.0.2 | ISC | yes |
+| ws | 8.21.3 | MIT | yes |
+| y18n | 5.0.8 | ISC | yes |
+| yargs | 17.7.3 | MIT | yes |
+| yargs-parser | 21.1.1 | ISC | yes |
+| yauzl | 2.10.0 | MIT | yes |
+| yocto-queue | 1.2.2 | MIT | yes |
+| zod | 3.25.76 | MIT | yes |
+
+Licenses not found for 5 Python and 0 npm packages; check those by hand before the repo goes public.
