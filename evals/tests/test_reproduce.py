@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 from evals import extract_raw, reproduce
 from evals.paid_runs import PAID_RUNS, PaidRun
@@ -420,3 +421,16 @@ def test_the_report_fails_on_any_problem_and_names_what_is_not_regraded() -> Non
     lines.clear()
     assert reproduce.report([good, bad], lines.append) == 1
     assert "FAIL results/b.json: 1 values regraded from a fixture" in lines
+
+
+def test_ci_runs_make_reproduce_after_make_check() -> None:
+    # REVIEW_03 R49: no test reads results/usability_synthetic.json again, so its p value flipped
+    # from 0.051 to 0.049 passed make check; only make reproduce failed. CI runs it as its own step.
+    workflow = yaml.safe_load((ROOT / ".github" / "workflows" / "check.yml").read_text())
+    runs = [str(step.get("run", "")).strip() for step in workflow["jobs"]["check"]["steps"]]
+    assert "make reproduce" in runs, runs
+    assert runs.index("make reproduce") > runs.index("make check")
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    recipe = makefile.split("\nreproduce:\n", 1)[1].split("\n\n", 1)[0]
+    assert "python evals/reproduce.py" in recipe
+    assert not recipe.lstrip().startswith("-"), "a leading - would ignore its failure"
