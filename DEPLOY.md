@@ -136,13 +136,14 @@ Both servers treat a secret shorter than 16 characters as not set (`apps/api/set
 
 ## Jobs on the Mac
 
-Three launchd jobs run from this checkout as Alex, with his wrangler login, so they need no
+Four launchd jobs run from this checkout as Alex, with his wrangler login, so they need no
 secret of their own.
 
 | Label | When | What | Install |
 |---|---|---|---|
 | `com.secondlook.backup` | daily at 21:00, and at wake if the Mac slept through it | `scripts/backup_d1.sh`: exports D1 to `~/second-look-backups`, outside the repo, and keeps the newest `BACKUP_KEEP` dumps | `make backup-install` |
 | `com.secondlook.theirs` | daily at 07:30 | `scripts/cache_their_records.py`: one read only GET to their sandbox, stored in `sandbox_cache` for `/two` | `bash scripts/install_cache_job.sh` |
+| `com.secondlook.inaturalist` | daily at 07:45 | `scripts/cache_inaturalist.py`: reads the creeks' Locations from our own API, asks iNaturalist about the region's listed invasive plants near them at one request a second, stores a summary per creek in `inaturalist_cache` | `bash scripts/install_inaturalist_job.sh` |
 | `com.secondlook.repush` | 08:00 on Sep 28, Sep 30 and Oct 1, 2026 | `scripts/repush_scheduled.sh`: puts our worked visit and Library entry back on their sandbox by conditional create | `bash scripts/install_repush_job.sh` |
 
 Each installer takes `--remove`. Logs go to `~/second-look-backups/`.
