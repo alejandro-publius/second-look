@@ -1,4 +1,144 @@
 {
+  "benchmark": {
+    "file": "results/benchmark_20260924T054939Z.json",
+    "interval": "Wilson score, 95 percent",
+    "models": {
+      "claude-fable-5-1": {
+        "all": {
+          "correct": 34,
+          "high_pct": 82,
+          "low_pct": 57,
+          "n": 48
+        },
+        "artificial_bank": {
+          "correct": 12,
+          "high_pct": 100,
+          "low_pct": 76,
+          "n": 12
+        },
+        "cant_tell_pct": 27,
+        "dug_out_channel": {
+          "correct": 10,
+          "high_pct": 95,
+          "low_pct": 55,
+          "n": 12
+        },
+        "invasive_plant": {
+          "correct": 0,
+          "high_pct": 24,
+          "low_pct": 0,
+          "n": 12
+        },
+        "pipe_running": {
+          "correct": 12,
+          "high_pct": 100,
+          "low_pct": 76,
+          "n": 12
+        }
+      },
+      "claude-haiku-4-5-20251001": {
+        "all": {
+          "correct": 31,
+          "high_pct": 77,
+          "low_pct": 50,
+          "n": 48
+        },
+        "artificial_bank": {
+          "correct": 12,
+          "high_pct": 100,
+          "low_pct": 76,
+          "n": 12
+        },
+        "cant_tell_pct": 35,
+        "dug_out_channel": {
+          "correct": 10,
+          "high_pct": 95,
+          "low_pct": 55,
+          "n": 12
+        },
+        "invasive_plant": {
+          "correct": 0,
+          "high_pct": 24,
+          "low_pct": 0,
+          "n": 12
+        },
+        "pipe_running": {
+          "correct": 9,
+          "high_pct": 91,
+          "low_pct": 47,
+          "n": 12
+        }
+      },
+      "claude-opus-5-5": {
+        "all": {
+          "correct": 33,
+          "high_pct": 80,
+          "low_pct": 55,
+          "n": 48
+        },
+        "artificial_bank": {
+          "correct": 12,
+          "high_pct": 100,
+          "low_pct": 76,
+          "n": 12
+        },
+        "cant_tell_pct": 31,
+        "dug_out_channel": {
+          "correct": 9,
+          "high_pct": 91,
+          "low_pct": 47,
+          "n": 12
+        },
+        "invasive_plant": {
+          "correct": 0,
+          "high_pct": 24,
+          "low_pct": 0,
+          "n": 12
+        },
+        "pipe_running": {
+          "correct": 12,
+          "high_pct": 100,
+          "low_pct": 76,
+          "n": 12
+        }
+      },
+      "claude-sonnet-5": {
+        "all": {
+          "correct": 33,
+          "high_pct": 80,
+          "low_pct": 55,
+          "n": 48
+        },
+        "artificial_bank": {
+          "correct": 12,
+          "high_pct": 100,
+          "low_pct": 76,
+          "n": 12
+        },
+        "cant_tell_pct": 27,
+        "dug_out_channel": {
+          "correct": 12,
+          "high_pct": 100,
+          "low_pct": 76,
+          "n": 12
+        },
+        "invasive_plant": {
+          "correct": 0,
+          "high_pct": 24,
+          "low_pct": 0,
+          "n": 12
+        },
+        "pipe_running": {
+          "correct": 9,
+          "high_pct": 91,
+          "low_pct": 47,
+          "n": 12
+        }
+      }
+    },
+    "photos": 16,
+    "runs": 3
+  },
   "by_feature": {
     "artificial_bank": {
       "answers": 48,

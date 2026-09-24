@@ -1,12 +1,13 @@
 """The counts behind docs/MODEL_CARD.md that no other results file holds.
 
-Two things, both read from committed files with no model call and no network:
+Three things, all read from committed files with no model call and no network:
 
 1. How each model answered, per feature, in the sweep that wrote the pass table. The sweep is
    found by its time stamp, which must equal the pass table's. It shows, for example, how many
    answers on the plant photos were "can't tell".
 2. What the paid calls cost, summed from results/cost_log.jsonl, one line per call. Lines from
    a fake client say `"real": false` and are counted apart.
+3. The newest real benchmark's Wilson intervals in whole percent, copied from its own file.
 
 Run: uv run python evals/model_card.py            writes results/model_card.json
      uv run python evals/model_card.py --check    fails unless the committed file is what it writes
@@ -69,6 +70,51 @@ def cost(log: Path) -> dict[str, Any]:
     }
 
 
+def newest_real_benchmark(results: Path) -> Path | None:
+    for path in sorted(results.glob("benchmark_*.json"), reverse=True):
+        if json.loads(path.read_text(encoding="utf-8")).get("real") is True:
+            return path
+    return None
+
+
+def percent(share: object) -> int | None:
+    return round(float(share) * 100) if isinstance(share, int | float) else None
+
+
+def benchmark(root: Path) -> dict[str, Any] | None:
+    """The newest real benchmark, with each Wilson interval in whole percent.
+
+    The shares in the benchmark file render to one decimal in a doc, which turns 0.953 into
+    1.0. Whole percent keeps the interval readable: 10 of 12 is 55 to 95 percent.
+    """
+    path = newest_real_benchmark(root / "results")
+    if path is None:
+        return None
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    models: dict[str, Any] = {}
+    for model, row in sorted(doc.get("models", {}).items()):
+        cells: dict[str, Any] = {}
+        for key, cell in sorted(row.items()):
+            if not isinstance(cell, dict) or "wilson_95" not in cell:
+                continue
+            low, high = cell["wilson_95"]
+            cells[key] = {
+                "correct": cell["correct"],
+                "n": cell["n"],
+                "low_pct": percent(low),
+                "high_pct": percent(high),
+            }
+        cells["cant_tell_pct"] = percent(row.get("cant_tell_share"))
+        models[model] = cells
+    return {
+        "file": path.relative_to(root).as_posix(),
+        "runs": doc.get("runs"),
+        "photos": doc.get("pool", {}).get("n_photos"),
+        "interval": doc.get("interval"),
+        "models": models,
+    }
+
+
 def build(root: Path = ROOT) -> dict[str, Any]:
     results = root / "results"
     table = json.loads((results / "model_pass_table.json").read_text(encoding="utf-8"))
@@ -92,6 +138,7 @@ def build(root: Path = ROOT) -> dict[str, Any]:
             for m in models
         },
         "cost": cost(results / "cost_log.jsonl"),
+        "benchmark": benchmark(root),
     }
 
 

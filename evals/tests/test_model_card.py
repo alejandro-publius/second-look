@@ -83,6 +83,45 @@ def test_only_real_calls_are_summed_and_the_fake_ones_are_counted_apart(tmp_path
     assert spent["log"] == "results/cost_log.jsonl"
 
 
+def bench(real: bool, correct: int) -> dict[str, Any]:
+    return {
+        "real": real,
+        "runs": 3,
+        "interval": "Wilson score, 95 percent",
+        "pool": {"n_photos": 16},
+        "models": {
+            "m1": {
+                "all": {"correct": correct, "n": 12, "wilson_95": [0.552, 0.953]},
+                "pipe_running": {"correct": 0, "n": 12, "wilson_95": [0.0, 0.2425]},
+                "cant_tell_share": 0.2708,
+                "malformed": 0,
+            }
+        },
+    }
+
+
+def test_the_newest_real_benchmark_is_copied_with_intervals_in_whole_percent(
+    tmp_path: Path,
+) -> None:
+    root = fixture(tmp_path)
+    results = root / "results"
+    (results / "benchmark_20260921T000000Z.json").write_text(json.dumps(bench(True, 1)))
+    (results / "benchmark_20260923T000000Z.json").write_text(json.dumps(bench(True, 10)))
+    (results / "benchmark_20260925T000000Z.json").write_text(json.dumps(bench(False, 12)))
+    block = model_card.build(root)["benchmark"]
+    assert block["file"] == "results/benchmark_20260923T000000Z.json"
+    assert (block["runs"], block["photos"]) == (3, 16)
+    assert block["models"]["m1"] == {
+        "all": {"correct": 10, "n": 12, "low_pct": 55, "high_pct": 95},
+        "pipe_running": {"correct": 0, "n": 12, "low_pct": 0, "high_pct": 24},
+        "cant_tell_pct": 27,
+    }
+
+
+def test_no_real_benchmark_gives_none(tmp_path: Path) -> None:
+    assert model_card.build(fixture(tmp_path))["benchmark"] is None
+
+
 def test_check_fails_when_the_committed_file_is_stale(tmp_path: Path, monkeypatch: Any) -> None:
     stale = tmp_path / "model_card.json"
     stale.write_text("{}\n", encoding="utf-8")
