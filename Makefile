@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -54,8 +54,22 @@ readability:
 
 # Every Mermaid block in README.md and docs/ parses. A broken diagram renders as nothing on
 # GitHub and nobody notices until a judge opens the page. MERMAID_CLI=1 also renders each one.
+# The three diagrams in docs/diagrams (UPDATE_27 block 23) are .mmd sources drawn as SVGs by the
+# Mermaid CLI pinned in tools/diagrams, in the Chromium Playwright installs for apps/web, so it
+# needs `(cd tools/diagrams && npm ci)` once. make diagrams renders each source again and fails
+# when a render fails or a committed SVG is missing, stale or edited by hand; make
+# diagrams-render draws them after an edit. tools/diagrams/render.mjs says why the comparison is
+# by content across machines and by bytes on the one that drew them.
+DIAGRAM_TOOL := tools/diagrams
+
 diagrams:
 	$(PY) scripts/check_diagrams.py
+	@test -d $(DIAGRAM_TOOL)/node_modules || { echo "diagrams: run (cd $(DIAGRAM_TOOL) && npm ci) first"; exit 1; }
+	cd $(DIAGRAM_TOOL) && node --test render.test.mjs && node render.mjs --check
+
+diagrams-render:
+	@test -d $(DIAGRAM_TOOL)/node_modules || { echo "diagrams: run (cd $(DIAGRAM_TOOL) && npm ci) first"; exit 1; }
+	cd $(DIAGRAM_TOOL) && node render.mjs
 
 dash-check:
 	$(PY) scripts/check_dashes.py

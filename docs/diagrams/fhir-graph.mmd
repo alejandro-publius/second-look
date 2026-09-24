@@ -1,0 +1,40 @@
+flowchart TB
+  accTitle: The FHIR resources of one creek visit, and how they point at each other
+  accDescr: One creek visit is emitted as a collection Bundle by core/fhir_emit.py. Its Observations sit on the spot, which is part of a reach, which is part of a creek. Each Observation names the volunteer as performer and the creek check answers as its source. The volunteer is a pseudonymous Practitioner whose dated qualification is issued by Second Look, and the test sitting with the per-feature score is authored by the same Practitioner. One Provenance ties every Observation to the volunteer, the software and both sets of answers. A pipe worth testing becomes a ServiceRequest made on request by core/fhir_referral.py, and our Library entry on their sandbox lists the mirrored Provenance.
+  subgraph VISIT["Bundle, type collection: one creek visit, from core/fhir_emit.py"]
+    ORG["Organization<br/>Second Look"]
+    DEV["Device<br/>the Second Look web app"]
+    PRAC["Practitioner, the volunteer<br/>known by a hash of a random token<br/>qualification: the Second Look test,<br/>from the test day until it lapses"]
+    QRT["QuestionnaireResponse<br/>the test sitting: each feature's score"]
+    QRV["QuestionnaireResponse<br/>the creek check: every answer"]
+    OBS["Observation, one per answered item<br/>profile ObservationIndicatorsOah<br/>value: a coded answer or a quantity"]
+    PROV["Provenance<br/>one per visit"]
+    subgraph NEST["Location nest, profile LocationOah"]
+      SPOT["Location: the spot"]
+      REACH["Location: the reach"]
+      CREEK["Location: the creek"]
+    end
+  end
+  subgraph REFER["Referral, core/fhir_referral.py"]
+    SR["ServiceRequest, intent proposal<br/>test the water coming out of this pipe<br/>made on request, never stored"]
+  end
+  subgraph SANDBOX["Their sandbox, our copies sent by scripts/repush_sandbox.py"]
+    LIB["Library, profile LibraryOah<br/>our data set, from core/fhir_library.py"]
+  end
+  SPOT -- "partOf" --> REACH
+  REACH -- "partOf" --> CREEK
+  PRAC -- "qualification.issuer" --> ORG
+  QRT -- "author" --> PRAC
+  QRV -- "author" --> PRAC
+  OBS -- "subject" --> SPOT
+  OBS -- "performer" --> PRAC
+  OBS -- "derivedFrom" --> QRV
+  PROV -- "target: every Observation" --> OBS
+  PROV -- "agent, author" --> PRAC
+  PROV -- "agent, assembler" --> DEV
+  PROV -- "entity, source: the answers" --> QRV
+  PROV -- "entity, source: the score" --> QRT
+  SR -- "subject: the pipe's spot" --> SPOT
+  SR -- "reasonReference:<br/>the pipe Observations" --> OBS
+  SR -- "requester" --> ORG
+  LIB -- "content: each mirrored<br/>Provenance, by its id there" --> PROV

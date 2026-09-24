@@ -154,3 +154,15 @@ def test_third_party_parses_both_lockfiles(tmp_path: Path) -> None:
     out = tmp_path / "TP.md"
     assert third_party.main(["--root", str(REPO), "--out", str(out)]) == 0
     assert out.read_text() == text.replace(text.split("\n")[2], out.read_text().split("\n")[2])
+
+
+def test_an_mit_license_file_names_the_license(tmp_path: Path) -> None:
+    """khroma, which Mermaid loads, says MIT only in its license file."""
+    pkg = tmp_path / "node_modules" / "khroma"
+    pkg.mkdir(parents=True)
+    (pkg / "package.json").write_text('{"name": "khroma"}')
+    assert third_party.npm_license({}, pkg) == third_party.NOT_STATED
+    (pkg / "license").write_text("\nThe MIT License (MIT)\n\nCopyright (c) 2019 someone\n")
+    assert third_party.npm_license({}, pkg) == "MIT (from its license file)"
+    (pkg / "license").write_text("Apache License\nVersion 2.0\n")
+    assert third_party.npm_license({}, pkg) == third_party.NOT_STATED

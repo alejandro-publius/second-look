@@ -9,9 +9,22 @@ What the offline parser checks, which is what actually breaks in practice:
 
 - the block names a diagram type we use (flowchart, graph, sequenceDiagram, erDiagram)
 - brackets, braces and parentheses balance on every line
-- `subgraph` and `end` pair up
+- `subgraph` and `end` pair up, and in a sequence diagram `alt`, `opt`, `loop` and the rest
 - an arrow has something on both sides of it
 - a node label with a bracket or a quote inside it is quoted
+
+The three diagrams of UPDATE_27 block 23 live as sources in docs/diagrams/*.mmd, each drawn as an
+SVG next to it by tools/diagrams/render.mjs. This script checks them offline too, before the
+render check in `make diagrams` runs a browser:
+
+- each source passes the structural check above, and names itself with accTitle and accDescr,
+  which become the SVG's title and description for a screen reader
+- in a flowchart source, every edge carries a label that says what flows along it
+- each source has its SVG, each SVG has its source, and the stamp on the SVG's first line carries
+  the sha256 of the source as it is now, so a source edited without a new render fails here, and
+  the sha256 of the drawing under it, so an SVG edited by hand fails too
+- a Markdown block that names the same accTitle as a source is a copy of it, and must be the
+  source word for word, so a copy in the README or docs/ARCHITECTURE.md cannot drift
 
 Run: uv run python scripts/check_diagrams.py
      MERMAID_CLI=1 uv run python scripts/check_diagrams.py   also run npx @mermaid-js/mermaid-cli
@@ -19,6 +32,7 @@ Run: uv run python scripts/check_diagrams.py
 
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import shutil
@@ -28,12 +42,30 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+DIAGRAM_DIR = Path("docs") / "diagrams"
 SEARCH = ("README.md", "docs")
 SKIP_DIRS = {"node_modules", ".next", "out", "ig-src"}
 FENCE = re.compile(r"^```mermaid\s*$")
 CLOSE = re.compile(r"^```\s*$")
 TYPES = ("flowchart", "graph", "sequenceDiagram", "erDiagram", "classDiagram", "stateDiagram")
+# What an end closes in a sequence diagram. In a flowchart only a subgraph opens a block.
+SEQUENCE_BLOCKS = ("alt", "opt", "loop", "par", "critical", "break", "rect", "box")
 ARROWS = ("-->", "---", "-.->", "==>", "->>", "-->>", "->", "--)", "--x")
+# A flowchart edge with its label, in the two spellings Mermaid knows:
+#   A -- "what flows" --> B    (also -. "x" .-> B, == "x" ==> B, A <-- "x" --> B)
+#   A -->|what flows| B
+LABELLED_EDGE = re.compile(
+    r'^\w+\s*<?(?:--|-\.|==)\s*"[^"]*\S[^"]*"\s*(?:-->|\.->|==>|---)\s*\w+$'
+    r"|^\w+\s*<?(?:-->|-\.->|==>|---)\s*\|[^|]*\S[^|]*\|\s*\w+$"
+)
+EDGE_TOKENS = ("-->", ".->", "==>", "---", "~~~", "-.-")
+NOT_EDGES = ("subgraph ", "accTitle", "accDescr", "classDef ", "class ", "style ", "linkStyle ")
+STAMP = re.compile(
+    r"^<!-- Drawn by make diagrams from docs/diagrams/(\S+)\.mmd \(sha256 ([0-9a-f]{64})\)"
+)
+# The same first line also carries the sha256 of the drawing below it, so a hand edit shows.
+DRAWING = re.compile(r"the drawing below has sha256 ([0-9a-f]{64})\. ")
+ACC_TITLE = re.compile(r"^\s*accTitle:\s*(.+?)\s*$", re.M)
 
 
 class DiagramError(Exception):
@@ -87,6 +119,7 @@ def check_source(source: str) -> list[str]:
     head = lines[0].strip()
     if not head.startswith(TYPES):
         problems.append(f"line 1 does not name a diagram type we use: {head!r}")
+    openers = SEQUENCE_BLOCKS if head.startswith("sequenceDiagram") else ("subgraph",)
     depth = 0
     for number, raw in enumerate(lines, start=1):
         line = _strip_labels(raw)
@@ -96,12 +129,12 @@ def check_source(source: str) -> list[str]:
                 problems.append(
                     f"line {number}: {open_char}{close_char} do not balance: {raw.strip()!r}"
                 )
-        if stripped.startswith("subgraph"):
+        if stripped.split(" ", 1)[0] in openers:
             depth += 1
         elif stripped == "end":
             depth -= 1
             if depth < 0:
-                problems.append(f"line {number}: an end with no subgraph")
+                problems.append(f"line {number}: an end with no {' or '.join(openers)} to close")
                 depth = 0
         for arrow in ARROWS:
             if arrow not in stripped:
@@ -113,7 +146,109 @@ def check_source(source: str) -> list[str]:
                 )
             break
     if depth != 0:
-        problems.append(f"{depth} subgraph(s) never closed with end")
+        problems.append(f"{depth} {' or '.join(openers)} block(s) never closed with end")
+    return problems
+
+
+def unlabelled_edges(source: str) -> list[str]:
+    """Every edge in a flowchart that does not say what flows along it, as "line N: ..."."""
+    lines = source.splitlines()
+    head = next((ln.strip() for ln in lines if ln.strip() and not ln.strip().startswith("%%")), "")
+    if not head.startswith(("flowchart", "graph")):
+        return []
+    problems: list[str] = []
+    for number, raw in enumerate(lines, start=1):
+        line = raw.strip()
+        if not line or line == "end" or line.startswith("%%") or line.startswith(NOT_EDGES):
+            continue
+        if not any(token in _strip_labels(line) for token in EDGE_TOKENS):
+            continue
+        if not LABELLED_EDGE.match(line):
+            problems.append(
+                f"line {number}: an edge with no label, or more than one edge: {line!r}"
+            )
+    return problems
+
+
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def diagram_sources(root: Path) -> list[Path]:
+    folder = root / DIAGRAM_DIR
+    return sorted(folder.glob("*.mmd")) if folder.is_dir() else []
+
+
+def source_problems(root: Path) -> list[str]:
+    """The .mmd sources in docs/diagrams and the SVGs drawn from them, checked without a browser."""
+    folder = root / DIAGRAM_DIR
+    sources = diagram_sources(root)
+    if not sources:
+        return [f"{DIAGRAM_DIR}: no .mmd sources"]
+    problems: list[str] = []
+    names = {p.stem for p in sources}
+    for svg in sorted(folder.glob("*.svg")):
+        if svg.stem not in names:
+            problems.append(f"{DIAGRAM_DIR / svg.name}: an SVG with no .mmd source next to it")
+    titles: dict[str, str] = {}
+    for src in sources:
+        where = DIAGRAM_DIR / src.name
+        raw = src.read_bytes()
+        text = raw.decode("utf-8")
+        problems += [f"{where}: {p}" for p in check_source(text)]
+        title = ACC_TITLE.search(text)
+        if title is None:
+            problems.append(f"{where}: no accTitle, which names the SVG for a screen reader")
+        elif title.group(1) in titles:
+            problems.append(f"{where}: the same accTitle as {titles[title.group(1)]}")
+        else:
+            titles[title.group(1)] = src.name
+        if not re.search(r"^\s*accDescr:\s*\S", text, re.M):
+            problems.append(f"{where}: no accDescr, which says in words what the diagram shows")
+        problems += [f"{where}: {p}" for p in unlabelled_edges(text)]
+        svg = src.with_suffix(".svg")
+        if not svg.exists():
+            problems.append(f"{where}: no SVG next to it; run make diagrams-render")
+            continue
+        first, _, body = svg.read_bytes().partition(b"\n")
+        stamp = STAMP.match(first.decode("utf-8", errors="replace"))
+        drawing = DRAWING.search(first.decode("utf-8", errors="replace"))
+        if stamp is None or stamp.group(1) != src.stem:
+            problems.append(
+                f"{DIAGRAM_DIR / svg.name}: no stamp naming {src.name} on its first line"
+            )
+        elif stamp.group(2) != _sha256(raw):
+            problems.append(
+                f"{DIAGRAM_DIR / svg.name}: drawn from another version of {src.name}; "
+                "run make diagrams-render"
+            )
+        elif drawing is None or drawing.group(1) != _sha256(body):
+            problems.append(
+                f"{DIAGRAM_DIR / svg.name}: edited by hand after it was drawn; "
+                "run make diagrams-render"
+            )
+    return problems
+
+
+def copy_problems(root: Path, blocks: list[tuple[str, str]]) -> list[str]:
+    """A Markdown block with a source's accTitle is a copy of that source and must match it."""
+    by_title: dict[str, tuple[str, str]] = {}
+    for src in diagram_sources(root):
+        text = src.read_text(encoding="utf-8")
+        title = ACC_TITLE.search(text)
+        if title is not None:
+            by_title.setdefault(title.group(1), (src.name, text))
+    problems: list[str] = []
+    for where, source in blocks:
+        title = ACC_TITLE.search(source)
+        if title is None or title.group(1) not in by_title:
+            continue
+        name, text = by_title[title.group(1)]
+        if source.rstrip("\n") != text.rstrip("\n"):
+            problems.append(
+                f"{where}: a copy of {DIAGRAM_DIR / name} that differs from it; "
+                "paste the source again"
+            )
     return problems
 
 
@@ -147,26 +282,33 @@ def run_cli(source: str) -> str | None:
     return None
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, root: Path = ROOT) -> int:
     use_cli = os.environ.get("MERMAID_CLI") == "1"
     problems: list[str] = []
-    count = 0
-    for path in markdown_files(ROOT):
+    blocks: list[tuple[str, str]] = []
+    for path in markdown_files(root):
         for line_no, source in blocks_in(path):
-            count += 1
-            where = f"{path.relative_to(ROOT)}:{line_no}"
+            where = f"{path.relative_to(root)}:{line_no}"
+            blocks.append((where, source))
             for problem in check_source(source):
                 problems.append(f"{where}: {problem}")
             if use_cli:
                 error = run_cli(source)
                 if error:
                     problems.append(f"{where}: mermaid-cli: {error}")
+    problems += source_problems(root)
+    problems += copy_problems(root, blocks)
+    count = len(blocks)
+    sources = len(diagram_sources(root))
     if problems:
         print("\n".join(problems))
-        print(f"diagrams: {len(problems)} problem(s) in {count} block(s)")
+        print(f"diagrams: {len(problems)} problem(s) in {count} block(s) and {sources} source(s)")
         return 1
     how = "mermaid-cli and the structural check" if use_cli else "the structural check"
-    print(f"diagrams: {count} Mermaid block(s) parse, by {how}")
+    print(
+        f"diagrams: {count} Mermaid block(s) parse, by {how}; {sources} source(s) in "
+        f"{DIAGRAM_DIR} have labelled edges and an SVG drawn from them as they are now"
+    )
     return 0
 
 

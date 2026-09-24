@@ -28,7 +28,7 @@ Nothing below needs an API key. Nothing below needs a network except the two row
 | 6 | Every image a person sees has a manifest row | `make manifest-check` | the image count, all with matching rows |
 | 7 | Plain words, reading age about 12 | `make readability` | the string count, the average grade under the cap, the exception count |
 | 8 | No em dash, no en dash, anywhere | `make dash-check` | no long dashes in tracked files |
-| 9 | Every diagram in the docs renders | `make diagrams` | the block count, parsed |
+| 9 | Every diagram in the docs renders, and the SVGs in `docs/diagrams` are what their sources draw | `make diagrams` | the block count, parsed; the source count, every edge labelled; each SVG the same as a fresh render |
 | 10 | Colour, spacing and tap targets come from tokens | `make design-check` | clean, with the contrast pairs computed and the tap targets measured |
 | 11 | The app builds as a static export | `make web-build` | `web build ok` |
 | 12 | Everything above, in one run | `make check` | `CHECK GREEN` |

@@ -23,6 +23,7 @@ jobs:
           cache-dependency-path: |
             apps/web/package-lock.json
             worker/package-lock.json
+            tools/diagrams/package-lock.json
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -47,6 +48,10 @@ jobs:
       # design-check drives the built app in Chromium to measure tap targets, so the runner
       # needs the browser Playwright pins, not only the package.
       - run: cd apps/web && npx playwright install --with-deps chromium
+      # make diagrams draws docs/diagrams/*.mmd again with the Mermaid CLI pinned here, in the
+      # Chromium installed just above. Puppeteer downloads no browser of its own
+      # (tools/diagrams/.puppeteerrc.cjs).
+      - run: cd tools/diagrams && npm ci
       # The Worker's package and its e2e live on depth until depth merges, so these three steps
       # run only where worker/package-lock.json exists. Same file on main and depth.
       - if: hashFiles('worker/package-lock.json') != ''

@@ -1,8 +1,9 @@
-"""Build docs/THIRD_PARTY.md from uv.lock and apps/web/package-lock.json (hard rule 1).
+"""Build docs/THIRD_PARTY.md from uv.lock and the npm lockfiles (hard rule 1).
 
 Run: uv run python scripts/third_party.py
-Python licenses come from the installed package metadata (importlib.metadata); web licenses from
-the lockfile or each installed package's package.json. Where neither says, the table says so.
+Python licenses come from the installed package metadata (importlib.metadata); npm licenses from
+the lockfile or each installed package's package.json. The npm lockfiles are apps/web's, the
+Worker's and tools/diagrams', the pinned Mermaid renderer. Where neither says, the table says so.
 The external services section is written here too, so the file is always whole.
 """
 
@@ -10,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import tomllib
 from datetime import UTC, datetime
@@ -19,6 +21,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 NOT_STATED = "not stated in package metadata"
+LICENSE_FILES = ("LICENSE", "LICENSE.md", "LICENSE.txt", "license", "license.md", "LICENCE")
+MIT_HEADING = re.compile(r"(The )?MIT License( \(MIT\))?")
 
 SERVICES = """## External services
 
@@ -60,6 +64,19 @@ no brand colour, name, logo or font was taken. They informed structure and restr
 - Phosphor Icons, MIT, through `@phosphor-icons/core` (a devDependency). Regular weight only.
   `apps/web/scripts/build-icons.mjs` generates `components/ui/Icon.tsx` from its SVG assets, so
   there is no icon runtime in the bundle and no second icon family can appear.
+"""
+
+DIAGRAMS = """## The diagram renderer
+
+- `tools/diagrams` draws the diagrams in `docs/diagrams/*.mmd` as SVG for `make diagrams`
+  and `make diagrams-render` (UPDATE_27 block 23). It pins the Mermaid CLI (MIT), which loads
+  Mermaid (MIT) and drives a browser through Puppeteer (Apache-2.0). Puppeteer downloads no
+  browser of its own (`tools/diagrams/.puppeteerrc.cjs`): `playwright-core` (Apache-2.0), at the
+  same version as apps/web's, finds the Chromium that `npx playwright install chromium` already
+  installed, so a render needs no network. Chosen over a hosted renderer because it runs offline
+  in CI, and over `npx @mermaid-js/mermaid-cli` because that fetches whatever version is newest.
+  Nothing from these packages is served or shipped; only the SVGs they draw from our own sources
+  are committed.
 """
 
 
@@ -116,7 +133,20 @@ def npm_license(entry: dict[str, Any], installed: Path) -> str:
         licenses = data.get("licenses")
         if isinstance(licenses, list) and licenses:
             return " OR ".join(str(x.get("type", "")) for x in licenses if isinstance(x, dict))
-    return NOT_STATED
+    return license_file(installed) or NOT_STATED
+
+
+def license_file(installed: Path) -> str | None:
+    """MIT, when a package says so only in its license file and not in its package.json."""
+    for name in LICENSE_FILES:
+        path = installed / name
+        if not path.is_file():
+            continue
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        first = next((line.strip() for line in lines if line.strip()), "")
+        if MIT_HEADING.fullmatch(first):
+            return "MIT (from its license file)"
+    return None
 
 
 def npm_packages(lock_path: Path) -> list[tuple[str, str, str, bool]]:
@@ -144,17 +174,22 @@ def build(root: Path) -> str:
     web = npm_packages(web_lock) if web_lock.exists() else []
     worker_lock = root / "worker" / "package-lock.json"
     worker = npm_packages(worker_lock) if worker_lock.exists() else []
+    diagrams_lock = root / "tools" / "diagrams" / "package-lock.json"
+    diagrams = npm_packages(diagrams_lock) if diagrams_lock.exists() else []
     today = datetime.now(UTC).strftime("%Y-%m-%d")
     out = [
         "# Third party dependencies",
         "",
         f"Generated on {today} by `uv run python scripts/third_party.py` from `uv.lock`, "
-        "`apps/web/package-lock.json` and `worker/package-lock.json`. Do not edit by hand; rerun "
-        "the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).",
+        "`apps/web/package-lock.json`, `worker/package-lock.json` and "
+        "`tools/diagrams/package-lock.json`. Do not edit by hand; rerun the script. Our own code "
+        "is MIT; our photos and copy are CC BY 4.0 (README).",
         "",
         SERVICES.rstrip(),
         "",
         REFERENCES.rstrip(),
+        "",
+        DIAGRAMS.rstrip(),
         "",
         f"## Python packages ({len(py)}, from uv.lock)",
         "",
@@ -183,11 +218,21 @@ def build(root: Path) -> str:
         "|---|---|---|---|",
     ]
     out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in worker]
-    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
-    unknown_web = sum(1 for _, _, lic, _ in web + worker if lic == NOT_STATED)
     out += [
         "",
-        f"Licenses not found for {unknown_py} Python and {unknown_web} web and worker packages; "
+        f"## Diagram tool packages ({len(diagrams)}, from tools/diagrams/package-lock.json)",
+        "",
+        "All dev: they draw the SVGs in docs/diagrams and do nothing else.",
+        "",
+        "| Package | Version | License | dev |",
+        "|---|---|---|---|",
+    ]
+    out += [f"| {n} | {v} | {lic} | {'yes' if dev else ''} |" for n, v, lic, dev in diagrams]
+    unknown_py = sum(1 for _, _, lic in py if lic in {NOT_STATED, "not installed here"})
+    unknown_web = sum(1 for _, _, lic, _ in web + worker + diagrams if lic == NOT_STATED)
+    out += [
+        "",
+        f"Licenses not found for {unknown_py} Python and {unknown_web} npm packages; "
         "check those by hand before the repo goes public.",
         "",
     ]
