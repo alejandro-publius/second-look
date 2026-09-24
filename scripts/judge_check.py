@@ -109,7 +109,8 @@ def last_line(text: str) -> str:
 
 def step_tests(root: Path, env: dict[str, str]) -> Step:
     step = Step("tests")
-    rc, out = run(["uv", "run", "pytest", "-q"], root, env)
+    # No -q here: pyproject.toml already adds one, and a second hides the "N passed" line.
+    rc, out = run(["uv", "run", "pytest"], root, env)
     if rc != 0:
         step.fail(f"pytest failed: {last_line(out)}")
     else:
