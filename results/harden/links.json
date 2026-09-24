@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-24T16:28:46Z",
- "commit": "b0bd12a",
+ "checked_utc": "2026-09-24T17:13:58Z",
+ "commit": "0326e78",
  "files": 58,
  "rows": [
   {
@@ -6685,6 +6685,15 @@
    "file": "docs/MODEL_CARD.md",
    "line": 33,
    "kind": "backtick",
+   "target": "content/form.yaml",
+   "in_code": true,
+   "status": "ok",
+   "detail": "content/form.yaml"
+  },
+  {
+   "file": "docs/MODEL_CARD.md",
+   "line": 34,
+   "kind": "backtick",
    "target": "core/followups.py",
    "in_code": true,
    "status": "ok",
@@ -6692,7 +6701,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 41,
+   "line": 44,
    "kind": "backtick",
    "target": "content/walks.yaml",
    "in_code": true,
@@ -6701,7 +6710,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 48,
+   "line": 51,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
@@ -6710,7 +6719,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 55,
+   "line": 58,
    "kind": "backtick",
    "target": "content/approved_sentences.yaml",
    "in_code": true,
@@ -6719,7 +6728,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 55,
+   "line": 58,
    "kind": "backtick",
    "target": "core/tests/test_healthcard.py",
    "in_code": true,
@@ -6728,7 +6737,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 55,
+   "line": 58,
    "kind": "backtick",
    "target": "core/tests/test_act.py",
    "in_code": true,
@@ -6737,7 +6746,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 60,
+   "line": 63,
    "kind": "backtick",
    "target": "docs/analysis_plan.md",
    "in_code": true,
@@ -6746,7 +6755,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 62,
+   "line": 65,
    "kind": "backtick",
    "target": "results/model_pass_table.json",
    "in_code": true,
@@ -6755,7 +6764,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 78,
+   "line": 81,
    "kind": "backtick",
    "target": "evals/benchmark.py",
    "in_code": true,
@@ -6764,7 +6773,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 105,
+   "line": 108,
    "kind": "backtick",
    "target": "evals/fixtures/__init__.py",
    "in_code": true,
@@ -6773,7 +6782,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 106,
+   "line": 109,
    "kind": "backtick",
    "target": "results/footage_latest.json",
    "in_code": true,
@@ -6782,7 +6791,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 129,
+   "line": 132,
    "kind": "backtick",
    "target": "evals/models.yaml",
    "in_code": true,
@@ -6791,7 +6800,7 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 153,
+   "line": 156,
    "kind": "backtick",
    "target": "results/cost_log.jsonl",
    "in_code": true,
@@ -6800,12 +6809,21 @@
   },
   {
    "file": "docs/MODEL_CARD.md",
-   "line": 173,
+   "line": 176,
    "kind": "backtick",
    "target": "core/gate.py",
    "in_code": true,
    "status": "ok",
    "detail": "core/gate.py"
+  },
+  {
+   "file": "docs/MODEL_CARD.md",
+   "line": 190,
+   "kind": "backtick",
+   "target": "results/model_card.json",
+   "in_code": true,
+   "status": "ok",
+   "detail": "results/model_card.json"
   },
   {
    "file": "docs/REAL_VS_SYNTHETIC.md",
@@ -7272,8 +7290,8 @@
    "kind": "url",
    "target": "https://www.inaturalist.org/pages/api+recommended+practices",
    "in_code": false,
-   "status": "ok",
-   "detail": "200"
+   "status": "blocked",
+   "detail": "403, the site refuses scripts"
   },
   {
    "file": "docs/THIRD_PARTY.md",
@@ -8966,6 +8984,24 @@
    "in_code": true,
    "status": "ok",
    "detail": "docs/internal/PANEL_STUDY.md"
+  },
+  {
+   "file": "docs/deviations.md",
+   "line": 38,
+   "kind": "backtick",
+   "target": "core/followups.py",
+   "in_code": true,
+   "status": "ok",
+   "detail": "core/followups.py"
+  },
+  {
+   "file": "docs/deviations.md",
+   "line": 38,
+   "kind": "backtick",
+   "target": "examples/footage-flag/",
+   "in_code": true,
+   "status": "ok",
+   "detail": "examples/footage-flag"
   },
   {
    "file": "docs/devpost.md",

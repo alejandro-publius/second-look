@@ -1,6 +1,6 @@
 # Link check 00
 
-Checked 2026-09-24T16:28:46Z at commit b0bd12a by `uv run python scripts/harden_links.py`, over README.md and every tracked Markdown file under docs/ (58 files). Nothing was fixed. Raw rows: `results/harden/links.json`.
+Checked 2026-09-24T17:13:58Z at commit 0326e78 by `uv run python scripts/harden_links.py`, over README.md and every tracked Markdown file under docs/ (58 files). Nothing was fixed. Raw rows: `results/harden/links.json`.
 
 Relative links are resolved from the file that holds them and their #anchors are checked against the target's headings the way GitHub makes them. Paths in backticks are resolved from the repo root. Each web address got one GET with redirects followed. A site that answers 401, 403, 405, 429 or 999 to a script is listed as blocked, not dead: open it by hand. A path that git ignores (build output, local data) is listed as ignored, not dead. api.enora-oah.eu and the Resilience Map API were never called (hard rule 9); the HL7 sandbox got at most one GET a second and 50 in all (hard rule 10).
 
@@ -9,8 +9,8 @@ Relative links are resolved from the file that holds them and their #anchors are
 | Kind | ok | dead | blocked | private | ignored | skipped |
 |---|---|---|---|---|---|---|
 | relative | 193 | 0 | 0 | 0 | 0 | 0 |
-| backtick | 938 | 0 | 0 | 0 | 8 | 0 |
-| url | 122 | 0 | 6 | 9 | 0 | 25 |
+| backtick | 942 | 0 | 0 | 0 | 8 | 0 |
+| url | 121 | 0 | 7 | 9 | 0 | 25 |
 
 ## Dead, in the README and product docs
 
@@ -26,6 +26,7 @@ None.
 |---|---|---|---|
 | README.md:613 | url (in code) | https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466 | the name does not resolve (NXDOMAIN at their own nameserver since 2026-09-23; hl7-eu/oah issue 8) |
 | docs/THIRD_PARTY.md:11 | url | https://sandbox.hl7europe.eu/oneaquahealth/fhir | the name does not resolve (NXDOMAIN at their own nameserver since 2026-09-23; hl7-eu/oah issue 8) |
+| docs/THIRD_PARTY.md:23 | url | https://www.inaturalist.org/pages/api+recommended+practices | 403, the site refuses scripts |
 | docs/notes/sandbox_library.md:13 | url (in code) | https://sandbox.hl7europe.eu/oneaquahealth/fhir | the name does not resolve (NXDOMAIN at their own nameserver since 2026-09-23; hl7-eu/oah issue 8) |
 | docs/notes/sandbox_library.md:17 | url (in code) | https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466 | the name does not resolve (NXDOMAIN at their own nameserver since 2026-09-23; hl7-eu/oah issue 8) |
 | docs/notes/sandbox_library.md:133 | url (in code) | https://sandbox.hl7europe.eu/oneaquahealth/fhir | the name does not resolve (NXDOMAIN at their own nameserver since 2026-09-23; hl7-eu/oah issue 8) |
