@@ -244,6 +244,21 @@ backup-install:
 poster:
 	cd $(WEB) && npm run poster
 
+# UPDATE_27 block 23: the README gallery, the GIF of the two-minute test and the social preview.
+# The read only pages come from the live site, reading only (apps/web/scripts/gallery-guard.mjs
+# refuses anything that could write). The test flow and the sample record come from this
+# checkout's production build on port GALLERY_PORT with the mock API, so nothing is sent anywhere.
+# Needs the network and a few minutes, so it is not part of make check; scripts/tests/
+# test_gallery.py checks what it wrote on every make check.
+GALLERY_PORT ?= 3217
+.PHONY: screens
+screens:
+	@if curl -s -o /dev/null http://127.0.0.1:$(GALLERY_PORT)/; then echo "screens: port $(GALLERY_PORT) is in use; set GALLERY_PORT"; exit 1; fi
+	cd $(WEB) && npm run build --silent
+	@bash -c 'set -euo pipefail; cd $(WEB); node node_modules/next/dist/bin/next start -p $(GALLERY_PORT) >/dev/null 2>&1 & server=$$!; trap "kill $$server 2>/dev/null || true" EXIT; for i in $$(seq 1 60); do curl -fs -o /dev/null http://127.0.0.1:$(GALLERY_PORT)/ && break; sleep 1; done; GALLERY_LOCAL_URL=http://127.0.0.1:$(GALLERY_PORT) node scripts/gallery.mjs'
+	$(PY) scripts/make_gallery.py
+	uv run pytest -q scripts/tests/test_gallery.py
+
 deploy:
 	bash scripts/deploy.sh
 
