@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -107,13 +107,24 @@ verify-claims:
 	$(PY) scripts/verify_claims.py --file WRITEUP.md
 	$(PY) scripts/verify_claims.py --file SECURITY.md
 	$(PY) scripts/verify_claims.py --file DEPLOY.md
+	$(PY) scripts/verify_claims.py --file docs/DATA_CARD.md
+	$(PY) scripts/verify_claims.py --file docs/MODEL_CARD.md
+	$(PY) scripts/verify_claims.py --file docs/THREAT_MODEL.md
 
 # The README and every other doc whose numbers verify-claims checks, so a new result or a new
 # test count is written everywhere it is quoted, not only in the README.
-RENDERED_DOCS := WRITEUP.md SECURITY.md DEPLOY.md docs/API.md docs/MCP.md
+RENDERED_DOCS := WRITEUP.md SECURITY.md DEPLOY.md docs/API.md docs/MCP.md docs/DATA_CARD.md docs/MODEL_CARD.md docs/THREAT_MODEL.md
 render-readme:
 	$(PY) scripts/render_readme.py
 	@for doc in $(RENDERED_DOCS); do $(PY) scripts/render_readme.py --readme $$doc || exit 1; done
+
+# UPDATE_29 section 5: docs/REPORT.pdf, a technical report of about six pages, from the README,
+# the docs it names and results/. docs/report/source.md holds its own words and names each
+# section it takes. Needs pandoc at the version pinned in scripts/build_report.py and apps/web's
+# node_modules with Playwright's Chromium; no network. It writes the stamp results/report_pdf.json,
+# and scripts/tests/test_report_pdf.py fails in make check when the PDF is older than its sources.
+report-pdf:
+	$(PY) scripts/build_report.py
 
 # The test counts the README cites (UPDATE_27 block 24): Python tests, Worker golden cases,
 # Playwright tests and the Worker e2e sections, into results/test_counts.json. Not in make check,

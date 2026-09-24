@@ -147,6 +147,13 @@ https://second-look-79t.pages.dev/judges
 https://github.com/alejandro-publius/second-look
 ```
 
+## Technical report
+
+Attach `docs/REPORT.pdf` to the submission where Devpost takes a file, and link it from the
+text as https://github.com/alejandro-publius/second-look/blob/main/docs/REPORT.pdf once the
+repository is public. It is built by `make report-pdf` from the README and `results/`, and a test
+in `make check` fails when it is older than its sources. This section is not a paste field.
+
 ## Video link
 
 50 characters
