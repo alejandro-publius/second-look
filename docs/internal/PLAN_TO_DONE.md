@@ -88,3 +88,19 @@ because its work is being built in parallel right now.
     It removes these working notes, this file included, runs `make submit-check`, and only then
     makes the repository public.
 18. **Alex, Wed Sep 30 by 18:00 PDT**: submit on Devpost (D48).
+
+## Last block: UPDATE_29, undeniable
+
+Taken only after every item above is PASS, HUMAN or BLOCKED, except the panel study's software
+side (D49, D50), which is done at once because Alex needs it by Sep 26 evening.
+
+19. **The session, Sep 24**: the panel study's software side and `docs/internal/PANEL_STUDY.md`
+    (D49, D50), as a logged deviation.
+20. **Alex, by Sat Sep 26 evening, 15 minutes**: create and fund the panel study from
+    `docs/internal/PANEL_STUDY.md` and launch it (D51).
+21. **The session**: contribute back to hl7-eu/oah (D53); OpenTimestamps and `/verify` (D54, D55);
+    `make reproduce`, mutation testing, Lighthouse on the landing page (D56 to D58); the model card,
+    threat model, report and data card (D59 to D62); iNaturalist context (D64); then the loop over
+    everything new (D65).
+22. **Rachel, optional, 15 minutes**: a second set of labels (D63).
+23. **The session, after the lock on Sep 28**: the analysis once, into the README's human row (D52).
