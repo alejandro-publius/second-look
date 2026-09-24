@@ -253,10 +253,10 @@ flowchart TB
   EMIT -- "visit Bundles as<br/>conditional creates" --> MIRROR
   LIB -- "what our data set is<br/>and where it lives" --> MIRROR
   MIRROR -- "our tag on every resource,<br/>ids kept in a ledger" --> SANDBOX
-  SANDBOX -- "one lab Observation of theirs,<br/>read once a day from the Mac" --> D1
+  SANDBOX -- "one lab Observation<br/>of theirs, read once<br/>a day from the Mac" --> D1
   D1 -- "stored visits and<br/>follow-up answers" --> ACTF
   REGIONS -- "creek and reach<br/>of each spot" --> ACTF
-  ACTF -- "a pipe two people who passed<br/>saw running after dry days" --> REFER
+  ACTF -- "a pipe two people<br/>who passed saw running<br/>after dry days" --> REFER
   ACTF -- "needs, pipes worth testing,<br/>downstream notes" --> VIEWS
   REFER -- "a ServiceRequest Bundle" --> VIEWS
   D1 -- "the record, its Bundle,<br/>their cached record" --> VIEWS
