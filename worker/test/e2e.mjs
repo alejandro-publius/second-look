@@ -345,6 +345,7 @@ try {
     species: [
       { taxon_id: 61317, name: "Himalayan blackberry", latin_name: "Rubus armeniacus", count: 3, last_observed: "2025-12-11", url: "https://www.inaturalist.org/observations?id=1,2,3" },
       { taxon_id: 1, name: "Not a link to iNaturalist", latin_name: "x", count: 1, last_observed: "2025-01-01", url: "https://example.org/" },
+      { taxon_id: 3, name: "A yes, not a count", latin_name: "z", count: true, last_observed: "2025-02-02", url: "https://www.inaturalist.org/observations?id=4" },
     ],
   }).replaceAll("'", "''");
   wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--command", `INSERT OR REPLACE INTO inaturalist_cache (creek, body, fetched_at) VALUES ('strawberry-creek', '${summary}', '2026-09-24T07:45:00Z')`]);
@@ -352,7 +353,7 @@ try {
   assert.equal(inat.data.status, "cached");
   assert.equal(inat.data.fetched_at, "2026-09-24T07:45:00Z");
   assert.equal(inat.data.radius_m, 300);
-  assert.deepEqual(inat.data.species.map((s) => [s.name, s.count, s.last_observed]), [["Himalayan blackberry", 3, "2025-12-11"]], "the link that leaves iNaturalist is dropped");
+  assert.deepEqual(inat.data.species.map((s) => [s.name, s.count, s.last_observed]), [["Himalayan blackberry", 3, "2025-12-11"]], "the link that leaves iNaturalist and the count that is not a number are dropped");
   const byCreekId = await api("GET", `/api/inaturalist/${record.data.spot.creek_id}`);
   assert.equal(byCreekId.data.creek, "strawberry-creek", "a stored creek id reads the same row as its slug");
   const cityAfter = await api("GET", "/api/city/strawberry-creek");
@@ -366,6 +367,18 @@ try {
   assert.equal(withheld.data.shown, false);
   assert.equal(withheld.data.status, "cached");
   assert.deepEqual(withheld.data.species, []);
+  // A check left unfinished there does not open it, even when it answers the question.
+  const unfinished = await api("POST", "/api/check/draft", { spot: { spot_id: bridge.spot_id }, answers: GOOD_ANSWERS, first_rating: "good", photo_ids: [] });
+  assert.equal(unfinished.status, 200, JSON.stringify(unfinished.data));
+  assert.equal((await api("GET", `/api/inaturalist/${bridgeCreek}`)).data.shown, false, "an unfinished check does not open the line");
+  // Nor does a finished check at a pin whose name reads like a test, which /city leaves out too.
+  const testPin = await visit(null, { new: { name: "test", latitude: 12.5, longitude: 12.5, coarse: false } }, GOOD_ANSWERS);
+  const testCreek = (await api("GET", `/api/spot/${testPin.spot_id}`)).data.spot.creek_id;
+  wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--command", `INSERT OR REPLACE INTO inaturalist_cache (creek, body, fetched_at) VALUES ('${testCreek}', '${summary}', '2026-09-24T07:45:00Z')`]);
+  const onTestPin = await api("GET", `/api/inaturalist/${testCreek}`);
+  assert.equal(onTestPin.data.status, "cached");
+  assert.equal(onTestPin.data.shown, false, "a test pin does not open the line");
+  assert.deepEqual(onTestPin.data.species, []);
   // Read only: the route answers GET and nothing else.
   assert.equal((await api("POST", "/api/inaturalist/strawberry-creek", {})).status, 404);
 

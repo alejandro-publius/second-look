@@ -46,6 +46,14 @@ SUMMARY = {
             "last_observed": "",
             "url": "https://www.inaturalist.org/observations?id=",
         },
+        {
+            "taxon_id": 3,
+            "name": "A yes, not a count",
+            "latin_name": "z",
+            "count": True,
+            "last_observed": "2025-02-02",
+            "url": "https://www.inaturalist.org/observations?id=4",
+        },
     ],
 }
 NO_INVASIVE = {k: v for k, v in GOOD_ANSWERS.items() if k != "invasive_species"}

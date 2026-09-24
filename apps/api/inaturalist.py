@@ -93,7 +93,10 @@ def clean_species(raw: object) -> list[dict[str, Any]]:
             continue
         url = str(s.get("url") or "")
         count = s.get("count")
-        if not url.startswith(LINK_PREFIX) or not isinstance(count, int) or count < 1:
+        # A bool is an int to Python but not a count; the Worker drops it too.
+        if isinstance(count, bool) or not isinstance(count, int):
+            continue
+        if not url.startswith(LINK_PREFIX) or count < 1:
             continue
         out.append(
             {
