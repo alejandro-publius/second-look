@@ -135,14 +135,15 @@ Both servers treat a secret shorter than 16 characters as not set (`apps/api/set
 
 ## Jobs on the Mac
 
-Three launchd jobs run from this checkout as Alex, with his wrangler login, so they need no
-secret of their own.
+These launchd jobs run from this checkout as Alex. The ones that reach D1 or the sandbox use his
+wrangler login, so no job needs a secret of its own.
 
 | Label | When | What | Install |
 |---|---|---|---|
 | `com.secondlook.backup` | daily at 21:00, and at wake if the Mac slept through it | `scripts/backup_d1.sh`: exports D1 to `~/second-look-backups`, outside the repo, and keeps the newest `BACKUP_KEEP` dumps | `make backup-install` |
 | `com.secondlook.theirs` | daily at 07:30 | `scripts/cache_their_records.py`: one read only GET to their sandbox, stored in `sandbox_cache` for `/two` | `bash scripts/install_cache_job.sh` |
 | `com.secondlook.repush` | 08:00 on Sep 28, Sep 30 and Oct 1, 2026 | `scripts/repush_scheduled.sh`: puts our worked visit and Library entry back on their sandbox by conditional create | `bash scripts/install_repush_job.sh` |
+| `com.secondlook.anchor` | daily at 06:00 | `scripts/anchor_audit_head.py`: stamps the audit log's last hash with OpenTimestamps into `proofs/`, sending only that hash to the public calendars; then `scripts/ots_status.py` upgrades every proof and writes `results/ots.json`. It commits nothing | `bash scripts/install_anchor_job.sh` |
 
 Each installer takes `--remove`. Logs go to `~/second-look-backups/`.
 
