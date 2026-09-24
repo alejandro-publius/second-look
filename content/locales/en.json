@@ -535,6 +535,8 @@
   "walk.structure_bad": "{n} problems inside the record",
   "walk.checker_asked": "The checker asked one question after you answered, because it passed the test for that feature.",
   "walk.checker_none": "The checker asked nothing. It is only allowed to ask about a feature it passed the same test on, and {n} of its guesses on this clip were stopped for that reason.",
+  "walk.checker_none_one": "The checker asked nothing. It is only allowed to ask about a feature it passed the same test on, and 1 of its guesses on this clip was stopped for that reason.",
+  "walk.checker_nothing_seen": "The checker asked nothing. No model saw any of the four features in this clip, so the checker had nothing to ask.",
   "walk.checker_not_real": "The checker asked nothing. It has not taken the test for real yet, so it is not allowed to ask anything.",
   "walk.no_curl": "This record was made on your phone and has no web address.",
   "walk.validated_like": "Walk records made the same way passed the HL7 validator on {date}. This one was made on your phone and was not checked.",

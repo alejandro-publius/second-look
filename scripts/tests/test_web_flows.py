@@ -48,8 +48,37 @@ const stubs = { "@/lib/t": t, "react/jsx-runtime": jsx };
 const WalkFlow = load("components/WalkFlow.tsx", stubs);
 // FollowupCard is not exported; the test reaches it so the buttons' wiring is checked too.
 const CheckFlow = load("components/CheckFlow.tsx", stubs, "\nexports.FollowupCard = FollowupCard;");
+const Text = load("lib/text.ts", {});
+// The walk's city view with the content and the phone's walks the test hands it. Its hooks run
+// once, in place, and every Row it draws comes back as { type: "Row", props }.
+function walkCityRows(content, walks, walkId) {
+  const react = { useMemo: (f) => f(), useSyncExternalStore: (_subscribe, get) => get() };
+  const { WalkCity } = load("components/WalkCity.tsx", {
+    ...stubs,
+    react,
+    "@/lib/text": Text,
+    "@/lib/content": content,
+    "@/lib/walks": walks,
+    "./FocusHeading": { FocusHeading: "FocusHeading" },
+    "./ui/Row": { Row: "Row" },
+  });
+  const rows = [];
+  const visit = (n) => {
+    if (Array.isArray(n)) return n.forEach(visit);
+    if (!n || typeof n !== "object") return;
+    if (n.type === "Row") rows.push(n.props);
+    visit(n.props && n.props.children);
+  };
+  visit(WalkCity({ walkId }));
+  return rows;
+}
 const expr = fs.readFileSync(0, "utf8");
-const result = new Function("WalkFlow", "CheckFlow", "return " + expr)(WalkFlow, CheckFlow);
+const result = new Function("WalkFlow", "CheckFlow", "Text", "walkCityRows", "return " + expr)(
+  WalkFlow,
+  CheckFlow,
+  Text,
+  walkCityRows,
+);
 process.stdout.write(JSON.stringify(result));
 """
 
@@ -104,6 +133,106 @@ def test_a_walk_from_a_synthetic_run_shows_no_number() -> None:
 def test_a_walk_from_a_real_run_shows_its_count() -> None:
     walk = {"question": None, "checker_run": "real", "checker_dropped": 4}
     assert checker_line(walk) == LOCALE["walk.checker_none"].replace("{n}", "4")
+    assert "4 of its guesses on this clip were stopped" in checker_line(walk)
+
+
+def test_one_stopped_guess_was_stopped_not_were() -> None:
+    # CRITIC_03 E04: live /walk/v03 read "1 of its guesses on this clip were stopped".
+    line = checker_line({"question": None, "checker_run": "real", "checker_dropped": 1})
+    assert line == LOCALE["walk.checker_none_one"]
+    assert "1 of its guesses on this clip was stopped" in line
+    assert " were " not in line
+
+
+def test_a_walk_where_the_gate_stopped_nothing_does_not_blame_the_pass_rule() -> None:
+    # CRITIC_03 E04: v02's build record is kept {} and dropped 0, so no model saw any feature and
+    # the pass rule stopped nothing. The line said "0 of its guesses ... were stopped for that
+    # reason", a reason that did not apply.
+    line = checker_line({"question": None, "checker_run": "real", "checker_dropped": 0})
+    assert line == LOCALE["walk.checker_nothing_seen"]
+    assert "No model saw any of the four features in this clip" in line
+    assert "stopped" not in line and not re.search(r"\d", line), line
+
+
+def test_every_committed_walk_gets_the_line_that_fits_its_build_record() -> None:
+    raw = yaml.safe_load((ROOT / "content" / "walks.yaml").read_text(encoding="utf-8"))["walks"]
+    by_id = {w["id"]: w["checker"] for w in raw}
+    for w in walks():
+        record = by_id[w["id"]]
+        line = checker_line(w)
+        if record.get("question"):
+            want = LOCALE["walk.checker_asked"]
+        elif record.get("footage_run") != "real":
+            want = LOCALE["walk.checker_not_real"]
+        elif record["dropped"] == 0:
+            assert record["kept"] == {}, w["id"]
+            want = LOCALE["walk.checker_nothing_seen"]
+        elif record["dropped"] == 1:
+            want = LOCALE["walk.checker_none_one"]
+        else:
+            want = LOCALE["walk.checker_none"].replace("{n}", str(record["dropped"]))
+        assert line == want, (w["id"], line)
+    # Both cases the critic saw are among the committed walks, so both lines are held for real.
+    assert {by_id[i]["dropped"] for i in ("v02", "v03")} == {0, 1}
+
+
+SOURCE = (
+    "OneAquaHealth Policy Brief (2026), page 9: removal of barriers. "
+    "https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf"
+)
+
+
+def test_the_reasons_then_the_source_take_one_stop_and_never_one_after_a_question() -> None:
+    cases = [
+        (["Pipes and drain outlets"], "Pipes and drain outlets. OneAquaHealth Policy Brief"),
+        (["Built banks", "Pipes and drain outlets"], "Built banks, Pipes and drain outlets. One"),
+        (["Do you see any dams?"], "Do you see any dams? OneAquaHealth Policy Brief"),
+        (["Built banks", "Do you see any dams?"], "Built banks, Do you see any dams? One"),
+        (["Done."], "Done. OneAquaHealth"),
+        ([], "OneAquaHealth Policy Brief"),
+    ]
+    out = run(f"{json.dumps(cases)}.map(([r]) => Text.reasonsThenSource(r, {json.dumps(SOURCE)}))")
+    for (reasons, start), line in zip(cases, out, strict=True):
+        assert line.startswith(start), (reasons, line)
+        assert "?." not in line and ".." not in line and "https://" not in line, line
+        assert line.endswith("removal of barriers."), line
+
+
+def test_the_walk_city_view_puts_no_stop_after_the_barriers_question() -> None:
+    # CRITIC_03 E06: the walk's city view read "barriers?. OneAquaHealth Policy Brief". The real
+    # form question and the real approved sentence, through the component itself.
+    form = yaml.safe_load((ROOT / "content" / "form.yaml").read_text(encoding="utf-8"))
+    items = [{"id": i["id"], "text": i["text"]} for i in form["items"]]
+    question = next(i["text"] for i in items if i["id"] == "barriers")
+    assert question.endswith("?")
+    approved = yaml.safe_load(
+        (ROOT / "content" / "approved_sentences.yaml").read_text(encoding="utf-8")
+    )
+    sentence = next(
+        s
+        for group in approved.values()
+        if isinstance(group, list)
+        for s in group
+        if isinstance(s, dict) and s.get("id") == "city_remove_barriers"
+    )
+    need = {
+        "sentence_id": sentence["id"],
+        "text": sentence["text"],
+        "because": ["barriers"],
+        "source": sentence["source"],
+    }
+    rows = run(
+        "walkCityRows("
+        f"{{ content: {{ form: {{ items: {json.dumps(items)} }} }}, featureById: () => undefined,"
+        " walkById: () => ({ creek_name: 'A creek' }) },"
+        " { savedWalkVisits: () => [], demoCreek: () => ({ visits: [{}], findings: [],"
+        f" needs: [{json.dumps(need)}] }}) }},"
+        " 'v02')"
+    )
+    values = [r["value"] for r in rows if r.get("label") == sentence["text"]]
+    source = re.sub(r"\s*https?://\S+", "", sentence["source"]).strip()
+    assert values == [f"{question} {source}"], values
+    assert "?." not in values[0]
 
 
 def test_a_walk_whose_checker_asked_says_so() -> None:
