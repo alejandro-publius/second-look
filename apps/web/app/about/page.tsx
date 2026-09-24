@@ -18,8 +18,11 @@ export default function AboutPage() {
           {t("landing.cta")}
         </Link>
       </p>
+      {/* About is one tap from the participant's door, so a judge who lands there finds their own
+          door here (CRITIC_02 D03). A participant is still three taps from the code. */}
       <nav className="site-footer" aria-label={t("nav.more")}>
-        <Link href="/privacy">{t("nav.privacy")}</Link> <Link href="/how-we-know">{t("nav.how_we_know")}</Link>{" "}
+        <Link href="/judges">{t("nav.judges")}</Link> <Link href="/privacy">{t("nav.privacy")}</Link>{" "}
+        <Link href="/how-we-know">{t("nav.how_we_know")}</Link>{" "}
         <Link href="/credits">{t("nav.credits")}</Link> <Link href="/accessibility">{t("nav.accessibility")}</Link>
       </nav>
     </article>

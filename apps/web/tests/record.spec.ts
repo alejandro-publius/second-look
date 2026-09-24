@@ -225,10 +225,17 @@ test("/spot asks only for the id in the link, and says when the link names none"
   expect(asked()).toEqual(["/api/spot/example"]);
 });
 
-test("the judges' door links the creek by its readable slug", async ({ page }) => {
+// The live creek's own page stays empty until a real check arrives, so the city door opens the walk
+// whose end has the full city view, and its line says both (CRITIC_02 D05). The creek's page still
+// answers by its readable slug.
+test("the judges' city door opens the walk that ends in the city view, and names the empty creek", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");
-  await page.getByRole("link", { name: "For a city" }).click();
-  await expect(page).toHaveURL(/\/city\?creek=strawberry-creek$/);
+  const row = page.locator(".row").filter({ has: page.getByRole("link", { name: "For a city", exact: true }) });
+  await expect(row).toContainText('press "See this creek as a city would"');
+  await expect(row).toContainText("The page /city?creek=strawberry-creek stays empty until the first real creek check.");
+  await row.getByRole("link", { name: "For a city", exact: true }).click();
+  await expect(page).toHaveURL(/\/walk\/v02$/);
+  await page.goto("/city?creek=strawberry-creek");
   await expect(page.getByRole("heading", { name: "What this creek needs", level: 1 })).toBeVisible();
 });
