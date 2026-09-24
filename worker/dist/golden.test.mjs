@@ -3220,11 +3220,20 @@ var Invalid = class extends Error {
 };
 var LOCALE = content_default.locale;
 var REGION_PLANTS = /* @__PURE__ */ new Set([...content_default.region_plants, "cant_tell"]);
+var randomHex = (bytes) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, "0")).join("");
 
 // src/uploads.ts
 var MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 var KEEP_DAYS = 30;
 var KEEP_SECONDS = KEEP_DAYS * 24 * 3600;
+var TooLarge = class extends Error {
+};
+function sniffImage(head) {
+  if (head[0] === 255 && head[1] === 216 && head[2] === 255) return "image/jpeg";
+  if (head[0] === 137 && head[1] === 80 && head[2] === 78 && head[3] === 71 && head[4] === 13 && head[5] === 10 && head[6] === 26 && head[7] === 10) return "image/png";
+  if (String.fromCharCode(...head.slice(0, 4)) === "RIFF" && String.fromCharCode(...head.slice(8, 12)) === "WEBP") return "image/webp";
+  return null;
+}
 function stripJpeg(bytes) {
   const damaged = () => new Invalid("That photo could not be read. Send it again, or another one.");
   const out = [bytes.slice(0, 2)];
@@ -3261,6 +3270,38 @@ function stripJpeg(bytes) {
   }
   throw damaged();
 }
+var PNG_DROP = /* @__PURE__ */ new Set(["tEXt", "zTXt", "iTXt", "eXIf", "tIME"]);
+function stripPng(bytes) {
+  const out = [bytes.slice(0, 8)];
+  let i = 8;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  while (i + 12 <= bytes.length) {
+    const length = view.getUint32(i, false);
+    const type = String.fromCharCode(...bytes.slice(i + 4, i + 8));
+    const end = i + 12 + length;
+    if (!PNG_DROP.has(type)) out.push(bytes.slice(i, Math.min(end, bytes.length)));
+    i = end;
+  }
+  return concat(out);
+}
+function stripWebp(bytes) {
+  const kept = [];
+  let i = 12;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  while (i + 8 <= bytes.length) {
+    const fourcc = String.fromCharCode(...bytes.slice(i, i + 4));
+    const size = view.getUint32(i + 4, true);
+    const end = i + 8 + size + size % 2;
+    if (fourcc !== "EXIF" && fourcc !== "XMP ") kept.push(bytes.slice(i, Math.min(end, bytes.length)));
+    i = end;
+  }
+  const body = concat(kept);
+  const header = new Uint8Array(12);
+  header.set(bytes.slice(0, 4));
+  new DataView(header.buffer).setUint32(4, 4 + body.length, true);
+  header.set(bytes.slice(8, 12), 8);
+  return concat([header, body]);
+}
 function concat(parts) {
   const total = parts.reduce((n, p) => n + p.length, 0);
   const out = new Uint8Array(total);
@@ -3270,6 +3311,31 @@ function concat(parts) {
     at += p.length;
   }
   return out;
+}
+function stripMetadata(bytes, type) {
+  if (type === "image/jpeg") return stripJpeg(bytes);
+  if (type === "image/png") return stripPng(bytes);
+  return stripWebp(bytes);
+}
+function urlSafeToken(bytes) {
+  const raw = crypto.getRandomValues(new Uint8Array(bytes));
+  return btoa(String.fromCharCode(...raw)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+async function storeUpload(env, request, now) {
+  const form = await request.formData().catch(() => null);
+  const file = form?.get("file");
+  if (!(file instanceof File)) throw new Invalid("Send the photo as a form field called file.");
+  if (file.size > MAX_UPLOAD_BYTES) throw new TooLarge("That photo is over 8 MB. Send a smaller one.");
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (bytes.length > MAX_UPLOAD_BYTES) throw new TooLarge("That photo is over 8 MB. Send a smaller one.");
+  const type = sniffImage(bytes.slice(0, 16));
+  if (type === null) throw new Invalid("Only JPEG, PNG or WebP photos can be uploaded.");
+  const clean = stripMetadata(bytes, type);
+  const photoId = `up-${randomHex(8)}`;
+  const token = urlSafeToken(24);
+  await env.PHOTOS.put(`photo:${photoId}`, clean, { expirationTtl: KEEP_SECONDS, metadata: { contentType: type } });
+  await env.DB.prepare("INSERT INTO upload (photo_id, token_hash, content_type, size_bytes, created_at) VALUES (?, ?, ?, ?, ?)").bind(photoId, sha256Hex(token), type, clean.length, now).run();
+  return { photo_id: photoId, token };
 }
 
 // test/golden.test.ts
@@ -3465,4 +3531,22 @@ test("uploads: a JPEG that breaks the shape is refused, not copied with its meta
   assert.throws(() => stripJpeg(noEnd), /could not be read/);
   const cut = Uint8Array.from([...p.soi, 255, 225, 64, 0, ...[..."Exif"].map((c) => c.charCodeAt(0))]);
   assert.throws(() => stripJpeg(cut), /could not be read/);
+});
+test("uploads: a stored photo is put in KV to expire after 30 days", async () => {
+  const p = jpegParts;
+  const puts = [];
+  const env = {
+    PHOTOS: {
+      put: async (key, _value, options) => {
+        puts.push({ key, options });
+      }
+    },
+    DB: { prepare: () => ({ bind: () => ({ run: async () => ({}) }) }) }
+  };
+  const form = new FormData();
+  form.append("file", new Blob([Uint8Array.from([...p.soi, ...p.app0, ...p.exif, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi])], { type: "image/jpeg" }), "photo.jpg");
+  const stored = await storeUpload(env, new Request("http://127.0.0.1/api/upload", { method: "POST", body: form }), "2026-09-24T10:00:00Z");
+  assert.equal(puts.length, 1);
+  assert.equal(puts[0].key, `photo:${stored.photo_id}`);
+  assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
 });

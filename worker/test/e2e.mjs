@@ -19,6 +19,7 @@ const RAIN_PORT = PORT + 1;
 // A second, short lived Worker whose clock reads the data lock itself (review REVIEW_03 R52).
 const AFTER_PORT = PORT + 2;
 const QA_KEY = "e2e-qa-key-0123456789abcdef";
+const EXPORT_TOKEN = "e2e-export-token-0123456789abcdef";
 const BASE = `http://127.0.0.1:${PORT}`;
 const PERSIST = join(worker, ".wrangler", "e2e-state");
 const PERSIST_AFTER = join(worker, ".wrangler", "e2e-state-after-lock");
@@ -97,6 +98,32 @@ async function stopDev(proc) {
       resolve();
     });
   });
+}
+
+/** The files of a zip written without compression, as the Worker's export writes it. */
+function readStoredZip(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const files = {};
+  let at = 0;
+  while (at + 30 <= bytes.length && view.getUint32(at, true) === 0x04034b50) {
+    assert.equal(view.getUint16(at + 8, true), 0, "stored, not compressed");
+    const size = view.getUint32(at + 18, true);
+    const nameLength = view.getUint16(at + 26, true);
+    const extraLength = view.getUint16(at + 28, true);
+    const start = at + 30 + nameLength + extraLength;
+    const name = new TextDecoder().decode(bytes.slice(at + 30, at + 30 + nameLength));
+    files[name] = new TextDecoder().decode(bytes.slice(start, start + size));
+    at = start + size;
+  }
+  return files;
+}
+
+/** A column list from the Python API's export (apps/api/study.py), the schema the Worker must match. */
+function pythonColumns(name) {
+  const source = readFileSync(join(worker, "..", "apps", "api", "study.py"), "utf8");
+  const found = new RegExp(`^${name} = \\[([^\\]]*)\\]`, "m").exec(source);
+  assert.ok(found, `${name} in apps/api/study.py`);
+  return [...found[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
 }
 
 // Whatever happens, this process ends: a stuck request cannot hold the CI job open.
@@ -234,6 +261,7 @@ try {
   await startDev(PORT, PERSIST, {
     QA_KEY,
     RAIN_URL: `http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
+    EXPORT_TOKEN,
     E2E_NOW: JUST_BEFORE_LOCK,
   });
 
@@ -487,6 +515,26 @@ try {
   assert.equal(counted.by_source.panel, 1, "the panel label is kept");
   assert.equal(counted.by_source.other, 1, "a label we do not keep is stored as other");
   assert.equal(counted.by_arm.untrained.completed + counted.by_arm.trained.completed, 2);
+
+  // 8d. The anonymous export (review REVIEW_03 R20): without the token, or with a wrong one, the
+  // route answers 404 as if it did not exist; with it, the two files in the Python API's schema.
+  at("the export");
+  assert.equal((await api("GET", "/api/test/export")).status, 404);
+  assert.equal((await api("GET", "/api/test/export?token=wrong")).status, 404);
+  assert.equal((await api("GET", `/api/test/export?token=${EXPORT_TOKEN.replace(/.$/, "x")}`)).status, 404, "one character off");
+  const exported = await fetch(`${BASE}/api/test/export?token=${EXPORT_TOKEN}`);
+  assert.equal(exported.status, 200);
+  assert.equal(exported.headers.get("content-type"), "application/zip");
+  const files = readStoredZip(new Uint8Array(await exported.arrayBuffer()));
+  assert.deepEqual(Object.keys(files).sort(), ["responses.csv", "sessions.csv"]);
+  const sessionLines = files["sessions.csv"].trimEnd().split("\r\n");
+  const responseLines = files["responses.csv"].trimEnd().split("\r\n");
+  assert.deepEqual(sessionLines[0].split(","), pythonColumns("SESSIONS_COLUMNS"));
+  assert.deepEqual(responseLines[0].split(","), pythonColumns("RESPONSES_COLUMNS"));
+  const sourceOf = (id) => sessionLines.find((l) => l.startsWith(`${id},`)).split(",")[3];
+  assert.equal(sourceOf(panelSession), "panel");
+  assert.equal(sourceOf(pastedSession), "other");
+  assert.equal(responseLines.filter((l) => l.startsWith(`${panelSession},`)).length, 16);
 
   // 9. Bad input is a plain 422 or 404, never a 500.
   at("bad input");
