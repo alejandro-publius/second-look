@@ -19,10 +19,17 @@ and `/verify` with Lighthouse on the landing page, and the iNaturalist context l
 tideline and blackbox-datahub READMEs, then the measurements again on the final deploy (axe,
 Lighthouse, flaky runs, README commands, links).
 
+Done since (08:40Z): the link check reads the public files only and is clean but for the four
+UPDATE_29 documents still on `p29/docs`; `make go-public`'s test passes again; axe and Lighthouse
+list every page (axe on production: 57 views, no violation); the README command check runs every
+command a judge could type; CI on `main` was red at 5ac66b0 (the diagrams lockfile, fixed on
+`depth` at 08b98ee, which `main` gets at the next fast-forward).
+
 Traps: after any change to `content/locales/en.json`, run `scripts/build_worker_content.py`, or
 `make check` fails at worker-check (it happened three times today). The web build rewrites the
 tracked `apps/web/public/_headers` with the build's API origin; restore it before committing.
-CI runs on `main` and pull requests only.
+CI runs on pushes to `main` and `depth` and on pull requests. A lockfile written by the Mac's
+npm 11 can fail CI's npm 10 (`tools/diagrams`); write lockfiles with `npx -y npm@10`.
 
 ## UPDATE_22, after the merge (Sep 24, 04:10Z)
 
