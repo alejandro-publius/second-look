@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -155,3 +156,30 @@ def test_the_page_has_the_exact_words_for_nothing_on_record() -> None:
     assert "no recent sightings on record" in locale["inat.none"]
     component = (WEB / "components" / "InatContext.tsx").read_text(encoding="utf-8")
     assert 't("inat.none")' in component
+
+
+def test_no_species_or_place_reaches_the_browser() -> None:
+    """The credits page gets three facts per photo. A test photo's species is its answer."""
+    if shutil.which("node") is None:
+        pytest.skip("needs node")
+    doc = json.loads((ROOT / "results" / "inat_photos.json").read_text(encoding="utf-8"))
+    body = (
+        "import { inatChecks } from './scripts/inat-checks.mjs';"
+        "const raw = JSON.parse(process.argv[1]);"
+        "const shown = new Set(raw.photos.map((p) => p.photo_id).slice(1));"
+        "process.stdout.write(JSON.stringify(inatChecks(raw, shown)));"
+    )
+    done = subprocess.run(
+        ["node", "--input-type=module", "-e", body, json.dumps(doc)],
+        cwd=WEB,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    out = json.loads(done.stdout)
+    assert out["checked_at"] == doc["checked_at"]
+    assert len(out["photos"]) == len(doc["photos"]) - 1, "only photos the site shows"
+    for got in out["photos"].values():
+        assert set(got) == {"found", "research_grade", "in_california"}
+    for p in doc["photos"]:
+        assert p["taxon"] not in done.stdout and p["place_guess"] not in done.stdout

@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
 import { load as yamlLoad } from "js-yaml";
 import { derivedSources } from "../photo-sources.mjs";
+import { inatChecks } from "./inat-checks.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, "..");
@@ -264,16 +265,10 @@ function main() {
     }
   }
 
-  // What iNaturalist itself said about each of its photos we show (scripts/verify_inat_photos.py):
-  // research grade or not, inside California or not, still there or not. Only those three facts
-  // travel; the species and the place stay out, because a test photo's species is its answer.
+  // What iNaturalist itself said about each of its photos we show (scripts/verify_inat_photos.py).
+  // Three facts only; the species stays out, because a test photo's species is its answer.
   const inatPath = join(repoRoot, "results", "inat_photos.json");
-  const inatRaw = existsSync(inatPath) ? JSON.parse(readFileSync(inatPath, "utf8")) : { photos: [] };
-  const inat_checks = { checked_at: String(inatRaw.checked_at ?? ""), photos: {} };
-  for (const p of inatRaw.photos ?? []) {
-    if (!photos[p.photo_id]) continue;
-    inat_checks.photos[p.photo_id] = { found: p.found === true, research_grade: p.research_grade === true, in_california: p.in_california === true };
-  }
+  const inat_checks = inatChecks(existsSync(inatPath) ? JSON.parse(readFileSync(inatPath, "utf8")) : null, new Set(Object.keys(photos)));
 
   // Fail the build rather than publish a CC BY photo with nobody's name on it.
   const unattributed = Object.values(photos).filter(

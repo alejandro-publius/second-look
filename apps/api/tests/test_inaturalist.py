@@ -125,6 +125,17 @@ def test_a_check_left_unfinished_does_not_open_the_line(client, monkeypatch):
     assert (out["shown"], out["species"]) == (False, [])
 
 
+def test_a_pin_that_reads_like_a_test_does_not_open_the_line(client, monkeypatch):
+    """The same pins /city keeps out of its numbers are kept out of this too."""
+    monkeypatch.setattr(core_calls, "rain_status", _dry)
+    freeze_now(NOW)
+    test_pin = {"new": {**NEW_SPOT["new"], "name": "test"}}
+    a_visit(client, token=None, spot=test_pin, answers=GOOD_ANSWERS)
+    store("strawberry-creek")
+    out = client.get("/api/inaturalist/strawberry-creek").json()
+    assert (out["shown"], out["species"]) == (False, [])
+
+
 def test_a_stored_creek_id_reads_the_same_row_as_its_slug(client, monkeypatch):
     spot = answered_creek(client, monkeypatch)
     store("strawberry-creek")
