@@ -1,4 +1,5 @@
-"""The OpenTimestamps scripts: the daily audit head anchor, its launchd job, and the status file.
+"""The OpenTimestamps scripts: the daily audit head anchor and the status file. Its launchd job
+is tested in test_install_jobs.py.
 
 No test here reaches a calendar or an explorer. Stamping is a fake that writes a real proof with
 the library, and block headers are made here with a proof of work easy enough to find at once,
@@ -10,9 +11,6 @@ from __future__ import annotations
 import hashlib
 import io
 import json
-import os
-import plistlib
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -154,32 +152,7 @@ def test_a_failed_stamp_leaves_no_half_proof(tmp_path: Path) -> None:
     assert list(proofs.iterdir()) == []
 
 
-# --- install_anchor_job.sh -----------------------------------------------------------------------
-
-
-@pytest.mark.skipif(shutil.which("plutil") is None, reason="plutil is macOS only")
-def test_the_job_runs_the_anchor_then_the_status_daily(tmp_path: Path) -> None:
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    calls = tmp_path / "launchctl.calls"
-    (fake_bin / "launchctl").write_text(f'#!/bin/sh\necho "$@" >> {calls}\n')
-    (fake_bin / "uv").write_text("#!/bin/sh\nexit 0\n")
-    for f in fake_bin.iterdir():
-        f.chmod(0o755)
-    env = {**os.environ, "HOME": str(tmp_path), "PATH": f"{fake_bin}:/usr/bin:/bin"}
-    subprocess.run(
-        ["bash", str(ROOT / "scripts" / "install_anchor_job.sh")],
-        env=env,
-        check=True,
-        capture_output=True,
-    )
-    plist = tmp_path / "Library" / "LaunchAgents" / "com.secondlook.anchor.plist"
-    job = plistlib.loads(plist.read_bytes())
-    command = job["ProgramArguments"][-1]
-    assert command.index("anchor_audit_head.py") < command.index("ots_status.py")
-    assert job["StartCalendarInterval"] == {"Hour": 6, "Minute": 0}
-    assert job["WorkingDirectory"] == str(ROOT)
-    assert "bootstrap" in calls.read_text()
+# install_anchor_job.sh is tested in test_install_jobs.py, with the other launchd installers.
 
 
 # --- ots_status ----------------------------------------------------------------------------------
