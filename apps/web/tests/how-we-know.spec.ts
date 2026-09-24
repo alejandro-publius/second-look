@@ -136,6 +136,11 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   // "the checker noticed", and nowhere else.
   const k = doc.kept;
   expect(k.gate.kept).toBe(true);
+  // CRITIC_06 H02: a feature the creek check asks about, so a flag on it can make a question
+  // eligible at all. The check has no item for a dug-out channel.
+  const asked = new Set(content.form.items.map((i: { feature?: string | null }) => i.feature).filter(Boolean));
+  expect(asked.has(k.feature)).toBe(true);
+  expect(asked.has("dug_out_channel")).toBe(false);
   const kept = page.getByTestId("example-kept");
   await expect(rowValue(kept, "how.example_frame")).toHaveText(k.frame);
   await expect(rowValue(kept, "how.example_model")).toHaveText(en[`model.${k.model}`]);
@@ -179,6 +184,7 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
 // other models that passed the feature answered on that frame, and both cards say nobody has
 // labelled the frame, all as the example file says.
 type SameFrame = { model: string; passed_this_feature: boolean; answers_by_run: string[] };
+const ANSWER_KEY: Record<string, string> = { yes: "test.yes", no: "test.no", cant_tell: "test.cant_tell" };
 
 test("/how-we-know shows each footage frame above its card, from its manifest row, with the other models' answers and no label", async ({ page, request }) => {
   const doc = example();
@@ -231,9 +237,13 @@ test("/how-we-know shows each footage frame above its card, from its manifest ro
   const lines = page.getByTestId("example-kept").getByTestId("example-other");
   await expect(lines).toHaveCount(others.length);
   for (const [i, o] of others.entries()) {
-    // The file says each of them answered no in every run, so the page says it in those words.
-    expect(o.answers_by_run.every((a) => a === "no")).toBe(true);
-    await expect(lines.nth(i)).toHaveText(fill("how.example_other_no", { model: en[`model.${o.model}`], runs: o.answers_by_run.length }));
+    // No in every run is said in those words; any other answers are listed run by run, as the file
+    // gives them (on the built bank frame the others each said can't tell three times).
+    const model = en[`model.${o.model}`];
+    const words = o.answers_by_run.every((a) => a === "no")
+      ? fill("how.example_other_no", { model, runs: o.answers_by_run.length })
+      : fill("how.example_other_said", { model, answers: o.answers_by_run.map((a) => en[ANSWER_KEY[a]].toLowerCase()).join(", ") });
+    await expect(lines.nth(i)).toHaveText(words);
   }
   await expect(page.getByTestId("example-dropped").getByTestId("example-other")).toHaveCount(0);
 });
@@ -271,8 +281,10 @@ test("the footage example's reader follows the file: a changed copy changes what
   fable.answers_by_run = ["yes", "cant_tell", "no"];
   const sonnet = (mixed.kept.same_frame_and_feature as SameFrame[]).find((m) => m.model === "claude-sonnet-5")!;
   sonnet.passed_this_feature = false;
+  const opus = (doc.kept.same_frame_and_feature as SameFrame[]).find((m) => m.model === "claude-opus-5-5")!;
+  expect(opus.passed_this_feature).toBe(true);
   expect(footageCases(mixed, run)!.kept!.others).toEqual([
-    { model: "claude-opus-5-5", answers: ["no", "no", "no"] },
+    { model: "claude-opus-5-5", answers: opus.answers_by_run },
     { model: "claude-fable-5-1", answers: ["yes", "cant_tell", "no"] },
   ]);
 

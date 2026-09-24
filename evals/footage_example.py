@@ -15,8 +15,11 @@ checker ask. It reads only committed files, and calls no model and no network:
 Every yes answer becomes a candidate flag and goes through the gate the way evals/footage.py does
 it: evals.footage.candidate_flag, then core.gate.parse_flags with the model and the pass table.
 
-The pick rule (PICK_RULE below): the candidates in order by frame id, then model id, feature and
-run. The kept case is the first candidate the gate kept, the dropped case the first it dropped.
+The pick rule (PICK_RULE below): only candidates on a feature the creek check asks about, one
+with an item in content/form.yaml, in order by frame id, then model id, feature and run. The kept
+case is the first of them the gate kept, the dropped case the first it dropped (CRITIC_06 H02: a
+kept flag on the dug-out channel, which the check never asks about, is not an example of what a
+person would see). The files also say how many kept flags there are on each feature.
 
 The kept flag then goes to core.followups.select_followups the way apps/api/check.py calls it,
 with this one flag, no answers, no test score, rain unknown and the checker switched on. The live
@@ -38,6 +41,7 @@ import csv
 import json
 import re
 import sys
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -47,6 +51,7 @@ from core.checker import feature_passed
 from core.content_loader import Content, load_content
 from core.followups import SiteContext, select_followups
 from core.gate import Flag, parse_flags
+from core.records import FEATURES
 from evals.footage import candidate_flag
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,9 +67,10 @@ MANIFEST = Path("photos") / "manifest.csv"
 UP = "../../"
 
 PICK_RULE = (
-    "Every yes answer in the run is a candidate flag. The candidates are put in order by frame "
-    "id, then model id, feature and run. The kept case is the first candidate the gate kept, and "
-    "the dropped case is the first candidate the gate dropped."
+    "Every yes answer in the run is a candidate flag. Only the candidates on a feature the creek "
+    "check asks about, one with an item in content/form.yaml, are picked from. They are put in "
+    "order by frame id, then model id, feature and run. The kept case is the first of them the "
+    "gate kept, and the dropped case is the first of them the gate dropped."
 )
 FOLLOWUP_CALL = (
     "core.followups.select_followups, called the way apps/api/check.py calls it, with the flags "
@@ -147,13 +153,28 @@ def candidates(
     return out
 
 
-def pick(found: Sequence[Candidate]) -> tuple[Candidate, Candidate]:
-    """PICK_RULE: the first kept and the first dropped, by frame, model, feature and run."""
-    ordered = sorted(found, key=lambda c: c.order)
+def asked_features(content: Content) -> list[str]:
+    """The features the creek check asks about: each one a form item names, in FEATURES order."""
+    named = {item.get("feature") for item in content.form.get("items", [])}
+    return [f for f in FEATURES if f in named]
+
+
+def kept_by_feature(found: Sequence[Candidate]) -> dict[str, int]:
+    """How many flags the gate kept on each feature, every feature named, in FEATURES order."""
+    counts = Counter(str(c.answer["feature"]) for c in found if c.flags)
+    return {f: counts.get(f, 0) for f in FEATURES}
+
+
+def pick(found: Sequence[Candidate], asked: Sequence[str]) -> tuple[Candidate, Candidate]:
+    """PICK_RULE: among candidates on an asked feature, the first kept and the first dropped."""
+    ordered = sorted((c for c in found if c.answer["feature"] in asked), key=lambda c: c.order)
     kept = next((c for c in ordered if c.flags), None)
     dropped = next((c for c in ordered if not c.flags), None)
     if kept is None or dropped is None:
-        raise SystemExit("footage-example: the run has no kept flag or no dropped flag to show")
+        raise SystemExit(
+            "footage-example: the run has no kept flag or no dropped flag on a feature the creek "
+            "check asks about"
+        )
     return kept, dropped
 
 
@@ -285,7 +306,25 @@ def case(
     return doc
 
 
-def build(root: Path = ROOT) -> dict[str, Any]:
+@dataclass(frozen=True)
+class Run:
+    """The footage run of results/footage_latest.json, its raw answers and the gate over them."""
+
+    latest: dict[str, Any]
+    fixture: Path
+    head: dict[str, Any]
+    pass_table: dict[str, Any]
+    answers: list[tuple[int, str, dict[str, Any]]]
+    found: list[Candidate]
+    counts: dict[str, int]
+
+
+def load_run(root: Path = ROOT) -> Run:
+    """Every yes answer of the latest real footage run through the gate, from committed files.
+
+    Stops unless the run is real, its pass table came first, and the gate gives the numbers
+    results/footage_latest.json holds. evals/model_card.py reads the kept flags by feature here.
+    """
     latest = load_json(root, LATEST)
     if latest.get("real") is not True:
         raise SystemExit(f"footage-example: {LATEST} is not a real run, so it shows no flag")
@@ -296,10 +335,8 @@ def build(root: Path = ROOT) -> dict[str, Any]:
             f"footage-example: {PASS_TABLE} was written after the footage run, so it is not the "
             "table that run's gate read"
         )
-    content = load_content(root)
     answers = answers_of(fixture_lines(fixture))
     found = candidates(answers, pass_table)
-    kept, dropped = pick(found)
     counts = {
         "candidates": len(found),
         "kept": sum(1 for c in found if c.flags),
@@ -311,8 +348,18 @@ def build(root: Path = ROOT) -> dict[str, Any]:
             f"footage-example: the gate gives {counts} on {RAW_DIR} with {PASS_TABLE}, but "
             f"{LATEST} says {committed}; make reproduce says which is wrong"
         )
+    return Run(latest, fixture, head, pass_table, answers, found, counts)
+
+
+def build(root: Path = ROOT) -> dict[str, Any]:
+    run = load_run(root)
+    latest, fixture, head, pass_table = run.latest, run.fixture, run.head, run.pass_table
+    answers, found, counts = run.answers, run.found, run.counts
+    content = load_content(root)
+    asked = asked_features(content)
+    kept, dropped = pick(found, asked)
     fixture_rel = fixture.relative_to(root).as_posix()
-    common = {
+    common: dict[str, Any] = {
         "root": root,
         "content": content,
         "fixture_rel": fixture_rel,
@@ -337,6 +384,8 @@ def build(root: Path = ROOT) -> dict[str, Any]:
         },
         "pick_rule": PICK_RULE,
         "gate_over_the_run": counts,
+        "kept_by_feature": kept_by_feature(found),
+        "features_the_check_asks_about": asked,
         "kept": case(kept, **common),
         "dropped": case(dropped, **common),
     }
@@ -487,6 +536,26 @@ def asked_words(fu: Mapping[str, Any]) -> str:
     )
 
 
+def by_feature_words(doc: Mapping[str, Any]) -> str:
+    """The kept flags by feature, and which features the creek check asks about."""
+    kept = doc["kept_by_feature"]
+    asked = list(doc["features_the_check_asks_about"])
+    unasked = [f for f in kept if f not in asked]
+    split = ", ".join(f"`{f}` {n}" for f, n in kept.items())
+    words = (
+        f"- The {doc['gate_over_the_run']['kept']} kept flags by feature: {split}. The creek "
+        f"check has an item in {link('content/form.yaml')} for {and_list(asked)}"
+    )
+    if unasked:
+        words += f", and none for {and_list(unasked)}"
+    return words + "."
+
+
+def and_list(features: Sequence[str]) -> str:
+    names = [f"`{f}`" for f in features]
+    return names[0] if len(names) == 1 else f"{', '.join(names[:-1])} and {names[-1]}"
+
+
 def readme(doc: Mapping[str, Any]) -> str:
     run = doc["run"]
     cands = doc["gate_over_the_run"]
@@ -510,6 +579,7 @@ def readme(doc: Mapping[str, Any]) -> str:
         f"candidate flags went through the gate: {cands['kept']} kept and {cands['dropped']} "
         f"dropped. These are the gate numbers in {link(LATEST.as_posix())}; the script stops if "
         "they differ.",
+        by_feature_words(doc),
         f"- How the two frames were picked, by a fixed rule. {doc['pick_rule']}",
         "",
         *section("Kept", doc["kept"], kept_words),
