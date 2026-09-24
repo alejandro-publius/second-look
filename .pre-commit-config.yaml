@@ -1,0 +1,47 @@
+# Fast checks on every git commit. Local hooks only: each one calls this repository's own tools,
+# the same ones make check runs, so a hook cannot drift from the gate. It never replaces make check.
+#
+# Install once (DEPLOY.md, "The checks before a commit"):
+#   uv tool install pre-commit
+#   pre-commit install
+#   pre-commit run --all-files
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff check
+        entry: uv run ruff check --force-exclude
+        language: system
+        types_or: [python, pyi]
+      - id: ruff-format
+        name: ruff format --check
+        entry: uv run ruff format --check --force-exclude
+        language: system
+        types_or: [python, pyi]
+      - id: dash-check
+        name: no em or en dashes in tracked files (hard rule 18)
+        entry: uv run python scripts/check_dashes.py
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: trailing-whitespace
+        name: no trailing whitespace
+        # pygrep is built into pre-commit: it fails on any line that matches.
+        entry: "[ \t]+$"
+        language: pygrep
+        types: [text]
+        # The review patches must keep their bytes, and the restore drill note is a terminal
+        # log kept word for word.
+        exclude: ^(docs/internal/reviews/patches/|docs/notes/restore_drill\.md$)
+      - id: gitleaks
+        name: gitleaks on the staged changes (hard rule 14)
+        entry: gitleaks git --pre-commit --staged --redact --no-banner
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: secrets-in-tree
+        name: no secret in the files git would commit (hard rule 14)
+        entry: uv run python scripts/submit_check.py --secrets-only
+        language: system
+        pass_filenames: false
+        always_run: true
