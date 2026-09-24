@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -178,6 +178,21 @@ preflight-judges:
 
 submit-check:
 	$(PY) scripts/submit_check.py
+
+# UPDATE_27 sections 0 and 3: the definition of done. Runs the command of every item in
+# docs/internal/DONE.md and prints PASS, RED, BLOCKED or HUMAN per item, then the line
+# "RED: <n> BLOCKED: <n> HUMAN: <n>". Red until the work is done, so it is not part of make check.
+done-check:
+	$(PY) scripts/done_check.py
+
+# A done-check item: line and branch coverage of core/ by core's own tests, 90 percent or red.
+# The data file stays outside the repo. About a minute.
+coverage-core:
+	COVERAGE_FILE=$${TMPDIR:-/tmp}/second-look-coverage-core uv run --with pytest-cov pytest core --cov=core --cov-config=scripts/coverage_core.ini --cov-fail-under=90 --cov-report=term:skip-covered
+
+# A dated done-check item: the live /demo shows judge mode open. GET requests only.
+demo-open-check:
+	cd $(WEB) && node scripts/demo-open-check.mjs
 
 # The paid model run, in one command, for Alex once the model gate flags are flipped and the key
 # is in .env (docs/ALEX_TODO.md step 2). Batch API throughout. The 16-photo sweep refuses above 10
