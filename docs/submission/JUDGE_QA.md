@@ -47,8 +47,9 @@ No. The record builder takes human answers only and refuses a flags argument. A 
 Proof: `core/tests/test_gate.py::test_fuzz_model_output_never_reaches_answers_or_labels`; `uv run pytest -q core/tests/test_gate.py`.
 
 **10. When may a model speak at all?**
-Only on a feature it passed: all four items right in at least two of three runs, on the same 16 photos people take. Then a flag can make one follow-up question eligible, and the person has already answered. The real model run has not happened yet; until it does, the pass table is synthetic and licenses nothing. `make ai-run` is the one command for it, once Alex confirms the model ids and prices.
-Proof: `core/gate.py`; `results/model_pass_table.json` (`"real": false` today); `core/tests/test_gate.py::test_synthetic_table_licenses_nothing`.
+Only on a feature it passed: all four items right in at least two of three runs, on the same 16 photos people take. Then a flag can make one follow-up question eligible, and the person has already answered. The real run happened on Sep 23 and 24: Claude Haiku 4.5 and Claude Sonnet 5 passed built banks and dug-out channels, Claude Opus 5 passed built banks and pipes, and no model passed invasive plants. A table that is not real licenses nothing.
+<!-- claim: results/model_pass_table.json#/real = True -->
+Proof: `core/gate.py`; `results/model_pass_table.json` (`"real": true`); `core/tests/test_gate.py::test_synthetic_table_licenses_nothing`.
 
 **11. What does the MCP server expose, and can an agent write?**
 Read only, over our own records. Tools include listing creeks, a creek record, findings, an observer's score and "explain this number", and every answer carries the resource ids behind it.

@@ -11,7 +11,7 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | The two minute test flow, its randomization and its scoring | real | code and tests; nothing is faked in the flow | `apps/web`, `worker/src/index.ts`, `core/allocator.py`, `core/scoring.py` |
 | The photographs in the test | real, openly licensed, from several countries | every row in the manifest names its source page, author and licence, and no row says `placeholder` | `photos/manifest.csv` |
 | The frames from open creek footage | real, cut from openly licensed video | role `benchmark` in the manifest, with the source video and the second it was taken at | `photos/benchmark/`, `videos/manifest.csv` |
-| Study results in the README | none yet | the results section shows no table until the model run; the synthetic dry runs stay in `results/` with SYNTHETIC on every file and none of their numbers appears in the README | `README.md`, `scripts/verify_claims.py` |
+| Study results in the README | the AI table is real since Sep 23 and 24; no human row, because no person's session has arrived | the synthetic dry runs stay in `results/` with SYNTHETIC on every file; the only synthetic numbers in the README are the coarseness simulation's, named as made-up people | `README.md`, `scripts/verify_claims.py` |
 | The model pass table | synthetic | `"real": false` in the file; the checker refuses to flag on it | `results/model_pass_table.json`, `core/checker.py` |
 | A creek check, its follow-ups and its record | real once a person files one | stored visit, FHIR Bundle in the store, audit line | `apps/api/check.py`, `data/fhir_store/` |
 | The golden Strawberry Creek visit Bundle | example, hand shaped from a worked visit | it is in `fhir/golden/` and not in the store | `fhir/golden/visit-strawberry-creek-1.json` |
@@ -25,7 +25,7 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | The simulation of weighted votes quoted under Known weaknesses in the README | synthetic by design: made-up people, never a study result | the file carries `"synthetic": true` and the SYNTHETIC stamp, the README sentence calls it a simulation, and `make consensus-check` reruns it | `results/consensus_coarseness.json`, `evals/consensus_coarseness.py` |
 | The screen that keeps a frame | real, run on this Mac | Apple Vision (people, faces, any readable text, a water label, blank frames) and OpenCV; every drop and its reason is in `videos/frames.json` | `scripts/make_frames.py` |
 | A video walk's record | real shape, demo content | made on the phone from the person's answers, every resource tagged `demo-walk`, never stored, counted or mirrored | `core/walks.py`, `worker/src/core/walks.ts`, `/walk/<id>` |
-| The checker's flags on a walk | synthetic until the model run | worked out at build time from `results/footage_latest.json`; a footage run that is not real gives no flag at all, and a pass table from the fake client licenses none, so no walk asks a question yet | `scripts/build_walks.py`, `content/walks.yaml` |
+| The checker's flags on a walk | real since the paid run of Sep 23 and 24 | worked out at build time from `results/footage_latest.json`, which is real; a flag passes only for a feature its model passed on the test |
 | The Heraklion follower city scaffold | example, dry run in English with no claims | the checklist says so in its first line | `docs/cities/heraklion/` |
 
 ## Where a frame's label comes from, and where it does not

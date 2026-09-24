@@ -33,11 +33,19 @@ The tidy park on the left hides a concrete channel. The messy bend on the right 
 | | The 16-photo test people take | Frames from open creek footage |
 |---|---|---|
 | Pool | 16 photos, 4 per feature, the frozen question wording | <!--v:results/footage_pool.json#/frames_kept-->46<!--/v--> frames from <!--v:results/footage_pool.json#/videos_kept-->5<!--/v--> openly licensed videos in <!--v:results/footage_pool.json#/countries_kept-->3<!--/v--> countries, screened for people and text |
-| Accuracy per feature, three models, three runs | results arrive with the model run | results arrive with the model run |
-| Which features each model passed | results arrive with the model run | not asked: footage decides nothing, a pass is earned on the test |
-| Agreement between models | not asked | results arrive with the model run |
-| Flags the gate stopped | results arrive with the model run | results arrive with the model run |
-| Cost per 100 frames | not asked | results arrive with the model run |
+| Right answers, three runs of the 16 photos | Claude Haiku 4.5 <!--v:results/benchmark_20260924T031225Z.json#/models/claude-haiku-4-5-20251001/all/correct-->31<!--/v--> of <!--v:results/benchmark_20260924T031225Z.json#/models/claude-haiku-4-5-20251001/all/n-->48<!--/v-->, Claude Sonnet 5 <!--v:results/benchmark_20260924T031225Z.json#/models/claude-sonnet-5/all/correct-->36<!--/v--> of <!--v:results/benchmark_20260924T031225Z.json#/models/claude-sonnet-5/all/n-->48<!--/v-->, Claude Opus 5 <!--v:results/benchmark_20260924T031225Z.json#/models/claude-opus-5/all/correct-->33<!--/v--> of <!--v:results/benchmark_20260924T031225Z.json#/models/claude-opus-5/all/n-->48<!--/v-->; per feature, with intervals, in `results/benchmark_20260924T031225Z.json` | not measured: none of the frames has a label, so this column reports agreement |
+| Which features each model passed | the table below | not asked: footage decides nothing, a pass is earned on the test |
+| Agreement between models | not asked | Haiku 4.5 and Opus 5, the pair that agreed least, gave the same answer on <!--v:results/footage_latest.json#/agreement/artificial_bank/pairs/claude-haiku-4-5-20251001 vs claude-opus-5/agree-->41<!--/v--> of <!--v:results/footage_latest.json#/agreement/artificial_bank/frames-->46<!--/v--> frames for built banks, <!--v:results/footage_latest.json#/agreement/dug_out_channel/pairs/claude-haiku-4-5-20251001 vs claude-opus-5/agree-->14<!--/v--> for a dug-out channel, <!--v:results/footage_latest.json#/agreement/invasive_plant/pairs/claude-haiku-4-5-20251001 vs claude-opus-5/agree-->41<!--/v--> for invasive plants and <!--v:results/footage_latest.json#/agreement/pipe_running/pairs/claude-haiku-4-5-20251001 vs claude-opus-5/agree-->30<!--/v--> for pipes |
+| Flags the gate stopped | not asked: an answer on the test is scored, never flagged | <!--v:results/footage_latest.json#/gate/dropped-->30<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->63<!--/v--> candidate flags dropped, <!--v:results/footage_latest.json#/gate/kept-->33<!--/v--> kept, because a model may flag only a feature it passed |
+| Cost per 100 frames | not asked | <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->23.1<!--/v--> USD, with direct calls at the full price |
+
+Which features each model passed on the 16-photo test: all four photos of a feature right in at least two of three runs (`results/model_pass_table.json`).
+
+| Model | Built bank | Dug-out channel | Invasive plant | Pipe running |
+|---|---|---|---|---|
+| Claude Haiku 4.5 | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/artificial_bank/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/dug_out_channel/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/invasive_plant/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-haiku-4-5-20251001/pipe_running/passed-->did not pass<!--/v--> |
+| Claude Sonnet 5 | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/artificial_bank/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/dug_out_channel/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/invasive_plant/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-sonnet-5/pipe_running/passed-->did not pass<!--/v--> |
+| Claude Opus 5 | <!--v:results/model_pass_table.json#/models/claude-opus-5/artificial_bank/passed-->passed<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-opus-5/dug_out_channel/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-opus-5/invasive_plant/passed-->did not pass<!--/v--> | <!--v:results/model_pass_table.json#/models/claude-opus-5/pipe_running/passed-->passed<!--/v--> |
 
 The full loop, from a desk: <!--v:results/footage_pool.json#/walks-->3<!--/v--> video walks from <!--v:results/footage_pool.json#/walk_country_count-->3<!--/v--> countries, each ending in a FHIR record made on the phone. The HL7 validator checked <!--v:results/fhir_validation.json#/files_validated-->14<!--/v--> records against OneAquaHealth's guide, <!--v:results/fhir_validation.json#/walk_records_validated-->2<!--/v--> of them walk records, with <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors.
 
@@ -285,7 +293,7 @@ The full list, kept current, is `docs/REAL_VS_SYNTHETIC.md`. In short:
 | The golden Strawberry Creek visit | example, hand shaped from a worked visit |
 | A referral for a pipe worth testing | real, computed on request from stored visits |
 | The laboratory result coming back | example, tagged and labelled EXAMPLE everywhere |
-| The model pass table and every AI number until the model run | synthetic, stamped SYNTHETIC, cited nowhere |
+| The model pass table and the AI numbers | real, from one paid run on Sep 23 and 24 (`results/model_pass_table.json` says `"real": true`); the earlier fake runs stay in `results/`, stamped SYNTHETIC |
 | The simulation of weighted votes under Known weaknesses | synthetic by design: made-up people, stamped SYNTHETIC |
 
 ## For judges
@@ -328,7 +336,7 @@ AI coding tools wrote most of the code and text here: Claude Code, working from 
 - The citizen observer is modelled as a FHIR Practitioner, for want of a better fit in the guide; our proposal says so.
 - Judge mode is shut until Sep 28, so the answer key cannot leak before then.
 - There is no recruited study. Whoever opens the link is whoever opens the link.
-- The AI numbers need a paid model run; until it runs, every AI slot says so.
+- The AI numbers come from one paid run: three models, three runs each, on 16 photos. That is small. Read the intervals in the benchmark file, not the point numbers.
 - English only. A Spanish draft exists and stays out of the build until a fluent person signs it.
 
 ## Repo map

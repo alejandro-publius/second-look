@@ -16,8 +16,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TOKEN_RE = re.compile(r"\{\{claim:([\w./-]+#[\w/.-]+)\}\}")
-RENDERED_RE = re.compile(r"<!--v:([\w./-]+#[\w/.-]+)-->(.*?)<!--/v-->", re.S)
+TOKEN_RE = re.compile(r"\{\{claim:([\w./-]+#[\w/. -]+)\}\}")
+RENDERED_RE = re.compile(r"<!--v:([\w./-]+#[\w/. -]+)-->(.*?)<!--/v-->", re.S)
 MARKER_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+#[\w/.-]+)\s*(?:=\s*[^\s]+)?\s*-->")
 
 

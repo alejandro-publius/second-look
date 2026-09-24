@@ -19,7 +19,7 @@ README = ROOT / "README.md"
 CLAIM_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+)#([\w/.-]+)\s*(?:=\s*([^\s]+))?\s*-->")
 # A number render_readme.py put in the text: <!--v:results/x.json#/a/b-->42<!--/v-->. It is
 # checked too, or a rendered number could drift from results/ with CI still green.
-RENDERED_RE = re.compile(r"<!--v:([\w./-]+)#([\w/.-]+)-->(.*?)<!--/v-->", re.S)
+RENDERED_RE = re.compile(r"<!--v:([\w./-]+)#([\w/. -]+)-->(.*?)<!--/v-->", re.S)
 UNRENDERED_RE = re.compile(r"\{\{claim:[^}]*\}\}")
 # Simulations by design: made-up people, never a stand-in for real data, and the README says so
 # where it quotes them. These may be cited without --synthetic. Any other synthetic file may not.

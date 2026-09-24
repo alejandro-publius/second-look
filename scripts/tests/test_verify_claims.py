@@ -74,3 +74,17 @@ def test_a_named_simulation_that_drifted_still_fails(
 
 def test_only_the_coarseness_simulation_is_named() -> None:
     assert vc.SIMULATIONS == frozenset({"results/consensus_coarseness.json"})
+
+
+def test_a_pointer_with_a_space_is_checked(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Pair keys such as "model a vs model b" hold spaces.
+    readme = "Agree: <!--v:results/x.json#/pairs/a vs b/agree-->41<!--/v-->."
+    assert run(tmp_path, monkeypatch, readme, {"pairs": {"a vs b": {"agree": 41}}}) == 0
+    assert run2(tmp_path, monkeypatch, readme, {"pairs": {"a vs b": {"agree": 40}}}) == 1
+
+
+def run2(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, readme: str, doc: dict) -> int:
+    (tmp_path / "results" / "x.json").write_text(json.dumps(doc))
+    (tmp_path / "README.md").write_text(readme)
+    monkeypatch.setattr("sys.argv", ["verify_claims.py"])
+    return vc.main()
