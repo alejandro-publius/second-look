@@ -18,3 +18,4 @@ replaced it. `scripts/tests/test_adr.py` checks that every record is listed here
 | [0008](0008-open-footage-no-creek-visit.md) | No creek visit: the video and the AI use openly licensed footage | 2026-09-23 | accepted |
 | [0009](0009-direct-calls-over-batches.md) | The paid model run may make direct calls instead of batches | 2026-09-23 | accepted |
 | [0010](0010-cached-sandbox-record.md) | `/two` shows their laboratory record from a daily copy, not a live fetch | 2026-09-23 | accepted |
+| [0011](0011-inaturalist-context.md) | Creek pages show iNaturalist sightings as context, from a daily copy, and nothing decides from them | 2026-09-24 | accepted |
