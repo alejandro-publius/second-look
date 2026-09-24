@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-24T08:28:19+00:00",
+  "generated_at_utc": "2026-09-24T10:51:45+00:00",
   "script": "scripts/mutation.py",
   "synthetic": false,
   "tool": "mutmut",
@@ -10,12 +10,12 @@
   "score_rule": "killed divided by every change checked, times 100, to one decimal; a timeout or any other outcome counts as not caught",
   "modules": {
     "core/gate.py": {
-      "mutants": 219,
-      "killed": 216,
+      "mutants": 229,
+      "killed": 226,
       "survived": 3,
       "timeout": 0,
       "other": {},
-      "score_percent": 98.6,
+      "score_percent": 98.7,
       "survivors": [
         "core.gate.x__candidates__mutmut_5",
         "core.gate.x__one_flag__mutmut_52",
@@ -125,11 +125,11 @@
   },
   "by_name": {
     "gate": {
-      "mutants": 219,
-      "killed": 216,
+      "mutants": 229,
+      "killed": 226,
       "survived": 3,
       "timeout": 0,
-      "score_percent": 98.6
+      "score_percent": 98.7
     },
     "followups": {
       "mutants": 324,
@@ -154,10 +154,10 @@
     }
   },
   "total": {
-    "mutants": 2139,
-    "killed": 2065,
+    "mutants": 2149,
+    "killed": 2075,
     "survived": 74,
     "timeout": 0,
-    "score_percent": 96.5
+    "score_percent": 96.6
   }
 }
