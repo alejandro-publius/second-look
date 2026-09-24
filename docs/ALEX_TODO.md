@@ -10,27 +10,29 @@ in the README (its cost is logged in `results/cost_log.jsonl`), and the QA key i
 password manager when you can. Nobody films at a creek: the creek shots are open footage from
 Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.md`.
 
-1. **Thu Sep 24, 2 minutes: look at the live site on your phone.** `/`, `/walk`, `/judges`, and
-   `/demo`, which says Judge mode opens on Sep 28. https://second-look-79t.pages.dev
-
-2. **By Fri Sep 25, 20 minutes: record your voice.** Run `make video-rough` and play
+1. **By Fri Sep 25, 20 minutes: record your voice.** Run `make video-rough` and play
    `docs/video/rough_cut_scratch_voice.mp4` once: its scratch voice is there for the timing
    only. Then record your voice against it, reading `docs/video/teleprompter.html` in a browser
    (space pauses, the arrows change speed). The words are the ones in `docs/video/VOICE_SCRIPT.md`
    and `docs/video/SHOTLIST.md`; beat 7 is filled from the real run. This is your only step in
    making the video.
 
-3. **By Sat Sep 26, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft
+2. **By Sat Sep 26, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft
    and invite Rachel to it. Pick the five gallery images it names. For the live judging, read
    `docs/submission/JUDGE_QA.md`: the 20 hardest questions with honest answers.
 
-4. **By Sat Sep 26 evening, 15 minutes: launch the panel study.** Make a researcher account on
+3. **By Sat Sep 26 evening, 15 minutes: launch the panel study.** Make a researcher account on
    Prolific, add about 300 dollars, create the study from `docs/internal/PANEL_STUDY.md` (every
    field is written out there, the link and the completion code too) and publish it. It runs by
    itself; `make panel-status` shows how many have finished.
 
-5. **By Sat Sep 26, 2 minutes: the social preview.** On GitHub, Settings, General, Social preview,
+4. **By Sat Sep 26, 2 minutes: the social preview.** On GitHub, Settings, General, Social preview,
    upload `docs/social-preview.png`.
+
+5. **Optional, by Sat Sep 26, 15 minutes, for Rachel: a second set of labels.** Rachel labels the
+   16 test photos blind: `uv run python scripts/label_photos.py --name rachel --roles test` opens a
+   local page and writes `photos/labels_rachel.csv`; commit it, or tell
+   us it is there.
 
 6. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
    read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
