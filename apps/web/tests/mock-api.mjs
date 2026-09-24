@@ -86,6 +86,12 @@ export const exampleCity = {
   reaches: [],
 };
 
+// The iNaturalist context line's sightings, as scripts/cache_inaturalist.py stores them.
+export const exampleInat = [
+  { taxon_id: 61317, name: "Himalayan blackberry", latin_name: "Rubus armeniacus", count: 5, last_observed: "2025-12-11", url: "https://www.inaturalist.org/observations?id=283650055,294575631,299064622,351067371,351067372" },
+  { taxon_id: 64113, name: "Algerian ivy", latin_name: "Hedera canariensis", count: 1, last_observed: "2025-12-16", url: "https://www.inaturalist.org/observations?id=330995130" },
+];
+
 const exampleNote = {
   reach_slug: "campus-west",
   reach_name: "Below the forks, west campus",
@@ -357,6 +363,26 @@ export async function mockApi(page, options = {}) {
         theirs: status === "down" ? null : exampleObservation("Organization/almyros-lab", "Laboratory analysis", null),
         theirs_status: status,
         fetched_at: "2026-09-20T20:00:00Z",
+      });
+    }
+    if (path.startsWith("/api/inaturalist/")) {
+      // The same shape worker/src/inaturalist.ts answers. options.inat picks the case: "cached"
+      // (the default), "empty" (a copy with no sightings), "none" (nothing stored), "hidden" (the
+      // creek's record has not answered the invasive plant question) or "down" (the route fails).
+      const kind = options.inat ?? "cached";
+      if (kind === "down") return json({ detail: "The server could not take that." }, 500);
+      const creek = decodeURIComponent(path.slice("/api/inaturalist/".length));
+      const stored = kind === "cached" || kind === "empty" || kind === "hidden";
+      return json({
+        creek: creek === "example" ? "strawberry-creek" : creek,
+        shown: kind !== "hidden",
+        status: stored ? "cached" : "none",
+        fetched_at: stored ? "2026-09-24T07:45:00Z" : null,
+        since: stored ? "2023-09-24" : null,
+        radius_m: stored ? 300 : null,
+        species: kind === "cached" ? exampleInat : [],
+        source: "https://www.inaturalist.org",
+        terms: "https://www.inaturalist.org/pages/terms",
       });
     }
     if (path.startsWith("/api/quick/")) return json({ ok: true, visit_id: "q1" });

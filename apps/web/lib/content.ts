@@ -132,6 +132,7 @@ export interface Content {
   walks: Walk[];
   footage_credits: FootageCredit[];
   video_credits: VideoCredits;
+  inat_checks: InatChecks;
 }
 
 /** A video walk (Update 14 3.7), from content/walks.yaml via scripts/build_walks.py. */
@@ -167,6 +168,15 @@ export interface VideoCredits {
   licence: string;
   licence_url: string;
   items: { title: string; author: string; license: string; license_url: string; source_url: string }[];
+}
+
+/**
+ * What iNaturalist said about each of its photos we show, from results/inat_photos.json. Only these
+ * three facts: never the species or the place, because a test photo's species is its answer.
+ */
+export interface InatChecks {
+  checked_at: string;
+  photos: Record<string, { found: boolean; research_grade: boolean; in_california: boolean }>;
 }
 
 export interface WarmupItem {

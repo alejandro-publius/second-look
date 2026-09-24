@@ -264,6 +264,17 @@ function main() {
     }
   }
 
+  // What iNaturalist itself said about each of its photos we show (scripts/verify_inat_photos.py):
+  // research grade or not, inside California or not, still there or not. Only those three facts
+  // travel; the species and the place stay out, because a test photo's species is its answer.
+  const inatPath = join(repoRoot, "results", "inat_photos.json");
+  const inatRaw = existsSync(inatPath) ? JSON.parse(readFileSync(inatPath, "utf8")) : { photos: [] };
+  const inat_checks = { checked_at: String(inatRaw.checked_at ?? ""), photos: {} };
+  for (const p of inatRaw.photos ?? []) {
+    if (!photos[p.photo_id]) continue;
+    inat_checks.photos[p.photo_id] = { found: p.found === true, research_grade: p.research_grade === true, in_california: p.in_california === true };
+  }
+
   // Fail the build rather than publish a CC BY photo with nobody's name on it.
   const unattributed = Object.values(photos).filter(
     (p) => p.license.startsWith("CC-BY") && !p.author.trim(),
@@ -354,6 +365,7 @@ function main() {
     walks,
     footage_credits,
     video_credits,
+    inat_checks,
   };
 
   // Guard: nothing named gold may remain anywhere in the output.

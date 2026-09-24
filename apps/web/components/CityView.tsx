@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FocusHeading } from "./FocusHeading";
+import { InatContext } from "./InatContext";
 import { Icon } from "./ui/Icon";
 import { Row } from "./ui/Row";
 import { Skeleton } from "./ui/Skeleton";
@@ -258,6 +259,9 @@ export function CityView({ creekId }: { creekId: string }) {
           ))}
         </div>
       )}
+
+      {/* Context from iNaturalist, after what people reported and counted in nothing above. */}
+      <InatContext creek={view.creek_slug ?? view.creek_id} />
 
       {view.flagged_spots.length > 0 ? (
         <>
