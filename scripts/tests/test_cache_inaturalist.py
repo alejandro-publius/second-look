@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-from datetime import date
+from datetime import UTC, date, datetime, tzinfo
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
@@ -195,6 +195,23 @@ def bundle(spot: str, lat: float, lng: float) -> dict[str, Any]:
     return {"resourceType": "Bundle", "entry": [{"resource": loc}]}
 
 
+# The day every run below takes as today, whatever the machine's clock says. main() keeps three
+# years of sightings back from today, and the mock sighting is from 2025-12-11, so on the real
+# clock the good run would find nothing from 2028-12-12 on (REVIEW_03 R58).
+TODAY = datetime(2026, 9, 24, 12, 0, tzinfo=UTC)
+
+
+def clock_at(now: datetime) -> type[datetime]:
+    """A stand-in for cache_inaturalist's datetime whose now() is always now."""
+
+    class Stopped(datetime):
+        @classmethod
+        def now(cls, tz: tzinfo | None = None) -> Stopped:
+            return cls.fromtimestamp(now.timestamp(), tz)
+
+    return Stopped
+
+
 def run(
     monkeypatch: pytest.MonkeyPatch,
     argv: list[str],
@@ -202,6 +219,7 @@ def run(
     plants: list[cache.Plant],
     inat_status: int = 200,
 ) -> tuple[int, list[httpx.Request], list[str]]:
+    monkeypatch.setattr(cache, "datetime", clock_at(TODAY))
     requests: list[httpx.Request] = []
     stored: list[str] = []
 
@@ -236,6 +254,15 @@ def run(
     monkeypatch.setattr(cache, "store", stored.append)
     monkeypatch.setattr(cache, "listed_plants", lambda: {"california-bay-area": plants})
     return cache.main(argv), requests, stored
+
+
+def test_a_good_run_does_not_hang_on_the_machines_clock(monkeypatch) -> None:
+    # The machine's clock in December 2028, three years after the mock sighting: the run still
+    # takes TODAY as today and finds the sighting.
+    monkeypatch.setattr(cache, "datetime", clock_at(datetime(2028, 12, 12, 12, 0, tzinfo=UTC)))
+    code, _, stored = run(monkeypatch, [], plants=[BLACKBERRY])
+    assert code == 0
+    assert len(stored) == 1 and "Himalayan blackberry" in stored[0]
 
 
 def test_a_good_run_stores_one_row_per_creek_and_reads_it_back(monkeypatch) -> None:
