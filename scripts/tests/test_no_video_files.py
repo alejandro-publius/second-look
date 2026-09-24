@@ -17,10 +17,15 @@ def tracked() -> list[str]:
     return [p for p in out.split("\0") if p]
 
 
+# An ISO media file whose major brand is one of these is a still image (the AVIF copies of the
+# warm-up photos), not a video. An animated AVIF says avis and still counts as a video.
+STILL_IMAGE_BRANDS = frozenset({b"avif", b"heic", b"heix", b"mif1"})
+
+
 def looks_like_video(head: bytes) -> bool:
     """The first bytes of a video container, whatever the file is called."""
     return (
-        head[4:8] == b"ftyp"  # mp4, mov, m4v, 3gp
+        (head[4:8] == b"ftyp" and head[8:12] not in STILL_IMAGE_BRANDS)  # mp4, mov, m4v, 3gp
         or head[:4] == b"\x1a\x45\xdf\xa3"  # webm, mkv
         or (head[:4] == b"RIFF" and head[8:12] == b"AVI ")
         or head[:4] == b"OggS"
@@ -50,6 +55,8 @@ def test_the_sniffer_knows_each_container() -> None:
     assert looks_like_video(b"RIFF\x00\x00\x00\x00AVI LIST")
     assert not looks_like_video(b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0d")
     assert not looks_like_video(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00")
+    assert not looks_like_video(b"\x00\x00\x00\x20ftypavif")
+    assert looks_like_video(b"\x00\x00\x00\x20ftypavis")
 
 
 def test_the_ignore_file_refuses_every_clip_the_video_makes() -> None:

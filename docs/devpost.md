@@ -100,7 +100,7 @@ Judges start here: https://second-look-79t.pages.dev/judges
 /two: a lab Observation from their sandbox and a volunteer Observation of ours in one viewer.
 /walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a record made on your phone that is never stored.
 
-Video: [VIDEO LINK]
+Video: [VIDEO LINK] (released under CC BY-SA 4.0; creek footage from Wikimedia Commons, credited in the video)
 ```
 
 ## Users and impact on ecosystem and human health
