@@ -230,9 +230,10 @@ go-public:
 	$(PY) scripts/go_public.py $(if $(filter yes,$(GO)),--yes,)
 # bash scripts/go_public.sh --run does the same thing; Alex was told that command first.
 
-# The one command for a judge: no key, no network, five lines out. Tests, FHIR validation,
-# the web build and the design gate, the audit chain, and a scan for secrets.
-judge-check:
+# The one command for a judge: no key, no network, six lines out. Tests, every AI number graded
+# again from the raw replies, FHIR validation, the web build and the design gate, the audit chain,
+# and a scan for secrets.
+judge-check:  # its second step is make reproduce
 	$(PY) scripts/judge_check.py
 
 # UPDATE_29 section 4: every AI number in results/ graded again from the raw model replies of the

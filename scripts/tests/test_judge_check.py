@@ -66,3 +66,54 @@ def test_an_error_in_the_last_run_fails_the_fhir_step(
     step = judge_check.step_fhir(tmp_path, {})
     assert not step.ok
     assert step.lines[0] == "3 validation error(s) in the last run"
+
+
+def test_the_reproduce_step_runs_make_reproduce_and_reports_its_last_line(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[list[str]] = []
+    last = "reproduce: 3 values in 1 files regraded from raw replies and seeds"
+
+    def fake_run(argv: list[str], cwd: Path, env: dict[str, str]) -> tuple[int, str]:
+        calls.append(argv)
+        return 0, f"ok   results/a.json: 3 values regraded from a fixture\n{last}\n"
+
+    monkeypatch.setattr(judge_check, "run", fake_run)
+    step = judge_check.step_reproduce(judge_check.ROOT, {})
+    assert step.ok
+    assert calls == [["make", "--no-print-directory", "reproduce"]]
+    assert step.lines == [last]
+
+
+def test_a_number_that_does_not_reproduce_fails_the_step_and_names_the_file(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = (
+        "ok   results/a.json: 3 values regraded from a fixture\n"
+        "FAIL results/b.json: 1 values regraded from a fixture\n"
+        "       /gate/kept: committed 36, regraded 35\n"
+        "reproduce: 1 of 2 files differ from the raw replies or seeds\n"
+    )
+    monkeypatch.setattr(judge_check, "run", lambda argv, cwd, env: (1, out))
+    step = judge_check.step_reproduce(judge_check.ROOT, {})
+    assert not step.ok
+    assert step.lines[0] == (
+        "make reproduce failed: reproduce: 1 of 2 files differ from the raw replies or seeds"
+    )
+    assert "FAIL results/b.json: 1 values regraded from a fixture" in step.lines
+
+
+def test_judge_check_runs_the_reproduce_step_second(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ran: list[str] = []
+    for name in ("tests", "reproduce", "fhir", "audit", "secrets"):
+
+        def stand_in(*args: object, _name: str = name) -> judge_check.Step:
+            ran.append(_name)
+            return judge_check.Step(_name, lines=[f"{_name} ok"])
+
+        monkeypatch.setattr(judge_check, f"step_{name}", stand_in)
+    assert judge_check.main(["--quick"]) == 0
+    assert ran == ["tests", "reproduce", "fhir", "audit", "secrets"]
+    assert "6 of 6 steps passed" in capsys.readouterr().out

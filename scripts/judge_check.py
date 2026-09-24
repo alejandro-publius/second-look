@@ -1,4 +1,4 @@
-"""One command a judge can run: no key, no network, five lines out (Update 10 tier 3 item 11).
+"""One command a judge can run: no key, no network, six lines out (Update 10 tier 3 item 11).
 
     make judge-check
 
@@ -7,15 +7,18 @@ in it really are. Every step runs offline. The API key is removed from the envir
 anything starts, so a step that quietly wanted to call a model fails here instead of passing on
 somebody's credit.
 
-The five steps:
+The six steps:
 
 1. Tests. The whole Python suite and the Worker's golden vector suite.
-2. FHIR. The result of the last HL7 validator run, read from the committed
+2. Reproduce. make reproduce grades every AI number in results/ again from the raw model replies
+   committed in evals/fixtures/raw/ and the synthetic ones from their seeds, and fails if one
+   differs (UPDATE_29 section 4).
+3. FHIR. The result of the last HL7 validator run, read from the committed
    results/fhir_validation.json (this step does not run the validator; make fhir-validate does),
    and the golden Bundles checked byte for byte against what the emitter produces today.
-3. Web. The app builds, and the design gate passes: tokens, contrast and tap targets.
-4. Audit log. The hash chain walks from the genesis hash to the last entry with no break.
-5. Secrets. gitleaks over the history when it is installed, and a scan of the working tree for
+4. Web. The app builds, and the design gate passes: tokens, contrast and tap targets.
+5. Audit log. The hash chain walks from the genesis hash to the last entry with no break.
+6. Secrets. gitleaks over the history when it is installed, and a scan of the working tree for
    anything shaped like a key.
 
 Run: uv run python scripts/judge_check.py
@@ -119,6 +122,18 @@ def step_tests(root: Path, env: dict[str, str]) -> Step:
             step.fail(f"worker tests failed: {last_line(out)}")
         else:
             step.lines.append(f"worker: {passed.group(0) if passed else 'ok'}")
+    return step
+
+
+def step_reproduce(root: Path, env: dict[str, str]) -> Step:
+    step = Step("reproduce")
+    rc, out = run(["make", "--no-print-directory", "reproduce"], root, env)
+    if rc != 0:
+        failed = [ln.strip() for ln in out.splitlines() if ln.startswith("FAIL")]
+        step.fail(f"make reproduce failed: {last_line(out)}")
+        step.lines.extend(failed[:4])
+    else:
+        step.lines.append(last_line(out))
     return step
 
 
@@ -257,6 +272,7 @@ def main(argv: list[str] | None = None) -> int:
     steps: list[Step] = []
     for make in (
         lambda: step_tests(root, env),
+        lambda: step_reproduce(root, env),
         lambda: step_fhir(root, env),
         lambda: step_web(root, env, args.quick),
         lambda: step_audit(root, env),
