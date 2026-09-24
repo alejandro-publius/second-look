@@ -226,6 +226,8 @@
   "inat.terms_link": "iNaturalist terms of use",
   "two.title": "Two kinds of observer",
   "two.intro": "A lab result from the OneAquaHealth sandbox and a volunteer answer from Strawberry Creek, in the same viewer.",
+  "two.intro_example": "A lab result from the OneAquaHealth sandbox and an example of a volunteer answer, in the same viewer.",
+  "two.example": "Example record, made by hand for this demo. No volunteer has sent a creek check yet.",
   "two.ours": "Volunteer (Second Look)",
   "two.theirs": "Lab (OneAquaHealth sandbox)",
   "two.down": "Their sandbox did not answer, so only our record is shown.",

@@ -66,6 +66,23 @@ test("/two renders both observers with one card and says plainly when theirs is 
   await expect(page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" })).toHaveCount(0);
 });
 
+test("/two labels the hand-made golden visit as an example and names its place (REVIEW_03 R33)", async ({ page }) => {
+  await mockApi(page, { oursExample: true });
+  await page.goto("/two");
+  const ours = page.getByRole("region", { name: "Volunteer (Second Look)" });
+  await expect(ours.getByText("Example record, made by hand for this demo.", { exact: false })).toBeVisible();
+  await expect(page.getByText("an example of a volunteer answer", { exact: false })).toBeVisible();
+  await expect(page.getByText("a volunteer answer from Strawberry Creek", { exact: false })).toHaveCount(0);
+  await expect(ours.getByText("Strawberry Creek, campus reach, spot 1")).toBeVisible();
+  await expect(ours.getByText("Location/sl-loc-spot-1")).toHaveCount(0);
+  // A stored visit is a volunteer's answer: no example label.
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+  await mockApi(page);
+  await page.goto("/two");
+  await expect(page.getByRole("region", { name: "Volunteer (Second Look)" })).toBeVisible();
+  await expect(page.getByText("Example record, made by hand for this demo.", { exact: false })).toHaveCount(0);
+});
+
 test("/quick/example posts the fixed enums", async ({ page }) => {
   const calls = await mockApi(page);
   await page.goto("/quick?spot=example");

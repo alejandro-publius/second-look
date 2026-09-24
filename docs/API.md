@@ -47,7 +47,7 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | any | `/api/fhir/validation` | The last HL7 validator run (`results/fhir_validation.json`). | nothing | none |
 | any | `/api/fhir/referral/{spot_id}` | A ServiceRequest for a pipe on the worth testing list, made on request from stored visits. | nothing | none |
 | any | `/api/fhir/referral/{spot_id}/example-result` | How a laboratory result would come back to that pipe. Tagged and labelled EXAMPLE. | nothing | none |
-| any | `/api/two` | One of our Observations beside one laboratory Observation from their sandbox, read from the copy `scripts/cache_their_records.py` stored. | nothing | none |
+| any | `/api/two` | One of our Observations beside one laboratory Observation from their sandbox, read from the copy `scripts/cache_their_records.py` stored. Ours is from the latest stored visit; with none stored, it is the golden visit, made by hand, and `ours_example` is true so the page labels it an example. `ours_place` names the place. | nothing | none |
 | GET | `/api/inaturalist/{creek}` | The iNaturalist context line for one creek: research-grade sightings of plants on the region's invasive list near its spots, read from the copy `scripts/cache_inaturalist.py` stored, with the fetch time. The sightings are withheld until the creek's record answers the invasive plant question. Context only: nothing counts it and nothing decides from it. | nothing | none |
 
 ## The Python API (reference)

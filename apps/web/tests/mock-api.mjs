@@ -358,8 +358,14 @@ export async function mockApi(page, options = {}) {
     if (path === "/api/fhir/validation") return json(exampleValidation);
     if (path === "/api/two") {
       const status = options.theirsStatus ?? "ok";
+      // options.oursExample: no creek check is stored, so the API sends the hand-made golden visit,
+      // whose subject is a bare Location id, and says so, with the place by name.
+      const ours = exampleObservation("Practitioner/sl-practitioner-1", null, "4 of 4 on Built banks, tested Sep 23");
+      if (options.oursExample) ours.subject = { reference: "Location/sl-loc-spot-1" };
       return json({
-        ours: exampleObservation("Practitioner/sl-practitioner-1", null, "4 of 4 on Built banks, tested Sep 23"),
+        ours,
+        ours_example: Boolean(options.oursExample),
+        ours_place: options.oursExample ? "Strawberry Creek, campus reach, spot 1" : "Footbridge below the library",
         theirs: status === "down" ? null : exampleObservation("Organization/almyros-lab", "Laboratory analysis", null),
         theirs_status: status,
         fetched_at: "2026-09-20T20:00:00Z",

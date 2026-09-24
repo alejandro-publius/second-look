@@ -237,9 +237,15 @@ try {
     E2E_NOW: JUST_BEFORE_LOCK,
   });
 
-  // 2a. Before anyone checks a creek. The first deploy's /api/skeleton is gone: it wrote a row on
-  // any request, a GET included (review REVIEW_03 R02).
+  // 2a. Before anyone checks a creek. /two has no visit of ours to show, so it shows the golden
+  // visit, which was made by hand, and says so (review REVIEW_03 R33). The first deploy's
+  // /api/skeleton is gone: it wrote a row on any request, a GET included (REVIEW_03 R02).
   at("an empty store");
+  const empty = await api("GET", "/api/two");
+  assert.equal(empty.status, 200, JSON.stringify(empty.data));
+  assert.equal(empty.data.ours_example, true, "the golden visit is labelled an example");
+  assert.equal(empty.data.ours.id, "sl-obs-visit-0001-bank-type");
+  assert.equal(empty.data.ours_place, "Strawberry Creek, campus reach, spot 1", "the place by name, not Location/sl-loc-spot-1");
   assert.equal((await api("GET", "/api/skeleton")).status, 404);
   assert.equal((await api("POST", "/api/skeleton", {})).status, 404);
   assert.deepEqual(d1("SELECT COUNT(*) AS n FROM skeleton_ping"), [{ n: 0 }], "no request wrote a skeleton row");
@@ -358,6 +364,10 @@ try {
   assert.equal(pair.status, 200);
   assert.equal(pair.data.theirs_status, "down");
   assert.equal(pair.data.ours.resourceType, "Observation");
+  // A stored visit now: a volunteer's answer, not the example, and its place by name.
+  assert.equal(pair.data.ours_example, false);
+  assert.ok(pair.data.ours.id.startsWith("sl-obs-visit-") && pair.data.ours.id !== "sl-obs-visit-0001-bank-type");
+  assert.ok(["Faculty Glade bridge", "Daylighted reach in the park"].includes(pair.data.ours_place), pair.data.ours_place);
   const query = { subject: "Location/Loc-Almyros", code: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu|dissolved-oxygen", _sort: "-date", _count: "1" };
   const key = `theirs-${createHash("sha256").update(JSON.stringify(query)).digest("hex").slice(0, 16)}`;
   const lab = JSON.stringify({ resourceType: "Observation", id: "lab-e2e", status: "final" }).replaceAll("'", "''");

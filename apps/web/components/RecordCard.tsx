@@ -75,13 +75,28 @@ export function sameReading(a: FhirObservation, b: FhirObservation): boolean {
  * One shared card for any FHIR Observation: theirs from the lab, ours from a volunteer. It shows what
  * a person needs to compare the two; the raw values stay in View as FHIR.
  */
-export function RecordCard({ observation, heading, performer }: { observation: FhirObservation; heading: string; performer?: string }) {
+export function RecordCard({
+  observation,
+  heading,
+  performer,
+  place,
+  note,
+}: {
+  observation: FhirObservation;
+  heading: string;
+  performer?: string;
+  /** The place by name, when the API read it from the record, in place of a raw Location id. */
+  place?: string | null;
+  /** A line shown first in the card, such as the label on an example record. */
+  note?: string;
+}) {
   const [showJson, setShowJson] = useState(false);
   const score = observerScore(observation);
   const method = concept(observation.method);
   return (
     <section className="card stack" aria-label={heading}>
       <h2>{heading}</h2>
+      {note ? <p className="notice notice-warn">{note}</p> : null}
       <dl>
         <div>
           <dt className="small muted">{t("record.code")}</dt>
@@ -99,7 +114,7 @@ export function RecordCard({ observation, heading, performer }: { observation: F
         </div>
         <div>
           <dt className="small muted">{t("record.subject")}</dt>
-          <dd>{refText(observation.subject) || t("spot.none")}</dd>
+          <dd>{place || refText(observation.subject) || t("spot.none")}</dd>
         </div>
         <div>
           <dt className="small muted">{t("record.performer")}</dt>
