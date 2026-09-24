@@ -1,8 +1,47 @@
 import type { Metadata } from "next";
 import { Row } from "@/components/ui/Row";
-import { content, featureById } from "@/lib/content";
-import { GATE_FILES, PASS_FILE, howWeKnowNumbers } from "@/lib/how-data";
+import { content, featureById, licenseUrl } from "@/lib/content";
+import { GATE_FILES, PASS_FILE, footageExample, howWeKnowNumbers } from "@/lib/how-data";
 import { t } from "@/lib/t";
+
+type Case = {
+  frame: string;
+  model: string;
+  feature: string;
+  credit: { author: string; license: string; source_url: string };
+};
+
+// The rows both cases open with, and the frame's credit they close with: the author, the licence
+// and the video it was taken from, as /credits and the walk credit a clip (CRITIC_03 D04).
+function CaseRows({ c }: { c: Case }) {
+  return (
+    <>
+      <Row label={t("how.example_frame")} value={<span className="hash">{c.frame}</span>} />
+      <Row label={t("how.example_model")} value={<span className="hash">{c.model}</span>} />
+      <Row label={t("how.example_feature")} value={featureById(c.feature)?.name ?? c.feature} />
+    </>
+  );
+}
+
+function FrameCredit({ c }: { c: Case }) {
+  const url = licenseUrl(c.credit.license);
+  return (
+    <p className="small muted" data-testid="frame-credit">
+      {t("how.example_credit", { author: c.credit.author })}{" "}
+      {url ? (
+        <a href={url} rel="license noreferrer">
+          {c.credit.license}
+        </a>
+      ) : (
+        c.credit.license
+      )}
+      {". "}
+      <a href={c.credit.source_url} rel="noreferrer nofollow">
+        {t("credits.source")}
+      </a>
+    </p>
+  );
+}
 
 export const metadata: Metadata = { title: `${t("how.title")}: ${t("app.name")}` };
 
@@ -24,6 +63,7 @@ function runDay(iso: string): string {
 // ones (CRITIC_02 D03). A part whose file is missing or not real is left out.
 export default function HowWeKnowPage() {
   const { pass, gate } = howWeKnowNumbers(content.features.map((f) => f.id));
+  const example = footageExample();
   return (
     <article className="stack">
       <h1>{t("how.title")}</h1>
@@ -78,6 +118,52 @@ export default function HowWeKnowPage() {
           </p>
           <p>{t("how.gate_rule")}</p>
           <p className="small muted">{t("how.from", { files: GATE_FILES.join(", "), date: runDay(gate.date) })}</p>
+        </section>
+      ) : null}
+      {/* The footage example, read from examples/footage-flag/example.json when the page is built
+          (CRITIC_03 D04). The model's words reach the page in one place only: the kept flag's
+          note, after "the checker noticed" (hard rule 5). The dropped flag's note is never shown. */}
+      {example ? (
+        <section className="stack" aria-labelledby="how-example">
+          <h3 id="how-example">{t("how.example_title")}</h3>
+          <p>{t("how.example_intro")}</p>
+          {example.kept ? (
+            <div className="card stack" data-testid="example-kept">
+              <h4>{t("how.example_kept_title")}</h4>
+              <CaseRows c={example.kept} />
+              <p>{t("how.example_kept", { photos: example.kept.photos, right: example.kept.right, runs: example.kept.runs })}</p>
+              <p>{t("how.example_question")}</p>
+              {/* The same words and the same shape as the walk's checker question (WalkFlow.tsx). */}
+              <div className="card stack" data-testid="example-question">
+                <p>
+                  <strong>{example.kept.question}</strong>
+                </p>
+                <p className="small muted" data-testid="example-note">
+                  {t("label.checker_noticed")}: {example.kept.note}
+                </p>
+              </div>
+              <FrameCredit c={example.kept} />
+            </div>
+          ) : null}
+          {example.dropped ? (
+            <div className="card stack" data-testid="example-dropped">
+              <h4>{t("how.example_dropped_title")}</h4>
+              <CaseRows c={example.dropped} />
+              <p>
+                {example.dropped.not_passed
+                  ? t("how.example_dropped", { photos: example.dropped.photos, right: example.dropped.right, runs: example.dropped.runs })
+                  : t("how.example_dropped_other")}
+              </p>
+              <p className="small muted">
+                {t("how.example_gate_words")}{" "}
+                <span className="hash" data-testid="example-reason">
+                  {example.dropped.reasons.join("; ")}
+                </span>
+              </p>
+              <FrameCredit c={example.dropped} />
+            </div>
+          ) : null}
+          <p className="small muted">{t("how.from", { files: example.files.join(", "), date: runDay(example.date) })}</p>
         </section>
       ) : null}
     </article>
