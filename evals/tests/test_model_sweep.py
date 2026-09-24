@@ -376,6 +376,50 @@ def test_batch_flow_collects_by_custom_id_and_logs_every_call(tmp_path: Path) ->
     assert params["tools"][0]["name"] == "answer"
 
 
+def test_direct_mode_makes_every_call_directly_in_order_at_the_full_price(tmp_path: Path) -> None:
+    sdk = StubSDK()
+    log = CostLog(tmp_path / "cost.jsonl")
+    client = RealClient(
+        api_key="not-a-real-key",
+        config=confirmed_config(),
+        pricing=checked_pricing(),
+        cost_log=log,
+        sdk_client=sdk,
+        batch=False,
+        workers=3,
+    )
+    items = fake_items()[:5]
+    records = run_sweep(client, ["m"], items, QUESTIONS, runs=2, settings=Settings(), images=IMAGES)
+    assert [r.custom_id for r in records] == [
+        f"m|t0{i}|r{run}" for run in range(2) for i in range(1, 6)
+    ]
+    assert all(r.answer == "yes" and r.note == "single call" for r in records)
+    assert all("custom_id" not in req for req in sdk.requests), "no batch was made"
+    assert sdk.polls == 0 and len(sdk.requests) == 10
+    assert records[0].cost_usd == pytest.approx((1300 * 2.0 + 40 * 10.0) / 1e6)
+    assert len((tmp_path / "cost.jsonl").read_text().splitlines()) == 10
+
+
+def test_direct_mode_is_chosen_by_evals_sync_only() -> None:
+    assert ms.sync_mode({"EVALS_SYNC": "1"})
+    assert not ms.sync_mode({}) and not ms.sync_mode({"EVALS_SYNC": "yes"})
+
+
+def test_a_direct_run_is_estimated_at_twice_the_batch_price() -> None:
+    config = confirmed_config()
+    batch = ms.estimate_cost(["m"], IMAGES, checked_pricing(), config.settings, runs=3)
+    direct = ms.estimate_cost(
+        ["m"], IMAGES, checked_pricing(), config.settings, runs=3, batch=False
+    )
+    assert direct["worst_case_usd"] == pytest.approx(2 * batch["worst_case_usd"], rel=1e-3)
+
+
+def test_the_answer_tool_allows_exactly_the_three_words_as_strings() -> None:
+    # Unquoted yes and no are booleans in YAML; the API was once sent [true, false, "cant_tell"].
+    tool = ms.load_models_config().prompt.tool
+    assert tool["input_schema"]["properties"]["answer"]["enum"] == ["yes", "no", "cant_tell"]
+
+
 def test_single_answer_sends_temperature_only_where_accepted() -> None:
     sdk = StubSDK()
     client = RealClient(

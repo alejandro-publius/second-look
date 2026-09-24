@@ -31,8 +31,10 @@ import json
 import os
 import random
 import sys
+import threading
 import time
 from collections.abc import Callable, Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -477,7 +479,9 @@ class RealClient:
     """Paid vision model calls through the anthropic SDK. Refuses without a key or unchecked config.
 
     Single answers use messages.create. answer_many uses the Messages Batch API: create one
-    batch, poll until it has ended, collect results by custom_id. Every call is logged.
+    batch, poll until it has ended, collect results by custom_id. With batch=False (EVALS_SYNC=1)
+    answer_many makes the same calls directly, a few at a time, at the full price: a batch can
+    wait hours in the queue. Every call is logged.
     """
 
     real = True
@@ -494,6 +498,8 @@ class RealClient:
         poll_seconds: float = 30.0,
         max_wait_seconds: float = 24 * 3600,
         sleep: Callable[[float], None] = time.sleep,
+        batch: bool = True,
+        workers: int = 8,
     ) -> None:
         if not api_key:
             raise RealClientRefused(REFUSAL_NO_KEY)
@@ -504,13 +510,16 @@ class RealClient:
         self.poll_seconds = poll_seconds
         self.max_wait_seconds = max_wait_seconds
         self._sleep = sleep
+        self.batch = batch
+        self.workers = workers
+        self._log_lock = threading.Lock()
         self._sdk = sdk_client if sdk_client is not None else self._make_sdk(api_key)
 
     @staticmethod
     def _make_sdk(api_key: str) -> Any:
         import anthropic
 
-        return anthropic.Anthropic(api_key=api_key)
+        return anthropic.Anthropic(api_key=api_key, max_retries=6)
 
     def check_ready(self, model_id: str) -> None:
         spec = self.config.spec(model_id)
@@ -552,6 +561,11 @@ class RealClient:
 
     def _log(self, raw: RawAnswer) -> None:
         if self.cost_log is not None:
+            with self._log_lock:
+                self._append(raw)
+
+    def _append(self, raw: RawAnswer) -> None:
+        if self.cost_log is not None:
             self.cost_log.append(
                 model=raw.model_id,
                 purpose=self.purpose,
@@ -581,6 +595,11 @@ class RealClient:
             self.check_ready(q.model_id)
         if not queries:
             return []
+        if not self.batch:
+            with ThreadPoolExecutor(max_workers=self.workers) as pool:
+                return list(
+                    pool.map(lambda q: self.answer(q.image_bytes, q.question, q.model_id), queries)
+                )
         # The Batch API takes a custom_id of letters, digits, _ and - only, 64 at most, so our
         # own ids (model|item|run) never go on the wire. Each query gets its position instead.
         wire = [f"q{index:05d}" for index in range(len(queries))]
@@ -857,8 +876,9 @@ def estimate_cost(
     settings: Settings,
     *,
     runs: int,
+    batch: bool = True,
 ) -> dict[str, float]:
-    """Rough upper and expected cost of a real batch run. An estimate, not a measurement."""
+    """Rough upper and expected cost of a real run, batched or not. An estimate only."""
     image_tokens = 0
     for data in images.values():
         w, h = image_size(data)
@@ -868,9 +888,9 @@ def estimate_cost(
     expected = worst = 0.0
     for model_id in model_ids:
         expected += pricing.cost_usd(
-            model_id, in_tokens, calls * ESTIMATE_OUTPUT_TOKENS, batch=True
+            model_id, in_tokens, calls * ESTIMATE_OUTPUT_TOKENS, batch=batch
         )
-        worst += pricing.cost_usd(model_id, in_tokens, calls * settings.max_tokens, batch=True)
+        worst += pricing.cost_usd(model_id, in_tokens, calls * settings.max_tokens, batch=batch)
     return {"expected_usd": round(expected, 4), "worst_case_usd": round(worst, 4)}
 
 
@@ -957,6 +977,11 @@ def write_outputs(
 # CLI
 
 
+def sync_mode(environ: Mapping[str, str]) -> bool:
+    """EVALS_SYNC=1 makes direct calls at the full price instead of one batch per model."""
+    return environ.get("EVALS_SYNC", "") == "1"
+
+
 def build_real_client(
     *,
     model_ids: Sequence[str],
@@ -980,6 +1005,7 @@ def build_real_client(
             cost_log=cost_log,
             purpose=purpose,
             poll_seconds=poll_seconds,
+            batch=not sync_mode(environ),
         )
         for m in model_ids:
             client.check_ready(m)
@@ -1036,7 +1062,9 @@ def main(argv: Sequence[str] | None = None, *, environ: Mapping[str, str] | None
         if real_client is None:
             print(why_not)
             return 2
-        est = estimate_cost(model_ids, images, pricing, config.settings, runs=runs)
+        est = estimate_cost(
+            model_ids, images, pricing, config.settings, runs=runs, batch=not sync_mode(env)
+        )
         if est["worst_case_usd"] > args.max_usd:
             print(REFUSAL_OVER_CAP.format(cost=est["worst_case_usd"], cap=args.max_usd))
             return 2
