@@ -1,0 +1,98 @@
+# HTTP API
+
+Two servers answer the same questions. The **Worker** (`worker/src/index.ts`, TypeScript on
+Cloudflare Workers with D1 and KV) is what the live site uses, under `/api` on the site's own
+origin. The **Python API** (`apps/api/`, FastAPI) is the reference: the tests, the evals and
+`make dev` run it, and the Worker's pure parts are ports of it, proved equal by golden vectors
+(`worker/golden/`, `make worker-check`).
+
+`scripts/api_inventory.py` reads both route lists out of the code, and
+`scripts/tests/test_api_docs.py` fails when a route has no row below, or a row has no route.
+The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes
+and the Python API <!--v:results/api_inventory.json#/python/count-->25<!--/v-->
+(`results/api_inventory.json`).
+
+Every answer is JSON unless the row says otherwise. An error is `{"detail": "..."}` in plain
+words. Nothing here takes a name, an email, an address or free text; see `docs/DATA_HANDLING.md`
+for what each table holds and `SECURITY.md` for the secrets and the lock.
+
+## The Worker (production)
+
+"any" means the Worker does not check the method; the web app sends GET. The Worker has no rate
+limit, on purpose: counting per visitor would mean holding something that identifies them
+(`docs/DATA_HANDLING.md`, "The rate limit"). Cloudflare's own edge protection sits in front.
+
+| Method | Path | What it does | What it stores | Limit or lock |
+|---|---|---|---|---|
+| any | `/health` | Says the API is up. The landing page calls it to wake the Worker. | nothing | none |
+| any | `/api/skeleton` | The first deploy's proof: writes one row and reads it back with the row count. | one `skeleton_ping` row: a note and the time | none |
+| any | `/api/content/hash` | The hash of the test content the Worker serves. | nothing | none |
+| POST | `/api/test/session` | Starts a two-minute test sitting: takes the next pre-registered arm and a shuffled item order. | a `session` row (arm, item order, consent version, hashes, coarse device class, source label, a hash of a random browser token) | the `x-qa-key` header, when it matches `QA_KEY`, marks the sitting as a test so it never counts |
+| POST | `/api/test/response` | Stores one answer to one test photo. The first answer stays; a different second one gets 409. | a `response` row (item, yes, no or can't tell, timing, position) | none |
+| POST | `/api/test/lesson-done` | Records the seconds spent on each lesson screen. | `session.lesson_seconds` | none |
+| POST | `/api/test/complete` | Ends the sitting and returns the score per feature. With `keep_score`, hands back a new random contributor token. | `completed_at`, the optional prior experience answer; with `keep_score`, an `observer` row (token, four scores, date) not linked to the session | none |
+| any | `/api/test/resume` | Where a reloaded sitting was. Read only: never makes a session or a token. | nothing | none |
+| any | `/api/test/counts` | Sittings randomized and completed per arm and per source, tests left out. | nothing | none |
+| any | `/api/test/export` | `sessions.csv` and `responses.csv` in one zip. | nothing | `?token=` must match `EXPORT_TOKEN`, or the answer is 404 |
+| POST | `/api/demo/answer` | Judge mode: says only whether an answer was right, never the gold label. | nothing | the data lock: 403 before 2026-09-28T01:00:00Z |
+| POST | `/api/check/draft` | A creek check's answers: makes the spot if it is new, asks Open-Meteo about rain, and picks at most two follow-up questions by code. | a `spot` row if new (a coarse point unless the person placed the pin), a draft `visit` row (coded answers, first rating, the questions asked, the contributor token if given) | none |
+| POST | `/api/check/finalize` | The answers to the follow-ups and the final rating; builds the FHIR Bundle. | `check_result` rows, the final rating, a `fhir_bundle` row | refuses an answer to a question it never asked |
+| POST | `/api/quick/{spot_id}` | The 20 second return check at a known spot: colour, smell, pipe running. | a `visit` row of kind quick | none |
+| POST | `/api/upload` | A creek photo as the form field `file`. JPEG, PNG or WebP only. Camera metadata (EXIF, GPS, XMP, ICC, comments) is cut out. Returns the photo id and the one token that can read it. | the bytes in KV with a 30 day expiry; an `upload` row with a hash of the token | 8 MB at most |
+| GET | `/api/photo/{photo_id}` | One uploaded photo, served private and uncached. | nothing | `?t=` must be that photo's token, or the answer is 404 |
+| any | `/api/creeks` | Every creek with a record, with the visit ids behind each count. | nothing | none |
+| any | `/api/city/{creek}` | The analyst's view of one creek: findings, what it needs in approved words, pipes worth testing, reaches, downstream notes. | nothing | none |
+| GET | `/api/spot/{spot_id}` | One spot's record: each answer beside the observer's score, the health card, the place and the downstream notes. | nothing | none |
+| any | `/api/spot/{spot_id}/fhir` | The latest visit at a spot as a FHIR Bundle. | nothing | none |
+| any | `/api/fhir/Bundle/{visit_id}` | One visit as a FHIR Bundle. | nothing | none |
+| any | `/api/fhir/validation` | The last HL7 validator run (`results/fhir_validation.json`). | nothing | none |
+| any | `/api/fhir/referral/{spot_id}` | A ServiceRequest for a pipe on the worth testing list, made on request from stored visits. | nothing | none |
+| any | `/api/fhir/referral/{spot_id}/example-result` | How a laboratory result would come back to that pipe. Tagged and labelled EXAMPLE. | nothing | none |
+| any | `/api/two` | One of our Observations beside one laboratory Observation from their sandbox, read from the copy `scripts/cache_their_records.py` stored. | nothing | none |
+
+## The Python API (reference)
+
+Limits are per client address, over a sliding window, kept in process memory only and gone when
+the process stops (`apps/api/security.py`). The address is hashed with a random salt and never
+stored or logged.
+
+| Limit | Requests | Window |
+|---|---|---|
+| study | <!--v:results/api_inventory.json#/rate_limits/study/limit-->60<!--/v--> | <!--v:results/api_inventory.json#/rate_limits/study/window_seconds-->10<!--/v--> seconds |
+| read | <!--v:results/api_inventory.json#/rate_limits/read/limit-->60<!--/v--> | <!--v:results/api_inventory.json#/rate_limits/read/window_seconds-->10<!--/v--> seconds |
+| demo | <!--v:results/api_inventory.json#/rate_limits/demo/limit-->30<!--/v--> | <!--v:results/api_inventory.json#/rate_limits/demo/window_seconds-->10<!--/v--> seconds |
+| upload | <!--v:results/api_inventory.json#/rate_limits/upload/limit-->12<!--/v--> | <!--v:results/api_inventory.json#/rate_limits/upload/window_seconds-->60<!--/v--> seconds |
+
+The routes do and store what the Worker's routes of the same path do, with the differences in
+the table. The last column names the limit from the table above, then any lock.
+
+| Method | Path | What it does | What it stores | Limit or lock |
+|---|---|---|---|---|
+| GET | `/health` | Says the API is up. | nothing | none |
+| POST | `/api/skeleton/ping` | The walking skeleton on docker compose: one row written, the count read back. | one `skeleton_ping` row | none |
+| GET | `/api/content/hash` | The content hash and the build hash. | nothing | read |
+| POST | `/api/test/session` | Starts a sitting. The arm comes from `core/allocator.py` itself. | a `session` row | study; the `x-qa-key` header marks a test |
+| POST | `/api/test/response` | One answer to one test photo. | a `response` row | study |
+| POST | `/api/test/lesson-done` | Seconds per lesson screen. | `session.lesson_seconds` | study |
+| POST | `/api/test/complete` | Ends the sitting, returns the score per feature, and with `keep_score` a contributor token. | `completed_at`; an `observer` row with `keep_score` | study |
+| GET | `/api/test/resume` | Where a reloaded sitting was. Read only. | nothing | study |
+| GET | `/api/test/counts` | Sittings per arm and per source. | nothing | read |
+| GET | `/api/test/export` | The two CSV files in a zip. | nothing | read; `?token=` must match `EXPORT_TOKEN`, or 404 |
+| POST | `/api/demo/answer` | Judge mode: right or not, never the label. Takes no database session. | nothing | demo; 403 before the data lock |
+| POST | `/api/check/draft` | A creek check's answers and the follow-up questions. | `spot` if new, a draft `visit` | study |
+| POST | `/api/check/finalize` | Follow-up answers and the final rating; writes the FHIR Bundle to the store folder. | `check_result` rows, a Bundle file under `FHIR_STORE_DIR` | study |
+| POST | `/api/quick/{spot_id}` | The 20 second return check. | a quick `visit` | study |
+| POST | `/api/upload` | A creek photo. Re-encoded as a new JPEG of at most 1600 pixels, so no metadata survives. | a file under `UPLOAD_DIR`, an `upload` row with a hash of the token | upload; 8 MB at most |
+| GET | `/api/photo/{photo_id}` | One uploaded photo with its token. | nothing | read; `?t=` must be the token, or 404 |
+| GET | `/api/creeks` | Every creek with a record. | nothing | read |
+| GET | `/api/city/{creek_id}` | The analyst's view of one creek. | nothing | read |
+| GET | `/api/spot/{spot_id}` | One spot's record. | nothing | read |
+| GET | `/api/spot/{spot_id}/fhir` | The latest visit at a spot as FHIR. | nothing | none |
+| GET | `/api/fhir/Bundle/{visit_id}` | One visit as FHIR. | nothing | none |
+| GET | `/api/fhir/validation` | The last validator run. | nothing | none |
+| GET | `/api/fhir/referral/{spot_id}` | The ServiceRequest for a pipe worth testing. | nothing | read |
+| GET | `/api/fhir/referral/{spot_id}/example-result` | The example laboratory result. | nothing | read |
+| GET | `/api/two` | Ours beside theirs. Unlike the Worker, this fetches their sandbox itself, one request a second at most, and keeps what it got for an hour under `SANDBOX_CACHE_DIR`. | a cache file on disk, never in git | none |
+
+`/health`, `/api/skeleton/ping`, `/api/two` and the three FHIR record routes carry no limiter on
+the Python API. It serves development and the tests, not the public.
