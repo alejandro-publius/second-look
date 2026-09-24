@@ -96,3 +96,11 @@ test("every photograph a visitor can see is named on the credits page", async ({
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Photo credits" })).toHaveCount(0);
 });
+
+// The plan was tagged prereg-v1 on 2026-09-21, before any participant, and the tag is never moved
+// (hard rules 13 and 15), so the page names it without a caveat (REVIEW_03 R30).
+test("the how we know page names the plan's tag as made", async ({ page }) => {
+  await page.goto("/how-we-know");
+  await expect(page.getByText("Analysis plan tag: prereg-v1. The plan names")).toBeVisible();
+  await expect(page.locator("main")).not.toContainText("not yet tagged");
+});
