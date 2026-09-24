@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: reproduce panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -234,6 +234,13 @@ go-public:
 # the web build and the design gate, the audit chain, and a scan for secrets.
 judge-check:
 	$(PY) scripts/judge_check.py
+
+# UPDATE_29 section 4: every AI number in results/ graded again from the raw model replies of the
+# paid runs in evals/fixtures/raw/, and every synthetic result made again from its seed, by the
+# same code the runs ran. No key, and no network: every socket to another machine is refused.
+# Fails if any committed number differs. About half a minute.
+reproduce:
+	env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN uv run --offline python evals/reproduce.py
 
 # The landing budgets from UPDATE_06 section 5 as Update 07 moved them. Needs the built app
 # running on 3100, so it is not inside make check.
