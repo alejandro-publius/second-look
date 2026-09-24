@@ -465,9 +465,9 @@ Every number is graded by code and written to `results/`; `scripts/verify_claims
 
 `make check` runs everything below except the browser suite and the Worker end to end, and prints `CHECK GREEN`. The counts are taken by `scripts/count_tests.py` into `results/test_counts.json`.
 
-- **Python:** <!--v:results/test_counts.json#/python/tests-->1901<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
+- **Python:** <!--v:results/test_counts.json#/python/tests-->1906<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
 - **Ports:** <!--v:results/test_counts.json#/worker_golden/cases-->113<!--/v--> golden cases written by the Python reference, which the TypeScript Worker must reproduce exactly, in <!--v:results/test_counts.json#/worker_golden/node_tests-->12<!--/v--> tests (`make worker-check`).
-- **Browser:** <!--v:results/test_counts.json#/playwright/tests-->77<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->18<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
+- **Browser:** <!--v:results/test_counts.json#/playwright/tests-->78<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->18<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
 - **Worker end to end:** <!--v:results/test_counts.json#/worker_e2e/sections-->9<!--/v--> sections that drive the real Worker's routes under `wrangler dev` with a local D1 and KV (`make worker-e2e`, in CI).
 - **Records:** the HL7 validator checks every emitted Bundle, from Python and from the Worker, against OneAquaHealth's guide: <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`make fhir-validate`).
 
@@ -578,7 +578,7 @@ You can run the same loop from your desk on a creek in another country: **`/walk
 
 The engineering challenges, each with the file and test that prove it: [`WRITEUP.md`](WRITEUP.md). How to deploy, with every setting: [`DEPLOY.md`](DEPLOY.md). Decisions as records: [`docs/adr/`](docs/adr/README.md).
 
-The technical report, <!--v:results/report_pdf.json#/pages-->6<!--/v--> pages built by `make report-pdf` from this README, the docs and `results/`: [`docs/REPORT.pdf`](docs/REPORT.pdf). What the checker may and may not do: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). Where the photos and footage come from and who labelled them: [`docs/DATA_CARD.md`](docs/DATA_CARD.md). Who might attack and what stops them: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
+The technical report, <!--v:results/report_pdf.json#/pages-->7<!--/v--> pages built by `make report-pdf` from this README, the docs and `results/`: [`docs/REPORT.pdf`](docs/REPORT.pdf). What the checker may and may not do: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). Where the photos and footage come from and who labelled them: [`docs/DATA_CARD.md`](docs/DATA_CARD.md). Who might attack and what stops them: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
 
 AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos and their gold labels with the planner (the labels came from the picks file, commit 81e62ed; no second, blind labeller yet, `docs/DATA_CARD.md`), froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
 
