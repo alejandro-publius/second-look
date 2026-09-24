@@ -26,7 +26,19 @@ Which creek is healthier? Take the two-minute test, no camera needed: **https://
 | ![A mown park beside a creek in a concrete channel](photos/warmup/ph-warmup-03.jpg) | ![A creek bending through a field, with fallen wood and an eroding bank](photos/warmup/ph-warmup-04.jpg) |
 | Gregwadley, CC BY-SA 4.0, Wikimedia Commons | Roger Kidd, CC BY-SA 2.0, Wikimedia Commons |
 
+<details><summary>The answer</summary>
+
 The tidy park on the left hides a concrete channel. The messy bend on the right is the healthier creek.
+
+</details>
+
+**[Take the two-minute test](https://second-look-79t.pages.dev/t?src=other)** | **[Judges start here](https://second-look-79t.pages.dev/judges)** | **[Walk a creek from your desk](https://second-look-79t.pages.dev/walk)**
+
+<!-- GIF -->
+
+How this answers the organizers' five headers: the problem and innovation are under *Why trust a volunteer, and the AI?*; alignment with OneAquaHealth under *How OneAquaHealth is used*; data, technology, AI, APIs and standards under *Architecture* and *Evals*; the demonstration under *For judges*.
+
+## Numbers at a glance
 
 ### The AI, on the same 16 photos and on real creek footage
 
@@ -52,49 +64,19 @@ The full loop, from a desk: <!--v:results/footage_pool.json#/walks-->3<!--/v--> 
 
 No recruited study. The two-minute test stays live as the volunteer's own calibration step and for judges. No session from a person has arrived through the public link, so there is no human row here; if sessions arrive they are reported as a description with their count.
 
-## Screens
+## Gallery
 
 | The question | The test | Your score | What the creek needs |
 |---|---|---|---|
 | ![Landing page with two creek photos](docs/screens/01-landing.png) | ![A test item with Yes, No and Can't tell](docs/screens/05-test-item.png) | ![Four gauges, one per feature](docs/screens/06-end-score.png) | ![The city view listing OneAquaHealth measures](docs/screens/10-city-needs.png) |
 
-## The problem
+## Why trust a volunteer, and the AI?
 
 People judge a creek the way they judge a park. Tidy and green reads as healthy. OneAquaHealth's project lead said it in the first workshop: volunteers catch smell, foam and colour, and walk past concrete banks, a channel that was dug out, and pretty plants that do not belong. So the best-looking creek can get the best rating and deserve the worst.
 
 Professional surveyors fixed this long ago. In the UK's River Habitat Survey, "only surveys from accredited surveyors will be entered on the RHS database", and accreditation means attending a course and passing a test (RHS manual 2003, pages 3 and 20; see `docs/notes/sources.md`). Volunteers have never had that. Their observations arrive with no mark of how far to trust them.
 
-## How the solution aligns with OneAquaHealth
-
-OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored as a dated Practitioner qualification and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in their order. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete.
-
-### How OneAquaHealth is used
-
-| Their surface | What we use it for | Where |
-|---|---|---|
-| The official Citizen Science App's question wording | The creek check mirrors its items, in its order, with its closing question on feelings | `content/form.yaml` |
-| Their Location and Observation profiles | Every spot and every answer | `core/fhir_emit.py`, `docs/fhir_mapping.md` |
-| Their value sets and UCUM units | Present, absent, the indicator groups, metres | `core/fhir_emit.py` |
-| A Questionnaire through their form extension | The test and the check, answered as QuestionnaireResponses | `fhir/fsh/` |
-| Nested Locations | Creek, reach and spot with `partOf` | `core/regions.py`, `content/regions/` |
-| The HL7 validator with their guide, terminology on | Every emitted resource in CI | `scripts/fhir_validate.py`, `fhir/ig.lock` |
-| Their sandbox | Conditional creates with our tag and a ledger, and a Library entry for the data set | `scripts/repush_sandbox.py`, `fhir/sandbox_ledger.jsonl` |
-| Their decision tool's measures | What a creek needs, in their words, from the Policy Brief, page 9 | `content/approved_sentences.yaml`, `/city` |
-| The five One Digital Health dimensions and FAIR | Stated in words below | this README |
-| The follower city recipe | `make new-city`, run once for Heraklion as a dry example | `scripts/new_city.py`, `docs/cities/` |
-| Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | `core/fhir_referral.py` |
-
-### Contributed back
-
-- A proposal for carrying observer quality in their guide, with three gaps our validator runs found: no profile for the person or the trail from an answer to them; a volunteer modelled as a Practitioner for want of a better fit; `SpecimenOah.collection.collector` allowing only a PractitionerRole. Its FSH builds inside their guide in CI. `docs/ig_proposal.md`.
-- A friendly note that their temporary code system spells one code `morophology`. We kept their spelling so our records validate.
-- A read only MCP server over our own records, so any software agent can ask for a creek's records with the resource ids behind every answer. `examples/mcp/README.md`.
-
-## Innovation and practical value
-
 Measure each volunteer, per feature, and store the measure with the data. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer, never a blended grade or a probability. Follow-up questions are chosen by code from the answers, the person's scores and the weather, two at most: "It has not rained here for N days. Is anything coming out of that pipe?" The AI takes the same test as the people and earns the right to ask one question, feature by feature.
-
-### Why trust a volunteer, and the AI?
 
 | What can go wrong | What stops it, by construction | Proof |
 |---|---|---|
@@ -108,10 +90,10 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | A record a city's systems cannot read | Every emitted resource is validated against their guide in CI, in Python and in the TypeScript Worker | `scripts/fhir_validate.py`, `worker/test/golden.test.ts` |
 | Someone edits history | A hash-chained audit log, checked by a script | `audit/`, `scripts/verify_audit.py` |
 | We fool ourselves with the statistics | The analysis plan is tagged before any data; every README number is checked against `results/` in CI; a synthetic result is cited only where the sentence says it is a simulation | `docs/analysis_plan.md` at `prereg-v1`, `scripts/verify_claims.py` |
-| Judge mode leaks the answer key | Judge mode is shut until Sep 28 by a lock constant, and a per-item answer is never sent before the test closes | `core/lock.py`, `core/tests/test_lock.py` |
+| Judge mode leaks the answer key | Judge mode is shut until Sep 28 by a lock constant, and its answer route refuses before then on the Worker and in the Python API | `core/lock.py`, `apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`, `worker/test/e2e.mjs` |
 | A refresh loses a session | The session resumes from the server; the creek check queues offline and sends later | `apps/web/lib/offline.ts`, `apps/web/tests/` |
 
-### What the AI cannot do
+## What the AI cannot do
 
 | It cannot | Enforced by | Test |
 |---|---|---|
@@ -122,11 +104,9 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | Put its own words in front of a person | Its note is shown only as "the checker noticed", cut to 160 characters | `core/checker.py`, `core/gate.py` |
 | State a risk for a named site | Every health or ecology sentence comes from `content/approved_sentences.yaml` with a source | `core/tests/test_labels.py` |
 
-## Effective use of data, technology, AI, APIs and standards
+<!-- GATE -->
 
-FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and built with SUSHI 3.20.1; their sandbox, read at one request per second and written with conditional creates; Open-Meteo for the rainfall behind the dry pipe rule; the Cal-IPC Inventory for the Bay Area plant list; three vision models through the Batch API, behind a gate. No names, emails, addresses or free text in the test; EXIF stripped from uploads, which are deleted after 30 days; a hash-chained audit log.
-
-### Architecture
+## Architecture
 
 The deep version, with every file named, is `docs/ARCHITECTURE.md`. `make diagrams` checks that every diagram here parses, in CI.
 
@@ -246,17 +226,103 @@ sequenceDiagram
   Note over Model,Store: The model never reaches the store. It has no path to it.
 ```
 
-### Evals
+### Tech stack
+
+FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and built with SUSHI 3.20.1; their sandbox, read at one request per second and written with conditional creates; Open-Meteo for the rainfall behind the dry pipe rule; the Cal-IPC Inventory for the Bay Area plant list; four vision models (Claude Haiku 4.5, Sonnet 5, Opus 5.5 and Fable 5.1), called directly and kept behind a gate. No names, emails, addresses or free text in the test; EXIF stripped from uploads, which are deleted after 30 days; a hash-chained audit log.
+
+<!-- API -->
+
+## How OneAquaHealth is used
+
+OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored as a dated Practitioner qualification and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in their order. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete.
+
+| Their surface | What we use it for | Where |
+|---|---|---|
+| The official Citizen Science App's question wording | The creek check mirrors its items, in its order, with its closing question on feelings | `content/form.yaml` |
+| Their Location and Observation profiles | Every spot and every answer | `core/fhir_emit.py`, `docs/fhir_mapping.md` |
+| Their value sets and UCUM units | Present, absent, the indicator groups, metres | `core/fhir_emit.py` |
+| A Questionnaire through their form extension | The test and the check, answered as QuestionnaireResponses | `fhir/fsh/` |
+| Nested Locations | Creek, reach and spot with `partOf` | `core/regions.py`, `content/regions/` |
+| The HL7 validator with their guide, terminology on | Every emitted resource in CI | `scripts/fhir_validate.py`, `fhir/ig.lock` |
+| Their sandbox | Conditional creates with our tag and a ledger, and a Library entry for the data set | `scripts/repush_sandbox.py`, `fhir/sandbox_ledger.jsonl` |
+| Their decision tool's measures | What a creek needs, in their words, from the Policy Brief, page 9 | `content/approved_sentences.yaml`, `/city` |
+| The five One Digital Health dimensions and FAIR | Stated in words below | this README |
+| The follower city recipe | `make new-city`, run once for Heraklion as a dry example | `scripts/new_city.py`, `docs/cities/` |
+| Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | `core/fhir_referral.py` |
+
+### Contributed back
+
+- A proposal for carrying observer quality in their guide, with three gaps our validator runs found: no profile for the person or the trail from an answer to them; a volunteer modelled as a Practitioner for want of a better fit; `SpecimenOah.collection.collector` allowing only a PractitionerRole. Its FSH builds inside their guide in CI. `docs/ig_proposal.md`.
+- A friendly note that their temporary code system spells one code `morophology`. We kept their spelling so our records validate.
+- A read only MCP server over our own records, so any software agent can ask for a creek's records with the resource ids behind every answer. `examples/mcp/README.md`.
+
+### Feasibility: Berkeley as a follower city
+
+OneAquaHealth calls a city that adopts the method a follower city. Run on Berkeley: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in two minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the 20 second return check. `make new-city` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
+
+### One Digital Health and FAIR
+
+Story: a student walks to Strawberry Creek, takes a two-minute test on her phone, and from then on every observation she makes carries how well she sees each kind of damage. A city analyst reads her record beside a lab result under the same profile and knows how much weight to give each. The health card tells her one thing for herself, one for her dog and one her city could do.
+
+Five dimensions, in words, because no script produces them: citizen engagement, strong; education, strong; human and veterinary healthcare, partial (approved sentences for the person and the pet, no diagnosis, no site risk); industry 4.0, partial (FHIR records, a gated vision model, an audit log); environment, strong.
+
+FAIR: findable through a Library entry in their sandbox and a public repository; accessible through a read-only FHIR endpoint; interoperable through their profiles, value sets and UCUM; reusable through MIT code, a pinned guide, Provenance on every record and a tagged analysis plan.
+
+## Evals
 
 Every number is graded by code and written to `results/`; `scripts/verify_claims.py` checks this README against those files in CI.
 
-- The 16-photo test, taken by three vision models, three runs each, through the Batch API: `evals/model_sweep.py` writes the pass table and per-item accuracy; `evals/benchmark.py` adds per-feature accuracy with Wilson intervals.
+- The 16-photo test, taken by four vision models, three runs each, called directly (a batch once waited three hours in the queue): `evals/model_sweep.py` writes the pass table and per-item accuracy; `evals/benchmark.py` adds per-feature accuracy with Wilson intervals.
 - The same models on frames from open creek footage: `evals/footage.py` reports accuracy against description labels with its count, agreement between models on unlabelled frames, what the gate stopped, and the adversarial frames. `evals/footage_pool.py` writes the numbers no model touches.
 - The ablation (rules only, context only, vision only, all three): `evals/ablation.py`.
 - The pre-registered analysis of the two-minute test, written and tested on synthetic data before the tag: `evals/usability_analysis.py`. Nobody is recruited, so it reports a description with counts.
 - Cost is logged per call in `results/cost_log.jsonl`. A fake run logs to `results/cost_log_fake.jsonl` and spends nothing.
 
-## A clear demonstration of what was built
+## What is real and what is synthetic
+
+The full list, kept current, is `docs/REAL_VS_SYNTHETIC.md`. In short:
+
+| Thing | Status |
+|---|---|
+| The test flow, its scoring and the photos in it | real, openly licensed photos from several countries |
+| Frames from open creek footage | real, cut from openly licensed video; labels only where the video's own description supports one, never called a gold standard |
+| A video walk's record | real shape, demo content, made on the phone and never stored |
+| The golden Strawberry Creek visit | example, hand shaped from a worked visit |
+| A referral for a pipe worth testing | real, computed on request from stored visits |
+| The laboratory result coming back | example, tagged and labelled EXAMPLE everywhere |
+| The model pass table and the AI numbers | real, from one paid run on Sep 23 and 24 (`results/model_pass_table.json` says `"real": true`); the earlier fake runs stay in `results/`, stamped SYNTHETIC |
+| The simulation of weighted votes under Known weaknesses | synthetic by design: made-up people, stamped SYNTHETIC |
+
+<!-- SECURITY -->
+
+## Quickstart
+
+```
+git clone https://github.com/alejandro-publius/second-look && cd second-look
+uv sync && (cd apps/web && npm ci) && (cd worker && npm ci)
+make judge-check
+```
+
+`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests. It reads the result of the last HL7 validator run from `results/fhir_validation.json` and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets, then prints five lines.
+
+<!-- RUNNING -->
+
+## For judges
+
+A 45 second path: [the test](https://second-look-79t.pages.dev/t?src=other), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record](https://second-look-79t.pages.dev/spot?id=example), [what the city sees](https://second-look-79t.pages.dev/city?creek=strawberry-creek), [lab and volunteer side by side](https://second-look-79t.pages.dev/two). Every door is on [/judges](https://second-look-79t.pages.dev/judges).
+
+See *Quickstart* above for `make judge-check`, the one command that needs no key and no network.
+
+| Proof | Where |
+|---|---|
+| Every gate and the command that proves it | `docs/ACCEPTANCE.md` |
+| A sample record | `fhir/golden/visit-strawberry-creek-1.json` |
+| Eval results | `results/` |
+| Architecture, the deep version | `docs/ARCHITECTURE.md` |
+| Our own scorecard, weaknesses included | `docs/JUDGE_SCORECARD.md` |
+| The demo script | `docs/video_script.md` |
+
+### What was built, screen by screen
 
 - `/t`: consent, the warm-up pair, the lesson, 16 items with Yes, No and Can't tell, the score per feature, the share card.
 - `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` replays one fixed path.
@@ -264,7 +330,7 @@ Every number is graded by code and written to `results/`; `scripts/verify_claims
 - `/walk`: a creek from your desk, a clip from another country, the same check, a demo record made on the phone.
 - `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card.
 - `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach.
-- `/two`: a lab Observation read from their sandbox beside one of ours. `/quick`, `/poster`, `/judges`, `/credits`.
+- `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so. `/quick`, `/poster`, `/judges`, `/credits`.
 - A read only MCP server over our own records: `examples/mcp/README.md`.
 
 ### See it work
@@ -282,52 +348,6 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 
 You can run the same loop from your desk on a creek in another country: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
 
-## What is real and what is synthetic
-
-The full list, kept current, is `docs/REAL_VS_SYNTHETIC.md`. In short:
-
-| Thing | Status |
-|---|---|
-| The test flow, its scoring and the photos in it | real, openly licensed photos from several countries |
-| Frames from open creek footage | real, cut from openly licensed video; labels only where the video's own description supports one, never called a gold standard |
-| A video walk's record | real shape, demo content, made on the phone and never stored |
-| The golden Strawberry Creek visit | example, hand shaped from a worked visit |
-| A referral for a pipe worth testing | real, computed on request from stored visits |
-| The laboratory result coming back | example, tagged and labelled EXAMPLE everywhere |
-| The model pass table and the AI numbers | real, from one paid run on Sep 23 and 24 (`results/model_pass_table.json` says `"real": true`); the earlier fake runs stay in `results/`, stamped SYNTHETIC |
-| The simulation of weighted votes under Known weaknesses | synthetic by design: made-up people, stamped SYNTHETIC |
-
-## For judges
-
-A 45 second path: [the test](https://second-look-79t.pages.dev/t?src=other), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record](https://second-look-79t.pages.dev/spot?id=example), [what the city sees](https://second-look-79t.pages.dev/city?creek=strawberry-creek), [lab and volunteer side by side](https://second-look-79t.pages.dev/two). Every door is on [/judges](https://second-look-79t.pages.dev/judges).
-
-`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests. It reads the result of the last HL7 validator run from `results/fhir_validation.json` and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets, then prints five lines.
-
-| Proof | Where |
-|---|---|
-| Every gate and the command that proves it | `docs/ACCEPTANCE.md` |
-| A sample record | `fhir/golden/visit-strawberry-creek-1.json` |
-| Eval results | `results/` |
-| Architecture, the deep version | `docs/ARCHITECTURE.md` |
-| Our own scorecard, weaknesses included | `docs/JUDGE_SCORECARD.md` |
-| The demo script | `docs/video_script.md` |
-
-## Feasibility: Berkeley as a follower city
-
-OneAquaHealth calls a city that adopts the method a follower city. Run on Berkeley: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in two minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the 20 second return check. `make new-city` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
-
-## One Digital Health and FAIR
-
-Story: a student walks to Strawberry Creek, takes a two-minute test on her phone, and from then on every observation she makes carries how well she sees each kind of damage. A city analyst reads her record beside a lab result under the same profile and knows how much weight to give each. The health card tells her one thing for herself, one for her dog and one her city could do.
-
-Five dimensions, in words, because no script produces them: citizen engagement, strong; education, strong; human and veterinary healthcare, partial (approved sentences for the person and the pet, no diagnosis, no site risk); industry 4.0, partial (FHIR records, a gated vision model, an audit log); environment, strong.
-
-FAIR: findable through a Library entry in their sandbox and a public repository; accessible through a read-only FHIR endpoint; interoperable through their profiles, value sets and UCUM; reusable through MIT code, a pinned guide, Provenance on every record and a tagged analysis plan.
-
-## How this was built
-
-AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos, set every gold label alone, froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
-
 ## Known weaknesses
 
 - One labeller. Every gold label was set by one person, so we report no agreement figure.
@@ -336,9 +356,21 @@ AI coding tools wrote most of the code and text here: Claude Code, working from 
 - The footage labels come from the videos' own descriptions, and almost no openly licensed description names a feature, so the footage result leans on agreement between models, which is not accuracy.
 - The citizen observer is modelled as a FHIR Practitioner, for want of a better fit in the guide; our proposal says so.
 - Judge mode is shut until Sep 28, so the answer key cannot leak before then.
+- Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23. `/two` can show their record only from a copy the Mac fetches while it answers, so for now it shows ours alone, and the re-push to their sandbox waits until it answers again.
 - There is no recruited study. Whoever opens the link is whoever opens the link.
-- The AI numbers come from one paid run: three models, three runs each, on 16 photos. That is small. Read the intervals in the benchmark file, not the point numbers.
+- The AI numbers come from one paid run: four models, three runs each, on 16 photos. That is small. Read the intervals in the benchmark file, not the point numbers.
 - English only. A Spanish draft exists and stays out of the build until a fluent person signs it.
+
+## How this was built
+
+AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos, set every gold label alone, froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
+
+## Credits
+
+- The photos in the test and the lessons are openly licensed, each credited at the exact licence version in `photos/manifest.csv` and on the app's `/credits` page.
+- The creek footage in the video and the walks comes from Wikimedia Commons; every clip and photo is credited on screen, in `docs/video/CREDITS.md` and on `/credits`. The video is released under CC BY-SA 4.0.
+- OneAquaHealth's implementation guide (hl7-eu/oah), their sandbox and their Citizen Science App's question wording; Open-Meteo for rainfall; the Cal-IPC Inventory for the Bay Area plant list.
+- Dependencies and their licences: `docs/THIRD_PARTY.md`.
 
 ## Repo map
 
