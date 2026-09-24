@@ -138,5 +138,7 @@ def test_an_escaped_alt_is_compared_as_it_reads(
 def test_every_readme_image_alt_matches_the_gallery() -> None:
     # The committed files: every README image with a gallery row, the GIF and lesson photos too.
     compared, problems = vc.alt_problems(vc.README.read_text(encoding="utf-8"))
-    assert problems == []
-    assert compared >= 30
+    page = vc.ROOT / vc.GALLERY_PAGE
+    more, drifted = vc.alt_problems(page.read_text(encoding="utf-8"), "docs/screens/")
+    assert problems == [] and drifted == []
+    assert compared >= 5 and more >= 30

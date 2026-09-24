@@ -54,8 +54,12 @@ def resolve_pointer(doc: object, pointer: str) -> object:
     return cur
 
 
-def alt_problems(text: str) -> tuple[int, list[str]]:
-    """How many <img> tags name a file in results/screens.json, and each whose alt text differs."""
+GALLERY_PAGE = Path("docs/screens/README.md")
+
+
+def alt_problems(text: str, base: str = "") -> tuple[int, list[str]]:
+    """How many <img> tags name a file in results/screens.json, and each whose alt text differs.
+    base is the folder a page's relative image paths start from, for the full gallery page."""
     screens = ROOT / SCREENS
     if not screens.exists():
         return 0, []
@@ -65,7 +69,7 @@ def alt_problems(text: str) -> tuple[int, list[str]]:
     problems: list[str] = []
     for tag in IMG_RE.findall(text):
         attrs = dict(ATTR_RE.findall(tag))
-        src = attrs.get("src", "")
+        src = base + attrs.get("src", "")
         if src not in alts:
             continue
         compared += 1
@@ -140,6 +144,12 @@ def main() -> int:
         problems.append(f"unrendered token {token}; run scripts/render_readme.py")
     alts, drifted = alt_problems(text)
     problems.extend(drifted)
+    page = ROOT / GALLERY_PAGE
+    if target == README and page.exists():
+        # The README shows five screens; the page with all of them is held to the same rule.
+        more, drifted = alt_problems(page.read_text(encoding="utf-8"), f"{GALLERY_PAGE.parent}/")
+        alts += more
+        problems.extend(drifted)
     if problems:
         print("\n".join(problems))
         print(f"verify-claims: {len(problems)} problem(s)")
