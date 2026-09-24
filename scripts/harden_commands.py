@@ -211,7 +211,7 @@ def policy(cmd: str) -> str:
         if any(w in ("-X", "--request", "-d", "--data", "-F", "--form", "-T") for w in words):
             return "curl that sends data"
         urls = [w for w in words if w.startswith("http")]
-        down = [urlparse(u).hostname for u in urls if urlparse(u).hostname in OUTSIDE_DOWN]
+        down = [h for u in urls if (h := urlparse(u).hostname or "") in OUTSIDE_DOWN]
         if down:
             return f"{OUTSIDE}: {down[0]}: {OUTSIDE_DOWN[down[0]]}"
         if not urls or not all(any(h in u for h in SAFE_HOSTS) for u in urls):
