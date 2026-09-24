@@ -221,3 +221,12 @@ def test_a_figure_is_the_committed_drawing_itself_with_its_caption(tmp_path: Pat
 def test_code_breaks_only_after_a_slash() -> None:
     html = br.breakable_code("<p><code>core/fhir_emit.py</code> and a/b</p>")
     assert html == "<p><code>core/<wbr>fhir_emit.py</code> and a/b</p>"
+
+
+def test_a_folded_readme_table_is_printed_open() -> None:
+    folded = (
+        "Text.\n\n<details>\n<summary>Every risk</summary>\n\n| a | b |\n|---|---|\n\n</details>\n"
+    )
+    out = br.unfolded(folded)
+    assert "<details>" not in out and "</details>" not in out and "<summary>" not in out
+    assert "*Every risk*" in out and "| a | b |" in out

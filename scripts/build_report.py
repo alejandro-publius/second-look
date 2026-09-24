@@ -145,6 +145,14 @@ def github_links(text: str) -> str:
     return LOCAL_LINK_RE.sub(lambda m: f"[{m.group(1)}]({REPO_URL}{m.group(2)})", text)
 
 
+def unfolded(text: str) -> str:
+    """The README folds long tables in <details>; a printed page cannot open one, so the report
+    shows what is inside: the fold's summary becomes a plain line and the tags go."""
+    text = re.sub(r"^<details>\s*$", "", text, flags=re.M)
+    text = re.sub(r"^</details>\s*$", "", text, flags=re.M)
+    return re.sub(r"^<summary>(.*?)</summary>\s*$", r"*\1*", text, flags=re.M)
+
+
 def figure(root: Path, rel: str, caption: str, inputs: set[str]) -> str:
     path = root / rel
     if not path.is_file():
@@ -188,7 +196,7 @@ def assemble(root: Path = ROOT) -> Assembled:
         inputs.add(rel)
         body = section_body(path.read_text(encoding="utf-8"), title, rel)
         out.append(checked_numbers(body, root, rel, inputs))
-    text = filled_tokens("\n".join(out), root, inputs)
+    text = filled_tokens(unfolded("\n".join(out)), root, inputs)
     text = github_links(COMMENT_RE.sub("", text))
     text = re.sub(r"\n{3,}", "\n\n", text).strip() + "\n"
     if "{{" in text:
