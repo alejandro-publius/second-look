@@ -54,6 +54,17 @@ no brand colour, name, logo or font was taken. They informed structure and restr
   Nothing from these packages is served or shipped; only the SVGs they draw from our own sources
   are committed.
 
+## The report renderer
+
+- `make report-pdf` builds `docs/REPORT.pdf` (UPDATE_29 section 5). Pandoc 3.9.0.2
+  (GPL-2.0-or-later), pinned in `scripts/build_report.py`, turns the Markdown into HTML; it is run
+  as a program on the Mac and none of it is copied into the repository. The Chromium that
+  Playwright (Apache-2.0) installs for apps/web prints the HTML to PDF, through
+  `apps/web/scripts/print-report.mjs`, with no network. The PDF embeds the Atkinson Hyperlegible
+  Next and Mono fonts listed above; the SIL Open Font License 1.1 allows embedding them in a
+  document. Chosen because no LaTeX, typst or weasyprint is installed here and these two tools
+  already were.
+
 ## Python packages (95, from uv.lock)
 
 | Package | Version | License |

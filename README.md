@@ -570,6 +570,8 @@ You can run the same loop from your desk on a creek in another country: **`/walk
 
 The engineering challenges, each with the file and test that prove it: [`WRITEUP.md`](WRITEUP.md). How to deploy, with every setting: [`DEPLOY.md`](DEPLOY.md). Decisions as records: [`docs/adr/`](docs/adr/README.md).
 
+The technical report, <!--v:results/report_pdf.json#/pages-->6<!--/v--> pages built by `make report-pdf` from this README, the docs and `results/`: [`docs/REPORT.pdf`](docs/REPORT.pdf). What the checker may and may not do: [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md). Where the photos and footage come from and who labelled them: [`docs/DATA_CARD.md`](docs/DATA_CARD.md). Who might attack and what stops them: [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md).
+
 AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos, set every gold label alone, froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
 
 ## Credits
