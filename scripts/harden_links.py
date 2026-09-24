@@ -1,4 +1,4 @@
-"""Link check over README.md and docs/ for Update 16A section 4. Reports, never fixes.
+"""Link check over README.md and the public docs/ for Update 16A section 4. Reports, never fixes.
 
 Three kinds of reference are checked:
 
@@ -76,11 +76,21 @@ class Result:
     detail: str
 
 
+# What a reader of the public repository sees: go-public removes docs/internal, whose dated
+# updates, reviews and reports cite files as they were on their day. The two live checklists are
+# read too, because the loop works from them until the end.
+LIVE_INTERNAL = ("docs/internal/DONE.md", "docs/internal/PLAN_TO_DONE.md")
+
+
 def tracked_markdown() -> list[Path]:
     out = subprocess.run(
         ["git", "ls-files", "-z", "README.md", "docs"], cwd=ROOT, check=True, capture_output=True
     ).stdout.decode()
-    return sorted(ROOT / p for p in out.split("\0") if p.endswith(".md"))
+    return sorted(
+        ROOT / p
+        for p in out.split("\0")
+        if p.endswith(".md") and (not p.startswith("docs/internal/") or p in LIVE_INTERNAL)
+    )
 
 
 def tracked_paths() -> set[str]:
