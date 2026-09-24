@@ -32,7 +32,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ("ph-warmup-03", "ph-warmup-04")
 # Never wider than the source. WebP stops at 800: the brook photo is so detailed that a 1200 wide
 # WebP stays above the cap until its quality is poor, and WebP is only for browsers without AVIF.
-WIDTHS = {"avif": (480, 800, 1200), "webp": (480, 800)}
+# AVIF has a 660 wide copy for the phones Lighthouse models (412 wide at 1.75x, so 649 pixels at
+# 90vw), which otherwise fetch the 800: the same quality, a third fewer bytes (UPDATE_29 4.3).
+WIDTHS = {"avif": (480, 660, 800, 1200), "webp": (480, 800)}
 START_QUALITY = {"avif": 60, "webp": 75}
 FLOOR_QUALITY = {"avif": 40, "webp": 60}
 QUALITY_STEP = 5
