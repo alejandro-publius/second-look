@@ -119,7 +119,7 @@ await page.goto(`${base}/spot/example`);
 await page.getByText("4 of 4 on Built banks, tested Sep 23").waitFor();
 await shot("spot-record");
 await click("View as FHIR");
-await page.getByText("Validated against guide commit").waitFor();
+await page.getByText("passed the HL7 validator against guide commit").waitFor();
 await shot("spot-fhir");
 await page.goto(`${base}/two`);
 await page.getByRole("region", { name: "Volunteer (Second Look)" }).waitFor();

@@ -36,7 +36,7 @@ test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR vie
   await expect(page.getByText("No answers here from people who passed the test for that feature.")).toBeVisible();
 
   await page.getByRole("button", { name: "View as FHIR" }).click();
-  await expect(page.getByText("Validated against guide commit b907cf0: passed")).toBeVisible();
+  await expect(page.getByText("Records built by the same code passed the HL7 validator against guide commit b907cf0 in CI: passed")).toBeVisible();
   await expect(page.getByText(`curl -s ${API_ORIGIN}/api/spot/example/fhir`)).toBeVisible();
   await expect(page.getByText('"resourceType": "Bundle"')).toBeVisible();
   expect(calls.some((c) => c.path === "/api/spot/example/fhir")).toBe(true);

@@ -63,7 +63,7 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
   await expect(page.getByTestId("fhir-badge")).toHaveText(
     "Walk records made the same way passed the HL7 validator on Sep 20, 2026. This one was made on your phone and was not checked.",
   );
-  await expect(page.getByText("Validated against guide commit")).toHaveCount(0);
+  await expect(page.getByText("passed the HL7 validator against guide commit")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Copy the curl line" })).toHaveCount(0);
   await expect(page.getByText("This record was made on your phone and has no web address.")).toBeVisible();
   const json = await page.locator("pre.code").last().innerText();

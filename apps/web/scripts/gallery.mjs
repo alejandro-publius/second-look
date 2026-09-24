@@ -170,7 +170,7 @@ async function localRun(browser) {
   await page.getByText("4 of 4 on Built banks, tested Sep 23").first().waitFor();
   gallery("spot-record", "/spot?id=example", "local mock", await shoot(page), "A sample creek record: what the volunteer saw, and the observer score that goes with it.");
   await button(page, "View as FHIR").first().click();
-  await page.getByText("Validated against guide commit").first().waitFor();
+  await page.getByText("passed the HL7 validator against guide commit").first().waitFor();
   gallery("spot-fhir", "/spot?id=example", "local mock", await shoot(page), "The same record opened with View as FHIR: the Observation the record is stored as.");
   await context.close();
 }
