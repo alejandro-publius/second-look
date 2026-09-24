@@ -622,6 +622,11 @@ def test_deploy_table_names_settings_the_code_uses(repo: Path) -> None:
     assert has(di.check_deploy_doc(repo), "no configuration table")
 
 
+def test_deploy_table_needs_five_settings(repo: Path) -> None:
+    edit(repo, "DEPLOY.md", "| `ANTHROPIC_API_KEY` | .env | evals |\n", "")
+    assert di.check_deploy_doc(repo) == ["the configuration table has 4 rows, fewer than 5"]
+
+
 def test_adrs_count_and_parts(repo: Path) -> None:
     edit(repo, "docs/adr/0003-decision-3.md", "## Consequences", "## Then")
     assert has(di.check_adrs(repo), "0003-decision-3.md has no Consequences part")
