@@ -637,6 +637,11 @@ def test_deploy_table_names_settings_the_code_uses(repo: Path) -> None:
     assert has(di.check_deploy_doc(repo), "no configuration table")
 
 
+def test_deploy_table_needs_five_settings(repo: Path) -> None:
+    edit(repo, "DEPLOY.md", "| `ANTHROPIC_API_KEY` | .env | evals |\n", "")
+    assert di.check_deploy_doc(repo) == ["the configuration table has 4 rows, fewer than 5"]
+
+
 def test_adrs_count_and_parts(repo: Path) -> None:
     edit(repo, "docs/adr/0003-decision-3.md", "## Consequences", "## Then")
     assert has(di.check_adrs(repo), "0003-decision-3.md has no Consequences part")
@@ -775,6 +780,40 @@ def test_lighthouse_every_page_loads_and_scores(tmp_path: Path, fresh: None) -> 
     assert has(problems, "did not measure /city")
     assert has(problems, "/walk: performance 80, under 90")
     assert has(problems, "/walk: accessibility 94, under 95")
+
+
+def test_axe_and_lighthouse_must_measure_every_page(tmp_path: Path, fresh: None) -> None:
+    for page in (
+        "page.tsx",
+        "t/page.tsx",
+        "walk/page.tsx",
+        "walk/[id]/page.tsx",
+        "share/[score]/page.tsx",
+        "accessibility/page.tsx",
+        "how-we-know/page.tsx",
+    ):
+        write(tmp_path, f"apps/web/app/{page}", "x")  # fmt: skip
+    paths = ["/", "/t", "/walk", "/share/12", "/accessibility", "/how-we-know?x=1"]
+    harden(tmp_path, "axe.json", {"commit": "abcdef1", "screens": [screen(p) for p in paths]})
+    assert di.check_axe(tmp_path) == []
+    site = "https://second-look-79t.pages.dev"
+    harden(tmp_path, "lighthouse.json",
+           {"commit": "abcdef1", "pages": [lh_page(site + p) for p in paths]})  # fmt: skip
+    assert di.check_lighthouse(tmp_path) == []
+    for gone, slug in (("/walk", "walk"), ("/", "landing"), ("/t", "t"), ("/share/12", "share")):
+        left = [p for p in paths if p != gone]
+        harden(tmp_path, "axe.json", {"commit": "abcdef1", "screens": [screen(p) for p in left]})
+        assert di.check_axe(tmp_path) == [f"axe never measured the page '{slug}'"], gone
+        doc = {"commit": "abcdef1", "pages": [lh_page(site + p) for p in left]}
+        harden(tmp_path, "lighthouse.json", doc)
+        assert di.check_lighthouse(tmp_path) == [f"Lighthouse never measured the page '{slug}'"]
+
+
+def test_lighthouse_counts_a_page_that_did_not_load(tmp_path: Path, fresh: None) -> None:
+    # A page that answered 404 is not measured, even when the file carries scores for it.
+    page = lh_page("/")
+    harden(tmp_path, "lighthouse.json", {"commit": "abcdef1", "pages": [{**page, "status": 404}]})
+    assert has(di.check_lighthouse(tmp_path), "did not measure /")
 
 
 def load_doc(**change: object) -> dict[str, object]:
@@ -945,6 +984,31 @@ def test_the_analysis_runs_once_on_real_data_after_the_lock(tmp_path: Path) -> N
     assert has(di.check_analysis_once(tmp_path), "2 real analysis results")
 
 
+@pytest.mark.parametrize(
+    ("status", "ok"),
+    [
+        ("descriptive", True),
+        ("confirmatory", True),
+        ("not computed: an arm is empty", True),
+        (None, False),
+        ("", False),
+        ("significant", False),
+    ],
+)
+def test_the_analysis_says_what_kind_of_result_it_is(
+    tmp_path: Path, status: str | None, ok: bool
+) -> None:
+    doc = json.loads(analysis("2026-09-28T02:00:00Z"))
+    doc["primary"] = {} if status is None else {"status": status}
+    write(tmp_path, "results/usability_20260928.json", json.dumps(doc))
+    problems = di.check_analysis_once(tmp_path)
+    assert (problems == []) is ok, problems
+    if not ok:
+        assert problems == [
+            "usability_20260928.json does not say whether it is a description or a test"
+        ]
+
+
 def test_the_sandbox_repush_needs_a_push_after_the_lock(tmp_path: Path) -> None:
     old = {"ts_utc": "2026-09-21T06:53:46Z", "action": "create"}
     write(tmp_path, "fhir/sandbox_ledger.jsonl", json.dumps(old) + "\n")
@@ -980,14 +1044,68 @@ def test_the_video_link_is_in_both_files_and_answers(tmp_path: Path) -> None:
     assert has(di.check_video_link(tmp_path, fake_get(404)), "answered 404")
 
 
+@pytest.mark.parametrize(
+    ("link", "asked"),
+    [
+        ("https://youtu.be/abc", "https://www.youtube.com/oembed?format=json&url=https%3A%2F%2Fyoutu.be%2Fabc"),
+        ("https://www.youtube.com/watch?v=abc", "https://www.youtube.com/oembed?format=json&url="),
+        ("https://m.youtube.com/watch?v=abc", "https://www.youtube.com/oembed?format=json&url="),
+        ("https://vimeo.com/123", "https://vimeo.com/123"),
+        ("https://notyoutube.com/abc", "https://notyoutube.com/abc"),
+    ],
+)  # fmt: skip
+def test_a_youtube_link_is_asked_through_oembed(tmp_path: Path, link: str, asked: str) -> None:
+    # YouTube's watch page answers 200 for a video that is not there; its oEmbed answers 400.
+    for rel in ("README.md", "docs/devpost.md"):
+        write(tmp_path, rel, f"Video: {link}\n")
+    seen: list[str] = []
+
+    def get(url: str) -> tuple[int, str]:
+        seen.append(url)
+        return (400, "") if "oembed" in url else (200, "")
+
+    problems = di.check_video_link(tmp_path, get)
+    assert len(seen) == 1 and seen[0].startswith(asked)
+    assert (problems == []) is ("oembed" not in asked)
+
+
+def devpost_page(hackathon: str, site: str = "https://second-look-79t.pages.dev") -> str:
+    """The shape of a real Devpost project page: links in the story, then the submissions list."""
+    return (
+        f'<div id="app-details-left"><a href="{site}">Try it out</a></div>'
+        '<div id="submissions" class="section"><h4>Submitted to</h4>'
+        f'<ul class="software-list-with-thumbnail"><li><a href="https://{hackathon}/">'
+        "A hackathon</a></li></ul></div>"
+        '<section id="app-team"><ul><li>A person</li></ul></section>'
+    )
+
+
+OURS = devpost_page("oneaquahealth-ieee-hackathon.devpost.com")
+# devpost.com/software/second-look is another team's "Second Look", submitted elsewhere.
+THEIRS = devpost_page("mac-a-thon-2026.devpost.com", site="https://github.com/someone/else")
+
+
 def test_devpost_page_and_submission(tmp_path: Path) -> None:
     write(tmp_path, "docs/devpost.md", "Paste from here.\n")
-    assert di.check_devpost_page(tmp_path, fake_get(200))
-    write(tmp_path, "docs/devpost.md", "Page: https://devpost.com/software/second-look\n")
-    assert di.check_devpost_page(tmp_path, fake_get(200)) == []
-    assert di.check_devpost_page(tmp_path, fake_get(404))
+    assert di.check_devpost_page(tmp_path, fake_get(200, OURS))
+    write(tmp_path, "docs/devpost.md", "Page: https://devpost.com/software/second-look-x1\n")
+    assert di.check_devpost_page(tmp_path, fake_get(200, OURS)) == []
+    assert di.check_devpost_page(tmp_path, fake_get(404, OURS))
+    assert has(di.check_devpost_page(tmp_path, fake_get(200, THEIRS)), "not our project page")
     assert has(di.check_devpost_submitted(tmp_path, fake_get(200, "Built with")), "not say")
-    assert di.check_devpost_submitted(tmp_path, fake_get(200, "Submitted to the hackathon")) == []
+    assert di.check_devpost_submitted(tmp_path, fake_get(200, OURS)) == []
+
+
+def test_a_page_submitted_to_another_hackathon_does_not_count(tmp_path: Path) -> None:
+    write(tmp_path, "docs/devpost.md", "Page: https://devpost.com/software/second-look\n")
+    assert has(di.check_devpost_submitted(tmp_path, fake_get(200, THEIRS)), "does not say")
+    assert has(di.check_devpost_submitted(tmp_path, fake_get(200, THEIRS)), "not our project")
+    # Our page, submitted elsewhere, with our hackathon named in the story above the list.
+    story = devpost_page("mac-a-thon-2026.devpost.com").replace(
+        "Try it out", "Built for oneaquahealth-ieee-hackathon.devpost.com"
+    )
+    problems = di.check_devpost_submitted(tmp_path, fake_get(200, story))
+    assert len(problems) == 1 and "does not say it was submitted to" in problems[0]
 
 
 def test_main_prints_the_first_gap_last_and_exits_1(

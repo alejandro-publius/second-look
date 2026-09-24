@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, urlsplit
 
 import httpx
 import yaml
@@ -65,6 +66,9 @@ VOICE_MIN_SECONDS = 120.0
 LOW_SEVERITY = {"none", "cosmetic"}
 SUBMIT_ALLOWED = {"video_link", "repo_public"}
 DEVPOST_RE = re.compile(r"https://devpost\.com/software/[A-Za-z0-9-]+")
+# The hackathon's own Devpost site (docs/notes/sources.md). A project page lists it under
+# "Submitted to" once the project is submitted there.
+HACKATHON = "oneaquahealth-ieee-hackathon.devpost.com"
 
 Check = Callable[[Path], list[str]]
 Fetch = Callable[[str], tuple[int, str]]
@@ -921,6 +925,32 @@ def check_judge_sim(root: Path) -> list[str]:
     return problems
 
 
+def app_pages(root: Path) -> set[str]:
+    """Every page of the web app by its route slug, the test flow's /t included."""
+    flow = {"t"} if (root / "apps" / "web" / "app" / "t" / "page.tsx").is_file() else set()
+    return route_slugs(root) | flow
+
+
+def measured_pages(targets: list[object]) -> set[str]:
+    """The route slugs a list of measured paths or URLs covers. /share/12 covers share, the
+    slug of share/[score]; / is the landing page."""
+    slugs: set[str] = set()
+    for target in targets:
+        if not isinstance(target, str):
+            continue
+        path = urlsplit(target).path if "://" in target else target.split("?")[0].split("#")[0]
+        parts = [p for p in path.split("/") if p]
+        if not parts:
+            slugs.add("landing")
+        slugs |= {"-".join(parts[:n]) for n in range(1, len(parts) + 1)}
+    return slugs
+
+
+def unmeasured(root: Path, targets: list[object], tool: str) -> list[str]:
+    missing = sorted(app_pages(root) - measured_pages(targets))
+    return [f"{tool} never measured the page '{slug}'" for slug in missing]
+
+
 def check_axe(root: Path) -> list[str]:
     doc, problems = results_file(root, "axe.json")
     if doc is None:
@@ -928,6 +958,7 @@ def check_axe(root: Path) -> list[str]:
     screens = [s for s in doc.get("screens") or [] if isinstance(s, dict)]
     if not screens:
         problems.append("axe.json checked no screen")
+    problems += unmeasured(root, [s.get("path") for s in screens], "axe")
     for s in screens:
         where = f"{s.get('path')} ({s.get('viewport')})"
         if s.get("status") != 200 or s.get("error"):
@@ -953,6 +984,7 @@ def check_lighthouse(root: Path) -> list[str]:
     pages = [p for p in doc.get("pages") or [] if isinstance(p, dict)]
     if not pages:
         problems.append("lighthouse.json measured no page")
+    problems += unmeasured(root, [p.get("url") for p in pages], "Lighthouse")
     for p in pages:
         median = p.get("median")
         if p.get("status") != 200 or not isinstance(median, dict):
@@ -1152,8 +1184,13 @@ def check_analysis_once(root: Path) -> list[str]:
     when = parse_utc(doc.get("generated_at_utc"))
     if when is None or when < DATA_LOCK_UTC:
         problems.append(f"{path.name} was made at {doc.get('generated_at_utc')}, before the lock")
+    # The three things evals/usability_analysis.py can say. With nobody in an arm, which is likely
+    # while nobody is recruited, it says "not computed: an arm is empty"; that run is still the
+    # one run, and a second run could never make this item pass.
     status = (doc.get("primary") or {}).get("status")
-    if status not in ("descriptive", "confirmatory"):
+    if not isinstance(status, str) or not (
+        status in ("descriptive", "confirmatory") or status.startswith("not computed:")
+    ):
         problems.append(f"{path.name} does not say whether it is a description or a test")
     return problems
 
@@ -1230,10 +1267,20 @@ def check_video_link(root: Path, get: Fetch = fetch) -> list[str]:
             problems.append(f"{rel} has no line with the word video and a link")
         links += found
     if links:
-        status, _ = get(links[0])
+        status, _ = get(video_probe(links[0]))
         if status != 200:
             problems.append(f"the video link {links[0]} answered {status or 'nothing'}, not 200")
     return problems
+
+
+def video_probe(url: str) -> str:
+    """The address that says whether a video is there. YouTube answers 200 on its watch page even
+    for a video that does not exist or is private, so a YouTube link is asked through oEmbed,
+    which answers 400, 401 or 404 for those."""
+    host = urlsplit(url).netloc.lower().split(":")[0]
+    if host == "youtu.be" or host == "youtube.com" or host.endswith(".youtube.com"):
+        return "https://www.youtube.com/oembed?format=json&url=" + quote(url, safe="")
+    return url
 
 
 def devpost_link(root: Path) -> str | None:
@@ -1241,12 +1288,29 @@ def devpost_link(root: Path) -> str | None:
     return m.group(0) if m else None
 
 
+def our_page(url: str, status: int, text: str) -> list[str]:
+    # Another team's project already answers at devpost.com/software/second-look, so a page that
+    # merely loads proves nothing. Ours was filled from docs/devpost.md, which links the live site.
+    if status != 200:
+        return [f"{url} answered {status or 'nothing'}, not 200"]
+    host = LIVE.split("//", 1)[1]
+    return [] if host in text else [f"{url} does not link {host}, so it is not our project page"]
+
+
 def check_devpost_page(root: Path, get: Fetch = fetch) -> list[str]:
     url = devpost_link(root)
     if url is None:
         return ["docs/devpost.md names no devpost.com/software page"]
-    status, _ = get(url)
-    return [] if status == 200 else [f"{url} answered {status or 'nothing'}, not 200"]
+    return our_page(url, *get(url))
+
+
+def submitted_to(text: str) -> str:
+    """The "Submitted to" part of a Devpost project page, up to the end of its list. The page marks
+    it id="submissions"; the words alone are the fallback, since a description may use them too."""
+    m = re.search(r"id=[\"']submissions[\"'](.*?)</ul>", text, re.S) or re.search(
+        r"submitted\s+to(.*?)</ul>", text, re.I | re.S
+    )
+    return m.group(1) if m else ""
 
 
 def check_devpost_submitted(root: Path, get: Fetch = fetch) -> list[str]:
@@ -1254,11 +1318,10 @@ def check_devpost_submitted(root: Path, get: Fetch = fetch) -> list[str]:
     if url is None:
         return ["docs/devpost.md names no devpost.com/software page"]
     status, text = get(url)
-    if status != 200:
-        return [f"{url} answered {status or 'nothing'}, not 200"]
-    return (
-        [] if re.search(r"submitted to", text, re.I) else [f"{url} does not say it was submitted"]
-    )
+    problems = our_page(url, status, text)
+    if status == 200 and HACKATHON not in submitted_to(text):
+        problems.append(f"{url} does not say it was submitted to {HACKATHON}")
+    return problems
 
 
 # ---------------------------------------------------------------------------------------------

@@ -24,7 +24,8 @@ and then one line exactly: RED: <n> BLOCKED: <n> HUMAN: <n>. It exits 1 when RED
 when the file cannot be read as a checklist, and 0 otherwise.
 
 A command that cannot fail is refused when the file is read: `true`, `|| true`, `|| echo ...`,
-`exit 0` and `set +o pipefail` never prove that anything was done.
+`; echo ...` at the end, a trailing `&`, an `if` without `else`, `exit 0` and `set +o pipefail`
+never prove that anything was done.
 
   make done-check
   uv run python scripts/done_check.py --only D01,D07 --timeout 60 --jobs 1
@@ -59,10 +60,18 @@ PIPE = re.compile(r"(?<!\\)\|")
 NEVER_FAILS = (
     (re.compile(r"^\s*(true|:)\s*$"), "the command is only `true`"),
     (
-        re.compile(r"\|\|\s*(?:(?:true|echo|printf)\b|:(?=\s|;|$)|exit\s+0\b)"),
+        re.compile(
+            r"\|\|\s*(?:\{\s*)?(?:(?:\S*/)?(?:true|echo|printf)\b|:(?=\s|;|$|\})|exit\s+0\b)"
+        ),
         "a failure is turned into success",
     ),
     (re.compile(r"(;|&&)\s*(true|:)\s*$"), "the command ends in `true`"),
+    (re.compile(r";\s*(?:\S*/)?(?:echo|printf)\b[^;&|]*$"), "the command ends in `echo`"),
+    (re.compile(r"(?<![&>])&\s*$"), "the command runs in the background"),
+    (
+        re.compile(r"^(?!.*\belse\b)(?:.*[;&|(]\s*|\s*)if\s"),
+        "an `if` without `else` passes when its test fails",
+    ),
     (re.compile(r"\bexit\s+0\b"), "the command says `exit 0`"),
     (re.compile(r"set\s+\+o\s+pipefail|set\s+\+e\b"), "the command switches its own checks off"),
 )
