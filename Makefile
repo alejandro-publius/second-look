@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: reproduce panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
+.PHONY: reproduce mutation panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -235,6 +235,12 @@ go-public:
 # and a scan for secrets.
 judge-check:  # its second step is make reproduce
 	$(PY) scripts/judge_check.py
+
+# UPDATE_29 section 4 item 2: mutmut changes the gate, the follow-up selector, scoring and the FHIR
+# emitter one small change at a time, and core's own tests must catch each change: 85 percent or
+# more per module, written to results/mutation.json. About three minutes, so not in make check.
+mutation:
+	$(PY) scripts/mutation.py
 
 # UPDATE_29 section 4: every AI number in results/ graded again from the raw model replies of the
 # paid runs in evals/fixtures/raw/, and every synthetic result made again from its seed, by the

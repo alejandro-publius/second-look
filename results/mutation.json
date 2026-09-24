@@ -1,0 +1,163 @@
+{
+  "generated_at_utc": "2026-09-24T08:28:19+00:00",
+  "script": "scripts/mutation.py",
+  "synthetic": false,
+  "tool": "mutmut",
+  "tool_version": "3.8.0",
+  "python": "3.12.13",
+  "tests": "core/tests, as set in pyproject.toml [tool.mutmut]",
+  "threshold_percent": 85.0,
+  "score_rule": "killed divided by every change checked, times 100, to one decimal; a timeout or any other outcome counts as not caught",
+  "modules": {
+    "core/gate.py": {
+      "mutants": 219,
+      "killed": 216,
+      "survived": 3,
+      "timeout": 0,
+      "other": {},
+      "score_percent": 98.6,
+      "survivors": [
+        "core.gate.x__candidates__mutmut_5",
+        "core.gate.x__one_flag__mutmut_52",
+        "core.gate.x__one_flag__mutmut_53"
+      ]
+    },
+    "core/followups.py": {
+      "mutants": 324,
+      "killed": 319,
+      "survived": 5,
+      "timeout": 0,
+      "other": {},
+      "score_percent": 98.5,
+      "survivors": [
+        "core.followups.x__low_score__mutmut_12",
+        "core.followups.x__low_score__mutmut_31",
+        "core.followups.x__rules_in_priority__mutmut_20",
+        "core.followups.x_select_followups__mutmut_10",
+        "core.followups.x_select_followups__mutmut_14"
+      ]
+    },
+    "core/scoring.py": {
+      "mutants": 53,
+      "killed": 53,
+      "survived": 0,
+      "timeout": 0,
+      "other": {},
+      "score_percent": 100.0,
+      "survivors": []
+    },
+    "core/fhir_emit.py": {
+      "mutants": 1543,
+      "killed": 1477,
+      "survived": 66,
+      "timeout": 0,
+      "other": {},
+      "score_percent": 95.7,
+      "survivors": [
+        "core.fhir_emit.x__if_none_exist__mutmut_26",
+        "core.fhir_emit.x__if_none_exist__mutmut_28",
+        "core.fhir_emit.x__if_none_exist__mutmut_31",
+        "core.fhir_emit.x__practitioner_id__mutmut_5",
+        "core.fhir_emit.x_bundle_keys__mutmut_10",
+        "core.fhir_emit.x_bundle_keys__mutmut_12",
+        "core.fhir_emit.x_bundle_keys__mutmut_15",
+        "core.fhir_emit.x_bundle_keys__mutmut_16",
+        "core.fhir_emit.x_bundle_keys__mutmut_17",
+        "core.fhir_emit.x_bundle_keys__mutmut_19",
+        "core.fhir_emit.x_bundle_keys__mutmut_20",
+        "core.fhir_emit.x_bundle_keys__mutmut_23",
+        "core.fhir_emit.x_bundle_keys__mutmut_25",
+        "core.fhir_emit.x_bundle_keys__mutmut_29",
+        "core.fhir_emit.x_bundle_keys__mutmut_3",
+        "core.fhir_emit.x_bundle_keys__mutmut_38",
+        "core.fhir_emit.x_bundle_keys__mutmut_39",
+        "core.fhir_emit.x_bundle_keys__mutmut_40",
+        "core.fhir_emit.x_bundle_keys__mutmut_41",
+        "core.fhir_emit.x_bundle_keys__mutmut_42",
+        "core.fhir_emit.x_bundle_keys__mutmut_43",
+        "core.fhir_emit.x_bundle_keys__mutmut_44",
+        "core.fhir_emit.x_bundle_keys__mutmut_45",
+        "core.fhir_emit.x_bundle_keys__mutmut_46",
+        "core.fhir_emit.x_bundle_keys__mutmut_5",
+        "core.fhir_emit.x_check_bundle__mutmut_145",
+        "core.fhir_emit.x_check_bundle__mutmut_146",
+        "core.fhir_emit.x_check_bundle__mutmut_147",
+        "core.fhir_emit.x_check_bundle__mutmut_16",
+        "core.fhir_emit.x_check_bundle__mutmut_160",
+        "core.fhir_emit.x_check_bundle__mutmut_162",
+        "core.fhir_emit.x_check_bundle__mutmut_18",
+        "core.fhir_emit.x_check_bundle__mutmut_28",
+        "core.fhir_emit.x_check_bundle__mutmut_30",
+        "core.fhir_emit.x_check_bundle__mutmut_34",
+        "core.fhir_emit.x_check_bundle__mutmut_48",
+        "core.fhir_emit.x_check_bundle__mutmut_50",
+        "core.fhir_emit.x_check_bundle__mutmut_80",
+        "core.fhir_emit.x_check_bundle__mutmut_82",
+        "core.fhir_emit.x_check_bundle__mutmut_86",
+        "core.fhir_emit.x_code_for_answer__mutmut_2",
+        "core.fhir_emit.x_code_for_answer__mutmut_3",
+        "core.fhir_emit.x_emit_visit__mutmut_75",
+        "core.fhir_emit.x_entry_label__mutmut_20",
+        "core.fhir_emit.x_entry_label__mutmut_22",
+        "core.fhir_emit.x_entry_label__mutmut_26",
+        "core.fhir_emit.x_entry_label__mutmut_3",
+        "core.fhir_emit.x_entry_label__mutmut_5",
+        "core.fhir_emit.x_fhir_id__mutmut_11",
+        "core.fhir_emit.x_fhir_id__mutmut_18",
+        "core.fhir_emit.x_reference_problems__mutmut_21",
+        "core.fhir_emit.x_reference_problems__mutmut_23",
+        "core.fhir_emit.x_reference_problems__mutmut_31",
+        "core.fhir_emit.x_reference_problems__mutmut_33",
+        "core.fhir_emit.x_to_transaction__mutmut_113",
+        "core.fhir_emit.x_to_transaction__mutmut_115",
+        "core.fhir_emit.x_to_transaction__mutmut_118",
+        "core.fhir_emit.x_to_transaction__mutmut_119",
+        "core.fhir_emit.x_to_transaction__mutmut_22",
+        "core.fhir_emit.x_to_transaction__mutmut_23",
+        "core.fhir_emit.x_to_transaction__mutmut_24",
+        "core.fhir_emit.x_to_transaction__mutmut_25",
+        "core.fhir_emit.x_to_transaction__mutmut_26",
+        "core.fhir_emit.x_to_transaction__mutmut_4",
+        "core.fhir_emit.x_to_transaction__mutmut_51",
+        "core.fhir_emit.x_to_transaction__mutmut_6"
+      ]
+    }
+  },
+  "by_name": {
+    "gate": {
+      "mutants": 219,
+      "killed": 216,
+      "survived": 3,
+      "timeout": 0,
+      "score_percent": 98.6
+    },
+    "followups": {
+      "mutants": 324,
+      "killed": 319,
+      "survived": 5,
+      "timeout": 0,
+      "score_percent": 98.5
+    },
+    "scoring": {
+      "mutants": 53,
+      "killed": 53,
+      "survived": 0,
+      "timeout": 0,
+      "score_percent": 100.0
+    },
+    "fhir_emit": {
+      "mutants": 1543,
+      "killed": 1477,
+      "survived": 66,
+      "timeout": 0,
+      "score_percent": 95.7
+    }
+  },
+  "total": {
+    "mutants": 2139,
+    "killed": 2065,
+    "survived": 74,
+    "timeout": 0,
+    "score_percent": 96.5
+  }
+}
