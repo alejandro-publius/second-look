@@ -84,24 +84,27 @@ export default function CreditsPage() {
         <section className="stack">
           <h2>{t("credits.footage_title")}</h2>
           <p>{t("credits.footage_intro")}</p>
+          {/* A title is long and goes in the value, which wraps; the end slot never shrinks, and a
+              title there made this page 713 pixels wide on a phone (REVIEW_03 R26). */}
           <div className="card">
             {content.footage_credits.map((v) => (
               <Row
                 key={v.id}
                 label={t("credits.by", { author: v.author })}
                 value={
-                  licenseUrl(v.license) ? (
-                    <a href={licenseUrl(v.license)} rel="license noreferrer">
-                      {v.license}
+                  <>
+                    <a href={v.source_url} rel="noreferrer nofollow">
+                      {v.title}
                     </a>
-                  ) : (
-                    v.license
-                  )
-                }
-                end={
-                  <a href={v.source_url} rel="noreferrer nofollow">
-                    {v.title}
-                  </a>
+                    <br />
+                    {licenseUrl(v.license) ? (
+                      <a href={licenseUrl(v.license)} rel="license noreferrer">
+                        {v.license}
+                      </a>
+                    ) : (
+                      v.license
+                    )}
+                  </>
                 }
               />
             ))}
@@ -123,14 +126,15 @@ export default function CreditsPage() {
                 key={v.title}
                 label={t("credits.by", { author: v.author })}
                 value={
-                  <a href={v.license_url} rel="license noreferrer">
-                    {v.license}
-                  </a>
-                }
-                end={
-                  <a href={v.source_url} rel="noreferrer nofollow">
-                    {v.title}
-                  </a>
+                  <>
+                    <a href={v.source_url} rel="noreferrer nofollow">
+                      {v.title}
+                    </a>
+                    <br />
+                    <a href={v.license_url} rel="license noreferrer">
+                      {v.license}
+                    </a>
+                  </>
                 }
               />
             ))}
