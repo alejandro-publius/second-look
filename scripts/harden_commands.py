@@ -11,12 +11,14 @@ are listed as not run, with the reason. Two commands need a harness and get one:
   on free ports and the report says so.
 - the MCP server speaks JSON-RPC on stdio: it passes when it answers initialize and tools/list.
 
-Another session uses ports 3100 and 8100 on this machine, so nothing here binds them: the targets
-whose design gate starts the built app on 3100 (make check, make judge-check, make design-check)
-run with SKIP_TAP=1, the repo's own switch that skips that one step, and the report says so; the
-Playwright suites that serve on 3100 and mock 8100 are listed as not run. A command with a
-placeholder in it (SITE_URL=...) is listed, not run. --branch reads a branch other than harden,
-for example depth, whose docs/ACCEPTANCE.md exists there first.
+- make demo-offline starts the same two servers on made-up data with no network: it passes when
+  both answer, on free ports if 8000 or 3100 are taken.
+
+A command that serves on port 3100 (the Playwright suites, which also mock the API on 8100, and
+the design gate inside make check and make judge-check) runs only when those ports are free when
+its turn comes; if another process holds one, it is listed as not run with that reason. A command
+with a placeholder in it (SITE_URL=...) is listed, not run. --branch reads a branch other than
+harden, for example depth, whose docs/ACCEPTANCE.md exists there first.
 
 Writes results/harden/commands.md and results/harden/commands.json.
 
@@ -37,8 +39,11 @@ import subprocess
 import time
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
+
+from scripts.harden_links import OUTSIDE_DOWN
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ["README.md", "docs/ACCEPTANCE.md"]
@@ -82,7 +87,22 @@ SAFE_MAKE = {
     "render-readme",
     "web-build",
     "help",
+    "screens",
+    "new-city",
+    "demo-offline",
+    "reproduce",
+    "panel-status",
+    "done-check",
 }
+# The setup a judge types first. Each only installs into the clone, or installs the pre-commit tool.
+SETUP = re.compile(
+    r"(uv sync( --frozen)?|\(cd (apps/web|worker|tools/diagrams) && npm ci\))"
+    r"( && (uv sync( --frozen)?|\(cd (apps/web|worker|tools/diagrams) && npm ci\)))*"
+)
+PRE_COMMIT = "uv tool install pre-commit && pre-commit install"
+# A host that is down for a cause outside this repository, named with its evidence in the link
+# check: a command that calls it is listed as not run, with the reason, not as failed.
+OUTSIDE = "blocked outside this repository"
 SAFE_HOSTS = (
     "second-look-79t.pages.dev",
     "depth.second-look-79t.pages.dev",
@@ -154,8 +174,15 @@ def run(cmd: str, cwd: Path, timeout: int = 900, env: dict[str, str] | None = No
     return {"code": code, "seconds": round(time.monotonic() - started, 1), "tail": out[-1500:]}
 
 
-PORT_BOUND_MAKE = {"check", "judge-check", "design-check"}  # run with SKIP_TAP=1
-SERVES_3100 = ("make e2e", "npx playwright test", "npm run start", "npm test")
+SERVES_3100 = (
+    "make e2e",
+    "make check",
+    "make judge-check",
+    "make design-check",
+    "npx playwright test",
+    "npm run start",
+    "npm test",
+)
 
 
 def policy(cmd: str) -> str:
@@ -163,14 +190,14 @@ def policy(cmd: str) -> str:
     low = cmd.lower()
     if "..." in cmd or "<" in cmd:
         return "a template with a placeholder in it, not a command to run as printed"
-    if any(s in cmd for s in SERVES_3100) and "deployed-smoke" not in cmd:
-        return "serves the app on port 3100, which another session uses on this machine"
     for bad in NEVER:
         if bad in low:
             return f"not on the safe list: contains '{bad}'"
     words = shlex.split(cmd)
-    if words[:2] == ["uv", "sync"] or re.fullmatch(
-        r"cd apps/web && npm (install|ci)( && cd \.\./\.\.)?", cmd
+    if (
+        SETUP.fullmatch(cmd)
+        or cmd == PRE_COMMIT
+        or re.fullmatch(r"cd apps/web && npm (install|ci)( && cd \.\./\.\.)?", cmd)
     ):
         return ""  # the setup a judge does first; it only touches the clone
     if words[0] == "make":
@@ -184,6 +211,9 @@ def policy(cmd: str) -> str:
         if any(w in ("-X", "--request", "-d", "--data", "-F", "--form", "-T") for w in words):
             return "curl that sends data"
         urls = [w for w in words if w.startswith("http")]
+        down = [urlparse(u).hostname for u in urls if urlparse(u).hostname in OUTSIDE_DOWN]
+        if down:
+            return f"{OUTSIDE}: {down[0]}: {OUTSIDE_DOWN[down[0]]}"
         if not urls or not all(any(h in u for h in SAFE_HOSTS) for u in urls):
             return "curl to a host not on the safe list"
         if any("/api/test/" in u and "counts" not in u for u in urls):
@@ -194,19 +224,23 @@ def policy(cmd: str) -> str:
     return "not on the safe list"
 
 
-def make_dev(tree: Path) -> dict:
+def make_dev(tree: Path, offline: bool = False) -> dict:
+    """make dev, or make demo-offline: two servers that never exit, passed when both answer."""
     api_port, web_port = 8000, 3100
     moved = ""
     if not (port_free(api_port) and port_free(web_port)):
-        api_port, web_port = 8960, 8961
+        api_port, web_port = (8962, 8963) if offline else (8960, 8961)
         moved = (
             "ports 8000 or 3100 are taken by another process on this machine, so the same two "
-            "servers ran on 8960 and 8961"
+            f"servers ran on {api_port} and {web_port}"
         )
-    cmds = [
-        (f"uv run python -m uvicorn apps.api.main:app --port {api_port}", tree),
-        (f"npm run dev -- -p {web_port}", tree / "apps" / "web"),
-    ]
+    if offline:
+        cmds = [(f"make demo-offline DEMO_API_PORT={api_port} DEMO_WEB_PORT={web_port}", tree)]
+    else:
+        cmds = [
+            (f"uv run python -m uvicorn apps.api.main:app --port {api_port}", tree),
+            (f"npm run dev -- -p {web_port}", tree / "apps" / "web"),
+        ]
     procs = [
         subprocess.Popen(
             c,
@@ -221,7 +255,7 @@ def make_dev(tree: Path) -> dict:
     started = time.monotonic()
     ok = {"api": False, "web": False}
     try:
-        while time.monotonic() - started < 150 and not all(ok.values()):
+        while time.monotonic() - started < (300 if offline else 150) and not all(ok.values()):
             for name, url in (
                 ("api", f"http://127.0.0.1:{api_port}/health"),
                 ("web", f"http://127.0.0.1:{web_port}/"),
@@ -336,6 +370,7 @@ def main() -> int:
         "uv sync --frozen": run("uv sync --frozen", tree),
         "npm ci (apps/web)": run("npm ci --no-audit --no-fund", tree / "apps" / "web"),
         "npm ci (worker)": run("npm ci --no-audit --no-fund", tree / "worker"),
+        "npm ci (tools/diagrams)": run("npm ci --no-audit --no-fund", tree / "tools" / "diagrams"),
     }
     rows = []
     for c in extract(tree):
@@ -344,20 +379,19 @@ def main() -> int:
         if why:
             rows.append({**c, "ran": False, "result": "not run", "detail": why})
             continue
+        if any(s in cmd for s in SERVES_3100) and not (port_free(3100) and port_free(8100)):
+            why = "serves on port 3100 (and mocks the API on 8100), and another process holds one"
+            rows.append({**c, "ran": False, "result": "not run", "detail": why})
+            continue
         if cmd.strip() == "make dev":
             r = make_dev(tree)
+        elif cmd.strip() == "make demo-offline":
+            r = make_dev(tree, offline=True)
         elif "apps.mcp.server" in cmd:
             r = mcp(cmd, tree)
         else:
             env = {"E2E_PORT": "8971"} if "worker-e2e" in cmd else {}
-            words = shlex.split(cmd)
-            if words[0] == "make" and len(words) > 1 and words[1] in PORT_BOUND_MAKE:
-                env["SKIP_TAP"] = "1"
             r = run(cmd, tree, env=env)
-            if env.get("SKIP_TAP"):
-                r["tail"] = (
-                    "(ran with SKIP_TAP=1: the tap target step on port 3100 skipped) " + r["tail"]
-                )
         result = "pass" if r["code"] == 0 else "fail"
         rows.append(
             {
@@ -393,7 +427,8 @@ def main() -> int:
         f"Checked {stamp} at commit {commit}"
         + (f" (branch {args.branch})" if args.branch else "")
         + " by `uv run python scripts/harden_commands.py`, in a "
-        "fresh clone after `uv sync --frozen` and `npm ci` in apps/web and worker, the way a judge "
+        "fresh clone after `uv sync --frozen` and `npm ci` in apps/web, worker and tools/diagrams, "
+        "the way a judge "
         "would start. "
         + (f"{', '.join(missing)} does not exist, so only the README was read. " if missing else "")
         + "Setup: "

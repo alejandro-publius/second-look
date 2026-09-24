@@ -420,7 +420,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | Their sandbox | Conditional creates with our tag and a ledger, and a Library entry for the data set | `scripts/repush_sandbox.py`, `fhir/sandbox_ledger.jsonl` |
 | Their decision tool's measures | What a creek needs, in their words, from the Policy Brief, page 9 | `content/approved_sentences.yaml`, `/city` |
 | The five One Digital Health dimensions and FAIR | Stated in words below | this README |
-| The follower city recipe | `make new-city`, run once for Heraklion as a dry example | `scripts/new_city.py`, `docs/cities/` |
+| The follower city recipe | `make new-city NAME=Heraklion COUNTRY=Greece LAT=35.3387 LON=25.1442`, run once as a dry example | `scripts/new_city.py`, `docs/cities/` |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | `core/fhir_referral.py` |
 
 ### Contributed back
@@ -436,7 +436,7 @@ Sent to OneAquaHealth's implementation guide on 2026-09-24, in the open:
 
 ### Feasibility: Berkeley as a follower city
 
-OneAquaHealth calls a city that adopts the method a follower city. Run on Berkeley: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in two minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the 20 second return check. `make new-city` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
+OneAquaHealth calls a city that adopts the method a follower city. Run on Berkeley: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in two minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the 20 second return check. `make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
 
 ### One Digital Health and FAIR
 
@@ -511,7 +511,7 @@ uv sync
 make demo-offline
 ```
 
-`scripts/seed_demo.py` fills `data/demo` through the API's own routes with every socket to another machine refused, and fails if one was tried: two test sittings that never count, three creek checks on Strawberry Creek, and one pipe worth testing. Then the API serves that folder on port 8000 and the site runs on http://localhost:3100. Open http://localhost:3100/city?creek=strawberry-creek. The first `uv sync` and `npm ci` are the only steps that use the network.
+`scripts/seed_demo.py` fills `data/demo` through the API's own routes with every socket to another machine refused, and fails if one was tried: two test sittings that never count, three creek checks on Strawberry Creek, and one pipe worth testing. Then the API serves that folder on port 8000 and the site runs on http://localhost:3100. Open http://localhost:3100/city?creek=strawberry-creek. The first two lines, `uv sync` and the web app's install, are the only steps that use the network.
 
 `make dev` runs the same two servers on an empty local database, with the network. Deploying, the D1 schema, the secrets by name, the jobs on the Mac and a table of every setting the code reads are in `DEPLOY.md`. Pre-commit hooks for the fast checks: `uv tool install pre-commit && pre-commit install`.
 

@@ -1040,7 +1040,11 @@ def check_flaky(root: Path) -> list[str]:
     return problems
 
 
-NEVER_RUN = ("not on the safe list: contains", "a template with a placeholder")
+NEVER_RUN = (
+    "not on the safe list: contains",
+    "a template with a placeholder",
+    "blocked outside this repository",  # a named host that is down, as in the link check (D41)
+)
 
 
 def check_readme_commands(root: Path) -> list[str]:
