@@ -207,10 +207,18 @@ def test_the_video_credits_match_the_manifest_and_name_every_kept_item() -> None
         if not e["kept"]:
             continue
         line = next(r for r in rows if r.startswith(f"| {e['title']} |"))
-        for field in (e["author"], e["licence_csv"], e["licence_url"], e["source_page"]):
+        page = fetch_footage.markdown_url(e["source_page"])
+        for field in (e["author"], e["licence_csv"], e["licence_url"], page):
             assert f"| {field} |" in line, (e["title"], field)
         assert e["licence_url"].startswith("https://creativecommons.org/")
     assert "released under CC BY-SA 4.0" in text
+
+
+def test_a_source_page_with_brackets_is_written_encoded() -> None:
+    page = "https://commons.wikimedia.org/wiki/File:North_Creek_(Bothell,_WA)_01.webm"
+    assert fetch_footage.markdown_url(page) == (
+        "https://commons.wikimedia.org/wiki/File:North_Creek_%28Bothell,_WA%29_01.webm"
+    )
 
 
 def test_the_credits_page_lists_what_the_manifest_kept() -> None:

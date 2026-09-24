@@ -260,6 +260,11 @@ def manifest(entries: list[dict[str, Any]], media: Path) -> dict[str, Any]:
     }
 
 
+def markdown_url(url: str) -> str:
+    """A bare address with its brackets encoded: a Markdown reader ends the address at one."""
+    return url.replace("(", "%28").replace(")", "%29")
+
+
 def credits_markdown(fetched: dict[str, Any]) -> str:
     """docs/video/CREDITS.md, written from the manifest so the two never drift apart."""
     kept = [e for e in fetched["items"] if e.get("kept")]
@@ -287,7 +292,7 @@ def credits_markdown(fetched: dict[str, Any]) -> str:
         lines.append(
             f"| {e['title']} | {e.get('shows', '')} | {e['author']} | {e['licence_csv']} "
             f"| {e['licence_url']} "
-            f"| {e['source_page']} |"
+            f"| {markdown_url(e['source_page'])} |"
         )
     dropped = [e for e in fetched["items"] if not e.get("kept")]
     lines.append("")
