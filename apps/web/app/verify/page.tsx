@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { VerifyLog } from "@/components/VerifyLog";
-import { verifyChain } from "@/lib/chain";
+import { headsAgainstLog, verifyChain } from "@/lib/chain";
 import { t } from "@/lib/t";
 import { auditEntries, otsStatus } from "@/lib/verify-data";
 import { proofName, proofStatus } from "@/lib/verify-text";
@@ -17,7 +17,7 @@ export default async function VerifyPage() {
   const entries = auditEntries();
   const ots = otsStatus();
   const built = await verifyChain(entries);
-  const heads = ots.proofs.filter((p) => p.what === "audit_head");
+  const heads = headsAgainstLog(ots.proofs, entries);
   const plan = ots.proofs.filter((p) => p.what !== "audit_head");
 
   return (

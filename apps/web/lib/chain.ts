@@ -77,7 +77,7 @@ export function anchorFor(seq: number, entries: AuditEntry[], proofs: OtsProof[]
       p.status !== "broken" &&
       typeof p.audit_seq === "number" &&
       p.audit_seq >= seq &&
-      entries[p.audit_seq - 1]?.hash === p.file_sha256,
+      stampedLineHolds(p, entries),
   );
   covering.sort(
     (a, b) =>
@@ -86,6 +86,21 @@ export function anchorFor(seq: number, entries: AuditEntry[], proofs: OtsProof[]
       a.proof.localeCompare(b.proof),
   );
   return covering[0] ?? null;
+}
+
+/** True when this log still has, at the proof's line, the hash the proof stamped. */
+export function stampedLineHolds(p: OtsProof, entries: AuditEntry[]): boolean {
+  return typeof p.audit_seq === "number" && entries[p.audit_seq - 1]?.hash === p.file_sha256;
+}
+
+/**
+ * The audit head proofs as /verify shows them. A proof of a line this log no longer has counts
+ * as broken: the log was changed after the stamp. results/ots.json can be older than the log,
+ * and a rewritten log with fresh hashes still passes verifyChain, so the page checks this itself,
+ * by the rule scripts/ots_status.py uses.
+ */
+export function headsAgainstLog(proofs: OtsProof[], entries: AuditEntry[]): OtsProof[] {
+  return proofs.filter((p) => p.what === "audit_head").map((p) => (stampedLineHolds(p, entries) ? p : { ...p, status: "broken" as const }));
 }
 
 /** The date in an audit head proof's name, proofs/audit-head-2026-09-24.ots. */
