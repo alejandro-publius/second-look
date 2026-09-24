@@ -7,7 +7,16 @@ import { BASE } from "./helpers";
 // Update 14 3.7: a walk is a guided check made while watching a clip. The record is built on the
 // phone, tagged as a demo on every resource, and nothing is sent to our store.
 const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
-const walks: { id: string; country: string; creek_name: string; title: string; author: string }[] = content.walks ?? [];
+const walks: {
+  id: string;
+  country: string;
+  creek_name: string;
+  title: string;
+  author: string;
+  question: unknown;
+  checker_run: string;
+  checker_dropped: number;
+}[] = content.walks ?? [];
 
 // Update 14 asks for four walks from four countries. The rule found three (docs/DECISIONS.md,
 // 2026-09-22), so the test holds the rule itself: at least one, each from a different country.
@@ -57,6 +66,12 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
   expect(sawFollowUp).toBe(true);
   expect(new Set(counts.map((c) => c.replace(/^Question \d+ /, ""))).size).toBe(1);
   await expect(page.getByTestId("walk-structure")).toHaveText("Every link inside the record checks out");
+  // CRITIC_03 E04: a walk whose build record stopped nothing says no model saw a feature, and
+  // never blames the pass rule for "0 of its guesses".
+  if (!w.question && w.checker_run === "real" && w.checker_dropped === 0) {
+    await expect(page.getByText(content.locale["walk.checker_nothing_seen"])).toBeVisible();
+    await expect(page.getByText(/of its guesses on this clip/)).toHaveCount(0);
+  }
   await page.getByRole("button", { name: "View as FHIR" }).click();
   // The record was made on this phone: the badge speaks of walk records made the same way, which
   // the validator checked in CI, never of this one, and there is no address to copy (REVIEW_03 R31).

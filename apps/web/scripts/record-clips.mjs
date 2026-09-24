@@ -150,11 +150,19 @@ await record("11-two", async (page) => {
   await page.goto(`${base}/two`);
   await beat(3500);
 });
+// Beat 12 ends on "the health card gives one action for you, one for your dog, and one for your
+// city", and /city has no health card, so part 12.3 of the shot list is the sample record's
+// health card, from the same mock (CRITIC_03 E01).
 await record("12-city", async (page) => {
   await page.goto(`${base}/city?creek=strawberry-creek`);
   await beat(2500);
   await page.mouse.wheel(0, 600);
   await beat(2500);
+  await page.goto(`${base}/spot?id=example`);
+  const health = page.getByRole("heading", { name: content.locale["spot.health_title"], exact: true });
+  await health.waitFor();
+  await health.evaluate((el) => el.scrollIntoView({ behavior: "smooth", block: "start" }));
+  await beat(6000);
 });
 if (walk) {
   await record("13-walk", async (page) => {

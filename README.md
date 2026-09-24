@@ -73,7 +73,7 @@ The test runs as a pre-registered study that stays open: it is the volunteer's o
 
 ## Gallery
 
-<!--v:results/screens.json#/screen_count-->31<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->24<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->7<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and [`results/screens.json`](results/screens.json) lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
+<!--v:results/screens.json#/screen_count-->32<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->24<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->8<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and [`results/screens.json`](results/screens.json) lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
 
 <table>
 <tr>

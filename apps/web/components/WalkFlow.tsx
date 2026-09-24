@@ -51,10 +51,16 @@ function Clip({ walk }: { walk: Walk }) {
 /**
  * The line under the record about the checker. The count of stopped guesses is shown only when the
  * checker's run on the footage was real: a number from the fake client's run is never shown.
+ *
+ * With no question and nothing dropped, no model said yes to any feature on the clip's frames in
+ * most of its runs (scripts/build_walks.py), so the pass rule stopped nothing and the line must
+ * not say it did (CRITIC_03 E04). One stopped guess "was", more "were".
  */
 export function checkerLine(walk: Pick<Walk, "question" | "checker_run" | "checker_dropped">): string {
   if (walk.question) return t("walk.checker_asked");
   if (walk.checker_run !== "real") return t("walk.checker_not_real");
+  if (walk.checker_dropped === 0) return t("walk.checker_nothing_seen");
+  if (walk.checker_dropped === 1) return t("walk.checker_none_one");
   return t("walk.checker_none", { n: walk.checker_dropped });
 }
 

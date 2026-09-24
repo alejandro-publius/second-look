@@ -5,7 +5,7 @@ import { FocusHeading } from "./FocusHeading";
 import { Row } from "./ui/Row";
 import { content, featureById, walkById } from "@/lib/content";
 import { t } from "@/lib/t";
-import { withoutUrl } from "@/lib/text";
+import { reasonsThenSource } from "@/lib/text";
 import { demoCreek, savedWalkVisits } from "@/lib/walks";
 
 /** The same name the city view gives a finding: the feature's name, else the form question. */
@@ -48,7 +48,7 @@ export function WalkCity({ walkId }: { walkId: string }) {
             <h2>{t("city.walk_needs")}</h2>
             {demo.needs.length === 0 ? <p className="muted">{t("city.walk_nothing")}</p> : null}
             {demo.needs.map((n) => (
-              <Row key={n.sentence_id} label={n.text} value={`${n.because.map(findingName).join(", ")}. ${withoutUrl(n.source)}`} />
+              <Row key={n.sentence_id} label={n.text} value={reasonsThenSource(n.because.map(findingName), n.source)} />
             ))}
           </section>
         </>
