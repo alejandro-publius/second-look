@@ -88,7 +88,7 @@ Yes: `make judge-check` runs the tests, grades the AI numbers in `results/` agai
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**
-Answer on the day from the Actions tab. It was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's); `main` has been green since fb3ff24 on Sep 24.
+Answer on the day from the Actions tab. It was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's), and once more on Sep 24 from 0326e78 to bef7015, when a test count moved and WRITEUP.md and docs/ACCEPTANCE.md kept the old one. A test now fails if a doc with a rendered number is left out of `make render-readme` or `make verify-claims` (`scripts/tests/test_render_readme.py::test_every_doc_with_a_rendered_number_is_rendered_and_checked`). The README's first badge shows the newest run on `main`.
 Proof: https://github.com/alejandro-publius/second-look/actions
 
 ## Blockchain

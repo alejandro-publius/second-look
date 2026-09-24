@@ -43,7 +43,7 @@ Nothing below needs an API key. Nothing below needs a network except the two row
 | # | The promise | Command | What it prints when it holds |
 |---|---|---|---|
 | 17 | A person can finish the test on a phone | `cd apps/web && npx playwright test` | every spec passing on the 390 by 844 viewport, both arms |
-| 18 | The whole API works on the edge runtime | `make worker-e2e` | <!--v:results/test_counts.json#/worker_e2e/sections-->13<!--/v--> sections green under `wrangler dev` |
+| 18 | The whole API works on the edge runtime | `make worker-e2e` | <!--v:results/test_counts.json#/worker_e2e/sections-->14<!--/v--> sections green under `wrangler dev` |
 | 19 | The deployed site is the one we think it is | `DEPLOYED_URL=... DEPLOYED_API=... npx playwright test tests/deployed-smoke.spec.ts` | a whole sitting finished, and the counts endpoint did not move |
 | 20 | The landing page paints fast enough on a slow phone | `SITE_URL=... node apps/web/scripts/live-check.mjs` | load and largest paint under the 3 second line on a throttled 4G profile |
 
