@@ -1,0 +1,60 @@
+{
+ "checked_utc": "2026-09-24T07:50:13Z",
+ "service": "OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin",
+ "client": "opentimestamps-client 0.7.2",
+ "upgraded": true,
+ "counts": {
+  "pending": 3,
+  "confirmed": 0,
+  "unchecked": 0,
+  "broken": 0
+ },
+ "proofs": [
+  {
+   "proof": "proofs/analysis_plan.md.ots",
+   "file": "docs/analysis_plan.md",
+   "what": "analysis_plan",
+   "file_sha256": "86da527e30c0a8e8492b6fb22c3056be1a2ad3087b5ca8c6f4a0a1bd58aed9cf",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "status": "pending"
+  },
+  {
+   "proof": "proofs/audit-head-2026-09-24.ots",
+   "file": "proofs/audit-head-2026-09-24",
+   "what": "audit_head",
+   "file_sha256": "3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "audit_seq": 3,
+   "status": "pending"
+  },
+  {
+   "proof": "proofs/prereg-v1.tag.ots",
+   "file": "proofs/prereg-v1.tag",
+   "what": "prereg_tag",
+   "file_sha256": "8edaede8a7832b56cb816cfd97692d499ca2e211ec417579271044834246a3d0",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "status": "pending"
+  }
+ ]
+}
