@@ -9,6 +9,7 @@ the last ones check that the gallery script can only read from the live site.
 
 from __future__ import annotations
 
+import csv
 import json
 import shutil
 import subprocess
@@ -211,16 +212,94 @@ def test_the_credit_must_be_the_manifest_credit(gallery: Path) -> None:
     assert says(problems, "social-preview: its credit does not name")
 
 
-def test_a_dropped_screen_fails(gallery: Path) -> None:
+@pytest.mark.parametrize("dropped", ["judge-mode", "check-location", "check-question"])
+def test_a_dropped_screen_fails(gallery: Path, dropped: str) -> None:
     def drop(doc: dict[str, Any]) -> None:
-        doc["images"] = [r for r in doc["images"] if r["name"] != "judge-mode"]
+        doc["images"] = [r for r in doc["images"] if r["name"] != dropped]
         doc["screen_count"] -= 1
         doc["live_count"] -= 1
 
     edit(gallery, drop)
-    (gallery / "docs/screens/judge-mode.webp").unlink()
+    (gallery / f"docs/screens/{dropped}.webp").unlink()
     problems = check(gallery)
-    assert problems == ["screens missing from the gallery: ['judge-mode']"]
+    assert problems == [f"screens missing from the gallery: [{dropped!r}]"]
+
+
+def test_a_dropped_gif_fails(gallery: Path) -> None:
+    edit(gallery, lambda d: d.update(images=[r for r in d["images"] if r["kind"] != "gif"]))
+    (gallery / "docs/screens/two-minute-test.gif").unlink()
+    assert says(check(gallery), "0 gif row(s), want 1")
+
+
+def test_a_screen_without_the_drawn_frame_fails(gallery: Path) -> None:
+    # The right size, but a plain picture: no clear corners and no grey bezel.
+    plain = Image.new("RGB", make_gallery.FRAMED_SIZE, (200, 210, 205))
+    replace_image(gallery, "quick", plain, "WEBP", quality=80)
+    assert says(check(gallery), "quick: not inside the one drawn frame")
+
+
+def test_a_screen_with_filled_corners_fails(gallery: Path) -> None:
+    # The same frame laid on white: the bezel is still grey, but the corners are no longer clear.
+    with Image.open(gallery / "docs/screens/quick.webp") as im:
+        rgba = im.convert("RGBA")
+    on_white = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
+    on_white.alpha_composite(rgba)
+    replace_image(gallery, "quick", on_white, "WEBP", quality=80)
+    assert says(check(gallery), "quick: not inside the one drawn frame")
+
+
+def test_a_screen_in_another_grey_fails(gallery: Path) -> None:
+    # The same screen, drawn again in a frame of another colour.
+    with Image.open(gallery / "docs/screens/quick.webp") as im:
+        rgba = im.convert("RGBA")
+    b = make_gallery.BEZEL
+    w, h = make_gallery.SCREEN_SIZE
+    screen = rgba.crop((b, b, b + w, b + h))
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(make_gallery, "FRAME_COLOUR", (200, 30, 30))
+        red = make_gallery.device_frame(screen)
+    replace_image(gallery, "quick", red, "WEBP", quality=80)
+    assert says(check(gallery), "quick: not inside the one drawn frame")
+
+
+def test_an_image_in_the_wrong_format_fails(gallery: Path) -> None:
+    # A PNG under a .webp name, with its row kept true to the bytes.
+    with Image.open(gallery / "docs/screens/quick.webp") as im:
+        copy = im.copy()
+    replace_image(gallery, "quick", copy, "PNG")
+    assert says(check(gallery), "quick: PNG, not WEBP")
+
+
+def test_a_lesson_photo_over_400_kb_fails(gallery: Path) -> None:
+    noise = Image.effect_noise((780, 1033), 120).convert("RGB")
+    replace_image(gallery, "lesson-photo-pipe", noise, "WEBP", quality=100)
+    assert (gallery / "docs/screens/lesson-photo-pipe.webp").stat().st_size > 400_000
+    assert says(check(gallery), "over the lesson_photo limit of 400000")
+
+
+def test_the_gif_and_the_preview_are_held_to_the_blind_rule(gallery: Path) -> None:
+    edit(gallery, lambda d: row_named(d, "two-minute-test").update(blind=False))
+    edit(gallery, lambda d: row_named(d, "social-preview").update(blind=False))
+    problems = check(gallery)
+    assert says(problems, "two-minute-test: shows photos people answer about")
+    assert says(problems, "social-preview: shows photos people answer about")
+
+
+def test_a_synthetic_photo_fails(gallery: Path) -> None:
+    manifest = gallery / "photos" / "manifest.csv"
+    photo = row_named(doc_of(gallery), "lesson-photo-pipe")["photos"][0]
+    with manifest.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        fields = list(reader.fieldnames or [])
+        rows = list(reader)
+    hit = [r for r in rows if r["id"] == photo]
+    assert len(hit) == 1
+    hit[0]["synthetic"] = "true"
+    with manifest.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
+    assert says(check(gallery), f"shows {photo}, which is synthetic")
 
 
 def test_the_gif_frame_count_must_match(gallery: Path) -> None:
@@ -232,10 +311,17 @@ def test_the_gif_frame_count_must_match(gallery: Path) -> None:
 
 
 def test_the_counts_must_match_the_rows(gallery: Path) -> None:
-    edit(gallery, lambda d: d.update(screen_count=99, live_count=0))
+    edit(
+        gallery,
+        lambda d: d.update(
+            screen_count=99, live_count=0, local_mock_count=0, largest_screen_bytes=1
+        ),
+    )
     problems = check(gallery)
     assert says(problems, "screen_count is 99")
     assert says(problems, "live_count is 0")
+    assert says(problems, "local_mock_count is 0")
+    assert says(problems, "largest_screen_bytes is 1")
 
 
 def test_an_image_with_exif_fails(gallery: Path) -> None:

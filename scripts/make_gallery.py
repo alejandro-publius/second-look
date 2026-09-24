@@ -55,6 +55,8 @@ BEZEL = 28
 SCREEN_RADIUS = 60
 OUTER_RADIUS = SCREEN_RADIUS + BEZEL
 FRAME_COLOUR = (48, 48, 48)
+# How far a lossy WebP may move the bezel's grey before the check calls it another frame.
+FRAME_TOLERANCE = 8
 FRAMED_SIZE = (SCREEN_SIZE[0] + 2 * BEZEL, SCREEN_SIZE[1] + 2 * BEZEL)
 # The GIF is drawn smaller than the stills (376 pixels wide, about the width a README shows it
 # at), with the most colours per frame that keep it under its limit.
@@ -490,6 +492,8 @@ REQUIRED_SCREENS = frozenset(
         "walk-in-progress",
         "walk-record",
         "check-start",
+        "check-location",
+        "check-question",
         "quick",
         "spot-record",
         "spot-fhir",
@@ -524,6 +528,29 @@ def gallery_files(root: Path) -> set[str]:
     if social.exists():
         found.add(social.relative_to(root).as_posix())
     return found
+
+
+def in_the_drawn_frame(image: Image.Image) -> bool:
+    """True when a screen sits in the frame device_frame draws: the corners clear, and the
+    middle of each side of the bezel the frame's one grey. The size alone does not say so."""
+    rgba = image.convert("RGBA")
+    w, h = rgba.size
+
+    def at(x: int, y: int) -> tuple[int, ...]:
+        pixel = rgba.getpixel((x, y))
+        return pixel if isinstance(pixel, tuple) else (-1, -1, -1, -1)  # fails the check
+
+    corners = [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]
+    if any(at(x, y)[3] != 0 for x, y in corners):
+        return False
+    half = BEZEL // 2
+    sides = [(w // 2, half), (w // 2, h - 1 - half), (half, h // 2), (w - 1 - half, h // 2)]
+    for x, y in sides:
+        r, g, b, a = at(x, y)
+        off = max(abs(r - FRAME_COLOUR[0]), abs(g - FRAME_COLOUR[1]), abs(b - FRAME_COLOUR[2]))
+        if a != 255 or off > FRAME_TOLERANCE:
+            return False
+    return True
 
 
 def hints_in(text: str) -> list[str]:
@@ -576,6 +603,8 @@ def check_row(root: Path, r: dict[str, Any], manifest: dict[str, dict[str, str]]
             out.append(f"{name}: {im.width}x{im.height}, not what results/screens.json says")
         if kind == "screen" and im.size != FRAMED_SIZE:
             out.append(f"{name}: {im.size}, not the one device frame {FRAMED_SIZE}")
+        elif kind == "screen" and not in_the_drawn_frame(im):
+            out.append(f"{name}: not inside the one drawn frame (clear corners, grey bezel)")
         if kind == "social_preview" and im.size != SOCIAL_SIZE:
             out.append(f"{name}: {im.size}, not {SOCIAL_SIZE}")
         if kind == "gif":
