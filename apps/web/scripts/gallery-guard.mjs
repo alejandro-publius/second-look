@@ -3,8 +3,11 @@
 // could write is refused before it leaves the browser, and a refused request fails the run.
 // scripts/tests/test_gallery.py runs these rules through node, so a change here is tested.
 
-/** Paths on the live site the gallery never asks for, whatever the method. */
-export const NEVER_ON_LIVE = ["/api/test/", "/api/demo/", "/api/check/", "/api/quick/", "/api/upload", "/api/photo/"];
+/**
+ * Paths on the live site the gallery never asks for, whatever the method. /api/skeleton is here
+ * because the Worker writes a row to the production database on every request to it, a GET too.
+ */
+export const NEVER_ON_LIVE = ["/api/test/", "/api/demo/", "/api/check/", "/api/quick/", "/api/upload", "/api/photo/", "/api/skeleton"];
 
 /** True when the gallery may send this request to the live site. */
 export function liveRequestAllowed(method, url, liveOrigin) {

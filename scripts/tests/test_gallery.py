@@ -342,6 +342,14 @@ LIVE_CASES = [
     ("POST", f"{LIVE}/api/check/draft", False),
     ("POST", f"{LIVE}/api/quick/example", False),
     ("POST", f"{LIVE}/api/upload", False),
+    # Every path on the never list is refused on a GET too, one case per entry, so dropping any
+    # one of them from the list turns this red.
+    ("GET", f"{LIVE}/api/check/draft", False),
+    ("GET", f"{LIVE}/api/quick/example", False),
+    ("GET", f"{LIVE}/api/upload", False),
+    ("GET", f"{LIVE}/api/photo/ph-x?t=token", False),
+    # The Worker writes a row to the production database on any request here, a GET included.
+    ("GET", f"{LIVE}/api/skeleton", False),
     ("PUT", f"{LIVE}/", False),
     ("DELETE", f"{LIVE}/api/two", False),
     ("GET", "https://api.enora-oah.eu/fhir/Observation", False),
