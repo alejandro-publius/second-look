@@ -1,0 +1,194 @@
+{
+  "film_footage": {
+    "by_kind": {
+      "photo": 7,
+      "video": 6
+    },
+    "by_licence": {
+      "CC BY 4.0": 1,
+      "CC BY-SA 3.0": 6,
+      "CC BY-SA 4.0": 3,
+      "CC0": 1,
+      "Public domain": 2
+    },
+    "by_source": {
+      "Wikimedia Commons": 13
+    },
+    "rows": 13
+  },
+  "photos": {
+    "benchmark": {
+      "absent": 0,
+      "by_licence": {
+        "CC-BY-3.0": 46
+      },
+      "by_source": {
+        "Wikimedia Commons": 6,
+        "YouTube": 40
+      },
+      "labelled": 0,
+      "per_feature": {},
+      "present": 0,
+      "rows": 46,
+      "unlabelled": 46
+    },
+    "by_licence": {
+      "CC-BY-2.0": 1,
+      "CC-BY-3.0": 47,
+      "CC-BY-4.0": 7,
+      "CC-BY-SA-2.0": 15,
+      "CC-BY-SA-3.0": 5,
+      "CC-BY-SA-4.0": 6,
+      "CC0-1.0": 2,
+      "public-domain": 1
+    },
+    "by_source": {
+      "Wikimedia Commons": 35,
+      "YouTube": 40,
+      "iNaturalist": 9
+    },
+    "labelled": 36,
+    "lesson": {
+      "absent": 8,
+      "by_licence": {
+        "CC-BY-2.0": 1,
+        "CC-BY-3.0": 1,
+        "CC-BY-4.0": 3,
+        "CC-BY-SA-2.0": 4,
+        "CC-BY-SA-3.0": 4,
+        "CC-BY-SA-4.0": 2,
+        "CC0-1.0": 1
+      },
+      "by_source": {
+        "Wikimedia Commons": 12,
+        "iNaturalist": 4
+      },
+      "labelled": 16,
+      "per_feature": {
+        "artificial_bank": {
+          "absent": 2,
+          "present": 2
+        },
+        "dug_out_channel": {
+          "absent": 2,
+          "present": 2
+        },
+        "invasive_plant": {
+          "absent": 2,
+          "present": 2
+        },
+        "pipe_running": {
+          "absent": 2,
+          "present": 2
+        }
+      },
+      "present": 8,
+      "rows": 16,
+      "unlabelled": 0
+    },
+    "marked_synthetic": 0,
+    "marked_with_faces": 0,
+    "other_roles": [],
+    "practice": {
+      "absent": 0,
+      "by_licence": {
+        "CC-BY-4.0": 1,
+        "CC-BY-SA-2.0": 2,
+        "CC-BY-SA-4.0": 1
+      },
+      "by_source": {
+        "Wikimedia Commons": 3,
+        "iNaturalist": 1
+      },
+      "labelled": 4,
+      "per_feature": {
+        "artificial_bank": {
+          "present": 1
+        },
+        "dug_out_channel": {
+          "present": 1
+        },
+        "invasive_plant": {
+          "present": 1
+        },
+        "pipe_running": {
+          "present": 1
+        }
+      },
+      "present": 4,
+      "rows": 4,
+      "unlabelled": 0
+    },
+    "rows": 84,
+    "test": {
+      "absent": 8,
+      "by_licence": {
+        "CC-BY-4.0": 3,
+        "CC-BY-SA-2.0": 8,
+        "CC-BY-SA-3.0": 1,
+        "CC-BY-SA-4.0": 2,
+        "CC0-1.0": 1,
+        "public-domain": 1
+      },
+      "by_source": {
+        "Wikimedia Commons": 12,
+        "iNaturalist": 4
+      },
+      "labelled": 16,
+      "per_feature": {
+        "artificial_bank": {
+          "absent": 2,
+          "present": 2
+        },
+        "dug_out_channel": {
+          "absent": 2,
+          "present": 2
+        },
+        "invasive_plant": {
+          "absent": 2,
+          "present": 2
+        },
+        "pipe_running": {
+          "absent": 2,
+          "present": 2
+        }
+      },
+      "present": 8,
+      "rows": 16,
+      "unlabelled": 0
+    },
+    "warmup": {
+      "absent": 0,
+      "by_licence": {
+        "CC-BY-SA-2.0": 1,
+        "CC-BY-SA-4.0": 1
+      },
+      "by_source": {
+        "Wikimedia Commons": 2
+      },
+      "labelled": 0,
+      "per_feature": {},
+      "present": 0,
+      "rows": 2,
+      "unlabelled": 2
+    },
+    "with_label_evidence": 84,
+    "with_second_label": 0
+  },
+  "real": true,
+  "script": "evals/data_card.py",
+  "synthetic": false,
+  "videos": {
+    "by_licence": {
+      "CC BY 3.0": 1,
+      "Creative Commons Attribution license (reuse allowed)": 4
+    },
+    "by_source": {
+      "Wikimedia Commons": 1,
+      "YouTube": 4
+    },
+    "countries": 3,
+    "labelled": 0,
+    "rows": 5
+  }
+}
