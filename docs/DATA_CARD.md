@@ -41,7 +41,8 @@ iNaturalist (<!--v:results/data_card.json#/photos/test/by_source/iNaturalist-->4
   `scripts/ingest_photos.py`: resized, EXIF, ICC and comments cut out, hashed after processing
   (`scripts/tests/test_ingest_photos.py::test_ingest_strips_exif_resizes_and_writes_rows`).
 - The photos come from several countries and seasons, not from the creeks in Berkeley. Only the
-  iNaturalist rows carry a capture date and a coarse place.
+  iNaturalist rows carry a capture date. The footage frames carry the video's country; the
+  Commons photos carry no place in the manifest, though many of their pages name one.
 
 **Footage.** `scripts/find_open_videos.py` searched Wikimedia Commons and YouTube for footage
 under CC BY, CC0 or public domain, and found <!--v:results/footage_pool.json#/candidates-->68<!--/v-->
