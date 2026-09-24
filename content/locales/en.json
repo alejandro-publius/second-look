@@ -444,6 +444,8 @@
   "judges.report": "The technical report, as a PDF",
   "judges.report_note": "How the test, the gate and the records work, with every result. About fifteen minutes to read. Opens on Sep 30, when the repository goes public.",
   "judges.model_card": "The model card",
+  "judges.ai_example": "The checker at work on real creek footage",
+  "judges.ai_example_note": "One frame where the gate let a model's flag through and one where it stopped it, from the raw reply to the question a person would be asked. About three minutes to read. Opens on Sep 30, when the repository goes public.",
   "judges.model_card_note": "What each vision model passed, where it fails, what it costs and what it may never do. About five minutes to read. Opens on Sep 30, when the repository goes public.",
   "judges.verify_note": "Proves no line of our audit log was changed after it was written. Your browser checks it again as the page opens. Under a minute.",
   "judges.credits_note": "Every photo and clip we show, who made it and its licence. Under a minute.",

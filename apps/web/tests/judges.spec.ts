@@ -28,13 +28,14 @@ test("every door on /judges has one line under it with about how long it takes",
   expect(untimed, "doors that do not say how long they take").toEqual([]);
 });
 
-test("the four repository doors link the README, the report, the model card and the code, and say they open on Sep 30", async ({ page }) => {
+test("the repository doors link the README, the report, the model card, the footage example and the code, and say they open on Sep 30", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");
   for (const [name, href] of [
     ["The guide for judges in our README", `${REPO}#for-judges`],
     ["The technical report, as a PDF", `${REPO}/blob/main/docs/REPORT.pdf`],
     ["The model card", `${REPO}/blob/main/docs/MODEL_CARD.md`],
+    ["The checker at work on real creek footage", `${REPO}/blob/main/examples/footage-flag/README.md`],
     ["The code", REPO],
   ]) {
     const link = page.getByRole("link", { name, exact: true });

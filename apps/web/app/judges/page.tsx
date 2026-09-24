@@ -36,6 +36,7 @@ const DOORS: { href: string; label: string; note: string; params?: Record<string
   { href: `${REPO}#for-judges`, label: "judges.readme", note: "judges.readme_note" },
   { href: `${REPO}/blob/main/docs/REPORT.pdf`, label: "judges.report", note: "judges.report_note" },
   { href: `${REPO}/blob/main/docs/MODEL_CARD.md`, label: "judges.model_card", note: "judges.model_card_note" },
+  { href: `${REPO}/blob/main/examples/footage-flag/README.md`, label: "judges.ai_example", note: "judges.ai_example_note" },
   { href: REPO, label: "judges.repo", note: "judges.repo_note" },
   { href: "/verify", label: "judges.verify", note: "judges.verify_note" },
   { href: "/credits", label: "nav.credits", note: "judges.credits_note" },
