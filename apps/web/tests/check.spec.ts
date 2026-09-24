@@ -14,8 +14,9 @@ async function placePin(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Next" }).click();
 }
 
-/** Answers every question in the form's order. Overall rating Good so the rating check fires. */
-async function answerForm(page: import("@playwright/test").Page) {
+/** Answers every question in the form's order. Overall rating Good so the rating check fires.
+ * On the feelings screen it moves Joy to 4, unless moveJoy is false. */
+async function answerForm(page: import("@playwright/test").Page, { moveJoy = true } = {}) {
   await expect(page.getByRole("heading", { name: "Channel form" })).toBeVisible();
   await page.getByRole("button", { name: "U shape" }).click();
   await page.getByRole("button", { name: "Artificial (concrete or stones with concrete)" }).click(); // bottom
@@ -45,7 +46,12 @@ async function answerForm(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "No", exact: true }).click(); // cuts
   await expect(page.getByRole("heading", { name: "Which feelings best describe your experience?" })).toBeVisible();
-  await page.getByLabel("Joy").fill("4");
+  if (moveJoy) await page.getByLabel("Joy").fill("4");
+  else {
+    // Ticked and then unticked again: still not an answer.
+    await page.locator(".card", { hasText: "Serenity" }).getByLabel("Not applicable").check();
+    await page.locator(".card", { hasText: "Serenity" }).getByLabel("Not applicable").uncheck();
+  }
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: /^Good:/ }).click();
   await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
@@ -71,8 +77,9 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   expect(draft.body.answers.habitats).toEqual(["riffles"]);
   expect(draft.body.answers.invasive_which).toEqual(["cant_tell"]);
   // The shape the API validates (SLIDER_RE in worker/src/check.ts and apps/api/check.py). It was
-  // an object once, which both servers answered with a 400.
-  expect(draft.body.answers.feelings).toContain("joy:4");
+  // an object once, which both servers answered with a 400. Only the slider that was moved is sent:
+  // the three left where they start are not a 0 (CRITIC_06 H03).
+  expect(draft.body.answers.feelings).toEqual(["joy:4"]);
   for (const entry of draft.body.answers.feelings) expect(entry).toMatch(/^(joy|serenity|anger|fear):([0-5]|not_applicable)$/);
   expect(draft.body.answers.natural_debris).toBeUndefined();
   expect(draft.body.photo_ids).toEqual([]);
@@ -91,6 +98,23 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await expect(page.getByRole("link", { name: "See this creek's record" })).toHaveAttribute("href", "/spot?id=example");
   expect(await page.evaluate(() => localStorage.getItem("sl_saved_spots"))).toContain("Footbridge");
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
+});
+
+// CRITIC_06 H03: every feelings slider starts at 0, and a person who went on past the screen
+// without moving one was sent as feeling none of the four. The screen has no Skip, so Next with
+// no slider moved now leaves the question out, as Skip does elsewhere.
+test("feelings sliders nobody moved are not sent with the check", async ({ page }) => {
+  const calls = await mockApi(page);
+  await page.goto("/check");
+  await placePin(page);
+  await answerForm(page, { moveJoy: false });
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByRole("heading", { name: "One or two follow-ups" })).toBeVisible();
+  const draft = calls.find((c) => c.path === "/api/check/draft")!;
+  expect(draft.body.answers.feelings).toBeUndefined();
+  // The answers on either side of it are still there.
+  expect(draft.body.answers.vegetation_cuts).toBe("absent");
+  expect(draft.body.first_rating).toBe("good");
 });
 
 test("offline: the check is saved on the phone and sent when the network returns", async ({ page, context }) => {

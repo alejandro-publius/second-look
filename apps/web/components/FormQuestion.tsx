@@ -163,6 +163,8 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: 
     case "sliders": {
       // The API takes sliders as a list like ["joy:3", "fear:not_applicable"] (content/form.yaml,
       // apps/api/check.py, worker/src/check.ts). The screen works on a map; this reads a list back.
+      // A slider is in the map only once the person moves it or ticks Not applicable. One left
+      // where it starts is not a 0: it is not sent and not in the record (CRITIC_06 H03).
       const current: Record<string, number | string> = {};
       if (Array.isArray(draft)) {
         for (const entry of draft) {
@@ -170,7 +172,12 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: 
           current[k] = v === "not_applicable" ? "na" : Number(v);
         }
       } else if (draft && typeof draft === "object") Object.assign(current, draft);
-      const set = (k: string, v: number | string) => setDraft({ ...current, [k]: v });
+      const set = (k: string, v: number | string | undefined) => {
+        const next = { ...current };
+        if (v === undefined) delete next[k];
+        else next[k] = v;
+        setDraft(next);
+      };
       return (
         <div className="stack">
           {head}
@@ -184,12 +191,12 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: 
                     <label htmlFor={`slider-${s}`}>{t(`check.slider.${s}`)}</label>
                     <input id={`slider-${s}`} type="range" min={0} max={5} step={1} value={typeof v === "number" ? v : 0} disabled={na} onChange={(e) => set(s, Number(e.target.value))} />
                     <output htmlFor={`slider-${s}`} aria-live="off">
-                      {na ? "" : typeof v === "number" ? v : 0}
+                      {typeof v === "number" ? v : ""}
                     </output>
                   </div>
                   {item.allow_not_applicable ? (
                     <label className="check">
-                      <input type="checkbox" checked={na} onChange={(e) => set(s, e.target.checked ? "na" : 0)} />
+                      <input type="checkbox" checked={na} onChange={(e) => set(s, e.target.checked ? "na" : undefined)} />
                       <span className="small">{t("check.slider_na")}</span>
                     </label>
                   ) : null}
@@ -202,11 +209,10 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: 
               type="button"
               className="btn"
               onClick={() => {
-                const out = (item.sliders ?? []).map((s) => {
-                  const v = current[s] ?? 0;
-                  return `${s}:${v === "na" ? "not_applicable" : v}`;
-                });
-                onAnswer(out);
+                const out = (item.sliders ?? []).filter((s) => current[s] !== undefined).map((s) => `${s}:${current[s] === "na" ? "not_applicable" : current[s]}`);
+                // No slider moved: the question is left out, as Skip leaves out the others.
+                if (out.length === 0) onSkip();
+                else onAnswer(out);
               }}
             >
               {t("check.next")}
