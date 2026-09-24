@@ -416,7 +416,7 @@
   "judges.demo": "Judge mode, feedback after every answer",
   "judges.check": "Creek check",
   "judges.record": "A sample record: a one-minute video walk that ends in its record, with View as FHIR",
-  "judges.two": "The same creek beside a laboratory result",
+  "judges.two": "A volunteer record in the viewer built for laboratory results",
   "judges.how": "How we know it works",
   "judges.repo": "The code",
   "nav.judges": "For judges",

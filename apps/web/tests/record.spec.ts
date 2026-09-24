@@ -185,6 +185,15 @@ test("/city with no creek says so rather than showing an empty page", async ({ p
   await expect(page.getByText("Nobody has checked this creek yet.")).toBeVisible();
 });
 
+// /two shows a volunteer record beside a laboratory reading from another place, so the door must
+// not promise the same creek (REVIEW_03 R34).
+test("the judges' door names /two for what it shows", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  await expect(page.getByRole("link", { name: "A volunteer record in the viewer built for laboratory results" })).toHaveAttribute("href", "/two");
+  await expect(page.getByText("The same creek beside a laboratory result")).toHaveCount(0);
+});
+
 test("the judges' door links the creek by its readable slug", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");
