@@ -408,7 +408,7 @@
   "test.pick_first": "Choose an answer first.",
   "test.resuming": "Picking up where you left off…",
   "demo.shut_title": "Judge mode opens on Sep 28",
-  "demo.shut_body": "Judge mode gives feedback on the same sixteen photos the study uses, so it would hand out the answer key while the study is running. It opens when the data locks, on Sunday Sep 27 at 18:00 PDT.",
+  "demo.shut_body": "Judge mode gives feedback on the same sixteen photos the study uses, so it would hand out the answer key while the study is running. It opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.",
   "demo.shut_meanwhile": "Until then, everything else is open.",
   "judges.title": "For judges",
   "judges.intro": "Every part of Second Look, in the order that makes the point. Nothing here is stored except the two minute test and a creek check you choose to send.",
