@@ -13,18 +13,18 @@ Deadline: Wednesday Sep 30, 2026, 18:00 PDT. Repo public first, then the incogni
 | video_link | A line with the word "video" and a link exists in README.md and docs/devpost.md | fails until the video is uploaded |
 | video_duration | With `--video path.mp4`, ffprobe says 180 to 300 seconds; skipped with a sentence when no file is given | skipped |
 | license | LICENSE exists and says MIT | pass |
-| demo_url | The URL in NEXT_PUBLIC_SITE_URL, or the demo link in docs/devpost.md, answers 200; skipped with a sentence when unset | skipped until deployed |
+| demo_url | The URL in NEXT_PUBLIC_SITE_URL, or the demo link in docs/devpost.md, answers 200; skipped with a sentence when unset | pass |
 | secrets_scan | No key shapes (AWS, Anthropic, OpenAI, GitHub, Slack, Google, private key blocks, quoted assigned secrets) in tracked or untracked files; gitleaks over the history when installed | pass |
-| verify_claims | `scripts/verify_claims.py` without `--synthetic` passes: every README number traces to a real results file | fails while results are synthetic |
+| verify_claims | `scripts/verify_claims.py` without `--synthetic` passes: every README number traces to a real results file | pass |
 | audit_log | `audit/log.jsonl` chain verifies | pass |
 | repo_public | `gh repo view --json visibility` says PUBLIC | fails until Sep 30 |
 
-Expected failures before submission day: video_link, repo_public, verify_claims (real results).
+Expected failures before submission day: video_link and repo_public.
 Anything else failing is our fault and gets fixed first.
 
 ## Done by a person
 
-- [ ] Video recorded to docs/video_script.md, edited to 3 to 5 minutes (target 3:45), uploaded,
+- [ ] Video recorded to docs/video/SHOTLIST.md, read from docs/video/VOICE_SCRIPT.md, edited to 3 to 5 minutes (target 3:45), uploaded,
       link pasted into README.md and docs/devpost.md, and `make submit-check --video` run on the file.
 - [ ] Devpost page filled: every field in docs/notes/devpost_fields.md mapped to a README section
       in docs/devpost.md, the track statement first, the five headers in order.

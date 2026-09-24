@@ -1,7 +1,7 @@
 # What is real and what is synthetic
 
 One list, kept current, so nobody has to guess. The README's "What is real and what is
-synthetic" section (Update 10 tier 3 item 10) is built from this file after data lock. Until then
+synthetic" section is built from this file after data lock. Until then
 this is the list. A thing is **real** when it was produced by the system from a person's action or
 from a live source. It is **synthetic** when a script made it up to show a shape. It is an
 **example** when it is a hand shaped instance that stands in for a real one and is marked as such.
@@ -25,7 +25,7 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | The simulation of weighted votes quoted under Known weaknesses in the README | synthetic by design: made-up people, never a study result | the file carries `"synthetic": true` and the SYNTHETIC stamp, the README sentence calls it a simulation, and `make consensus-check` reruns it | `results/consensus_coarseness.json`, `evals/consensus_coarseness.py` |
 | The screen that keeps a frame | real, run on this Mac | Apple Vision (people, faces, any readable text, a water label, blank frames) and OpenCV; every drop and its reason is in `videos/frames.json` | `scripts/make_frames.py` |
 | A video walk's record | real shape, demo content | made on the phone from the person's answers, every resource tagged `demo-walk`, never stored, counted or mirrored | `core/walks.py`, `worker/src/core/walks.ts`, `/walk/<id>` |
-| The checker's flags on a walk | real since the paid run of Sep 23 and 24 | worked out at build time from `results/footage_latest.json`, which is real; a flag passes only for a feature its model passed on the test |
+| The checker's flags on a walk | real since the paid run of Sep 23 and 24 | worked out at build time from `results/footage_latest.json`, which is real; a flag passes only for a feature its model passed on the test | [`content/walks.yaml`](../content/walks.yaml), [`scripts/build_walks.py`](../scripts/build_walks.py) |
 | The Heraklion follower city scaffold | example, dry run in English with no claims | the checklist says so in its first line | `docs/cities/heraklion/` |
 
 ## Where a frame's label comes from, and where it does not

@@ -176,3 +176,23 @@ def test_judge_check_runs_the_reproduce_step_second(
     assert judge_check.main(["--quick"]) == 0
     assert ran == ["tests", "reproduce", "fhir", "audit", "secrets"]
     assert "6 of 6 steps passed" in capsys.readouterr().out
+
+
+def test_the_summary_file_holds_one_line_per_step_as_printed(tmp_path: Path) -> None:
+    steps = [
+        judge_check.Step("tests", True, ["python: 3 passed", "worker: pass 2"], 1.4),
+        judge_check.Step("secrets", False, ["gitleaks found 1"], 0.2),
+    ]
+    out = tmp_path / "judge_check.json"
+    judge_check.write_summary(out, judge_check.ROOT, steps, "judge-check: 1 of 2 steps failed")
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert [s["name"] for s in doc["steps"]] == ["tests", "secrets"]
+    assert doc["steps"][0] == {
+        "name": "tests",
+        "ok": True,
+        "text": "python: 3 passed; worker: pass 2",
+        "seconds": 1,
+    }
+    assert doc["steps"][1]["ok"] is False
+    assert doc["last"] == "judge-check: 1 of 2 steps failed"
+    assert re.fullmatch(r"[0-9a-f]{7,}", doc["commit"])

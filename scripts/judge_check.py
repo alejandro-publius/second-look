@@ -270,10 +270,36 @@ def step_secrets(root: Path, env: dict[str, str]) -> Step:
     return step
 
 
+def write_summary(out: Path, root: Path, steps: list[Step], last: str) -> None:
+    """The summary the README shows (results/judge_check.json): one line per step, as printed."""
+    commit = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"], cwd=root, capture_output=True, text=True
+    ).stdout.strip()
+    doc = {
+        "commit": commit,
+        "ran_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "steps": [
+            {
+                "name": s.name,
+                "ok": s.ok,
+                "text": "; ".join(s.lines),
+                "seconds": round(s.seconds),
+            }
+            for s in steps
+        ],
+        "seconds": round(sum(s.seconds for s in steps)),
+        "last": last,
+    }
+    out.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--quick", action="store_true", help="skip the web build")
     parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--out", type=Path, default=None, help="also write the summary to this JSON file"
+    )
     args = parser.parse_args(argv)
     root = args.root.resolve()
     env = offline_env()
@@ -304,10 +330,16 @@ def main(argv: list[str] | None = None) -> int:
         mark = "PASS" if step.ok else "FAIL"
         headline = step.lines[0] if step.lines else ""
         print(f"{mark}  {step.name:<10} {step.seconds:5.1f}s  {headline}")
+    last = (
+        f"judge-check: {len(failed)} of {len(steps)} steps failed"
+        if failed
+        else f"judge-check: {len(steps)} of {len(steps)} steps passed, offline, with no key"
+    )
+    if args.out:
+        write_summary(args.out, root, steps, last)
+    print(last)
     if failed:
-        print(f"judge-check: {len(failed)} of {len(steps)} steps failed")
         return 1
-    print(f"judge-check: {len(steps)} of {len(steps)} steps passed, offline, with no key")
     return 0
 
 

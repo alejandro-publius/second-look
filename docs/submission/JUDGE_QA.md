@@ -17,13 +17,13 @@ The key came from the picks file Alex Velazquez wrote with the planner, a Claude
 Proof: `docs/DATA_CARD.md`; `docs/deviations.md`; `photos/manifest.csv` column `label_evidence`.
 
 **4. "Invasive" depends on where you are. Whose list?**
-The Bay Area list from the Cal-IPC Inventory. Every plant we call invasive is on it, and the region file is swappable per city.
-Proof: `content/regions/california-bay-area.yaml`; `content/regions/heraklion.yaml` for a second region.
+A Bay Area draft list from the Cal-IPC Inventory, which waits for Rachel's check before it counts. Until then no plant is named as invasive on a creek, the check's plant question asks for Can't tell, and the iNaturalist line reports no sightings. The region file is swappable per city.
+Proof: `content/drafts/regions/california-bay-area.yaml` (the draft); `content/regions/california-bay-area.yaml` (approved: false, empty).
 
 ## FHIR standards
 
 **5. Does it really validate against the OneAquaHealth guide?**
-Yes. The guide is pinned at hl7-eu/oah b907cf0 and built from source with SUSHI 3.20.1, and CI runs the HL7 validator over every emitted resource.
+Yes. The guide is pinned at hl7-eu/oah b907cf0 and built from source with SUSHI 3.20.1, and CI runs the HL7 validator over sample records from both emitters, the Python API and the live Worker; golden vectors hold the Worker's emitter to the Python one.
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 The latest run has zero errors.
 Proof: `fhir/ig.lock`; `results/fhir_validation.json`; `make fhir-validate`.

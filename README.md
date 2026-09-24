@@ -117,7 +117,7 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | The model invents a feature | Model output becomes a Flag through the gate or is dropped; a fuzz test throws arbitrary output at it | [`core/gate.py`](core/gate.py), [`core/tests/test_gate.py`](core/tests/test_gate.py) |
 | The model was never good at that feature | A model may flag only a feature it passed on the same test as the people; the pass table is a committed file, and one from the fake client licenses nothing | [`results/model_pass_table.json`](results/model_pass_table.json), [`core/tests/test_checker.py`](core/tests/test_checker.py) |
 | Duplicate and test pins fill the map | A precise pin within 30 metres of an existing spot is offered as that spot; names that read like a test are kept out of the counts and listed apart for a person to check; a coarse pin is never compared | [`core/act.py`](core/act.py), [`core/tests/test_act.py`](core/tests/test_act.py) |
-| A record a city's systems cannot read | Every emitted resource is validated against their guide in CI, in Python and in the TypeScript Worker | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`worker/test/golden.test.ts`](worker/test/golden.test.ts) |
+| A record a city's systems cannot read | Sample records from both emitters, the Python API and the TypeScript Worker (<!--v:results/fhir_validation.json#/files_validated-->14<!--/v--> files, walk records among them), are validated against their guide in CI, and golden vectors hold the live emitter to the same output | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`worker/test/golden.test.ts`](worker/test/golden.test.ts) |
 | Someone edits history | A hash-chained audit log, checked by a script | [`audit/`](audit/), [`scripts/verify_audit.py`](scripts/verify_audit.py) |
 | Someone rewrites the audit log, last line included | Its last hash is stamped with OpenTimestamps once a day. A rewrite with fresh hashes still holds together, so the stamped line is compared with the log's own line; `/verify` does that too, and checks the whole chain again in your browser | `uv run python scripts/verify_audit.py`, then `uv run python scripts/ots_status.py`, which fails when the log no longer has a stamped line; `.venv/bin/ots verify proofs/audit-head-2026-09-24.ots` checks the stamp itself |
 | The plan was written after the data came in | The `prereg-v1` tag object and [`docs/analysis_plan.md`](docs/analysis_plan.md) are stamped with OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin; it is not our own chain. `/verify` shows each proof and its Bitcoin block once confirmed | `.venv/bin/ots verify proofs/prereg-v1.tag.ots`, `.venv/bin/ots verify -f docs/analysis_plan.md proofs/analysis_plan.md.ots` (`uv sync` puts `ots` in `.venv/bin`; it needs a Bitcoin node to finish), or `uv run python scripts/ots_status.py`, which checks the block against a public explorer; [`proofs/README.md`](proofs/README.md) |
@@ -356,9 +356,12 @@ sequenceDiagram
   R-->>App: The visit record, human answers only
 ```
 
-The same three as images, for places that do not draw Mermaid: [`docs/diagrams/system-map.svg`](docs/diagrams/system-map.svg), [`docs/diagrams/fhir-graph.svg`](docs/diagrams/fhir-graph.svg), [`docs/diagrams/ai-gate.svg`](docs/diagrams/ai-gate.svg).
+The same four as images, for places that do not draw Mermaid: [`docs/diagrams/loop.svg`](docs/diagrams/loop.svg), [`docs/diagrams/system-map.svg`](docs/diagrams/system-map.svg), [`docs/diagrams/fhir-graph.svg`](docs/diagrams/fhir-graph.svg), [`docs/diagrams/ai-gate.svg`](docs/diagrams/ai-gate.svg).
 
 ### Tech stack
+
+<details>
+<summary>The stack, part by part</summary>
 
 | Part | Built with |
 |---|---|
@@ -372,9 +375,14 @@ The same three as images, for places that do not draw Mermaid: [`docs/diagrams/s
 | Checks | pytest with Hypothesis, Playwright, ruff, mypy, gitleaks, and `make check` in GitHub Actions |
 | Weather | Open-Meteo, for the dry pipe question |
 
-FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and built with SUSHI 3.20.1; their sandbox, read at one request per second and written with conditional creates; Open-Meteo for the rainfall behind the dry pipe rule; the Cal-IPC Inventory for the Bay Area plant list; four vision models (Claude Haiku 4.5, Sonnet 5, Opus 5.5 and Fable 5.1), called directly and kept behind a gate. No names, emails, addresses or free text in the test; EXIF stripped from uploads, which are deleted after 30 days; a hash-chained audit log.
+FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and built with SUSHI 3.20.1; their sandbox, read at one request per second and written with conditional creates; Open-Meteo for the rainfall behind the dry pipe rule; the Cal-IPC Inventory for the Bay Area plant list (a draft until Rachel checks it); four vision models (Claude Haiku 4.5, Sonnet 5, Opus 5.5 and Fable 5.1), called directly and kept behind a gate. No names, emails, addresses or free text in the test; EXIF stripped from uploads, which are deleted after 30 days; a hash-chained audit log.
+
+</details>
 
 ### API
+
+<details>
+<summary>Every route, what it is for</summary>
 
 The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes, under `/api` on the site's own origin. The Python API in [`apps/api/`](apps/api/) is the reference, with <!--v:results/api_inventory.json#/python/count-->26<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in [`docs/API.md`](docs/API.md); a test fails when a route is added without a row there.
 
@@ -387,7 +395,12 @@ The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_
 | `GET /api/two` | one of our Observations beside a laboratory one from their sandbox |
 | `POST /api/demo/answer` | judge mode: right or wrong only, shut until the data lock |
 
+</details>
+
 ### MCP tools
+
+<details>
+<summary>Every tool the MCP server offers</summary>
 
 [`apps/mcp/server.py`](apps/mcp/server.py) is a read only MCP server over our records, run locally over stdio. Every answer carries `resource_ids` and `fhir`, the visits it was counted from, so an agent cannot state a number it cannot trace. It has <!--v:results/api_inventory.json#/mcp/count-->5<!--/v--> tools; inputs and outputs in [`docs/MCP.md`](docs/MCP.md), a real session in [`examples/mcp/transcript.md`](examples/mcp/transcript.md).
 
@@ -398,6 +411,8 @@ The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_
 | `list_findings` | findings across creeks, filtered by feature, by how many people, and by whether they passed |
 | `get_observer_score` | an observer's dated qualification and score per feature, as the record carries it |
 | `explain_number` | the visit ids behind one figure on a creek's record |
+
+</details>
 
 ## How OneAquaHealth is used
 
@@ -410,13 +425,13 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | Their value sets and UCUM units | Present, absent, the indicator groups, metres | [`core/fhir_emit.py`](core/fhir_emit.py) |
 | A Questionnaire through their form extension | The test and the check, answered as QuestionnaireResponses | [`fhir/fsh/`](fhir/fsh/) |
 | Nested Locations | Creek, reach and spot with `partOf` | [`core/regions.py`](core/regions.py), [`content/regions/`](content/regions/) |
-| The HL7 validator with their guide, terminology on | Every emitted resource in CI | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`fhir/ig.lock`](fhir/ig.lock) |
+| The HL7 validator with their guide, terminology on | Sample records from both emitters in CI; golden vectors hold the live emitter to them | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`fhir/ig.lock`](fhir/ig.lock) |
 | Their sandbox | Conditional creates with our tag and a ledger, and a Library entry for the data set | [`scripts/repush_sandbox.py`](scripts/repush_sandbox.py), [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl) |
 | Their decision tool's measures | What a creek needs, in their words, from the Policy Brief, page 9 | [`content/approved_sentences.yaml`](content/approved_sentences.yaml), `/city` |
 | The five One Digital Health dimensions and FAIR | Stated in words below | this section |
 | The follower city recipe | `make new-city NAME=Aarhus COUNTRY=Denmark LAT=56.1629 LON=10.2039` scaffolds a new city in seconds; Heraklion was made that way, as a dry example | [`scripts/new_city.py`](scripts/new_city.py), [`docs/cities/`](docs/cities/) |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | [`core/fhir_referral.py`](core/fhir_referral.py) |
-| Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek on the record page and `/city`: research grade sightings of the region's listed invasive plants near its spots, with the fetch time, from a daily copy. Never in the guided check, shown only once a finished check on that creek has answered the invasive plant question (then to anyone who opens the page, a later volunteer included), counted in no number, deciding nothing. The iNaturalist plant photos are credited by author and licence on `/credits` | [`scripts/cache_inaturalist.py`](scripts/cache_inaturalist.py), [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) |
+| Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek on the record page and `/city`: research grade sightings of the region's listed invasive plants near its spots, with the fetch time, from a daily copy. Never in the guided check, shown only once a finished check on that creek has answered the invasive plant question (then to anyone who opens the page, a later volunteer included), counted in no number, deciding nothing. The iNaturalist plant photos are credited by author and licence on `/credits` | [`scripts/cache_inaturalist.py`](scripts/cache_inaturalist.py), [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) The Bay Area plant list waits on a check, so until then the line reports no recent sightings. |
 
 ### Contributed back
 
@@ -431,7 +446,7 @@ Sent to OneAquaHealth's implementation guide on 2026-09-24, in the open:
 
 ### Feasibility: run on Berkeley the way a follower city would
 
-OneAquaHealth calls a city that adopts the method a follower city. Berkeley has not adopted it; we ran the five steps on its creeks as a follower city would: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in two minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the three-question return check (`/quick`). `make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
+OneAquaHealth calls a city that adopts the method a follower city. Berkeley has not adopted it; we ran the five steps on its creeks as a follower city would: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in about four minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the three-question return check (`/quick`). `make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
 
 ### One Digital Health and FAIR
 
@@ -460,7 +475,7 @@ Every number is graded by code and written to [`results/`](results/); [`scripts/
 - **Ports:** <!--v:results/test_counts.json#/worker_golden/cases-->114<!--/v--> golden cases written by the Python reference, which the TypeScript Worker must reproduce exactly, in <!--v:results/test_counts.json#/worker_golden/node_tests-->15<!--/v--> tests (`make worker-check`).
 - **Browser:** <!--v:results/test_counts.json#/playwright/tests-->101<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->20<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
 - **Worker end to end:** <!--v:results/test_counts.json#/worker_e2e/sections-->13<!--/v--> sections that drive the real Worker's routes under `wrangler dev` with a local D1 and KV (`make worker-e2e`, in CI).
-- **Records:** the HL7 validator checks every emitted Bundle, from Python and from the Worker, against OneAquaHealth's guide: <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`make fhir-validate`).
+- **Records:** the HL7 validator checks sample Bundles from Python and from the Worker against OneAquaHealth's guide: <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`make fhir-validate`).
 
 ## What is real and what is synthetic
 
@@ -515,7 +530,7 @@ make demo-offline
 
 ## For judges
 
-A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full 24 question check), what the city sees, from the end of that walk ("See this creek as a city would"; [`/city?creek=strawberry-creek`](https://second-look-79t.pages.dev/city?creek=strawberry-creek) stays empty until the first real check), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two). The main doors are on [/judges](https://second-look-79t.pages.dev/judges).
+A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full creek check), what the city sees, from the end of that walk ("See this creek as a city would"; [`/city?creek=strawberry-creek`](https://second-look-79t.pages.dev/city?creek=strawberry-creek) stays empty until the first real check), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two). The main doors are on [/judges](https://second-look-79t.pages.dev/judges).
 
 See *Quickstart* above for `make judge-check`, the one command that needs no key and no network.
 
@@ -534,7 +549,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 - `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` replays one fixed path.
 - `/check`: the guided creek check, one question per screen, with follow-ups chosen by [`core/followups.py`](core/followups.py), working offline.
 - `/walk`: a creek from your desk, a clip from another country, the same check, a demo record made on the phone.
-- `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card.
+- `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card. It needs a stored record, so on the live site today it is empty; the gallery shows it on a local build.
 - `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach.
 - `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so. `/quick`, `/poster`, `/judges`, `/credits`.
 - A read only MCP server over our own records: [`examples/mcp/README.md`](examples/mcp/README.md).
@@ -550,7 +565,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 | What code asked next | The follow-up selector chose the questions from the answers, the weather and the person's score. No model call is in that path. | [`core/followups.py`](core/followups.py), [`core/tests/test_followups.py`](core/tests/test_followups.py) |
 | What validated | The whole Bundle, against OneAquaHealth's guide at b907cf0 with terminology on. | [`results/fhir_validation.json`](results/fhir_validation.json), `make fhir-validate` |
 | What went to their sandbox | Every resource by conditional create, tagged as ours, with a ledger of ids, and a Library entry that points back here. | [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl); the read-back, [`docs/notes/sandbox_library.md`](docs/notes/sandbox_library.md), with its screenshot [`docs/notes/sandbox-library.png`](docs/notes/sandbox-library.png); when their name resolves again (hl7-eu/oah issue 8), `curl -H "Accept: application/fhir+json" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466` |
-| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so; the page a walk opens (`/city?walk=v02`) and `make demo-offline` show the full view. | `/city?creek=strawberry-creek`, [`docs/screens/city.webp`](docs/screens/city.webp) |
+| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so; the page a walk opens (`/city?walk=v02`) and `make demo-offline` show the full view. | `/city?creek=strawberry-creek`, [`docs/screens/walk-city.webp`](docs/screens/walk-city.webp) |
 
 You can run the same loop from your desk on a creek in another country: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
 

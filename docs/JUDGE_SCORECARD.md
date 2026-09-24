@@ -10,15 +10,15 @@ Our mark: strong. The per-feature score travels with every observation in their 
 | What to look at | Where |
 |---|---|
 | The problem, in the project lead's own words: volunteers miss built banks, dug-out channels and invasive plants | the README's first lines; `docs/devpost.md`, The problem |
-| The score travels with every observation: the test sitting's QuestionnaireResponse holds it, a dated Practitioner qualification names the test, and Provenance links both to every Observation | `fhir/golden/visit-strawberry-creek-1.json`; `/spot` |
-| City actions are OneAquaHealth's own restoration measures, from their Policy Brief (2026), page 9 | `/city?creek=strawberry-creek`; README |
-| One action each for the person, the pet and the city, from approved sentences with sources | `content/approved_sentences.yaml`; the health card on `/spot` |
+| The score travels with every observation: the test sitting's QuestionnaireResponse holds it, a dated Practitioner qualification names the test, and Provenance links both to every Observation | `fhir/golden/visit-strawberry-creek-1.json`; `/two`, an answer beside "4 of 4 on this feature" |
+| City actions are OneAquaHealth's own restoration measures, from their Policy Brief (2026), page 9 | `/walk/v02`, then "See this creek as a city would"; the live creek page stays empty until the first real check |
+| One action each for the person, the pet and the city, from approved sentences with sources | `content/approved_sentences.yaml`; the health card on the sample record, `docs/screens/spot-health.webp` (local build) |
 
 Thin: no person has taken the test yet, so there is no measured effect of the lesson on people. A paid research panel may add sessions before the data lock on Sep 28, if Alex launches it; they would count in the one pre-registered analysis, reported whatever it shows. Said in README, Known weaknesses.
 
 ## Innovation and creativity (20%)
 
-Our mark: strong. Testing observers is old in professional surveys; doing it in two minutes, inside the flow, and storing it with the data is what is new.
+Our mark: strong. Testing observers is old in professional surveys; doing it in about four minutes, inside the flow, and storing it with the data is what is new.
 
 
 | What to look at | Where |
@@ -68,7 +68,7 @@ Our mark: strong. Free to run, a follower city scaffolds in seconds, and a city 
 | What to look at | Where |
 |---|---|
 | OneAquaHealth's five steps for a follower city, run the way a follower city would on Berkeley | README, How OneAquaHealth is used |
-| A second city scaffold, and a second plant list | `fhir/fsh/city-heraklion.fsh`; `content/regions/heraklion.yaml` |
+| A second city scaffold, its lists still to fill | `fhir/fsh/city-heraklion.fsh`; `content/regions/heraklion.yaml` |
 | Free to run on Cloudflare, no card | `docs/notes/hosting.md` |
 | The example offered back to their guide | `docs/ig_proposal.md` |
 

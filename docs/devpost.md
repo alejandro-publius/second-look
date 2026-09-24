@@ -47,7 +47,7 @@ Professional surveyors fixed this long ago. In the UK's River Habitat Survey, on
 ```text
 OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their score per feature, stored in the record of their test sitting beside a dated Practitioner qualification, and linked through Provenance to every Observation they make.
 
-The four features are the ones the project lead named. The creek check follows the official Citizen Science App's items in its order. The health card ends in one action each for the person, the pet and the city, and the city actions are OneAquaHealth's own restoration measures from the OneAquaHealth Policy Brief (2026), page 9. Every record validates against their implementation guide at commit b907cf0 with zero errors.
+The four features are the ones the project lead named. The creek check follows the official Citizen Science App's items in its order. The health card ends in one action each for the person, the pet and the city, and the city actions are OneAquaHealth's own restoration measures from the OneAquaHealth Policy Brief (2026), page 9. Sample records from both emitters validate against their implementation guide at commit b907cf0 with zero errors, and golden vectors hold the live emitter to them.
 ```
 
 ## Innovation and practical value
@@ -74,7 +74,7 @@ It costs nothing to run: Cloudflare's free plan, no card. A follower city adopts
 <!-- claim: results/footage_latest.json#/gate/candidates = 64 -->
 
 ```text
-Standards: FHIR R4 4.0.1. The OneAquaHealth guide pinned at hl7-eu/oah b907cf0, built with SUSHI 3.20.1, and every emitted resource validated in CI with the HL7 validator, with 0 errors in the latest run. Their codes where they exist, ours only for the four features and "can't tell". UCUM units. Nested Locations.
+Standards: FHIR R4 4.0.1. The OneAquaHealth guide pinned at hl7-eu/oah b907cf0, built with SUSHI 3.20.1, and sample records from both emitters validated in CI with the HL7 validator, with 0 errors in the latest run. Their codes where they exist, ours only for the four features and "can't tell". UCUM units. Nested Locations.
 
 APIs: their FHIR sandbox, read at one request a second and mirrored with conditional creates, a tag on every resource and a ledger of ids, plus a Library entry there for our data set. Open-Meteo for 72 hours of rain behind the dry pipe rule. A read-only MCP server over our own records for software agents.
 

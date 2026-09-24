@@ -3,8 +3,9 @@
 One row per promise this project makes. The command is the proof. If a command does not print
 what the row says, the promise is not kept, whatever any page claims.
 
-Run everything from the repository root. `make judge-check` runs the first five rows on its own,
-offline, with no API key, with `make reproduce` (row 16) as well, and prints a six line summary.
+Run everything from the repository root. `make judge-check` runs rows 1, 2 and 5 on its own and reads
+row 3's last run, with `make reproduce` (row 16), the web build, the design gate and a secret scan
+as well, offline, with no API key, and prints a six line summary.
 
 ## Setup, once
 
@@ -22,7 +23,7 @@ Nothing below needs an API key. Nothing below needs a network except the two row
 |---|---|---|---|
 | 1 | Everything is tested | `make test` | the pytest line with 0 failures |
 | 2 | The edge is the same function twice, not a second opinion | `make worker-check` | `build-worker-content` and `golden-vectors` both up to date, then the Worker's own suites pass |
-| 3 | Every record their systems could not read is stopped here | `make fhir-validate` | validated against `hl7-eu/oah` at `b907cf0` with 0 errors |
+| 3 | Sample records from both emitters are ones their systems can read | `make fhir-validate` | validated against `hl7-eu/oah` at `b907cf0` with 0 errors |
 | 4 | No number in the README was typed by hand | `make verify-claims` | every claim matched against `results/` |
 | 5 | The audit log has no break in it | `make audit-verify` | the entry count, `chain intact`, and the last hash |
 | 6 | Every image a person sees has a manifest row | `make manifest-check` | the image count, all with matching rows |

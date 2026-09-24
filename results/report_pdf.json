@@ -8,7 +8,7 @@
   "pages": 8,
   "pandoc": "pandoc 3.9.0.2",
   "pdf": "docs/REPORT.pdf",
-  "pdf_sha256": "206f5fa20eecdaadf535c4f221c5d7423ba8733fc008e60600709e86af5ac16c",
+  "pdf_sha256": "239e561cda082a69d9b49270027023c00c0d8eb2cfa4133b88477cc5bc1d48de",
   "playwright": "1.63.0",
   "sources": [
     "README.md",
@@ -32,5 +32,5 @@
     "results/model_sweep_20260924T054756Z.json",
     "results/mutation.json"
   ],
-  "sources_sha256": "94fd4152d8051416c2babb5d23112280bebf5258386e0a502cbb7be36f47366a"
+  "sources_sha256": "68e5a6526caf23933bb58810a5665bc40c24a5bb5c6cb15331fc38d729904ff8"
 }
