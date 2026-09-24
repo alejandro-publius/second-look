@@ -6,6 +6,12 @@ days pass: prices and ids move.
 **Checked 2026-09-21** against https://platform.claude.com/docs/en/about-claude/pricing (the
 older docs.claude.com path now redirects there).
 
+**In use from 2026-09-24** (UPDATE_27 section 4): `claude-haiku-4-5-20251001`, `claude-sonnet-5`,
+`claude-opus-5-5` in place of the legacy `claude-opus-5`, and `claude-fable-5-1`, the strongest
+model on the models page, as a fourth observer. Opus 5.5 costs $4 and $20 per MTok and Fable 5.1
+$10 and $50, both checked on the pages below on 2026-09-23; one direct call to each with our
+prompt and tool answered through the tool in about 120 output tokens.
+
 **Re-confirmed 2026-09-23** (UPDATE_22 section 3) on the models overview page
 (https://platform.claude.com/docs/en/about-claude/models/overview) and the pricing page. The three
 ids in `evals/models.yaml` still answer exactly as below, at the same prices and batch prices.

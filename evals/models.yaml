@@ -18,8 +18,15 @@ models:
     short: sonnet
     confirmed_against_models_page: true
     accepts_temperature: false
-  - id: claude-opus-5
+  # Opus 5.5 replaced Opus 5 on Sep 24 (UPDATE_27 section 4: the current Opus), and Fable 5.1, the
+  # strongest model on the models page, was added as a fourth observer. Both were checked on the
+  # models overview page on 2026-09-23 (docs/notes/model_ids.md).
+  - id: claude-opus-5-5
     short: opus
+    confirmed_against_models_page: true
+    accepts_temperature: false
+  - id: claude-fable-5-1
+    short: fable
     confirmed_against_models_page: true
     accepts_temperature: false
 
@@ -85,10 +92,17 @@ fake_profiles:
       dug_out_channel: 0.70
       invasive_plant: 0.60
       pipe_running: 0.95
-  claude-opus-5:
+  claude-opus-5-5:
     malformed_rate: 0.0
     accuracy:
       artificial_bank: 1.0
       dug_out_channel: 0.95
       invasive_plant: 0.80
+      pipe_running: 1.0
+  claude-fable-5-1:
+    malformed_rate: 0.0
+    accuracy:
+      artificial_bank: 1.0
+      dug_out_channel: 0.95
+      invasive_plant: 0.85
       pipe_running: 1.0

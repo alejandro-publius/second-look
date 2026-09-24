@@ -23,8 +23,13 @@ models:
     output_per_million: 10.00
     source_checked: true
     note: Checked 2026-09-23 on the pricing page (docs/notes/model_ids.md).
-  claude-opus-5:
-    input_per_million: 5.00
-    output_per_million: 25.00
+  claude-opus-5-5:
+    input_per_million: 4.00
+    output_per_million: 20.00
+    source_checked: true
+    note: Checked 2026-09-23 on the pricing page (docs/notes/model_ids.md).
+  claude-fable-5-1:
+    input_per_million: 10.00
+    output_per_million: 50.00
     source_checked: true
     note: Checked 2026-09-23 on the pricing page (docs/notes/model_ids.md).

@@ -141,9 +141,9 @@ submit-check:
 # Afterwards the walks are gated again on the real answers and the pool numbers rewritten; the
 # README's AI table is filled by the next session from results/, never by hand.
 ai-run:
-	$(PY) evals/model_sweep.py --real --max-usd 10
+	$(PY) evals/model_sweep.py --real --max-usd 60
 	$(PY) evals/benchmark.py --real --runs 3
-	$(PY) evals/footage.py --real --max-usd 25
+	$(PY) evals/footage.py --real --max-usd 120
 	$(PY) scripts/build_walks.py --no-clips
 	$(PY) evals/footage_pool.py
 

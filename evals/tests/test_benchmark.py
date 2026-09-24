@@ -16,7 +16,12 @@ from evals.agreement import cohens_kappa, pairs_from_csvs, summarise
 from evals.benchmark import labelled_pool, per_feature_accuracy, skipped_rows, wilson_interval
 from evals.model_sweep import REFUSAL_NO_KEY, AnswerRecord
 
-MODEL_IDS = ("claude-haiku-4-5-20251001", "claude-sonnet-5", "claude-opus-5")
+MODEL_IDS = (
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-5",
+    "claude-opus-5-5",
+    "claude-fable-5-1",
+)
 
 # Wilson -----------------------------------------------------------------------------------------
 

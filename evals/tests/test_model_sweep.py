@@ -37,7 +37,12 @@ from evals.model_sweep import (
     run_sweep,
 )
 
-MODEL_IDS = ("claude-haiku-4-5-20251001", "claude-sonnet-5", "claude-opus-5")
+MODEL_IDS = (
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-5",
+    "claude-opus-5-5",
+    "claude-fable-5-1",
+)
 T, F = True, False
 
 
@@ -479,13 +484,15 @@ def test_main_fake_writes_the_contract_files(tmp_path: Path, capsys: Any) -> Non
     sweeps = list(tmp_path.glob("model_sweep_*.json"))
     assert len(sweeps) == 1
     doc = json.loads(sweeps[0].read_text())
-    assert len(doc["answers"]) == 3 * 16 * 3 and doc["stamp"] == "SYNTHETIC"
+    assert len(doc["answers"]) == len(MODEL_IDS) * 16 * 3 and doc["stamp"] == "SYNTHETIC"
     assert doc["settings"]["resize_long_side_px"] == 1092
     # Real photos come in several shapes, so the sizes differ. What must hold for every one of
     # them is the long side the plan promises: 1092 px.
     sizes = doc["settings"]["image_sizes_sent"]
     assert sizes and all(max(s) == 1092 for s in sizes), sizes
-    assert len((tmp_path / "cost_log_fake.jsonl").read_text().splitlines()) == 144
+    assert (
+        len((tmp_path / "cost_log_fake.jsonl").read_text().splitlines()) == len(MODEL_IDS) * 16 * 3
+    )
 
 
 def test_same_seed_same_pass_table(tmp_path: Path) -> None:
