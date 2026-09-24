@@ -14,7 +14,7 @@ export const dynamicParams = false;
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const walk = walkById(id);
-  return { title: `${walk ? t("walk.title", { country: walk.country }) : t("walk.list_title")}: ${t("app.name")}` };
+  return { title: `${walk ? walk.creek_name : t("walk.list_title")}: ${t("app.name")}` };
 }
 
 export default async function WalkPage({ params }: { params: Promise<{ id: string }> }) {

@@ -29,6 +29,23 @@ def test_one_walk_per_country_the_video_with_most_frames_wins() -> None:
     assert [c["id"] for c in chosen] == ["v02", "v03"]
 
 
+def test_a_creek_name_reads_with_the_where_the_country_takes_it() -> None:
+    # REVIEW_03 R41: "A creek in United Kingdom" read wrong on /walk.
+    assert bw.creek_name("Russia") == "A creek in Russia"
+    assert bw.creek_name("United Kingdom") == "A creek in the United Kingdom"
+    assert bw.creek_name("United States") == "A creek in the United States"
+    assert bw.creek_name("Netherlands") == "A creek in the Netherlands"
+    assert bw.creek_name("Czech Republic") == "A creek in the Czech Republic"
+    assert bw.creek_name("Chile") == "A creek in Chile"
+
+
+def test_the_committed_walks_carry_the_creek_name_the_rule_writes() -> None:
+    walks = yaml.safe_load(bw.OUT_YAML.read_text(encoding="utf-8"))["walks"]
+    assert walks
+    for w in walks:
+        assert w["creek_name"] == bw.creek_name(w["country"]), w["id"]
+
+
 def test_the_window_holds_the_most_kept_frames() -> None:
     assert bw.best_window([10, 100, 104, 108, 112, 300], duration_s=400) == 98
     # Never past the end of the video.

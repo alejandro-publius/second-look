@@ -18,7 +18,7 @@ export default function WalksPage() {
       {walks.map((w) => (
         <Link key={w.id} href={`/walk/${w.id}`} className="card stack">
           <Photo id={w.poster_photo_id} />
-          <span>{t("walk.title", { country: w.country })}</span>
+          <span>{w.creek_name}</span>
         </Link>
       ))}
     </div>

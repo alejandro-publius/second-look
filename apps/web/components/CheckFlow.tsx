@@ -8,7 +8,7 @@ import { LocationStep } from "./LocationStep";
 import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
 import { Progress } from "./Progress";
 import { api, ApiError, isNetworkError, type AnswerValue, type DraftRequest, type DraftResponse, type Followup, type SpotRef } from "@/lib/api";
-import { content, type FormItem } from "@/lib/content";
+import { content, questionCount, type FormItem } from "@/lib/content";
 import { enqueue, flushQueue, getQueued, onQueueChange } from "@/lib/offline";
 import { clearContributorToken, getContributorToken, rememberSpot } from "@/lib/session";
 import { t } from "@/lib/t";
@@ -205,9 +205,10 @@ export function CheckFlow() {
         setStage({ name: "photos" });
         return null;
       }
+      const count = questionCount(items, stage.index);
       return (
         <div className="stack" key={item.id}>
-          <Progress value={stage.index + 1} max={items.length} labelKey="check.progress" />
+          <Progress value={count.n} max={count.total} labelKey="check.progress" />
           <FormQuestion
             item={item}
             value={answers[item.id]}

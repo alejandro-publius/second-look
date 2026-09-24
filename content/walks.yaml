@@ -33,7 +33,7 @@ walks:
   license: CC-BY-3.0
   source_url: https://www.youtube.com/watch?v=7soch86PJ2U
   country: United Kingdom
-  creek_name: A creek in United Kingdom
+  creek_name: A creek in the United Kingdom
   spot_name: The stretch in the clip
   clip:
     file: walks/v03.mp4
@@ -59,7 +59,7 @@ walks:
   license: CC-BY-3.0
   source_url: https://www.youtube.com/watch?v=DaD3RJGEvhM
   country: United States
-  creek_name: A creek in United States
+  creek_name: A creek in the United States
   spot_name: The stretch in the clip
   clip:
     file: walks/v07.mp4

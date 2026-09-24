@@ -8,7 +8,7 @@ import { FormQuestion } from "./FormQuestion";
 import { Photo } from "./Photo";
 import { Progress } from "./Progress";
 import type { AnswerValue } from "@/lib/api";
-import { content, featureById, licenseUrl, type FormItem, type Walk } from "@/lib/content";
+import { content, featureById, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
 import { t } from "@/lib/t";
 import { buildRecord, saveWalkVisit, type WalkAnswers } from "@/lib/walks";
 
@@ -26,7 +26,7 @@ function Clip({ walk }: { walk: Walk }) {
   const poster = content.photos[walk.poster_photo_id];
   return (
     <figure className="stack walk-figure">
-      <video className="walk-clip" controls muted playsInline preload="metadata" poster={poster?.url} aria-label={t("walk.clip_label", { country: walk.country })}>
+      <video className="walk-clip" controls muted playsInline preload="metadata" poster={poster?.url} aria-label={t("walk.clip_label", { creek: walk.creek_name })}>
         <source src={`/${walk.clip.file}`} type="video/mp4" />
         <Photo id={walk.poster_photo_id} />
       </video>
@@ -106,9 +106,10 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     case "items": {
       const item = items[stage.index];
       if (item) {
+        const count = questionCount(items, stage.index);
         body = (
           <div className="stack" key={item.id}>
-            <Progress value={stage.index + 1} max={items.length} labelKey="check.progress" />
+            <Progress value={count.n} max={count.total} labelKey="check.progress" />
             <FormQuestion
               item={item}
               value={answers[item.id]}
@@ -160,7 +161,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
             {problems.length === 0 ? t("walk.structure_ok") : t("walk.structure_bad", { n: problems.length })}
           </p>
           <p className="small muted">{checkerLine(walk)}</p>
-          <FhirView load={() => Promise.resolve(bundle)} curl={t("walk.no_curl")} />
+          <FhirView load={() => Promise.resolve(bundle)} curl={null} />
           <p>
             <Link className="btn btn-block" href={`/city?walk=${encodeURIComponent(walk.id)}`}>
               {t("walk.city_link")}
@@ -176,7 +177,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
 
   return (
     <div className="stack">
-      <FocusHeading>{t("walk.title", { country: walk.country })}</FocusHeading>
+      <FocusHeading>{walk.creek_name}</FocusHeading>
       <Clip walk={walk} />
       {body}
     </div>

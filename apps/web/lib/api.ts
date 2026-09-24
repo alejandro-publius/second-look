@@ -199,6 +199,8 @@ export interface FhirValidationOut {
   terminology_checks_ran?: boolean;
   errors?: number;
   warnings?: number;
+  /** How many of the files the validator checked are walk records (scripts/fhir_validate.py). */
+  walk_records_validated?: number;
   [k: string]: unknown;
 }
 
