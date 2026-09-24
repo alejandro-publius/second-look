@@ -441,8 +441,23 @@ def test_diagrams_need_labelled_edges_and_ci_rendering(repo: Path) -> None:
         text = text.replace(label, "")
     (repo / "README.md").write_text(text)
     assert has(di.check_diagrams(repo), "carry no labels")
+    # CI renders only when a workflow installs tools/diagrams and runs make check with a diagrams
+    # target that renders (render.mjs --check), or sets MERMAID_CLI.
     write(repo, ".github/workflows/check.yml", "run: make check\n")
-    assert has(di.check_diagrams(repo), "MERMAID_CLI")
+    assert has(di.check_diagrams(repo), "does not render the diagrams")
+    write(
+        repo, ".github/workflows/check.yml", "run: cd tools/diagrams && npm ci\nrun: make check\n"
+    )
+    write(
+        repo,
+        "Makefile",
+        "check: lint diagrams\ndiagrams:\n\tcd tools/diagrams && node render.mjs --check\n",
+    )
+    assert not has(di.check_diagrams(repo), "does not render the diagrams")
+    write(
+        repo, "Makefile", "check: lint\ndiagrams:\n\tcd tools/diagrams && node render.mjs --check\n"
+    )
+    assert has(di.check_diagrams(repo), "does not render the diagrams")
 
 
 @pytest.mark.parametrize(

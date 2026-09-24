@@ -188,13 +188,32 @@ def run_checks(
         track.reasons.append("README.md's first line is not the track statement word for word")
     checks.append(track)
 
+    # The organizers' five headers: in order in the Devpost text, which is what they read, and each
+    # named word for word in the README's line that maps them to its judge-first sections
+    # (UPDATE_27 section 3 set the README's order; the headers moved to that line).
     headers = Check("five_headers")
-    positions = [readme.find(f"## {h}") for h in HEADERS]
+    devpost_text = (
+        (root / "docs" / "devpost.md").read_text(encoding="utf-8")
+        if (root / "docs" / "devpost.md").exists()
+        else ""
+    )
+    positions = [devpost_text.find(h) for h in HEADERS]
     for h, pos in zip(HEADERS, positions, strict=True):
         if pos < 0:
-            headers.reasons.append(f"README.md lacks the header '## {h}'")
+            headers.reasons.append(f"docs/devpost.md lacks the organizer header '{h}'")
     if all(p >= 0 for p in positions) and positions != sorted(positions):
-        headers.reasons.append("the five organizer headers are out of order in README.md")
+        headers.reasons.append("the five organizer headers are out of order in docs/devpost.md")
+    map_line = next(
+        (
+            ln
+            for ln in readme_lines
+            if ln.startswith("How this answers the organizers' five headers")
+        ),
+        "",
+    )
+    for h in HEADERS:
+        if f"*{h}*" not in map_line:
+            headers.reasons.append(f"README.md's map line does not name '{h}'")
     checks.append(headers)
 
     link = Check("video_link")

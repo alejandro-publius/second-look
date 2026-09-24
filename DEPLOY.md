@@ -127,7 +127,7 @@ Names only. No value is in the repository: `.env.example` is tracked and `.env` 
 | `EXPORT_TOKEN` | a Worker secret; the ignored `.env` | opens `/api/test/export`; without it the route is 404 |
 | `ANTHROPIC_API_KEY` | the ignored `.env` in `~/second-look-depth` only, never exported in a shell | lets `make ai-run` call the models; nothing else reads it |
 | `CLOUDFLARE_D1_READ_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets, not yet set | let `.github/workflows/backup.yml` export D1; the workflow runs by hand only until they exist |
-| the wrangler login | wrangler's own store on the Mac | deploys, the D1 backup and the daily cache job |
+| `wrangler login` (not a variable) | wrangler's own store on the Mac | deploys, the D1 backup and the daily cache job |
 
 A secret shorter than 16 characters, or left at the placeholder in `.env.example`, is treated as
 not set by both servers (`apps/api/settings.py`, `sameSecret` in `worker/src/index.ts`).
@@ -211,6 +211,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `README_HTML` | none | `apps/web/scripts/record-clips.mjs` | the rendered README the clip script films |
 | `E2E_PORT` | `8791` | `worker/test/e2e.mjs` | the port of `wrangler dev` in the Worker e2e |
 | `E2E_COMPAT_DATE` | `2026-08-18` | `worker/test/e2e.mjs` | a compatibility date the local runtime knows |
+| `DEMO_URL` | `https://second-look-79t.pages.dev/demo` | `apps/web/scripts/demo-open-check.mjs` | which judge mode page the Sep 28 opening check reads |
 | `ALLOW_BRANCH` | not set | `scripts/deploy.sh` | `yes` lets a deploy run from a branch other than `main` |
 | `BACKUP_DIR` | `~/second-look-backups` for D1, `data/backups` for the local database | `scripts/backup_d1.sh`, `scripts/backup_db.sh`, `scripts/restore_db.sh`, `scripts/restore_drill_d1.sh` | where backups are written and read |
 | `BACKUP_KEEP` | `30` | `scripts/backup_d1.sh` | how many D1 dumps to keep |

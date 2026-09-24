@@ -10,7 +10,7 @@ in the README (its cost is logged in `results/cost_log.jsonl`), and the QA key i
 password manager when you can. Nobody films at a creek: the creek shots are open footage from
 Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.md`.
 
-1. **Tonight, 2 minutes: look at the live site on your phone.** `/`, `/walk`, `/judges`, and
+1. **Thu Sep 24, 2 minutes: look at the live site on your phone.** `/`, `/walk`, `/judges`, and
    `/demo`, which says Judge mode opens on Sep 28. https://second-look-79t.pages.dev
 
 2. **By Fri Sep 25, 20 minutes: record your voice.** Run `make video-rough` and play
@@ -27,10 +27,9 @@ Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.
 4. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
    read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
 
-5. **By Tue Sep 29, 10 minutes: upload the video.** A session lays your voice over the rough cut
-   in place of the scratch voice, keeping every credit line and the end card. The upload must come
-   from your account: put the licence line from `docs/devpost.md` in its description (the video is
-   CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README, or give it to a session.
+5. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
+   account, with the licence line from `docs/devpost.md` in its description (the video is
+   CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
 6. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
    `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then

@@ -1,4 +1,4 @@
-# How Second Look was built: the hard parts
+# Engineering challenges: how Second Look was built, the hard parts
 
 Second Look gives a creek volunteer a two-minute photo test, stores their score per feature with
 every observation they make, and lets a vision model ask one follow-up question only where it

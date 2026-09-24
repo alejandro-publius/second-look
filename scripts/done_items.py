@@ -342,8 +342,18 @@ def check_diagrams(root: Path) -> list[str]:
         problems.append("the system map's edges carry no labels")
     workflows = root / ".github" / "workflows"
     ci = [read(p) for p in sorted(workflows.glob("*.y*ml"))] if workflows.is_dir() else []
-    if not any("MERMAID_CLI" in text for text in ci):
-        problems.append("CI does not render the diagrams: no workflow sets MERMAID_CLI")
+    # CI renders the diagrams when a workflow installs the pinned renderer and runs make check,
+    # whose diagrams target draws every source again (tools/diagrams/render.mjs --check); or when
+    # a workflow sets MERMAID_CLI.
+    makefile = read(root / "Makefile")
+    check_line = next((ln for ln in makefile.splitlines() if ln.startswith("check:")), "")
+    renders = "diagrams" in check_line.split() and "render.mjs --check" in makefile
+    installs = any("tools/diagrams" in text and "make check" in text for text in ci)
+    if not any("MERMAID_CLI" in text for text in ci) and not (renders and installs):
+        problems.append(
+            "CI does not render the diagrams: no workflow installs tools/diagrams "
+            "and runs make check with its render"
+        )
     return problems
 
 
@@ -705,6 +715,9 @@ CONFIG_PLACES = (
     "apps/api/settings.py",
     "Makefile",
     "docker-compose.yml",
+    "apps/web/next.config.ts",
+    "apps/web/package.json",
+    "apps/web/Dockerfile",
 )
 CONFIG_GLOBS = (
     ("worker/src", "*.ts"),
@@ -714,6 +727,12 @@ CONFIG_GLOBS = (
     ("scripts", "*.py"),
     ("scripts", "*.sh"),
     (".github/workflows", "*.yml"),
+    ("evals", "*.py"),
+    ("core", "*.py"),
+    ("apps/web/app", "*.tsx"),
+    ("apps/web/components", "*.tsx"),
+    ("apps/web/tests", "*.ts"),
+    ("worker/test", "*.mjs"),
 )
 
 
@@ -748,7 +767,9 @@ def check_deploy_doc(root: Path) -> list[str]:
                 f"configuration row '{r[0] if r else ''}' does not name its setting in backticks"
             )
         for name in spans:
-            if name not in haystack:
+            # pydantic settings read an environment name case-insensitively (content_root is
+            # CONTENT_ROOT), so the name counts wherever it appears in any case.
+            if name.lower() not in haystack.lower():
                 problems.append(
                     f"the configuration table names {name}, which no config or code file uses"
                 )
@@ -769,7 +790,7 @@ def check_adrs(root: Path) -> list[str]:
     for p in adrs:
         text = read(p)
         for part in ("Status", "Context", "Decision", "Consequences"):
-            if not re.search(rf"^(#+\s*|\*\*)?{part}\b", text, re.M | re.I):
+            if not re.search(rf"^(-\s*)?(#+\s*|\*\*)?{part}\b", text, re.M | re.I):
                 problems.append(f"docs/adr/{p.name} has no {part} part")
     return problems
 

@@ -12,6 +12,9 @@ from scripts import submit_check, third_party
 REPO = Path(__file__).parents[2]
 STATEMENT = (REPO / "docs" / "track_statement.md").read_text().strip()
 HEADERS = "".join(f"\n## {h}\n\ntext\n" for h in submit_check.HEADERS)
+MAP_LINE = "How this answers the organizers' five headers: " + "; ".join(
+    f"*{h}* under a section" for h in submit_check.HEADERS
+)
 
 
 def fake_runner(visibility: str = "PRIVATE", claims_rc: int = 0) -> submit_check.Runner:
@@ -34,8 +37,11 @@ def build_root(tmp_path: Path, *, video: bool = True, headers: str = HEADERS) ->
     (root / "docs").mkdir(parents=True)
     (root / "docs" / "track_statement.md").write_text(STATEMENT + "\n")
     video_line = "\nVideo: https://youtu.be/fake\n" if video else ""
-    (root / "README.md").write_text(f"{STATEMENT}\n\n# Second Look\n{video_line}{headers}")
-    (root / "docs" / "devpost.md").write_text(f"Demo: https://example.org/demo\n{video_line}")
+    # The five headers live in the Devpost text; the README names each one in its map line.
+    (root / "README.md").write_text(f"{STATEMENT}\n\n# Second Look\n{video_line}\n{MAP_LINE}\n")
+    (root / "docs" / "devpost.md").write_text(
+        f"Demo: https://example.org/demo\n{video_line}{headers}"
+    )
     (root / "LICENSE").write_text("MIT License\n\nCopyright 2026\n")
     return root
 
@@ -71,8 +77,16 @@ def test_each_guard_fires(tmp_path: Path) -> None:
     reasons = {c.name: c.reasons for c in checks}
     assert any("A clear demonstration" in r for r in reasons["five_headers"])
 
+    root = build_root(tmp_path / "d")
+    (root / "README.md").write_text(
+        STATEMENT + "\n\nHow this answers the organizers' five headers: none\n"
+    )
+    checks = submit_check.run_checks(root, runner=fake_runner("PUBLIC"), fetch=lambda url: 200)
+    reasons = {c.name: c.reasons for c in checks}
+    assert any("map line does not name 'The problem'" in r for r in reasons["five_headers"])
+
     root = build_root(tmp_path / "c")
-    (root / "README.md").write_text("# Not the statement\n" + HEADERS)
+    (root / "README.md").write_text("# Not the statement\n" + MAP_LINE + "\n")
     (root / "LICENSE").write_text("Proprietary\n")
     (root / "audit").mkdir()
     (root / "audit" / "log.jsonl").write_text("{}\n")

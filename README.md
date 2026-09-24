@@ -36,7 +36,7 @@ The tidy park on the left hides a concrete channel. The messy bend on the right 
 
 <!-- GIF -->
 
-How this answers the organizers' five headers: the problem and innovation are under *Why trust a volunteer, and the AI?*; alignment with OneAquaHealth under *How OneAquaHealth is used*; data, technology, AI, APIs and standards under *Architecture* and *Evals*; the demonstration under *For judges*.
+How this answers the organizers' five headers: *The problem* and *Innovation and practical value* are under Why trust a volunteer, and the AI?; *How the solution aligns with OneAquaHealth* under How OneAquaHealth is used; *Effective use of data, technology, AI, APIs and standards* under Architecture and Evals; *A clear demonstration of what was built* under For judges. The Devpost text keeps the five headers as they are.
 
 ## Numbers at a glance
 
@@ -113,7 +113,7 @@ A vision model can help a volunteer look again. It can never decide what is stor
 3. **Its answer is forced.** One photo, one feature, the frozen question wording. Anything that is not yes, no or can't tell with a short note becomes can't tell and counts as malformed (`force_answer` in `core/checker.py`).
 4. **The gate turns it into a flag or drops it.** `parse_flags` in `core/gate.py` keeps a `Flag` only for a known feature the model passed, with a sane confidence and a short plain note, and drops everything else with a reason in plain words. It never raises. On the footage run it dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags, each for a feature that model had not passed.
 5. **A flag can only make one question eligible.** `core/followups.py` picks the follow-up questions from the answers, the rain (`core/rainfall.py`), the person's scores and the flags, by the rules in `content/followups.yaml`: two questions at most, the model's at most one, and no model call inside it.
-6. **The person answers again.** The model's note is shown only as "the checker noticed".
+6. **The person answers again.** The model's note is shown only as "the checker noticed" (`core/checker.py`, `apps/web/components/WalkFlow.tsx`).
 7. **The record is built from human inputs only.** `build_record` in `core/gate.py` has no parameter that could carry a flag, a model id or model text. `core/fhir_emit.py` writes the record under OneAquaHealth's profiles with the person's score attached, and `scripts/fhir_validate.py` checks it in CI.
 
 Where it runs today: the model's flags reach a person in the video walks, where `scripts/build_walks.py` sends the footage run's answers through the same gate at build time. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called.
