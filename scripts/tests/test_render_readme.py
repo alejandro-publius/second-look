@@ -48,7 +48,9 @@ def test_every_doc_with_a_rendered_number_is_rendered_and_checked() -> None:
         p for p in tracked if "<!--v:" in (root / p).read_text(encoding="utf-8", errors="ignore")
     }
     make = (root / "Makefile").read_text(encoding="utf-8")
-    rendered = set(re.search(r"^RENDERED_DOCS := (.+)$", make, re.M).group(1).split())
+    found = re.search(r"^RENDERED_DOCS := (.+)$", make, re.M)
+    assert found, "the Makefile has no RENDERED_DOCS line"
+    rendered = set(found.group(1).split())
     checked = set(re.findall(r"verify_claims\.py --file (\S+)", make))
     marked.discard("README.md")  # render_readme.py and verify_claims.py take it by default
     assert marked, "no doc with a rendered value was found"

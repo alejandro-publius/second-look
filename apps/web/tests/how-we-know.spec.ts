@@ -151,8 +151,13 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
     kept.getByText(fill("how.example_kept", { photos: cell.photos_per_run, right: cell.runs_with_every_photo_right, runs: cell.runs })),
   ).toBeVisible();
   await expect(kept.getByTestId("example-question").locator("strong")).toHaveText(k.followup.on_screen.question);
-  await expect(kept.getByTestId("example-note")).toHaveText(`${en["label.checker_noticed"]}: ${k.followup.on_screen.note}`);
-  await expect(page.getByText(k.followup.on_screen.note, { exact: false })).toHaveCount(1);
+  // A note the checker cut at 160 characters is shown to its last whole word, then "...", never
+  // stopping mid-word (CRITIC_07 J04).
+  const note: string = k.followup.on_screen.note;
+  const shown = note.length < 160 ? note : `${note.slice(0, note.lastIndexOf(" ")).replace(/[\s,;:.]+$/, "")}...`;
+  await expect(kept.getByTestId("example-note")).toHaveText(`${en["label.checker_noticed"]}: ${shown}`);
+  await expect(page.getByText(shown, { exact: false })).toHaveCount(1);
+  if (note.length >= 160) expect(shown.endsWith("...") && note.startsWith(shown.slice(0, -3))).toBe(true);
   await credit(kept, k);
 
   // Dropped: the model, the feature and the gate's reason in plain words, and in its own words.
@@ -246,6 +251,11 @@ test("/how-we-know shows each footage frame above its card, from its manifest ro
     await expect(lines.nth(i)).toHaveText(words);
   }
   await expect(page.getByTestId("example-dropped").getByTestId("example-other")).toHaveCount(0);
+  // CRITIC_07 J03: when no other model that passed the feature said yes on the frame, the card says
+  // so, and says that is why a flag can only ask.
+  const noOtherYes = others.every((o) => !o.answers_by_run.includes("yes"));
+  await expect(page.getByTestId("example-why-ask")).toHaveCount(noOtherYes ? 1 : 0);
+  if (noOtherYes) await expect(page.getByTestId("example-why-ask")).toHaveText(en["how.example_why_ask"]);
 });
 
 test("the footage example's reader follows the file: a changed copy changes what the page would show, and a run that is not real shows none", () => {

@@ -29,6 +29,15 @@ function CaseRows({ c }: { c: Case }) {
   );
 }
 
+// core/checker.py keeps at most 160 characters of a note, so a long one stops mid-word. The page
+// shows it up to its last whole word, with "..." to say it was cut (CRITIC_07 J04).
+const NOTE_MAX_CHARS = 160;
+function shownNote(note: string): string {
+  if (note.length < NOTE_MAX_CHARS) return note;
+  const cut = note.slice(0, note.lastIndexOf(" ")).replace(/[\s,;:.]+$/, "");
+  return `${cut}...`;
+}
+
 // The frame itself, whole, above its card (CRITIC_04 F02). build-content.mjs copies these two
 // benchmark frames and no others, and gives each its own alt text from the locale, which says what
 // is in the frame and not what the model or the gate made of it.
@@ -162,7 +171,7 @@ export default function HowWeKnowPage() {
                   <strong>{example.kept.question}</strong>
                 </p>
                 <p className="small muted" data-testid="example-note">
-                  {t("label.checker_noticed")}: {example.kept.note}
+                  {t("label.checker_noticed")}: {shownNote(example.kept.note)}
                 </p>
               </div>
               {/* What the other models that passed this feature answered on the same frame. */}
@@ -173,6 +182,9 @@ export default function HowWeKnowPage() {
                     : t("how.example_other_said", { model: modelName(o.model), answers: o.answers.map((a) => t(ANSWER_KEYS[a]).toLowerCase()).join(", ") })}
                 </p>
               ))}
+              {example.kept.others.length > 0 && example.kept.others.every((o) => !o.answers.includes("yes")) ? (
+                <p data-testid="example-why-ask">{t("how.example_why_ask")}</p>
+              ) : null}
               <NoLabel c={example.kept} />
               <FrameCredit c={example.kept} />
             </div>

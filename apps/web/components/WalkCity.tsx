@@ -69,7 +69,10 @@ export function WalkCity({ walkId }: { walkId: string }) {
           </section>
           <section className="card stack" aria-label={t("city.walk_needs")}>
             <h2>{t("city.walk_needs")}</h2>
-            {demo.needs.length === 0 ? <p className="muted">{t("city.walk_nothing")}</p> : null}
+            {/* Findings with no measure (a plant) are not "nothing found" (CRITIC_07 J04). */}
+            {demo.needs.length === 0 ? (
+              <p className="muted">{t(demo.findings.length === 0 ? "city.walk_nothing" : "city.walk_needs_none")}</p>
+            ) : null}
             {demo.needs.map((n) => (
               <Row key={n.sentence_id} label={n.text} value={reasonsThenSource(n.because.map(findingName), n.source)} />
             ))}

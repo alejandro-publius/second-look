@@ -56,7 +56,6 @@ How this answers the organizers' five headers: *The problem* and *Innovation and
 | Flags the gate stopped | not asked: an answer on the test is scored, never flagged | <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags dropped, <!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> kept, because a model may flag only a feature it passed |
 | One checker question about one frame, in cents | not asked | Claude Haiku 4.5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-haiku-4-5-20251001-->0.2<!--/v-->, Claude Sonnet 5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-sonnet-5-->0.4<!--/v-->, Claude Opus 5.5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-opus-5-5-->1.0<!--/v-->, Claude Fable 5.1 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-fable-5-1-->2.3<!--/v--> |
 | Cost per 100 frames, each asked the four questions three times by all four models | not asked | <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD, with direct calls at the full price |
-| Small bugs planted on purpose in four modules, the gate, the follow-up selector, scoring and the FHIR emitter, caught by core's tests (`make mutation`, mutmut); [`core/checker.py`](core/checker.py), [`core/rainfall.py`](core/rainfall.py) and the Worker's TypeScript ports are not in this run | the gate caught <!--v:results/mutation.json#/by_name/gate/killed-->226<!--/v--> of <!--v:results/mutation.json#/by_name/gate/mutants-->229<!--/v-->, the follow-up picker <!--v:results/mutation.json#/by_name/followups/killed-->319<!--/v--> of <!--v:results/mutation.json#/by_name/followups/mutants-->324<!--/v-->, scoring <!--v:results/mutation.json#/by_name/scoring/killed-->53<!--/v--> of <!--v:results/mutation.json#/by_name/scoring/mutants-->53<!--/v-->, the FHIR record writer <!--v:results/mutation.json#/by_name/fhir_emit/killed-->1477<!--/v--> of <!--v:results/mutation.json#/by_name/fhir_emit/mutants-->1543<!--/v-->; each must catch <!--v:results/mutation.json#/threshold_percent-->85.0<!--/v--> percent or more ([`results/mutation.json`](results/mutation.json)) | the same gate decides every footage flag |
 
 Which features each model passed on the 16-photo test: all four photos of a feature right in at least two of three runs ([`results/model_pass_table.json`](results/model_pass_table.json)).
 
@@ -73,7 +72,7 @@ The test runs as a pre-registered study that stays open: it is the volunteer's o
 
 ## Gallery
 
-<!--v:results/screens.json#/screen_count-->32<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->24<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->8<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and [`results/screens.json`](results/screens.json) lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
+<!--v:results/screens.json#/screen_count-->32<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->24<!--/v--> come from the live site; the <!--v:results/screens.json#/local_mock_count-->8<!--/v--> marked (mock) come from a local build with the mock API, so no screenshot joined the study. `make screens` makes them again, and [`results/screens.json`](results/screens.json) lists each. The photos are credited on /credits.
 
 <table>
 <tr>
@@ -83,11 +82,14 @@ The test runs as a pre-registered study that stays open: it is the volunteer's o
 </tr>
 <tr>
 <td align="center"><img src="docs/screens/walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
-<td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it: a demo creek built from the record on this phone."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
+<td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
 </tr>
 </table>
 
 All the screens, with the route and the source of each: [`docs/screens/README.md`](docs/screens/README.md).
+
+<details>
+<summary>Two lesson photos with their marks, and the licences of the photos in the screens</summary>
 
 Two lesson photos with their marks, as a person sees them on the lesson cards:
 
@@ -141,6 +143,8 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | Put its own words in front of a person | Its note is shown only as "the checker noticed", cut to 160 characters | [`core/checker.py`](core/checker.py), [`core/gate.py`](core/gate.py) |
 | State a risk for a named site | Every health or ecology sentence comes from [`content/approved_sentences.yaml`](content/approved_sentences.yaml) with a source | [`core/tests/test_healthcard.py`](core/tests/test_healthcard.py), [`core/tests/test_act.py`](core/tests/test_act.py) |
 
+</details>
+
 ## The gate, the heart of it
 
 A vision model can help a volunteer look again. It can never decide what is stored. Every model answer takes this path:
@@ -150,10 +154,10 @@ A vision model can help a volunteer look again. It can never decide what is stor
 3. **Its answer is forced.** One photo, one feature, the frozen question wording. Anything that is not yes, no or can't tell with a short note becomes can't tell and counts as malformed (`force_answer` in [`core/checker.py`](core/checker.py)).
 4. **The gate turns it into a flag or drops it.** `parse_flags` in [`core/gate.py`](core/gate.py) keeps a `Flag` only for a known feature the model passed, with a sane confidence and a short plain note, and drops everything else with a reason in plain words. It never raises. On the footage run it dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags, each for a feature that model had not passed.
 5. **A flag can only make one question eligible.** [`core/followups.py`](core/followups.py) picks the follow-up questions from the answers, the rain ([`core/rainfall.py`](core/rainfall.py)), the person's scores and the flags, by the rules in [`content/followups.yaml`](content/followups.yaml): two questions at most, the model's at most one, and no model call inside it.
-6. **The person taps "I looked again" or "Skip", and no stored answer changes.** The question comes only for a feature the check asks about, so a flag on a dug-out channel asks nothing. In the creek check the same question has Yes, No and Can't tell, and that tap is kept beside the answers, never in place of one. The model's note is shown only as "the checker noticed" ([`core/checker.py`](core/checker.py), [`apps/web/components/WalkFlow.tsx`](apps/web/components/WalkFlow.tsx)).
+6. **The person taps "I looked again" or "Skip", and no stored answer changes.** The question comes only for a feature the check asks about, and the model's note is shown only as "the checker noticed" ([`core/followups.py`](core/followups.py), [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md)).
 7. **The record is built from human inputs only.** `build_record` in [`core/gate.py`](core/gate.py) has no parameter that could carry a flag, a model id or model text. [`core/fhir_emit.py`](core/fhir_emit.py) writes the record under OneAquaHealth's profiles with the person's score attached, and [`scripts/fhir_validate.py`](scripts/fhir_validate.py) checks it in CI.
 
-Where it runs today: nowhere a person sees yet. [`scripts/build_walks.py`](scripts/build_walks.py) sends the footage run's answers through the same gate when the video walks are built, and no flag on those clips passed it, so <!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of the <!--v:results/footage_pool.json#/walks-->3<!--/v--> walks shows a checker question. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called. To see the gate act on the footage run, open [`examples/footage-flag/`](examples/footage-flag/README.md): one frame where it kept a model's flag, with the question that flag makes eligible, and one where it dropped a flag, with its reason in the gate's own words.
+Where it runs today: nowhere a person sees yet. [`scripts/build_walks.py`](scripts/build_walks.py) sends the footage run's answers through the same gate when the video walks are built, and no flag on those clips passed it, so <!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of the <!--v:results/footage_pool.json#/walks-->3<!--/v--> walks shows a checker question. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called. [`examples/footage-flag/`](examples/footage-flag/README.md) shows it act on the footage run.
 
 ## Three properties that follow
 
@@ -457,8 +461,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 
 Sent to OneAquaHealth's implementation guide on 2026-09-24, in the open:
 
-- [hl7-eu/oah pull request 5](https://github.com/hl7-eu/oah/pull/5): our citizen observer example, five FSH files that build inside their guide with SUSHI 3.20.1 at no errors, and the proposal as a page. It asks which resource should stand for a citizen observer.
-- The proposal in that pull request, for carrying observer quality in their guide, with three gaps our validator runs found: no profile for the person or the trail from an answer to them; a volunteer modelled as a Practitioner for want of a better fit; `SpecimenOah.collection.collector` allowing only a PractitionerRole. Its FSH builds inside their guide in CI. [`docs/ig_proposal.md`](docs/ig_proposal.md).
+- [hl7-eu/oah pull request 5](https://github.com/hl7-eu/oah/pull/5): our citizen observer example, five FSH files that build inside their guide with SUSHI 3.20.1 at no errors, and a proposal for carrying observer quality in their guide ([`docs/ig_proposal.md`](docs/ig_proposal.md)), with the gaps our validator runs found. It asks which resource should stand for a citizen observer.
 - [hl7-eu/oah issue 6](https://github.com/hl7-eu/oah/issues/6): their temporary code system spells one code `morophology`. We kept their spelling so our records validate.
 - [hl7-eu/oah issue 7](https://github.com/hl7-eu/oah/issues/7): `SpecimenOah.collection.collector` allows only a PractitionerRole, which leaves out a laboratory and a volunteer who takes a sample.
 - [hl7-eu/oah issue 8](https://github.com/hl7-eu/oah/issues/8): their sandbox's name stopped resolving on 2026-09-23, with the evidence from their own nameserver.
@@ -485,12 +488,12 @@ FAIR: findable through a Library entry in their sandbox and a public repository;
 
 Every number is graded by code and written to [`results/`](results/); [`scripts/verify_claims.py`](scripts/verify_claims.py) checks this README against those files in CI.
 
-- The 16-photo test, taken by four vision models, three runs each, called directly (a batch once waited three hours in the queue): [`evals/model_sweep.py`](evals/model_sweep.py) writes the pass table and per-item accuracy; [`evals/benchmark.py`](evals/benchmark.py) adds per-feature accuracy with Wilson intervals.
-- The same models on frames from open creek footage: [`evals/footage.py`](evals/footage.py) reports accuracy against description labels with its count, agreement between models on unlabelled frames, what the gate stopped, and the adversarial frames. [`evals/footage_pool.py`](evals/footage_pool.py) writes the numbers no model touches.
+- The 16-photo test, taken by four vision models, three runs each: [`evals/model_sweep.py`](evals/model_sweep.py) writes the pass table; [`evals/benchmark.py`](evals/benchmark.py) adds per-feature accuracy with Wilson intervals.
+- The same models on open creek footage: [`evals/footage.py`](evals/footage.py) reports agreement between models, what the gate stopped, and the adversarial frames; [`evals/footage_pool.py`](evals/footage_pool.py) writes the numbers no model touches.
 - The ablation (rules only, context only, vision only, all three): [`evals/ablation.py`](evals/ablation.py).
 - The pre-registered analysis of the two-minute test, written and tested on synthetic data before the tag: [`evals/usability_analysis.py`](evals/usability_analysis.py). It runs once, after the lock: with at least 20 finished sessions per arm it makes its one confirmatory test, and with fewer it reports a description with counts.
-- Cost is logged per call in [`results/cost_log.jsonl`](results/cost_log.jsonl). A fake run logs to [`results/cost_log_fake.jsonl`](results/cost_log_fake.jsonl) and spends nothing.
-- `make reproduce` grades every AI number in [`results/`](results/) again from the committed raw replies in [`evals/fixtures/raw/`](evals/fixtures/raw/) and the seeds, with no network and no key, fails if one differs, and names what it cannot regrade and why. `make judge-check` and CI run it; the Quickstart shows its line.
+- Cost is logged per call in [`results/cost_log.jsonl`](results/cost_log.jsonl).
+- `make reproduce` grades every AI number again from the committed raw replies in [`evals/fixtures/raw/`](evals/fixtures/raw/) and the seeds, with no network and no key, and fails if one differs. `make judge-check` and CI run it.
 
 ### Tests
 
@@ -501,6 +504,7 @@ Every number is graded by code and written to [`results/`](results/); [`scripts/
 - **Browser:** <!--v:results/test_counts.json#/playwright/tests-->112<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->20<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
 - **Worker end to end:** <!--v:results/test_counts.json#/worker_e2e/sections-->14<!--/v--> sections that drive the real Worker's routes under `wrangler dev` with a local D1 and KV (`make worker-e2e`, in CI).
 - **Records:** the HL7 validator checks sample Bundles from Python and from the Worker against OneAquaHealth's guide: <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`make fhir-validate`).
+- **Mutation:** small bugs planted on purpose in four modules, the gate, the follow-up selector, scoring and the FHIR emitter (`make mutation`, mutmut): the gate caught <!--v:results/mutation.json#/by_name/gate/killed-->226<!--/v--> of <!--v:results/mutation.json#/by_name/gate/mutants-->229<!--/v-->, the follow-up picker <!--v:results/mutation.json#/by_name/followups/killed-->319<!--/v--> of <!--v:results/mutation.json#/by_name/followups/mutants-->324<!--/v-->, scoring <!--v:results/mutation.json#/by_name/scoring/killed-->53<!--/v--> of <!--v:results/mutation.json#/by_name/scoring/mutants-->53<!--/v-->, the FHIR record writer <!--v:results/mutation.json#/by_name/fhir_emit/killed-->1477<!--/v--> of <!--v:results/mutation.json#/by_name/fhir_emit/mutants-->1543<!--/v-->; each must catch <!--v:results/mutation.json#/threshold_percent-->85.0<!--/v--> percent or more ([`results/mutation.json`](results/mutation.json)). [`core/checker.py`](core/checker.py), [`core/rainfall.py`](core/rainfall.py) and the Worker's TypeScript ports are not in this run.
 
 ## What is real and what is synthetic
 
@@ -624,6 +628,7 @@ The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/RE
 - One labeller. The gold labels came from the picks file Alex wrote with the planner, a Claude chat (commit 81e62ed), and no second, blind label exists yet, so read every accuracy as agreement with this key ([`docs/DATA_CARD.md`](docs/DATA_CARD.md), [`docs/deviations.md`](docs/deviations.md)).
 - Four photos per feature is coarse: it shows a person what to practise and flags an answer worth a second look, but it is too coarse to weight votes by feature. In our simulation with made-up people ([`results/consensus_coarseness.json`](results/consensus_coarseness.json)), weights from each feature's own photos did worse than a plain majority in all <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_feature_only_clearly_loses-->5<!--/v--> skill patterns.
 - The official app has no question for a dug-out channel, so the creek check asks none: that score is kept but stands beside no answer, and the city measure it would lead to waits for one. Plants that do not belong have no city measure of their own.
+- Of the <!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> footage flags the gate kept, <!--v:results/model_card.json#/footage_kept/by_feature/dug_out_channel-->32<!--/v--> are on a dug-out channel, so they ask nothing. The other <!--v:results/model_card.json#/footage_kept/by_feature/artificial_bank-->3<!--/v--> are one model's runs on built banks, all on one frame of creek water over stones, seen from above, where the other models that passed built banks said can't tell. Passing four photos did not stop that flag, which is why a flag can only ask ([`examples/footage-flag/`](examples/footage-flag/README.md)).
 - The photos come from open collections in several countries and seasons, not from the creeks a Berkeley visitor will stand in.
 - The footage labels come from the videos' own descriptions, and almost no openly licensed description names a feature, so the footage result leans on agreement between models, which is not accuracy.
 - The citizen observer is modelled as a FHIR Practitioner, for want of a better fit in the guide; our proposal says so.

@@ -53,6 +53,8 @@ Frame `v06-00403` from https://www.youtube.com/watch?v=CsayzeejVzY, by OkState A
 
    The frame has no label in the manifest, so nobody has said whether the model was right. The flag decides nothing either way: it only lets the checker ask the person to look again, and what is kept is the person's answer.
 
+   What the frame shows, from its alt text: Clear, shallow creek water over a bed of flat brown stones and small pebbles, seen from above. No other model that passed this feature said yes on it. Passing the photos did not stop this flag, which is why a flag can only ask the person to look again and never answers for them.
+
 ## Dropped: frame `v02-00143`
 
 ![Frame v02-00143, a still from a creek video filmed in Russia](../../photos/benchmark/v02-00143.jpg)

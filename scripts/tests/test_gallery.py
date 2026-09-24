@@ -506,7 +506,16 @@ def test_the_walk_record_shot_is_taken_from_the_top_of_the_page() -> None:
     # The step itself is tested in apps/web/tests/walk.spec.ts; this checks the gallery takes it
     # after the record shows and before the shot.
     source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
-    assert 'import { toPageTop } from "./gallery-view.mjs";' in source
+    assert 'import { toPageTop, toRegionTop } from "./gallery-view.mjs";' in source
     record = source.index('getByRole("heading", { name: "Your record from the clip" }).waitFor()')
     shot = source.index('gallery("walk-record"')
     assert "await toPageTop(page);" in source[record:shot]
+
+
+def test_the_walk_city_shot_is_taken_from_the_needs_region() -> None:
+    # CRITIC_07 J04: the city view's shot cut the first measure off before its source. The step is
+    # tested in apps/web/tests/walk.spec.ts; this checks the gallery takes it before the shot.
+    source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
+    city = source.index("await page.waitForURL(/\\/city/);")
+    shot = source.index('gallery("walk-city"')
+    assert 'await toRegionTop(page, content.locale["city.walk_needs"]);' in source[city:shot]

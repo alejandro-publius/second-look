@@ -150,7 +150,9 @@ def unfolded(text: str) -> str:
     shows what is inside: the fold's summary becomes a plain line and the tags go."""
     text = re.sub(r"^<details>\s*$", "", text, flags=re.M)
     text = re.sub(r"^</details>\s*$", "", text, flags=re.M)
-    return re.sub(r"^<summary>(.*?)</summary>\s*$", r"*\1*", text, flags=re.M)
+    # [ \t]*, not \s*: \s* would eat the blank line after the summary, and pandoc then reads the
+    # table under it as one paragraph of pipes (CRITIC_07 J02).
+    return re.sub(r"^<summary>(.*?)</summary>[ \t]*$", r"*\1*\n", text, flags=re.M)
 
 
 def figure(root: Path, rel: str, caption: str, inputs: set[str]) -> str:
@@ -351,12 +353,28 @@ def stamp_problems(root: Path = ROOT) -> list[str]:
     return problems
 
 
+RAW_TABLE_RE = re.compile(r"\|\s*:?-{3,}:?\s*\|")
+
+
+def raw_tables(fragment: str) -> list[str]:
+    """A Markdown table pandoc could not read reaches the page as a paragraph of pipes. Code
+    blocks may show pipes on purpose, so they are left out before looking (CRITIC_07 J02)."""
+    prose = re.sub(r"<pre\b.*?</pre>|<code\b.*?</code>", "", fragment, flags=re.S)
+    return [m.group(0) for m in RAW_TABLE_RE.finditer(prose)]
+
+
 def build(root: Path = ROOT) -> dict[str, object]:
     pandoc = pandoc_version()
     doc = assemble(root)
+    fragment = to_html_fragment(doc.markdown)
+    if raw := raw_tables(fragment):
+        raise ReportError(
+            f"{len(raw)} table(s) would print as raw pipe text, starting {raw[0]!r}; "
+            "each table needs a blank line above it"
+        )
     with tempfile.TemporaryDirectory(prefix="second-look-report-") as tmp:
         html = Path(tmp) / "report.html"
-        html.write_text(page_html(root, to_html_fragment(doc.markdown)), encoding="utf-8")
+        html.write_text(page_html(root, fragment), encoding="utf-8")
         out = Path(tmp) / "REPORT.pdf"
         browser = print_pdf(root, html, out)
         pages = pdf_pages(out)

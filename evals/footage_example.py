@@ -419,6 +419,13 @@ def credit(row: Mapping[str, str]) -> str:
     )
 
 
+def frame_alt(frame: str) -> str:
+    """The frame's alt text from the locale, which says what is in it and not what any model made
+    of it (apps/web/scripts/build-content.mjs gives /how-we-know the same words)."""
+    locale = json.loads((ROOT / "content" / "locales" / "en.json").read_text(encoding="utf-8"))
+    return str(locale.get(f"photo.alt.{frame}", ""))
+
+
 def others_table(rows: Sequence[Mapping[str, Any]]) -> list[str]:
     out = [
         "| Model | Passed this feature on the 16-photo test | Its answers, run by run |",
@@ -529,6 +536,22 @@ def section(title: str, c: Mapping[str, Any], raw_kept: str) -> list[str]:
             "right. The flag decides nothing either way: it only lets the checker ask the person "
             "to look again, and what is kept is the person's answer."
         )
+        # CRITIC_07 J03: say what the frame shows, from its alt text, and whether any other model
+        # that passed this feature agreed with the flag.
+        others = [
+            r
+            for r in c["same_frame_and_feature"]
+            if r["passed_this_feature"] and r["model"] != c["model"]
+        ]
+        shows = frame_alt(str(row["id"]))
+        if others and not any("yes" in r["answers_by_run"] for r in others):
+            lines.append("")
+            lines.append(
+                (f"   What the frame shows, from its alt text: {shows} " if shows else "   ")
+                + "No other model that passed this feature said yes on it. Passing the photos "
+                "did not stop this flag, which is why a flag can only ask the person to look "
+                "again and never answers for them."
+            )
     else:
         lines.append(
             "   The frame has no label in the manifest, so nobody has said whether the model was "

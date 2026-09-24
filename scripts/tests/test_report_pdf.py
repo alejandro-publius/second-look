@@ -230,3 +230,16 @@ def test_a_folded_readme_table_is_printed_open() -> None:
     out = br.unfolded(folded)
     assert "<details>" not in out and "</details>" not in out and "<summary>" not in out
     assert "*Every risk*" in out and "| a | b |" in out
+    # a blank line between the summary and the table, or pandoc prints the table as raw pipes
+    assert re.search(r"\*Every risk\*\n[ \t]*\n\s*\| a \| b \|", out)
+    # and with no blank line in the README, the report still gets one
+    tight = br.unfolded("<summary>Every risk</summary>\n| a | b |\n")
+    assert re.search(r"\*Every risk\*\n[ \t]*\n\s*\| a \| b \|", tight)
+
+
+def test_a_table_left_as_pipe_text_stops_the_build() -> None:
+    """CRITIC_07 J02: a table glued to the line above it printed as a paragraph of pipes."""
+    glued = "<p><em>Every risk</em> | a | b | |---|---| | 1 | 2 |</p>"
+    assert br.raw_tables(glued) == ["|---|"]
+    assert br.raw_tables("<table><tr><td>a</td></tr></table>") == []
+    assert br.raw_tables("<pre><code>| a |\n|---|</code></pre>") == []

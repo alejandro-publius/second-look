@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { API_ORIGIN, BUILT_IN_DEFAULT, goldFor, mockApi } from "../tests/mock-api.mjs";
 import { liveRequestAllowed, localRequestAllowed } from "./gallery-guard.mjs";
-import { toPageTop } from "./gallery-view.mjs";
+import { toPageTop, toRegionTop } from "./gallery-view.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const RAW = resolve(process.env.GALLERY_RAW || join(here, "..", "screens", "gallery"));
@@ -249,7 +249,8 @@ async function liveRun(browser) {
     gallery("walk-record", route, "live", await shoot(page), "The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out.");
     await page.getByRole("link", { name: "See this creek as a city would" }).click();
     await page.waitForURL(/\/city/);
-    gallery("walk-city", "/city?walk=" + firstWalk.id, "live", await shoot(page), "The walk seen as a city would see it: a demo creek built from the record on this phone.");
+    await toRegionTop(page, content.locale["city.walk_needs"]);
+    gallery("walk-city", "/city?walk=" + firstWalk.id, "live", await shoot(page), "The walk seen as a city would see it: what this demo creek needs, in OneAquaHealth's own measures, each with its source.");
   }
   gallery("check-start", "/check", "live", await visit("/check"), "The creek check: what it asks and a button to start.");
   await button(page, "Start the check").click();

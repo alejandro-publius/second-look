@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { toPageTop } from "../scripts/gallery-view.mjs";
+import { toPageTop, toRegionTop } from "../scripts/gallery-view.mjs";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
@@ -111,6 +111,42 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
 });
 
 const featureNames: Record<string, string> = Object.fromEntries(content.features.map((f: { id: string; name: string }) => [f.id, f.name]));
+
+// CRITIC_07 J04: a walk that found only a plant has a finding and no measure. Its needs box says
+// that no measure applies, never "Nothing was found", which the findings box above contradicts.
+test("a walk that found only a plant says no measure applies to it", async ({ page }) => {
+  await mockApi(page, {});
+  const w = walks[0];
+  await page.goto(`${BASE}/walk/${w.id}`);
+  await page.getByRole("button", { name: "Start the check" }).click();
+  const plantItem = content.form.items.find((it: { feature?: string | null; kind?: string }) => it.feature === "invasive_plant")!;
+  for (let i = 0; i < 60; i++) {
+    if (await page.getByRole("heading", { name: "Your record from the clip" }).isVisible()) break;
+    if (await page.getByRole("button", { name: "Finish" }).isVisible()) {
+      await page.getByRole("button", { name: "Finish" }).click();
+      continue;
+    }
+    const onPlant = await page.getByRole("heading", { name: plantItem.text, exact: true }).isVisible();
+    const yes = page.getByRole("button", { name: en["test.yes"], exact: true });
+    const no = page.getByRole("button", { name: en["test.no"], exact: true });
+    const skip = page.getByRole("button", { name: "Skip" });
+    const none = page.getByRole("button", { name: "None of these" });
+    const choice = page.getByRole("main").getByRole("group").first().getByRole("button");
+    if (onPlant && (await yes.isVisible())) await yes.click();
+    else if (await no.isVisible()) await no.click();
+    else if (await none.isVisible()) await none.click();
+    else if (await skip.first().isVisible()) await skip.first().click();
+    else if (await choice.first().isVisible()) await choice.first().click();
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+  }
+  await page.getByRole("link", { name: "See this creek as a city would" }).click();
+  const found = page.getByRole("region", { name: en["city.walk_findings"] });
+  await expect(found.locator(".row")).toHaveCount(1);
+  await expect(found).toContainText(featureNames["invasive_plant"]);
+  const needs = page.getByRole("region", { name: en["city.walk_needs"] });
+  await expect(needs).toContainText(en["city.walk_needs_none"]);
+  await expect(needs).not.toContainText(en["city.walk_nothing"]);
+});
 
 // CRITIC_04 F01: the one record a judge can make listed no answer and no score. The record screen
 // now lists every answer the walk made, the way /spot lists a stored visit's, and where /spot shows
@@ -246,6 +282,39 @@ test("the gallery's shot of a walk's record has the page title whole in view", a
   await answerWalk(page, () => page.getByRole("button", { name: "Next", exact: true }).click());
   await toPageTop(page);
   const box = (await page.getByRole("heading", { name: en["walk.done_title"], level: 1 }).boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(844);
+});
+
+// CRITIC_07 J04: the gallery's shot of the walk's city view cut the first measure off before its
+// source. The gallery now puts the needs region at the top (scripts/gallery-view.mjs); this makes
+// the same city view at the gallery's phone size, takes the same step, and checks the first
+// measure is whole on screen, source and all.
+test("the gallery's shot of a walk's city view shows the first measure whole, with its source", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockApi(page, {});
+  await page.goto(`${BASE}/walk/${walks[0].id}`);
+  await page.getByRole("button", { name: "Start the check" }).click();
+  await page.getByRole("button", { name: "U shape" }).click();
+  for (let i = 0; i < 60; i++) {
+    if (await page.getByRole("heading", { name: "Your record from the clip" }).isVisible()) break;
+    if (await page.getByRole("button", { name: "Finish" }).isVisible()) {
+      await page.getByRole("button", { name: "Finish" }).click();
+      continue;
+    }
+    const skip = page.getByRole("button", { name: "Skip" });
+    const none = page.getByRole("button", { name: "None of these" });
+    const choice = page.getByRole("main").getByRole("group").first().getByRole("button");
+    if (await skip.first().isVisible()) await skip.first().click();
+    else if (await none.isVisible()) await none.click();
+    else if (await choice.first().isVisible()) await choice.first().click();
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+  }
+  await page.getByRole("link", { name: "See this creek as a city would" }).click();
+  await toRegionTop(page, en["city.walk_needs"]);
+  const first = page.getByRole("region", { name: en["city.walk_needs"] }).locator(".row").first();
+  await expect(first).toContainText("OneAquaHealth Policy Brief");
+  const box = (await first.boundingBox())!;
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y + box.height).toBeLessThanOrEqual(844);
 });
