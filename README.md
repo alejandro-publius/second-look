@@ -6,7 +6,7 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 >
 > People walk past concrete banks, dug-out channels, plants that do not belong and pipes. A two-minute photo test measures who does, per feature. The score travels with every observation, in OneAquaHealth's own FHIR profiles.
 >
-> Second Look teaches a volunteer the four kinds of creek damage people usually miss, tests them on 16 real photos, and stores their per-feature score in the record of their test sitting, with a dated qualification for the test, both linked by Provenance to every Observation they later make. A vision model takes the same test and may only ever raise one question, on a feature it passed, after the person has answered. A city analyst reads each answer beside the score of the person who gave it.
+> Second Look teaches a volunteer the four kinds of creek damage people usually miss, tests them on 16 real photos, and keeps their score for each feature with every observation they make later. A city analyst reads each answer beside the score of the person who gave it. A vision model takes the same test and may raise one question, only on a feature it passed, only after the person has answered; on the live site today that checker is off, so every answer you see there is a person's.
 >
 > **Train. Check. Verify. Record. Act.**
 
