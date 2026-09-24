@@ -78,52 +78,16 @@ The test runs as a pre-registered study that stays open: it is the volunteer's o
 <table>
 <tr>
 <td align="center"><img src="docs/screens/landing.webp" width="200" alt="The first screen: the question Which creek is healthier? above two creek photos."><br>Landing<br><code>/</code></td>
-<td align="center"><img src="docs/screens/landing-guess.webp" width="200" alt="The same screen after a tap on the left photo: the guess is kept on the phone until the person agrees to take part."><br>The guess<br><code>/</code></td>
-<td align="center"><img src="docs/screens/consent.webp" width="200" alt="The consent screen: what the test is, what is stored, and two boxes to tick."><br>Consent<br><code>/t</code> (mock)</td>
-<td align="center"><img src="docs/screens/lesson-card.webp" width="200" alt="A lesson card on built banks: a concrete channel with two numbered marks, and what each mark points at."><br>A lesson card with its marks<br><code>/t</code> (mock)</td>
-</tr>
-<tr>
-<td align="center"><img src="docs/screens/test-item.webp" width="200" alt="A test item: one creek photo, the question, and the buttons Yes, No and Can't tell."><br>A test item<br><code>/t</code> (mock)</td>
 <td align="center"><img src="docs/screens/score.webp" width="200" alt="The score screen: the total and a score for each of the four features."><br>The score<br><code>/t</code> (mock)</td>
-<td align="center"><img src="docs/screens/demo.webp" width="200" alt="Judge mode today: it opens on Sep 28, when the data locks."><br>Judge mode today<br><code>/demo</code></td>
-<td align="center"><img src="docs/screens/judges.webp" width="200" alt="The page for judges: every part of Second Look, in order."><br>For judges<br><code>/judges</code></td>
-</tr>
-<tr>
-<td align="center"><img src="docs/screens/walks.webp" width="200" alt="Check a creek from your desk: one short clip of a creek for each country."><br>Walks<br><code>/walk</code></td>
 <td align="center"><img src="docs/screens/walk.webp" width="200" alt="A walk: the clip of a creek, with its credit, and a button to start the check."><br>A walk<br><code>/walk/v02</code></td>
-<td align="center"><img src="docs/screens/walk-in-progress.webp" width="200" alt="A walk in progress: a question about the creek in the clip, with a progress count."><br>A walk in progress<br><code>/walk/v02</code></td>
+</tr>
+<tr>
 <td align="center"><img src="docs/screens/walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
-</tr>
-<tr>
 <td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it: a demo creek built from the record on this phone."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
-<td align="center"><img src="docs/screens/check-start.webp" width="200" alt="The creek check: what it asks and a button to start."><br>Creek check<br><code>/check</code></td>
-<td align="center"><img src="docs/screens/check-location.webp" width="200" alt="The creek check asks where you are: use the phone's location or drop a pin."><br>Where are you?<br><code>/check</code></td>
-<td align="center"><img src="docs/screens/check-question.webp" width="200" alt="The first question of the creek check, with the answers as big buttons."><br>First question<br><code>/check</code></td>
-</tr>
-<tr>
-<td align="center"><img src="docs/screens/quick.webp" width="200" alt="The quick check: water colour, smell and the pipe, in three taps."><br>Quick check<br><code>/quick</code></td>
-<td align="center"><img src="docs/screens/spot-record.webp" width="200" alt="A sample creek record: what the volunteer saw, and the observer score that goes with it."><br>A sample record<br><code>/spot?id=example</code> (mock)</td>
-<td align="center"><img src="docs/screens/spot-fhir.webp" width="200" alt="The same record opened with View as FHIR: the Observation the record is stored as."><br>View as FHIR<br><code>/spot?id=example</code> (mock)</td>
-<td align="center"><img src="docs/screens/city.webp" width="200" alt="The city view of Strawberry Creek before anyone has checked it: no visits yet, and no OneAquaHealth measure shown yet."><br>City view<br><code>/city?creek=strawberry-creek</code></td>
-</tr>
-<tr>
-<td align="center"><img src="docs/screens/two.webp" width="200" alt="Two kinds of observer: a volunteer record in the same viewer built for a laboratory result."><br>Two kinds of observer<br><code>/two</code></td>
-<td align="center"><img src="docs/screens/how-we-know.webp" width="200" alt="How we know: where each rule and each number comes from."><br>How we know<br><code>/how-we-know</code></td>
-<td align="center"><img src="docs/screens/credits.webp" width="200" alt="Credits: every photo and clip with its author and licence."><br>Credits<br><code>/credits</code></td>
-<td align="center"><img src="docs/screens/privacy.webp" width="200" alt="Privacy: what is stored and what is not."><br>Privacy<br><code>/privacy</code></td>
-</tr>
-<tr>
-<td align="center"><img src="docs/screens/about.webp" width="200" alt="About: what Second Look is and who made it."><br>About<br><code>/about</code></td>
-<td align="center"><img src="docs/screens/poster.webp" width="200" alt="The poster to print and put up by a creek, with its QR code."><br>Poster<br><code>/poster</code></td>
-<td align="center"><img src="docs/screens/verify.webp" width="200" alt="Check a record: its receipt, its place in the audit log and the OpenTimestamps proof."><br>Check a record<br><code>/verify</code></td>
-</tr>
-<tr>
-<td align="center"><img src="docs/screens/warmup.webp" width="200" alt="The warm-up: which creek is healthier, asked once before the test and answered at the end."><br>The warm-up<br><code>/t</code> (mock)</td>
-<td align="center"><img src="docs/screens/accessibility.webp" width="200" alt="Accessibility: what we aim for and how each part is checked."><br>Accessibility<br><code>/accessibility</code></td>
-<td align="center"><img src="docs/screens/offline.webp" width="200" alt="The page a phone shows when it has no signal: what still works."><br>Offline<br><code>/offline</code></td>
-<td align="center"><img src="docs/screens/share.webp" width="200" alt="The page a shared score opens: the score card and a link to take the test."><br>A shared score<br><code>/share/12</code></td>
 </tr>
 </table>
+
+All the screens, with the route and the source of each: [`docs/screens/README.md`](docs/screens/README.md).
 
 Two lesson photos with their marks, as a person sees them on the lesson cards:
 
@@ -425,7 +389,7 @@ The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_
 
 ### MCP tools
 
-[`apps/mcp/server.py`](apps/mcp/server.py) is a read only MCP server over our records, run locally over stdio. Every answer carries `resource_ids` and [`fhir`](fhir), the visits it was counted from, so an agent cannot state a number it cannot trace. It has <!--v:results/api_inventory.json#/mcp/count-->5<!--/v--> tools; inputs and outputs in [`docs/MCP.md`](docs/MCP.md), a real session in [`examples/mcp/transcript.md`](examples/mcp/transcript.md).
+[`apps/mcp/server.py`](apps/mcp/server.py) is a read only MCP server over our records, run locally over stdio. Every answer carries `resource_ids` and `fhir`, the visits it was counted from, so an agent cannot state a number it cannot trace. It has <!--v:results/api_inventory.json#/mcp/count-->5<!--/v--> tools; inputs and outputs in [`docs/MCP.md`](docs/MCP.md), a real session in [`examples/mcp/transcript.md`](examples/mcp/transcript.md).
 
 | Tool | Answers |
 |---|---|
@@ -449,7 +413,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | The HL7 validator with their guide, terminology on | Every emitted resource in CI | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`fhir/ig.lock`](fhir/ig.lock) |
 | Their sandbox | Conditional creates with our tag and a ledger, and a Library entry for the data set | [`scripts/repush_sandbox.py`](scripts/repush_sandbox.py), [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl) |
 | Their decision tool's measures | What a creek needs, in their words, from the Policy Brief, page 9 | [`content/approved_sentences.yaml`](content/approved_sentences.yaml), `/city` |
-| The five One Digital Health dimensions and FAIR | Stated in words below | [`README.md`](README.md) |
+| The five One Digital Health dimensions and FAIR | Stated in words below | this section |
 | The follower city recipe | `make new-city NAME=Heraklion COUNTRY=Greece LAT=35.3387 LON=25.1442`, run once as a dry example | [`scripts/new_city.py`](scripts/new_city.py), [`docs/cities/`](docs/cities/) |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | [`core/fhir_referral.py`](core/fhir_referral.py) |
 | Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek on the record page and `/city`: research grade sightings of the region's listed invasive plants near its spots, with the fetch time, from a daily copy. Never in the guided check, shown only once a finished check on that creek has answered the invasive plant question (then to anyone who opens the page, a later volunteer included), counted in no number, deciding nothing. The iNaturalist plant photos are credited by author and licence on `/credits` | [`scripts/cache_inaturalist.py`](scripts/cache_inaturalist.py), [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) |
@@ -525,13 +489,15 @@ Everything, with the known gaps and how to report a problem: [`SECURITY.md`](SEC
 
 ## Quickstart
 
+Needs git, [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12) and Node 20 or later with npm. No Java, no key, no network after the setup.
+
 ```
 git clone https://github.com/alejandro-publius/second-look && cd second-look
 uv sync && (cd apps/web && npm ci && npx playwright install chromium) && (cd worker && npm ci) && (cd tools/diagrams && npm ci)
 make judge-check
 ```
 
-`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests, then grades every AI number in [`results/`](results/) again from the committed raw model replies (`make reproduce`). It reads the result of the last HL7 validator run from [`results/fhir_validation.json`](results/fhir_validation.json) and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets: six steps, each printed with ok or FAIL.
+`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests, then grades every AI number in [`results/`](results/) again from the committed raw model replies (`make reproduce`). It reads the result of the last HL7 validator run from [`results/fhir_validation.json`](results/fhir_validation.json) and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets: six steps, each printed with ok or FAIL, in about five minutes after the setup. The tests line gives the Python count as pytest prints it and the Worker's golden tests as node prints them, and the last line says whether all six passed, offline, with no key.
 
 ### Running locally
 
@@ -549,7 +515,7 @@ make demo-offline
 
 ## For judges
 
-A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full 24 question check), [what the city sees](https://second-look-79t.pages.dev/city?creek=strawberry-creek) (empty until someone checks the creek; after the walk, its own city view shows the full page), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two). The main doors are on [/judges](https://second-look-79t.pages.dev/judges).
+A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full 24 question check), what the city sees, from the end of that walk ("See this creek as a city would"; [`/city?creek=strawberry-creek`](https://second-look-79t.pages.dev/city?creek=strawberry-creek) stays empty until the first real check), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two). The main doors are on [/judges](https://second-look-79t.pages.dev/judges).
 
 See *Quickstart* above for `make judge-check`, the one command that needs no key and no network.
 
@@ -560,7 +526,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 | Eval results | [`results/`](results/) |
 | Architecture, the deep version | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | Our own scorecard, weaknesses included | [`docs/JUDGE_SCORECARD.md`](docs/JUDGE_SCORECARD.md) |
-| The demo script | [`docs/video_script.md`](docs/video_script.md) |
+| The demo script | [`docs/video/SHOTLIST.md`](docs/video/SHOTLIST.md), read aloud from [`docs/video/VOICE_SCRIPT.md`](docs/video/VOICE_SCRIPT.md) |
 
 ### What was built, screen by screen
 
@@ -575,7 +541,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 
 ### See it work
 
-One worked visit to Strawberry Creek in Berkeley, from the golden record in this repository. It is an example, hand shaped, as the table of what is real and what is synthetic below says: no person has made a real record yet, because a record comes only from a person at a creek or in the test. The loop you can run live, today, is the walk at the end of this section, which builds your own record on your phone.
+One worked visit to Strawberry Creek in Berkeley, from the golden record in this repository. It is an example, hand shaped, as the table of what is real and what is synthetic above says: no person has made a real record yet, because a record comes only from a person at a creek or in the test. The loop you can run live, today, is the walk at the end of this section, which builds your own record on your phone.
 
 | Step | What happened | Where to check |
 |---|---|---|
@@ -597,7 +563,7 @@ You can run the same loop from your desk on a creek in another country: **`/walk
 - The citizen observer is modelled as a FHIR Practitioner, for want of a better fit in the guide; our proposal says so.
 - Judge mode is shut until Sep 28, so the answer key cannot leak before then.
 - Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23. `/two` can show their record only from a copy the Mac fetches while it answers, so for now it shows ours alone, and the re-push to their sandbox waits until it answers again.
-- The tagged plan did not plan recruitment, and nobody has taken the test yet. A paid research panel may add sessions before the lock if Alex launches it (a logged deviation); without it, whoever opens the link is whoever opens the link.
+- The tagged plan did not plan recruitment, and nobody has taken the test yet. A paid research panel may add sessions before the lock if Alex launches it (a logged deviation); without it, whoever opens the link is whoever opens the link. The panel study has had no ethics review: it is an anonymous usability test that keeps no name or contact, and whether a paid one needs a review is checked before it launches.
 - The AI numbers come from paid calls on Sep 23, Pacific time: four models, three runs each, on 16 photos, once for the pass table and once more for the right-answer counts, plus the footage run. That is small. Read the intervals in the benchmark file, not the point numbers.
 - English only. A Spanish draft exists and stays out of the build until a fluent person signs it.
 

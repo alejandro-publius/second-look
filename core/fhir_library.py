@@ -77,7 +77,8 @@ def library_entry(
     words = (
         f"Second Look data set: creek checks from Berkeley, run the way a follower city would, "
         f"with the observer's per feature test score carried on every observation. {n_records} "
-        f"visit records mirrored to this server.{example} The repository holds the code, the FSH "
+        f"visit {'record' if n_records == 1 else 'records'} mirrored to this server.{example} The "
+        f"repository holds the code, the FSH "
         f"and the tests."
     )
     return {

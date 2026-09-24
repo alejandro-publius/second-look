@@ -84,7 +84,7 @@ Each number carries a claim that points into `results/`, and `scripts/verify_cla
 Proof: `make verify-claims`.
 
 **18. Can a judge check it without a key or the network?**
-Yes: `make judge-check` runs the tests, grades the AI numbers in `results/` again from the committed raw model replies (`make reproduce`), FHIR validation against the pinned guide, the web build and design gate, the audit chain and a secret scan, with no key.
+Yes: `make judge-check` runs the tests, grades the AI numbers in `results/` again from the committed raw model replies (`make reproduce`), reads the last HL7 validator run against the pinned guide, the web build and design gate, the audit chain and a secret scan, with no key.
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**

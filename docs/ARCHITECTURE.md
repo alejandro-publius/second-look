@@ -1,6 +1,6 @@
 # Architecture
 
-The deep version. The README has the three diagrams and the short reasons; this file says what
+The deep version. The README has the four diagrams and the short reasons; this file says what
 runs where, what is pure, what may write, and what stops what.
 
 The loop is five verbs, and they line up with OneAquaHealth's own five pipeline stages:

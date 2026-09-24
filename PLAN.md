@@ -162,7 +162,7 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 ## Risks
 
 - Photos arrive late: the launch slips one day per day late. The lock does not move, so the sample shrinks.
-- Nobody is recruited (Update 14 section 0). Any sessions that arrive are reported as a description with their count. Fallback F1 is the standing plan, not a fallback.
+- Nobody is recruited in person (Update 14 section 0); a paid research panel may add sessions before the lock (UPDATE_29, a logged deviation). Sessions that arrive are in the one pre-registered analysis: a confirmatory test with at least 20 finished sessions per arm, a description with fewer. Fallback F1 is the standing plan, not a fallback.
 - Another team wipes the sandbox: repush from our store; the ledger makes it a one-command fix; the sandbox part of the video is recorded the day it first works.
 - Every vision model fails every feature: the checker ships with zero flags and the README says where AI should stay quiet.
 - The Devpost form refuses a one-person team: add Rachel as a teammate before Sep 28.
@@ -178,7 +178,7 @@ in docs/internal/KILL_TESTS.md.
   skeleton runs on docker compose, not on a real host, because no hosting account existed
   yet. That is the single thing most likely to stop the launch. (Since Update 09 it runs on
   Cloudflare and P1 passed there; see docs/internal/KILL_TESTS.md.)
-- **Reach check: decided on Sep 21, not on Sep 24.** Nobody is recruited, so the headline is F1
+- **Reach check: decided on Sep 21, not on Sep 24.** Nobody was recruited in person, so the headline is F1
   from here: the full loop, the AI on the same 16 photos and on open creek footage, and a citizen
   record validated in their own format. Whatever sessions arrive are reported as a description
   with their count. The analysis plan is unchanged; only the emphasis is (Update 14 section 0).

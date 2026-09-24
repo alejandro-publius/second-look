@@ -10,13 +10,16 @@ jobs:
     steps:
       # make check runs make secrets, which reads the whole history with gitleaks, and
       # .gitleaksignore names each finding by the commit that added it, so fetch every commit.
-      - uses: actions/checkout@v4
+      - name: Check out every commit
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v5
+      - name: Python 3.12 with uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - name: Node 20 for the web build
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
@@ -24,7 +27,8 @@ jobs:
             apps/web/package-lock.json
             worker/package-lock.json
             tools/diagrams/package-lock.json
-      - uses: actions/setup-java@v4
+      - name: Java 17 for the HL7 validator
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
@@ -43,34 +47,39 @@ jobs:
           mkdir -p "$RUNNER_TEMP/gitleaks"
           tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP/gitleaks" gitleaks
           echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
-      - run: uv sync --frozen
-      - run: cd apps/web && npm ci
+      - name: Python packages
+        run: uv sync --frozen
+      - name: Web packages
+        run: cd apps/web && npm ci
       # design-check drives the built app in Chromium to measure tap targets, so the runner
       # needs the browser Playwright pins, not only the package.
-      - run: cd apps/web && npx playwright install --with-deps chromium
+      - name: Chromium for the design check and the end to end tests
+        run: cd apps/web && npx playwright install --with-deps chromium
       # make diagrams draws docs/diagrams/*.mmd again with the Mermaid CLI pinned here, in the
       # Chromium installed just above. Puppeteer downloads no browser of its own
       # (tools/diagrams/.puppeteerrc.cjs).
-      - run: cd tools/diagrams && npm ci
-      # The Worker's package and its e2e live on depth until depth merges, so these three steps
-      # run only where worker/package-lock.json exists. Same file on main and depth.
-      - if: hashFiles('worker/package-lock.json') != ''
+      - name: The pinned diagram renderer
+        run: cd tools/diagrams && npm ci
+      - name: Worker packages
         run: cd worker && npm ci
-      - run: make check
+      - name: make check (lint, types, tests, FHIR validation, claims, web build, design gate)
+        run: make check
       # Every AI number in results/ graded again from the committed raw replies, and every
       # synthetic result made again from its seed, with no key and no network. make check does not
       # do this, so a synthetic p value flipped to significant would pass every step of it.
-      - run: make reproduce
+      - name: make reproduce (every AI number graded again from its raw replies)
+        run: make reproduce
       # The web end to end on a phone viewport with a mocked API: the test flow, judge mode, the
       # check, the walks, keyboard only, reflow and axe on every screen it reaches. The
       # /accessibility page says the build fails on a serious axe finding; this step is why.
-      - run: make e2e
+      - name: Web end to end on a phone viewport
+        run: make e2e
       # The Worker end to end under wrangler dev with a local D1 and KV, rain from a stub, no
       # login and no network beyond this runner (Update 10 answer A3). Wrangler 4.135 needs
       # Node 22; the web build above keeps its Node 20 pin (PLAN.md), so the switch comes last.
-      - if: hashFiles('worker/package-lock.json') != ''
+      - name: Node 22 for wrangler
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - if: hashFiles('worker/package-lock.json') != ''
+      - name: Worker end to end under wrangler dev
         run: cd worker && npm run e2e

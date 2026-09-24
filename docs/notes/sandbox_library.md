@@ -1,5 +1,12 @@
 # Sandbox evidence: the Library entry
 
+What is below is the read-back of Sep 21, word for word, and so it still says "Berkeley, a follower
+city" and "1 visit records", and does not say the one visit is made by hand. Since Sep 24 the
+Library we would push says the project runs the method on Berkeley the way a follower city would,
+the city has not adopted it, and the worked visit is a hand-made example
+(`fhir/golden/library-second-look.json`). The allowed conditional update on our own Library entry
+waits until their sandbox's name resolves again (hl7-eu/oah issue 8).
+
 Written by `scripts/repush_sandbox.py --library` at 2026-09-21T06:53:47Z. The ledger is
 `fhir/sandbox_ledger.jsonl`; every id below is in it.
 

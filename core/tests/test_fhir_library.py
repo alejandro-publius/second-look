@@ -54,7 +54,7 @@ def test_it_is_their_shape_and_points_at_our_repository(library: dict) -> None:
     urls = [c["url"] for c in library["content"]]
     assert urls[0] == REPO_URL, "the repository comes first: that is the FAIR pointer"
     assert urls[-1] == "Provenance/452", "and the mirrored record on the same server comes last"
-    assert "1 visit records mirrored" in library["description"]
+    assert "1 visit record mirrored" in library["description"]
     assert "EXAMPLE" not in json.dumps(library), "the Library is a real entry, not an example"
 
 

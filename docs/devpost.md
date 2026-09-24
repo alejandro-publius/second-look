@@ -64,26 +64,28 @@ It costs nothing to run: Cloudflare's free plan, no card. A follower city adopts
 
 ## Effective use of data, technology, AI, APIs and standards
 
-1507 characters
+1596 characters
 
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 <!-- claim: results/footage_pool.json#/frames_kept = 46 -->
 <!-- claim: results/footage_pool.json#/videos_kept = 5 -->
 <!-- claim: results/footage_pool.json#/countries_kept = 3 -->
+<!-- claim: results/footage_latest.json#/gate/dropped = 29 -->
+<!-- claim: results/footage_latest.json#/gate/candidates = 64 -->
 
 ```text
 Standards: FHIR R4 4.0.1. The OneAquaHealth guide pinned at hl7-eu/oah b907cf0, built with SUSHI 3.20.1, and every emitted resource validated in CI with the HL7 validator, with 0 errors in the latest run. Their codes where they exist, ours only for the four features and "can't tell". UCUM units. Nested Locations.
 
 APIs: their FHIR sandbox, read at one request a second and mirrored with conditional creates, a tag on every resource and a ledger of ids, plus a Library entry there for our data set. Open-Meteo for 72 hours of rain behind the dry pipe rule. A read-only MCP server over our own records for software agents.
 
-AI: vision models take the same 16-photo test as people, same words, three runs, and the same pipeline is ready for 46 frames from 5 openly licensed creek videos in 3 countries, each frame screened by Apple Vision for people and text and then checked by eye. Every model passed built banks and none passed invasive plants; Claude Opus 5.5 and Fable 5.1 also passed pipes, and Haiku 4.5, Sonnet 5 and Opus 5.5 the dug-out channel. A model may raise a flag only on a feature it passed. core/gate.py turns model output into a flag or drops it, and a flag can only make one follow-up question eligible. The person always answers first, and a fuzz test proves the stored answers equal the human answers whatever the model returns.
+AI: vision models take the same 16-photo test as people, same words, three runs, and the same pipeline ran on 46 frames from 5 openly licensed creek videos in 3 countries, each frame screened by Apple Vision for people and text and then checked by eye; there the gate dropped 29 of 64 candidate flags, each for a feature that model had not passed. Every model passed built banks and none passed invasive plants; Claude Opus 5.5 and Fable 5.1 also passed pipes, and Haiku 4.5, Sonnet 5 and Opus 5.5 the dug-out channel. A model may raise a flag only on a feature it passed. core/gate.py turns model output into a flag or drops it, and a flag can only make one follow-up question eligible. The person always answers first, and a fuzz test proves the stored answers equal the human answers whatever the model returns.
 
 Data: no names, emails or free text in the test; a random session id; EXIF stripped from uploads, which are deleted after 30 days; a hash-chained audit log.
 ```
 
 ## A clear demonstration of what was built
 
-973 characters
+984 characters
 
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->
@@ -95,8 +97,7 @@ Judges start here: https://second-look-79t.pages.dev/judges
 /t: consent, warm-up, lesson, 16 photos, a score per feature.
 /demo: judge mode with feedback after each answer.
 /check: the guided creek check, one question per screen, with follow-ups chosen by code.
-/spot: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card.
-/city: the analyst's view of Strawberry Creek, with what the creek needs in OneAquaHealth's own measures.
+/walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. /city?creek=strawberry-creek stays empty until the first real check.
 /two: a volunteer Observation of ours in the viewer built for a lab result; their sandbox's lab record joins it when their name resolves again.
 /walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a record made on your phone that is never stored.
 
@@ -169,7 +170,7 @@ The video is released under CC BY-SA 4.0, because several of the creek clips in 
 1. `docs/screens/landing.webp`: the question every visitor meets.
 2. `docs/screens/score.webp`: the score per feature.
 3. `docs/screens/walk.webp`: a video walk, a creek in another country.
-4. `docs/screens/spot-record.webp`: an answer beside the observer's score.
+4. `docs/screens/spot-record.webp`: an answer beside the observer's score (a sample record, from a local build).
 5. `docs/screens/walk-city.webp`: the creek a walk just checked, seen as a city would, with what it needs in OneAquaHealth's own measures and their source.
 
 ## Team

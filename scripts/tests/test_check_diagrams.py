@@ -227,7 +227,9 @@ def test_make_check_and_ci_run_the_render_check() -> None:
     steps = workflow.split("\n      - ")
     install = next(i for i, s in enumerate(steps) if "cd tools/diagrams && npm ci" in s)
     browser = next(i for i, s in enumerate(steps) if "npx playwright install" in s)
-    run_check = next(i for i, s in enumerate(steps) if s.split("\n", 1)[0] == "run: make check")
+    run_check = next(
+        i for i, s in enumerate(steps) if "run: make check" in [ln.strip() for ln in s.split("\n")]
+    )
     assert browser < run_check and install < run_check
     assert "tools/diagrams/package-lock.json" in workflow
 

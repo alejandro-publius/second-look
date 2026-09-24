@@ -44,3 +44,14 @@ def test_the_docs_speak_with_one_voice_on_recruiting() -> None:
         if s.lower() in p.read_text(encoding="utf-8").lower()
     ]
     assert not hits, hits
+
+
+def test_the_real_list_says_what_the_pass_table_says() -> None:
+    """docs/REAL_VS_SYNTHETIC.md, which the README calls kept current, must agree with the file."""
+    import json
+
+    table = json.loads((ROOT / "results" / "model_pass_table.json").read_text(encoding="utf-8"))
+    doc = (ROOT / "docs" / "REAL_VS_SYNTHETIC.md").read_text(encoding="utf-8")
+    row = next(line for line in doc.splitlines() if line.startswith("| The model pass table |"))
+    said = row.split("|")[2].strip()
+    assert said.startswith("real") == (table.get("real") is True), row

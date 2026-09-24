@@ -12,7 +12,7 @@ from a live source. It is **synthetic** when a script made it up to show a shape
 | The photographs in the test | real, openly licensed, from several countries | every row in the manifest names its source page, author and licence, and no row says `placeholder` | `photos/manifest.csv` |
 | The frames from open creek footage | real, cut from openly licensed video | role `benchmark` in the manifest, with the source video and the second it was taken at | `photos/benchmark/`, `videos/manifest.csv` |
 | Study results in the README | the AI table is real since Sep 23 and 24; no human row, because no person's session has arrived | the synthetic dry runs stay in `results/` with SYNTHETIC on every file; the only synthetic numbers in the README are the coarseness simulation's, named as made-up people | `README.md`, `scripts/verify_claims.py` |
-| The model pass table | synthetic | `"real": false` in the file; the checker refuses to flag on it | `results/model_pass_table.json`, `core/checker.py` |
+| The model pass table | real, from the paid sweep of Sep 23, Pacific time | `"real": true` in the file; a table without it licenses no flag, and the checker refuses to flag on it | `results/model_pass_table.json`, `core/checker.py` |
 | A creek check, its follow-ups and its record | real once a person files one | stored visit, FHIR Bundle in the store, audit line | `apps/api/check.py`, `data/fhir_store/` |
 | The golden Strawberry Creek visit Bundle | example, hand shaped from a worked visit | it is in `fhir/golden/` and not in the store | `fhir/golden/visit-strawberry-creek-1.json` |
 | The referral: a ServiceRequest for a pipe worth testing | real, computed on request from stored visits | it exists only for a pipe two people who passed saw running in dry weather, and it is never stored | `core/fhir_referral.py`, `GET /api/fhir/referral/{spot_id}` |
@@ -57,7 +57,7 @@ this list and the code stay the same:
   knows it, and our own rule is that a plant we call invasive must be on the Cal-IPC inventory
   with a link. A video description cannot meet that.
 - Everything else is **unlabelled**. An unlabelled frame is never scored for accuracy. It is used
-  only to ask whether the three models agree with each other, which is a question that needs no
+  only to ask whether the four models agree with each other, which is a question that needs no
   key.
 
 What this method is not:

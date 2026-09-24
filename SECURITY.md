@@ -1,8 +1,8 @@
 # Security and privacy
 
 What Second Look keeps, what it never keeps, how the secrets and the locks work, and how to tell
-us about a problem. The full list of fields is `docs/DATA_HANDLING.md`, which the consent screen
-links to; this page follows it and adds the security side. Every route, with its lock, is in
+us about a problem. The full list of fields is `docs/DATA_HANDLING.md`, which the privacy page
+points to; this page follows it and adds the security side. Every route, with its lock, is in
 `docs/API.md`.
 
 ## What we keep
@@ -30,7 +30,8 @@ links to; this page follows it and adds the security side. Every route, with its
   (`apps/api/tests/test_privacy.py::test_full_session_leaves_no_client_address_in_any_log_line`).
   Our Worker code writes no address anywhere. Cloudflare keeps its own short lived edge records,
   which we do not read; the consent screen says so.
-- Free text from a person. Every answer is a choice from a list.
+- Free text from a person, except the name typed for a new spot, which is public. Every other
+  answer is a choice from a list.
 - Photo metadata. The Python API re-encodes an upload as a new JPEG; the Worker, which cannot
   re-encode, cuts the EXIF, XMP, ICC, comment and text segments out of JPEG, PNG and WebP files.
   The Worker e2e uploads a JPEG with a GPS tag and checks it is gone (`worker/test/e2e.mjs`,
