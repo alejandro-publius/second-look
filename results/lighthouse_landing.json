@@ -1,29 +1,29 @@
 {
- "checked_utc": "2026-09-24T08:10:45Z",
- "commit": "a47ee78",
+ "checked_utc": "2026-09-24T09:56:38Z",
+ "commit": "183066d",
  "uncommitted_changes": [],
- "target": "local static export, served here the way Cloudflare Pages serves it",
- "url": "/ of the local export",
+ "target": "deployed site",
+ "url": "https://second-look-79t.pages.dev/",
  "lighthouse": "lighthouse@13.5.0",
  "profile": "Lighthouse default mobile: simulated throttling, 150 ms RTT, 1.6 Mbps, 4x CPU",
  "cpus": 8,
  "runs": [
   {
    "scores": {
-    "performance": 98,
+    "performance": 94,
     "accessibility": 100,
     "best-practices": 100,
     "seo": 100
    },
    "metrics": {
-    "FCP ms": 755.0,
-    "LCP ms": 2447.0,
-    "TBT ms": 22,
+    "FCP ms": 848.0,
+    "LCP ms": 2935.0,
+    "TBT ms": 37,
     "CLS": 0,
-    "SI ms": 755.0,
-    "TTI ms": 2847.0,
-    "TTFB ms": 2,
-    "bytes": 493297
+    "SI ms": 3634.0,
+    "TTI ms": 2935.0,
+    "TTFB ms": 53,
+    "bytes": 410312
    },
    "requests": 27,
    "form_factor": "mobile",
@@ -37,25 +37,27 @@
    },
    "throttling_method": "simulate",
    "lighthouse": "13.5.0",
-   "final_url": "http://127.0.0.1:52899/",
-   "warnings": []
+   "final_url": "https://second-look-79t.pages.dev/",
+   "warnings": [
+    "The page loaded too slowly to finish within the time limit. Results may be incomplete."
+   ]
   },
   {
    "scores": {
-    "performance": 93,
+    "performance": 96,
     "accessibility": 100,
     "best-practices": 100,
     "seo": 100
    },
    "metrics": {
-    "FCP ms": 759.0,
-    "LCP ms": 3234.0,
-    "TBT ms": 24.0,
+    "FCP ms": 850.0,
+    "LCP ms": 2704.0,
+    "TBT ms": 7,
     "CLS": 0,
-    "SI ms": 759.0,
-    "TTI ms": 3256.0,
-    "TTFB ms": 1,
-    "bytes": 493297
+    "SI ms": 2144.0,
+    "TTI ms": 2710.0,
+    "TTFB ms": 39,
+    "bytes": 410341
    },
    "requests": 27,
    "form_factor": "mobile",
@@ -69,8 +71,10 @@
    },
    "throttling_method": "simulate",
    "lighthouse": "13.5.0",
-   "final_url": "http://127.0.0.1:52899/",
-   "warnings": []
+   "final_url": "https://second-look-79t.pages.dev/",
+   "warnings": [
+    "The page loaded too slowly to finish within the time limit. Results may be incomplete."
+   ]
   },
   {
    "scores": {
@@ -80,14 +84,14 @@
     "seo": 100
    },
    "metrics": {
-    "FCP ms": 761.0,
-    "LCP ms": 2568.0,
-    "TBT ms": 14.0,
+    "FCP ms": 818.0,
+    "LCP ms": 2681.0,
+    "TBT ms": 17,
     "CLS": 0,
-    "SI ms": 761.0,
-    "TTI ms": 2770.0,
-    "TTFB ms": 2,
-    "bytes": 493297
+    "SI ms": 818.0,
+    "TTI ms": 2684.0,
+    "TTFB ms": 41,
+    "bytes": 410493
    },
    "requests": 27,
    "form_factor": "mobile",
@@ -101,26 +105,28 @@
    },
    "throttling_method": "simulate",
    "lighthouse": "13.5.0",
-   "final_url": "http://127.0.0.1:52899/",
-   "warnings": []
+   "final_url": "https://second-look-79t.pages.dev/",
+   "warnings": [
+    "The page loaded too slowly to finish within the time limit. Results may be incomplete."
+   ]
   }
  ],
  "median": {
   "scores": {
-   "performance": 97,
+   "performance": 96,
    "accessibility": 100,
    "best-practices": 100,
    "seo": 100
   },
   "metrics": {
-   "FCP ms": 761.0,
-   "LCP ms": 2568.0,
-   "TBT ms": 14.0,
+   "FCP ms": 850.0,
+   "LCP ms": 2704.0,
+   "TBT ms": 7,
    "CLS": 0,
-   "SI ms": 761.0,
-   "TTI ms": 2770.0,
-   "TTFB ms": 2,
-   "bytes": 493297
+   "SI ms": 2144.0,
+   "TTI ms": 2710.0,
+   "TTFB ms": 39,
+   "bytes": 410341
   },
   "requests": 27,
   "form_factor": "mobile",
@@ -134,7 +140,9 @@
   },
   "throttling_method": "simulate",
   "lighthouse": "13.5.0",
-  "final_url": "http://127.0.0.1:52899/",
-  "warnings": []
+  "final_url": "https://second-look-79t.pages.dev/",
+  "warnings": [
+   "The page loaded too slowly to finish within the time limit. Results may be incomplete."
+  ]
  }
 }
