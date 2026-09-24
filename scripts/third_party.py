@@ -113,7 +113,7 @@ TIMESTAMPS = """## Timestamps
   hashes and write one summary of them into a Bitcoin transaction. No file, answer or name
   leaves this Mac. The proofs are in `proofs/`. `scripts/ots_status.py` asks the calendars for
   the finished proof and reads block headers from the public Blockstream explorer
-  (https://blockstream.info/api), read only, to check a confirmed proof without a Bitcoin node.
+  (`blockstream.info/api`), read only, to check a confirmed proof without a Bitcoin node.
 """
 
 
