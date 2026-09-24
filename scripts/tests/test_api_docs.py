@@ -130,6 +130,73 @@ def test_the_python_reader_sees_prefix_method_and_limiter(tmp_path: Path) -> Non
     assert got == {("GET", "/api/x/{a}", "READ_LIMIT"), ("POST", "/health", None)}
 
 
+@pytest.mark.parametrize(
+    "route",
+    [
+        'if (path.startsWith("/api/new")) return y;',
+        'if (path.endsWith("/new")) return y;',
+        'switch (path) { case "/api/new": return y; }',
+        'if (path == "/api/new") return y;',
+        'if (new URL(request.url).pathname === "/api/new") return y;',
+    ],
+)
+def test_a_worker_route_the_reader_cannot_read_is_an_error(route: str) -> None:
+    text = (
+        "const path = url.pathname;\n"
+        "// a comment about the path is fine\n"
+        'if (path === "/health") return x;\n' + route + "\n"
+    )
+    with pytest.raises(inv.InventoryError):
+        inv.worker_routes(text)
+
+
+def test_the_real_worker_uses_the_path_only_in_forms_the_reader_reads() -> None:
+    assert inv.unread_path_uses(inv.WORKER_INDEX.read_text(encoding="utf-8")) == []
+    assert inv.worker_routing_elsewhere() == []
+
+
+def test_a_worker_file_other_than_index_that_reads_a_path_is_an_error(tmp_path: Path) -> None:
+    (tmp_path / "index.ts").write_text("const path = url.pathname;\n", encoding="utf-8")
+    (tmp_path / "core").mkdir()
+    (tmp_path / "core" / "pure.ts").write_text("export const walk = (path) => path;\n")
+    assert inv.worker_routing_elsewhere(tmp_path) == []
+    (tmp_path / "router.ts").write_text("if (new URL(u).pathname === '/x') go();\n")
+    assert inv.worker_routing_elsewhere(tmp_path) == ["router.ts"]
+
+
+@pytest.mark.parametrize(
+    "code",
+    [
+        "app.add_api_route('/api/new', handler)\n",
+        "app.include_router(router, prefix='/v2')\n",
+        "app.mount('/static', files)\n",
+        "@app.api_route('/api/new', methods=['GET'])\ndef x(): ...\n",
+    ],
+)
+def test_a_python_route_the_reader_cannot_read_is_an_error(tmp_path: Path, code: str) -> None:
+    # One route the reader does read, so the error can only come from the unread one.
+    readable = "app = FastAPI()\n@app.get('/health')\ndef h(): ...\n"
+    (tmp_path / "main.py").write_text(readable, encoding="utf-8")
+    assert [r.path for r in inv.python_routes(tmp_path)] == ["/health"]
+    (tmp_path / "main.py").write_text(readable + code, encoding="utf-8")
+    with pytest.raises(inv.InventoryError, match="does not read"):
+        inv.python_routes(tmp_path)
+
+
+def test_the_python_reader_looks_in_subfolders_but_not_tests(tmp_path: Path) -> None:
+    (tmp_path / "main.py").write_text("app = FastAPI()\n@app.get('/health')\ndef h(): ...\n")
+    (tmp_path / "extra").mkdir()
+    (tmp_path / "extra" / "more.py").write_text(
+        "router = APIRouter(prefix='/api')\n@router.head('/more')\ndef m(): ...\n"
+    )
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_x.py").write_text(
+        "app = FastAPI()\n@app.get('/only-in-a-test')\ndef t(): ...\n"
+    )
+    got = {(r.method, r.path) for r in inv.python_routes(tmp_path)}
+    assert got == {("GET", "/health"), ("HEAD", "/api/more")}
+
+
 def test_the_committed_inventory_matches_the_code() -> None:
     committed = (ROOT / "results" / "api_inventory.json").read_text(encoding="utf-8")
     assert committed == inv.render(inv.inventory()), "run scripts/api_inventory.py"
