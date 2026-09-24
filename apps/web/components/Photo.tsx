@@ -5,7 +5,7 @@ import { preload } from "react-dom";
 import { firstUrl } from "../photo-sources.mjs";
 import { photoById } from "@/lib/content";
 
-export function Photo({ id, large = false, priority = false }: { id: string; large?: boolean; priority?: boolean }) {
+export function Photo({ id, large = false, priority = false, first = false }: { id: string; large?: boolean; priority?: boolean; first?: boolean }) {
   const p = photoById(id);
   if (!p) {
     return <div className="photo" role="img" aria-label={`missing photo ${id}`} />;
@@ -18,6 +18,7 @@ export function Photo({ id, large = false, priority = false }: { id: string; lar
       width={p.width}
       height={p.height}
       loading={priority ? "eager" : "lazy"}
+      fetchPriority={first ? "high" : undefined}
       decoding="async"
       draggable={false}
     />
@@ -30,7 +31,9 @@ export function Photo({ id, large = false, priority = false }: { id: string; lar
   // React writes no preload for an <img> inside <picture>, so the AVIF set gets its own, the same
   // one the Link header in public/_headers carries: imagesrcset so the browser fetches only the
   // copy it will show, type so a browser without AVIF fetches none of them.
-  if (priority && avif) preload(firstUrl(avif.srcset), { as: "image", type: avif.type, imageSrcSet: avif.srcset, imageSizes: p.sizes });
+  // The first photo of the page is its largest paint, so it asks for high priority (first).
+  if (priority && avif)
+    preload(firstUrl(avif.srcset), { as: "image", type: avif.type, imageSrcSet: avif.srcset, imageSizes: p.sizes, fetchPriority: first ? "high" : undefined });
   return (
     <picture>
       {p.sources.map((s) => (

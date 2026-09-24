@@ -18,7 +18,7 @@ export default function Home() {
           guessKept={t("landing.guess_kept")}
           cta={t("landing.cta")}
           sides={[
-            { id: left.id, photo: <Photo id={left.photo_id} priority />, pickLabel: t("landing.pick_left") },
+            { id: left.id, photo: <Photo id={left.photo_id} priority first />, pickLabel: t("landing.pick_left") },
             { id: right.id, photo: <Photo id={right.photo_id} priority />, pickLabel: t("landing.pick_right") },
           ]}
         />

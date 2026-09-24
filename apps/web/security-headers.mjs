@@ -49,7 +49,15 @@ export function buildHeaders({ apiOrigin, isDev = false }) {
  * but stopped once the project gained the /api Functions, and the first screen got slower.
  */
 export function photoPreloads(content) {
-  const links = (content?.warmup ?? []).slice(0, 2).map((w) => photoPreload(content?.photos?.[w.photo_id])).filter(Boolean);
+  // The first photo is the page's largest paint (Lighthouse, 2026-09-24), so its preload asks for
+  // high priority, as its <img> does: both photos load at once, and the first should not wait.
+  const links = (content?.warmup ?? [])
+    .slice(0, 2)
+    .map((w, i) => {
+      const entry = photoPreload(content?.photos?.[w.photo_id]);
+      return entry && i === 0 ? { ...entry, fetchpriority: "high" } : entry;
+    })
+    .filter(Boolean);
   return links.length ? { "/": links, "/poster": links } : {};
 }
 
@@ -69,7 +77,8 @@ export function photoPreload(photo) {
 
 /** One Link header entry. The attributes go in quotes, because a srcset holds commas. */
 export function linkEntry(entry) {
-  const { href, type, imagesrcset, imagesizes } = typeof entry === "string" ? { href: entry } : entry;
+  const { href, type, imagesrcset, imagesizes, fetchpriority } = typeof entry === "string" ? { href: entry } : entry;
+  if (fetchpriority && !["high", "low", "auto"].includes(fetchpriority)) throw new Error(`a Link fetchpriority is high, low or auto: ${fetchpriority}`);
   const quoted = (name, value) => {
     if (/["\r\n]/.test(value)) throw new Error(`a Link ${name} cannot hold quotes or line breaks: ${value}`);
     return `; ${name}="${value}"`;
@@ -78,7 +87,8 @@ export function linkEntry(entry) {
     `<${href}>; rel=preload; as=image` +
     (type ? quoted("type", type) : "") +
     (imagesrcset ? quoted("imagesrcset", imagesrcset) : "") +
-    (imagesizes ? quoted("imagesizes", imagesizes) : "")
+    (imagesizes ? quoted("imagesizes", imagesizes) : "") +
+    (fetchpriority ? `; fetchpriority=${fetchpriority}` : "")
   );
 }
 

@@ -8,10 +8,10 @@
   Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
 
 /
-  Link: </photos/ph-warmup-03-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-03-480.avif 480w, /photos/ph-warmup-03-800.avif 800w, /photos/ph-warmup-03-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw", </photos/ph-warmup-04-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-04-480.avif 480w, /photos/ph-warmup-04-800.avif 800w, /photos/ph-warmup-04-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw"
+  Link: </photos/ph-warmup-03-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-03-480.avif 480w, /photos/ph-warmup-03-800.avif 800w, /photos/ph-warmup-03-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw"; fetchpriority=high, </photos/ph-warmup-04-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-04-480.avif 480w, /photos/ph-warmup-04-800.avif 800w, /photos/ph-warmup-04-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw"
 
 /poster
-  Link: </photos/ph-warmup-03-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-03-480.avif 480w, /photos/ph-warmup-03-800.avif 800w, /photos/ph-warmup-03-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw", </photos/ph-warmup-04-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-04-480.avif 480w, /photos/ph-warmup-04-800.avif 800w, /photos/ph-warmup-04-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw"
+  Link: </photos/ph-warmup-03-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-03-480.avif 480w, /photos/ph-warmup-03-800.avif 800w, /photos/ph-warmup-03-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw"; fetchpriority=high, </photos/ph-warmup-04-480.avif>; rel=preload; as=image; type="image/avif"; imagesrcset="/photos/ph-warmup-04-480.avif 480w, /photos/ph-warmup-04-800.avif 800w, /photos/ph-warmup-04-1200.avif 1200w"; imagesizes="(min-width: 900px) 612px, 90vw"
 
 /check
   Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()

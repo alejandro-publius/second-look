@@ -74,7 +74,8 @@ def fails(expr: str, module: Path = MODULE) -> str:
 
 
 def test_the_first_two_warmup_photos_are_preloaded_on_the_landing_page_and_the_poster() -> None:
-    links = [{"href": "/photos/a.jpg"}, {"href": "/photos/b.jpg"}]
+    # The first is the landing page's largest paint, so it alone asks for high priority.
+    links = [{"href": "/photos/a.jpg", "fetchpriority": "high"}, {"href": "/photos/b.jpg"}]
     assert call(f"m.photoPreloads({json.dumps(CONTENT)})") == {"/": links, "/poster": links}
     assert call("m.photoPreloads({})") == {}
 
@@ -83,7 +84,10 @@ def test_the_headers_file_carries_one_link_header_per_page() -> None:
     text = call(
         f"m.headersFile({{ apiOrigin: '', preloads: m.photoPreloads({json.dumps(CONTENT)}) }})"
     )
-    link = "  Link: </photos/a.jpg>; rel=preload; as=image, </photos/b.jpg>; rel=preload; as=image"
+    link = (
+        "  Link: </photos/a.jpg>; rel=preload; as=image; fetchpriority=high, "
+        "</photos/b.jpg>; rel=preload; as=image"
+    )
     assert f"/\n{link}\n" in text
     assert f"/poster\n{link}\n" in text
     assert "c.jpg" not in text
@@ -95,7 +99,7 @@ def test_a_photo_with_smaller_copies_preloads_its_avif_set_and_not_the_jpeg() ->
     )
     avif = (
         f'</photos/a-480.avif>; rel=preload; as=image; type="image/avif"; '
-        f'imagesrcset="{AVIF}"; imagesizes="{SIZES}"'
+        f'imagesrcset="{AVIF}"; imagesizes="{SIZES}"; fetchpriority=high'
     )
     link = f"  Link: {avif}, </photos/b.jpg>; rel=preload; as=image"
     assert f"/\n{link}\n" in text
@@ -124,6 +128,11 @@ def test_a_headers_line_longer_than_pages_reads_fails_the_build() -> None:
         f"m.headersFile({{ apiOrigin: '', preloads: m.photoPreloads({json.dumps(content)}) }})"
     )
     assert "over the 2000" in err
+
+
+def test_a_link_fetchpriority_is_one_of_three_words() -> None:
+    err = fails("""m.linkEntry({ href: "/a", fetchpriority: "high; rel=evil" })""")
+    assert "high, low or auto" in err
 
 
 def test_a_link_value_cannot_break_out_of_its_quotes() -> None:
