@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 import yaml
@@ -903,6 +904,32 @@ def check_judge_sim(root: Path) -> list[str]:
     return problems
 
 
+def app_pages(root: Path) -> set[str]:
+    """Every page of the web app by its route slug, the test flow's /t included."""
+    flow = {"t"} if (root / "apps" / "web" / "app" / "t" / "page.tsx").is_file() else set()
+    return route_slugs(root) | flow
+
+
+def measured_pages(targets: list[object]) -> set[str]:
+    """The route slugs a list of measured paths or URLs covers. /share/12 covers share, the
+    slug of share/[score]; / is the landing page."""
+    slugs: set[str] = set()
+    for target in targets:
+        if not isinstance(target, str):
+            continue
+        path = urlsplit(target).path if "://" in target else target.split("?")[0].split("#")[0]
+        parts = [p for p in path.split("/") if p]
+        if not parts:
+            slugs.add("landing")
+        slugs |= {"-".join(parts[:n]) for n in range(1, len(parts) + 1)}
+    return slugs
+
+
+def unmeasured(root: Path, targets: list[object], tool: str) -> list[str]:
+    missing = sorted(app_pages(root) - measured_pages(targets))
+    return [f"{tool} never measured the page '{slug}'" for slug in missing]
+
+
 def check_axe(root: Path) -> list[str]:
     doc, problems = results_file(root, "axe.json")
     if doc is None:
@@ -910,6 +937,7 @@ def check_axe(root: Path) -> list[str]:
     screens = [s for s in doc.get("screens") or [] if isinstance(s, dict)]
     if not screens:
         problems.append("axe.json checked no screen")
+    problems += unmeasured(root, [s.get("path") for s in screens], "axe")
     for s in screens:
         where = f"{s.get('path')} ({s.get('viewport')})"
         if s.get("status") != 200 or s.get("error"):
@@ -935,6 +963,7 @@ def check_lighthouse(root: Path) -> list[str]:
     pages = [p for p in doc.get("pages") or [] if isinstance(p, dict)]
     if not pages:
         problems.append("lighthouse.json measured no page")
+    problems += unmeasured(root, [p.get("url") for p in pages], "Lighthouse")
     for p in pages:
         median = p.get("median")
         if p.get("status") != 200 or not isinstance(median, dict):

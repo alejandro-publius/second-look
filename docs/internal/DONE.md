@@ -31,7 +31,8 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 - **Fresh results.** The hardening results in `results/harden/` count only when measured at a
   commit that contains 8cecc38, the tip of `depth` when UPDATE_27's work began (the `commit`
   field), or, for `load_live.json`, finished after that commit's time. An older file measured an
-  older README and an older site.
+  older README and an older site. axe and Lighthouse must each have measured every page in
+  `apps/web/app`, `/t` included; `/share/12` stands for `share/[score]`.
 - **Reviews.** `docs/internal/reviews/REVIEW_<nn>.md`, `CRITIC_<nn>.md` and
   `JUDGE_SIM_<nn>_<name>.md`, numbered upward. The newest review and judge simulation name the
   commit they read first in their text, as "commit <sha>". A critic round carries two lines of

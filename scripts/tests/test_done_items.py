@@ -762,6 +762,40 @@ def test_lighthouse_every_page_loads_and_scores(tmp_path: Path, fresh: None) -> 
     assert has(problems, "/walk: accessibility 94, under 95")
 
 
+def test_axe_and_lighthouse_must_measure_every_page(tmp_path: Path, fresh: None) -> None:
+    for page in (
+        "page.tsx",
+        "t/page.tsx",
+        "walk/page.tsx",
+        "walk/[id]/page.tsx",
+        "share/[score]/page.tsx",
+        "accessibility/page.tsx",
+        "how-we-know/page.tsx",
+    ):
+        write(tmp_path, f"apps/web/app/{page}", "x")  # fmt: skip
+    paths = ["/", "/t", "/walk", "/share/12", "/accessibility", "/how-we-know?x=1"]
+    harden(tmp_path, "axe.json", {"commit": "abcdef1", "screens": [screen(p) for p in paths]})
+    assert di.check_axe(tmp_path) == []
+    site = "https://second-look-79t.pages.dev"
+    harden(tmp_path, "lighthouse.json",
+           {"commit": "abcdef1", "pages": [lh_page(site + p) for p in paths]})  # fmt: skip
+    assert di.check_lighthouse(tmp_path) == []
+    for gone, slug in (("/walk", "walk"), ("/", "landing"), ("/t", "t"), ("/share/12", "share")):
+        left = [p for p in paths if p != gone]
+        harden(tmp_path, "axe.json", {"commit": "abcdef1", "screens": [screen(p) for p in left]})
+        assert di.check_axe(tmp_path) == [f"axe never measured the page '{slug}'"], gone
+        doc = {"commit": "abcdef1", "pages": [lh_page(site + p) for p in left]}
+        harden(tmp_path, "lighthouse.json", doc)
+        assert di.check_lighthouse(tmp_path) == [f"Lighthouse never measured the page '{slug}'"]
+
+
+def test_lighthouse_counts_a_page_that_did_not_load(tmp_path: Path, fresh: None) -> None:
+    # A page that answered 404 is not measured, even when the file carries scores for it.
+    page = lh_page("/")
+    harden(tmp_path, "lighthouse.json", {"commit": "abcdef1", "pages": [{**page, "status": 404}]})
+    assert has(di.check_lighthouse(tmp_path), "did not measure /")
+
+
 def load_doc(**change: object) -> dict[str, object]:
     doc: dict[str, object] = {
         "finished_utc": "2026-09-25T00:00:00Z",
