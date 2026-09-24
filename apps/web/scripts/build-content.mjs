@@ -224,11 +224,20 @@ function main() {
   const walksPath = join(contentDir, "walks.yaml");
   const walksRaw = existsSync(walksPath) ? readYaml(walksPath).walks ?? [] : [];
   const posterIds = new Set(walksRaw.map((w) => w.poster_photo_id));
+  // Benchmark frames stay on the server side on purpose (SHOWN_ROLES above): they are the models'
+  // labelled pool, and the site ships no photo it does not show. The footage example on
+  // /how-we-know shows two of them (CRITIC_04 F02), so exactly those two are copied, by name from
+  // examples/footage-flag/example.json, never the whole role. Each keeps its manifest row and its
+  // credit, and needs an alt text of its own in the locale, photo.alt.<id>, that says what is in
+  // the frame and gives no answer away.
+  const examplePath = join(repoRoot, "examples", "footage-flag", "example.json");
+  const example = existsSync(examplePath) ? JSON.parse(readFileSync(examplePath, "utf8")) : null;
+  const exampleIds = new Set([example?.kept?.frame, example?.dropped?.frame].filter((id) => typeof id === "string" && id !== ""));
   const photos = {};
   const copyList = [];
   for (const row of manifestRows) {
     if (!row.id || !row.file) continue;
-    if (!SHOWN_ROLES.has(row.role) && !posterIds.has(row.id)) continue;
+    if (!SHOWN_ROLES.has(row.role) && !posterIds.has(row.id) && !exampleIds.has(row.id)) continue;
     const src = join(photosDir, row.file);
     if (!existsSync(src)) fail(`manifest row ${row.id} points at a missing file ${row.file}`);
     const isPlaceholder = row.license === "placeholder";
@@ -241,8 +250,9 @@ function main() {
       feature: row.feature || null,
       placeholder: isPlaceholder,
       // Alt text never gives away a test answer. Placeholders say what they are; a real photo gets a
-      // neutral scene line unless the manifest grows an `alt` column.
-      alt: isPlaceholder ? locale["photo.placeholder_alt"] : row.alt || locale["photo.creek_alt"],
+      // neutral scene line unless the manifest grows an `alt` column or the locale has a line for
+      // that photo alone (photo.alt.<id>, the footage example's two frames).
+      alt: isPlaceholder ? locale["photo.placeholder_alt"] : row.alt || locale[`photo.alt.${row.id}`] || locale["photo.creek_alt"],
       // CC BY and CC BY-SA ask us to name the author wherever the photo appears, so the credit
       // travels with the photo into the browser and /credits lists every one of them.
       author: row.author || "",
@@ -294,6 +304,10 @@ function main() {
   }
 
   for (const w of walksRaw) if (!photos[w.poster_photo_id]) fail(`walk ${w.id} has no poster row ${w.poster_photo_id}`);
+  for (const id of exampleIds) {
+    if (!photos[id]) fail(`the footage example shows frame ${id}, which has no manifest row`);
+    if (!locale[`photo.alt.${id}`]) fail(`frame ${id} on /how-we-know needs its own alt text, photo.alt.${id}, in content/locales/en.json`);
+  }
   // What a walk page needs, and nothing about which model said what beyond the one question.
   const walks = walksRaw.map((w) => ({
     id: String(w.id),

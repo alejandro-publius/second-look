@@ -5,14 +5,15 @@ import { preload } from "react-dom";
 import { firstUrl } from "../photo-sources.mjs";
 import { photoById } from "@/lib/content";
 
-export function Photo({ id, large = false, priority = false, first = false }: { id: string; large?: boolean; priority?: boolean; first?: boolean }) {
+// wide: a still from a video, shown whole at 16 by 9 rather than cut to the 4 by 3 of a photograph.
+export function Photo({ id, large = false, priority = false, first = false, wide = false }: { id: string; large?: boolean; priority?: boolean; first?: boolean; wide?: boolean }) {
   const p = photoById(id);
   if (!p) {
     return <div className="photo" role="img" aria-label={`missing photo ${id}`} />;
   }
   const img = (
     <img
-      className={large ? "photo photo-large" : "photo"}
+      className={["photo", large ? "photo-large" : "", wide ? "photo-wide" : ""].filter(Boolean).join(" ")}
       src={p.url}
       alt={p.alt}
       width={p.width}

@@ -44,7 +44,33 @@ function common(c) {
     photos: cell.photos_per_run,
     right: cell.runs_with_every_photo_right,
     runs: cell.runs,
+    // True only when the manifest row the file copies says, in so many words, that the frame has
+    // no label: the field is there and empty (CRITIC_04 F02). The label itself never leaves here.
+    unlabelled: row.gold_label === "",
   };
+}
+
+const ANSWERS = new Set(["yes", "no", "cant_tell"]);
+
+/**
+ * The other models that passed this feature on the test, each with its answers on this frame run
+ * by run, from the file's same_frame_and_feature (CRITIC_04 F02). A model the file does not say
+ * passed is left out, and so is a row that is not a list of answers.
+ * @param {any} c
+ */
+function othersThatPassed(c) {
+  const rows = Array.isArray(c?.same_frame_and_feature) ? c.same_frame_and_feature : [];
+  return rows
+    .filter(
+      (r) =>
+        isText(r?.model) &&
+        r.model !== c.model &&
+        r.passed_this_feature === true &&
+        Array.isArray(r.answers_by_run) &&
+        r.answers_by_run.length > 0 &&
+        r.answers_by_run.every((a) => ANSWERS.has(a)),
+    )
+    .map((r) => ({ model: r.model, answers: [...r.answers_by_run] }));
 }
 
 /**
@@ -54,9 +80,10 @@ function common(c) {
  *   date: string,
  *   files: string[],
  *   kept: null | { frame: string, model: string, feature: string, credit: { author: string, license: string, source_url: string },
- *     photos: number, right: number, runs: number, question: string, note: string },
+ *     photos: number, right: number, runs: number, unlabelled: boolean, question: string, note: string,
+ *     others: { model: string, answers: string[] }[] },
  *   dropped: null | { frame: string, model: string, feature: string, credit: { author: string, license: string, source_url: string },
- *     photos: number, right: number, runs: number, not_passed: boolean, reasons: string[] },
+ *     photos: number, right: number, runs: number, unlabelled: boolean, not_passed: boolean, reasons: string[] },
  * } | null}
  */
 export function footageCases(example, run) {
@@ -75,7 +102,7 @@ export function footageCases(example, run) {
     isText(screen?.question) &&
     isText(screen?.note)
   ) {
-    kept = { ...base, question: screen.question, note: screen.note };
+    kept = { ...base, question: screen.question, note: screen.note, others: othersThatPassed(k) };
   }
 
   let dropped = null;

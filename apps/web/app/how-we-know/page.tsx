@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Photo } from "@/components/Photo";
 import { Row } from "@/components/ui/Row";
 import { content, featureById, licenseUrl } from "@/lib/content";
 import { GATE_FILES, PASS_FILE, footageExample, howWeKnowNumbers } from "@/lib/how-data";
+import { modelName } from "@/lib/models";
 import { t } from "@/lib/t";
 
 type Case = {
@@ -9,7 +11,11 @@ type Case = {
   model: string;
   feature: string;
   credit: { author: string; license: string; source_url: string };
+  unlabelled: boolean;
 };
+
+// The yes and no words the test uses, for the other models' answers on the kept frame.
+const ANSWER_KEYS: Record<string, string> = { yes: "test.yes", no: "test.no", cant_tell: "test.cant_tell" };
 
 // The rows both cases open with, and the frame's credit they close with: the author, the licence
 // and the video it was taken from, as /credits and the walk credit a clip (CRITIC_03 D04).
@@ -17,10 +23,26 @@ function CaseRows({ c }: { c: Case }) {
   return (
     <>
       <Row label={t("how.example_frame")} value={<span className="hash">{c.frame}</span>} />
-      <Row label={t("how.example_model")} value={<span className="hash">{c.model}</span>} />
+      <Row label={t("how.example_model")} value={modelName(c.model)} />
       <Row label={t("how.example_feature")} value={featureById(c.feature)?.name ?? c.feature} />
     </>
   );
+}
+
+// The frame itself, whole, above its card (CRITIC_04 F02). build-content.mjs copies these two
+// benchmark frames and no others, and gives each its own alt text from the locale, which says what
+// is in the frame and not what the model or the gate made of it.
+function Frame({ c, testId }: { c: Case; testId: string }) {
+  return (
+    <div data-testid={testId}>
+      <Photo id={c.frame} wide />
+    </div>
+  );
+}
+
+// The manifest row gives the frame no label, so nobody has said whether the model was right.
+function NoLabel({ c }: { c: Case }) {
+  return c.unlabelled ? <p data-testid="example-no-label">{t("how.example_no_label")}</p> : null;
 }
 
 function FrameCredit({ c }: { c: Case }) {
@@ -90,7 +112,7 @@ export default function HowWeKnowPage() {
             {pass.models.map((m) => (
               <Row
                 key={m.model}
-                label={<span className="hash">{m.model}</span>}
+                label={modelName(m.model)}
                 value={
                   <>
                     {t("how.passed", { list: featureNames(m.passed) })}
@@ -127,6 +149,7 @@ export default function HowWeKnowPage() {
         <section className="stack" aria-labelledby="how-example">
           <h3 id="how-example">{t("how.example_title")}</h3>
           <p>{t("how.example_intro")}</p>
+          {example.kept ? <Frame c={example.kept} testId="example-kept-frame" /> : null}
           {example.kept ? (
             <div className="card stack" data-testid="example-kept">
               <h4>{t("how.example_kept_title")}</h4>
@@ -142,9 +165,19 @@ export default function HowWeKnowPage() {
                   {t("label.checker_noticed")}: {example.kept.note}
                 </p>
               </div>
+              {/* What the other models that passed this feature answered on the same frame. */}
+              {example.kept.others.map((o) => (
+                <p key={o.model} data-testid="example-other">
+                  {o.answers.every((a) => a === "no")
+                    ? t("how.example_other_no", { model: modelName(o.model), runs: o.answers.length })
+                    : t("how.example_other_said", { model: modelName(o.model), answers: o.answers.map((a) => t(ANSWER_KEYS[a]).toLowerCase()).join(", ") })}
+                </p>
+              ))}
+              <NoLabel c={example.kept} />
               <FrameCredit c={example.kept} />
             </div>
           ) : null}
+          {example.dropped ? <Frame c={example.dropped} testId="example-dropped-frame" /> : null}
           {example.dropped ? (
             <div className="card stack" data-testid="example-dropped">
               <h4>{t("how.example_dropped_title")}</h4>
@@ -160,6 +193,7 @@ export default function HowWeKnowPage() {
                   {example.dropped.reasons.join("; ")}
                 </span>
               </p>
+              <NoLabel c={example.dropped} />
               <FrameCredit c={example.dropped} />
             </div>
           ) : null}

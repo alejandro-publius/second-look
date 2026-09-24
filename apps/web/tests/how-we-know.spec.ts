@@ -1,6 +1,7 @@
 import { expect, test, type Locator } from "@playwright/test";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { footageCases } from "../lib/footage-example.mjs";
 import { howNumbers } from "../lib/how-numbers.mjs";
 
@@ -36,12 +37,14 @@ test("/how-we-know shows the pass table and the gate on real footage as the file
     const byFeature = table.models[model];
     const names = (passed: boolean) =>
       order.filter((f) => byFeature[f] && byFeature[f].passed === passed).map((f) => featureName[f]).join(", ") || en["how.none"];
-    await expect(rows.nth(i).locator(".hash")).toHaveText(model);
     // The two lines sit either side of a <br>, which textContent joins with nothing.
-    await expect(rows.nth(i).locator(".row-value")).toHaveText(
-      exactly(fill("how.passed", { list: names(true) }) + fill("how.not_passed", { list: names(false) })),
-    );
+    const lines = fill("how.passed", { list: names(true) }) + fill("how.not_passed", { list: names(false) });
+    await expect(rows.nth(i).locator(".row-value")).toHaveText(exactly(lines));
+    // CRITIC_04 F02 and F04: the model by the name the README and the model card give it, never its API id.
+    expect(en[`model.${model}`], `content/locales/en.json has no model.${model}`).toBeTruthy();
+    await expect(rows.nth(i).locator(".row-label")).toHaveText(exactly(en[`model.${model}`] + lines));
   }
+  await expect(page.getByTestId("pass-table")).not.toContainText(/claude-[a-z0-9-]+/);
   await expect(
     page.getByText(fill("how.from", { files: "results/model_pass_table.json", date: day(table.generated_at_utc) })),
   ).toBeVisible();
@@ -135,7 +138,7 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   expect(k.gate.kept).toBe(true);
   const kept = page.getByTestId("example-kept");
   await expect(rowValue(kept, "how.example_frame")).toHaveText(k.frame);
-  await expect(rowValue(kept, "how.example_model")).toHaveText(k.model);
+  await expect(rowValue(kept, "how.example_model")).toHaveText(en[`model.${k.model}`]);
   await expect(rowValue(kept, "how.example_feature")).toHaveText(featureName[k.feature]);
   const cell = k.pass_table_cell;
   expect(cell.passed).toBe(true);
@@ -152,7 +155,7 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   expect(d.gate.kept).toBe(false);
   const dropped = page.getByTestId("example-dropped");
   await expect(rowValue(dropped, "how.example_frame")).toHaveText(d.frame);
-  await expect(rowValue(dropped, "how.example_model")).toHaveText(d.model);
+  await expect(rowValue(dropped, "how.example_model")).toHaveText(en[`model.${d.model}`]);
   await expect(rowValue(dropped, "how.example_feature")).toHaveText(featureName[d.feature]);
   const dcell = d.pass_table_cell;
   expect(dcell.passed).toBe(false);
@@ -170,6 +173,71 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   ).toBeVisible();
 });
 
+// CRITIC_04 F02: the page credited two frames it did not show. Each frame now sits right above its
+// card, served by the site byte for byte from the file its manifest row names, with an alt text of
+// its own that says what is in the frame and gives no answer away. The kept card says what the
+// other models that passed the feature answered on that frame, and both cards say nobody has
+// labelled the frame, all as the example file says.
+type SameFrame = { model: string; passed_this_feature: boolean; answers_by_run: string[] };
+
+test("/how-we-know shows each footage frame above its card, from its manifest row, with the other models' answers and no label", async ({ page, request }) => {
+  const doc = example();
+  const manifest = readFileSync(join(ROOT, "photos", "manifest.csv"), "utf8").split("\n");
+  // id, file and sha256 lead every row and never hold a comma.
+  const row = (id: string) => manifest.find((l) => l.startsWith(`${id},`))?.split(",");
+  await page.goto("/how-we-know");
+
+  for (const [which, c] of [
+    ["kept", doc.kept],
+    ["dropped", doc.dropped],
+  ] as const) {
+    const frame = page.getByTestId(`example-${which}-frame`);
+    await expect(frame.locator("xpath=following-sibling::*[1]")).toHaveAttribute("data-testid", `example-${which}`);
+    const img = frame.locator("img");
+    await expect(img).toHaveAttribute("src", `/photos/${basename(c.manifest_row.file)}`);
+    const alt = en[`photo.alt.${c.frame}`];
+    expect(alt, `content/locales/en.json has no photo.alt.${c.frame}`).toBeTruthy();
+    await expect(img).toHaveAttribute("alt", alt);
+    // What is in the frame, never what the model, the gate or a label made of it (hard rule 17).
+    expect(alt).not.toMatch(/straight|dug|deepen|channel|pipe|drain|outlet|sewage|built|concrete|invasive|flag|model|checker|label/i);
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(() => img.evaluate((el: HTMLImageElement) => (el.complete ? el.naturalWidth : 0))).toBeGreaterThan(0);
+    // Served by the site, and the very file whose hash the manifest row holds (hard rule 6).
+    const r = row(c.frame);
+    expect(r, `photos/manifest.csv has no row ${c.frame}`).toBeTruthy();
+    expect(r![1]).toBe(c.manifest_row.file);
+    const served = await request.get(`/photos/${basename(r![1])}`);
+    expect(served.status()).toBe(200);
+    expect(createHash("sha256").update(await served.body()).digest("hex")).toBe(r![2]);
+    // Both frames have no label in the file, and the card says so.
+    expect(c.manifest_row.gold_label).toBe("");
+    await expect(page.getByTestId(`example-${which}`).getByTestId("example-no-label")).toHaveText(en["how.example_no_label"]);
+  }
+
+  // Only these two benchmark frames reach the site, besides the walks' posters.
+  const posters: string[] = content.walks.map((w: { poster_photo_id: string }) => w.poster_photo_id);
+  const shownBenchmark = Object.values(content.photos as Record<string, { id: string; role: string }>)
+    .filter((p) => p.role === "benchmark")
+    .map((p) => p.id)
+    .sort();
+  expect(shownBenchmark).toEqual([...new Set([...posters, doc.kept.frame, doc.dropped.frame])].sort());
+  const another = manifest.map((l) => l.split(",")).find((r) => /^v\d+-\d+$/.test(r[0]) && !shownBenchmark.includes(r[0]));
+  expect(another, "a benchmark frame the site does not show").toBeTruthy();
+  expect((await request.get(`/photos/${basename(another![1])}`)).status()).toBe(404);
+
+  // The kept card: every other model that passed the feature, by name, with its answers.
+  const others = (doc.kept.same_frame_and_feature as SameFrame[]).filter((m) => m.model !== doc.kept.model && m.passed_this_feature);
+  expect(others.length).toBeGreaterThan(0);
+  const lines = page.getByTestId("example-kept").getByTestId("example-other");
+  await expect(lines).toHaveCount(others.length);
+  for (const [i, o] of others.entries()) {
+    // The file says each of them answered no in every run, so the page says it in those words.
+    expect(o.answers_by_run.every((a) => a === "no")).toBe(true);
+    await expect(lines.nth(i)).toHaveText(fill("how.example_other_no", { model: en[`model.${o.model}`], runs: o.answers_by_run.length }));
+  }
+  await expect(page.getByTestId("example-dropped").getByTestId("example-other")).toHaveCount(0);
+});
+
 test("the footage example's reader follows the file: a changed copy changes what the page would show, and a run that is not real shows none", () => {
   const doc = example();
   const run = runOf(doc);
@@ -183,6 +251,30 @@ test("the footage example's reader follows the file: a changed copy changes what
     right: doc.kept.pass_table_cell.runs_with_every_photo_right,
   });
   expect(out.dropped).toMatchObject({ frame: doc.dropped.frame, not_passed: true, reasons: doc.dropped.gate.drop_reasons });
+  // CRITIC_04 F02: the other models that passed, with their answers, and whether the frame has a label.
+  expect(out.kept!.others).toEqual(
+    (doc.kept.same_frame_and_feature as SameFrame[])
+      .filter((m) => m.model !== doc.kept.model && m.passed_this_feature)
+      .map((m) => ({ model: m.model, answers: m.answers_by_run })),
+  );
+  expect([out.kept!.unlabelled, out.dropped!.unlabelled]).toEqual([true, true]);
+  const labelled = structuredClone(doc);
+  labelled.kept.manifest_row.gold_label = "present";
+  delete labelled.dropped.manifest_row.gold_label;
+  const lab = footageCases(labelled, run)!;
+  // A label, or no word on it, is never read as no label, and the label itself goes nowhere.
+  expect([lab.kept!.unlabelled, lab.dropped!.unlabelled]).toEqual([false, false]);
+  expect(JSON.stringify(lab)).not.toContain("gold");
+  const mixed = structuredClone(doc);
+  const fable = (mixed.kept.same_frame_and_feature as SameFrame[]).find((m) => m.model === "claude-fable-5-1")!;
+  fable.passed_this_feature = true;
+  fable.answers_by_run = ["yes", "cant_tell", "no"];
+  const sonnet = (mixed.kept.same_frame_and_feature as SameFrame[]).find((m) => m.model === "claude-sonnet-5")!;
+  sonnet.passed_this_feature = false;
+  expect(footageCases(mixed, run)!.kept!.others).toEqual([
+    { model: "claude-opus-5-5", answers: ["no", "no", "no"] },
+    { model: "claude-fable-5-1", answers: ["yes", "cant_tell", "no"] },
+  ]);
 
   const copy = structuredClone(doc);
   copy.kept.frame = "v99-00001";
