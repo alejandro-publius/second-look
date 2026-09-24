@@ -94,8 +94,12 @@ verify-claims:
 	$(PY) scripts/verify_claims.py --file SECURITY.md
 	$(PY) scripts/verify_claims.py --file DEPLOY.md
 
+# The README and every other doc whose numbers verify-claims checks, so a new result or a new
+# test count is written everywhere it is quoted, not only in the README.
+RENDERED_DOCS := WRITEUP.md SECURITY.md DEPLOY.md docs/API.md docs/MCP.md
 render-readme:
 	$(PY) scripts/render_readme.py
+	@for doc in $(RENDERED_DOCS); do $(PY) scripts/render_readme.py --readme $$doc || exit 1; done
 
 # The test counts the README cites (UPDATE_27 block 24): Python tests, Worker golden cases,
 # Playwright tests and the Worker e2e sections, into results/test_counts.json. Not in make check,
