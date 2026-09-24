@@ -7,6 +7,10 @@ draws) the group answers each item of the other half by plain majority, once usi
 once using only the people who passed the first half. When nobody passed, or the passers tie, the
 group falls back to everyone. We report the share of items each version gets right.
 
+Without --synthetic it refuses to run exactly when evals/usability_analysis.py does, through the
+same guard: before the data lock, without the pinned tag and plan, or on synthetic data. With
+--synthetic it reads only a folder marked SYNTHETIC.txt, never the real export.
+
 Usage: uv run python evals/consensus.py --synthetic [--scenario skill_spread]
 """
 
@@ -36,11 +40,15 @@ from evals.common import (  # noqa: E402
     chart_title,
     load_test_items,
     now_utc,
-    parse_utc,
     result_header,
     write_json,
 )
-from evals.usability_analysis import apply_exclusions, load_export, refusal_reason  # noqa: E402
+from evals.usability_analysis import (  # noqa: E402
+    apply_exclusions,
+    guard,
+    load_export,
+    plan_sha256,
+)
 
 SCRIPT = "evals/consensus.py"
 GROUP_SIZE = 5
@@ -331,14 +339,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--input", type=Path, default=None)
     parser.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
-    parser.add_argument("--now", default=None)
-    parser.add_argument("--repo", type=Path, default=None)
     parser.add_argument("--draws", type=int, default=N_DRAWS)
     parser.add_argument("--splits", type=int, default=N_SPLITS)
     args = parser.parse_args(argv)
 
-    now = parse_utc(args.now) if args.now else now_utc()
-    repo = args.repo if args.repo is not None else RESULTS_DIR.parent
     if args.synthetic:
         if args.scenario:
             scenario = args.scenario
@@ -352,13 +356,13 @@ def main(argv: list[str] | None = None) -> int:
         if args.scenario:
             print("The --scenario option only makes sense with --synthetic.")
             return 2
-        reason = refusal_reason(now, repo)
-        if reason:
-            print(reason)
-            return 3
         scenario = None
         input_dir = args.input if args.input is not None else EXPORT_DIR
-        stamp_name = now.strftime("%Y%m%d")
+        stamp_name = now_utc().strftime("%Y%m%d")
+    reason = guard(input_dir, synthetic=args.synthetic)
+    if reason:
+        print(reason)
+        return 3
     if not (input_dir / "sessions.csv").exists():
         print(
             f"No sessions.csv in {input_dir}. "
@@ -367,10 +371,11 @@ def main(argv: list[str] | None = None) -> int:
         return 4
 
     sessions, responses = load_export(input_dir)
-    result = result_header(SCRIPT, synthetic=args.synthetic, stamp=stamp_name, when=now)
+    result = result_header(SCRIPT, synthetic=args.synthetic, stamp=stamp_name)
     if args.synthetic:
         result["scenario"] = scenario
     result["input"] = str(input_dir)
+    result["plan_sha256"] = plan_sha256()
     result.update(run_consensus(sessions, responses, n_splits=args.splits, n_draws=args.draws))
     title_extra = f" ({scenario} scenario)" if scenario else ""
     png = args.out_dir / f"consensus_{stamp_name}.png"

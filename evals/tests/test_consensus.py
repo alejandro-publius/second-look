@@ -21,7 +21,7 @@ from evals.consensus import (
     run_consensus,
     split_items,
 )
-from evals.usability_analysis import apply_exclusions
+from evals.usability_analysis import PLAN_SHA256, apply_exclusions
 
 Loader = Callable[[str], tuple[pd.DataFrame, pd.DataFrame]]
 
@@ -209,6 +209,7 @@ def test_cli_writes_stamped_outputs(synthetic_root: Path, tmp_path: Path) -> Non
     doc = json.loads((tmp_path / "consensus_synthetic.json").read_text())
     assert doc["stamp"] == "SYNTHETIC" and doc["synthetic"] is True
     assert doc["scenario"] == "skill_spread"
+    assert doc["plan_sha256"] == PLAN_SHA256
     assert doc["chart_title"].startswith("SYNTHETIC")
     assert doc["plan"]["pass_mark_of_8"] == 6
     assert doc["plan"]["group_size"] == 5

@@ -12,10 +12,11 @@ import pandas as pd
 import pytest
 
 from core.lock import DATA_LOCK_UTC
-from evals.common import SESSION_COLUMNS, SYNTHETIC_STAMP
+from evals.common import SESSION_COLUMNS, SYNTHETIC_STAMP, parse_utc
 from evals.make_synthetic_sessions import NO_EXTRAS, ExtraCounts, generate, simulate_accuracy
 from evals.usability_analysis import (
     MIN_COMPLETED_PER_ARM,
+    PLAN_SHA256,
     analyse,
     apply_exclusions,
     hedges_g,
@@ -305,14 +306,16 @@ def test_outputs_are_stamped_synthetic(synthetic_root: Path, tmp_path: Path) -> 
         synthetic=True,
         stamp_name="synthetic",
         scenario="no_effect",
-        when=datetime(2026, 9, 20, tzinfo=UTC),
         n_boot=200,
         n_perm=200,
     )
     doc = json.loads((tmp_path / "usability_synthetic.json").read_text())
-    for key in ("generated_at_utc", "script", "synthetic", "stamp"):
+    for key in ("generated_at_utc", "script", "synthetic", "stamp", "plan_sha256"):
         assert key in doc
     assert doc["synthetic"] is True and doc["stamp"] == SYNTHETIC_STAMP
+    assert doc["plan_sha256"] == PLAN_SHA256
+    written = parse_utc(doc["generated_at_utc"])
+    assert abs(written - datetime.now(UTC)) < timedelta(minutes=10)
     assert doc["chart_title"].startswith(SYNTHETIC_STAMP)
     assert result["chart_title"].startswith("SYNTHETIC")
     for pointer in ("untrained_mean", "trained_mean", "difference", "ci_low", "ci_high"):

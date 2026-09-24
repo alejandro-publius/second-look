@@ -1,17 +1,20 @@
 """The pre-registered analysis of the usability test: docs/analysis_plan.md items 4 to 7 and 9.
 
 Without --synthetic this script refuses to run before the data lock, without the git tag
-prereg-v1, or when docs/analysis_plan.md differs from the tagged version. With --synthetic it
-runs on generated data and stamps every output SYNTHETIC.
+prereg-v1 on the pinned commit, when docs/analysis_plan.md differs from the tagged and pinned
+version, or on a folder marked SYNTHETIC.txt. It always reads the real clock and this repository.
+With --synthetic it runs only on a folder that evals/make_synthetic_sessions.py wrote, never on
+the real export, and stamps every output SYNTHETIC.
 
 Usage:
   uv run python evals/usability_analysis.py --synthetic [--scenario real_gain]
-  uv run python evals/usability_analysis.py [--input data/export] [--now ISO] [--repo PATH]
+  uv run python evals/usability_analysis.py [--input data/export]
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import subprocess
 import sys
@@ -49,8 +52,14 @@ from evals.common import (  # noqa: E402
 )
 
 SCRIPT = "evals/usability_analysis.py"
+REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAN_RELATIVE = "docs/analysis_plan.md"
 PLAN_TAG = "prereg-v1"
+# The commit the tag points at and the SHA-256 of the tagged plan, as docs/notes/plan_hash.md
+# records them. Another repository, a look-alike ref or a moved tag cannot match both.
+PLAN_COMMIT = "ca0a83251ef38d85f1e8d5d268df858e8819faff"
+PLAN_SHA256 = "86da527e30c0a8e8492b6fb22c3056be1a2ad3087b5ca8c6f4a0a1bd58aed9cf"
+SYNTHETIC_MARKER = "SYNTHETIC.txt"
 N_BOOT = 10_000
 N_PERM = 10_000
 ALPHA = 0.05
@@ -68,8 +77,20 @@ TRUE_WORDS = {"true", "1", "yes", "t", "y"}
 # ---------------------------------------------------------------------------
 
 
+class Refused(RuntimeError):
+    """run() raises this with the sentence from guard(), so an import cannot skip the checks."""
+
+
 def _git(repo: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
-    return subprocess.run(["git", "-C", str(repo), *args], capture_output=True, check=False)
+    # GIT_DIR, GIT_WORK_TREE, GIT_INDEX_FILE and the other GIT_ variables would let another
+    # repository answer for this one, and replace refs could swap objects. Ignore them all.
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    return subprocess.run(
+        ["git", "--no-replace-objects", "-C", str(repo), *args],
+        capture_output=True,
+        check=False,
+        env=env,
+    )
 
 
 def tag_exists(repo: Path, tag: str = PLAN_TAG) -> bool:
@@ -77,11 +98,24 @@ def tag_exists(repo: Path, tag: str = PLAN_TAG) -> bool:
     return done.returncode == 0
 
 
+def tagged_commit(repo: Path, tag: str = PLAN_TAG) -> str | None:
+    """The commit the tag points at. The full ref name means no other ref can shadow the tag."""
+    done = _git(repo, "rev-parse", "--verify", "--quiet", f"refs/tags/{tag}^{{commit}}")
+    if done.returncode != 0:
+        return None
+    return done.stdout.decode("ascii").strip()
+
+
 def tagged_plan(repo: Path, tag: str = PLAN_TAG, relative: str = PLAN_RELATIVE) -> bytes | None:
-    done = _git(repo, "show", f"{tag}:{relative}")
+    done = _git(repo, "show", f"refs/tags/{tag}:{relative}")
     if done.returncode != 0:
         return None
     return done.stdout
+
+
+def plan_sha256() -> str:
+    """SHA-256 of the plan in this repository, recorded in every results JSON."""
+    return hashlib.sha256((REPO_ROOT / PLAN_RELATIVE).read_bytes()).hexdigest()
 
 
 def refusal_reason(now: datetime, repo: Path) -> str | None:
@@ -108,7 +142,41 @@ def refusal_reason(now: datetime, repo: Path) -> str | None:
             f"Refusing to run: {PLAN_RELATIVE} differs from the version tagged {PLAN_TAG}. "
             "Changes after the tag belong in docs/deviations.md."
         )
+    if hashlib.sha256(tagged).hexdigest() != PLAN_SHA256:
+        return (
+            f"Refusing to run: the tagged {PLAN_RELATIVE} does not have the SHA-256 pinned in "
+            f"{SCRIPT} and docs/notes/plan_hash.md, so it is not the registered plan."
+        )
+    if tagged_commit(repo) != PLAN_COMMIT:
+        return (
+            f"Refusing to run: the tag {PLAN_TAG} does not point at commit {PLAN_COMMIT[:7]}, "
+            "the commit docs/notes/plan_hash.md records."
+        )
     return None
+
+
+def guard(input_dir: Path, *, synthetic: bool) -> str | None:
+    """Why this run must not go ahead, or None. Both analysis scripts call it (hard rule 13).
+
+    A synthetic run reads only a folder that evals/make_synthetic_sessions.py marked with
+    SYNTHETIC.txt, never the real export. A real run never reads a marked folder, and it checks
+    the real clock and this repository: no option or environment variable stands in for either.
+    """
+    marked = (input_dir / SYNTHETIC_MARKER).exists()
+    if synthetic:
+        if not marked or input_dir.resolve() == EXPORT_DIR.resolve():
+            return (
+                "Refusing to run: with --synthetic the input must be a folder that "
+                f"evals/make_synthetic_sessions.py wrote, with {SYNTHETIC_MARKER} in it, and "
+                f"never the real export. {input_dir} is not one."
+            )
+        return None
+    if marked:
+        return (
+            f"Refusing to run: {input_dir} holds {SYNTHETIC_MARKER}, so it is generated data "
+            "and not the real export. Add --synthetic to analyse it."
+        )
+    return refusal_reason(now_utc(), REPO_ROOT)
 
 
 # ---------------------------------------------------------------------------
@@ -870,16 +938,19 @@ def run(
     synthetic: bool,
     stamp_name: str,
     scenario: str | None,
-    when: datetime,
     n_boot: int = N_BOOT,
     n_perm: int = N_PERM,
     launch_utc: datetime | None = None,
 ) -> dict[str, Any]:
+    reason = guard(input_dir, synthetic=synthetic)
+    if reason:
+        raise Refused(reason)
     sessions, responses = load_export(input_dir)
-    result = result_header(SCRIPT, synthetic=synthetic, stamp=stamp_name, when=when)
+    result = result_header(SCRIPT, synthetic=synthetic, stamp=stamp_name)
     if synthetic:
         result["scenario"] = scenario
     result["input"] = str(input_dir)
+    result["plan_sha256"] = plan_sha256()
     result.update(analyse(sessions, responses, n_boot=n_boot, n_perm=n_perm, launch_utc=launch_utc))
     title_extra = f" ({scenario} scenario)" if synthetic and scenario else ""
     paths = write_outputs(
@@ -887,9 +958,6 @@ def run(
     )
     result["paths"] = {k: str(v) for k, v in paths.items()}
     return result
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -906,26 +974,12 @@ def main(argv: list[str] | None = None) -> int:
         "--input", type=Path, default=None, help="folder with sessions.csv and responses.csv"
     )
     parser.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
-    parser.add_argument("--now", default=None, help="pretend the clock says this UTC time (tests)")
-    parser.add_argument(
-        "--repo", type=Path, default=None, help="git repo to check for the tag (tests)"
-    )
     parser.add_argument(
         "--launch-utc", default=None, help="drop dry runs started before this UTC time"
     )
     parser.add_argument("--resamples", type=int, default=N_BOOT)
     parser.add_argument("--permutations", type=int, default=N_PERM)
     args = parser.parse_args(argv)
-
-    test_clock = os.environ.get("SECOND_LOOK_TEST_CLOCK") == "1"
-    if (args.now or args.repo is not None) and not (args.synthetic or test_clock):
-        print(
-            "The --now and --repo options are for tests. A real run reads the real clock and "
-            "this repository. Set SECOND_LOOK_TEST_CLOCK=1 if you are writing a test."
-        )
-        return 2
-    now = parse_utc(args.now) if (args.now and (args.synthetic or test_clock)) else now_utc()
-    repo = args.repo if (args.repo is not None and (args.synthetic or test_clock)) else REPO_ROOT
     launch = parse_utc(args.launch_utc) if args.launch_utc else None
 
     if args.synthetic:
@@ -941,14 +995,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.scenario:
             print("The --scenario option only makes sense with --synthetic.")
             return 2
-        reason = refusal_reason(now, repo)
-        if reason:
-            print(reason)
-            return 3
         scenario = None
         input_dir = args.input if args.input is not None else EXPORT_DIR
-        stamp_name = now.strftime("%Y%m%d")
+        stamp_name = now_utc().strftime("%Y%m%d")
 
+    reason = guard(input_dir, synthetic=args.synthetic)
+    if reason:
+        print(reason)
+        return 3
     if not (input_dir / "sessions.csv").exists():
         print(
             f"No sessions.csv in {input_dir}. "
@@ -962,7 +1016,6 @@ def main(argv: list[str] | None = None) -> int:
         synthetic=args.synthetic,
         stamp_name=stamp_name,
         scenario=scenario,
-        when=now,
         n_boot=args.resamples,
         n_perm=args.permutations,
         launch_utc=launch,
