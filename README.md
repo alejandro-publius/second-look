@@ -104,63 +104,110 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | Put its own words in front of a person | Its note is shown only as "the checker noticed", cut to 160 characters | `core/checker.py`, `core/gate.py` |
 | State a risk for a named site | Every health or ecology sentence comes from `content/approved_sentences.yaml` with a source | `core/tests/test_labels.py` |
 
-<!-- GATE -->
+## The gate, the heart of it
+
+A vision model can help a volunteer look again. It can never decide what is stored. Every model answer takes this path:
+
+1. **The person answers first.** The creek check asks the official app's questions (`content/form.yaml`), and the answers are the person's own.
+2. **The model is asked only where it passed.** `core/checker.py` reads the committed pass table, `results/model_pass_table.json`, and does not even ask about a feature that model did not pass on the same 16-photo test the volunteers take. A table that does not say `"real": true` licenses nothing.
+3. **Its answer is forced.** One photo, one feature, the frozen question wording. Anything that is not yes, no or can't tell with a short note becomes can't tell and counts as malformed (`force_answer` in `core/checker.py`).
+4. **The gate turns it into a flag or drops it.** `parse_flags` in `core/gate.py` keeps a `Flag` only for a known feature the model passed, with a sane confidence and a short plain note, and drops everything else with a reason in plain words. It never raises. On the footage run it dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags, each for a feature that model had not passed.
+5. **A flag can only make one question eligible.** `core/followups.py` picks the follow-up questions from the answers, the rain (`core/rainfall.py`), the person's scores and the flags, by the rules in `content/followups.yaml`: two questions at most, the model's at most one, and no model call inside it.
+6. **The person answers again.** The model's note is shown only as "the checker noticed".
+7. **The record is built from human inputs only.** `build_record` in `core/gate.py` has no parameter that could carry a flag, a model id or model text. `core/fhir_emit.py` writes the record under OneAquaHealth's profiles with the person's score attached, and `scripts/fhir_validate.py` checks it in CI.
+
+Where it runs today: the model's flags reach a person in the video walks, where `scripts/build_walks.py` sends the footage run's answers through the same gate at build time. The live creek check runs with the checker off (`CHECKER_ENABLED`), so both servers pass it no flags and no model is called.
+
+## Three properties that follow
+
+| Property | Why it holds | The test that fails if it breaks |
+|---|---|---|
+| The model cannot write the record | The only way to make a record takes no model output | `core/tests/test_gate.py::test_build_record_signature_carries_human_inputs_only`, and the fuzz test `core/tests/test_gate.py::test_fuzz_model_output_never_reaches_answers_or_labels` |
+| A model speaks only where it passed, and a made-up pass table licenses nothing | The gate and the checker both read the committed table and require `"real": true` | `core/tests/test_harden_gate_properties.py::test_every_kept_flag_is_licensed_for_that_exact_model`, `core/tests/test_checker.py::test_synthetic_pass_table_never_licenses_a_flag_by_default` |
+| Code chooses the questions: two at most, the model's at most one, no network and no model call | Follow-up selection is a pure function | `core/tests/test_harden_followups_properties.py::test_the_content_table_never_asks_more_than_two_questions_for_any_input`, `core/tests/test_harden_followups_properties.py::test_the_selector_runs_with_http_and_the_model_client_patched_to_raise` |
+
+The hard parts of building this, and how each is proved, are in `WRITEUP.md`. The decisions are in `docs/adr/`.
 
 ## Architecture
 
-The deep version, with every file named, is `docs/ARCHITECTURE.md`. `make diagrams` checks that every diagram here parses, in CI.
+The deep version, with every file named, is `docs/ARCHITECTURE.md`. The loop is five verbs: Train, Check, Verify, Record, Act. Each diagram below is a source in `docs/diagrams/`, drawn as an SVG next to it by the Mermaid CLI pinned in `tools/diagrams`. `make diagrams` draws each one again, in CI too. It fails when a drawing is stale, was edited by hand, or has an edge that does not say what flows along it.
+
+**The system map.** Every edge says what flows. Where a part is a `core/` file, the live site runs its TypeScript port in `worker/src/core/`, held equal to the Python by golden vectors.
 
 ```mermaid
 flowchart TB
+  accTitle: The system map, by the five verbs Train, Check, Verify, Record and Act
+  accDescr: A volunteer takes the photo test on /t and the Worker keeps the per-feature score in D1. Vision models take the same test, and the pass table says which features each may flag. On /check the Worker hands the answers, the dry days and the person's score to the follow-up selector, which returns at most two questions. The finished visit becomes a record of human answers only, then a FHIR Bundle stored in D1, checked by the HL7 validator in CI and mirrored to their sandbox. From the stored visits, core/act.py works out what the creek needs and which pipes are worth testing, a pipe becomes a ServiceRequest, and the read only MCP server hands any agent the same records with their ids.
   subgraph TRAIN["TRAIN: collection"]
-    L["Two minute photo lesson<br/>content/lessons.yaml"]
-    T["16 item test<br/>core/scoring.py"]
-    M["The same 16 items, three models<br/>evals/model_sweep.py"]
-    P["Pass table<br/>results/model_pass_table.json"]
-    L --> T
-    M --> P
+    TPAGE["/t, the photo test<br/>apps/web/app/t"]
+    SWEEP["Vision models take the same test<br/>evals/model_sweep.py"]
+    PASS["Pass table<br/>results/model_pass_table.json"]
   end
   subgraph CHECK["CHECK: collection"]
-    F["Guided creek check<br/>content/form.yaml"]
-    Q["20 second return check<br/>core/quick.py"]
-    W["A walk from your desk<br/>content/walks.yaml"]
-    U["Photo upload, metadata cut out<br/>worker/src/uploads.ts"]
+    CPAGE["/check, the guided creek check<br/>apps/web/app/check"]
+    QPAGE["/quick, the return check<br/>apps/web/app/quick"]
+    WPAGE["/walk, a creek from your desk<br/>apps/web/app/walk"]
   end
+  WORKER["The Worker, every /api route<br/>worker/src/index.ts on Cloudflare"]
+  D1[("D1 database<br/>sessions, observers, visits, Bundles")]
+  KV[("KV<br/>uploaded photos")]
+  METEO["Open-Meteo"]
   subgraph VERIFY["VERIFY: transformation"]
-    R["Rainfall, Open-Meteo<br/>core/rainfall.py"]
-    S["Follow-up selector, pure<br/>core/followups.py"]
-    G["The gate<br/>core/gate.py"]
-    C["Vision checker<br/>core/checker.py"]
-    C --> G
-    P --> G
-    G --> S
-    R --> S
+    RAIN["Dry days<br/>core/rainfall.py"]
+    FOLLOW["Follow-up selector, pure<br/>core/followups.py"]
+    GATE["The gate<br/>core/gate.py"]
+    CHECKER["Vision checker, off on the live site<br/>core/checker.py"]
+    WALKS["Walk builder<br/>scripts/build_walks.py"]
   end
   subgraph RECORD["RECORD: validation"]
-    E["FHIR emitter<br/>core/fhir_emit.py"]
-    V["HL7 validator, their guide at b907cf0<br/>scripts/fhir_validate.py"]
-    O["Our store<br/>data/fhir_store"]
-    X["Their sandbox, conditional creates<br/>scripts/repush_sandbox.py"]
-    E --> V --> O --> X
+    BUILD["Record builder<br/>build_record in core/gate.py"]
+    EMIT["FHIR emitter<br/>core/fhir_emit.py"]
+    VALID["HL7 validator, their guide at b907cf0<br/>scripts/fhir_validate.py in CI"]
+    LIB["Our Library entry<br/>core/fhir_library.py"]
+    MIRROR["Sandbox mirror<br/>scripts/repush_sandbox.py"]
   end
+  SANDBOX["Their sandbox<br/>OneAquaHealth FHIR server"]
   subgraph ACT["ACT: aggregation and publication"]
-    A["What the creek needs, pipes worth testing<br/>core/act.py"]
-    D["Downstream note by reach<br/>core/regions.py"]
-    Y["Referral as a ServiceRequest<br/>core/fhir_referral.py"]
-    Z["Read only MCP server<br/>apps/mcp"]
+    REGIONS["Creek and reach of each spot<br/>core/regions.py"]
+    ACTF["What the creek needs, pipes worth testing<br/>core/act.py"]
+    REFER["Referral<br/>core/fhir_referral.py"]
+    VIEWS["/spot, /city and /two<br/>apps/web/app"]
+    MCP["Read only MCP server<br/>apps/mcp"]
   end
-  T --> SC["The person's per-feature score"]
-  SC --> S
-  SC --> E
-  F --> S
-  Q --> S
-  W --> S
-  U --> E
-  S --> E
-  O --> A
-  A --> D
-  A --> Y
-  O --> Z
+  CLIENT["An agent or a city's software"]
+  TPAGE -- "each answer,<br/>then keep my score" --> WORKER
+  WORKER -- "sessions, answers,<br/>the score if kept" --> D1
+  SWEEP -- "passed or not,<br/>per model and feature" --> PASS
+  PASS -- "which features<br/>a model may flag" --> GATE
+  PASS -- "which features<br/>it may ask about" --> CHECKER
+  CPAGE -- "answers, the spot,<br/>then follow-up answers" --> WORKER
+  QPAGE -- "colour, smell, pipe" --> WORKER
+  WORKER -- "photos, metadata cut out,<br/>deleted after 30 days" --> KV
+  METEO -- "rain at the spot" --> RAIN
+  RAIN -- "dry, wet or unknown" --> FOLLOW
+  WORKER <-- "answers and the score in,<br/>at most two questions out" --> FOLLOW
+  CHECKER -- "a clean yes,<br/>as a candidate flag" --> GATE
+  GATE -. "a flag makes one<br/>question eligible,<br/>none on the live check" .-> FOLLOW
+  WALKS -- "the footage run's<br/>yes answers" --> GATE
+  GATE -- "flags or drop reasons" --> WALKS
+  WALKS -- "the clip and at most<br/>one question, in<br/>content/walks.yaml" --> WPAGE
+  WORKER -- "human answers,<br/>ratings, follow-up answers" --> BUILD
+  BUILD -- "a visit record" --> EMIT
+  EMIT -- "one Bundle per visit" --> D1
+  WPAGE -- "answers, as a demo Bundle<br/>on the phone, never sent" --> EMIT
+  EMIT -- "sample Bundles from<br/>both emitters" --> VALID
+  EMIT -- "visit Bundles as<br/>conditional creates" --> MIRROR
+  LIB -- "what our data set is<br/>and where it lives" --> MIRROR
+  MIRROR -- "our tag on every resource,<br/>ids kept in a ledger" --> SANDBOX
+  SANDBOX -- "one lab Observation of theirs,<br/>read once a day from the Mac" --> D1
+  D1 -- "stored visits and<br/>follow-up answers" --> ACTF
+  REGIONS -- "creek and reach<br/>of each spot" --> ACTF
+  ACTF -- "a pipe two people who passed<br/>saw running after dry days" --> REFER
+  ACTF -- "needs, pipes worth testing,<br/>downstream notes" --> VIEWS
+  REFER -- "a ServiceRequest Bundle" --> VIEWS
+  D1 -- "the record, its Bundle,<br/>their cached record" --> VIEWS
+  WORKER -- "creeks, city views,<br/>records, Bundles" --> MCP
+  MCP -- "answers with their<br/>visit ids and Bundle links" --> CLIENT
 ```
 
 Why this architecture matters:
@@ -169,68 +216,134 @@ Why this architecture matters:
 - Python is the reference and the Worker runs the same functions, proved equal by golden vectors, so the live site and the tests cannot quietly disagree.
 - Every record is a FHIR Bundle under their profiles before it is stored, so a city that reads OneAquaHealth records reads ours.
 
+**One creek visit as FHIR.** Every arrow is a reference in the emitted JSON, named by its FHIR path, read off `fhir/golden/`. The Practitioner's qualification carries the test and its dates. The score itself is in the test sitting's QuestionnaireResponse, which the Provenance names as a source of every Observation.
+
 ```mermaid
-flowchart LR
-  PR["Practitioner<br/>the volunteer, pseudonymous<br/>qualification = per-feature score"]
-  PRL["PractitionerRole"]
-  ORG["Organization<br/>Second Look"]
-  QR["QuestionnaireResponse<br/>the creek check, their form"]
-  QN["Questionnaire<br/>mirrors the official app"]
-  OBS["Observation<br/>one per feature<br/>ObservationIndicatorsOah"]
-  LOC["Location<br/>the spot, LocationOah<br/>nested: reach, creek, city"]
-  PROV["Provenance<br/>who, when, with what score"]
-  SR["ServiceRequest<br/>this pipe is worth testing"]
-  SPEC["Specimen, SpecimenOah<br/>EXAMPLE only"]
-  LIB["Library<br/>our entry on their sandbox"]
-  BUN["Bundle<br/>one visit, one transaction"]
-  PR --> PRL --> ORG
-  QR --> QN
-  QR --> LOC
-  OBS --> LOC
-  OBS --> PR
-  PROV --> OBS
-  PROV --> QR
-  PROV --> PR
-  SR --> LOC
-  SR --> OBS
-  SPEC --> SR
-  BUN --> QR
-  BUN --> OBS
-  BUN --> LOC
-  BUN --> PROV
-  LIB --> PROV
+flowchart TB
+  accTitle: The FHIR resources of one creek visit, and how they point at each other
+  accDescr: One creek visit is emitted as a collection Bundle by core/fhir_emit.py. Its Observations sit on the spot, which is part of a reach, which is part of a creek. Each Observation names the volunteer as performer and the creek check answers as its source. The volunteer is a pseudonymous Practitioner whose dated qualification is issued by Second Look, and the test sitting with the per-feature score is authored by the same Practitioner. One Provenance ties every Observation to the volunteer, the software and both sets of answers. A pipe worth testing becomes a ServiceRequest made on request by core/fhir_referral.py, and our Library entry on their sandbox lists the mirrored Provenance.
+  subgraph VISIT["Bundle, type collection: one creek visit, from core/fhir_emit.py"]
+    ORG["Organization<br/>Second Look"]
+    DEV["Device<br/>the Second Look web app"]
+    PRAC["Practitioner, the volunteer<br/>known by a hash of a random token<br/>qualification: the Second Look test,<br/>from the test day until it lapses"]
+    QRT["QuestionnaireResponse<br/>the test sitting: each feature's score"]
+    QRV["QuestionnaireResponse<br/>the creek check: every answer"]
+    OBS["Observation, one per answered item<br/>profile ObservationIndicatorsOah<br/>value: a coded answer or a quantity"]
+    PROV["Provenance<br/>one per visit"]
+    subgraph NEST["Location nest, profile LocationOah"]
+      SPOT["Location: the spot"]
+      REACH["Location: the reach"]
+      CREEK["Location: the creek"]
+    end
+  end
+  subgraph REFER["Referral, core/fhir_referral.py"]
+    SR["ServiceRequest, intent proposal<br/>test the water coming out of this pipe<br/>made on request, never stored"]
+  end
+  subgraph SANDBOX["Their sandbox, our copies sent by scripts/repush_sandbox.py"]
+    LIB["Library, profile LibraryOah<br/>our data set, from core/fhir_library.py"]
+  end
+  SPOT -- "partOf" --> REACH
+  REACH -- "partOf" --> CREEK
+  PRAC -- "qualification.issuer" --> ORG
+  QRT -- "author" --> PRAC
+  QRV -- "author" --> PRAC
+  OBS -- "subject" --> SPOT
+  OBS -- "performer" --> PRAC
+  OBS -- "derivedFrom" --> QRV
+  PROV -- "target: every Observation" --> OBS
+  PROV -- "agent, author" --> PRAC
+  PROV -- "agent, assembler" --> DEV
+  PROV -- "entity, source: the answers" --> QRV
+  PROV -- "entity, source: the score" --> QRT
+  SR -- "subject: the pipe's spot" --> SPOT
+  SR -- "reasonReference:<br/>the pipe Observations" --> OBS
+  SR -- "requester" --> ORG
+  LIB -- "content: each mirrored<br/>Provenance, by its id there" --> PROV
 ```
+
+**The AI gate.** Every arrow is a call in `core/checker.py`, `core/gate.py` or `core/followups.py`. On the live creek check the checker is off and the Worker passes no flags, so no model is in that request path. The walks run the same gate when they are built, in `scripts/build_walks.py`.
 
 ```mermaid
 sequenceDiagram
-  participant Person
-  participant App as Web app
-  participant Checker as core/checker.py
-  participant Model as Vision model
-  participant Gate as core/gate.py
-  participant Follow as core/followups.py
-  participant Store as FHIR store
-  Person->>App: Files a creek check, or opens a walk
-  App->>Checker: Photo or frame, and the features to look at
-  Checker->>Checker: Refuse any feature this model did not pass
-  Checker->>Model: One photo, one question, forced answer
-  Model-->>Checker: yes, no or cant_tell, and a note
-  Checker->>Gate: Proposed flag
-  Gate->>Gate: Shape, feature, pass table, note length, one flag per feature
-  Gate-->>Follow: At most one eligible question, or nothing
-  Follow->>Follow: Answers, weather and the person's score decide. No model call here.
-  Follow-->>App: At most two questions, the model's at most one of them
-  App->>Person: "One more look", with the reason in one line
-  Person-->>App: The person answers. The model's note is shown as "the checker noticed".
-  App->>Store: The record, built from human answers only
-  Note over Model,Store: The model never reaches the store. It has no path to it.
+  accTitle: The AI gate, step by step
+  accDescr: The volunteer answers every question first. Only then may a vision model answer one question about one photo, and only for a feature it passed on the same test the volunteers take. The gate turns that answer into a flag or drops it. A flag can make one follow-up question eligible. The follow-up selector, which calls no model, picks at most two questions. The person answers them, and the record is built from the person's answers alone.
+  autonumber
+  actor V as Volunteer
+  participant App as The app and its API
+  participant C as core/checker.py
+  participant P as Pass table<br/>results/model_pass_table.json
+  participant M as Vision model
+  participant G as core/gate.py
+  participant F as core/followups.py
+  participant R as build_record<br/>core/gate.py
+  V->>App: Answers every question in the creek check first
+  App->>C: check_photo: one photo, one feature
+  C->>P: feature_passed: is the table from a real run, and did this model pass this feature?
+  alt The checker is off, or the answer is no
+    C-->>App: No flag. The model is never asked.
+  else Yes
+    C->>M: The feature's question, from content/features.yaml
+    M-->>C: yes, no or cant_tell, and a note
+    C->>C: force_answer: anything but a clean yes stops here
+    C->>G: parse_flags: the yes as a candidate flag
+    G->>P: Reads the table again: real run, feature passed by this model
+    G->>G: Checks the feature, the confidence and a short plain note
+    G-->>C: A Flag, or a reason it was dropped
+    C-->>App: At most one Flag
+  end
+  App->>F: select_followups: answers, dry days, the person's score, flags
+  F->>F: Rules in order: dry pipe, rating check, checker flag, low score
+  Note over F: A flag can make only the checker flag question eligible. No model call in here.
+  F-->>App: At most two questions, and at most one of them from a flag
+  App->>V: Look again? The model's note is shown as "the checker noticed"
+  V->>App: The person's own answer
+  App->>R: Answers, ratings, follow-up answers and photo ids
+  Note over R: No parameter takes a flag, a model id or model text
+  R-->>App: The visit record, human answers only
 ```
+
+The same three as images, for places that do not draw Mermaid: `docs/diagrams/system-map.svg`, `docs/diagrams/fhir-graph.svg`, `docs/diagrams/ai-gate.svg`.
 
 ### Tech stack
 
+| Part | Built with |
+|---|---|
+| Web app | Next.js 16 and React 19, a static export on Cloudflare Pages, a service worker for offline checks, self-hosted fonts, no third party script |
+| API, live | a TypeScript Worker on Cloudflare Workers, with D1 for records and Workers KV for photos |
+| API, reference | Python 3.12, FastAPI, SQLModel and Alembic, SQLite locally and Postgres in docker compose |
+| Pure logic | `core/`: the gate, the follow-ups, scoring, labels, the FHIR emitter; ported to TypeScript and proved equal by golden vectors |
+| Standards | FHIR R4 4.0.1 under OneAquaHealth's guide pinned at b907cf0, FSH built by SUSHI, checked by the HL7 validator <!--v:results/fhir_validation.json#/validator_version-->6.10.4<!--/v--> with terminology on |
+| AI | Claude vision models through the Anthropic API, behind the gate, only where they passed the test |
+| Agents | a read only MCP server on the `mcp` Python SDK |
+| Checks | pytest with Hypothesis, Playwright, ruff, mypy, gitleaks, and `make check` in GitHub Actions |
+| Weather | Open-Meteo, for the dry pipe question |
+
 FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and built with SUSHI 3.20.1; their sandbox, read at one request per second and written with conditional creates; Open-Meteo for the rainfall behind the dry pipe rule; the Cal-IPC Inventory for the Bay Area plant list; four vision models (Claude Haiku 4.5, Sonnet 5, Opus 5.5 and Fable 5.1), called directly and kept behind a gate. No names, emails, addresses or free text in the test; EXIF stripped from uploads, which are deleted after 30 days; a hash-chained audit log.
 
-<!-- API -->
+### API
+
+The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes, under `/api` on the site's own origin. The Python API in `apps/api/` is the reference, with <!--v:results/api_inventory.json#/python/count-->25<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in `docs/API.md`; a test fails when a route is added without a row there.
+
+| Route | What it is for |
+|---|---|
+| `POST /api/test/session`, `/response`, `/complete` | the two-minute test; `x-qa-key` marks a live check as a test |
+| `POST /api/check/draft`, `/api/check/finalize` | a creek check and the follow-up questions code picked |
+| `GET /api/spot/{spot_id}`, `/api/city/{creek}` | a record, and the analyst's view of a creek, every number with the visit ids behind it |
+| `GET /api/fhir/Bundle/{visit_id}`, `/api/fhir/referral/{spot_id}` | the FHIR behind every record, and a ServiceRequest for a pipe worth testing |
+| `GET /api/two` | one of our Observations beside a laboratory one from their sandbox |
+| `POST /api/demo/answer` | judge mode: right or wrong only, shut until the data lock |
+
+### MCP tools
+
+`apps/mcp/server.py` is a read only MCP server over our records, run locally over stdio. Every answer carries `resource_ids` and `fhir`, the visits it was counted from, so an agent cannot state a number it cannot trace. It has <!--v:results/api_inventory.json#/mcp/count-->5<!--/v--> tools; inputs and outputs in `docs/MCP.md`, a real session in `examples/mcp/transcript.md`.
+
+| Tool | Answers |
+|---|---|
+| `list_creeks` | every creek with a record |
+| `get_creek_record` | one creek: findings, what it needs in approved words, pipes worth testing, reaches, downstream notes |
+| `list_findings` | findings across creeks, filtered by feature, by how many people, and by whether they passed |
+| `get_observer_score` | an observer's dated qualification and score per feature, as the record carries it |
+| `explain_number` | the visit ids behind one figure on a creek's record |
 
 ## How OneAquaHealth is used
 
@@ -278,6 +391,16 @@ Every number is graded by code and written to `results/`; `scripts/verify_claims
 - The pre-registered analysis of the two-minute test, written and tested on synthetic data before the tag: `evals/usability_analysis.py`. Nobody is recruited, so it reports a description with counts.
 - Cost is logged per call in `results/cost_log.jsonl`. A fake run logs to `results/cost_log_fake.jsonl` and spends nothing.
 
+### Tests
+
+`make check` runs everything below except the browser suite and the Worker end to end, and prints `CHECK GREEN`. The counts are taken by `scripts/count_tests.py` into `results/test_counts.json`.
+
+- **Python:** <!--v:results/test_counts.json#/python/tests-->1604<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
+- **Ports:** <!--v:results/test_counts.json#/worker_golden/cases-->113<!--/v--> golden cases written by the Python reference, which the TypeScript Worker must reproduce exactly, in <!--v:results/test_counts.json#/worker_golden/node_tests-->12<!--/v--> tests (`make worker-check`).
+- **Browser:** <!--v:results/test_counts.json#/playwright/tests-->59<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->15<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
+- **Worker end to end:** <!--v:results/test_counts.json#/worker_e2e/sections-->8<!--/v--> sections that drive the real Worker's routes under `wrangler dev` with a local D1 and KV (`make worker-e2e`, in CI).
+- **Records:** the HL7 validator checks every emitted Bundle, from Python and from the Worker, against OneAquaHealth's guide: <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`make fhir-validate`).
+
 ## What is real and what is synthetic
 
 The full list, kept current, is `docs/REAL_VS_SYNTHETIC.md`. In short:
@@ -293,19 +416,39 @@ The full list, kept current, is `docs/REAL_VS_SYNTHETIC.md`. In short:
 | The model pass table and the AI numbers | real, from one paid run on Sep 23 and 24 (`results/model_pass_table.json` says `"real": true`); the earlier fake runs stay in `results/`, stamped SYNTHETIC |
 | The simulation of weighted votes under Known weaknesses | synthetic by design: made-up people, stamped SYNTHETIC |
 
-<!-- SECURITY -->
+## Security and privacy
+
+The two-minute test is anonymous and field use is pseudonymous. We keep coded answers, a coarse location unless the person places the pin, a hash of a random browser token, and a score under a random contributor token only when the person asks us to keep it. We never keep names, emails, internet addresses, free text or photo metadata, and the site loads nothing from anyone else. Uploads are deleted after 30 days and served only with their own token.
+
+- `QA_KEY` only marks a live check as a test; `EXPORT_TOKEN` opens the anonymous export; neither can read a person's answers. No secret is in the repository: `make check` runs gitleaks over the history and scans every file git would commit.
+- The data lock, 2026-09-28T01:00:00Z, is enforced in code: judge mode's answer route is shut until then, and the analysis refuses real data before the lock or without the `prereg-v1` tag.
+- The Python API rate-limits per address in memory; the deployed Worker has no rate limit on purpose, because counting per visitor would mean holding something that identifies them.
+
+Everything, with the known gaps and how to report a problem: `SECURITY.md` and `docs/DATA_HANDLING.md`.
 
 ## Quickstart
 
 ```
 git clone https://github.com/alejandro-publius/second-look && cd second-look
-uv sync && (cd apps/web && npm ci) && (cd worker && npm ci)
+uv sync && (cd apps/web && npm ci) && (cd worker && npm ci) && (cd tools/diagrams && npm ci)
 make judge-check
 ```
 
 `make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests. It reads the result of the last HL7 validator run from `results/fhir_validation.json` and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets, then prints five lines.
 
-<!-- RUNNING -->
+### Running locally
+
+With no network and no key, on made-up demo data:
+
+```
+uv sync
+(cd apps/web && npm ci)
+make demo-offline
+```
+
+`scripts/seed_demo.py` fills `data/demo` through the API's own routes with every socket to another machine refused, and fails if one was tried: two test sittings that never count, three creek checks on Strawberry Creek, and one pipe worth testing. Then the API serves that folder on port 8000 and the site runs on http://localhost:3100. Open http://localhost:3100/city?creek=strawberry-creek. The first `uv sync` and `npm ci` are the only steps that use the network.
+
+`make dev` runs the same two servers on an empty local database, with the network. Deploying, the D1 schema, the secrets by name, the jobs on the Mac and a table of every setting the code reads are in `DEPLOY.md`. Pre-commit hooks for the fast checks: `uv tool install pre-commit && pre-commit install`.
 
 ## For judges
 
@@ -363,6 +506,8 @@ You can run the same loop from your desk on a creek in another country: **`/walk
 
 ## How this was built
 
+The engineering challenges, each with the file and test that prove it: [`WRITEUP.md`](WRITEUP.md). How to deploy, with every setting: [`DEPLOY.md`](DEPLOY.md). Decisions as records: [`docs/adr/`](docs/adr/README.md).
+
 AI coding tools wrote most of the code and text here: Claude Code, working from written briefs, with subagents for independent pieces, every change checked by `make check` before it was committed. The humans set the direction and made every decision that needs a person. Alex Velazquez wrote the briefs, chose the photos, set every gold label alone, froze the question wording and approved every sentence a person reads; every approval recorded in this repository is his. The team is Alex Velazquez and Rachel Selbrede. All work happened inside Sep 16 to 30, 2026, in small commits, and nothing was copied from earlier projects.
 
 ## Credits
@@ -384,6 +529,7 @@ photos/      every image with its manifest row   videos/  the footage we chose, 
 evals/       every reported number               results/ their outputs, failures included
 fhir/        the pinned guide, our FSH, golden records, the sandbox ledger
 scripts/     checks, gates, the footage pipeline, the sandbox mirror
+tools/diagrams/  the pinned Mermaid renderer: make diagrams-render draws docs/diagrams, make diagrams checks them
 docs/        product docs; docs/internal/ holds the working notes, removed before the repo opens
 ```
 
