@@ -85,10 +85,10 @@ flowchart TB
   EMIT -- "visit Bundles as<br/>conditional creates" --> MIRROR
   LIB -- "what our data set is<br/>and where it lives" --> MIRROR
   MIRROR -- "our tag on every resource,<br/>ids kept in a ledger" --> SANDBOX
-  SANDBOX -- "one lab Observation of theirs,<br/>read once a day from the Mac" --> D1
+  SANDBOX -- "one lab Observation<br/>of theirs, read once<br/>a day from the Mac" --> D1
   D1 -- "stored visits and<br/>follow-up answers" --> ACTF
   REGIONS -- "creek and reach<br/>of each spot" --> ACTF
-  ACTF -- "a pipe two people who passed<br/>saw running after dry days" --> REFER
+  ACTF -- "a pipe two people<br/>who passed saw running<br/>after dry days" --> REFER
   ACTF -- "needs, pipes worth testing,<br/>downstream notes" --> VIEWS
   REFER -- "a ServiceRequest Bundle" --> VIEWS
   D1 -- "the record, its Bundle,<br/>their cached record" --> VIEWS
@@ -106,9 +106,11 @@ flowchart TB
   `core/scoring.py`, `core/act.py` and `core/regions.py` take values and return values. They
   have no database, no clock and no network, so a test can pin every branch, and the same
   functions run in TypeScript on the edge against golden vectors written by the Python.
-- **The score travels with the observation.** It is not a badge on a profile page. It is a dated
-  `Practitioner.qualification` in the record and a `Provenance` link on every `Observation`, so
-  an analyst who receives one observation receives the trust mark with it.
+- **The score travels with the observation.** It is not a badge on a profile page. The test
+  sitting, with each feature's score, is a `QuestionnaireResponse` in the record, the
+  `Practitioner` carries a dated `qualification` for the test, and the `Provenance` on every
+  `Observation` names the test sitting as a source, so an analyst who receives one observation
+  receives the trust mark with it.
 - **Validation is a gate, not a report.** `make check` fails if any emitted resource does not
   validate against the OneAquaHealth guide at the pinned commit. A record that their systems
   could not read never leaves this repository.
@@ -120,8 +122,10 @@ flowchart TB
 
 ## The FHIR resources, and how they point at each other
 
-Every arrow is a reference in the emitted JSON, named by its FHIR path, and each one was read
-off `fhir/golden/visit-strawberry-creek-1.json` and `fhir/golden/referral-strawberry-creek-1.json`.
+Every arrow is a link in the emitted JSON, labelled with the element that holds it. The links in
+the visit and the referral were read off `fhir/golden/visit-strawberry-creek-1.json` and
+`fhir/golden/referral-strawberry-creek-1.json`. The Library's `content` lists each mirrored
+Provenance by its address on their server, as `fhir/golden/library-second-look.json` shows.
 The Practitioner's qualification carries the test and its dates; the numbers of the score sit in
 the test sitting's QuestionnaireResponse, which the Provenance names as a source of every
 Observation. The image: [`docs/diagrams/fhir-graph.svg`](diagrams/fhir-graph.svg).
@@ -176,11 +180,12 @@ the values. `docs/fhir_mapping.md` has every field.
 
 ## The AI gate, step by step
 
-Every arrow is a call in `core/checker.py`, `core/gate.py` or `core/followups.py`. On the live
-creek check the checker is off: `apps/api/settings.py` has `checker_enabled` false and the
-Worker passes no flags, so no model is in that request path. The walks run the same gate at
-build time in `scripts/build_walks.py` and ask their one question after the person has
-answered. The image: [`docs/diagrams/ai-gate.svg`](diagrams/ai-gate.svg).
+Every arrow between the parts of the code is a call, its return, or a read of the pass table in
+`core/checker.py`, `core/gate.py` or `core/followups.py`. The arrows to and from the volunteer
+are the app's screens. On the live creek check the checker is off: `apps/api/settings.py` has
+`checker_enabled` false and the Worker passes no flags, so no model is in that request path.
+The walks run the same gate at build time in `scripts/build_walks.py` and ask their one question
+after the person has answered. The image: [`docs/diagrams/ai-gate.svg`](diagrams/ai-gate.svg).
 
 ```mermaid
 sequenceDiagram

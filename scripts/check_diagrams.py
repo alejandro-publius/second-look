@@ -19,7 +19,8 @@ render check in `make diagrams` runs a browser:
 
 - each source passes the structural check above, and names itself with accTitle and accDescr,
   which become the SVG's title and description for a screen reader
-- in a flowchart source, every edge carries a label that says what flows along it
+- in a flowchart source, every edge carries a label that says what flows along it, and every
+  line of a label in the SVG is a line the source wrote, so Mermaid never wrapped one on its own
 - each source has its SVG, each SVG has its source, and the stamp on the SVG's first line carries
   the sha256 of the source as it is now, so a source edited without a new render fails here, and
   the sha256 of the drawing under it, so an SVG edited by hand fails too
@@ -33,6 +34,7 @@ Run: uv run python scripts/check_diagrams.py
 from __future__ import annotations
 
 import hashlib
+import html
 import os
 import re
 import shutil
@@ -54,11 +56,12 @@ ARROWS = ("-->", "---", "-.->", "==>", "->>", "-->>", "->", "--)", "--x")
 # A flowchart edge with its label, in the two spellings Mermaid knows:
 #   A -- "what flows" --> B    (also -. "x" .-> B, == "x" ==> B, A <-- "x" --> B)
 #   A -->|what flows| B
+#   An edge may also end in a circle or a cross (A --o B, A x--x B), so those ends count too.
 LABELLED_EDGE = re.compile(
-    r'^\w+\s*<?(?:--|-\.|==)\s*"[^"]*\S[^"]*"\s*(?:-->|\.->|==>|---)\s*\w+$'
-    r"|^\w+\s*<?(?:-->|-\.->|==>|---)\s*\|[^|]*\S[^|]*\|\s*\w+$"
+    r'^\w+\s*[<ox]?(?:--|-\.|==)\s*"[^"]*\S[^"]*"\s*(?:-->|\.->|==>|---|[-.=][-=][ox])\s*\w+$'
+    r"|^\w+\s*[<ox]?(?:-->|-\.->|==>|---|[-.=][-=][ox])\s*\|[^|]*\S[^|]*\|\s*\w+$"
 )
-EDGE_TOKENS = ("-->", ".->", "==>", "---", "~~~", "-.-")
+EDGE_TOKENS = ("-->", ".->", "==>", "---", "~~~", "-.-", "--o", "--x", "==o", "==x", ".-o", ".-x")
 NOT_EDGES = ("subgraph ", "accTitle", "accDescr", "classDef ", "class ", "style ", "linkStyle ")
 STAMP = re.compile(
     r"^<!-- Drawn by make diagrams from docs/diagrams/(\S+)\.mmd \(sha256 ([0-9a-f]{64})\)"
@@ -66,6 +69,12 @@ STAMP = re.compile(
 # The same first line also carries the sha256 of the drawing below it, so a hand edit shows.
 DRAWING = re.compile(r"the drawing below has sha256 ([0-9a-f]{64})\. ")
 ACC_TITLE = re.compile(r"^\s*accTitle:\s*(.+?)\s*$", re.M)
+# One line of a label as Mermaid draws it in a flowchart SVG: a row tspan holding one tspan per
+# word. Mermaid breaks an edge label on its own once a line is wider than 200 pixels, and where it
+# breaks depends on the fonts of the machine, so every row must be a line the source wrote.
+SVG_ROW = re.compile(r'<tspan class="text-outer-tspan row"[^>]*>(.*?)</tspan></tspan>')
+SVG_WORD = re.compile(r">([^<]*)")
+SOURCE_LABEL = re.compile(r'"([^"]*)"|\|([^|]*)\|')
 
 
 class DiagramError(Exception):
@@ -170,6 +179,25 @@ def unlabelled_edges(source: str) -> list[str]:
     return problems
 
 
+def wrapped_rows(source: str, svg: str) -> list[str]:
+    """Label lines in a flowchart SVG that the source did not write: Mermaid wrapped them itself.
+
+    A wrap moves with the fonts of the machine that draws it, so a label that wraps here may not
+    wrap on the CI runner, and the drawing then differs in content. Break long labels with <br/>.
+    """
+    head = next((ln.strip() for ln in source.splitlines() if ln.strip()), "")
+    if not head.startswith(("flowchart", "graph")):
+        return []
+    lines = set()
+    for quoted, piped in SOURCE_LABEL.findall(source):
+        for part in re.split(r"<br\s*/?>", quoted or piped):
+            lines.add(" ".join(part.split()))
+    rows = [html.unescape("".join(SVG_WORD.findall(row))).strip() for row in SVG_ROW.findall(svg)]
+    if not rows:
+        return ["no label rows found in the SVG, so the wrap check cannot read it"]
+    return [f"a label wrapped on its own at {row!r}" for row in rows if row and row not in lines]
+
+
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -227,6 +255,11 @@ def source_problems(root: Path) -> list[str]:
                 f"{DIAGRAM_DIR / svg.name}: edited by hand after it was drawn; "
                 "run make diagrams-render"
             )
+        else:
+            problems += [
+                f"{DIAGRAM_DIR / svg.name}: {p}; break the line with <br/> in {src.name}"
+                for p in wrapped_rows(text, body.decode("utf-8"))
+            ]
     return problems
 
 

@@ -40,7 +40,19 @@ def test_an_edge_needs_a_label() -> None:
     assert check_diagrams.unlabelled_edges(head + "  A -->|water| B\n") == []
     assert check_diagrams.unlabelled_edges(head + '  A -. "maybe" .-> B\n') == []
     assert check_diagrams.unlabelled_edges(head + '  A <-- "both ways" --> B\n') == []
-    for bare in ("  A --> B\n", '  A -- "" --> B\n', "  A ~~~ B\n", '  A -- "x" --> B --> A\n'):
+    assert check_diagrams.unlabelled_edges(head + '  A -- "ends in a circle" --o B\n') == []
+    assert check_diagrams.unlabelled_edges(head + "  A --x|ends in a cross| B\n") == []
+    for bare in (
+        "  A --> B\n",
+        '  A -- "" --> B\n',
+        "  A ~~~ B\n",
+        '  A -- "x" --> B --> A\n',
+        "  A --o B\n",
+        "  A --x B\n",
+        "  A o--o B\n",
+        "  A x--x B\n",
+        "  A ==o B\n",
+    ):
         problems = check_diagrams.unlabelled_edges(head + bare)
         assert len(problems) == 1 and problems[0].startswith("line 4:"), bare
 
@@ -74,11 +86,63 @@ def test_an_svg_edited_by_hand_fails(tmp_path: Path) -> None:
     root = _copy_diagrams(tmp_path)
     svg = root / "docs" / "diagrams" / "system-map.svg"
     text = svg.read_text(encoding="utf-8")
-    assert text.count('<text y="-10.1"') > 1
-    svg.write_text(text.replace('<text y="-10.1"', '<text y="-12.4"', 1))
+    # Whatever offset this machine's fonts gave the first label, move it by a few pixels.
+    offset = re.search(r'<text y="(-?[0-9.]+)"', text)
+    assert offset is not None
+    moved = f"{float(offset.group(1)) - 2.3:.1f}"
+    svg.write_text(text.replace(offset.group(0), f'<text y="{moved}"', 1))
     assert check_diagrams.source_problems(root) == [
         "docs/diagrams/system-map.svg: edited by hand after it was drawn; run make diagrams-render"
     ]
+
+
+def _rows(*rows: tuple[str, ...]) -> str:
+    """Label rows as Mermaid draws them in a flowchart SVG: one tspan per word inside a row."""
+    return "".join(
+        '<tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em">'
+        + "".join(f'<tspan class="text-inner-tspan">{word}</tspan>' for word in row)
+        + "</tspan>"
+        for row in rows
+    )
+
+
+def test_a_label_that_wraps_on_its_own_fails() -> None:
+    """Mermaid breaks an edge label wider than 200 pixels where this machine's fonts say."""
+    source = (
+        'flowchart TB\n  A["a node"]\n  B["rain & wind"]\n  A -- "short<br/>then a line" --> B\n'
+    )
+    nodes = (("a", " node"), ("rain", " &amp;", " wind"))
+    drawn = _rows(*nodes, ("short",), ("then", " a", " line"))
+    assert check_diagrams.wrapped_rows(source, drawn) == []
+    wrapped = _rows(*nodes, ("short",), ("then", " a"), ("line",))
+    assert check_diagrams.wrapped_rows(source, wrapped) == [
+        "a label wrapped on its own at 'then a'",
+        "a label wrapped on its own at 'line'",
+    ]
+    assert check_diagrams.wrapped_rows(source, "<svg></svg>") == [
+        "no label rows found in the SVG, so the wrap check cannot read it"
+    ]
+    assert check_diagrams.wrapped_rows("sequenceDiagram\n  A->>B: hi\n", wrapped) == []
+
+
+def test_a_drawing_whose_rows_are_not_the_source_lines_fails(tmp_path: Path) -> None:
+    """The wrap check runs on the real SVGs: here the rows no longer match the source's lines."""
+    root = _copy_diagrams(tmp_path)
+    folder = root / "docs" / "diagrams"
+    src = folder / "system-map.mmd"
+    old = src.read_text(encoding="utf-8")
+    new = old.replace(
+        '"one lab Observation<br/>of theirs, read once<br/>a day from the Mac"',
+        '"one lab Observation of theirs,<br/>read once a day from the Mac"',
+    )
+    assert new != old
+    src.write_text(new, encoding="utf-8")
+    svg = folder / "system-map.svg"
+    stamp_old = check_diagrams._sha256(old.encode("utf-8"))
+    stamp_new = check_diagrams._sha256(new.encode("utf-8"))
+    svg.write_text(svg.read_text(encoding="utf-8").replace(stamp_old, stamp_new, 1), "utf-8")
+    problems = check_diagrams.source_problems(root)
+    assert len(problems) == 3 and all("a label wrapped on its own" in p for p in problems)
 
 
 def test_a_missing_svg_an_orphan_svg_and_a_missing_stamp_fail(tmp_path: Path) -> None:
