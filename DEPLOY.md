@@ -20,7 +20,7 @@ record of why the hosting looks like this is `docs/notes/hosting.md`; the decisi
 | Command | What runs | Network | Data |
 |---|---|---|---|
 | `make dev` | the Python API on port 8000 with reload, and the site in dev mode on http://localhost:3100 | the creek check asks Open-Meteo about rain, and `/two` asks their sandbox; both fail closed when offline | `data/local.db` and `data/fhir_store`, empty at first |
-| `make demo-offline` | the same two servers on the same ports, after `scripts/seed_demo.py` fills `data/demo` | none: the seed refuses every socket to another machine and fails if one was tried; the servers get a proxy that goes nowhere | three made up creek checks on Strawberry Creek by two people who passed, one pipe worth testing, two test sittings that never count |
+| `make demo-offline` | the same two servers on the same ports, after `scripts/seed_demo.py` fills `data/demo` | none: the seed refuses every socket to another machine and fails if one was tried; the servers get a proxy that goes nowhere | three made up creek checks on Strawberry Creek, two of them by people who passed the test and one with no score; one pipe worth testing; two test sittings that never count |
 | `docker compose up` | Postgres, the API and the web server, as in `docker-compose.yml` | as `make dev` | a Postgres volume |
 
 `make demo-offline` needs no key: `ANTHROPIC_API_KEY` is removed before the seed and set empty for
@@ -129,8 +129,9 @@ Names only. No value is in the repository: `.env.example` is tracked and `.env` 
 | `CLOUDFLARE_D1_READ_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets, not yet set | let `.github/workflows/backup.yml` export D1; the workflow runs by hand only until they exist |
 | the wrangler login | wrangler's own store on the Mac | deploys, the D1 backup and the daily cache job |
 
-A secret shorter than 16 characters, or left at the placeholder in `.env.example`, is treated as
-not set by both servers (`apps/api/settings.py`, `sameSecret` in `worker/src/index.ts`).
+Both servers treat a secret shorter than 16 characters as not set (`apps/api/settings.py`,
+`sameSecret` in `worker/src/index.ts`). The Python API also refuses the placeholder in
+`.env.example`; the Worker does not check for it, so never set a Worker secret to that value.
 
 ## Jobs on the Mac
 
@@ -161,7 +162,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `API_ORIGIN` | `http://localhost:8000` | `apps/api/settings.py`, `scripts/smoke.py` | where the API is, for the compose smoke test |
 | `RAINFALL_DRY_MM` | `2.5` | `apps/api/settings.py` | rain in the window, in millimetres, at or under which it counts as dry |
 | `RAINFALL_WINDOW_HOURS` | `72` | `apps/api/settings.py` | how far back the rain lookup looks |
-| `CHECKER_ENABLED` | `false` | `apps/api/settings.py` | lets the vision checker raise its one question; off unless set |
+| `CHECKER_ENABLED` | `false` | `apps/api/settings.py` | passed to the follow-up selector; the Python API passes it no flags, so even `true` asks no model question today |
 | `SANDBOX_BASE_URL` | `https://sandbox.hl7europe.eu/oneaquahealth/fhir` | `apps/api/settings.py`, `apps/api/fhir_routes.py`, `scripts/repush_sandbox.py` | their shared FHIR sandbox |
 | `SANDBOX_MIRROR_ENABLED` | `false` | `apps/api/settings.py`, `scripts/repush_sandbox.py` | the mirror writes nothing unless this is `true` |
 | `REPO_URL` | `https://github.com/alejandro-publius/second-look` | `apps/api/settings.py`, `scripts/repush_sandbox.py`, `scripts/sandbox_write_test.sh` | named in the user agent and our identifiers |

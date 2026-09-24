@@ -48,8 +48,8 @@ links to; this page follows it and adds the security side. Every route, with its
 on one Mac. No value is in the repository: `.env.example` is tracked and `.env` is not, and
 `make secrets`, part of `make check`, runs gitleaks over the history and scans every file git would
 commit. The pre-commit hooks run the same scans on each commit (`DEPLOY.md`). Both servers compare a
-secret in constant time and treat one shorter than 16 characters, or left at the placeholder, as
-not set.
+secret in constant time and treat one shorter than 16 characters as not set. The Python API also
+treats the placeholder in `.env.example` as not set; the Worker does not check for it.
 
 - **The QA key** does one thing: a sitting started with the `x-qa-key` header set to it is marked
   as a test, so a check of the live site never lands in the data
@@ -116,8 +116,9 @@ is Cloudflare's rate limiting rules at the edge, which never hand an address to 
   first deploy's proof, writes one small row each time it is called.
 - Without `ALLOWED_ORIGIN` set, the Worker answers any origin for CORS. The site reaches it on its
   own origin, and nothing it serves needs a login, so CORS is not what protects it.
-- The Python API's FHIR routes and `/api/two` carry no rate limit; it serves development and the
-  tests, not the public.
+- On the Python API, `/health`, `/api/skeleton/ping`, `/api/two` and the three FHIR record routes
+  (`/api/spot/{spot_id}/fhir`, `/api/fhir/Bundle/{visit_id}`, `/api/fhir/validation`) carry no
+  rate limit; it serves development and the tests, not the public.
 
 ## Reporting a problem
 

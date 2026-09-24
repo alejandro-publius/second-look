@@ -3,7 +3,7 @@
 Second Look gives a creek volunteer a two-minute photo test, stores their score per feature with
 every observation they make, and lets a vision model ask one follow-up question only where it
 passed the same test. This page is for someone who wants to know what was hard to build and how
-each part is proved. Every number on it comes from a file in `results/` and is checked by
+each part is proved. Every measured number on it comes from a file in `results/` and is checked by
 `scripts/verify_claims.py` in `make check`. Each part names the files that do the work and the
 test that fails if it breaks. The decisions behind them are in `docs/adr/`.
 
@@ -71,8 +71,8 @@ rounds the way Python does. Randomization is not ported at all: `scripts/seed_ar
 `core/allocator.py`'s own sequence into a D1 table and the Worker takes the next slot. The Bundles
 the TypeScript emitter writes go through the HL7 validator with the Python ones.
 
-**Proof.** `make worker-check`, which fails when the golden files or `worker/src/content.json` are
-older than the Python that writes them, then runs `worker/test/golden.test.ts`;
+**Proof.** `make worker-check`, which fails when the golden files or `worker/src/content.json` no
+longer match what the Python writes, then runs `worker/test/golden.test.ts`;
 `evals/tests/test_golden_vectors.py`; `results/fhir_validation.json`, with
 <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors over
 <!--v:results/fhir_validation.json#/files_validated-->14<!--/v--> records.
