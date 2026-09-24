@@ -68,7 +68,7 @@ No recruited study. The two-minute test stays live as the volunteer's own calibr
 
 ## Gallery
 
-<!--v:results/screens.json#/screen_count-->26<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->20<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->6<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and `results/screens.json` lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
+<!--v:results/screens.json#/screen_count-->30<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->23<!--/v--> come from the live site. The <!--v:results/screens.json#/local_mock_count-->7<!--/v--> marked (mock) come from a local build with the mock API: the test flow, so no screenshot joined the study, and the sample record, which the live site does not have yet. `make screens` makes them all again, and `results/screens.json` lists each one with its route, bytes and source. The photos in them belong to their authors and are credited on /credits.
 
 <table>
 <tr>
@@ -80,7 +80,7 @@ No recruited study. The two-minute test stays live as the volunteer's own calibr
 <tr>
 <td align="center"><img src="docs/screens/test-item.webp" width="200" alt="A test item: one creek photo, the question, and the buttons Yes, No and Can't tell."><br>A test item<br><code>/t</code> (mock)</td>
 <td align="center"><img src="docs/screens/score.webp" width="200" alt="The score screen: the total and a score for each of the four features."><br>The score<br><code>/t</code> (mock)</td>
-<td align="center"><img src="docs/screens/judge-mode.webp" width="200" alt="Judge mode today: it opens on Sep 28, when the data locks."><br>Judge mode today<br><code>/demo</code></td>
+<td align="center"><img src="docs/screens/demo.webp" width="200" alt="Judge mode today: it opens on Sep 28, when the data locks."><br>Judge mode today<br><code>/demo</code></td>
 <td align="center"><img src="docs/screens/judges.webp" width="200" alt="The page for judges: every part of Second Look, in order."><br>For judges<br><code>/judges</code></td>
 </tr>
 <tr>
@@ -110,6 +110,12 @@ No recruited study. The two-minute test stays live as the volunteer's own calibr
 <tr>
 <td align="center"><img src="docs/screens/about.webp" width="200" alt="About: what Second Look is and who made it."><br>About<br><code>/about</code></td>
 <td align="center"><img src="docs/screens/poster.webp" width="200" alt="The poster to print and put up by a creek, with its QR code."><br>Poster<br><code>/poster</code></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screens/warmup.webp" width="200" alt="The warm-up: which creek is healthier, asked once before the test and answered at the end."><br>The warm-up<br><code>/t</code> (mock)</td>
+<td align="center"><img src="docs/screens/accessibility.webp" width="200" alt="Accessibility: what we aim for and how each part is checked."><br>Accessibility<br><code>/accessibility</code></td>
+<td align="center"><img src="docs/screens/offline.webp" width="200" alt="The page a phone shows when it has no signal: what still works."><br>Offline<br><code>/offline</code></td>
+<td align="center"><img src="docs/screens/share.webp" width="200" alt="The page a shared score opens: the score card and a link to take the test."><br>A shared score<br><code>/share/12</code></td>
 </tr>
 </table>
 

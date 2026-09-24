@@ -215,7 +215,7 @@ def test_the_credit_must_be_the_manifest_credit(gallery: Path) -> None:
     assert says(problems, "social-preview: its credit does not name")
 
 
-@pytest.mark.parametrize("dropped", ["judge-mode", "check-location", "check-question"])
+@pytest.mark.parametrize("dropped", ["demo", "check-location", "check-question"])
 def test_a_dropped_screen_fails(gallery: Path, dropped: str) -> None:
     def drop(doc: dict[str, Any]) -> None:
         doc["images"] = [r for r in doc["images"] if r["name"] != dropped]

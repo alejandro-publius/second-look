@@ -196,7 +196,7 @@ async function liveRun(browser) {
   await page.getByRole("button", { name: /This creek, on the left/ }).click();
   await page.getByText("Kept on this phone.", { exact: false }).waitFor();
   gallery("landing-guess", "/", "live", await shoot(page), "The same screen after a tap on the left photo: the guess is kept on the phone until the person agrees to take part.");
-  gallery("judge-mode", "/demo", "live", await visit("/demo"), "Judge mode today: it opens on Sep 28, when the data locks.");
+  gallery("demo", "/demo", "live", await visit("/demo"), "Judge mode today: it opens on Sep 28, when the data locks.");
   gallery("judges", "/judges", "live", await visit("/judges"), "The page for judges: every part of Second Look, in order.");
   gallery("walks", "/walk", "live", await visit("/walk"), "Check a creek from your desk: one short clip of a creek for each country.");
   if (firstWalk) {
