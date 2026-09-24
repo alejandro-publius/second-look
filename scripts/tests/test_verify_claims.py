@@ -54,3 +54,23 @@ def test_another_file_is_checked_the_same_way(
     monkeypatch.setattr(vc, "README", tmp_path / "README.md")
     monkeypatch.setattr("sys.argv", ["verify_claims.py", "--file", "devpost.md"])
     assert vc.main() == 1
+
+
+def test_a_named_simulation_is_checked_and_may_be_cited_without_synthetic(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(vc, "SIMULATIONS", frozenset({"results/x.json"}))
+    readme = "Groups: <!--v:results/x.json#/n-->5<!--/v-->. <!-- claim: results/x.json#/n = 5 -->"
+    assert run(tmp_path, monkeypatch, readme, {"n": 5, "synthetic": True}) == 0
+
+
+def test_a_named_simulation_that_drifted_still_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(vc, "SIMULATIONS", frozenset({"results/x.json"}))
+    readme = "Groups: <!--v:results/x.json#/n-->5<!--/v-->."
+    assert run(tmp_path, monkeypatch, readme, {"n": 7, "synthetic": True}) == 1
+
+
+def test_only_the_coarseness_simulation_is_named() -> None:
+    assert vc.SIMULATIONS == frozenset({"results/consensus_coarseness.json"})

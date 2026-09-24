@@ -21,6 +21,9 @@ CLAIM_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+)#([\w/.-]+)\s*(?:=\s*([^\s]+))
 # checked too, or a rendered number could drift from results/ with CI still green.
 RENDERED_RE = re.compile(r"<!--v:([\w./-]+)#([\w/.-]+)-->(.*?)<!--/v-->", re.S)
 UNRENDERED_RE = re.compile(r"\{\{claim:[^}]*\}\}")
+# Simulations by design: made-up people, never a stand-in for real data, and the README says so
+# where it quotes them. These may be cited without --synthetic. Any other synthetic file may not.
+SIMULATIONS = frozenset({"results/consensus_coarseness.json"})
 
 
 def display(value: object) -> str:
@@ -65,7 +68,8 @@ def main() -> int:
             problems.append(f"claim points at missing file: {rel}")
             continue
         doc = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(doc, dict) and doc.get("synthetic") and not args.synthetic:
+        simulation = rel in SIMULATIONS
+        if isinstance(doc, dict) and doc.get("synthetic") and not args.synthetic and not simulation:
             problems.append(f"synthetic results cited without --synthetic: {rel}")
             continue
         try:
@@ -85,7 +89,8 @@ def main() -> int:
             problems.append(f"rendered number points at missing file: {rel}")
             continue
         doc = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(doc, dict) and doc.get("synthetic") and not args.synthetic:
+        simulation = rel in SIMULATIONS
+        if isinstance(doc, dict) and doc.get("synthetic") and not args.synthetic and not simulation:
             problems.append(f"synthetic results shown without --synthetic: {rel}")
             continue
         try:
