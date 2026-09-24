@@ -23,9 +23,9 @@ way their sandbox's DNS failure broke `/two` (ADR 0010).
 
 - The Mac asks, the Worker reads. `scripts/cache_inaturalist.py` runs once a day through launchd
   (`com.secondlook.inaturalist`, 07:45). It reads each creek's Locations from our own public API,
-  asks `api.inaturalist.org/v1/observations` once per Location for research grade observations of
-  the plants on the region pack's invasive list (by `inaturalist_taxon_id`), within
-  `RADIUS_KM` of the Location and on or after the day `YEARS` years back. At most one request a
+  asks https://api.inaturalist.org/v1/observations once per Location for research grade
+  observations of the plants on the region pack's invasive list (by `inaturalist_taxon_id`),
+  within `RADIUS_KM` of the Location and on or after the day `YEARS` years back. At most one request a
   second, with a user agent that names this repo, as iNaturalist asks of API users. It stores one
   summary per creek (per plant: the count, the latest date, a link to those observations) in the
   D1 table `inaturalist_cache` with the fetch time, by `wrangler d1 execute --remote` as
