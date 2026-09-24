@@ -40,6 +40,19 @@ SERVICES = """## External services
   they log on their own is written in docs/DATA_HANDLING.md.
 - The MCP server in `apps/mcp/` runs locally over stdio through the `mcp` Python SDK (MIT). It
   reads our own read only endpoint or a local export and calls no other service.
+- iNaturalist (https://www.inaturalist.org), through its public API
+  (https://api.inaturalist.org/v1), under its terms of use (https://www.inaturalist.org/pages/terms)
+  and its API practice (https://www.inaturalist.org/pages/api+recommended+practices).
+  `scripts/cache_inaturalist.py` asks it once a day from the Mac, never from the Worker, for
+  research grade observations of the region's listed invasive plants near each creek's spots: at
+  most one request a second, with a user agent that names this repo. The record page and `/city`
+  show a plant name, a count, a date and a link back, with the fetch time and iNaturalist named.
+  Each observation keeps the licence its observer chose, which can be CC BY-NC or all rights
+  reserved; we copy no photo, note, name or position from them
+  (docs/adr/0011-inaturalist-context.md).
+  The plant photos in the lesson, the practice and the test that come from iNaturalist carry their
+  own CC BY or CC0 licence and are credited by author on `/credits`; `scripts/verify_inat_photos.py`
+  asked iNaturalist whether each is research grade and from California (`results/inat_photos.json`).
 """
 
 REFERENCES = """## Design references

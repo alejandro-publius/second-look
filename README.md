@@ -387,7 +387,7 @@ FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and buil
 
 ### API
 
-The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes, under `/api` on the site's own origin. The Python API in `apps/api/` is the reference, with <!--v:results/api_inventory.json#/python/count-->25<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in `docs/API.md`; a test fails when a route is added without a row there.
+The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->26<!--/v--> routes, under `/api` on the site's own origin. The Python API in `apps/api/` is the reference, with <!--v:results/api_inventory.json#/python/count-->26<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in `docs/API.md`; a test fails when a route is added without a row there.
 
 | Route | What it is for |
 |---|---|
@@ -427,6 +427,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | The five One Digital Health dimensions and FAIR | Stated in words below | this README |
 | The follower city recipe | `make new-city NAME=Heraklion COUNTRY=Greece LAT=35.3387 LON=25.1442`, run once as a dry example | `scripts/new_city.py`, `docs/cities/` |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | `core/fhir_referral.py` |
+| Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek on the record page and `/city`: research grade sightings of the region's listed invasive plants near its spots, with the fetch time, from a daily copy. Never in the guided check, never before the invasive plant question is answered, counted in no number, deciding nothing. The iNaturalist plant photos are credited by author and licence on `/credits` | `scripts/cache_inaturalist.py`, `docs/adr/0011-inaturalist-context.md` |
 
 ### Contributed back
 

@@ -136,3 +136,12 @@ CREATE TABLE IF NOT EXISTS sandbox_cache (
   status TEXT NOT NULL,
   fetched_at TEXT NOT NULL
 );
+
+-- A short summary of iNaturalist sightings near each creek, as scripts/cache_inaturalist.py
+-- fetched it on the Mac, for the context line on the record page and /city. One row per creek.
+-- Context only: nothing counts it and nothing decides from it (docs/adr/0011-inaturalist-context.md).
+CREATE TABLE IF NOT EXISTS inaturalist_cache (
+  creek TEXT PRIMARY KEY,
+  body TEXT NOT NULL,
+  fetched_at TEXT NOT NULL
+);

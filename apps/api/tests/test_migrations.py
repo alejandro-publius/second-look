@@ -47,6 +47,7 @@ def test_upgrade_head_matches_the_models_and_downgrade_removes_everything(tmp_pa
         "check_result",
         "upload",
         "sandbox_cache",
+        "inaturalist_cache",
         "randomization_counter",
         "skeleton_ping",
     }

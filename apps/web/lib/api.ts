@@ -315,6 +315,32 @@ export interface TwoOut {
   fetched_at: string;
 }
 
+/** One listed plant in the iNaturalist context line. */
+export interface InatSpecies {
+  taxon_id: number | null;
+  name: string;
+  latin_name: string;
+  count: number;
+  last_observed: string;
+  url: string;
+}
+
+/**
+ * GET /api/inaturalist/{creek}: the copy the Mac stored. `shown` is false until the creek's record
+ * answers the invasive plant question, and then `species` is always empty.
+ */
+export interface InatOut {
+  creek: string;
+  shown: boolean;
+  status: "cached" | "none";
+  fetched_at: string | null;
+  since: string | null;
+  radius_m: number | null;
+  species: InatSpecies[];
+  source: string;
+  terms: string;
+}
+
 export type QuickColour = "clear" | "muddy" | "foam" | "coloured" | "cant_tell";
 export type QuickSmell = "none" | "bad" | "cant_tell";
 
@@ -435,6 +461,9 @@ export const api = {
   },
   two() {
     return request<TwoOut>("GET", "/api/two");
+  },
+  inaturalist(creek: string) {
+    return request<InatOut>("GET", `/api/inaturalist/${encodeURIComponent(creek)}`);
   },
   quick(spot_id: string, body: QuickRequest) {
     return request<{ ok?: boolean; visit_id?: string }>("POST", `/api/quick/${encodeURIComponent(spot_id)}`, body);

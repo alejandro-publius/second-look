@@ -8,8 +8,8 @@ origin. The **Python API** (`apps/api/`, FastAPI) is the reference: the tests, t
 
 `scripts/api_inventory.py` reads both route lists out of the code, and
 `scripts/tests/test_api_docs.py` fails when a route has no row below, or a row has no route.
-The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes
-and the Python API <!--v:results/api_inventory.json#/python/count-->25<!--/v-->
+The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->26<!--/v--> routes
+and the Python API <!--v:results/api_inventory.json#/python/count-->26<!--/v-->
 (`results/api_inventory.json`).
 
 Every answer is JSON unless the row says otherwise. An error is `{"detail": "..."}` in plain
@@ -49,6 +49,7 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | any | `/api/fhir/referral/{spot_id}` | A ServiceRequest for a pipe on the worth testing list, made on request from stored visits. | nothing | none |
 | any | `/api/fhir/referral/{spot_id}/example-result` | How a laboratory result would come back to that pipe. Tagged and labelled EXAMPLE. | nothing | none |
 | any | `/api/two` | One of our Observations beside one laboratory Observation from their sandbox, read from the copy `scripts/cache_their_records.py` stored. | nothing | none |
+| GET | `/api/inaturalist/{creek}` | The iNaturalist context line for one creek: research-grade sightings of plants on the region's invasive list near its spots, read from the copy `scripts/cache_inaturalist.py` stored, with the fetch time. The sightings are withheld until the creek's record answers the invasive plant question. Context only: nothing counts it and nothing decides from it. | nothing | none |
 
 ## The Python API (reference)
 
@@ -86,6 +87,7 @@ the table. The last column names the limit from the table above, then any lock.
 | GET | `/api/photo/{photo_id}` | One uploaded photo with its token. | nothing | read; `?t=` must be the token, or 404 |
 | GET | `/api/creeks` | Every creek with a record. | nothing | read |
 | GET | `/api/city/{creek_id}` | The analyst's view of one creek. | nothing | read |
+| GET | `/api/inaturalist/{creek_id}` | The iNaturalist context line for one creek, from the `inaturalist_cache` table. It never asks iNaturalist itself. | nothing | read |
 | GET | `/api/spot/{spot_id}` | One spot's record. | nothing | read |
 | GET | `/api/spot/{spot_id}/fhir` | The latest visit at a spot as FHIR. | nothing | none |
 | GET | `/api/fhir/Bundle/{visit_id}` | One visit as FHIR. | nothing | none |

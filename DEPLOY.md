@@ -115,6 +115,7 @@ deploys to https://depth.second-look-79t.pages.dev.
 | `fhir_bundle` | the validated FHIR Bundle of one finished visit, our store of record |
 | `upload` | one photo's id, a hash of its token, its type and size; the bytes are in KV |
 | `sandbox_cache` | the laboratory record `/two` shows, as `scripts/cache_their_records.py` fetched it |
+| `inaturalist_cache` | one creek's iNaturalist context line: per listed invasive plant, a count, the latest date and a link, as `scripts/cache_inaturalist.py` fetched it |
 
 ## Secrets
 
@@ -135,13 +136,14 @@ Both servers treat a secret shorter than 16 characters as not set (`apps/api/set
 
 ## Jobs on the Mac
 
-These launchd jobs run from this checkout as Alex. The ones that reach D1 or the sandbox use his
-wrangler login, so no job needs a secret of its own.
+These five launchd jobs run from this checkout as Alex. The ones that reach D1 or the sandbox use
+his wrangler login, so no job needs a secret of its own.
 
 | Label | When | What | Install |
 |---|---|---|---|
 | `com.secondlook.backup` | daily at 21:00, and at wake if the Mac slept through it | `scripts/backup_d1.sh`: exports D1 to `~/second-look-backups`, outside the repo, and keeps the newest `BACKUP_KEEP` dumps | `make backup-install` |
 | `com.secondlook.theirs` | daily at 07:30 | `scripts/cache_their_records.py`: one read only GET to their sandbox, stored in `sandbox_cache` for `/two` | `bash scripts/install_cache_job.sh` |
+| `com.secondlook.inaturalist` | daily at 07:45 | `scripts/cache_inaturalist.py`: reads the creeks' Locations from our own API, asks iNaturalist about the region's listed invasive plants near them at one request a second, stores a summary per creek in `inaturalist_cache` | `bash scripts/install_inaturalist_job.sh` |
 | `com.secondlook.repush` | 08:00 on Sep 28, Sep 30 and Oct 1, 2026 | `scripts/repush_scheduled.sh`: puts our worked visit and Library entry back on their sandbox by conditional create | `bash scripts/install_repush_job.sh` |
 | `com.secondlook.anchor` | daily at 06:00 | `scripts/anchor_audit_head.py`: stamps the audit log's last hash with OpenTimestamps into `proofs/`, sending only that hash to the public calendars; then `scripts/ots_status.py` upgrades every proof and writes `results/ots.json`. It commits nothing | `bash scripts/install_anchor_job.sh` |
 

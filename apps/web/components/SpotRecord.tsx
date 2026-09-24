@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
+import { InatContext } from "./InatContext";
 import { api, type CheckResultOut, type SpotRecordOut, type VisitOut } from "@/lib/api";
 import { featureById } from "@/lib/content";
 import { has, t } from "@/lib/t";
@@ -108,6 +109,8 @@ export function SpotRecord({ spotId }: { spotId: string }) {
   const title = spot.spot_name || spotId;
   const placed = record.place ?? null;
   const notes = record.downstream_notes ?? [];
+  // The creek this spot sits on, as /city and the iNaturalist route read it.
+  const creekKey = placed?.creek_slug ?? spot.creek_id ?? null;
   // The region pack's readable names when the spot sits on a known creek, else the stored ones.
   const place = placed ? [placed.reach_name, placed.creek_name].filter(Boolean).join(", ") : [spot.reach_name, spot.creek_name].filter(Boolean).join(", ");
 
@@ -203,6 +206,10 @@ export function SpotRecord({ spotId }: { spotId: string }) {
           );
         })}
       </ol>
+
+      {/* Context from iNaturalist, below the answers, never above them. The API sends the
+          sightings only once this creek's record answers the invasive plant question. */}
+      {creekKey ? <InatContext creek={creekKey} /> : null}
 
       <FhirView load={() => api.spotFhir(spotId)} curl={`curl -s ${api.spotFhirUrl(spotId)}`} />
 

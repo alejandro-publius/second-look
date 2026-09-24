@@ -175,3 +175,15 @@ class SandboxCache(SQLModel, table=True):
     body: str = Field(sa_column=Column(Text, nullable=False))
     status: str = Field(max_length=16)
     fetched_at: datetime = Field(sa_column=_tz_column())
+
+
+class InaturalistCache(SQLModel, table=True):
+    """A short summary of iNaturalist sightings near one creek, as scripts/cache_inaturalist.py
+    fetched it: per listed plant, a count, the latest date and a link. Context only; nothing
+    counts it and nothing decides from it. Never in git."""
+
+    __tablename__ = "inaturalist_cache"
+
+    creek: str = Field(primary_key=True, max_length=255)
+    body: str = Field(sa_column=Column(Text, nullable=False))
+    fetched_at: datetime = Field(sa_column=_tz_column())

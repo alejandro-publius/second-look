@@ -30,6 +30,9 @@ Creek check (rung 2, `/check`):
 - `upload`: the photo bytes after EXIF stripping, a per-upload token, and the upload time.
 - `sandbox_cache`: copies of public Observations fetched from the OneAquaHealth sandbox, so the
   two-observer screen still works when the sandbox is down.
+- `inaturalist_cache`: per creek, a short summary of public iNaturalist observations near its
+  spots (a plant name, a count, the latest date and a link), with the time it was fetched. No
+  observer's name, photo or exact position is stored.
 
 Export: `GET /api/test/export?token=...` gives `sessions.csv` and `responses.csv` with the
 columns listed in docs/CONTRACTS.md. Neither file has a name, an address, a token or a time
@@ -85,6 +88,7 @@ if we change hosts, change both this file and the consent text.
 - Creek records (`spot`, `visit`, `check_result`): kept; they are the point of the product.
   Our own FHIR store is the source of truth; the sandbox mirror is a copy we can rebuild.
 - `sandbox_cache`: replaced on each successful fetch; never committed to git.
+- `inaturalist_cache`: replaced on each successful daily fetch; never committed to git.
 
 ## The rate limit, and why the deployed API has none
 
