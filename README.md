@@ -426,7 +426,10 @@ The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_
 
 ## How OneAquaHealth is used
 
-OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored in the record of their test sitting beside a dated Practitioner qualification for the test, and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in their order, each marked draft wording until it is checked against the app itself. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete.
+OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their per-feature score, stored in the record of their test sitting beside a dated Practitioner qualification for the test, and linked through Provenance to every Observation they make. The four features are the ones the project lead named. The creek check mirrors the official Citizen Science App's items in their order, each marked draft wording until it is checked against the app itself. The city actions are OneAquaHealth's own restoration measures, from the [OneAquaHealth Policy Brief (2026), page 9](https://www.oneaquahealth.eu/app/uploads/2026/05/OneAquaHealth-Policy-Brief.pdf): replant margins, fix sewers, reconnect the floodplain, remove barriers, take out the concrete. The official app has no question for a dug-out channel, so the check asks none: that score is kept but stands beside no answer, and "reconnect the floodplain" waits for one; plants have no city measure of their own.
+
+<details>
+<summary>Every surface of theirs we use, and where</summary>
 
 | Their surface | What we use it for | Where |
 |---|---|---|
@@ -441,7 +444,9 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | The five One Digital Health dimensions and FAIR | Stated in words below | this section |
 | The follower city recipe | `make new-city NAME=Aarhus COUNTRY=Denmark LAT=56.1629 LON=10.2039` scaffolds a new city in seconds; Heraklion was made that way, as a dry example | [`scripts/new_city.py`](scripts/new_city.py), [`docs/cities/`](docs/cities/) |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | [`core/fhir_referral.py`](core/fhir_referral.py) |
-| Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek on the record page and `/city`: research grade sightings of the region's listed invasive plants near its spots, with the fetch time, from a daily copy. Never in the guided check, shown only once a finished check on that creek has answered the invasive plant question (then to anyone who opens the page, a later volunteer included), counted in no number, deciding nothing. The iNaturalist plant photos are credited by author and licence on `/credits` The Bay Area plant list waits on a check, so until then the line reports no recent sightings. | [`scripts/cache_inaturalist.py`](scripts/cache_inaturalist.py), [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) |
+| Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek, research grade sightings of the region's listed invasive plants near its spots, shown once a finished check on that creek has answered the plant question, never in the check and never counted; the Bay Area list waits on a check, so it reports none yet. | [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) |
+
+</details>
 
 ### Contributed back
 
@@ -522,7 +527,7 @@ uv sync && (cd apps/web && npm ci && npx playwright install chromium) && (cd wor
 make judge-check
 ```
 
-`make judge-check` needs no key and no network. It runs the Python tests and the Worker's golden vector tests, then grades every AI number in [`results/`](results/) again from the committed raw model replies (`make reproduce`). It reads the result of the last HL7 validator run from [`results/fhir_validation.json`](results/fhir_validation.json) and checks the golden Bundles against the emitter; it does not run the validator itself, which needs Java and a download, so `make fhir-validate` is the command for that. It builds the web app and runs the design check, verifies the audit log and scans for secrets: six steps, each printed with ok or FAIL, in about five minutes after the setup. The tests line gives the Python count as pytest prints it and the Worker's golden tests as node prints them, and the last line says whether all six passed, offline, with no key. Its last recorded run, at commit <!--v:results/judge_check.json#/commit-->72a4136<!--/v-->, took <!--v:results/judge_check.json#/seconds-->194<!--/v--> seconds after the setup ([`results/judge_check.json`](results/judge_check.json), written by [`scripts/judge_check.py`](scripts/judge_check.py) with its `--out` option):
+`make judge-check` needs no key and no network: it runs the Python tests and the Worker's golden vectors, grades every AI number again from the raw replies (`make reproduce`), reads the last HL7 validator run, builds the web app with its design check, verifies the audit log and scans for secrets, in about five minutes after the setup (`make fhir-validate` runs the validator itself, with Java). Its last recorded run, at commit <!--v:results/judge_check.json#/commit-->72a4136<!--/v-->, took <!--v:results/judge_check.json#/seconds-->194<!--/v--> seconds after the setup ([`results/judge_check.json`](results/judge_check.json), written by [`scripts/judge_check.py`](scripts/judge_check.py) with its `--out` option):
 
 - **<!--v:results/judge_check.json#/steps/0/name-->tests<!--/v-->**: <!--v:results/judge_check.json#/steps/0/text-->python: 2010 passed, 1 skipped, 9 xfailed in 153.13s (0:02:33); worker: pass 15<!--/v-->
 - **<!--v:results/judge_check.json#/steps/1/name-->reproduce<!--/v-->**: <!--v:results/judge_check.json#/steps/1/text-->reproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches<!--/v-->
@@ -563,6 +568,9 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 
 ### What was built, screen by screen
 
+<details>
+<summary>Each route and what it shows</summary>
+
 - `/t`: consent, the warm-up pair, the lesson, 16 items with Yes, No and Can't tell, the score per feature, the share card.
 - `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` replays one fixed path.
 - `/check`: the guided creek check, one question per screen, with follow-ups chosen by [`core/followups.py`](core/followups.py), working offline.
@@ -571,6 +579,8 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 - `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach. It is empty until the first real check; `make demo-offline` shows it full.
 - `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so. `/quick`, `/poster`, `/judges`, `/credits`.
 - A read only MCP server over our own records: [`examples/mcp/README.md`](examples/mcp/README.md).
+
+</details>
 
 ### See it work
 
@@ -593,6 +603,7 @@ The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/RE
 
 - One labeller. The gold labels came from the picks file Alex wrote with the planner, a Claude chat (commit 81e62ed), and no second, blind label exists yet, so read every accuracy as agreement with this key ([`docs/DATA_CARD.md`](docs/DATA_CARD.md), [`docs/deviations.md`](docs/deviations.md)).
 - Four photos per feature is coarse: it shows a person what to practise and flags an answer worth a second look, but it is too coarse to weight votes by feature. In our simulation with made-up people ([`results/consensus_coarseness.json`](results/consensus_coarseness.json)), weights from each feature's own photos did worse than a plain majority in all <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_feature_only_clearly_loses-->5<!--/v--> skill patterns.
+- The official app has no question for a dug-out channel, so the creek check asks none: that score is kept but stands beside no answer, and the city measure it would lead to waits for one. Plants that do not belong have no city measure of their own.
 - The photos come from open collections in several countries and seasons, not from the creeks a Berkeley visitor will stand in.
 - The footage labels come from the videos' own descriptions, and almost no openly licensed description names a feature, so the footage result leans on agreement between models, which is not accuracy.
 - The citizen observer is modelled as a FHIR Practitioner, for want of a better fit in the guide; our proposal says so.

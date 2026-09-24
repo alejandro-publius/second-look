@@ -51,9 +51,11 @@ export interface AnswerRow {
   feature: string | null;
 }
 
-/** The answers in the form's order, each with its question and its answer in words. A skipped question is not listed. */
+/** The answers in the form's order, each with its question and its answer in words. A skipped
+ * question is not listed, and neither is a list with nothing ticked in it. */
 export function answerRows(answers: Record<string, AnswerValue>): AnswerRow[] {
+  const given = (value: AnswerValue | undefined) => value !== undefined && !(Array.isArray(value) && value.length === 0);
   return content.form.items
-    .filter((item) => answers[item.id] !== undefined)
+    .filter((item) => given(answers[item.id]))
     .map((item) => ({ item_id: item.id, text: item.text, label: answerLabel(item, answers[item.id]), feature: item.feature }));
 }

@@ -18,7 +18,7 @@ export default function AboutPage() {
       <p>{t("about.licence")}</p>
       <p>
         <Link href="/t" className="btn">
-          {t("landing.cta")}
+          {t("about.cta")}
         </Link>
       </p>
       {/* About is one tap from the participant's door, so a judge who lands there finds their own

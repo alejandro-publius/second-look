@@ -40,7 +40,7 @@ Professional surveyors fixed this long ago. In the UK's River Habitat Survey, on
 
 ## How the solution aligns with OneAquaHealth
 
-825 characters
+895 characters
 
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 
@@ -64,7 +64,7 @@ It costs nothing to run: Cloudflare's free plan, no card. A follower city adopts
 
 ## Effective use of data, technology, AI, APIs and standards
 
-1596 characters
+1607 characters
 
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 <!-- claim: results/footage_pool.json#/frames_kept = 46 -->
@@ -106,12 +106,12 @@ Video: [VIDEO LINK] (released under CC BY-SA 4.0; creek footage from Wikimedia C
 
 ## Users and impact on ecosystem and human health
 
-632 characters
+784 characters
 
 ```text
 Users: volunteers who check creeks, and the city and project staff who read their records.
 
-Ecosystem: the four features people miss (built banks, a dug-out channel, invasive plants, pipes and drain outlets) are the ones that tell a city what a creek needs. Scoring observers per feature means a city can act on the observations it can trust, and send a lab test where two trained people both saw a pipe running in dry weather.
+Ecosystem: the four features people miss are built banks, a dug-out channel, invasive plants, and pipes and drain outlets; the answers on built banks and pipes tell a city what a creek needs. The official app has no question for a dug-out channel, so the check asks none, and plants have no city measure of their own. Scoring observers per feature means a city can act on the observations it can trust, and send a lab test where two trained people both saw a pipe running in dry weather.
 
 Human and animal health: the health card gives one action for the person, one for the pet and one for the city, each from an approved sentence with its source. It never states a risk for a specific site.
 ```
