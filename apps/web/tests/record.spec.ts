@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { API_ORIGIN, assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
+import { API_ORIGIN, assertOnlyOurOrigins, exampleCity, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
 test("/spot/example: timeline, observer labels, the passed-only toggle, FHIR view and curl", async ({ page }) => {
@@ -157,6 +157,27 @@ test("/city shows two lists decided by code, and no number without its records",
   await page.getByRole("button", { name: "Hide the example result" }).click();
   await expect(page.getByText("Example", { exact: true })).toHaveCount(0);
 });
+
+// An empty list of measures blames approval only when no measure is approved (REVIEW_03 R28).
+for (const waiting of [false, true]) {
+  test(`/city with no measure to show, measures ${waiting ? "not yet approved" : "approved"}`, async ({ page }) => {
+    await mockApi(page);
+    // Registered after mockApi, so this answers the creek first.
+    await page.route(`${API_ORIGIN}/api/city/**`, (route) =>
+      route.fulfill({ contentType: "application/json", body: JSON.stringify({ ...exampleCity, needs: [], measures_waiting_for_approval: waiting }) }),
+    );
+    await page.goto("/city?creek=example");
+    await expect(page.getByRole("heading", { name: "What OneAquaHealth says to do" })).toBeVisible();
+    await expect(page.getByText("Find and fix leaking or wrongly connected sewers")).toHaveCount(0);
+    if (waiting) {
+      await expect(page.getByText("an empty list here means nobody has approved one")).toBeVisible();
+      await expect(page.getByText("No measure applies to what people have reported here so far.")).toHaveCount(0);
+    } else {
+      await expect(page.getByText("No measure applies to what people have reported here so far.")).toBeVisible();
+      await expect(page.getByText("nobody has approved")).toHaveCount(0);
+    }
+  });
+}
 
 test("/city with no creek says so rather than showing an empty page", async ({ page }) => {
   await mockApi(page);
