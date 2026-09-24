@@ -1,0 +1,140 @@
+{
+ "checked_utc": "2026-09-24T08:10:45Z",
+ "commit": "a47ee78",
+ "uncommitted_changes": [],
+ "target": "local static export, served here the way Cloudflare Pages serves it",
+ "url": "/ of the local export",
+ "lighthouse": "lighthouse@13.5.0",
+ "profile": "Lighthouse default mobile: simulated throttling, 150 ms RTT, 1.6 Mbps, 4x CPU",
+ "cpus": 8,
+ "runs": [
+  {
+   "scores": {
+    "performance": 98,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+   },
+   "metrics": {
+    "FCP ms": 755.0,
+    "LCP ms": 2447.0,
+    "TBT ms": 22,
+    "CLS": 0,
+    "SI ms": 755.0,
+    "TTI ms": 2847.0,
+    "TTFB ms": 2,
+    "bytes": 493297
+   },
+   "requests": 27,
+   "form_factor": "mobile",
+   "throttling": {
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "requestLatencyMs": 562.5,
+    "downloadThroughputKbps": 1474.5600000000002,
+    "uploadThroughputKbps": 675,
+    "cpuSlowdownMultiplier": 4
+   },
+   "throttling_method": "simulate",
+   "lighthouse": "13.5.0",
+   "final_url": "http://127.0.0.1:52899/",
+   "warnings": []
+  },
+  {
+   "scores": {
+    "performance": 93,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+   },
+   "metrics": {
+    "FCP ms": 759.0,
+    "LCP ms": 3234.0,
+    "TBT ms": 24.0,
+    "CLS": 0,
+    "SI ms": 759.0,
+    "TTI ms": 3256.0,
+    "TTFB ms": 1,
+    "bytes": 493297
+   },
+   "requests": 27,
+   "form_factor": "mobile",
+   "throttling": {
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "requestLatencyMs": 562.5,
+    "downloadThroughputKbps": 1474.5600000000002,
+    "uploadThroughputKbps": 675,
+    "cpuSlowdownMultiplier": 4
+   },
+   "throttling_method": "simulate",
+   "lighthouse": "13.5.0",
+   "final_url": "http://127.0.0.1:52899/",
+   "warnings": []
+  },
+  {
+   "scores": {
+    "performance": 97,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+   },
+   "metrics": {
+    "FCP ms": 761.0,
+    "LCP ms": 2568.0,
+    "TBT ms": 14.0,
+    "CLS": 0,
+    "SI ms": 761.0,
+    "TTI ms": 2770.0,
+    "TTFB ms": 2,
+    "bytes": 493297
+   },
+   "requests": 27,
+   "form_factor": "mobile",
+   "throttling": {
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "requestLatencyMs": 562.5,
+    "downloadThroughputKbps": 1474.5600000000002,
+    "uploadThroughputKbps": 675,
+    "cpuSlowdownMultiplier": 4
+   },
+   "throttling_method": "simulate",
+   "lighthouse": "13.5.0",
+   "final_url": "http://127.0.0.1:52899/",
+   "warnings": []
+  }
+ ],
+ "median": {
+  "scores": {
+   "performance": 97,
+   "accessibility": 100,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "metrics": {
+   "FCP ms": 761.0,
+   "LCP ms": 2568.0,
+   "TBT ms": 14.0,
+   "CLS": 0,
+   "SI ms": 761.0,
+   "TTI ms": 2770.0,
+   "TTFB ms": 2,
+   "bytes": 493297
+  },
+  "requests": 27,
+  "form_factor": "mobile",
+  "throttling": {
+   "rttMs": 150,
+   "throughputKbps": 1638.4,
+   "requestLatencyMs": 562.5,
+   "downloadThroughputKbps": 1474.5600000000002,
+   "uploadThroughputKbps": 675,
+   "cpuSlowdownMultiplier": 4
+  },
+  "throttling_method": "simulate",
+  "lighthouse": "13.5.0",
+  "final_url": "http://127.0.0.1:52899/",
+  "warnings": []
+ }
+}

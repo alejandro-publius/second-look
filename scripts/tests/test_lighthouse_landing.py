@@ -3,8 +3,8 @@ Cloudflare Pages does, or the landing page's scores describe a different site.""
 
 from __future__ import annotations
 
-import gzip
 import json
+import socket
 from pathlib import Path
 
 import httpx
@@ -27,12 +27,15 @@ HEADERS = """# made by build-headers.mjs
 
 @pytest.fixture
 def site(tmp_path: Path) -> Path:
-    (tmp_path / "index.html").write_text("<h1>landing</h1>")
-    (tmp_path / "about.html").write_text("<h1>about</h1>")
-    (tmp_path / "404.html").write_text("<h1>not here</h1>")
-    (tmp_path / "sw.js").write_text("self.x = 1;")
-    (tmp_path / "_headers").write_text(HEADERS)
-    return tmp_path
+    (tmp_path / "secret.txt").write_text("outside the site")
+    root = tmp_path / "site"
+    root.mkdir()
+    (root / "index.html").write_text("<h1>landing</h1>")
+    (root / "about.html").write_text("<h1>about</h1>")
+    (root / "404.html").write_text("<h1>not here</h1>")
+    (root / "sw.js").write_text("self.x = 1;")
+    (root / "_headers").write_text(HEADERS)
+    return root
 
 
 def test_headers_follow_the_rules_of_the_headers_file(site: Path) -> None:
@@ -49,7 +52,8 @@ def test_clean_urls_and_no_way_out_of_the_site(site: Path) -> None:
     assert ll.file_for(site, "/") == site / "index.html"
     assert ll.file_for(site, "/about") == site / "about.html"
     assert ll.file_for(site, "/about?x=1") == site / "about.html"
-    assert ll.file_for(site, "/../secret") is None
+    assert (site.parent / "secret.txt").is_file()
+    assert ll.file_for(site, "/../secret.txt") is None
     assert ll.file_for(site, "/missing") is None
 
 
@@ -63,9 +67,9 @@ def test_the_server_answers_like_pages(site: Path) -> None:
             assert home.text == "<h1>landing</h1>"  # httpx undoes the gzip
             assert home.headers["content-security-policy"] == "default-src 'self'"
             assert "link" in home.headers
-            raw = client.get("/", headers={"Accept-Encoding": "identity"})
-            assert "content-encoding" not in raw.headers
-            assert gzip.compress(raw.content) != raw.content
+            plain = client.get("/", headers={"Accept-Encoding": "identity"})
+            assert "content-encoding" not in plain.headers
+            assert plain.content == b"<h1>landing</h1>"
             assert client.get("/about").text == "<h1>about</h1>"
             # The router asks with HEAD; Pages answers it, so a 501 here would be a console
             # error the live site never logs, and a lower best practices score.
@@ -76,8 +80,26 @@ def test_the_server_answers_like_pages(site: Path) -> None:
             assert client.get("/api/test/session").status_code == 404
             missing = client.get("/nowhere")
             assert missing.status_code == 404 and missing.text == "<h1>not here</h1>"
+        # httpx never reads a body after HEAD, so read the raw reply: headers and nothing more.
+        host, port = url.removeprefix("http://").rstrip("/").split(":")
+        with socket.create_connection((host, int(port))) as raw_socket:
+            raw_socket.sendall(b"HEAD /about HTTP/1.0\r\n\r\n")
+            reply = b"".join(iter(lambda: raw_socket.recv(4096), b""))
+        assert reply.startswith(b"HTTP/1.0 200") and reply.endswith(b"\r\n\r\n")
     finally:
         server.shutdown()
+
+
+def test_the_reported_run_is_the_one_with_the_median_performance(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    scores = iter([98, 93, 97])
+    monkeypatch.setattr(
+        ll, "one_run", lambda url, report: {"scores": {"performance": next(scores)}}
+    )
+    runs, median = ll.measure("http://x/", 3, tmp_path)
+    assert [r["scores"]["performance"] for r in runs] == [98, 93, 97]
+    assert median["scores"]["performance"] == 97
 
 
 def test_the_committed_result_is_the_shape_the_done_check_reads() -> None:
