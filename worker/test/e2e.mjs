@@ -16,10 +16,17 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worker = join(here, "..");
 const PORT = Number(process.env.E2E_PORT ?? 8791);
 const RAIN_PORT = PORT + 1;
+// A second, short lived Worker whose clock reads the data lock itself (review REVIEW_03 R52).
+const AFTER_PORT = PORT + 2;
 const QA_KEY = "e2e-qa-key-0123456789abcdef";
 const BASE = `http://127.0.0.1:${PORT}`;
 const PERSIST = join(worker, ".wrangler", "e2e-state");
+const PERSIST_AFTER = join(worker, ".wrangler", "e2e-state-after-lock");
 const CONTENT = JSON.parse(readFileSync(join(worker, "src", "content.json"), "utf8"));
+// Judge mode's lock (core/lock.py). The main Worker's clock is fixed one second before it, the
+// second Worker's at it, so both sides of the lock run on every run, whatever today is.
+const LOCK = "2026-09-28T01:00:00Z";
+const JUST_BEFORE_LOCK = "2026-09-28T00:59:59Z";
 
 // Wrangler never gets a terminal here: no metrics prompt, no update check, no stdin to wait on,
 // and a hard time limit so a hang in CI fails with its output instead of eating the job. The
@@ -43,6 +50,47 @@ function wrangler(args, opts = {}) {
     throw new Error(`wrangler ${args.join(" ")} failed${result.error ? ` (${result.error.code})` : ""}`);
   }
   return result.stdout;
+}
+
+/** wrangler dev on a port, with its own state folder and vars. The caller kills it. */
+async function startDev(port, persist, vars) {
+  const args = [
+    "dev", "--local", "--port", String(port), "--persist-to", persist,
+    // The local runtime binary lags the edge; the date only has to be one this binary knows.
+    "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
+    "--show-interactive-dev-session=false",
+  ];
+  for (const [name, value] of Object.entries(vars)) args.push("--var", `${name}:${value}`);
+  const proc = spawn(process.execPath, wranglerArgs(args), { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV });
+  let log = "";
+  proc.stdout.on("data", (d) => (log += d));
+  proc.stderr.on("data", (d) => (log += d));
+  proc.on("exit", (code) => {
+    if (code !== null && code !== 0) console.error(`wrangler dev on ${port} exited with ${code}\n${log}`);
+  });
+  running.push(proc);
+  try {
+    await waitFor(`http://127.0.0.1:${port}/health`, 120_000);
+  } catch (err) {
+    console.error(log);
+    throw err;
+  }
+  return proc;
+}
+
+async function stopDev(proc) {
+  if (proc.exitCode !== null || proc.signalCode !== null) return;
+  proc.kill("SIGTERM");
+  await new Promise((resolve) => {
+    const hard = setTimeout(() => {
+      proc.kill("SIGKILL");
+      resolve();
+    }, 5000);
+    proc.on("exit", () => {
+      clearTimeout(hard);
+      resolve();
+    });
+  });
 }
 
 // Whatever happens, this process ends: a stuck request cannot hold the CI job open.
@@ -160,7 +208,7 @@ function jpegWithExif() {
   return new Uint8Array([0xff, 0xd8, ...app1, ...dqt, ...sos]);
 }
 
-let dev = null;
+const running = [];
 let rain = null;
 try {
   // 1. Fresh local state: schema, arms, the counter row.
@@ -177,29 +225,11 @@ try {
   });
   await new Promise((r) => rain.listen(RAIN_PORT, "127.0.0.1", r));
   at("start wrangler dev");
-  dev = spawn(
-    process.execPath,
-    wranglerArgs([
-      "dev", "--local", "--port", String(PORT), "--persist-to", PERSIST,
-      // The local runtime binary lags the edge; the date only has to be one this binary knows.
-      "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
-      "--var", `QA_KEY:${QA_KEY}`, "--var", `RAIN_URL:http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
-      "--show-interactive-dev-session=false",
-    ]),
-    { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV },
-  );
-  let devLog = "";
-  dev.stdout.on("data", (d) => (devLog += d));
-  dev.stderr.on("data", (d) => (devLog += d));
-  dev.on("exit", (code) => {
-    if (code !== null && code !== 0) console.error(`wrangler dev exited with ${code}\n${devLog}`);
+  await startDev(PORT, PERSIST, {
+    QA_KEY,
+    RAIN_URL: `http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
+    E2E_NOW: JUST_BEFORE_LOCK,
   });
-  try {
-    await waitFor(`${BASE}/health`, 120_000);
-  } catch (err) {
-    console.error(devLog);
-    throw err;
-  }
 
   // 3. Two people who passed, one pipe, one quiet visit downstream.
   at("sessions and visits");
@@ -383,15 +413,26 @@ try {
   assert.equal((await api("POST", "/api/inaturalist/strawberry-creek", {})).status, 404);
 
   // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
-  // sixteen answers would be the live test's key.
+  // sixteen answers would be the live test's key. This Worker's clock reads one second before
+  // the lock; a second Worker's reads the lock itself, where the route opens (REVIEW_03 R52).
   at("judge mode shut before the lock");
   const demo = await api("POST", "/api/demo/answer", { item_id: "t01", answer: "yes" });
-  if (Date.now() < Date.parse("2026-09-28T01:00:00Z")) {
-    assert.equal(demo.status, 403);
-    assert.equal(demo.data.detail, "Judge mode opens on Sep 28.");
-  } else {
-    assert.equal(demo.status, 200);
-  }
+  assert.equal(demo.status, 403);
+  assert.equal(demo.data.detail, "Judge mode opens on Sep 28.");
+
+  at("judge mode open at the lock");
+  spawnSync("rm", ["-rf", PERSIST_AFTER]);
+  const afterLock = await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: LOCK });
+  const judge = async (itemId, answer) => {
+    const res = await fetch(`http://127.0.0.1:${AFTER_PORT}/api/demo/answer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_id: itemId, answer }) });
+    return { status: res.status, data: await res.json() };
+  };
+  const t01 = CONTENT.test_items.find((i) => i.id === "t01");
+  const right = t01.gold === "present" ? "yes" : "no";
+  assert.deepEqual(await judge("t01", right), { status: 200, data: { correct: true } });
+  assert.deepEqual(await judge("t01", right === "yes" ? "no" : "yes"), { status: 200, data: { correct: false } });
+  assert.equal((await judge("t99", "yes")).status, 404);
+  await stopDev(afterLock);
 
   // 9. Bad input is a plain 422 or 404, never a 500.
   at("bad input");
@@ -403,18 +444,6 @@ try {
   console.log(`worker e2e: ${sections} sections passed against wrangler dev on port`, PORT);
 } finally {
   if (rain) rain.close();
-  if (dev) {
-    dev.kill("SIGTERM");
-    await new Promise((resolve) => {
-      const hard = setTimeout(() => {
-        dev.kill("SIGKILL");
-        resolve();
-      }, 5000);
-      dev.on("exit", () => {
-        clearTimeout(hard);
-        resolve();
-      });
-    });
-  }
+  for (const proc of running) await stopDev(proc);
   clearTimeout(watchdog);
 }
