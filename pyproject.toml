@@ -40,6 +40,7 @@ dev = [
   "yt-dlp>=2026.1.1",
   "opencv-python-headless>=4.10,<5",
   "pyobjc-framework-Vision>=11; sys_platform == 'darwin'",
+  "mutmut>=3.8.0",
 ]
 
 [build-system]
@@ -55,6 +56,23 @@ testpaths = ["core", "apps/api", "apps/mcp", "evals", "scripts"]
 addopts = "-q -p no:cacheprovider"
 asyncio_mode = "auto"
 filterwarnings = ["ignore::DeprecationWarning"]
+
+# make mutation (scripts/mutation.py): mutmut changes the four modules that decide, one small
+# change at a time, and core's own tests must notice each one. It works in mutants/, which git
+# ignores. The tests read content, the FHIR sources, the photo manifest, the pass table and two eval
+# helpers, so those are copied in beside core.
+[tool.mutmut]
+source_paths = ["core"]
+only_mutate = ["core/gate.py", "core/followups.py", "core/scoring.py", "core/fhir_emit.py"]
+pytest_add_cli_args_test_selection = ["core/tests"]
+also_copy = ["content", "fhir", "photos", "results", "evals", "conftest.py"]
+use_git_change_detection = false
+# This test reads the imports in core/followups.py's source, and mutmut's copy imports mutmut, so
+# it can only fail there. make check still runs it on the real file.
+pytest_add_cli_args = [
+  "--deselect",
+  "core/tests/test_harden_followups_properties.py::test_the_selector_and_what_it_imports_load_no_network_or_model_library",
+]
 
 [tool.ruff]
 line-length = 100

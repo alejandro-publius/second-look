@@ -47,3 +47,5 @@ photos/candidates/
 *.ogv
 apps/web/public/walks/
 docs/video/clips/
+# make mutation works in a copy of core/ with one change at a time (pyproject.toml, tool.mutmut).
+mutants/
