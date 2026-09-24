@@ -9,6 +9,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
 import { load as yamlLoad } from "js-yaml";
+import { derivedSources } from "../photo-sources.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, "..");
@@ -208,6 +209,15 @@ function main() {
   const consent_version = "en-" + createHash("sha256").update(consentKeys.map((k) => `${k}=${locale[k]}`).join("\n")).digest("hex").slice(0, 12);
 
   const manifestRows = parseCsv(readFileSync(join(photosDir, "manifest.csv"), "utf8"));
+  // Smaller AVIF and WebP copies, written by scripts/derive_photos.py. Only the two warm-up photos
+  // have them; every other photo is built exactly as before.
+  const derivedPath = join(photosDir, "derived", "manifest.csv");
+  let derived = {};
+  try {
+    derived = derivedSources(manifestRows, existsSync(derivedPath) ? parseCsv(readFileSync(derivedPath, "utf8")) : []);
+  } catch (e) {
+    fail(e.message);
+  }
   // Video walks (Update 14 3.7). Written by scripts/build_walks.py. A walk's poster is one of its
   // clip's own benchmark frames, so it is shown, copied and credited like any other photograph.
   const walksPath = join(contentDir, "walks.yaml");
@@ -242,6 +252,16 @@ function main() {
       height: 900,
     };
     copyList.push({ src, file });
+    const copies = derived[row.id];
+    if (copies) {
+      photos[row.id].sources = copies.sources;
+      photos[row.id].sizes = copies.sizes;
+      for (const rel of copies.files) {
+        const copySrc = join(photosDir, rel);
+        if (!existsSync(copySrc)) fail(`manifest row for copy ${rel} points at a missing file`);
+        copyList.push({ src: copySrc, file: basename(rel), copy: true });
+      }
+    }
   }
 
   // Fail the build rather than publish a CC BY photo with nobody's name on it.
@@ -356,7 +376,8 @@ function main() {
   const precache = {
     version: content_hash,
     pages: ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/offline", "/manifest.webmanifest"],
-    photos: Object.values(photos).map((p) => p.url),
+    // The copies too: offline, the landing page asks for the copy it picks, not the JPEG.
+    photos: [...Object.values(photos).map((p) => p.url), ...copyList.filter((c) => c.copy).map((c) => `/photos/${c.file}`)],
   };
   writeFileSync(join(webRoot, "public", "precache.json"), JSON.stringify(precache, null, 2) + "\n");
 
@@ -367,7 +388,8 @@ function main() {
   if (stamped !== sw) writeFileSync(swPath, stamped);
 
   const size = statSync(join(outDir, "content.json")).size;
-  console.log(`build-content: content_hash ${content_hash}, consent ${consent_version}, ${copyList.length} photos copied, content.json ${size} bytes`);
+  const copyCount = copyList.filter((c) => c.copy).length;
+  console.log(`build-content: content_hash ${content_hash}, consent ${consent_version}, ${copyList.length - copyCount} photos and ${copyCount} smaller copies copied, content.json ${size} bytes`);
 }
 
 main();

@@ -64,6 +64,15 @@ export interface Photo {
   source_url: string;
   width: number;
   height: number;
+  /** Smaller AVIF and WebP copies, best first, when scripts/derive_photos.py made some. */
+  sources?: PhotoSource[];
+  /** The sizes attribute that goes with sources. */
+  sizes?: string;
+}
+
+export interface PhotoSource {
+  type: string;
+  srcset: string;
 }
 
 export interface Mark {

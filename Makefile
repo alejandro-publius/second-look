@@ -41,7 +41,7 @@ test:
 	uv run pytest
 
 web-build:
-	@if [ -f $(WEB)/package.json ]; then cd $(WEB) && npm run build --silent && echo "web build ok" && node scripts/check-bundle.mjs; else echo "no web app yet"; fi
+	@if [ -f $(WEB)/package.json ]; then cd $(WEB) && npm run build --silent && echo "web build ok" && node scripts/check-bundle.mjs && node scripts/check-preloads.mjs; else echo "no web app yet"; fi
 
 manifest-check:
 	$(PY) scripts/check_manifest.py
