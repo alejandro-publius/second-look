@@ -34,6 +34,24 @@ Creek check (rung 2, `/check`):
   spots (a plant name, a count, the latest date and a link), with the time it was fetched. No
   observer's name, photo or exact position is stored.
 
+Video walks (`/walk`, a creek from your desk; UPDATE_30 section 1 items 2 and 3):
+
+- While a walk is being made, its answers stay on the phone, in the browser's IndexedDB beside
+  the creek check's offline queue, keyed by the walk's id, so Back, a reload or a closed tab
+  opens it where it was. Start again deletes them.
+- `walk_record`: once the walk is finished, the phone sends it to our store as a demo record, so
+  its link opens on any device. A row holds the walk's id, the answers as coded values from the
+  form's lists, the time the walk was finished, the time it was stored, its delete date and its
+  FHIR Bundle, tagged as a demo on every resource. No contributor token, no position, no photo,
+  no free text and nothing about the browser. The route refuses a body over 4096 bytes, any
+  field but those three, an answer the form does not allow, and a time more than 5 minutes
+  ahead or 7 days old, and it takes at most 200 walk records a day on the whole server.
+- A walk record is never counted: it is in no study table, it is not a spot or a visit, so no
+  creek's numbers, no `/city?creek=` view and no count include it. It is never sent to
+  OneAquaHealth's sandbox: the mirror reads visit Bundles only and refuses anything with the
+  demo tag. It shows only on `/spot?id=<its id>` and on `/city?walk=<walk>&record=<its id>`, the
+  links the walk page gives.
+
 Who else gets a spot's position: Open-Meteo, for the rainfall lookup behind the dry pipe
 question, at 4 decimals; and iNaturalist, from the daily job on the Mac, which asks for sightings
 near each spot of a creek whose region has an approved plant list, at the precision the spot is
@@ -102,6 +120,13 @@ if we change hosts, change both this file and the consent text.
   Our own FHIR store is the source of truth; the sandbox mirror is a copy we can rebuild.
 - `sandbox_cache`: replaced on each successful fetch; never committed to git.
 - `inaturalist_cache`: replaced on each successful daily fetch; never committed to git.
+- `walk_record`: deleted 30 days after it is stored. Its delete date is written on the row when it
+  is stored, and the API never serves a row past it. On the live site the Worker deletes every
+  row past its date once a day, at 04:17 UTC (the cron in `worker/wrangler.jsonc`), and again
+  whenever a new walk is stored; the Python API deletes them whenever a new walk is stored. A
+  daily backup taken before that keeps a row until the backup itself is deleted (see Backups).
+- A walk's answers on the phone: in the browser until Start again, or until the person clears
+  the site's data. They are never sent anywhere before the walk is finished.
 
 ## The rate limit, and why the deployed API has none
 
