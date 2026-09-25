@@ -796,13 +796,14 @@ def remove_worktree(checkout: Path, tree: Path) -> None:
 # ---------------------------------------------------------------------------------------------
 
 
-def plan(checkout: Path) -> int:
+def plan(checkout: Path, slug: str = REPO_SLUG) -> int:
     rows = mentions(checkout)
     print("go-public: nothing changes. make go-public GO=dry runs every step before the flip in")
     print("a throwaway worktree and stops; make go-public GO=yes runs them all, on main.")
     steps = next(p for p in (__doc__ or "").split("\n\n") if p.startswith("  start"))
     print(steps)
-    print(f"The notes step would git rm -r {INTERNAL} and reword {sum(c for _, c in rows)} ")
+    print("The flip runs: " + " ".join(public_cmd(slug)))
+    print(f"The notes step would git rm -r {INTERNAL} and reword {sum(c for _, c in rows)}")
     print(f"mentions in {len(rows)} files:")
     for path, count in rows:
         print(f"    {path}: {count}")
@@ -843,7 +844,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     checkout = args.root.resolve()
     if not (args.yes or args.no_flip):
-        return plan(checkout)
+        return plan(checkout, args.repo)
     dry = args.no_flip
     _, commit = run(["git", "rev-parse", "--short", "HEAD"], checkout)
     steps: list[Step] = []

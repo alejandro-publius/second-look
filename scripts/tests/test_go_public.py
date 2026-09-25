@@ -818,6 +818,8 @@ def test_the_plan_changes_nothing_and_says_history_keeps_the_notes(
     assert before == after
     out = capsys.readouterr().out
     assert "the git history still holds docs/internal" in out
+    # The done list's D36 reads this line: the plan names the exact flip for this repository.
+    assert f"gh repo edit {SLUG} --visibility public --accept-visibility-change-consequences" in out
     for name in gp.STEP_NAMES:
         assert f"  {name} " in out
     for path in gp.READERS:
