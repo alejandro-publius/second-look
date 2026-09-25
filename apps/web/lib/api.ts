@@ -347,6 +347,27 @@ export interface InatOut {
   terms: string;
 }
 
+/** POST /api/walk: a finished video walk, sent once so its record opens on any device. */
+export interface WalkStoreRequest {
+  walk_id: string;
+  answers: Record<string, AnswerValue>;
+  answered_at: string;
+}
+
+/** What the store answers: the record's id, which is the walk visit's own id, and its delete date. */
+export interface WalkStoredOut {
+  record_id: string;
+  walk_id: string;
+  answered_at: string;
+  delete_after: string;
+}
+
+/** GET /api/walk/{record_id}: one stored walk record, with its answers and its demo Bundle. */
+export interface WalkRecordOut extends WalkStoredOut {
+  answers: Record<string, AnswerValue>;
+  bundle: Record<string, unknown>;
+}
+
 export type QuickColour = "clear" | "muddy" | "foam" | "coloured" | "cant_tell";
 export type QuickSmell = "none" | "bad" | "cant_tell";
 
@@ -499,6 +520,17 @@ export const api = {
   },
   quick(spot_id: string, body: QuickRequest) {
     return withDetail<{ ok?: boolean; visit_id?: string }>("POST", `/api/quick/${encodeURIComponent(spot_id)}`, body);
+  },
+  /** Stores a finished walk's demo record (UPDATE_30 section 1 item 3). Sent through the offline
+   *  queue, so a walk finished without a network is stored when it returns. */
+  storeWalk(body: WalkStoreRequest) {
+    return withDetail<WalkStoredOut>("POST", "/api/walk", body);
+  },
+  walkRecord(record_id: string) {
+    return withDetail<WalkRecordOut>("GET", `/api/walk/${encodeURIComponent(record_id)}`);
+  },
+  walkRecordUrl(record_id: string) {
+    return absoluteApiUrl(`/api/walk/${encodeURIComponent(record_id)}`);
   },
   /** Multipart upload. The API strips EXIF and checks the real type; we only downsize. The token
    *  serves the photo back to the uploader only; we never store it. */

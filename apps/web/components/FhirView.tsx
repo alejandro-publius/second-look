@@ -11,10 +11,12 @@ function day(iso: string | undefined): string {
 
 /**
  * View as FHIR: the JSON, a badge with the guide commit and the validator verdict, a copyable curl
- * line. curl is null for a record made on this phone: it has no address to fetch, and the validator
- * in CI never saw it, so the badge speaks of walk records made the same way (REVIEW_03 R31).
+ * line. curl is null for a record made on this phone and not stored yet: it has no address to
+ * fetch. A walk record, stored or not, was never seen by the validator in CI, so its badge speaks
+ * of walk records made the same way (REVIEW_03 R31): `walk` says which of its two lines to show.
  */
-export function FhirView({ load, curl }: { load: () => Promise<unknown>; curl: string | null }) {
+export function FhirView({ load, curl, walk }: { load: () => Promise<unknown>; curl: string | null; walk?: "phone" | "stored" }) {
+  const walkBadge = walk ?? (curl === null ? "phone" : null);
   const [open, setOpen] = useState(false);
   const [json, setJson] = useState<string | null>(null);
   const [validation, setValidation] = useState<FhirValidationOut | null | "down">(null);
@@ -54,10 +56,10 @@ export function FhirView({ load, curl }: { load: () => Promise<unknown>; curl: s
   }
 
   const badge =
-    validation && validation !== "down" && curl === null ? (
+    validation && validation !== "down" && walkBadge !== null ? (
       validation.errors === 0 && (validation.walk_records_validated ?? 0) > 0 ? (
         <span className="badge badge-ok" data-testid="fhir-badge">
-          {t("walk.validated_like", { date: day(validation.ran_at_utc) })}
+          {t(walkBadge === "stored" ? "walk.validated_like_stored" : "walk.validated_like", { date: day(validation.ran_at_utc) })}
         </span>
       ) : null
     ) : validation && validation !== "down" ? (

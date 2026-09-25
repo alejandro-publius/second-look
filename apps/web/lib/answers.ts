@@ -1,7 +1,7 @@
 // The answers a creek check holds, in words, for a record made on the phone (CRITIC_04 F01). /spot
-// gets each answer already worded by the API (apps/api/check.py and worker/src/check.ts); the walk's
-// record is never sent, so its answers are worded here from the same form, the same labels and
-// the same yes and no words.
+// gets each answer already worded by the API (apps/api/check.py and worker/src/check.ts); a walk's
+// record, made on the phone or read back from the walk store as coded answers, is worded here from
+// the same form, the same labels and the same yes and no words.
 import type { AnswerValue } from "./api";
 import { content, type FormItem } from "./content";
 import { t } from "./t";

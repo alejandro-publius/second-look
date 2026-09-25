@@ -2,6 +2,8 @@
 // the API origin is answered here with the response shapes from docs/CONTRACTS.md, so nothing is
 // ever sent to a real server. Plain JS so both the Playwright specs and scripts/screens.mjs can use it.
 
+import { createHash } from "node:crypto";
+
 export const API_ORIGIN = "http://127.0.0.1:8100";
 
 // NEXT_PUBLIC_API_ORIGIN is inlined at build time, so a build made without it bakes the default
@@ -225,14 +227,27 @@ export const exampleObservation = (performer, method, note) => ({
 
 export const exampleValidation = { ran_at_utc: "2026-09-20T22:58:03+00:00", validator_version: "6.10.4", ig_commit: "b907cf0", fhir_version: "4.0.1", terminology_checks_ran: false, errors: 0, warnings: 15, files_validated: 14, walk_records_validated: 2 };
 
+// A finished walk's stored record (UPDATE_30 section 1 item 3): the id is the walk visit's own,
+// sha256 of "<walk id>|<time to the second>", as core/walks.py and worker/src/core/walks.ts make it.
+const WALK_KEYS = ["walk_id", "answers", "answered_at"];
+const secondsOf = (iso) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString().replace(/\.\d{3}Z$/, "Z");
+};
+export const walkRecordId = (walkId, answeredAt) => "walk-" + createHash("sha256").update(`${walkId}|${secondsOf(answeredAt)}`).digest("hex").slice(0, 16);
+
 /**
  * Registers the fake API on a page. Options: lessonFirst (bool), followups (array), theirsStatus,
- * offline (object with a mutable `value` flag; when true every API request fails like a dead network).
+ * offline (object with a mutable `value` flag; when true every API request fails like a dead network),
+ * walkStore (a Map of stored walk records; hand the same one to two pages, in two browser contexts,
+ * and a record one stores opens in the other, as on the real store), walkBundle (walkId, answers,
+ * answeredAt) => the record's Bundle, and walkRefuse ({ status, detail }: every walk store is refused).
  * Returns the list of calls: { method, path, body }.
  */
 export async function mockApi(page, options = {}) {
   const calls = [];
   const offline = options.offline ?? { value: false };
+  const walkStore = options.walkStore ?? new Map();
   const followups =
     options.followups ?? [
       { rule_id: "dry_pipe", question_text: "It has not rained here for 5 days. Is anything coming out of that pipe?", kind: "yesno" },
@@ -393,6 +408,32 @@ export async function mockApi(page, options = {}) {
       });
     }
     if (path.startsWith("/api/quick/")) return json({ ok: true, visit_id: "q1" });
+    if (path === "/api/walk" && req.method() === "POST") {
+      // What the servers refuse, in short (worker/src/walk_store.ts): another field, or no time.
+      if (!body || typeof body !== "object" || Object.keys(body).some((k) => !WALK_KEYS.includes(k))) return json({ detail: "A walk has no field called that." }, 422);
+      const answeredAt = secondsOf(body.answered_at);
+      if (!answeredAt) return json({ detail: "answered_at must be a time like 2026-09-25T10:00:00Z." }, 422);
+      if (options.walkRefuse) return json({ detail: options.walkRefuse.detail }, options.walkRefuse.status);
+      const record_id = walkRecordId(body.walk_id, body.answered_at);
+      const kept = walkStore.get(record_id);
+      if (kept && JSON.stringify(kept.answers) !== JSON.stringify(body.answers)) return json({ detail: "Another walk of this clip was stored in the same second." }, 409);
+      const row = kept ?? {
+        record_id,
+        walk_id: body.walk_id,
+        answered_at: answeredAt,
+        delete_after: secondsOf(new Date(Date.now() + 30 * 86_400_000).toISOString()),
+        answers: body.answers,
+        bundle: options.walkBundle ? options.walkBundle(body.walk_id, body.answers, body.answered_at) : { resourceType: "Bundle", type: "collection", entry: [] },
+      };
+      walkStore.set(record_id, row);
+      return json({ record_id, walk_id: row.walk_id, answered_at: row.answered_at, delete_after: row.delete_after });
+    }
+    if (path.startsWith("/api/walk/")) {
+      const id = decodeURIComponent(path.slice("/api/walk/".length));
+      const row = walkStore.get(id);
+      if (!row) return json({ detail: `We have no stored walk record called '${id}'. A walk record is deleted 30 days after it is stored.` }, 404);
+      return json(row);
+    }
     if (path === "/api/test/counts") return json({ by_arm: { untrained: { randomized: 0, completed: 0 }, trained: { randomized: 0, completed: 0 } }, by_source: {}, post_lock: 0 });
     return json({ detail: "unknown route in mock" }, 404);
   };

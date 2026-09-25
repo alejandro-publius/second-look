@@ -79,6 +79,13 @@ async function main() {
   page.on("request", (r) => {
     if (r.method() !== "GET" && /\/api\/(test|check|quick|upload)/.test(r.url())) writes.push(r.url());
   });
+  // A finished walk sends its record to the store (UPDATE_30 section 1 item 3). This check stores
+  // none: the send is dropped like a lost network, so the walk keeps its record on the phone. A
+  // walk send that still reached the server counts as a write.
+  await context.route("**/api/walk", (route) => (route.request().method() === "POST" ? route.abort("internetdisconnected") : route.fallback()));
+  page.on("requestfinished", (r) => {
+    if (r.method() === "POST" && new URL(r.url()).pathname === "/api/walk") writes.push(r.url());
+  });
 
   async function step(name, fn) {
     try {
@@ -134,7 +141,7 @@ async function main() {
     });
     await step("the demo creek on /city", async () => {
       await page.getByRole("link", { name: "See this creek as a city would" }).click();
-      await page.getByText("Checks from this phone: 1").waitFor({ timeout: 10000 });
+      await page.getByText("Checks in this demo creek: 1").waitFor({ timeout: 10000 });
     });
   }
   await step("what the city sees, from the API", async () => {
@@ -164,7 +171,7 @@ async function main() {
 
   await browser.close();
   const after = await readCounts(api);
-  ok("no request wrote to the study, check, quick or upload routes", writes.length === 0, writes.join(", "));
+  ok("no request wrote to the study, check, quick, upload or walk routes", writes.length === 0, writes.join(", "));
   const counts = countsCheck(before, after);
   ok("the public counts did not move", counts.pass, counts.detail);
   const failed = results.filter((r) => !r.pass);

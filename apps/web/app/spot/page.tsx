@@ -3,6 +3,7 @@
 import { FocusHeading } from "@/components/FocusHeading";
 import { SpotRecord } from "@/components/SpotRecord";
 import { useQueryParamOrNull } from "@/components/QueryParam";
+import { WalkStoredRecord } from "@/components/WalkRecord";
 import { t } from "@/lib/t";
 
 // /spot?id=<spot id>. A query route, not a path route, because Cloudflare Pages serves a static
@@ -25,5 +26,8 @@ export default function SpotPage() {
       </div>
     );
   }
+  // A finished video walk's stored demo record (UPDATE_30 section 1 item 3). Its id starts with
+  // "walk-", which no creek spot's id can (core/walks.py), and it is read from its own route.
+  if (id.startsWith("walk-")) return <WalkStoredRecord recordId={id} />;
   return <SpotRecord spotId={id} />;
 }

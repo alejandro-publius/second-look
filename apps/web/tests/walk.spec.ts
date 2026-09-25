@@ -7,7 +7,8 @@ import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
 // Update 14 3.7: a walk is a guided check made while watching a clip. The record is built on the
-// phone, tagged as a demo on every resource, and nothing is sent to our store.
+// phone and tagged as a demo on every resource. Since UPDATE_30 the finished walk is also sent to
+// the walk store, and to nothing else (tests/walk-store.spec.ts).
 const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
 const walks: {
   id: string;
@@ -50,14 +51,17 @@ test("the walks are said to be somewhere else, not from another country", async 
   }
 });
 
-test("a walk shows its credit, builds a demo record on the phone, and sends nothing", async ({ page }) => {
+// UPDATE_30 section 1 item 3: the finished walk now goes to the walk store, once, as a demo
+// record, and to nothing else: no creek check, no upload, no quick check.
+test("a walk shows its credit, builds a demo record on the phone, and sends it to the walk store only", async ({ page }) => {
   const calls = await mockApi(page, {});
   const urls = watchRequests(page);
   const w = walks[0];
   await page.goto(`${BASE}/walk/${w.id}`);
   await expect(page.locator("video.walk-clip")).toHaveCount(1);
   await expect(page.getByText(w.author, { exact: false }).first()).toBeVisible();
-  await expect(page.getByText("never stored, never counted")).toBeVisible();
+  await expect(page.getByText(en["walk.demo_notice"])).toBeVisible();
+  await expect(page.getByText(en["walk.demo_notice"])).toContainText("never counted");
   await page.getByRole("button", { name: "Start the check" }).click();
   await page.getByRole("button", { name: "U shape" }).click(); // channel form
   // The count's total stays the same when a follow-up such as "Which ones?" appears (REVIEW_03 R42).
@@ -90,26 +94,29 @@ test("a walk shows its credit, builds a demo record on the phone, and sends noth
     await expect(page.getByText(content.locale["walk.checker_nothing_seen"])).toBeVisible();
     await expect(page.getByText(/of its guesses on this clip/)).toHaveCount(0);
   }
+  // Stored as a demo: the page links to it (UPDATE_30 section 1 item 3).
+  await expect(page.getByTestId("walk-record-link")).toHaveText(en["walk.stored_link"]);
   await page.getByRole("button", { name: "View as FHIR" }).click();
   // The record was made on this phone: the badge speaks of walk records made the same way, which
-  // the validator checked in CI, never of this one, and there is no address to copy (REVIEW_03 R31).
+  // the validator checked in CI, never of this one (REVIEW_03 R31). The curl line fetches the
+  // stored copy.
   await expect(page.getByTestId("fhir-badge")).toHaveText(
     "Walk records made the same way passed the HL7 validator on Sep 20, 2026. This one was made on your phone and was not checked.",
   );
   await expect(page.getByText("passed the HL7 validator against guide commit")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Copy the curl line" })).toHaveCount(0);
-  await expect(page.getByText("This record was made on your phone and has no web address.")).toBeVisible();
+  await expect(page.locator("pre.code").first()).toHaveText(/^curl -s http:\/\/127\.0\.0\.1:8100\/api\/walk\/walk-[0-9a-f]{16}$/);
   const json = await page.locator("pre.code").last().innerText();
   const bundle = JSON.parse(json);
   expect(bundle.meta.tag.some((t: { code: string }) => t.code === "demo-walk")).toBe(true);
   for (const e of bundle.entry) expect(e.resource.meta.tag.some((t: { code: string }) => t.code === "demo-walk")).toBe(true);
-  // No check, upload or quick call: the record never leaves the phone.
+  // One send, to the walk store: no check, upload or quick call.
+  expect(calls.filter((c: { method: string }) => c.method === "POST").map((c: { path: string }) => c.path)).toEqual(["/api/walk"]);
   expect(calls.filter((c: { path: string }) => /\/api\/(check|upload|quick)/.test(c.path))).toEqual([]);
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
 
   await page.getByRole("link", { name: "See this creek as a city would" }).click();
   await expect(page.getByRole("heading", { name: /Demo creek/ })).toBeVisible();
-  await expect(page.getByText("Checks from this phone: 1")).toBeVisible();
+  await expect(page.getByText(en["city.walk_visits"].replace("{n}", "1"))).toBeVisible();
   // CRITIC_04 F04: the walk said yes to barriers, and the finding and the reason carry the short
   // label, never the form's whole question.
   const barriers = formItems.find((it) => it.id === "barriers")!.text;
@@ -358,7 +365,7 @@ test("the gallery's shot of a walk's city view shows the first measure whole, wi
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y + box.height).toBeLessThanOrEqual(844);
   // CRITIC_11 U02: the page is too short to bring the region to the top, and the shot stopped
-  // where the page ends, cutting "Checks from this phone: 1" through the middle at the top edge.
+  // where the page ends, cutting the line that counts the checks through the middle at the top edge.
   // It now stops at the top of a whole line instead, so no text is cut there.
   expect(await textCutAtTop(page)).toEqual([]);
 });

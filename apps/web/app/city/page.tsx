@@ -11,7 +11,9 @@ export default function CityPage() {
   // from one not read yet, and the page never says to pick a creek to a link that names one.
   const creek = useQueryParamOrNull("creek");
   const walk = useQueryParam("walk");
-  // /city?walk=<id> is the demo creek a video walk feeds, built on this phone only.
-  if (walk) return <WalkCity walkId={walk} />;
+  const record = useQueryParam("record");
+  // /city?walk=<id> is the demo creek a video walk feeds: the walk this browser finished, and the
+  // stored walk record the link names with &record=<id>.
+  if (walk) return <WalkCity walkId={walk} recordId={record} />;
   return <CityView creekId={creek} />;
 }
