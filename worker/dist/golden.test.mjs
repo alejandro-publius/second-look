@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "0ba30c5ec09f5c5e",
+  content_hash: "37d114251e7e0542",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -2714,12 +2714,16 @@ function observation(visit, item, value, pid, spotLocationId, visitQrId, score) 
 }
 function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
   const entities = [{ role: "source", what: ref("QuestionnaireResponse", visitQrId) }];
-  if (testQrId) entities.push({ role: "source", what: ref("QuestionnaireResponse", testQrId) });
+  let sources = "The source is the visit.";
+  if (testQrId) {
+    entities.push({ role: "source", what: ref("QuestionnaireResponse", testQrId) });
+    sources = "The sources are the visit and the observer test sitting.";
+  }
   return {
     resourceType: "Provenance",
     id: fhirId("sl-provenance", visit.visit_id),
     text: narrative(
-      `${observations.length} observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.`
+      `${observations.length} observations from one creek check, answered by the volunteer and assembled by the Second Look software. ${sources}`
     ),
     target: observations.map((o) => ref("Observation", String(o.id))),
     recorded: instant(emittedAt),
