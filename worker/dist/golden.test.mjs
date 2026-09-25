@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "dd63f5f1302b1668",
+  content_hash: "acc51ff8d4511970",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -1287,6 +1287,64 @@ var core_content_default = {
       m: "metre",
       mL: "millilitre"
     }
+  },
+  followups: {
+    max_questions: 2,
+    rules: [
+      {
+        dry_rule: {
+          max_mm: 2.5,
+          window_hours: 72
+        },
+        fail_closed: "if rainfall or location is unknown, this rule does not fire",
+        id: "dry_pipe",
+        needs_items: [
+          "draining_pipes",
+          "sewage_discharge"
+        ],
+        priority: 1,
+        question_key: "followup.dry_pipe",
+        trigger: "draining_pipes or sewage_discharge answered present, and rainfall status is dry"
+      },
+      {
+        id: "rating_check",
+        needs_items: [
+          "overall_rating",
+          "bank_type",
+          "impervious_left",
+          "impervious_right",
+          "invasive_species",
+          "sewage_discharge"
+        ],
+        priority: 2,
+        question_key: "followup.rating_check",
+        stores: [
+          "first_rating",
+          "final_rating"
+        ],
+        trigger: "overall_rating is good, and any of bank_type present, impervious_left present, impervious_right present, invasive_species present, sewage_discharge present"
+      },
+      {
+        feature_flag: "CHECKER_ENABLED",
+        id: "checker_flag",
+        needs_items: [],
+        priority: 3,
+        question_key: "followup.checker_flag",
+        trigger: "a Flag from core.gate for a feature the model passed, shown only after the person answered"
+      },
+      {
+        asks_for: "photo",
+        id: "low_score",
+        needs_items: [
+          "bank_type",
+          "draining_pipes",
+          "invasive_species"
+        ],
+        priority: 4,
+        question_key: "followup.low_score",
+        trigger: "observer scored 2 of 4 or lower on a feature and answered absent for that feature"
+      }
+    ]
   },
   form_items: [
     {
@@ -3307,6 +3365,46 @@ function walkRecord(walk, answers, answeredAt, now) {
     bundle: walkBundle(walk, answers, at)
   };
 }
+var WALK_SITE = { rain: "unknown" };
+var RATING_ITEM2 = "overall_rating";
+var WALK_FOLLOWUP_ANSWERS = {
+  yesno: ["yes", "no", "cant_tell", "skipped"],
+  keep_rating: ["keep", "change", "skipped"],
+  look_again: ["looked", "skipped"],
+  photo: ["skipped"]
+};
+function walkFollowups(answers, table, formItems) {
+  return selectFollowups(answers, WALK_SITE, null, [], table, formItems, false);
+}
+function walkChecks(answers, followups, questionTexts, given, finalRating) {
+  if (questionTexts.length !== followups.length) throw new WalkRecordError("Every follow-up needs its question.");
+  const asked = new Set(followups.map((f) => f.rule_id));
+  for (const ruleId of Object.keys(given)) {
+    if (!asked.has(ruleId)) throw new WalkRecordError(`No follow-up called '${ruleId}' was asked in this walk.`);
+  }
+  const first = answers[RATING_ITEM2];
+  const firstRating = typeof first === "string" ? first : null;
+  let final = firstRating;
+  const checks = followups.map((f, i) => {
+    const raw = given[f.rule_id];
+    let answer = null;
+    if (raw !== void 0 && raw !== null) {
+      const allowed = WALK_FOLLOWUP_ANSWERS[f.kind] ?? [];
+      if (typeof raw !== "string" || !allowed.includes(raw)) throw new WalkRecordError(`${f.rule_id}: answer ${allowed.join(", ")}.`);
+      answer = raw;
+    }
+    if (f.kind === "keep_rating" && answer === "change") {
+      if (finalRating === null) throw new WalkRecordError("A changed rating needs the new rating.");
+      final = finalRating;
+    }
+    const detail = {};
+    for (const [k, v] of Object.entries(f.params)) detail[k] = typeof v === "string" || typeof v === "number" ? v : String(v);
+    detail.kind = f.kind;
+    return { rule_id: f.rule_id, asked: true, question_text: questionTexts[i], answer, detail };
+  });
+  if (finalRating !== null && finalRating !== final) throw new WalkRecordError("The final rating can differ from the first only when the rating check says change.");
+  return { checks, final_rating: final };
+}
 
 // src/check.ts
 var Invalid = class extends Error {
@@ -3592,6 +3690,25 @@ test("walks: the stored row of a finished walk, or the same reason to refuse it,
     if (!("error" in c.expected)) stored += 1;
   }
   assert.ok(stored > 0 && stored < doc.record_cases.length, "both kinds of case ran");
+});
+test("walks: the follow-ups a walk asks and the checks kept with it, or the same reason to refuse them, as Python", () => {
+  const doc = golden("walks");
+  const kinds = /* @__PURE__ */ new Set();
+  for (const c of doc.followups_cases) {
+    const chosen = walkFollowups(c.input.answers, content_default.followups, content_default.form_items);
+    let got;
+    try {
+      const out = walkChecks(c.input.answers, chosen, c.input.question_texts, c.input.given, c.input.final_rating);
+      got = { followups: chosen, checks: out.checks, final_rating: out.final_rating };
+      kinds.add(out.checks.length > 0 ? "checks" : "none");
+    } catch (err) {
+      assert.ok(err instanceof WalkRecordError, `${c.name}: ${String(err)}`);
+      got = { followups: chosen, error: err.message };
+      kinds.add("error");
+    }
+    same(got, c.expected, c.name);
+  }
+  assert.deepEqual([...kinds].sort(), ["checks", "error", "none"], "cases that keep checks, keep none, and refuse");
 });
 test("old Bundles: only ts- JSON files are deleted, and only the ones in that folder", () => {
   const dir = mkdtempSync(join(tmpdir(), "sl-instances-"));

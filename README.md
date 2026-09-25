@@ -18,7 +18,7 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 <!-- claim: results/fhir_validation.json#/terminology_checks_ran = True -->
 
-Which creek is healthier? Take the test, about four minutes with its lesson, no camera needed: **https://second-look-79t.pages.dev**
+Which creek is healthier? Take the two-minute test (about four minutes with its lesson), no camera needed: **https://second-look-79t.pages.dev**
 
 | Norman Creek | Nurton Brook |
 |---|---|

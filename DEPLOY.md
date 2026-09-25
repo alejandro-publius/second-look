@@ -193,6 +193,10 @@ a row names something the code no longer reads, or when a default below differs 
 | `MERMAID_CLI` | not set | `scripts/check_diagrams.py` | `1` also renders every diagram, not only parses it |
 | `SECOND_LOOK_BACKUP_DIR` | `~/second-look-backups` | `scripts/preflight.py` | where preflight looks for the last backup |
 | `SECOND_LOOK_MEDIA` | `~/second-look-media` | `scripts/fetch_footage.py` | where downloaded footage goes, outside the repo |
+| `SECOND_LOOK_SCREENS` | `docs/video/clips` | `scripts/video_final.py` | the screen recordings the final cut uses (`make video-final SCREENS=...` sets it) |
+| `SECOND_LOOK_VOICE` | `~/second-look-media/voice` | `scripts/video_final.py` | where a voice file is looked for, outside the repo |
+| `SECOND_LOOK_FINAL` | `~/second-look-media/final` | `scripts/video_final.py` | where the final cut, its .srt and the thumbnail are written, outside the repo |
+| `SCREENS_API_ORIGIN` | not set | `apps/web/scripts/record-clips.mjs` | the API address a recorded build calls; the mock answers it, so nothing reaches it |
 | `SECOND_LOOK_CLIPS` | `~/second-look-media/clips` | `scripts/video_rough.py` | the cut clips the rough cut reads |
 | `SECOND_LOOK_SAY_VOICE` | `Samantha` | `scripts/video_rough.py` | the macOS voice of the scratch narration |
 | `SECOND_LOOK_CONTACT` | the project's GitHub noreply address | `scripts/find_open_photos.py`, `scripts/find_open_videos.py` | the contact in the user agent of the photo and video searches |
