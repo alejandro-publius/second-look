@@ -353,12 +353,17 @@ function observation(
 
 function provenance(visit: VisitRecord, observations: Resource[], pid: string, visitQrId: string, testQrId: string | null, emittedAt: string): Resource {
   const entities: Resource[] = [{ role: "source", what: ref("QuestionnaireResponse", visitQrId) }];
-  if (testQrId) entities.push({ role: "source", what: ref("QuestionnaireResponse", testQrId) });
+  // The last sentence names only the sources in entity (round 09 Q02).
+  let sources = "The source is the visit.";
+  if (testQrId) {
+    entities.push({ role: "source", what: ref("QuestionnaireResponse", testQrId) });
+    sources = "The sources are the visit and the observer test sitting.";
+  }
   return {
     resourceType: "Provenance",
     id: fhirId("sl-provenance", visit.visit_id),
     text: narrative(
-      `${observations.length} observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.`,
+      `${observations.length} observations from one creek check, answered by the volunteer and assembled by the Second Look software. ${sources}`,
     ),
     target: observations.map((o) => ref("Observation", String(o.id))),
     recorded: instant(emittedAt),
