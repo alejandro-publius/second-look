@@ -14,6 +14,7 @@ import { Invalid, NotFound, createDraft, finalize, latestBundleForSpot, loadVisi
 import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, referralView } from "./city";
 import { TooLarge, photoResponse, storeUpload } from "./uploads";
 import { two } from "./two";
+import { Conflict, TooMany, purgeWalks, storeWalk, walkView } from "./walk_store";
 import { inaturalistView } from "./inaturalist";
 
 export interface Env {
@@ -460,6 +461,11 @@ export default {
     const checkEnv = { DB: env.DB, PHOTOS: env.PHOTOS, RAIN_FETCH: env.RAIN_URL ? rainFetchAt(env.RAIN_URL) : undefined };
     try {
       if (path === "/api/upload" && request.method === "POST") return json(env, await storeUpload(env, request, now));
+      // A finished video walk's demo record (UPDATE_30 section 1 item 3), in its own table, never
+      // counted and never mirrored. It reads its own body, to refuse a large one before parsing.
+      if (path === "/api/walk" && request.method === "POST") return json(env, await storeWalk(env.DB, request, now));
+      const walk = /^\/api\/walk\/([^/]+)$/.exec(path);
+      if (walk && request.method === "GET") return json(env, await walkView(env.DB, decodeURIComponent(walk[1]), now));
       const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
       if (photo && request.method === "GET") return withCors(env, await photoResponse(env, decodeURIComponent(photo[1]), url.searchParams.get("t")));
       if (path === "/api/creeks") return json(env, await creeksView(checkEnv));
@@ -545,6 +551,12 @@ export default {
     }
     return json(env, { detail: "Not found." }, 404);
   },
+
+  /** Once a day (the cron in worker/wrangler.jsonc): deletes every video walk record past its
+   *  delete date (UPDATE_30 section 1 item 3, docs/DATA_HANDLING.md). Nothing else runs on it. */
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    await purgeWalks(env.DB, nowIso());
+  },
 };
 
 /** The time judge mode's lock is read against: the real clock, unless E2E_NOW holds a time. Only
@@ -562,6 +574,8 @@ function errorResponse(env: Env, err: unknown): Response {
   if (err instanceof Invalid) return json(env, { detail: err.message }, 422);
   if (err instanceof NotFound) return json(env, { detail: err.message }, 404);
   if (err instanceof TooLarge) return json(env, { detail: err.message }, 413);
+  if (err instanceof Conflict) return json(env, { detail: err.message }, 409);
+  if (err instanceof TooMany) return json(env, { detail: err.message }, 429);
   return json(env, { detail: "The server could not take that. Try again in a moment.", error: String(err) }, 500);
 }
 

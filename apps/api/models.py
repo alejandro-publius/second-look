@@ -187,3 +187,20 @@ class InaturalistCache(SQLModel, table=True):
     creek: str = Field(primary_key=True, max_length=255)
     body: str = Field(sa_column=Column(Text, nullable=False))
     fetched_at: datetime = Field(sa_column=_tz_column())
+
+
+class WalkRecordRow(SQLModel, table=True):
+    """A finished video walk's demo record (UPDATE_30 section 1 item 3), so its link opens on any
+    device. A table of its own: nothing that counts, maps or mirrors creek checks reads it. The
+    answers are coded values from the form's lists; no token, no position, no free text. Deleted
+    after delete_after, 30 days after it was stored (apps/api/walk_store.py)."""
+
+    __tablename__ = "walk_record"
+
+    record_id: str = Field(primary_key=True, max_length=32)
+    walk_id: str = Field(max_length=16)
+    answered_at: datetime = Field(sa_column=_tz_column())
+    answers_json: str = Field(sa_column=Column(Text, nullable=False))
+    bundle_json: str = Field(sa_column=Column(Text, nullable=False))
+    created_at: datetime = Field(sa_column=_tz_column(index=True))
+    delete_after: datetime = Field(sa_column=_tz_column(index=True))

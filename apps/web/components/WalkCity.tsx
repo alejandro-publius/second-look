@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { Row } from "./ui/Row";
-import { content, featureById, walkById } from "@/lib/content";
+import { ApiError, api } from "@/lib/api";
+import { content, featureById, walkById, type Walk } from "@/lib/content";
 import { has, t } from "@/lib/t";
 import { reasonsThenSource } from "@/lib/text";
-import { demoCreek, exampleNeeds, hasMeasure, savedWalkVisits } from "@/lib/walks";
+import { demoCreek, exampleNeeds, finishedWalk, hasMeasure, type WalkVisitSaved } from "@/lib/walks";
 
 /**
  * A finding's name: a short label from the locale when the finding has one (city.finding_<key>),
@@ -21,26 +22,23 @@ function findingName(key: string): string {
   return featureById(key)?.name ?? content.form.items.find((i) => i.id === key)?.text ?? key;
 }
 
+type Demo = ReturnType<typeof demoCreek>;
+
 /**
- * /city?walk=<id>: the demo creek a video walk feeds. Same two functions the city view runs on
- * stored visits (findings, then what the creek needs in approved words), over the walks made on
- * this phone only. Nothing here is stored or counted.
+ * The demo creek on screen: what the walks found and what the creek needs, in approved words.
+ * Pure, so scripts/tests/test_web_flows.py can draw it with the rows it hands in.
  */
-export function WalkCity({ walkId }: { walkId: string }) {
-  const walk = walkById(walkId);
-  // Session storage exists only in the browser, so the server render sees no visits yet.
-  const saved = useSyncExternalStore(
-    () => () => undefined,
-    () => JSON.stringify(savedWalkVisits()),
-    () => "",
-  );
-  const demo = useMemo(() => (walk && saved ? demoCreek(walk) : null), [walk, saved]);
-  const example = useMemo(() => exampleNeeds(), []);
-  if (!walk) return <p className="notice notice-warn">{t("city.none")}</p>;
+export function WalkCityView({ walk, demo, back, missing }: { walk: Walk; demo: Demo | null; back: { href: string; label: string } | null; missing?: string | null }) {
+  const example = exampleNeeds();
   return (
     <div className="stack">
       <FocusHeading>{t("city.walk_title", { name: walk.creek_name })}</FocusHeading>
       <p className="notice notice-warn">{t("city.walk_notice")}</p>
+      {missing ? (
+        <p className="notice notice-warn" data-testid="walk-record-missing">
+          {missing}
+        </p>
+      ) : null}
       {demo === null ? null : demo.visits.length === 0 ? (
         <p>{t("city.walk_empty")}</p>
       ) : (
@@ -93,10 +91,9 @@ export function WalkCity({ walkId }: { walkId: string }) {
           ) : null}
         </>
       )}
-      {/* The walk page opens on the record this tab made (CRITIC_10 S01). */}
-      {demo && demo.visits.length > 0 ? (
+      {back ? (
         <p>
-          <Link href={`/walk/${encodeURIComponent(walk.id)}`}>{t("city.walk_back")}</Link>
+          <Link href={back.href}>{back.label}</Link>
         </p>
       ) : null}
       <p>
@@ -104,4 +101,46 @@ export function WalkCity({ walkId }: { walkId: string }) {
       </p>
     </div>
   );
+}
+
+/**
+ * /city?walk=<id>[&record=<record id>]: the demo creek a video walk feeds. Same two functions the
+ * city view runs on stored visits (findings, then what the creek needs in approved words), over
+ * the walk this browser finished, kept in IndexedDB so a new tab sees it too, and the stored
+ * record the link names, read from GET /api/walk/{record_id}, so the link opens on any device
+ * (UPDATE_30 section 1 item 3). It never pools other visitors' walks, and nothing here is counted.
+ */
+export function WalkCity({ walkId, recordId }: { walkId: string; recordId: string }) {
+  const walk = walkById(walkId);
+  // Null until IndexedDB and the store have answered, so the page never says to do the walk first
+  // to someone whose walk is on its way.
+  const [loaded, setLoaded] = useState<{ mine: WalkVisitSaved | null; linked: WalkVisitSaved | null; missing: string | null } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const linked: Promise<{ visit: WalkVisitSaved | null; missing: string | null }> = recordId
+      ? api.walkRecord(recordId).then(
+          (r) => ({ visit: r.walk_id === walkId ? { walk_id: r.walk_id, answers: r.answers, answered_at: r.answered_at } : null, missing: null }),
+          (err: unknown) => ({ visit: null, missing: err instanceof ApiError ? (err.detail ?? t("spot.not_found")) : t("error.network") }),
+        )
+      : Promise.resolve({ visit: null, missing: null });
+    void Promise.all([finishedWalk(walkId).catch(() => null), linked]).then(([mine, other]) => {
+      if (alive) setLoaded({ mine, linked: other.visit, missing: other.missing });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [walkId, recordId]);
+  const demo = useMemo(() => {
+    if (!walk || loaded === null) return null;
+    return demoCreek(walk, [loaded.mine, loaded.linked].filter((v): v is WalkVisitSaved => v !== null));
+  }, [walk, loaded]);
+  if (!walk) return <p className="notice notice-warn">{t("city.none")}</p>;
+  // Back to the walk page, which opens on the record this browser made (CRITIC_10 S01), or to the
+  // stored record the link named.
+  const back = loaded?.mine
+    ? { href: `/walk/${encodeURIComponent(walk.id)}`, label: t("city.walk_back") }
+    : loaded?.linked
+      ? { href: `/spot?id=${encodeURIComponent(recordId)}`, label: t("city.walk_back_stored") }
+      : null;
+  return <WalkCityView walk={walk} demo={demo} back={back} missing={loaded?.missing ?? null} />;
 }

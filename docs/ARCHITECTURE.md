@@ -99,7 +99,8 @@ flowchart TB
   WORKER -- "human answers,<br/>ratings, follow-up answers" --> BUILD
   BUILD -- "a visit record" --> EMIT
   EMIT -- "one Bundle per visit" --> D1
-  WPAGE -- "answers, as a demo Bundle<br/>on the phone, never sent" --> EMIT
+  WPAGE -- "answers, as a demo Bundle<br/>built on the phone" --> EMIT
+  WPAGE -- "a finished walk, kept<br/>30 days as a demo,<br/>never counted" --> WORKER
   EMIT -- "sample Bundles from<br/>both emitters" --> VALID
   EMIT -- "visit Bundles as<br/>conditional creates" --> MIRROR
   LIB -- "what our data set is<br/>and where it lives" --> MIRROR

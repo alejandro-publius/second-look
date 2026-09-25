@@ -21,6 +21,10 @@ points to; this page follows it and adds the security side. Every route, with it
 - **Photos people upload,** with their camera metadata cut out, readable only with the one token
   handed to the uploader, and deleted after 30 days.
 - **One laboratory record** copied from the OneAquaHealth sandbox for `/two`.
+- **A finished video walk's demo record,** so its link opens on any device: the walk's id, the
+  answers as coded values, the time and its FHIR Bundle, tagged as a demo, in a table of its own.
+  No token, no position, no free text. At most 200 a day, deleted after 30 days, never counted
+  and never mirrored (`POST /api/walk`, `docs/DATA_HANDLING.md`).
 
 ## What we never keep
 
@@ -40,8 +44,8 @@ points to; this page follows it and adds the security side. Every route, with it
   the browser load scripts, styles, fonts and images from our own origin only (an image may also be
   one the page made itself) and connect to our own origin only (`apps/web/security-headers.mjs`).
   The Python API's answers carry `default-src 'none'`.
-- Anything from judge mode (`/demo`) or from a video walk. A walk's record is built on the phone,
-  tagged as a demo, and never sent.
+- Anything from judge mode (`/demo`). A video walk's answers stay on the phone until the walk is
+  finished; only its demo record, above, is ever sent.
 
 ## Secrets
 

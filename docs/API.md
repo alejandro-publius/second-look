@@ -8,8 +8,8 @@ origin. The **Python API** (`apps/api/`, FastAPI) is the reference: the tests, t
 
 `scripts/api_inventory.py` reads both route lists out of the code, and
 `scripts/tests/test_api_docs.py` fails when a route has no row below, or a row has no route.
-The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes
-and the Python API <!--v:results/api_inventory.json#/python/count-->26<!--/v-->
+The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->27<!--/v--> routes
+and the Python API <!--v:results/api_inventory.json#/python/count-->28<!--/v-->
 (`results/api_inventory.json`).
 
 Every answer is JSON unless the row says otherwise. An error is `{"detail": "..."}` in plain
@@ -39,6 +39,8 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | POST | `/api/quick/{spot_id}` | The three-question return check at a known spot: colour, smell, pipe running. | a `visit` row of kind quick | none |
 | POST | `/api/upload` | A creek photo as the form field `file`. JPEG, PNG or WebP only. Camera metadata (EXIF, GPS, XMP, ICC, comments) is cut out. Returns the photo id and the one token that can read it. | the bytes in KV with a 30 day expiry; an `upload` row with a hash of the token | 8 MB at most |
 | GET | `/api/photo/{photo_id}` | One uploaded photo, served private and uncached. | nothing | `?t=` must be that photo's token, or the answer is 404 |
+| POST | `/api/walk` | A finished video walk, sent by the phone: `{walk_id, answers, answered_at}`. Builds its demo record and returns its `record_id`. The same walk sent again returns the same id; other answers for the same walk and second get 409. Never counted and never mirrored to the sandbox. | a `walk_record` row (the walk id, the coded answers, the time, the demo Bundle), deleted 30 days later | the body is 4096 bytes at most and holds nothing else; each answer must be a value from the form; the time at most 5 minutes ahead and 7 days old; 200 records a day on the whole server, then 429 |
+| GET | `/api/walk/{record_id}` | One stored walk record: its answers and its demo Bundle, until its delete date. | nothing | none |
 | any | `/api/creeks` | Every creek with a record, with the visit ids behind each count. | nothing | none |
 | any | `/api/city/{creek}` | The analyst's view of one creek: findings, what it needs in approved words, pipes worth testing, reaches, downstream notes. | nothing | none |
 | GET | `/api/spot/{spot_id}` | One spot's record: each answer beside the observer's score, the health card, the place and the downstream notes. | nothing | none |
@@ -84,6 +86,8 @@ the table. The last column names the limit from the table above, then any lock.
 | POST | `/api/quick/{spot_id}` | The three-question return check. | a quick `visit` | study |
 | POST | `/api/upload` | A creek photo. Re-encoded as a new JPEG of at most 1600 pixels, so no metadata survives. | a file under `UPLOAD_DIR`, an `upload` row with a hash of the token | upload; 8 MB at most |
 | GET | `/api/photo/{photo_id}` | One uploaded photo with its token. | nothing | read; `?t=` must be the token, or 404 |
+| POST | `/api/walk` | A finished video walk's demo record, as the Worker stores it; expired rows go on each new store. | a `walk_record` row | study; the same body cap, daily cap and time window as the Worker |
+| GET | `/api/walk/{record_id}` | One stored walk record until its delete date. | nothing | read |
 | GET | `/api/creeks` | Every creek with a record. | nothing | read |
 | GET | `/api/city/{creek_id}` | The analyst's view of one creek. | nothing | read |
 | GET | `/api/inaturalist/{creek_id}` | The iNaturalist context line for one creek, from the `inaturalist_cache` table. It never asks iNaturalist itself. | nothing | read |

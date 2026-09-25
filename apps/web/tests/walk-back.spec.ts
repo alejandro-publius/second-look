@@ -6,9 +6,9 @@ import { mockApi } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
 // CRITIC_10 S01: the browser's Back from a walk's city view reopened the walk on its watch screen,
-// and the record, its answers and View as FHIR were gone, though the answers were still in this
-// tab's session storage. A walk this tab has finished now opens on its record, rebuilt from the
-// saved answers, with Start again; and the city view links back to the record.
+// and the record, its answers and View as FHIR were gone, though the answers were still saved. A
+// walk this browser has finished now opens on its record, rebuilt from the saved answers (kept in
+// IndexedDB since UPDATE_30), with Start again; and the city view links back to the record.
 const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
 const en: Record<string, string> = content.locale;
 const walk: { id: string } = content.walks[0];

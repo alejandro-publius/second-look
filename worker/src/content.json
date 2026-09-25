@@ -1,5 +1,5 @@
 {
-  "content_hash": "59756409d63f26bf",
+  "content_hash": "dd63f5f1302b1668",
   "creeks": [
     {
       "name": "Strawberry Creek",
@@ -1106,6 +1106,23 @@
       "feature": "pipe_running",
       "gold": "absent",
       "id": "t16"
+    }
+  ],
+  "walks": [
+    {
+      "creek_name": "A creek in Russia",
+      "id": "v02",
+      "spot_name": "The stretch in the clip"
+    },
+    {
+      "creek_name": "A creek in the United Kingdom",
+      "id": "v03",
+      "spot_name": "The stretch in the clip"
+    },
+    {
+      "creek_name": "A creek in the United States",
+      "id": "v07",
+      "spot_name": "The stretch in the clip"
     }
   ],
   "warmup_ids": [

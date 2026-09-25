@@ -209,6 +209,10 @@ async function liveRun(browser) {
   await context.route("**/*", (route) => {
     const req = route.request();
     if (liveRequestAllowed(req.method(), req.url(), LIVE)) return route.fallback();
+    // A finished walk sends its record to the store (UPDATE_30 section 1 item 3). The gallery
+    // stores none on the live site: the send is dropped like a lost network, the walk keeps its
+    // record on the phone, and the run goes on. Every other write still fails the run.
+    if (req.method() === "POST" && new URL(req.url()).pathname === "/api/walk") return route.abort("internetdisconnected");
     refused.push(`live: ${req.method()} ${req.url()}`);
     return route.abort();
   });
@@ -247,7 +251,7 @@ async function liveRun(browser) {
     await page.getByRole("heading", { name: "Your record from the clip" }).waitFor();
     // From the top of the page, with the title in view, never from where the form left off.
     await toPageTop(page);
-    gallery("walk-record", route, "live", await shoot(page), "The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out.");
+    gallery("walk-record", route, "live", await shoot(page), "The record from the walk, tagged as a demo and never counted, with a line saying every link inside it checks out.");
     await page.getByRole("link", { name: "See this creek as a city would" }).click();
     await page.waitForURL(/\/city/);
     await toRegionTop(page, content.locale["city.walk_needs"]);

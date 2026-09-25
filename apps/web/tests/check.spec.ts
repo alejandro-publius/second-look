@@ -149,7 +149,8 @@ test("offline: the check is saved on the phone and sent when the network returns
   const queued = await page.evaluate(
     () =>
       new Promise<number>((resolve) => {
-        const req = indexedDB.open("second-look", 1);
+        // No version: whichever the app is at. Version 2 added the walks store (UPDATE_30).
+        const req = indexedDB.open("second-look");
         req.onsuccess = () => {
           const tx = req.result.transaction("queue", "readonly");
           const all = tx.objectStore("queue").getAll();

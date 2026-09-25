@@ -100,7 +100,7 @@ Judges start here: https://second-look-79t.pages.dev/judges
 /walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. The clips show natural creeks, so a measure appears when the walk reports damage, for example Artificial for the bank. /city?creek=strawberry-creek stays empty until the first real check.
 /two: a volunteer Observation of ours in the viewer built for a lab result; their sandbox's lab record joins it when their name resolves again.
 /how-we-know: which features each vision model passed on the 16-photo test, and what the gate kept and dropped on real creek footage, with the frames.
-/walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a record made on your phone that is never stored.
+/walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a demo record with its own link, never counted.
 
 Video: [VIDEO LINK] (released under CC BY-SA 4.0; creek footage from Wikimedia Commons, credited in the video)
 ```

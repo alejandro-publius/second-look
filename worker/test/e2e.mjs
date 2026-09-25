@@ -60,12 +60,13 @@ function d1(sql) {
 }
 
 /** wrangler dev on a port, with its own state folder and vars. The caller kills it. */
-async function startDev(port, persist, vars) {
+async function startDev(port, persist, vars, extra = []) {
   const args = [
     "dev", "--local", "--port", String(port), "--persist-to", persist,
     // The local runtime binary lags the edge; the date only has to be one this binary knows.
     "--compatibility-date", process.env.E2E_COMPAT_DATE ?? "2026-08-18",
     "--show-interactive-dev-session=false",
+    ...extra,
   ];
   for (const [name, value] of Object.entries(vars)) args.push("--var", `${name}:${value}`);
   const proc = spawn(process.execPath, wranglerArgs(args), { cwd: worker, stdio: ["ignore", "pipe", "pipe"], env: WRANGLER_ENV });
@@ -258,12 +259,13 @@ try {
   });
   await new Promise((r) => rain.listen(RAIN_PORT, "127.0.0.1", r));
   at("start wrangler dev");
+  // --test-scheduled lets the walk section run the daily cron by hand, at /__scheduled.
   await startDev(PORT, PERSIST, {
     QA_KEY,
     RAIN_URL: `http://127.0.0.1:${RAIN_PORT}/v1/forecast`,
     EXPORT_TOKEN,
     E2E_NOW: JUST_BEFORE_LOCK,
-  });
+  }, ["--test-scheduled"]);
 
   // 2a. Before anyone checks a creek. /two has no visit of ours to show, so it shows the golden
   // visit, which was made by hand, and says so (review REVIEW_03 R33). The first deploy's
@@ -482,6 +484,101 @@ try {
   assert.equal(plantCity.data.visits, 1);
   assert.deepEqual(plantCity.data.findings.map((f) => [f.feature, f.feature_name, f.observers, f.visit_ids]), [["invasive_plant", "Plants that do not belong", 1, [plantOnly.visit_id]]]);
   assert.deepEqual(plantCity.data.needs, []);
+
+  // 8a3. A finished video walk's demo record (UPDATE_30 section 1 item 3). Stored by its id in
+  // walk_record and read back on any device; the same walk sent again is one record. Never
+  // counted: the study counts, the creeks, the city view and /two do not move, and no spot, visit
+  // or FHIR row is made, so the sandbox mirror cannot see it. The guards: the body's size, only
+  // what a walk collects, the time window, the same headers as the other routes, a daily cap,
+  // and the delete date, kept by the daily cron and by every new store.
+  at("a video walk's demo record");
+  const walkRule = (name) => Number(new RegExp(`export const ${name} = (\\d+);`).exec(readFileSync(join(worker, "src", "core", "walks.ts"), "utf8"))[1]);
+  const WALK_DAILY_CAP = walkRule("WALK_DAILY_CAP");
+  const WALK_MAX_BYTES = walkRule("WALK_MAX_BYTES");
+  const walkId = CONTENT.walks[0].id;
+  const secondsAgo = (s) => new Date(Date.now() - s * 1000).toISOString();
+  const walkAnswers = { bank_type: "present", draining_pipes: "present", water_height_m: 0.5, habitats: ["riffles"], feelings: ["joy:3", "fear:not_applicable"] };
+  const unmoved = async () => ({
+    counts: (await api("GET", "/api/test/counts")).data,
+    creeks: (await api("GET", "/api/creeks")).data,
+    city: (await api("GET", "/api/city/strawberry-creek")).data,
+    two: (await api("GET", "/api/two")).data,
+    rows: d1("SELECT (SELECT COUNT(*) FROM spot) AS spots, (SELECT COUNT(*) FROM visit) AS visits, (SELECT COUNT(*) FROM fhir_bundle) AS bundles, (SELECT COUNT(*) FROM check_result) AS checks"),
+  });
+  const beforeWalk = await unmoved();
+  const firstAt = secondsAgo(90);
+  const storedWalk = await api("POST", "/api/walk", { walk_id: walkId, answers: walkAnswers, answered_at: firstAt });
+  assert.equal(storedWalk.status, 200, JSON.stringify(storedWalk.data));
+  const recordId = storedWalk.data.record_id;
+  assert.match(recordId, /^walk-[0-9a-f]{16}$/);
+  assert.equal(storedWalk.data.walk_id, walkId);
+  const keptDays = (Date.parse(storedWalk.data.delete_after) - Date.now()) / 86_400_000;
+  assert.ok(keptDays > 29.99 && keptDays <= 30, `deleted 30 days on, not ${keptDays}`);
+  const creeksHeaders = (await api("GET", "/api/creeks")).res.headers;
+  for (const name of ["content-type", "cache-control", "access-control-allow-origin", "access-control-allow-methods", "access-control-allow-headers"]) {
+    assert.equal(storedWalk.res.headers.get(name), creeksHeaders.get(name), `${name} as on the other routes`);
+  }
+  const readWalk = await api("GET", `/api/walk/${recordId}`);
+  assert.equal(readWalk.status, 200, JSON.stringify(readWalk.data));
+  assert.deepEqual(readWalk.data.answers, walkAnswers);
+  assert.equal(readWalk.data.answered_at, firstAt.replace(/\.\d{3}Z$/, "Z"));
+  assert.equal(readWalk.res.headers.get("cache-control"), creeksHeaders.get("cache-control"));
+  const walkTags = [readWalk.data.bundle, ...readWalk.data.bundle.entry.map((e) => e.resource)].map((r) => (r.meta?.tag ?? []).map((t) => t.code));
+  assert.ok(walkTags.every((codes) => codes.includes("demo-walk")), "the demo tag on every resource");
+  const resent = await api("POST", "/api/walk", { walk_id: walkId, answers: walkAnswers, answered_at: firstAt });
+  assert.equal(resent.status, 200);
+  assert.equal(resent.data.record_id, recordId, "the same walk sent again is the same record");
+  const clash = await api("POST", "/api/walk", { walk_id: walkId, answers: { bank_type: "absent" }, answered_at: firstAt });
+  assert.equal(clash.status, 409, JSON.stringify(clash.data));
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: 1 }]);
+  assert.deepEqual(await unmoved(), beforeWalk, "a walk is never counted, never a creek, never a visit");
+  assert.equal((await api("GET", `/api/city/walk-${walkId}`)).status, 404, "the walk's demo creek is not a creek on the server");
+  // Only what a walk collects, in a small body, dated when a phone could have made it.
+  const refused = [
+    [{ walk_id: "v99", answers: walkAnswers, answered_at: firstAt }, 404],
+    [{ walk_id: walkId, answers: walkAnswers, answered_at: firstAt, note: "a note" }, 422],
+    [{ walk_id: walkId, answers: { bank_type: "my own words" }, answered_at: firstAt }, 422],
+    [{ walk_id: walkId, answers: { notes: "free text" }, answered_at: firstAt }, 422],
+    [{ walk_id: walkId, answers: { habitats: [{ x: 1 }] }, answered_at: firstAt }, 422],
+    [{ walk_id: walkId, answers: walkAnswers, answered_at: secondsAgo(8 * 86_400) }, 422],
+    [{ walk_id: walkId, answers: walkAnswers, answered_at: secondsAgo(-3600) }, 422],
+    [{ walk_id: walkId, answers: walkAnswers, answered_at: "soon" }, 422],
+  ];
+  for (const [body, status] of refused) {
+    const r = await api("POST", "/api/walk", body);
+    assert.equal(r.status, status, `${JSON.stringify(body)}: ${JSON.stringify(r.data)}`);
+    assert.equal(typeof r.data.detail, "string");
+  }
+  const notJson = await fetch(`${BASE}/api/walk`, { method: "POST", headers: { "content-type": "application/json" }, body: "walk_id=v02" });
+  assert.equal(notJson.status, 422);
+  const large = await fetch(`${BASE}/api/walk`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ walk_id: walkId, answers: walkAnswers, answered_at: firstAt }) + " ".repeat(WALK_MAX_BYTES) });
+  assert.equal(large.status, 413);
+  // The same body sent in chunks, with no length declared: refused by the count of what came in.
+  const chunked = new Blob([JSON.stringify({ walk_id: walkId, answers: walkAnswers, answered_at: firstAt }), " ".repeat(WALK_MAX_BYTES)]).stream();
+  const streamed = await fetch(`${BASE}/api/walk`, { method: "POST", headers: { "content-type": "application/json" }, body: chunked, duplex: "half" });
+  assert.equal(streamed.status, 413, "a body with no declared length is still measured");
+  assert.equal((await api("GET", "/api/walk/walk-0000000000000000")).status, 404);
+  assert.equal((await api("GET", "/api/walk/not-a-walk")).status, 404);
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: 1 }], "nothing refused was stored");
+  // The daily cap, over the whole server: the day is filled to one short of it by hand.
+  const today = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  const later = new Date(Date.now() + 29 * 86_400_000).toISOString().replace(/\.\d{3}Z$/, "Z");
+  d1(`WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < ${WALK_DAILY_CAP - 2}) INSERT INTO walk_record (record_id, walk_id, answered_at, answers_json, bundle_json, created_at, delete_after) SELECT printf('walk-fill%012d', i), '${walkId}', '${today}', '{}', '{}', '${today}', '${later}' FROM n`);
+  const last = await api("POST", "/api/walk", { walk_id: walkId, answers: walkAnswers, answered_at: secondsAgo(60) });
+  assert.equal(last.status, 200, `the day's last place: ${JSON.stringify(last.data)}`);
+  const overCap = await api("POST", "/api/walk", { walk_id: walkId, answers: walkAnswers, answered_at: secondsAgo(30) });
+  assert.equal(overCap.status, 429, JSON.stringify(overCap.data));
+  assert.equal((await api("POST", "/api/walk", { walk_id: walkId, answers: walkAnswers, answered_at: firstAt })).status, 200, "a stored walk sent again still gets its id");
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: WALK_DAILY_CAP }]);
+  // The delete date: past it, the record is not served, and the daily cron deletes the row.
+  d1(`UPDATE walk_record SET delete_after = '2026-01-01T00:00:00Z' WHERE record_id = '${recordId}'`);
+  assert.equal((await api("GET", `/api/walk/${recordId}`)).status, 404, "not served after its date");
+  assert.equal((await api("GET", `/api/walk/${last.data.record_id}`)).status, 200);
+  const cron = await fetch(`${BASE}/__scheduled?cron=${encodeURIComponent("17 4 * * *")}`);
+  assert.equal(cron.status, 200, await cron.text());
+  assert.deepEqual(d1(`SELECT COUNT(*) AS n FROM walk_record WHERE record_id = '${recordId}'`), [{ n: 0 }], "the daily cron deleted it");
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: WALK_DAILY_CAP - 1 }], "and nothing else");
+  assert.deepEqual(await unmoved(), beforeWalk, "still nothing counted");
 
   // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
   // sixteen answers would be the live test's key. This Worker's clock reads one second before

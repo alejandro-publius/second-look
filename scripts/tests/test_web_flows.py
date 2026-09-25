@@ -49,13 +49,12 @@ const WalkFlow = load("components/WalkFlow.tsx", stubs);
 // FollowupCard is not exported; the test reaches it so the buttons' wiring is checked too.
 const CheckFlow = load("components/CheckFlow.tsx", stubs, "\nexports.FollowupCard = FollowupCard;");
 const Text = load("lib/text.ts", {});
-// The walk's city view with the content and the phone's walks the test hands it. Its hooks run
-// once, in place, and every Row it draws comes back as { type: "Row", props }.
+// The walk's city view with the content and the walks the test hands it: WalkCityView, the part
+// that draws, over walks.demoCreek(), which WalkCity feeds with the walk this browser finished and
+// the stored record a link names. Every Row it draws comes back as { type: "Row", props }.
 function walkCityRows(content, walks, walkId) {
-  const react = { useMemo: (f) => f(), useSyncExternalStore: (_subscribe, get) => get() };
-  const { WalkCity } = load("components/WalkCity.tsx", {
+  const { WalkCityView } = load("components/WalkCity.tsx", {
     ...stubs,
-    react,
     "@/lib/text": Text,
     "@/lib/content": content,
     "@/lib/walks": walks,
@@ -69,7 +68,7 @@ function walkCityRows(content, walks, walkId) {
     if (n.type === "Row") rows.push(n.props);
     visit(n.props && n.props.children);
   };
-  visit(WalkCity({ walkId }));
+  visit(WalkCityView({ walk: content.walkById(walkId), demo: walks.demoCreek(), back: null }));
   return rows;
 }
 const expr = fs.readFileSync(0, "utf8");
@@ -240,7 +239,7 @@ def test_the_walk_city_view_names_barriers_by_a_short_label_with_one_stop_after_
         "walkCityRows("
         f"{{ content: {{ form: {{ items: {json.dumps(items)} }} }}, featureById: () => undefined,"
         " walkById: () => ({ creek_name: 'A creek' }) },"
-        " { savedWalkVisits: () => [], hasMeasure: (f) => f === 'barriers',"
+        " { hasMeasure: (f) => f === 'barriers',"
         + EXAMPLE_NEEDS
         + " demoCreek: () => ({ visits: [{}],"
         " findings: [{ spot_id: 's', feature: 'barriers', visit_ids: ['v1'] }],"
@@ -269,7 +268,7 @@ def test_the_walk_city_view_lists_a_plant_beside_a_line_that_no_measure_answers_
         " { content: { form: { items: [] } }, featureById: (id) => ({ name: "
         + json.dumps(name)
         + " }), walkById: () => ({ creek_name: 'A creek' }) },"
-        " { savedWalkVisits: () => [], hasMeasure: (f) => f !== 'invasive_plant',"
+        " { hasMeasure: (f) => f !== 'invasive_plant',"
         + EXAMPLE_NEEDS
         + " demoCreek: () => ({ visits: [{}],"
         " findings: [{ spot_id: 's', feature: 'invasive_plant', visit_ids: ['v1'] }],"
