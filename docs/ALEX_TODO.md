@@ -16,12 +16,12 @@ Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.
 back: hl7-eu/oah pull request 5 and issues 6, 7 and 8 are open under your account. Two daily jobs
 on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache (07:45).
 
-1. **By Fri Sep 25, 20 minutes: record your voice.** Run `make video-rough` and play
-   `docs/video/rough_cut_scratch_voice.mp4` once: its scratch voice is there for the timing
-   only. Then record your voice against it, reading `docs/video/teleprompter.html` in a browser
-   (space pauses, the arrows change speed). The words are the ones in `docs/video/VOICE_SCRIPT.md`
-   and `docs/video/SHOTLIST.md`; beat 7 is filled from the real run. This is your only step in
-   making the video.
+1. **By Fri Sep 25, or Sat Sep 26 at the latest, 20 minutes: record your voice.** Read
+   `docs/video/teleprompter.html` in a browser (space pauses, the arrows change speed) and save the
+   recording as `~/second-look-media/voice/voice.m4a` (or .wav or .mp3). Then `make video-final`
+   lays it over the finished cut, keeps the captions as subtitles and writes
+   `~/second-look-media/final/second-look-final.mp4` (`docs/video/README.md`). If no voice
+   arrives by the end of Sep 26, the captions-only cut that is already there is the video.
 
 2. **By Sat Sep 26, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft
    and invite Rachel to it. Pick the five gallery images it names, and attach `docs/REPORT.pdf`
@@ -55,8 +55,9 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    after each step are in `docs/SUBMISSION_DAY.md`. Judge mode opens that day; check `/demo` on
    your phone.
 
-8. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
-   account, with the licence line from `docs/devpost.md` in its description (the video is
+8. **By Tue Sep 29, 10 minutes: upload the video.** Upload
+   `~/second-look-media/final/second-look-final.mp4` to YouTube as unlisted, from your own account,
+   with the title, description, tags and thumbnail in `docs/video/UPLOAD.md` (the video is
    CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
 9. **Wed Sep 30, morning: go public.** Follow `docs/SUBMISSION_DAY.md` in order: on `main`,
