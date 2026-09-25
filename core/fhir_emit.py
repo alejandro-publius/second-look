@@ -514,15 +514,17 @@ def _provenance(
     emitted_at: datetime,
 ) -> dict[str, Any]:
     entities = [{"role": "source", "what": _ref("QuestionnaireResponse", visit_qr_id)}]
+    # The last sentence names only the sources in entity (round 09 Q02).
+    sources = "The source is the visit."
     if test_qr_id:
         entities.append({"role": "source", "what": _ref("QuestionnaireResponse", test_qr_id)})
+        sources = "The sources are the visit and the observer test sitting."
     return {
         "resourceType": "Provenance",
         "id": fhir_id("sl-provenance", visit.visit_id),
         "text": _narrative(
             f"{len(observations)} observations from one creek check, answered by the volunteer "
-            "and assembled by the Second Look software. The sources are the visit and the "
-            "observer test sitting."
+            f"and assembled by the Second Look software. {sources}"
         ),
         "target": [_ref("Observation", o["id"]) for o in observations],
         "recorded": _instant(emitted_at),

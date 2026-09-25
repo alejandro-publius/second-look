@@ -359,6 +359,25 @@ def test_provenance_ties_answers_to_the_person_and_the_software(golden_bundle: d
     ]
 
 
+SITTING_SENTENCE = "The sources are the visit and the observer test sitting."
+VISIT_ONLY_SENTENCE = "The source is the visit."
+
+
+def test_provenance_narrative_names_the_test_sitting_only_when_there_is_one(
+    golden_bundle: dict,
+) -> None:
+    # Round 09 Q02: the narrative said a test sitting was a source even when entity had none.
+    (with_sitting,) = resources(golden_bundle, "Provenance")
+    assert len(with_sitting["entity"]) == 2
+    assert with_sitting["text"]["div"].endswith(f"{SITTING_SENTENCE}</p></div>")
+    for visit in (second_visit(), strawberry_visit()):
+        bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
+        (without,) = resources(bundle, "Provenance")
+        assert len(without["entity"]) == 1
+        assert without["text"]["div"].endswith(f"{VISIT_ONLY_SENTENCE}</p></div>")
+        assert "test sitting" not in without["text"]["div"]
+
+
 def test_every_domain_resource_has_a_generated_narrative(golden_bundle: dict) -> None:
     for entry in golden_bundle["entry"]:
         text = entry["resource"]["text"]

@@ -1776,7 +1776,7 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>7 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>7 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
                 "status": "generated"
               }
             }
@@ -2357,7 +2357,7 @@
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>3 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>3 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
                 "status": "generated"
               }
             }
@@ -3277,7 +3277,7 @@
                     }
                   ],
                   "text": {
-                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>1 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>1 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
                     "status": "generated"
                   }
                 }
@@ -3650,7 +3650,7 @@
                     }
                   ],
                   "text": {
-                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>1 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>1 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
                     "status": "generated"
                   }
                 }
