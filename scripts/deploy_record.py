@@ -172,8 +172,9 @@ def record(
     when: str,
     hosting: Path = HOSTING,
     web_dir: Path | None = None,
-    archives: Path = ARCHIVES,
+    archives: Path | None = None,
 ) -> Row:
+    archives = archives or ARCHIVES  # read at call time, so a test can point it elsewhere
     rows = load(hosting)
     if part == "worker":
         row = Row(when, part, commit, worker_version(output), "", False)
@@ -183,7 +184,10 @@ def record(
         row = Row(when, part, commit, deployment, home_path(kept), False)
     rows.insert(0, row)
     save(rows, hosting)
-    prune_archives(rows[:KEEP_ROWS], archives)
+    # Only a site upload adds an archive, so only a site upload prunes: a Worker deploy never
+    # deletes a kept site build (a test that recorded a Worker deploy once emptied the real folder).
+    if part == "web":
+        prune_archives(rows[:KEEP_ROWS], archives)
     return row
 
 

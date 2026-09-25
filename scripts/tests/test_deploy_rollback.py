@@ -263,3 +263,23 @@ def test_deploy_sh_records_each_deploy_right_after_it(
     assert any(printed in c for c in calls[recorded:]), (
         "the recorder was not given wrangler's output"
     )
+
+
+def test_tests_never_reach_the_real_deploy_archives() -> None:
+    # conftest.py points every test at its own folder; without it a recorded deploy pruned the
+    # real ~/second-look-backups/deploys/ and deleted the site build kept for rollback.
+    assert "second-look-backups" not in str(dr.ARCHIVES)
+
+
+def test_a_worker_deploy_never_prunes_kept_site_builds(hosting: Path, tmp_path: Path) -> None:
+    archives = tmp_path / "kept"
+    (archives / "web-20260925T000000Z-abc1234").mkdir(parents=True)
+    dr.record(
+        "worker",
+        WRANGLER_DEPLOY,
+        commit="abc1234",
+        when="2026-09-28T01:30:00Z",
+        hosting=hosting,
+        archives=archives,
+    )
+    assert (archives / "web-20260925T000000Z-abc1234").is_dir()
