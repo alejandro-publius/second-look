@@ -889,24 +889,65 @@ def check_review(root: Path) -> list[str]:
     return [f"{problem} (the second review reads the finished repo)"] if problem else []
 
 
+CONFIRMED = re.compile(r"^- ([A-Z]\d{2}): confirmed, (\w+)\.", re.M)
+RESOLVED = re.compile(
+    r"^- ([A-Z]\d{2}): (?:fixed in `?([0-9a-f]{7,40})`?|known weakness: \"(.+)\")", re.M
+)
+
+
+def known_weaknesses(root: Path) -> str:
+    text = read(root / "README.md")
+    start = text.find("## Known weaknesses")
+    if start < 0:
+        return ""
+    end = text.find("\n## ", start + 5)
+    return text[start : end if end > 0 else len(text)]
+
+
 def check_critics(root: Path) -> list[str]:
+    """UPDATE_30 section 2: the two newest critic rounds read the same commit, no finding a
+    skeptic confirmed is major or worse, and every confirmed minor is fixed (a commit this tree
+    holds) or written into the README's Known weaknesses, as each round's Resolution says. The
+    rule before it, nothing above cosmetic in two rounds running, could not be met: each round
+    finds a few new minors."""
     rounds = numbered(root.joinpath(*REVIEWS), "CRITIC")
     if len(rounds) < 2:
         return [f"{len(rounds)} critic rounds in the reviews folder, not 2 or more"]
     problems = []
+    commits = []
+    weak = known_weaknesses(root)
     for _, path in rounds[-2:]:
         text = read(path)
-        sev = re.search(r"^Highest severity:\s*([A-Za-z][A-Za-z -]*?)\s*$", text, re.M | re.I)
-        if not sev:
-            problems.append(
-                f"{path.name} has no line 'Highest severity: <none or cosmetic or ...>'"
-            )
-        elif sev.group(1).strip().lower() not in LOW_SEVERITY:
-            problems.append(f"{path.name} reports '{sev.group(1).strip()}', above cosmetic")
         m = re.search(r"^Commit:\s*`?([0-9a-f]{7,40})\b", text, re.M)
+        commits.append(m.group(1)[:7] if m else None)
         problem = commit_problem(root, m.group(1) if m else None, path.name)
         if problem:
             problems.append(problem)
+        if "## Checked by independent skeptics" not in text:
+            problems.append(f"{path.name} has no section 'Checked by independent skeptics'")
+        confirmed = CONFIRMED.findall(text)
+        for fid, sev in confirmed:
+            if sev.lower() in ("major", "blocker"):
+                problems.append(f"{path.name}: {fid} is confirmed at {sev}")
+        resolved = {r[0]: r for r in RESOLVED.findall(text)}
+        for fid, sev in confirmed:
+            if sev.lower() != "minor":
+                continue
+            r = resolved.get(fid)
+            if not r:
+                problems.append(f"{path.name}: confirmed minor {fid} has no Resolution line")
+            elif r[1]:
+                gone = commit_problem(root, r[1], f"{path.name} {fid}'s fix")
+                if gone:
+                    problems.append(gone)
+            elif r[2] not in weak:
+                problems.append(
+                    f"{path.name}: {fid}'s known weakness is not in the README's Known weaknesses"
+                )
+    if len(commits) == 2 and commits[0] != commits[1]:
+        problems.append(
+            f"the two newest rounds read different commits: {commits[0]} and {commits[1]}"
+        )
     return problems
 
 

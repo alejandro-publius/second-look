@@ -703,20 +703,46 @@ def test_the_second_review_reads_the_finished_repo(tmp_path: Path, fresh: None) 
     assert di.check_review(tmp_path) == []
 
 
-def test_critic_rounds_newest_two_at_most_cosmetic(tmp_path: Path, fresh: None) -> None:
+def critic2(sha: str = "abcdef1", checked: str = "", resolution: str = "") -> str:
+    return (
+        f"# Critic\n\nHighest severity: minor\nCommit: {sha}\n\nNotes.\n\n"
+        f"## Checked by independent skeptics\n\n{checked}\n## Resolution\n\n{resolution}"
+    )
+
+
+def test_critic_rounds_new_rule_no_confirmed_major_and_every_minor_resolved(
+    tmp_path: Path, fresh: None
+) -> None:
+    # UPDATE_30 section 2: same commit, no confirmed major, each confirmed minor fixed or listed.
     folder = reviews(tmp_path)
-    (folder / "CRITIC_01.md").write_text(critic("major"))
+    (tmp_path / "README.md").write_text(
+        "# R\n\n## Known weaknesses\n\n- Walks live in one tab.\n\n## Credits\n"
+    )
+    (folder / "CRITIC_01.md").write_text(critic2())
     assert has(di.check_critics(tmp_path), "1 critic rounds")
-    (folder / "CRITIC_02.md").write_text(critic("cosmetic"))
-    assert has(di.check_critics(tmp_path), "reports 'major'")
-    (folder / "CRITIC_03.md").write_text(critic("none"))
+    (folder / "CRITIC_02.md").write_text(critic2(checked="- X01: confirmed, major.\n"))
+    assert has(di.check_critics(tmp_path), "X01 is confirmed at major")
+    (folder / "CRITIC_03.md").write_text(critic2(checked="- Y01: not confirmed, major.\n"))
+    (folder / "CRITIC_04.md").write_text(critic2(checked="- Z01: confirmed, minor.\n"))
+    assert has(di.check_critics(tmp_path), "Z01 has no Resolution line")
+    (folder / "CRITIC_04.md").write_text(
+        critic2(checked="- Z01: confirmed, minor.\n", resolution='- Z01: known weakness: "Nope."\n')
+    )
+    assert has(di.check_critics(tmp_path), "not in the README's Known weaknesses")
+    (folder / "CRITIC_04.md").write_text(
+        critic2(
+            checked="- Z01: confirmed, minor.\n",
+            resolution='- Z01: known weakness: "Walks live in one tab."\n',
+        )
+    )
     assert di.check_critics(tmp_path) == []
-    (folder / "CRITIC_04.md").write_text(critic("should-fix"))
-    assert has(di.check_critics(tmp_path), "above cosmetic")
-    (folder / "CRITIC_05.md").write_text(critic("cosmetic", "9999999"))
+    (folder / "CRITIC_05.md").write_text(critic2(sha="9999999"))
     assert has(di.check_critics(tmp_path), "measured at 9999999")
-    (folder / "CRITIC_06.md").write_text("# Critic\n\nCommit: abcdef1\n")
-    assert has(di.check_critics(tmp_path), "has no line 'Highest severity")
+    assert has(di.check_critics(tmp_path), "read different commits")
+    (folder / "CRITIC_05.md").write_text(
+        critic2().replace("## Checked by independent skeptics", "")
+    )
+    assert has(di.check_critics(tmp_path), "no section 'Checked by independent skeptics'")
 
 
 def judge_sim(n_judges: int, sha: str = "abcdef1") -> str:
