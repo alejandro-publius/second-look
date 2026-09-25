@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "acc51ff8d4511970",
+  content_hash: "9d0410261a364f11",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -3138,6 +3138,11 @@ function issueLabel(item, itemId, value) {
   if (typeof text === "string" && text.trim()) return text.trim();
   return itemId.replace(/_/g, " ");
 }
+function joined(parts) {
+  const rest = parts.slice(0, -1);
+  const last = parts[parts.length - 1];
+  return rest.length > 0 ? `${rest.join(", ")} and ${last}` : last;
+}
 function dryPipe(rule, answers, site) {
   if (site.rain !== "dry") return null;
   if (site.dry_days === null || site.dry_days === void 0 || site.dry_days < 1) return null;
@@ -3161,7 +3166,7 @@ function ratingCheck(rule, answers, formItems) {
     rule_id: "rating_check",
     kind: "keep_rating",
     question_key: String(rule.question_key ?? "followup.rating_check"),
-    params: { issues: issues.join(", "), first_rating: BEST_RATING }
+    params: { issues: joined(issues), first_rating: BEST_RATING }
   };
 }
 function askedFeatures(formItems) {
@@ -3287,6 +3292,7 @@ var DEMO_TAG_SYSTEM = `${REPO_URL}/tags`;
 var DEMO_TAG_CODE = "demo-walk";
 var DEMO_TAG_DISPLAY = "Demo visit from a video walk. Never counted and never sent to the sandbox.";
 var WALK_PREFIX = "walk-";
+var RATING_ITEM2 = "overall_rating";
 var WALK_KEEP_DAYS = 30;
 var WALK_PAST_DAYS = 7;
 var WALK_FUTURE_SECONDS = 300;
@@ -3335,9 +3341,24 @@ function tagDemo(bundle) {
   }
   return out;
 }
-function walkBundle(walk, answers, answeredAt) {
-  const visit = walkVisit(walk, answers, answeredAt);
-  return tagDemo(emitVisit(visit, null, instant(answeredAt)));
+function ratingChangedNote(first, final) {
+  return `The first overall rating was ${first}. On the rating check the volunteer changed it to ${final}.`;
+}
+function walkBundle(walk, answers, answeredAt, finalRating = null) {
+  const first = answers[RATING_ITEM2];
+  const changed = typeof first === "string" && finalRating !== null && finalRating !== first;
+  const rated = changed ? { ...answers, [RATING_ITEM2]: finalRating } : answers;
+  const bundle = emitVisit(walkVisit(walk, rated, answeredAt), null, instant(answeredAt));
+  if (changed) {
+    for (const entry3 of bundle.entry) {
+      const resource = entry3.resource;
+      if (resource.resourceType !== "QuestionnaireResponse") continue;
+      const text = resource.text;
+      const note = escapeXml(ratingChangedNote(first, finalRating));
+      text.div = String(text.div).replace("</p></div>", `</p><p>${note}</p></div>`);
+    }
+  }
+  return tagDemo(bundle);
 }
 function isDemo(bundle) {
   const tags = bundle.meta?.tag ?? [];
@@ -3353,7 +3374,7 @@ function walkAnsweredAt(text, now) {
   if (at < clock - WALK_PAST_DAYS * DAY_MS) throw new WalkRecordError(`That walk is more than ${WALK_PAST_DAYS} days old, so it is not stored.`);
   return instant(at);
 }
-function walkRecord(walk, answers, answeredAt, now) {
+function walkRecord(walk, answers, answeredAt, now, finalRating = null) {
   const at = walkAnsweredAt(answeredAt, now);
   const clock = parseInstant(now);
   return {
@@ -3362,11 +3383,10 @@ function walkRecord(walk, answers, answeredAt, now) {
     answered_at: at,
     created_at: instant(clock),
     delete_after: instant(clock + WALK_KEEP_DAYS * DAY_MS),
-    bundle: walkBundle(walk, answers, at)
+    bundle: walkBundle(walk, answers, at, finalRating)
   };
 }
 var WALK_SITE = { rain: "unknown" };
-var RATING_ITEM2 = "overall_rating";
 var WALK_FOLLOWUP_ANSWERS = {
   yesno: ["yes", "no", "cant_tell", "skipped"],
   keep_rating: ["keep", "change", "skipped"],
@@ -3664,7 +3684,7 @@ test("fhir_referral: the ServiceRequest and the example result, the same as Pyth
 test("walks: the same demo Bundle as Python, tagged on every resource, and structurally sound", () => {
   const doc = golden("walks");
   for (const c of doc.cases) {
-    const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at);
+    const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at, c.input.final_rating ?? null);
     same(bundle, c.expected, c.name);
     assert.deepEqual(checkBundle(bundle), [], `${c.name}: structural check`);
     assert.ok(isDemo(bundle), `${c.name}: the Bundle carries the demo tag`);
@@ -3681,7 +3701,7 @@ test("walks: the stored row of a finished walk, or the same reason to refuse it,
   for (const c of doc.record_cases) {
     let got;
     try {
-      got = walkRecord(c.input.walk, c.input.answers, c.input.answered_at, c.input.now);
+      got = walkRecord(c.input.walk, c.input.answers, c.input.answered_at, c.input.now, c.input.final_rating ?? null);
     } catch (err) {
       assert.ok(err instanceof WalkRecordError, `${c.name}: ${String(err)}`);
       got = { error: err.message };
