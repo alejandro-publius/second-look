@@ -10,7 +10,7 @@ import { Photo } from "./Photo";
 import { Progress } from "./Progress";
 import { answerRows } from "@/lib/answers";
 import type { AnswerValue } from "@/lib/api";
-import { content, featureById, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
+import { content, featureById, licenseName, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
 import { t } from "@/lib/t";
 import { buildRecord, clearWalkVisits, lastWalkVisitJson, saveWalkVisit, type WalkAnswers, type WalkVisitSaved } from "@/lib/walks";
 
@@ -36,10 +36,10 @@ function Clip({ walk }: { walk: Walk }) {
         {t("walk.credit", { title: walk.title, author: walk.author })}{" "}
         {licenseUrl(walk.license) ? (
           <a href={licenseUrl(walk.license)} rel="license noreferrer">
-            {walk.license}
+            {licenseName(walk.license)}
           </a>
         ) : (
-          walk.license
+          licenseName(walk.license)
         )}
         {". "}
         <a href={walk.source_url} rel="noreferrer nofollow">
@@ -134,10 +134,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           {/* The clips show natural creeks, so an honest check finds little for a city to do. This
               says how to see a measure before the check starts (CRITIC_09 Q01). */}
           <p data-testid="walk-honest-note">{t("walk.honest_note")}</p>
-          <p className="notice notice-warn">{t("walk.demo_notice")}</p>
+          {/* The button before the demo notice, so it is on the first screen of every walk on a
+              390 by 844 phone (CRITIC_11 V01). */}
           <button type="button" className="btn btn-block" onClick={() => setStage({ name: "items", index: 0 })}>
             {t("walk.start")}
           </button>
+          <p className="notice notice-warn">{t("walk.demo_notice")}</p>
         </>
       );
       break;

@@ -7,6 +7,7 @@
     "dev": "next dev -p 3100",
     "prebuild": "node scripts/build-content.mjs && node scripts/build-headers.mjs",
     "build": "next build",
+    "postbuild": "node scripts/precache-static.mjs",
     "start": "next start -p 3100",
     "prelint": "node scripts/build-content.mjs",
     "lint": "eslint",
@@ -19,7 +20,7 @@
     "design-check": "node scripts/design-check.mjs",
     "design-screens": "node scripts/design-screens.mjs",
     "budget": "node scripts/budget.mjs",
-    "export": "node scripts/build-content.mjs && node scripts/build-headers.mjs && NEXT_EXPORT=1 next build"
+    "export": "node scripts/build-content.mjs && node scripts/build-headers.mjs && NEXT_EXPORT=1 next build && node scripts/precache-static.mjs --export"
   },
   "dependencies": {
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",

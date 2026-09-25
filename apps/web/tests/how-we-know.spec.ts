@@ -50,9 +50,16 @@ test("/how-we-know shows the pass table and the gate on real footage as the file
   ).toBeVisible();
 
   // CRITIC_09 J03: after "kept 35", how many of those are on a dug-out channel and ask nothing, and
-  // how many are the kept case below, from results/model_card.json.
+  // how many are the kept case below, from results/model_card.json. CRITIC_11 V02: and whose those
+  // are, the kept model's answers on the frame below, one yes in each of its runs, from the run's
+  // own answers in results/, never typed.
   const card = result("model_card.json");
-  const kept = example().kept.feature;
+  const k0 = example().kept;
+  const kept = k0.feature;
+  const own = (runOf(example()).answers as { frame: string; feature: string; model: string; answer: string }[]).filter(
+    (a) => a.frame === k0.frame && a.feature === k0.feature && a.model === k0.model,
+  );
+  expect(own.map((a) => a.answer)).toEqual(Array(card.footage_kept.by_feature[kept]).fill("yes"));
   await expect(page.getByTestId("gate-numbers")).toHaveText(
     exactly(
       fill("how.gate", {
@@ -67,13 +74,15 @@ test("/how-we-know shows the pass table and the gate on real footage as the file
           nothing: card.footage_kept.by_feature.dug_out_channel,
           kept: footage.gate.kept,
           shown: card.footage_kept.by_feature[kept],
+          model: en[`model.${k0.model}`],
+          runs: own.length,
         }),
     ),
   );
   await expect(
     page.getByText(
       fill("how.from", {
-        files: "results/footage_latest.json, results/footage_pool.json, results/model_card.json",
+        files: `results/footage_latest.json, results/footage_pool.json, results/model_card.json, ${example().run.results}`,
         date: day(footage.generated_at_utc),
       }),
     ),
@@ -126,34 +135,54 @@ test("the page's reader follows the files: a changed copy changes the numbers, a
 
 // CRITIC_09 J03: the split of the kept flags follows results/model_card.json. A changed copy
 // changes the words, and a copy whose parts do not add up to the gate's kept count shows none.
+// CRITIC_11 V02: the rest are named as the kept model's answers on the frame below, so the split is
+// shown only while that model's own answers there, from the run in results/, are all yes and are
+// as many as the rest.
 test("the page's reader follows the model card's split of the kept flags", () => {
   const card = result("model_card.json");
   const gate = howNumbers(result("model_pass_table.json"), result("footage_latest.json"), result("footage_pool.json"), order).gate!;
-  const feature = example().kept.feature;
+  const doc = example();
+  const shownCase = footageCases(doc, runOf(doc))!.kept!;
+  const feature = shownCase.feature;
   const by = card.footage_kept.by_feature;
-  expect(keptSplit(card, gate, feature)).toEqual({ nothing: by.dug_out_channel, shown: by[feature] });
+  const name = en[`model.${doc.kept.model}`];
+  expect(shownCase.own).toEqual(Array(by[feature]).fill("yes"));
+  expect(keptSplit(card, gate, shownCase)).toEqual({ nothing: by.dug_out_channel, shown: by[feature], model: doc.kept.model, runs: by[feature] });
+  const words = fill("how.gate_split", { nothing: by.dug_out_channel, kept: gate.kept, shown: by[feature], model: name, runs: by[feature] });
+  expect(words).toContain(`The other ${by[feature]} are ${name}'s answers on the frame shown below`);
+  expect(words).toContain(`yes in each of its ${by[feature]} runs`);
 
-  // Two flags move from the kept case to the dug-out channel.
+  // Two flags move from the kept case to the dug-out channel, and the kept model said yes in one run.
   const moved = structuredClone(card);
   moved.footage_kept.by_feature.dug_out_channel += 2;
   moved.footage_kept.by_feature[feature] -= 2;
-  const out = keptSplit(moved, gate, feature)!;
-  expect(out).toEqual({ nothing: by.dug_out_channel + 2, shown: by[feature] - 2 });
-  const words = fill("how.gate_split", { nothing: out.nothing, kept: gate.kept, shown: out.shown });
-  expect(words).toContain(`${by.dug_out_channel + 2} of the ${gate.kept} kept flags`);
-  expect(words).toContain(`The other ${by[feature] - 2} are`);
+  const oneRun = { ...shownCase, own: Array(by[feature] - 2).fill("yes") };
+  const out = keptSplit(moved, gate, oneRun)!;
+  expect(out).toEqual({ nothing: by.dug_out_channel + 2, shown: by[feature] - 2, model: doc.kept.model, runs: by[feature] - 2 });
+  const movedWords = fill("how.gate_split", { nothing: out.nothing, kept: gate.kept, shown: out.shown, model: name, runs: out.runs });
+  expect(movedWords).toContain(`${by.dug_out_channel + 2} of the ${gate.kept} kept flags`);
+  // The moved copy with the kept model's answers as the file gives them does not add up, so no split.
+  expect(keptSplit(moved, gate, shownCase)).toBeNull();
+
+  // Answers that are not all yes, fewer than the rest, none at all, or no model.
+  expect(keptSplit(card, gate, { ...shownCase, own: ["yes", "no", "yes"] })).toBeNull();
+  expect(keptSplit(card, gate, { ...shownCase, own: shownCase.own.slice(1) })).toBeNull();
+  expect(keptSplit(card, gate, { ...shownCase, own: [] })).toBeNull();
+  expect(keptSplit(card, gate, { ...shownCase, model: undefined as unknown as string })).toBeNull();
+  // The run must list the answers: a run without them gives none, and so no split.
+  expect(footageCases(doc, { ...runOf(doc), answers: undefined })!.kept!.own).toEqual([]);
 
   // Parts that are not the whole, a kept count the gate does not give, or a card that is not real.
   const short = structuredClone(card);
   short.footage_kept.by_feature.dug_out_channel -= 1;
-  expect(keptSplit(short, gate, feature)).toBeNull();
+  expect(keptSplit(short, gate, shownCase)).toBeNull();
   const other = structuredClone(card);
   other.footage_kept.kept += 1;
-  expect(keptSplit(other, gate, feature)).toBeNull();
-  expect(keptSplit({ ...card, real: false }, gate, feature)).toBeNull();
-  expect(keptSplit(card, null, feature)).toBeNull();
+  expect(keptSplit(other, gate, shownCase)).toBeNull();
+  expect(keptSplit({ ...card, real: false }, gate, shownCase)).toBeNull();
+  expect(keptSplit(card, null, shownCase)).toBeNull();
   expect(keptSplit(card, gate, null)).toBeNull();
-  expect(keptSplit(card, gate, "dug_out_channel")).toBeNull();
+  expect(keptSplit(card, gate, { ...shownCase, feature: "dug_out_channel" })).toBeNull();
 });
 
 // CRITIC_03 D04: no volunteer has seen a checker question, because the checker is off on the live
@@ -175,10 +204,13 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   const credit = async (card: Locator, c: { manifest_row: { author: string; license: string; source_url: string } }) => {
     const line = card.getByTestId("frame-credit");
     await expect(line).toContainText(fill("how.example_credit", { author: c.manifest_row.author }));
-    await expect(line.getByRole("link", { name: c.manifest_row.license, exact: true })).toHaveAttribute(
+    // CRITIC_11 V02: the licence as people write it, as /credits writes it, never the manifest's code.
+    expect(c.manifest_row.license).toBe("CC-BY-3.0");
+    await expect(line.getByRole("link", { name: "CC BY 3.0", exact: true })).toHaveAttribute(
       "href",
       "https://creativecommons.org/licenses/by/3.0/",
     );
+    await expect(line).not.toContainText(c.manifest_row.license);
     await expect(line.getByRole("link", { name: en["credits.source"], exact: true })).toHaveAttribute("href", c.manifest_row.source_url);
   };
 

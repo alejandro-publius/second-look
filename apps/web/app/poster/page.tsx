@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import QRCode from "qrcode";
 import { PRINT_INK, PRINT_PAPER } from "../theme";
 import { Photo } from "@/components/Photo";
-import { content, photoById } from "@/lib/content";
+import { content, licenseName, photoById } from "@/lib/content";
 import { siteUrl } from "@/lib/session";
 import { t } from "@/lib/t";
 
@@ -15,10 +15,11 @@ export default async function PosterPage() {
   const svg = await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 1, color: { dark: PRINT_INK, light: PRINT_PAPER } });
   const [left, right] = content.warmup;
   // A printed poster is a published copy, and both warm-up photographs are CC BY-SA, so the
-  // author and the licence travel with them (hard rule 16, Update 11b step 8).
+  // author and the licence travel with them (hard rule 16, Update 11b step 8), the licence written
+  // as /credits writes it (CRITIC_11 R05).
   const credit = (id: string) => {
     const photo = photoById(id);
-    return photo ? t("credits.photo_line", { author: photo.author, license: photo.license }) : id;
+    return photo ? t("credits.photo_line", { author: photo.author, license: licenseName(photo.license) }) : id;
   };
   return (
     <div className="poster">

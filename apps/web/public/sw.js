@@ -1,5 +1,6 @@
 /* Second Look service worker. Hand written, no packages.
- * - Precaches the lesson and test screens plus the placeholder photos listed in /precache.json.
+ * - Precaches the pages, the /_next/static files they load and the photos listed in /precache.json,
+ *   so a page opened offline after one visit runs, not only shows (scripts/precache-static.mjs).
  * - Same-origin pages: network first, cache fallback, then /offline. A page is cached under its
  *   path and src only, never the rest of its query (see pageKey).
  * - Same-origin static files: cache first, refreshed in the background.
@@ -9,7 +10,7 @@
  */
 // The cache name carries the content hash, so new photos and new copy replace the placeholders
 // on the next visit instead of hiding behind a stale cache. build-content.mjs rewrites this line.
-const VERSION = "sl-cefb4fa07b838a83";
+const VERSION = "sl-90828d6977093b75";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 
@@ -24,7 +25,7 @@ self.addEventListener("install", (event) => {
       } catch {
         // offline at install: keep the minimal list
       }
-      const urls = [...(list.pages || []), ...(list.photos || [])];
+      const urls = [...(list.pages || []), ...(list.static || []), ...(list.photos || [])];
       await Promise.all(
         urls.map((u) =>
           cache.add(u).catch(() => {

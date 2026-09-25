@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { toPageTop, toRegionTop } from "../scripts/gallery-view.mjs";
+import { toPageTop, toRegionTop, wholeOnFirstScreen } from "../scripts/gallery-view.mjs";
 import { answerWalkPlainly } from "../scripts/gallery-walk.mjs";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
@@ -38,6 +38,16 @@ test("every walk comes from a different country and is linked from /judges", asy
   const names = await page.getByRole("main").getByRole("link").allInnerTexts();
   expect(names.filter((n) => /\bin United\b/.test(n))).toEqual([]);
   if (walks.some((w) => w.country === "United Kingdom")) expect(names).toContain("A creek in the United Kingdom");
+});
+
+// CRITIC_11 V02: /walk and /judges said the clips show "a creek from another country", though one
+// walk is in the United States, where the Berkeley setup that /about describes is.
+test("the walks are said to be somewhere else, not from another country", async ({ page }) => {
+  for (const path of ["/walk", "/judges"]) {
+    await page.goto(`${BASE}${path}`);
+    await expect(page.getByRole("main"), path).not.toContainText(/another country/i);
+    await expect(page.getByRole("main"), path).toContainText("a short clip of a creek somewhere else");
+  }
 });
 
 test("a walk shows its credit, builds a demo record on the phone, and sends nothing", async ({ page }) => {
@@ -279,6 +289,22 @@ test("a feelings slider nobody moved stays out of the walk's record", async ({ p
   }
 });
 
+// CRITIC_11 V01: the note on how to see a measure pushed Start the check below the first screen
+// of every walk at 390 by 844, and the gallery's picture of a walk, whose alt text names the
+// button, showed none. The button now comes before the demo notice. The gallery takes the same
+// step (scripts/gallery-view.mjs) before its shot, so a walk whose button is not whole on the
+// first screen fails both here and there.
+test("Start the check is whole on the first screen of every walk at 390 by 844", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(walks.length).toBeGreaterThan(0);
+  for (const w of walks) {
+    await page.goto(`${BASE}/walk/${w.id}`);
+    const box = await wholeOnFirstScreen(page, page.getByRole("button", { name: en["walk.start"] }));
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height, w.id).toBeLessThanOrEqual(844);
+  }
+});
+
 // CRITIC_06 H03: the gallery's shot of a walk's record opened on a line cut in half, with the page
 // title out of the frame, because the record showed wherever the form had left the page. The
 // gallery now goes to the top of the page first (scripts/gallery-view.mjs). This makes a record on
@@ -331,7 +357,54 @@ test("the gallery's shot of a walk's city view shows the first measure whole, wi
   const box = (await first.boundingBox())!;
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y + box.height).toBeLessThanOrEqual(844);
+  // CRITIC_11 U02: the page is too short to bring the region to the top, and the shot stopped
+  // where the page ends, cutting "Checks from this phone: 1" through the middle at the top edge.
+  // It now stops at the top of a whole line instead, so no text is cut there.
+  expect(await textCutAtTop(page)).toEqual([]);
 });
+
+// CRITIC_11 U02: the same step on a page made too short to bring its region to the top, with lines
+// of text of a fractional height above it, so the step must find a line's top for itself.
+test("the gallery's step to a region stops at a whole line when the page is too short", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const lines = Array.from({ length: 40 }, (_, i) => `<p style="margin:0">Line ${i + 1} of the text above</p>`).join("");
+  await page.setContent(
+    `<head><meta name="viewport" content="width=device-width, initial-scale=1"></head>` +
+      `<body style="margin:0;font:17px/25.5px sans-serif">${lines}<section aria-label="Needs" style="height:120px"><h2 style="margin:0">Needs</h2></section></body>`,
+  );
+  expect(await page.evaluate(() => window.innerHeight)).toBe(844);
+  const most = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+  const regionTop = await page.getByRole("region", { name: "Needs" }).evaluate((el) => el.getBoundingClientRect().top);
+  // Too short: the region cannot come to the top, and where the page ends the edge cuts a line.
+  expect(most).toBeLessThan(regionTop - 12);
+  expect(most % 25.5).not.toBe(0);
+  await toRegionTop(page, "Needs");
+  expect(await textCutAtTop(page)).toEqual([]);
+  // As far down as it can go without cutting one: less than a line short of the end of the page.
+  const y = await page.evaluate(() => window.scrollY);
+  expect(y).toBeLessThanOrEqual(most);
+  expect(most - y).toBeLessThan(25.5 + 12);
+  // The region's heading is on screen, whole.
+  const box = (await page.getByRole("heading", { name: "Needs" }).boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(844);
+});
+
+/** The text lines on screen that the top edge cuts through: part above it, part below. */
+async function textCutAtTop(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const cut: string[] = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const text = n.textContent?.trim();
+      if (!text) continue;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      for (const r of Array.from(range.getClientRects())) if (r.top < -1 && r.bottom > 1) cut.push(text);
+    }
+    return cut;
+  });
+}
 
 // CRITIC_09 Q01: the clips show natural creeks, so a walk answered as the clip shows it found
 // nothing, and the city view said so twice and stopped. The walk now says, before the check starts,
@@ -355,8 +428,11 @@ test("a walk says how to see a measure, and an honest walk ends on a marked exam
   await expect(example.getByRole("heading", { name: en["city.walk_example_title"], level: 2 })).toBeVisible();
   await expect(example).toContainText(en["city.walk_example_intro"]);
   await expect(example.locator(".row")).toHaveText(bankMeasures.map((m) => `${m.text}${featureNames["artificial_bank"]}. ${m.source}`));
-  const back = page.getByRole("main").getByRole("link", { name: en["city.walk_more"], exact: true });
+  // CRITIC_11 V02: the link says where it goes. It said "Try another door", and no page calls the
+  // judges' entries doors.
+  const back = page.getByRole("main").getByRole("link", { name: "Back to the judges' page", exact: true });
   await expect(back).toHaveAttribute("href", "/judges");
+  await expect(page.getByRole("main")).not.toContainText(/\bdoor\b/i);
   await back.click();
   await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
 });

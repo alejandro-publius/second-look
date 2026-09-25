@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Photo } from "@/components/Photo";
 import { Row } from "@/components/ui/Row";
-import { content, featureById, licenseUrl } from "@/lib/content";
+import { content, featureById, licenseName, licenseUrl } from "@/lib/content";
 import { GATE_FILES, MODEL_CARD_FILE, PASS_FILE, footageExample, howKeptSplit, howWeKnowNumbers } from "@/lib/how-data";
 import { modelName } from "@/lib/models";
 import { t } from "@/lib/t";
@@ -61,10 +61,10 @@ function FrameCredit({ c }: { c: Case }) {
       {t("how.example_credit", { author: c.credit.author })}{" "}
       {url ? (
         <a href={url} rel="license noreferrer">
-          {c.credit.license}
+          {licenseName(c.credit.license)}
         </a>
       ) : (
-        c.credit.license
+        licenseName(c.credit.license)
       )}
       {". "}
       <a href={c.credit.source_url} rel="noreferrer nofollow">
@@ -96,8 +96,9 @@ export default function HowWeKnowPage() {
   const { pass, gate } = howWeKnowNumbers(content.features.map((f) => f.id));
   const example = footageExample();
   // Most kept flags are on a dug-out channel, which the check never asks about, so they ask nothing.
-  // The page says how many, and that the rest are the kept case below (CRITIC_09 J03).
-  const split = howKeptSplit(gate, example?.kept?.feature);
+  // The page says how many (CRITIC_09 J03), and that the rest are the kept model's answers on the
+  // frame below, with the model and its runs read from the files (CRITIC_11 V02).
+  const split = howKeptSplit(gate, example?.kept);
   return (
     <article className="stack">
       <h1>{t("how.title")}</h1>
@@ -149,11 +150,14 @@ export default function HowWeKnowPage() {
               dropped: gate.dropped,
               kept: gate.kept,
             })}
-            {split ? ` ${t("how.gate_split", { nothing: split.nothing, kept: gate.kept, shown: split.shown })}` : null}
+            {split
+              ? ` ${t("how.gate_split", { nothing: split.nothing, kept: gate.kept, shown: split.shown, model: modelName(split.model), runs: split.runs })}`
+              : null}
           </p>
           <p>{t("how.gate_rule")}</p>
           <p className="small muted">
-            {t("how.from", { files: [...GATE_FILES, ...(split ? [MODEL_CARD_FILE] : [])].join(", "), date: runDay(gate.date) })}
+            {/* The split names the model's answers, which come from the run the example names. */}
+            {t("how.from", { files: [...GATE_FILES, ...(split && example ? [MODEL_CARD_FILE, example.files[1]] : [])].join(", "), date: runDay(gate.date) })}
           </p>
         </section>
       ) : null}

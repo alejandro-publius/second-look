@@ -277,10 +277,22 @@ for (const visits of [5, 0]) {
   });
 }
 
-test("/city with no creek says so rather than showing an empty page", async ({ page }) => {
-  await mockApi(page);
+// CRITIC_11 W02: bare /city, the route the README names, said "Nobody has checked this creek yet."
+// without naming a creek or saying how to pick one. It now says the link names no creek and links
+// each creek the site knows, from content/regions/.
+test("/city with no creek says to pick one and links each creek", async ({ page }) => {
+  const calls = await mockApi(page);
   await page.goto("/city");
-  await expect(page.getByText("Nobody has checked this creek yet.")).toBeVisible();
+  await expect(page.getByText("This link names no creek. Pick a creek to see what it needs.")).toBeVisible();
+  await expect(page.getByText("Nobody has checked this creek yet.")).toHaveCount(0);
+  const link = page.getByRole("main").getByRole("link", { name: "Strawberry Creek", exact: true });
+  await expect(link).toHaveAttribute("href", "/city?creek=strawberry-creek");
+  // Nothing is asked of the API about a creek the link does not name.
+  expect(calls.filter((c: { path: string }) => c.path.startsWith("/api/city"))).toEqual([]);
+  await link.click();
+  await expect(page).toHaveURL(/\/city\?creek=strawberry-creek$/);
+  await expect(page.getByText("This link names no creek.", { exact: false })).toHaveCount(0);
+  await expect.poll(() => calls.filter((c: { path: string }) => c.path === "/api/city/strawberry-creek").length).toBeGreaterThan(0);
 });
 
 // CRITIC_09 R05: /city?creek=<unknown> said "Something did not send", though nothing was sent and

@@ -506,10 +506,24 @@ def test_the_walk_record_shot_is_taken_from_the_top_of_the_page() -> None:
     # The step itself is tested in apps/web/tests/walk.spec.ts; this checks the gallery takes it
     # after the record shows and before the shot.
     source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
-    assert 'import { toPageTop, toRegionTop } from "./gallery-view.mjs";' in source
+    imports = 'import { toPageTop, toRegionTop, wholeOnFirstScreen } from "./gallery-view.mjs";'
+    assert imports in source
     record = source.index('getByRole("heading", { name: "Your record from the clip" }).waitFor()')
     shot = source.index('gallery("walk-record"')
     assert "await toPageTop(page);" in source[record:shot]
+
+
+def test_the_walk_shot_fails_unless_its_start_button_is_on_the_first_screen() -> None:
+    # CRITIC_11 V01: a note above the button pushed Start the check below the first screen, and
+    # the picture of a walk showed no button while its alt text named one. The gallery now fails
+    # unless the button is whole on the first screen before it shoots, the step
+    # apps/web/tests/walk.spec.ts takes on every walk.
+    source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
+    shot = source.index('gallery("walk", route')
+    before = source[source.index("const route = `/walk/${firstWalk.id}`;") : shot]
+    assert 'await wholeOnFirstScreen(page, button(page, "Start the check"));' in before
+    assert "await shoot(page)" in source[shot : shot + 200]
+    assert "a button to start the check" in source[shot : shot + 200]
 
 
 WALK_CITY_ALT = (
@@ -535,6 +549,8 @@ def test_the_walk_city_shot_follows_a_walk_that_reported_only_a_built_bank() -> 
     assert json.dumps(WALK_CITY_ALT) in source[city : city + 400]
     screens = (ROOT / "docs" / "screens" / "README.md").read_text(encoding="utf-8")
     assert f'<img src="walk-city.webp" width="200" alt="{WALK_CITY_ALT}">' in screens
+    # CRITIC_11 V02: the visible caption says it too, not the alt text alone.
+    assert "<br>The walk as a city sees it, after answering Artificial for the bank<br>" in screens
 
 
 def test_the_quick_check_shot_shows_the_form_from_a_record_link_on_the_mock() -> None:

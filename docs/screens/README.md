@@ -22,7 +22,7 @@ The phone screens of Second Look, in one drawn frame, captured by `make screens`
 <td align="center"><img src="walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
 </tr>
 <tr>
-<td align="center"><img src="walk-city.webp" width="200" alt="The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
+<td align="center"><img src="walk-city.webp" width="200" alt="The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it, after answering Artificial for the bank<br><code>/city?walk=v02</code></td>
 <td align="center"><img src="check-start.webp" width="200" alt="The creek check: what it asks and a button to start."><br>Creek check<br><code>/check</code></td>
 <td align="center"><img src="check-location.webp" width="200" alt="The creek check asks where you are: use the phone's location or drop a pin."><br>Where are you?<br><code>/check</code></td>
 <td align="center"><img src="check-question.webp" width="200" alt="The first question of the creek check, with the answers as big buttons."><br>First question<br><code>/check</code></td>
