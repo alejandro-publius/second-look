@@ -411,11 +411,36 @@ def link(rel: str) -> str:
     return f"[`{rel}`]({UP}{rel})"
 
 
+def licence_name(code: str) -> str:
+    """A manifest licence code as /credits writes it: licenseName in apps/web/lib/content.ts,
+    rule for rule. CC-BY-3.0 is CC BY 3.0, CC-BY-SA-2.0 is CC BY-SA 2.0, CC0-1.0 is CC0 1.0 and
+    public-domain is Public domain (critic round 15 N02)."""
+    if code == "public-domain":
+        return "Public domain"
+    if code == "CC0":
+        return "CC0 1.0"
+    if code.startswith("CC0-"):
+        return f"CC0 {code.removeprefix('CC0-')}"
+    parts = code.removeprefix("own-").split("-")
+    if parts[0] == "CC" and len(parts) >= 3:
+        return f"CC {'-'.join(parts[1:-1])} {parts[-1]}"
+    return code
+
+
+# Country names English writes with "the" (critic round 15 N02: "filmed in United States").
+WITH_THE = ("United ", "Netherlands", "Philippines", "Czech Republic", "Dominican Republic")
+
+
+def place(coarse: str) -> str:
+    """A manifest's coarse location as it reads after "filmed in"."""
+    return f"the {coarse}" if coarse.startswith(WITH_THE) else coarse
+
+
 def credit(row: Mapping[str, str]) -> str:
     return (
         f"Frame `{row['id']}` from {row['source_url']}, by {row['author']}, licence "
-        f"{row['license']}. File {link('photos/' + row['file'])}, with its row in "
-        f"{link(MANIFEST.as_posix())}."
+        f"{licence_name(row['license'])}. File {link('photos/' + row['file'])}, with its row "
+        f"in {link(MANIFEST.as_posix())}."
     )
 
 
@@ -451,7 +476,7 @@ def section(title: str, c: Mapping[str, Any], raw_kept: str) -> list[str]:
     gate = c["gate"]
     cell = c["pass_table_cell"]
     fu = c["followup"]
-    alt = f"Frame {row['id']}, a still from a creek video filmed in {row['coarse_location']}"
+    alt = f"Frame {row['id']}, a still from a creek video filmed in {place(row['coarse_location'])}"
     lines = [
         f"## {title}: frame `{c['frame']}`",
         "",

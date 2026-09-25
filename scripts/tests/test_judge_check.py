@@ -86,7 +86,8 @@ def test_the_reproduce_step_runs_make_reproduce_and_reports_its_last_line(
     step = judge_check.step_reproduce(judge_check.ROOT, {})
     assert step.ok
     assert calls == [["make", "--no-print-directory", "reproduce"]]
-    assert step.lines == [last]
+    # The step already names the tool, so the line drops its "reproduce: " (critic round 14 A04).
+    assert step.lines == [last.removeprefix("reproduce: ")]
     assert step.notes == []
 
 
@@ -116,7 +117,13 @@ def test_the_reproduce_step_keeps_every_note_and_every_skip(
     monkeypatch.setattr(judge_check, "run", lambda argv, cwd, env: (0, out))
     step = judge_check.step_reproduce(judge_check.ROOT, {})
     assert step.ok
-    assert step.lines == [judge_check.last_line(out)]
+    # make reproduce prints its notes above its last line; judge-check shows them after it, so
+    # there the line says "below" (critic round 15 E02).
+    last = judge_check.last_line(out)
+    assert last.startswith("reproduce: ") and last.endswith(", each named above")
+    assert step.lines == [
+        last.removeprefix("reproduce: ").replace(", each named above", ", each named below")
+    ]
     assert step.notes[:2] == [
         "note on results/benchmark_a.json and results/benchmark_b.json: "
         "the right-answer counts per feature are as recorded",

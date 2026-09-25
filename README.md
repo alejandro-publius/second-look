@@ -154,7 +154,7 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 
 ## What the AI cannot do
 
-It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate, the heart of it, says how, and Three properties that follow names the test for each. Two more limits:
+It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate says how, and Three properties that follow names the test for each. Two more limits:
 
 | It cannot | Enforced by | Test |
 |---|---|---|
@@ -429,6 +429,7 @@ The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_
 | `GET /api/spot/{spot_id}`, `/api/city/{creek}` | a record, and the analyst's view of a creek, every number with the visit ids behind it |
 | `GET /api/fhir/Bundle/{visit_id}`, `/api/fhir/referral/{spot_id}` | the FHIR behind every record, and a ServiceRequest for a pipe worth testing |
 | `GET /api/two` | one of our Observations beside a laboratory one from their sandbox |
+| `POST /api/walk`, `GET /api/walk/{record_id}` | a finished video walk's demo record, kept 30 days and never counted, and reading it back |
 | `POST /api/demo/answer` | judge mode: right or wrong only, shut until the data lock |
 
 </details>
@@ -564,7 +565,7 @@ Everything, with the known gaps and how to report a problem: [`SECURITY.md`](SEC
 
 ## Quickstart
 
-Needs git, [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12) and Node 20 or later with npm. No Java, no key, no network after the setup.
+Needs git, [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12) and Node 20 or later with npm; `make worker-e2e` needs Node 22 or later, because the Worker's wrangler refuses to start on anything older ([`DEPLOY.md`](DEPLOY.md)). No Java, no key, no network after the setup.
 
 ```
 git clone https://github.com/alejandro-publius/second-look && cd second-look
@@ -574,15 +575,24 @@ make judge-check
 
 `make judge-check` needs no key and no network: it runs the Python tests and the Worker's golden vectors, grades the AI numbers again from the raw replies where a run kept them (`make reproduce`, whose notes it prints under its summary: the benchmark's right-answer counts, its share of can't tell answers and its count of malformed replies are checked only as recorded, as Evals says), reads the last HL7 validator run, builds the web app with its design check, verifies the audit log and scans for secrets, in about five minutes after the setup (`make fhir-validate` runs the validator itself, with Java). Its last recorded run, at commit <!--v:results/judge_check.json#/commit-->c28bb88<!--/v-->, took <!--v:results/judge_check.json#/seconds-->274<!--/v--> seconds after the setup ([`results/judge_check.json`](results/judge_check.json), written by [`scripts/judge_check.py`](scripts/judge_check.py) with its `--out` option):
 
-The web step builds the app and measures it on port 3100, or, when something else holds 3100 (such as `make demo-offline`), on a free port it picks and names, and it frees that port after. Two judge-checks in one checkout take turns at the web step.
+<!--block:judge-check results/judge_check.json-->
+- **tests**: python: 2319 passed, 2 skipped, 9 xfailed in 228.59s (0:03:48); worker: pass 17
+- **reproduce**: 28603 values in 23 files regraded from raw replies and seeds, with no network and no key; every one matches; 3 files not regraded and 5 notes, each named below
+  - results/benchmark_20260924T031225Z.json and results/benchmark_20260924T054939Z.json: the right-answer counts per feature, the share of cant_tell answers and the count of malformed replies are as recorded: the run kept counts, not answers, so no reply is left to grade them from; the accuracies, intervals and cost are regraded
+  - results/footage_20260924T032230Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 144 calls is regraded
+  - results/footage_20260924T060539Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 192 calls is regraded
+  - results/cost_log.jsonl: 41.11 USD paid in all, every line accounted for
+  - results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has
+  - results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file
+  - results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has
+- **fhir**: last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4
+- **web**: next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s); served on port 3100, which is free again
+- **audit log**: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3
+- **secrets**: working tree: nothing shaped like a live key; gitleaks: history clean
+- judge-check: 6 of 6 steps passed, offline, with no key
+<!--/block-->
 
-- **<!--v:results/judge_check.json#/steps/0/name-->tests<!--/v-->**: <!--v:results/judge_check.json#/steps/0/text-->python: 2319 passed, 2 skipped, 9 xfailed in 228.59s (0:03:48); worker: pass 17<!--/v-->
-- **<!--v:results/judge_check.json#/steps/1/name-->reproduce<!--/v-->**: <!--v:results/judge_check.json#/steps/1/text-->reproduce: 28603 values in 23 files regraded from raw replies and seeds, with no network and no key; every one matches; 3 files not regraded and 5 notes, each named above; note on results/benchmark_20260924T031225Z.json and results/benchmark_20260924T054939Z.json: the right-answer counts per feature, the share of cant_tell answers and the count of malformed replies are as recorded: the run kept counts, not answers, so no reply is left to grade them from; the accuracies, intervals and cost are regraded; note on results/footage_20260924T032230Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 144 calls is regraded; note on results/footage_20260924T060539Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 192 calls is regraded; note on results/cost_log.jsonl: 41.11 USD paid in all, every line accounted for; note on results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has; note on results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file; note on results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has<!--/v-->
-- **<!--v:results/judge_check.json#/steps/2/name-->fhir<!--/v-->**: <!--v:results/judge_check.json#/steps/2/text-->last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4<!--/v-->
-- **<!--v:results/judge_check.json#/steps/3/name-->web<!--/v-->**: <!--v:results/judge_check.json#/steps/3/text-->next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).; served on port 3100, which is free again<!--/v-->
-- **<!--v:results/judge_check.json#/steps/4/name-->audit log<!--/v-->**: <!--v:results/judge_check.json#/steps/4/text-->audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3<!--/v-->
-- **<!--v:results/judge_check.json#/steps/5/name-->secrets<!--/v-->**: <!--v:results/judge_check.json#/steps/5/text-->working tree: nothing shaped like a live key; gitleaks: history clean<!--/v-->
-- <!--v:results/judge_check.json#/last-->judge-check: 6 of 6 steps passed, offline, with no key<!--/v-->
+The web step builds the app and measures it on port 3100, or, when something else holds 3100 (such as `make demo-offline`), on a free port it picks and names, and it frees that port after. Two judge-checks in one checkout take turns at the web step.
 
 ### Running locally
 
@@ -666,7 +676,8 @@ The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/RE
 - One labeller. The gold labels came from the picks file Alex wrote with the planner, a Claude chat (commit 81e62ed), and no second, blind label exists yet, so read every accuracy as agreement with this key ([`docs/DATA_CARD.md`](docs/DATA_CARD.md), [`docs/deviations.md`](docs/deviations.md)).
 - Four photos per feature is coarse: it shows a person what to practise and flags an answer worth a second look, but it is too coarse to weight votes by feature. In our simulation with made-up people ([`results/consensus_coarseness.json`](results/consensus_coarseness.json)), weights from each feature's own photos did worse than a plain majority in all <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_feature_only_clearly_loses-->5<!--/v--> skill patterns.
 - A test started online keeps going if the network drops, from smaller copies of its photos. A reload while offline does not bring the sitting back: it opens the test at its start, or the offline page when the phone has not kept that exact link, such as `/t?src=other` opened once. The end of the lesson is not sent again once the network is back. The creek check works offline after one visit.
-- The test and lesson photos are sent as the full-size JPEGs, so on a slow phone line each photo can take a few seconds to appear. That is on purpose: they are the study's pre-registered materials, and every person must see the same pixels, so only the landing page and the poster got smaller copies. The smaller copies a phone keeps are shown only when a photo cannot be fetched at all, mid-sitting.
+- The test and lesson photos are sent as the full-size JPEGs, so on a slow phone line each photo can take a few seconds to appear. That is on purpose: they are the study's pre-registered materials, and every person must see the same pixels, so everyone online gets them full size; only the landing page and the poster serve smaller copies to everyone. A phone also keeps a smaller copy of each test and lesson photo, shown only when a photo cannot be fetched at all, mid-sitting.
+- A walk clip restarts from the beginning when you seek in it, even once it has loaded, because the site's host, Cloudflare Pages, answers a request for part of the file (a range request) with the whole file. So to see second 30 again you watch the first 30 seconds. Serving the clips in parts, from the Worker or from storage behind it, would fix it.
 - The official app has no question for a dug-out channel, so the creek check asks none: that score is kept but stands beside no answer, and the city measure it would lead to waits for one. Plants that do not belong have no city measure of their own.
 - Of the <!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> footage flags the gate kept, <!--v:results/model_card.json#/footage_kept/by_feature/dug_out_channel-->32<!--/v--> are on a dug-out channel, so they ask nothing. The other <!--v:results/model_card.json#/footage_kept/by_feature/artificial_bank-->3<!--/v--> are one model's runs on built banks, all on one frame of creek water over stones, seen from above, where the other models that passed built banks said can't tell. Passing four photos did not stop that flag, which is why a flag can only ask ([`examples/footage-flag/`](examples/footage-flag/README.md)).
 - The photos come from open collections in several countries and seasons, not from the creeks a Berkeley visitor will stand in.

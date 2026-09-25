@@ -14,9 +14,9 @@ This page and [`example.json`](example.json) are written by [`evals/footage_exam
 
 ## Kept: frame `v06-00403`
 
-![Frame v06-00403, a still from a creek video filmed in United States](../../photos/benchmark/v06-00403.jpg)
+![Frame v06-00403, a still from a creek video filmed in the United States](../../photos/benchmark/v06-00403.jpg)
 
-Frame `v06-00403` from https://www.youtube.com/watch?v=CsayzeejVzY, by OkState Ag, licence CC-BY-3.0. File [`photos/benchmark/v06-00403.jpg`](../../photos/benchmark/v06-00403.jpg), with its row in [`photos/manifest.csv`](../../photos/manifest.csv).
+Frame `v06-00403` from https://www.youtube.com/watch?v=CsayzeejVzY, by OkState Ag, licence CC BY 3.0. File [`photos/benchmark/v06-00403.jpg`](../../photos/benchmark/v06-00403.jpg), with its row in [`photos/manifest.csv`](../../photos/manifest.csv).
 
 1. **What the model was asked.** `claude-haiku-4-5-20251001` was asked the frozen question for `artificial_bank` from [`content/features.yaml`](../../content/features.yaml): "Are the banks artificial, such as concrete or stones set in concrete?" This is its answer from run 0 (the runs are numbered from 0).
 2. **What the model answered.** Line 126 of [`evals/fixtures/raw/footage_20260924T060539Z.jsonl`](../../evals/fixtures/raw/footage_20260924T060539Z.jsonl), exactly as committed:
@@ -59,7 +59,7 @@ Frame `v06-00403` from https://www.youtube.com/watch?v=CsayzeejVzY, by OkState A
 
 ![Frame v02-00143, a still from a creek video filmed in Russia](../../photos/benchmark/v02-00143.jpg)
 
-Frame `v02-00143` from https://www.youtube.com/watch?v=vN5ArGGmdUY, by Красота Приморского края и не только, licence CC-BY-3.0. File [`photos/benchmark/v02-00143.jpg`](../../photos/benchmark/v02-00143.jpg), with its row in [`photos/manifest.csv`](../../photos/manifest.csv).
+Frame `v02-00143` from https://www.youtube.com/watch?v=vN5ArGGmdUY, by Красота Приморского края и не только, licence CC BY 3.0. File [`photos/benchmark/v02-00143.jpg`](../../photos/benchmark/v02-00143.jpg), with its row in [`photos/manifest.csv`](../../photos/manifest.csv).
 
 1. **What the model was asked.** `claude-haiku-4-5-20251001` was asked the frozen question for `pipe_running` from [`content/features.yaml`](../../content/features.yaml): "Can you see a pipe or drain outlet that empties into this creek?" This is its answer from run 0 (the runs are numbered from 0).
 2. **What the model answered.** Line 61 of [`evals/fixtures/raw/footage_20260924T060539Z.jsonl`](../../evals/fixtures/raw/footage_20260924T060539Z.jsonl), exactly as committed:

@@ -28,12 +28,8 @@ def load(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    ap.add_argument("--log", type=Path, default=ROOT / "results" / "cost_log.jsonl")
-    ap.add_argument("--out", type=Path, default=ROOT / "results" / "harden")
-    args = ap.parse_args()
-    rows = load(args.log)
+def summarize(rows: list[dict[str, Any]], log: str) -> dict[str, Any]:
+    """Everything costs.json holds but its time stamp, from the log's lines."""
     real = [r for r in rows if r.get("real") is True]
     groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     for r in real:
@@ -58,30 +54,30 @@ def main() -> int:
     for r in rows:
         if r.get("real") is not True:
             fake_by_purpose[str(r.get("purpose"))] += 1
-    stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    rel = args.log.relative_to(ROOT) if ROOT in args.log.resolve().parents else args.log
-    summary = {
-        "checked_utc": stamp,
-        "log": str(rel),
+    return {
+        "log": log,
         "lines": len(rows),
         "real_lines": len(real),
         "not_real_lines_by_purpose": dict(fake_by_purpose),
         "groups": table,
     }
-    args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "costs.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
 
+
+def page(summary: dict[str, Any]) -> str:
+    """costs.md, from costs.json alone, so the two cannot say different things."""
+    table = summary["groups"]
+    fake_by_purpose = summary["not_real_lines_by_purpose"]
     lines = [
         "# Cost per assessment",
         "",
-        f"Computed {stamp} by `uv run python scripts/harden_costs.py` from `{rel}`. One line in "
-        "the log is one model call, and one call judges one photo or one frame, so an assessment "
-        "is one call. Only lines marked real count.",
+        f"Computed {summary['checked_utc']} by `uv run python scripts/harden_costs.py` from "
+        f"`{summary['log']}`. One line in the log is one model call, and one call judges one "
+        "photo or one frame, so an assessment is one call. Only lines marked real count.",
         "",
-        f"The log has {len(rows)} lines and {len(real)} of them are real.",
+        f"The log has {summary['lines']} lines and {summary['real_lines']} of them are real.",
         "",
     ]
-    if not real:
+    if not table:
         lines += [
             "No real lines, so there is no cost per assessment and no cost per 100 frames yet. "
             "No paid model run has been logged on this branch. The numbers arrive with the model "
@@ -111,8 +107,22 @@ def main() -> int:
             + "), and per 100 photos on the others.",
             "",
         ]
-    (args.out / "costs.md").write_text("\n".join(lines), encoding="utf-8")
-    print(f"{len(rows)} lines, {len(real)} real; wrote {args.out / 'costs.md'}")
+    return "\n".join(lines)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    ap.add_argument("--log", type=Path, default=ROOT / "results" / "cost_log.jsonl")
+    ap.add_argument("--out", type=Path, default=ROOT / "results" / "harden")
+    args = ap.parse_args()
+    rows = load(args.log)
+    rel = args.log.relative_to(ROOT) if ROOT in args.log.resolve().parents else args.log
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    summary = {"checked_utc": stamp, **summarize(rows, str(rel))}
+    args.out.mkdir(parents=True, exist_ok=True)
+    (args.out / "costs.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
+    (args.out / "costs.md").write_text(page(summary), encoding="utf-8")
+    print(f"{len(rows)} lines, {summary['real_lines']} real; wrote {args.out / 'costs.md'}")
     return 0
 
 

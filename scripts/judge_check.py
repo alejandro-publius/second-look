@@ -53,6 +53,7 @@ from pathlib import Path
 from typing import Any
 
 from scripts import submit_check
+from scripts.render_readme import summary_line
 
 ROOT = Path(__file__).resolve().parents[1]
 # Anything that looks like a live credential: the shapes submit-check and make secrets use, so a
@@ -192,7 +193,8 @@ def step_reproduce(root: Path, env: dict[str, str]) -> Step:
         step.fail(f"make reproduce failed: {last_line(out)}")
         step.lines.extend(failed[:4])
     else:
-        step.lines.append(last_line(out))
+        # Its notes are shown after this line, so it names them "below" (critic round 15 E02).
+        step.lines.append(summary_line(step.name, last_line(out)))
     step.notes = reproduce_notes(out)
     return step
 
@@ -370,7 +372,7 @@ def step_audit(root: Path, env: dict[str, str]) -> Step:
     if rc != 0:
         step.fail(f"the chain is broken: {last_line(out)}")
     else:
-        step.lines.append(last_line(out))
+        step.lines.append(summary_line(step.name, last_line(out)))
     return step
 
 

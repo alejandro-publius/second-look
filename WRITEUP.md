@@ -105,8 +105,8 @@ into `fhir/sandbox_ledger.jsonl`. A delete names one id, which must be in the le
 delete by search and no `$expunge`. The one update is on our own Library entry, matched by our own
 identifier, so it can only ever reach our resource. Only visit Bundles are sent: a demo walk, a
 referral or an example is refused by shape. The mirror refuses OneAquaHealth's closed API by name.
-A launchd job re-pushes on set days, and the conditional creates make that a no-op for what is
-still there.
+A launchd job re-pushes every day that their sandbox answers, and the conditional creates make
+that a no-op for what is still there.
 
 **Proof.** `scripts/tests/test_repush_sandbox.py::test_delete_refuses_unknown_ids_searches_and_operations`,
 `scripts/tests/test_repush_sandbox.py::test_delete_only_an_id_from_the_ledger`,

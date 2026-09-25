@@ -106,8 +106,9 @@ We do not control the hosting providers' own logs. Plainly:
   names the address that failed. It is Cloudflare's own setting; we never see the reports.
 - D1 holds the study tables. Workers KV holds creek check photos after downsizing and EXIF
   stripping. Both sit in the same Cloudflare account.
-- GitHub hosts the code, the daily database backup as a private artifact, and the anonymous
-  response table after publication; it logs downloads in aggregate.
+- GitHub hosts the code and, after publication, the anonymous response table; it logs downloads
+  in aggregate. It holds no copy of the database: the daily backup stays on Alex's Mac (see
+  Backups).
 
 The consent screen says: "Cloudflare, which serves this site, keeps its own short-lived
 connection records, which include internet addresses. We do not." That sentence must stay true;
@@ -159,11 +160,23 @@ edge, which never hand an address to our code, and a line in docs/deviations.md.
 
 ## Backups
 
-The raw database is backed up once a day by `.github/workflows/backup.yml`, which runs
-`wrangler d1 export` against the `second-look` database and keeps the dump as a private GitHub
-Actions artifact. The token it uses is scoped to D1 read on this one account and nothing else.
-`scripts/backup_db.sh` still covers the compose stack. Nobody computes outcomes from a backup
-before the lock. The only code that computes outcomes is
+The raw database is backed up once a day on Alex's Mac, not on GitHub. The launchd job
+`com.secondlook.backup` (`DEPLOY.md`, Jobs on the Mac) runs `scripts/backup_d1.sh` at 21:00, or
+when the Mac wakes if it slept through that time. The script runs `wrangler d1 export` against the
+`second-look` database with the wrangler login already on the Mac, so no token is written down,
+and puts the dump in `~/second-look-backups/`. That folder is outside the repo, only its owner can
+read it, and it keeps the newest 30 dumps (`BACKUP_KEEP`). No dump goes to git or to GitHub.
+`scripts/backup_db.sh` still covers the compose stack.
+
+`.github/workflows/backup.yml` can make the same export on GitHub, but it runs only when someone
+starts it by hand, and nobody has: the two secrets it needs were never added, and its only two
+runs, scheduled on Sep 21 and 22, failed. It would keep the dump as a GitHub Actions artifact. On
+a public repository anyone signed in to GitHub can download those, and this one turns public on
+Sep 30. So the dump is kept out of Actions artifacts there: the workflow's job runs only while the
+repository is private, and on a public one it is skipped. An artifact made before the flip would
+turn public with it, so none should be made; on Sep 25 there were none.
+
+Nobody computes outcomes from a backup before the lock. The only code that computes outcomes is
 `evals/usability_analysis.py`, which refuses to run before data lock (2026-09-28T01:00:00Z)
 and refuses to run without the `prereg-v1` tag. At the lock, `make lock-analysis` takes one more
 backup on this Mac and exports the two study tables from it (`scripts/study_export.py`, the same

@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+import json
+import re
+from pathlib import Path
+
+import pytest
+
 from scripts import harden_commands as hc
 from scripts.done_items import NEVER_RUN
 
@@ -60,3 +66,54 @@ def test_submit_check_red_only_on_the_video_link_and_the_public_repo_counts_as_t
 def test_rollback_and_the_video_are_run_not_skipped() -> None:
     assert hc.policy("make rollback") == ""
     assert hc.policy("make video-final") == ""
+
+
+# ---- no machine paths in what is kept (critic round 15 N03) -------------------------------------
+
+WARNING = (
+    "warning: `VIRTUAL_ENV=/Users/someone/second-look/.venv` does not match the project "
+    "environment path `.venv` and will be ignored; use `--active` to target the active "
+    "environment instead\n"
+)
+MACHINE = re.compile(r"/Users/|/home/|/private/|/tmp/|/var/folders/|-Users-|VIRTUAL_ENV=|--active")
+
+
+def test_what_a_command_printed_is_kept_without_this_machines_paths() -> None:
+    clone = "/private/tmp/claude-501/-Users-someone/abc/scratchpad/cmds/tree"
+    out = (
+        "nt path `.venv` and will be ignored; use `--active` to target the active environment "
+        f"instead\n{WARNING}mutation: wrote {clone}/results/mutation.json\n{WARNING}"
+        "ad/cmds/tree/fhir/build/a.json ok\n"
+        "screens from /Users/someone/second-look-media/screens into /tmp/x/video-final-out\n"
+        "see https://github.com/a/b/tree/main/docs\n"
+    )
+    kept = hc.scrub(out)
+    assert MACHINE.search(kept) is None, kept
+    assert kept.splitlines() == [
+        "mutation: wrote results/mutation.json",
+        "fhir/build/a.json ok",
+        "screens from ~/second-look-media/screens into <temp folder>",
+        "see https://github.com/a/b/tree/main/docs",
+    ]
+
+
+def test_a_command_runs_without_the_shells_virtual_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("VIRTUAL_ENV", "/Users/someone/elsewhere/.venv")
+    r = hc.run('echo "venv=${VIRTUAL_ENV:-none}"; echo /Users/someone/x', Path.cwd())
+    assert r["tail"] == "venv=none\n~/x\n"
+
+
+def test_the_committed_command_tables_hold_no_machine_path_and_are_what_render_writes(
+    tmp_path: Path,
+) -> None:
+    folder = hc.ROOT / "results" / "harden"
+    for name in ("commands", "commands_depth"):
+        committed = (folder / f"{name}.json").read_text(encoding="utf-8")
+        doc = json.loads(committed)
+        for r in doc["commands"]:
+            assert MACHINE.search(str(r["detail"])) is None, (name, r["command"])
+        page = (folder / f"{name}.md").read_text(encoding="utf-8")
+        assert MACHINE.search(page) is None, name
+        hc.write(doc, tmp_path, name)
+        assert (tmp_path / f"{name}.md").read_text(encoding="utf-8") == page, name
+        assert (tmp_path / f"{name}.json").read_text(encoding="utf-8") == committed, name
