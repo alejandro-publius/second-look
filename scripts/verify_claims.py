@@ -18,6 +18,8 @@ import re
 import sys
 from pathlib import Path
 
+from scripts.render_readme import BLOCK_RE, block_text
+
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 CLAIM_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+)#([\w/.-]+)\s*(?:=\s*([^\s]+))?\s*-->")
@@ -138,6 +140,19 @@ def main() -> int:
             problems.append(
                 f"rendered number drifted: {rel}#{pointer} README shows {shown}, results say "
                 f"{display(value)}; run scripts/render_readme.py"
+            )
+        checked += 1
+    for m in BLOCK_RE.finditer(text):
+        # A block is made whole from its results file, so it is checked whole (critic round 14
+        # A04): the README's judge-check run shows what results/judge_check.json holds.
+        name, rel, shown = m.group(2), m.group(3), m.group(4)
+        want = block_text(name, rel, ROOT)
+        if want is None:
+            problems.append(f"rendered block {name} cannot be made from {rel}")
+        elif shown != want:
+            problems.append(
+                f"rendered block drifted: {name} from {rel} is not what the results say; run "
+                "scripts/render_readme.py"
             )
         checked += 1
     for token in UNRENDERED_RE.findall(text):

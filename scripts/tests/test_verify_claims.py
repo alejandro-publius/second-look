@@ -39,6 +39,25 @@ def test_a_rendered_synthetic_number_fails(tmp_path: Path, monkeypatch: pytest.M
     assert run(tmp_path, monkeypatch, readme, {"frames": 42, "synthetic": True}) == 1
 
 
+def test_a_block_is_checked_whole_against_its_results_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Critic round 14 A04: the README's recorded judge-check run is a block made from
+    # results/judge_check.json, so a block that no longer matches the file is a drifted claim.
+    from scripts.render_readme import judge_check_list
+
+    run_doc = {"steps": [{"name": "tests", "ok": True, "text": "python: 3 passed"}], "last": "ok"}
+    body = judge_check_list(run_doc)
+    readme = f"Run:\n\n<!--block:judge-check results/x.json-->\n{body}<!--/block-->\n"
+    assert run(tmp_path, monkeypatch, readme, run_doc) == 0
+    drifted = {**run_doc, "last": "judge-check: 1 of 1 steps failed"}
+    (tmp_path / "results" / "x.json").write_text(json.dumps(drifted))
+    assert vc.main() == 1
+    assert "rendered block drifted: judge-check from results/x.json" in capsys.readouterr().out
+    (tmp_path / "results" / "x.json").write_text(json.dumps({"no": "steps"}))
+    assert vc.main() == 1
+
+
 def test_a_token_nobody_rendered_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert run(tmp_path, monkeypatch, "{{claim:results/x.json#/frames}}", {"frames": 1}) == 1
 

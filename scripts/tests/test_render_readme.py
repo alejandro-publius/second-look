@@ -46,8 +46,9 @@ def test_every_doc_with_a_rendered_number_is_rendered_and_checked() -> None:
     tracked = subprocess.run(
         ["git", "ls-files", "*.md"], cwd=root, capture_output=True, text=True, check=True
     ).stdout.split()
-    # A whole rendered value, outside code spans: a review that quotes "`<!--v:`" is not one.
-    value = re.compile(r"<!--v:[^\s>]+-->[^<]*<!--/v-->")
+    # A whole rendered value, outside code spans: a review that quotes "`<!--v:`" is not one. A
+    # rendered block counts too.
+    value = re.compile(r"<!--v:[^\s>]+-->[^<]*<!--/v-->|<!--block:[\w-]+ [^\s>]+-->\n")
     marked = {
         p
         for p in tracked
@@ -166,3 +167,76 @@ def test_render_refuses_to_write_a_line_that_breaks_a_paragraph(
     doc.write_text(before.replace("saw\n", "saw "), encoding="utf-8")
     assert rr.main() == 0
     assert "saw <!--v:results/r.json#/n-->4<!--/v--> flags." in doc.read_text(encoding="utf-8")
+
+
+# ---- the recorded judge-check run (critic round 14 A04, round 15 E02) ---------------------------
+
+RUN = {
+    "commit": "abc1234",
+    "steps": [
+        {"name": "tests", "ok": True, "text": "python: 3 passed; worker: pass 2"},
+        {
+            "name": "reproduce",
+            "ok": True,
+            "text": "reproduce: 9 values in 2 files regraded; every one matches; 1 files not "
+            "regraded and 1 notes, each named above; note on results/a.json: the counts are as "
+            "recorded; the cost is regraded; note on results/b.json: not regraded: no seed",
+        },
+        {"name": "web", "ok": False, "text": "design-check: clean. tap targets 3 passed.; port 1"},
+        {"name": "audit log", "ok": True, "text": "audit-log: 3 entries, chain intact"},
+    ],
+    "last": "judge-check: 1 of 4 steps failed",
+}
+
+
+def test_the_judge_check_run_gives_each_note_its_own_item_under_its_step() -> None:
+    from scripts.render_readme import judge_check_list
+
+    assert judge_check_list(RUN).splitlines() == [
+        "- **tests**: python: 3 passed; worker: pass 2",
+        "- **reproduce**: 9 values in 2 files regraded; every one matches; 1 files not regraded "
+        "and 1 notes, each named below",
+        "  - results/a.json: the counts are as recorded; the cost is regraded",
+        "  - results/b.json: not regraded: no seed",
+        "- **web** (failed): design-check: clean. tap targets 3 passed; port 1",
+        "- **audit log**: 3 entries, chain intact",
+        "- judge-check: 1 of 4 steps failed",
+    ]
+
+
+def test_a_block_is_written_whole_from_its_results_file_and_written_again(tmp_path: Path) -> None:
+    (tmp_path / "results").mkdir()
+    run = tmp_path / "results" / "judge_check.json"
+    run.write_text(json.dumps(RUN))
+    text = "The run:\n\n<!--block:judge-check results/judge_check.json-->\n<!--/block-->\n\nNext.\n"
+    out, missing = render(text, tmp_path)
+    assert missing == []
+    assert "\n  - results/b.json: not regraded: no seed\n- **web** (failed): " in out
+    assert out.endswith("steps failed\n<!--/block-->\n\nNext.\n")
+    run.write_text(json.dumps({**RUN, "last": "judge-check: 4 of 4 steps passed"}))
+    again, _ = render(out, tmp_path)
+    assert again.count("- judge-check:") == 1 and "4 of 4 steps passed\n<!--/block-->" in again
+    assert broken_paragraph_lines(again) == []
+    run.unlink()
+    kept, missing = render(again, tmp_path)
+    assert kept == again and missing == ["results/judge_check.json (block judge-check)"]
+
+
+def test_the_readme_shows_the_recorded_run_as_items_and_the_port_note_after_them() -> None:
+    import re
+
+    root = Path(__file__).resolve().parents[2]
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    block = re.search(
+        r"option\):\n\n<!--block:judge-check results/judge_check.json-->\n(.*?)<!--/block-->\n\n"
+        r"The web step builds the app",
+        readme,
+        re.S,
+    )
+    assert block, "the run is not a block between its colon and the port note"
+    shown = block.group(1)
+    assert "each named above" not in shown
+    assert not re.search(r"\*\*([\w ]+)\*\*: \1:", shown.replace("audit-log", "audit log"))
+    notes = [ln for ln in shown.splitlines() if ln.startswith("  - ")]
+    run = json.loads((root / "results" / "judge_check.json").read_text(encoding="utf-8"))
+    assert len(notes) == sum(s["text"].count("; note on ") for s in run["steps"]) > 0
