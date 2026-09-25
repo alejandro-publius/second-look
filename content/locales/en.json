@@ -142,6 +142,8 @@
   "check.number_label": "Number {unit}",
   "check.unverified": "Draft wording",
   "check.region_list_empty": "No plant list for this region yet. Pick Can't tell.",
+  "check.region_list_for": "This list is for {region}.",
+  "check.region_list_elsewhere": "We have a plant list only for {regions}, so there is none for this creek. Pick Can't tell, or None of these.",
   "check.slider_na": "Not applicable",
   "check.slider.joy": "Joy",
   "check.slider.serenity": "Serenity",

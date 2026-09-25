@@ -359,6 +359,9 @@ function main() {
     question: w.checker?.question ?? null,
     checker_run: w.checker?.footage_run ?? "synthetic",
     checker_dropped: w.checker?.dropped ?? 0,
+    // A walk filmed inside a region pack names it, so Which ones? offers that region's plants.
+    // None of today's clips is (critic round 14 B03).
+    region: w.region ?? null,
   }));
   // One credit line per video a visitor can see, for /credits: the walks, with their licence code.
   const footage_credits = walksRaw.map((w) => ({

@@ -9,6 +9,12 @@ name: "California, San Francisco Bay Area"
 approved: true
 approved_by: "the team, Alex Velazquez, 2026-09-25"
 source: "https://www.cal-ipc.org/plants/inventory/"
+# Where this list is offered on the creek check: the nine Bay Area counties as one box, [south,
+# west, north, east] in degrees. Approximate, hand filled 2026-09-25 from public maps, and not part
+# of the list the team approved. A spot outside the box, or a video walk, is offered no list, only
+# Can't tell and None of these, with a line that says the list is for this region (critic round 14
+# B03).
+bbox: [36.8, -123.7, 38.9, -121.2]
 invasive_plants:
   - common_name: "Giant reed"
     latin_name: "Arundo donax"

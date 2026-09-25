@@ -46,6 +46,8 @@ async function answerForm(page: import("@playwright/test").Page, { moveJoy = tru
   // The Bay Area list was approved on 2026-09-25 (UPDATE_30 section 3), so its plants are offered.
   await expect(page.getByLabel("Himalayan blackberry (Rubus armeniacus)")).toBeVisible();
   await expect(page.getByText("No plant list for this region yet.")).toHaveCount(0);
+  // Critic round 14 B03: the list says whose it is, here the spot's own region.
+  await expect(page.getByTestId("region-list-note")).toHaveText("This list is for California, San Francisco Bay Area.");
   await page.getByLabel("Can't tell").check();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "No", exact: true }).click(); // cuts
@@ -208,4 +210,35 @@ test.describe("Use my location works on a check opened by a tap inside the app",
       await expect(page.getByText("Rounded position: 37.87, -122.26")).toBeVisible();
     });
   }
+});
+
+// Critic round 14 B03: in /check the plant list follows the spot's region. A pin outside every
+// region pack's box, here Heraklion, gets no list, only Can't tell and None of these, with a line
+// that says the list is for the Bay Area.
+test("a spot outside the Bay Area is offered no plant list", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/check");
+  await page.getByRole("button", { name: "Start the check" }).click();
+  await page.getByRole("button", { name: "Drop a pin instead" }).click();
+  await page.getByLabel("Latitude").fill("35.3387");
+  await page.getByLabel("Longitude").fill("25.1442");
+  await page.getByLabel("Name for this spot").fill("Bridge");
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Question 1 of")).toBeVisible();
+  for (let i = 0; i < 40; i++) {
+    const question = (await page.locator("h1#question").innerText()).trim();
+    if (question === "Which ones?") break;
+    if (question === "Do you see any non-native or invasive plant species?") await page.getByRole("button", { name: "Yes", exact: true }).click();
+    else if (await page.getByRole("button", { name: "Skip", exact: true }).isVisible()) await page.getByRole("button", { name: "Skip", exact: true }).click();
+    else if (await page.getByRole("button", { name: "None of these", exact: true }).isVisible()) await page.getByRole("button", { name: "None of these", exact: true }).click();
+    else if (await page.getByRole("main").getByRole("group").first().getByRole("button").first().isVisible()) await page.getByRole("main").getByRole("group").first().getByRole("button").first().click();
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.locator("h1#question")).toHaveText("Which ones?");
+  await expect(page.getByText(/Hedera helix/)).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("group").getByRole("checkbox")).toHaveCount(1);
+  await expect(page.getByTestId("region-list-note")).toHaveText(
+    "We have a plant list only for California, San Francisco Bay Area, so there is none for this creek. Pick Can't tell, or None of these.",
+  );
 });

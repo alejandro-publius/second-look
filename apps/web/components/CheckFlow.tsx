@@ -9,7 +9,7 @@ import { LocationStep } from "./LocationStep";
 import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
 import { Progress } from "./Progress";
 import { api, ApiError, isNetworkError, type AnswerValue, type DraftRequest, type DraftResponse, type SpotRef } from "@/lib/api";
-import { content, questionCount, type FormItem } from "@/lib/content";
+import { content, questionCount, regionAt, type FormItem } from "@/lib/content";
 import { enqueue, flushQueue, getQueued, onQueueChange } from "@/lib/offline";
 import { clearContributorToken, getContributorToken, rememberSpot } from "@/lib/session";
 import { t } from "@/lib/t";
@@ -51,6 +51,9 @@ export function CheckFlow() {
   const items = useMemo(() => visibleItems(answers), [answers]);
   const firstRating = typeof answers.overall_rating === "string" ? answers.overall_rating : null;
   const ratingItem = content.form.items.find((i) => i.id === "overall_rating");
+  // The region whose plant list Which ones? offers: the one a new spot's position is in, or none.
+  // A saved spot's position is not kept on this device, so it is not known (critic round 14 B03).
+  const plantRegion = spot && "new" in spot ? (regionAt(spot.new.latitude, spot.new.longitude)?.region ?? null) : undefined;
 
   // Watch the queue while a saved check waits.
   const queuedId = stage.name === "queued" ? stage.id : null;
@@ -195,6 +198,7 @@ export function CheckFlow() {
             onAnswer={(v) => answerItem(stage.index, v)}
             onSkip={() => answerItem(stage.index, undefined)}
             onBack={() => (stage.index === 0 ? setStage({ name: "location" }) : setStage({ name: "items", index: stage.index - 1 }))}
+            plantRegion={plantRegion}
           />
         </div>
       );

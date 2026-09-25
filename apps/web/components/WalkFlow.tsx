@@ -357,6 +357,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
                 if (stage.index === 0) setStage({ name: "watch" });
                 else setStage({ name: "items", index: stage.index - 1 });
               }}
+              plantRegion={walk.region ?? null}
             />
           </div>
         );

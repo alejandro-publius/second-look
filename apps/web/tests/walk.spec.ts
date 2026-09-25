@@ -124,7 +124,7 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
     "Walk records made the same way passed the HL7 validator on Sep 20, 2026. This one was made on your phone and was not checked.",
   );
   await expect(page.getByText("passed the HL7 validator against guide commit")).toHaveCount(0);
-  await expect(page.locator("pre.code").first()).toHaveText(/^curl -s http:\/\/127\.0\.0\.1:8100\/api\/walk\/walk-[0-9a-f]{16}$/);
+  await expect(page.locator("pre.code").first()).toHaveText(/^curl -s http:\/\/127\.0\.0\.1:8100\/api\/walk\/walk-[0-9a-f]{16}\/fhir$/);
   const json = await page.locator("pre.code").last().innerText();
   const bundle = JSON.parse(json);
   expect(bundle.meta.tag.some((t: { code: string }) => t.code === "demo-walk")).toBe(true);
@@ -462,4 +462,34 @@ test("a walk says how to see a measure, and an honest walk ends on a marked exam
   await expect(page.getByRole("main")).not.toContainText(/\bdoor\b/i);
   await back.click();
   await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
+});
+
+// Critic round 14 B03 and round 15 F04: Which ones? offered the San Francisco Bay Area's plant list
+// on creeks in Russia, the UK and Oregon, English ivy among them, which is native to Britain, and
+// named no region. A walk's creek is in no region with a list, so it offers only Can't tell and
+// None of these, and says whose list it would be.
+test("a walk's Which ones? offers no region's plants and says the list is for the Bay Area", async ({ page }) => {
+  await mockApi(page, {});
+  const uk = walks.find((w: { id: string }) => w.id === "v03")!;
+  await page.goto(`${BASE}/walk/${uk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  const invasive = content.form.items.find((i: { id: string }) => i.id === "invasive_species");
+  for (let i = 0; i < 40; i++) {
+    const question = (await page.locator("h1#question").innerText()).trim();
+    if (question === "Which ones?") break;
+    if (question === invasive.text) await page.getByRole("button", { name: en["check.yes"], exact: true }).click();
+    else if (await page.getByRole("button", { name: en["check.skip"], exact: true }).isVisible()) await page.getByRole("button", { name: en["check.skip"], exact: true }).click();
+    else if (await page.getByRole("button", { name: en["check.none_of_these"], exact: true }).isVisible()) await page.getByRole("button", { name: en["check.none_of_these"], exact: true }).click();
+    else if (await page.getByRole("main").getByRole("group").first().getByRole("button").first().isVisible()) await page.getByRole("main").getByRole("group").first().getByRole("button").first().click();
+    else await page.getByRole("button", { name: en["check.next"], exact: true }).click();
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.locator("h1#question")).toHaveText("Which ones?");
+  const group = page.getByRole("main").getByRole("group");
+  await expect(group.getByText(/Hedera helix/)).toHaveCount(0);
+  await expect(group.getByRole("checkbox")).toHaveCount(1);
+  await expect(group.getByLabel(en["check.not_sure"])).toBeVisible();
+  await expect(page.getByRole("button", { name: en["check.none_of_these"], exact: true })).toBeVisible();
+  const bayArea = content.regions["california-bay-area"].name;
+  await expect(page.getByTestId("region-list-note")).toHaveText(en["check.region_list_elsewhere"].replace("{regions}", bayArea));
 });
