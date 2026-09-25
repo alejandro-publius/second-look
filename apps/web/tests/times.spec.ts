@@ -21,8 +21,9 @@ const QUOTES_TEST = ["consent.what", "end.share", "share.card_line2", "share.cta
 const QUOTES_CHECK = ["check.intro", "judges.check_note", "judges.walks_note"];
 // The landing page's two frozen lines, and the lesson's own time, which is another thing.
 const TWO_MINUTES = ["landing.cta", "app.one_sentence", "end.lesson_offer"];
-// Other things with a time of their own: judge mode, and reading one example.
-const THREE_OF_ANOTHER_THING = ["judges.demo_note", "judges.ai_example_note"];
+// Other things with a time of their own: judge mode, reading one example, and reading the judge's
+// day (critic round 14 R12).
+const THREE_OF_ANOTHER_THING = ["judges.demo_note", "judges.ai_example_note", "judges.day_note"];
 
 test("the test's time and the check's time are each written once, and the strings that quote them read them from there", () => {
   expect(TEST).toBe("about four minutes");
