@@ -614,6 +614,9 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 | Architecture, the deep version | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | The technical report, about fifteen minutes to read | [`docs/REPORT.pdf`](docs/REPORT.pdf) |
 | Our own scorecard, weaknesses included | [`docs/JUDGE_SCORECARD.md`](docs/JUDGE_SCORECARD.md) |
+| A judge's day: the path on the live site, with what you should see at each step | [`docs/JUDGE_DAY.md`](docs/JUDGE_DAY.md) |
+| The 20 hardest questions, with honest answers and the file or command that proves each | [`docs/submission/JUDGE_QA.md`](docs/submission/JUDGE_QA.md) |
+| The known bugs, each kept as a test that fails until it is fixed | [`docs/KNOWN_BUGS.md`](docs/KNOWN_BUGS.md) |
 | The demo script | [`docs/video/SHOTLIST.md`](docs/video/SHOTLIST.md), read aloud from [`docs/video/VOICE_SCRIPT.md`](docs/video/VOICE_SCRIPT.md) |
 
 ### What was built, screen by screen

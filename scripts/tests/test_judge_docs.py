@@ -99,3 +99,10 @@ def test_the_first_mention_of_an_arm_says_what_an_arm_is() -> None:
     lines = text(README).splitlines()
     first = next(ln for ln in lines if re.search(r"\barms?\b", ln, re.I))
     assert "called arms" in first or first.startswith("- **Arm:**"), first
+
+
+def test_the_for_judges_section_links_the_pages_written_for_judges() -> None:
+    # R12: the judge's day and the twenty hardest questions were linked from nowhere a judge reads.
+    judges = section(text(README), "For judges")
+    for page in ("docs/JUDGE_DAY.md", "docs/submission/JUDGE_QA.md", "docs/KNOWN_BUGS.md"):
+        assert f"({page})" in judges, page

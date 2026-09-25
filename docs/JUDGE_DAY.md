@@ -23,6 +23,9 @@ about a feature it passed.
 
 ## In 10 minutes
 
+The README's own path, under For judges, starts with the test itself; this one starts with judge
+mode, which shows the same photos and stores nothing.
+
 1. **Judge mode** (/demo): the 16 photos with "Right." or "Not this time." after each answer, then
    the score per feature. It stores nothing. About three minutes.
 2. **A walk** (/walk, then a creek): a 40 second clip, then the same guided check a volunteer does at
@@ -38,7 +41,7 @@ about a feature it passed.
    Bitcoin timestamp. Under a minute.
 6. **The repository** (public from Sep 30): the README's "For judges" section, the technical report
    (docs/REPORT.pdf) and `make judge-check`, which runs the checks again in about five minutes with
-   no key and no network.
+   no key and no network, and names in its summary the AI numbers it can check only as recorded.
 
 ## If their sandbox is still down
 
@@ -50,6 +53,8 @@ shows their laboratory record beside ours.
 
 ## If something does not load
 
-The site is watched every 10 minutes from the team's Mac, and a failure is posted on the status
-issue. A judge who meets a broken page can still read every screen in docs/screens/ and run
-`make judge-check` from the repository.
+The site is watched every 10 minutes from a team member's laptop, and a failure is posted on the
+team's status issue,
+[issue 4 of this repository](https://github.com/alejandro-publius/second-look/issues/4). While
+that laptop sleeps, nobody is told. A judge who meets a broken page can still read every screen in
+docs/screens/ and run `make judge-check` from the repository.

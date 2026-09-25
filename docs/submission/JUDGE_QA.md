@@ -1,6 +1,6 @@
 # The 20 hardest questions, with honest answers
 
-For the live judging and for anyone reading the repo. From pull request #5, checked against this branch on 2026-09-24. Short answers, then the file or command that proves each one. Where the honest answer is "not yet" or "no", it says so.
+For the live judging and for anyone reading the repo. First written in this repository's own pull request #5 (not the one we sent to hl7-eu/oah), checked against `main` on 2026-09-24; questions 4 and 18 were brought up to date on 2026-09-25. Short answers, then the file or command that proves each one. Where the honest answer is "not yet" or "no", it says so.
 
 ## Freshwater ecologist
 
