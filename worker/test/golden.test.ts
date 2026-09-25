@@ -20,7 +20,7 @@ import { observerLabel } from "../src/core/labels";
 import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
-import { isDemo, walkBundle } from "../src/core/walks";
+import { WalkRecordError, isDemo, walkBundle, walkRecord } from "../src/core/walks";
 import { storeUpload, stripJpeg } from "../src/uploads";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -191,6 +191,24 @@ test("walks: the same demo Bundle as Python, tagged on every resource, and struc
     }
     writeBundle(bundle);
   }
+});
+
+test("walks: the stored row of a finished walk, or the same reason to refuse it, as Python", () => {
+  const doc = golden("walks");
+  assert.ok(doc.record_cases.length >= 5, "cases that store and cases that refuse");
+  let stored = 0;
+  for (const c of doc.record_cases) {
+    let got: unknown;
+    try {
+      got = walkRecord(c.input.walk, c.input.answers, c.input.answered_at, c.input.now);
+    } catch (err) {
+      assert.ok(err instanceof WalkRecordError, `${c.name}: ${String(err)}`);
+      got = { error: err.message };
+    }
+    same(got, c.expected, c.name);
+    if (!("error" in c.expected)) stored += 1;
+  }
+  assert.ok(stored > 0 && stored < doc.record_cases.length, "both kinds of case ran");
 });
 
 test("old Bundles: only ts- JSON files are deleted, and only the ones in that folder", () => {

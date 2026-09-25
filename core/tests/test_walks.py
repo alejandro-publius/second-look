@@ -9,7 +9,19 @@ from datetime import UTC, datetime, timedelta, timezone
 import pytest
 
 from core.fhir_emit import check_bundle
-from core.walks import DEMO_TAG_CODE, is_demo, utc_stamp, walk_bundle, walk_spot, walk_visit_id
+from core.walks import (
+    DEMO_TAG_CODE,
+    WALK_FUTURE_SECONDS,
+    WALK_KEEP_DAYS,
+    WALK_PAST_DAYS,
+    WalkRecordError,
+    is_demo,
+    utc_stamp,
+    walk_bundle,
+    walk_record,
+    walk_spot,
+    walk_visit_id,
+)
 
 WALK = {"id": "v03", "spot_name": "The stretch in the clip", "creek_name": "A creek in Chile"}
 AT = datetime(2026, 9, 24, 16, 5, 9, tzinfo=UTC)
@@ -81,3 +93,55 @@ def test_a_time_with_no_zone_is_read_as_utc_like_the_emitter_and_the_worker() ->
 def test_a_time_with_a_zone_is_moved_to_utc() -> None:
     berlin = AT.astimezone(timezone(timedelta(hours=2)))
     assert utc_stamp(berlin) == "2026-09-24T16:05:09Z"
+
+
+# UPDATE_30 section 1 item 3: the row the store keeps for a finished walk.
+NOW = datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC)
+
+
+def test_a_stored_walk_is_the_record_the_phone_built_with_the_same_id() -> None:
+    row = walk_record(WALK, {"bank_type": "present"}, "2026-09-25T09:59:58.250Z", NOW)
+    at = datetime(2026, 9, 25, 9, 59, 58, tzinfo=UTC)
+    assert row["record_id"] == walk_visit_id("v03", at)
+    assert row["bundle"] == walk_bundle(WALK, {"bank_type": "present"}, at)
+    assert is_demo(row["bundle"])
+    assert row["answered_at"] == "2026-09-25T09:59:58Z"
+    assert row["created_at"] == "2026-09-25T10:00:00Z"
+
+
+def test_a_stored_walk_is_deleted_after_the_days_the_docs_name() -> None:
+    row = walk_record(WALK, {}, "2026-09-25T10:00:00Z", NOW)
+    assert row["delete_after"] == utc_stamp(NOW + timedelta(days=WALK_KEEP_DAYS))
+    assert WALK_KEEP_DAYS == 30
+
+
+def test_the_same_walk_sent_twice_is_one_record() -> None:
+    first = walk_record(WALK, {"bank_type": "present"}, "2026-09-25T09:00:00Z", NOW)
+    later = NOW + timedelta(hours=2)
+    again = walk_record(WALK, {"bank_type": "present"}, "2026-09-25T09:00:00Z", later)
+    assert first["record_id"] == again["record_id"]
+
+
+@pytest.mark.parametrize(
+    ("answered_at", "reason"),
+    [
+        ("2026-09-25T10:05:01Z", "dated in the future"),
+        ("2026-09-18T09:59:59Z", "more than 7 days old"),
+        ("2026-09-25T10:00:00", "must be a time like"),
+        ("yesterday", "must be a time like"),
+        (1790000000, "must be a time like"),
+        (None, "must be a time like"),
+    ],
+)
+def test_a_walk_dated_where_nobody_could_have_made_it_is_refused(
+    answered_at: object, reason: str
+) -> None:
+    with pytest.raises(WalkRecordError, match=reason):
+        walk_record(WALK, {"bank_type": "present"}, answered_at, NOW)
+
+
+def test_the_edges_of_the_window_are_kept() -> None:
+    ahead = NOW + timedelta(seconds=WALK_FUTURE_SECONDS)
+    old = NOW - timedelta(days=WALK_PAST_DAYS)
+    for moment in (ahead, old):
+        assert walk_record(WALK, {}, utc_stamp(moment), NOW)["answered_at"] == utc_stamp(moment)

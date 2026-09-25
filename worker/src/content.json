@@ -1085,6 +1085,23 @@
       "id": "t16"
     }
   ],
+  "walks": [
+    {
+      "creek_name": "A creek in Russia",
+      "id": "v02",
+      "spot_name": "The stretch in the clip"
+    },
+    {
+      "creek_name": "A creek in the United Kingdom",
+      "id": "v03",
+      "spot_name": "The stretch in the clip"
+    },
+    {
+      "creek_name": "A creek in the United States",
+      "id": "v07",
+      "spot_name": "The stretch in the clip"
+    }
+  ],
   "warmup_ids": [
     "w01",
     "w02"

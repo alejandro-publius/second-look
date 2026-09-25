@@ -980,7 +980,83 @@ def walk_vectors() -> dict[str, Any]:
                 datetime(2026, 9, 25, 8, 0, 0, 750000, tzinfo=UTC),
             ),
         ],
+        # UPDATE_30 section 1 item 3: the row the store keeps for a finished walk, or the plain
+        # reason it refuses one. Both servers build the row with this function.
+        "record_function": "core.walks.walk_record",
+        "record_cases": [
+            record_case(walk, name, answers, answered_at, now)
+            for name, answers, answered_at, now in (
+                (
+                    "a walk sent at once, with milliseconds",
+                    {"bank_type": "present", "water_height_m": 0.5},
+                    "2026-09-25T10:00:00.123Z",
+                    datetime(2026, 9, 25, 10, 0, 2, tzinfo=UTC),
+                ),
+                (
+                    "a walk made offline six days ago, in another zone",
+                    {"bank_type": "absent", "habitats": ["riffles"]},
+                    "2026-09-19T12:30:00+02:00",
+                    datetime(2026, 9, 25, 9, 0, 0, tzinfo=UTC),
+                ),
+                (
+                    "a phone clock four minutes ahead",
+                    {},
+                    "2026-09-25T10:04:00Z",
+                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                ),
+                (
+                    "a walk dated six minutes ahead",
+                    {"bank_type": "present"},
+                    "2026-09-25T10:06:00Z",
+                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                ),
+                (
+                    "a walk eight days old",
+                    {"bank_type": "present"},
+                    "2026-09-17T10:00:00Z",
+                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                ),
+                (
+                    "a time with no zone",
+                    {"bank_type": "present"},
+                    "2026-09-25T10:00:00",
+                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                ),
+                (
+                    "a date and no time",
+                    {"bank_type": "present"},
+                    "2026-09-25",
+                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                ),
+                (
+                    "a number, not a time",
+                    {"bank_type": "present"},
+                    1790000000,
+                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                ),
+            )
+        ],
     }
+
+
+def record_case(
+    walk: dict[str, Any], name: str, answers: dict[str, Any], answered_at: object, now: datetime
+) -> dict[str, Any]:
+    """One stored walk row, or {"error": <the plain reason>} when the store refuses it."""
+    try:
+        row = walks.walk_record(walk, answers, answered_at, now)
+    except walks.WalkRecordError as err:
+        expected: dict[str, Any] = {"error": str(err)}
+    else:
+        assert check_bundle(row["bundle"]) == [] and walks.is_demo(row["bundle"])
+        expected = row
+    inputs = {
+        "walk": walk,
+        "answers": answers,
+        "answered_at": answered_at,
+        "now": now.isoformat().replace("+00:00", "Z"),
+    }
+    return case(name, inputs, expected)
 
 
 def helper_vectors() -> dict[str, Any]:

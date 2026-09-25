@@ -56,6 +56,32 @@ def warmup_ids() -> frozenset[str]:
     return frozenset(str(w["id"]) for w in raw.get("warmup", []))
 
 
+@lru_cache(maxsize=1)
+def walks() -> tuple[dict[str, str], ...]:
+    """The video walks a finished walk may name (content/walks.yaml): id, spot and creek names.
+
+    Only what the record needs. The clip, its credit and the checker's flags stay in the file.
+    """
+    import yaml
+
+    path = get_content().root / "content" / "walks.yaml"
+    if not path.exists():
+        return ()
+    with path.open(encoding="utf-8") as f:
+        raw = yaml.safe_load(f) or {}
+    return tuple(
+        {"id": str(w["id"]), "spot_name": str(w["spot_name"]), "creek_name": str(w["creek_name"])}
+        for w in raw.get("walks", []) or []
+    )
+
+
+def walk_by_id(walk_id: str) -> dict[str, str] | None:
+    for walk in walks():
+        if walk["id"] == walk_id:
+            return walk
+    return None
+
+
 def form_items() -> list[dict[str, Any]]:
     return list(get_content().form.get("items", []))
 
