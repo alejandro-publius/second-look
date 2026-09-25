@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { toPageTop, toRegionTop } from "../scripts/gallery-view.mjs";
+import { toPageTop, toRegionTop, wholeOnFirstScreen } from "../scripts/gallery-view.mjs";
 import { answerWalkPlainly } from "../scripts/gallery-walk.mjs";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
@@ -274,6 +274,22 @@ test("a feelings slider nobody moved stays out of the walk's record", async ({ p
     const row = page.getByTestId("walk-answers").locator(".answer-line").filter({ hasText: feelings });
     if (moved) await expect(row.locator("strong")).toHaveText("Joy: 3, Fear: Not applicable");
     else await expect(row).toHaveCount(0);
+  }
+});
+
+// CRITIC_11 V01: the note on how to see a measure pushed Start the check below the first screen
+// of every walk at 390 by 844, and the gallery's picture of a walk, whose alt text names the
+// button, showed none. The button now comes before the demo notice. The gallery takes the same
+// step (scripts/gallery-view.mjs) before its shot, so a walk whose button is not whole on the
+// first screen fails both here and there.
+test("Start the check is whole on the first screen of every walk at 390 by 844", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(walks.length).toBeGreaterThan(0);
+  for (const w of walks) {
+    await page.goto(`${BASE}/walk/${w.id}`);
+    const box = await wholeOnFirstScreen(page, page.getByRole("button", { name: en["walk.start"] }));
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height, w.id).toBeLessThanOrEqual(844);
   }
 });
 

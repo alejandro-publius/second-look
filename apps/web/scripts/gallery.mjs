@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { API_ORIGIN, BUILT_IN_DEFAULT, goldFor, mockApi } from "../tests/mock-api.mjs";
 import { liveRequestAllowed, localRequestAllowed } from "./gallery-guard.mjs";
-import { toPageTop, toRegionTop } from "./gallery-view.mjs";
+import { toPageTop, toRegionTop, wholeOnFirstScreen } from "./gallery-view.mjs";
 import { answerWalkPlainly } from "./gallery-walk.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -227,7 +227,11 @@ async function liveRun(browser) {
   gallery("walks", "/walk", "live", await visit("/walk"), "Check a creek from your desk: one short clip of a creek for each country.");
   if (firstWalk) {
     const route = `/walk/${firstWalk.id}`;
-    gallery("walk", route, "live", await visit(route), "A walk: the clip of a creek, with its credit, and a button to start the check.");
+    // The alt text names the button, so the run fails unless the button is whole on the first
+    // screen (CRITIC_11 V01). tests/walk.spec.ts takes the same step on every walk.
+    await page.goto(`${LIVE}${route}`);
+    await wholeOnFirstScreen(page, button(page, "Start the check"));
+    gallery("walk", route, "live", await shoot(page), "A walk: the clip of a creek, with its credit, and a button to start the check.");
     await button(page, "Start the check").click();
     for (let step = 0; step < 2; step++) {
       const choice = page.getByRole("main").getByRole("group").first().getByRole("button");

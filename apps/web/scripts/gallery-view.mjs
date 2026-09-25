@@ -12,6 +12,24 @@ export async function toPageTop(page) {
 }
 
 /**
+ * Goes to the top of the page and fails unless the element is whole on that first screen. Returns
+ * its box. The gallery's picture of a walk says it shows a button to start the check, and a note
+ * above the button once pushed it below the first screen, so the picture showed none (CRITIC_11 V01).
+ */
+export async function wholeOnFirstScreen(page, locator) {
+  await locator.waitFor();
+  await page.evaluate(() => document.fonts.ready);
+  await toPageTop(page);
+  const box = await locator.boundingBox();
+  const height = page.viewportSize().height;
+  if (!box || box.y < 0 || box.y + box.height > height) {
+    const where = box ? `from ${Math.round(box.y)} to ${Math.round(box.y + box.height)}` : "not drawn";
+    throw new Error(`gallery-view: the element is not whole on the first screen (${where}, screen ${height} tall)`);
+  }
+  return box;
+}
+
+/**
  * Puts the top of a named region at the top of the screen, so the shot shows that region from its
  * heading down. The walk's city view listed a plant above its needs, and a shot from the page top
  * cut the first measure off before its source (CRITIC_07 J04).

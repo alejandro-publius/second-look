@@ -107,10 +107,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           {/* The clips show natural creeks, so an honest check finds little for a city to do. This
               says how to see a measure before the check starts (CRITIC_09 Q01). */}
           <p data-testid="walk-honest-note">{t("walk.honest_note")}</p>
-          <p className="notice notice-warn">{t("walk.demo_notice")}</p>
+          {/* The button before the demo notice, so it is on the first screen of every walk on a
+              390 by 844 phone (CRITIC_11 V01). */}
           <button type="button" className="btn btn-block" onClick={() => setStage({ name: "items", index: 0 })}>
             {t("walk.start")}
           </button>
+          <p className="notice notice-warn">{t("walk.demo_notice")}</p>
         </>
       );
       break;
