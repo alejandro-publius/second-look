@@ -1,5 +1,9 @@
 # PLAN.md: Second Look build plan
 
+Working notes: the build plan as it was written on Sep 20, kept public on purpose and not updated.
+Names, models, owners and dates here may have changed since; what was built is in the README, and
+every change to this plan is in `docs/DECISIONS.md`.
+
 Version 2, Sun Sep 20 2026. Folds docs/internal/updates/UPDATE_02.md into the plan from docs/internal/MASTER_BRIEF.md section 17. Precedence: the latest file in docs/internal/updates/ wins over the brief; the brief wins over this plan unless a change is recorded in docs/DECISIONS.md.
 
 Tags: MUST before the Wednesday Sep 23 launch. SHOULD before the Saturday Sep 26 freeze. COULD only if everything above it is green.

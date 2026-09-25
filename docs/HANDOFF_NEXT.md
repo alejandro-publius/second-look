@@ -1,5 +1,9 @@
 # Handoff: where Second Look stands, 2026-09-24
 
+Working notes, kept public on purpose: each section says what was true on its date, and an item
+closed since is marked with when and how. What is true now is in the README; the changes and their
+reasons are in `docs/DECISIONS.md` and `docs/deviations.md`.
+
 ## UPDATE_27 and UPDATE_29, the loop to RED: 0 (Sep 24, 14:00Z)
 
 The definition of done is `docs/internal/DONE.md`; `make done-check` prints PASS, RED, BLOCKED or
@@ -11,11 +15,11 @@ order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA k
 `PLAN.md`, this file, `docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest
 `docs/internal/updates/`.
 
-Where it stands (Sep 25, 05:07Z): everything is merged, deployed and green on `main` and `depth`. REVIEW_03's 59 findings are fixed with proofs; the six-judge rerun scored 7.33 against 5.73. Critic rounds 01 to 13 are in `docs/internal/reviews/`; from round 08 a round is three critics at once (the repository, and the live product in two parts), and rounds 10 and 11, then 12 and 13, ran in pairs on the same commit. Rounds 12 and 13 reported minor and minor at worst. Measured on the live site: axe clean, Lighthouse 93 or more on all 20 pages (Sep 24), no dead link, every README command runs in a fresh clone. `make done-check` ends with the counts in the newest report in `docs/internal/reports/`; what is left is dated (Sep 28) or waits on a person (`docs/ALEX_TODO.md`). Dependabot's update pull requests wait for a person.
+Where it stands (Sep 25, 05:07Z): everything is merged, deployed and green on `main` and `depth`. REVIEW_03's 59 findings are fixed with proofs; a rerun of the simulated six-judge panel (Claude sessions playing judges, not real judges) scored the entry higher than the first run. Critic rounds 01 to 13 are in `docs/internal/reviews/`; from round 08 a round is three critics at once (the repository, and the live product in two parts), and rounds 10 and 11, then 12 and 13, ran in pairs on the same commit. Rounds 12 and 13 reported minor and minor at worst. Measured on the live site: axe clean, Lighthouse 93 or more on all 20 pages (Sep 24), no dead link, every README command runs in a fresh clone. `make done-check` ends with the counts in the newest report in `docs/internal/reports/`; what is left is dated (Sep 28) or waits on a person (`docs/ALEX_TODO.md`). Dependabot's update pull requests wait for a person.
 
 Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamps) and
-`com.secondlook.inaturalist` (07:45; it asks nothing until Rachel approves the Bay Area plant
-list, D66). Their logs are in `~/second-look-backups/logs/`.
+`com.secondlook.inaturalist` (07:45; it asked nothing until the Bay Area plant list was approved
+for the team on Sep 25, D66). Their logs are in `~/second-look-backups/logs/`.
 
 Traps: after any change to `content/locales/en.json`, run `scripts/build_worker_content.py`. The
 web build rewrites the tracked `apps/web/public/_headers`; restore it before committing. A change
@@ -32,29 +36,35 @@ not checked: run `make check` before moving `main`. Production runs `main`: the 
 4f4cee43) and Pages with the API on its own origin. Keys live only in the ignored `.env` files:
 `QA_KEY` in both checkouts, `ANTHROPIC_API_KEY` in `~/second-look-depth/.env`.
 
-Done in this run: the two machine sittings marked as tests (counts read 0); the weighting
+Done in this run: the two machine sittings marked as tests (the counts then read 0); the weighting
 simulation committed and the README saying what it shows; the paid AI run (6 of 12 features
-passed, 13.09 USD of the 40 dollar cap, `results/cost_log.jsonl`) and the README's AI table;
+passed, 13.09 USD of the 40 dollar cap, `results/cost_log.jsonl`; the four-model run later that
+day replaced it, and the README has its numbers) and the README's AI table;
 smaller AVIF and WebP copies of the two warm-up photos; pull request #8 merged (3 of 21 patches);
 open creek footage in the rough cut, credited, and the creek trip removed from Alex's list.
 
-Still open, for a session:
+Still open, for a session, as it stood on Sep 24 at 04:10Z. Checked again on Sep 25: F86, F06
+to F08, F85, F01 and the warm-up precache item are closed, as each says; F04 and F12 are still
+open; F88 is logged in `docs/deviations.md` and its remedy is Alex's.
 - Their sandbox's name, `sandbox.hl7europe.eu`, is NXDOMAIN at their own nameserver since Sep 23.
   `/two` shows our record alone and says so; `scripts/cache_their_records.py` runs daily at 07:30
   (launchd `com.secondlook.theirs`) and fills the cache the day the name resolves again. The
   sandbox re-push job on Sep 28, Sep 30 and Oct 1 will fail the same way until then. This terminal
   refused a fetch pinned to their last known address, so none was built.
 - Open review findings from pull request #8 (`docs/internal/reviews/REVIEW_02.md`): F86, POST
-  `/api/demo/answer` has no server lock check before Sep 28, so 16 POSTs reveal the gold key (the
-  fix touches the frozen study routes; low risk while nobody is recruited); F06 to F08, the
-  analysis can be run on real data before the lock through test flags (patch 04 applies cleanly
-  but was held back as a change to the lock guard); F85, `person_no_swallow` was drafted by a
-  session and carries Alex's name as approver (on Alex's list); F88, the gold key came from the
-  planner's picks, and patch 15 asks Alex to label the 16 test photos blind; F01, check the
-  Worker's JPEG stripper against REVIEW_02's four GPS photos; F04 and F12, the favicon's manifest
-  row and the IG package sha256.
+  `/api/demo/answer` has no server lock check before Sep 28, so 16 POSTs reveal the gold key
+  (closed on Sep 24: the route answers 403 until the lock, on both servers, `docs/deviations.md`);
+  F06 to F08, the analysis can be run on real data before the lock through test flags (closed on
+  Sep 24: patch 04 is applied, `docs/deviations.md`); F85, `person_no_swallow` was drafted by a
+  session and carries Alex's name as approver (closed on Sep 23: the sentence was dropped in
+  cd50b1d); F88, the gold key came from the planner's picks, and patch 15 asks Alex to label the
+  16 test photos blind (logged as a deviation on Sep 24; the blind labels are step 5 of
+  `docs/ALEX_TODO.md`); F01, check the Worker's JPEG stripper against REVIEW_02's four GPS photos
+  (closed on Sep 24 in bbef994, `docs/deviations.md`); F04 and F12, the favicon's manifest row and
+  the IG package sha256 (still open on Sep 25).
 - The service worker precaches all ten warm-up copies on a first visit, though a phone shows two;
-  `apps/web/scripts/build-content.mjs` could leave them out of `public/precache.json`.
+  `apps/web/scripts/build-content.mjs` could leave them out of `public/precache.json` (closed on
+  Sep 25 in fee99f9: the precache now holds one phone-size copy of each photo of the test).
 - Beat 9 of the rough cut loops the 9 second extra check recording over 13 seconds, so the phone
   never reaches the dry pipe question the words describe; record a longer clip with
   `make video-clips` before the final cut.

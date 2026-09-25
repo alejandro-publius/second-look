@@ -243,9 +243,11 @@ coverage-core:
 demo-open-check:
 	cd $(WEB) && node scripts/demo-open-check.mjs
 
-# The paid model run, in one command, for Alex once the model gate flags are flipped and the key
-# is in .env (docs/ALEX_TODO.md step 2). Batch API throughout. The 16-photo sweep refuses above 10
-# dollars worst case and the footage run above 25 expected, inside the 40 dollar cap of Update 14.
+# The paid model run, in one command, with the key in .env; it ran on Sep 24. The 16-photo sweep
+# refuses when its worst case is above --max-usd, and the footage run when what it has spent plus
+# the next model's expected cost is above its --max-usd: 60 and 120 dollars below. Update 14 named
+# 10, 25 and a 40 dollar cap in all; the caps were raised for the four-model run (docs/DECISIONS.md,
+# Sep 24), and every paid call, over 40 dollars in all, is a line in results/cost_log.jsonl.
 # Afterwards the walks are gated again on the real answers and the pool numbers rewritten; the
 # README's AI table is filled by the next session from results/, never by hand.
 ai-run:

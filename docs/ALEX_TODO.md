@@ -1,10 +1,14 @@
 # Alex: what only you can do, in order
 
+Working notes: the team's own to-do list, kept public on purpose. What is true of the product is
+in the README.
+
 Everything on this page needs your voice, your eyes or your account. Everything else is done.
 Times are Pacific.
 
-Done for you on Sep 23 and 24: the two machine sittings are marked as tests (the public counts
-read 0), the model ids and prices were confirmed and the paid AI run, four models from Sep 24, is
+Done for you on Sep 23 and 24: the two machine sittings of Sep 21 and 22 are marked as tests (on
+Sep 25 our own judge walk finished one more sitting with the hidden field filled, which the plan's
+exclusions leave out; `docs/deviations.md`), the model ids and prices were confirmed and the paid AI run, four models from Sep 24, is
 in the README (its cost is logged in `results/cost_log.jsonl`), and the QA key is set on the Worker with a copy as `QA_KEY` in
 `~/second-look/.env` and `~/second-look-depth/.env`. Copy that key and your API key to your
 password manager when you can. Nobody films at a creek: the creek shots are open footage from
@@ -58,10 +62,11 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
 9. **Wed Sep 30, morning: go public.** Follow `docs/SUBMISSION_DAY.md` in order: on `main`,
    `make go-public GO=dry`, then `make go-public GO=yes`. It scans the whole history for secrets,
    removes the working notes, runs the tests and `make submit-check`, checks the README's images
-   and links, and only then makes the repository public, checks it logged out, and tags v1.0.
+   and links, and only then makes the repository public, checks it logged out, and tags v1.0. This page,
+   `docs/HANDOFF_NEXT.md` and `PLAN.md` stay, each marked as notes.
 
 10. **Wed Sep 30, by 18:00: submit.**
 
 Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23 (their own nameserver
 answers that it does not exist); we reported it as hl7-eu/oah issue 8. While it is gone, `/two`
-shows our record alone, and the sandbox re-push on Sep 28 cannot run.
+shows our record alone, and the daily sandbox re-push sends nothing until the name comes back.

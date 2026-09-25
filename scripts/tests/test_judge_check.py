@@ -87,6 +87,71 @@ def test_the_reproduce_step_runs_make_reproduce_and_reports_its_last_line(
     assert step.ok
     assert calls == [["make", "--no-print-directory", "reproduce"]]
     assert step.lines == [last]
+    assert step.notes == []
+
+
+def reproduce_output_with_notes() -> str:
+    """What make reproduce prints for two files with the same note, one with its own and a skip,
+    printed by evals/reproduce.py's own report, so the parser reads the real format."""
+    from evals import reproduce
+
+    first = reproduce.Check("results/benchmark_a.json", "a fixture", values=5)
+    second = reproduce.Check("results/benchmark_b.json", "a fixture", values=5)
+    for check in (first, second):
+        check.notes.append("the right-answer counts per feature are as recorded")
+    footage = reproduce.Check("results/footage_a.json", "a fixture", values=7)
+    footage.notes.append("the adversarial answers are as recorded")
+    lines: list[str] = []
+    assert reproduce.report([first, second, footage, *reproduce.not_regraded()], lines.append) == 0
+    return "\n".join(lines) + "\n"
+
+
+def test_the_reproduce_step_keeps_every_note_and_every_skip(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Judge walk 01, R02: the benchmark runs kept counts, not replies, and make reproduce says so
+    # in a note under the file. The step kept only the last line, so the README said every
+    # number was regraded from a reply.
+    out = reproduce_output_with_notes()
+    monkeypatch.setattr(judge_check, "run", lambda argv, cwd, env: (0, out))
+    step = judge_check.step_reproduce(judge_check.ROOT, {})
+    assert step.ok
+    assert step.lines == [judge_check.last_line(out)]
+    assert step.notes[:2] == [
+        "note on results/benchmark_a.json and results/benchmark_b.json: "
+        "the right-answer counts per feature are as recorded",
+        "note on results/footage_a.json: the adversarial answers are as recorded",
+    ]
+    skipped = [n for n in step.notes[2:] if ": not regraded: " in n]
+    assert len(skipped) == len(step.notes) - 2 == 3, step.notes
+    assert skipped[0].startswith("note on results/ablation_20260921T001415Z.json: not regraded:")
+
+
+def test_the_summary_and_its_file_carry_the_reproduce_notes(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    notes = ["note on results/b.json: the counts are as recorded", "note on results/c.json: x"]
+
+    def stand_in(name: str) -> object:
+        def make(*args: object) -> judge_check.Step:
+            step = judge_check.Step(name, lines=[f"{name} ok"])
+            if name == "reproduce":
+                step.notes = list(notes)
+            return step
+
+        return make
+
+    for name in ("tests", "reproduce", "fhir", "audit", "secrets"):
+        monkeypatch.setattr(judge_check, f"step_{name}", stand_in(name))
+    out = tmp_path / "judge_check.json"
+    assert judge_check.main(["--quick", "--out", str(out)]) == 0
+    summary = capsys.readouterr().out.split("\n\n", 1)[1]
+    lines = summary.splitlines()
+    at = next(i for i, ln in enumerate(lines) if "reproduce ok" in ln)
+    assert [ln.strip() for ln in lines[at + 1 : at + 3]] == notes
+    step = json.loads(out.read_text(encoding="utf-8"))["steps"][1]
+    assert step["name"] == "reproduce"
+    assert step["text"] == "; ".join(["reproduce ok", *notes])
 
 
 def test_a_number_that_does_not_reproduce_fails_the_step_and_names_the_file(

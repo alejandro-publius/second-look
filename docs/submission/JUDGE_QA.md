@@ -1,6 +1,6 @@
 # The 20 hardest questions, with honest answers
 
-For the live judging and for anyone reading the repo. From pull request #5, checked against this branch on 2026-09-24. Short answers, then the file or command that proves each one. Where the honest answer is "not yet" or "no", it says so.
+For the live judging and for anyone reading the repo. First written in this repository's own pull request #5 (not the one we sent to hl7-eu/oah), checked against `main` on 2026-09-24; questions 4 and 18 were brought up to date on 2026-09-25. Short answers, then the file or command that proves each one. Where the honest answer is "not yet" or "no", it says so.
 
 ## Freshwater ecologist
 
@@ -17,8 +17,8 @@ The key came from the picks file Alex Velazquez wrote with the planner, a Claude
 Proof: `docs/DATA_CARD.md`; `docs/deviations.md`; `photos/manifest.csv` column `label_evidence`.
 
 **4. "Invasive" depends on where you are. Whose list?**
-A Bay Area draft list from the Cal-IPC Inventory, which waits for Rachel's check before it counts. Until then no plant is named as invasive on a creek, the check's plant question asks for Can't tell, and the iNaturalist line reports no sightings. The region file is swappable per city.
-Proof: `content/drafts/regions/california-bay-area.yaml` (the draft); `content/regions/california-bay-area.yaml` (approved: false, empty).
+A Bay Area list from the Cal-IPC Inventory, approved for the team by Alex Velazquez on 2026-09-25 after each species was checked against its Cal-IPC profile. The creek check's plant question, "Which ones?", offers the species on that list and Not sure, so no free text is stored. The iNaturalist line shows research grade sightings of listed plants near a creek once a finished check there has answered the plant question; none has yet, so it shows nothing so far. The region file is swappable per city.
+Proof: `content/regions/california-bay-area.yaml` (`approved: true`, `approved_by`, a Cal-IPC link per species); `content/form.yaml`, item `invasive_which`; `docs/adr/0011-inaturalist-context.md`.
 
 ## FHIR standards
 
@@ -82,7 +82,7 @@ Each number carries a claim that points into `results/`, and `scripts/verify_cla
 Proof: `make verify-claims`.
 
 **18. Can a judge check it without a key or the network?**
-Yes: `make judge-check` runs the tests, grades the AI numbers in `results/` again from the committed raw model replies (`make reproduce`), reads the last HL7 validator run against the pinned guide, the web build and design gate, the audit chain and a secret scan, with no key.
+Yes, with one limit it names. `make judge-check` runs the tests, grades the AI numbers in `results/` again from the committed raw model replies wherever a run kept them (`make reproduce`), reads the last HL7 validator run against the pinned guide, the web build and design gate, the audit chain and a secret scan, with no key. The benchmark runs kept counts, not replies, so their right-answer counts, their share of can't tell answers and their count of malformed replies are checked only as recorded: `make reproduce` prints a note under each such file, and judge-check prints those notes in its summary. The footage runs' answers on the adversarial frames are as recorded too, and three old synthetic files are not graded again.
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**

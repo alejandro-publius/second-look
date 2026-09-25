@@ -423,6 +423,22 @@ def test_the_report_fails_on_any_problem_and_names_what_is_not_regraded() -> Non
     assert "FAIL results/b.json: 1 values regraded from a fixture" in lines
 
 
+def test_the_last_line_counts_only_regraded_files_and_names_the_rest() -> None:
+    # Judge walk 01, R02: "in 26 files regraded" counted the three files it skips, and said
+    # nothing of the notes on numbers kept as recorded.
+    lines: list[str] = []
+    good = reproduce.Check("results/a.json", "a fixture", values=3)
+    noted = reproduce.Check("results/b.json", "a fixture", values=2, notes=["kept as recorded"])
+    assert reproduce.report([good, noted, *reproduce.not_regraded()], lines.append) == 0
+    assert lines[-1] == (
+        "reproduce: 5 values in 2 files regraded from raw replies and seeds, with no network and "
+        "no key; every one matches; 3 files not regraded and 1 notes, each named above"
+    )
+    lines.clear()
+    assert reproduce.report([good], lines.append) == 0
+    assert lines[-1].endswith("; every one matches")
+
+
 def test_ci_runs_make_reproduce_after_make_check() -> None:
     # REVIEW_03 R49: no test reads results/usability_synthetic.json again, so its p value flipped
     # from 0.051 to 0.049 passed make check; only make reproduce failed. CI runs it as its own step.

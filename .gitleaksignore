@@ -38,3 +38,7 @@ e219c5f0cd071736b3b13dd73f141d1bb8c268cc:worker/test/e2e.mjs:generic-api-key:18
 2f61b23c885b40a44ac62d9cae8ab23ec9037f11:worker/src/index.ts:generic-api-key:25
 # docs/reviews/REVIEW_01.md line 629: a pseudonymous token the review made against a throwaway local stack
 138751dedd4b1382ff53f8f511d3ae08e206b072:docs/reviews/REVIEW_01.md:generic-api-key:629
+# worker/test/part2_e2e.mjs line 20 on branch assisted: the QA key the Worker end to end test gives
+# wrangler dev on this Mac, a fixed local value like worker/test/e2e.mjs; it is not the production key
+# (their SHA-256 differ) and marks a session as a test only on the local dev server
+7294fea1f4575bc1f656198e1d7b4aa42e52b3d6:worker/test/part2_e2e.mjs:generic-api-key:20
