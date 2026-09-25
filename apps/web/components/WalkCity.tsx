@@ -40,7 +40,12 @@ export function WalkCityView({ walk, demo, back, missing }: { walk: Walk; demo: 
         </p>
       ) : null}
       {demo === null ? null : demo.visits.length === 0 ? (
-        <p>{t("city.walk_empty")}</p>
+        // A fresh tab has no walk yet: the way on is the walk itself (critic round 14 O02).
+        <p data-testid="walk-city-empty">
+          {t("city.walk_empty").split("{link}")[0]}
+          <Link href={`/walk/${encodeURIComponent(walk.id)}`}>{t("city.walk_empty_link")}</Link>
+          {t("city.walk_empty").split("{link}")[1]}
+        </p>
       ) : (
         <>
           <p>{t("city.walk_visits", { n: demo.visits.length })}</p>
@@ -134,7 +139,18 @@ export function WalkCity({ walkId, recordId }: { walkId: string; recordId: strin
     if (!walk || loaded === null) return null;
     return demoCreek(walk, [loaded.mine, loaded.linked].filter((v): v is WalkVisitSaved => v !== null));
   }, [walk, loaded]);
-  if (!walk) return <p className="notice notice-warn">{t("city.none")}</p>;
+  // A walk nobody has: a heading, what went wrong, and the way to the walks (critic round 14 O02).
+  if (!walk) {
+    return (
+      <div className="stack">
+        <FocusHeading>{t("city.walk_unknown_title")}</FocusHeading>
+        <p className="notice notice-warn">{t("city.walk_unknown")}</p>
+        <p>
+          <Link href="/walk">{t("walk.list_title")}</Link>
+        </p>
+      </div>
+    );
+  }
   // Back to the walk page, which opens on the record this browser made (CRITIC_10 S01), or to the
   // stored record the link named.
   const back = loaded?.mine

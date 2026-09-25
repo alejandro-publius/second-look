@@ -294,7 +294,10 @@ test("a feelings slider nobody moved stays out of the walk's record", async ({ p
   for (const moved of [false, true]) {
     await page.goto(`${BASE}/walk/${walks[0].id}`);
     // The second time, this tab holds the first walk, so the page opens on its record (CRITIC_10 S01).
-    if (moved) await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+    if (moved) {
+      await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+      await page.getByRole("button", { name: en["walk.start_again_yes"], exact: true }).click();
+    }
     await page.getByRole("button", { name: "Start the check" }).click();
     await answerWalk(page, async () => {
       const shown = page.locator("output[for^='slider-']");
@@ -467,11 +470,13 @@ test("a walk says how to see a measure, and an honest walk ends on a marked exam
 // Critic round 14 B03 and round 15 F04: Which ones? offered the San Francisco Bay Area's plant list
 // on creeks in Russia, the UK and Oregon, English ivy among them, which is native to Britain, and
 // named no region. A walk's creek is in no region with a list, so it offers only Can't tell and
-// None of these, and says whose list it would be.
+// None of these, and says whose list it would be. The clip's line about seeking is there too
+// (round 15 W05).
 test("a walk's Which ones? offers no region's plants and says the list is for the Bay Area", async ({ page }) => {
   await mockApi(page, {});
   const uk = walks.find((w: { id: string }) => w.id === "v03")!;
   await page.goto(`${BASE}/walk/${uk.id}`);
+  await expect(page.getByTestId("walk-seek-note")).toHaveText(en["walk.seek_note"]);
   await page.getByRole("button", { name: en["walk.start"] }).click();
   const invasive = content.form.items.find((i: { id: string }) => i.id === "invasive_species");
   for (let i = 0; i < 40; i++) {

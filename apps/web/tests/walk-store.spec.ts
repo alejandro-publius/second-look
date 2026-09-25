@@ -317,7 +317,7 @@ test("a link to a walk record that is gone says so, on /spot and on /city", asyn
   await expect(page.getByText(/deleted 30 days after it is stored/)).toBeVisible();
   await page.goto(`${BASE}/city?walk=${walk.id}&record=walk-0000000000000000`);
   await expect(page.getByTestId("walk-record-missing")).toContainText("deleted 30 days after it is stored");
-  await expect(page.getByText(en["city.walk_empty"])).toBeVisible();
+  await expect(page.getByTestId("walk-city-empty")).toHaveText(en["city.walk_empty"].replace("{link}", en["city.walk_empty_link"]));
 });
 
 test("a walk the store refuses keeps its record on the page and says why", async ({ page }) => {
@@ -363,6 +363,7 @@ test("Start again forgets the walk on this device, and a new walk starts from th
   // The first question's Back returns to the clip; a finished walk's Start again clears it all.
   await answerWalkPlainly(page, content, { bank: "absent" });
   await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+  await page.getByRole("button", { name: en["walk.start_again_yes"], exact: true }).click();
   await expect(page.getByRole("button", { name: en["walk.start"] })).toBeVisible();
   await page.reload();
   await page.getByRole("button", { name: en["walk.start"] }).click();
@@ -405,4 +406,60 @@ test("the rating card shows which answer was picked and the rating the record ke
   await expect(card.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_kept"], { rating: en["spot.rating_word_good"] }));
   expect(await look(keep)).not.toBe(before[0]);
   expect(await look(change)).toBe(before[1]);
+});
+
+// Critic round 15 Y02: one tap on Start again dropped a finished walk's record, and the only place
+// its link was shown, with no warning. It now asks first, says what goes and what stays, and Keep
+// this walk leaves everything as it was.
+test("Start again on a finished walk asks first, and says the stored record stays at its link", async ({ page }) => {
+  const walkStore = new Map<string, unknown>();
+  await mockApi(page, { walkStore, walkBundle: bundleFor });
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "absent" });
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+  const warn = page.getByTestId("walk-start-again-warn");
+  await expect(warn).toContainText(en["walk.start_again_warn"]);
+  await expect(warn).toContainText(/The stored record still opens at its link until \w{3} \d{1,2}, \d{4}\./);
+  await expect(page.getByRole("button", { name: en["walk.start_again_no"], exact: true })).toBeFocused();
+  await page.getByRole("button", { name: en["walk.start_again_no"], exact: true }).click();
+  await expect(warn).toHaveCount(0);
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  await page.reload();
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+});
+
+// Critic rounds 14 and 15 O02: in a fresh tab the demo creek said "Do the walk first" with no way
+// to the walk, and an unknown walk showed one line with no heading and no link.
+test("the walk's demo creek links to the walk in a fresh tab, and an unknown walk says so with a way on", async ({ page }) => {
+  await mockApi(page, {});
+  await page.goto(`${BASE}/city?walk=${walk.id}`);
+  const empty = page.getByTestId("walk-city-empty");
+  await expect(empty).toHaveText(en["city.walk_empty"].replace("{link}", en["city.walk_empty_link"]));
+  await expect(empty.getByRole("link", { name: en["city.walk_empty_link"] })).toHaveAttribute("href", `/walk/${walk.id}`);
+  await page.goto(`${BASE}/city?walk=v99`);
+  await expect(page.getByRole("heading", { level: 1, name: en["city.walk_unknown_title"] })).toBeVisible();
+  await expect(page.getByText(en["city.walk_unknown"])).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: en["walk.list_title"] })).toHaveAttribute("href", "/walk");
+});
+
+// Critic round 15 O02 item 4: a reloaded finished walk painted an empty clip frame under the
+// heading while it opened. Nothing but the heading and the opening line shows until it knows.
+test("a finished walk opens on its record with no clip painted first", async ({ page }) => {
+  await mockApi(page, {});
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "absent" });
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  await page.addInitScript(() => {
+    const seen: boolean[] = [];
+    (window as unknown as { __clipSeen: boolean[] }).__clipSeen = seen;
+    new MutationObserver(() => {
+      if (document.querySelector("video.walk-clip")) seen.push(true);
+    }).observe(document, { childList: true, subtree: true });
+  });
+  await page.reload();
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { __clipSeen: boolean[] }).__clipSeen.length)).toBe(0);
 });

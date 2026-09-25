@@ -55,7 +55,7 @@ export function PhotoPicker({ photos, onChange, max = 4, capture = true }: { pho
         </button>
       </div>
       <p className="small muted" role="status">
-        {t("check.photo_count", { n: photos.length })}
+        {photos.length === 1 ? t("check.photo_count_one") : t("check.photo_count", { n: photos.length })}
       </p>
       {photos.length > 0 ? (
         <ul className="stack">

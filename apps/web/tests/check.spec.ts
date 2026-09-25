@@ -216,8 +216,9 @@ test.describe("Use my location works on a check opened by a tap inside the app",
 
 // Critic round 14 B03: in /check the plant list follows the spot's region. A pin outside every
 // region pack's box, here Heraklion, gets no list, only Can't tell and None of these, with a line
-// that says the list is for the Bay Area.
-test("a spot outside the Bay Area is offered no plant list", async ({ page }) => {
+// that says the list is for the Bay Area. Critic round 14 B04: the Photos screen counts in words
+// that fit the number.
+test("a spot outside the Bay Area is offered no plant list, and the Photos screen counts photos in plain words", async ({ page }) => {
   await mockApi(page);
   await page.goto("/check");
   await page.getByRole("button", { name: "Start the check" }).click();
@@ -243,4 +244,15 @@ test("a spot outside the Bay Area is offered no plant list", async ({ page }) =>
   await expect(page.getByTestId("region-list-note")).toHaveText(
     "We have a plant list only for California, San Francisco Bay Area, so there is none for this creek. Pick Can't tell, or None of these.",
   );
+  await page.getByRole("button", { name: "None of these", exact: true }).click();
+  for (let i = 0; i < 10 && !(await page.getByRole("heading", { name: "Photos" }).isVisible()); i++) {
+    const question = (await page.locator("h1#question").innerText()).trim();
+    if (await page.getByRole("button", { name: "Skip", exact: true }).isVisible()) await page.getByRole("button", { name: "Skip", exact: true }).click();
+    else if (await page.getByRole("main").getByRole("group").first().getByRole("button").first().isVisible()) await page.getByRole("main").getByRole("group").first().getByRole("button").first().click();
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
+  await expect(page.getByText("0 photos ready")).toBeVisible();
+  await expect(page.getByText(/photo\(s\)/)).toHaveCount(0);
 });

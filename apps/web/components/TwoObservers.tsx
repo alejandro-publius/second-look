@@ -36,7 +36,8 @@ export function TwoObservers() {
     <div className="stack">
       <FocusHeading>{t("two.title")}</FocusHeading>
       {lead ? <p>{lead}</p> : null}
-      <p>{data?.ours_example ? t("two.intro_example") : t("two.intro")}</p>
+      {/* With their record missing, the page opens on what it shows: ours alone (critic round 14 O02). */}
+      <p>{data && (data.theirs_status === "down" || !data.theirs) ? t("two.intro_ours_only") : data?.ours_example ? t("two.intro_example") : t("two.intro")}</p>
       {state === "loading" ? (
         <p role="status" className="muted">
           {t("spot.loading")}
