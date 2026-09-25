@@ -551,6 +551,24 @@ def test_the_quick_check_shot_shows_the_form_from_a_record_link_on_the_mock() ->
     assert "<br>Quick check<br><code>/quick?spot=example</code> (mock)</td>" in screens
 
 
+ABOUT_ALT = "About: what Second Look is and why it was built."
+
+
+def test_the_about_shot_says_what_about_shows_and_never_who_made_it() -> None:
+    # CRITIC_10 T03: the alt text said "what Second Look is and who made it", but /about names no
+    # person or team. The gallery, its page and the capture record all carry the same words.
+    source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
+    about = source.index('gallery("about"')
+    assert json.dumps(ABOUT_ALT) in source[about : about + 200]
+    screens = (ROOT / "docs" / "screens" / "README.md").read_text(encoding="utf-8")
+    assert f'<img src="about.webp" width="200" alt="{ABOUT_ALT}">' in screens
+    rows = json.loads((ROOT / "results" / "screens.json").read_text(encoding="utf-8"))
+    rows = rows["images"]
+    assert [r["alt"] for r in rows if r.get("name") == "about"] == [ABOUT_ALT]
+    for text in (source, screens):
+        assert "who made it" not in text
+
+
 def test_the_walk_city_shot_is_taken_from_the_needs_region() -> None:
     # CRITIC_07 J04: the city view's shot cut the first measure off before its source. The step is
     # tested in apps/web/tests/walk.spec.ts; this checks the gallery takes it before the shot.

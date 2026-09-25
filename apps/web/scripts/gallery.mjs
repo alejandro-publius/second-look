@@ -271,7 +271,7 @@ async function liveRun(browser) {
   gallery("how-we-know", "/how-we-know", "live", await visit("/how-we-know"), "How we know: where each rule and each number comes from.");
   gallery("credits", "/credits", "live", await visit("/credits"), "Credits: every photo and clip with its author and licence.");
   gallery("privacy", "/privacy", "live", await visit("/privacy"), "Privacy: what is stored and what is not.");
-  gallery("about", "/about", "live", await visit("/about"), "About: what Second Look is and who made it.");
+  gallery("about", "/about", "live", await visit("/about"), "About: what Second Look is and why it was built.");
   gallery("poster", "/poster", "live", await visit("/poster"), "The poster to print and put up by a creek, with its QR code.");
   gallery("accessibility", "/accessibility", "live", await visit("/accessibility"), "Accessibility: what we aim for and how each part is checked.");
   gallery("verify", "/verify", "live", await visit("/verify"), "Check a record: its receipt, its place in the audit log and the OpenTimestamps proof.");

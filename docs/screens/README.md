@@ -40,7 +40,7 @@ The phone screens of Second Look, in one drawn frame, captured by `make screens`
 <td align="center"><img src="privacy.webp" width="200" alt="Privacy: what is stored and what is not."><br>Privacy<br><code>/privacy</code></td>
 </tr>
 <tr>
-<td align="center"><img src="about.webp" width="200" alt="About: what Second Look is and who made it."><br>About<br><code>/about</code></td>
+<td align="center"><img src="about.webp" width="200" alt="About: what Second Look is and why it was built."><br>About<br><code>/about</code></td>
 <td align="center"><img src="poster.webp" width="200" alt="The poster to print and put up by a creek, with its QR code."><br>Poster<br><code>/poster</code></td>
 <td align="center"><img src="verify.webp" width="200" alt="Check a record: its receipt, its place in the audit log and the OpenTimestamps proof."><br>Check a record<br><code>/verify</code></td>
 <td align="center"><img src="warmup.webp" width="200" alt="The warm-up: which creek is healthier, asked once before the test and answered at the end."><br>The warm-up<br><code>/t</code> (mock)</td>
