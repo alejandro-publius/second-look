@@ -21,6 +21,90 @@ RENDERED_RE = re.compile(r"<!--v:([\w./-]+#[\w/. -]+)-->(.*?)<!--/v-->", re.S)
 MARKER_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+#[\w/.-]+)\s*(?:=\s*[^\s]+)?\s*-->")
 
 
+# What a line is, for broken_paragraph_lines: CommonMark's block starts, cut down to what these
+# docs use. HTML_BLOCK_TAGS is CommonMark's list for HTML blocks of type 6.
+FENCE_LINE_RE = re.compile(r"^ {0,3}(```|~~~)")
+HEADING_LINE_RE = re.compile(r"^ {0,3}#{1,6}(\s|$)")
+LIST_ITEM_RE = re.compile(r"^\s*(?:[-*+]|\d{1,9}[.)])(\s|$)")
+COMMENTS_ONLY_RE = re.compile(r"^\s*(?:<!--(?:(?!-->).)*-->\s*)+$")
+HTML_BLOCK_TAGS = (
+    "address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|"
+    "dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|"
+    "h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|"
+    "option|p|param|search|section|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul"
+)
+HTML_BLOCK_RE = re.compile(rf"^ {{0,3}}</?(?:{HTML_BLOCK_TAGS})(?:\s|/?>|$)", re.I)
+LONE_TAG_RE = re.compile(r"^ {0,3}(?:<[A-Za-z][\w-]*(?:\s[^<>]*)?/?>|</[A-Za-z][\w-]*\s*>)\s*$")
+SENTENCE_ENDS = (".", "!", "?", '."', ".)")
+
+
+def line_kinds(lines: list[str]) -> list[str]:
+    """Each line as blank, text (a paragraph line), item (a list item's first line), comment (only
+    comments), comment-led (starts with "<!--" and holds more), or block (anything else)."""
+    kinds: list[str] = []
+    fence, html, comment = False, False, False
+    for line in lines:
+        bare = line.strip()
+        prev = kinds[-1] if kinds else "blank"
+        if fence:
+            kinds.append("block")
+            fence = not FENCE_LINE_RE.match(line)
+        elif comment:  # inside a comment that opened on an earlier line
+            kinds.append("block")
+            comment = "-->" not in line
+        elif not bare:
+            kinds.append("blank")
+            html = False
+        elif html:
+            kinds.append("block")
+        elif FENCE_LINE_RE.match(line):
+            kinds.append("block")
+            fence = True
+        elif bare.startswith("<!--"):
+            if COMMENTS_ONLY_RE.match(line):
+                kinds.append("comment")
+            elif "-->" not in bare:
+                kinds.append("comment")
+                comment = True
+            else:
+                kinds.append("comment-led")
+        elif HTML_BLOCK_RE.match(line) or (
+            LONE_TAG_RE.match(line) and prev not in ("text", "item")
+        ):
+            kinds.append("block")
+            html = True
+        elif HEADING_LINE_RE.match(line) or bare.startswith(("|", ">")):
+            kinds.append("block")
+        elif LIST_ITEM_RE.match(line):
+            kinds.append("item")
+        else:
+            kinds.append("text")
+    return kinds
+
+
+def broken_paragraph_lines(text: str) -> list[int]:
+    """Line numbers (from 1) where a line that starts with "<!--" breaks a paragraph.
+
+    In CommonMark, and so on GitHub, a line that starts with "<!--" opens an HTML block: it cuts
+    off the paragraph above it, and the rest of that line is raw HTML, so its Markdown shows as
+    typed (critic round 09 L01). So a rendered number keeps a word before it on its line. A line
+    that holds only a comment is fine, unless it cuts a sentence in two: paragraph text runs on
+    both sides of it and the line above does not end a sentence.
+    """
+    lines = text.splitlines()
+    kinds = line_kinds(lines)
+    broken = []
+    for n, kind in enumerate(kinds):
+        before = kinds[n - 1] if n else "blank"
+        after = kinds[n + 1] if n + 1 < len(kinds) else "blank"
+        cuts = before in ("text", "item") and after == "text"
+        if kind == "comment-led" or (
+            kind == "comment" and cuts and not lines[n - 1].rstrip().endswith(SENTENCE_ENDS)
+        ):
+            broken.append(n + 1)
+    return broken
+
+
 def resolve(ref: str, root: Path) -> object:
     rel, pointer = ref.split("#", 1)
     doc = json.loads((root / rel).read_text(encoding="utf-8"))
@@ -86,6 +170,14 @@ def main() -> int:
     args = parser.parse_args()
     path = Path(args.readme)
     text, missing = render(path.read_text(encoding="utf-8"), ROOT)
+    if broken := broken_paragraph_lines(text):
+        for n in broken:
+            print(
+                f"render-readme: {path}:{n}: a line inside a paragraph starts with <!--, which "
+                "breaks the paragraph on GitHub; keep a word before it on the same line"
+            )
+        print(f"render-readme: {path} was not written")
+        return 1
     path.write_text(text, encoding="utf-8")
     unresolved = len(TOKEN_RE.findall(text))
     print(f"render-readme: {unresolved} unresolved token(s), {len(missing)} missing ref(s)")

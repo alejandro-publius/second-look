@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
-from scripts.render_readme import render
+import pytest
+
+from scripts.render_readme import broken_paragraph_lines, render
 
 
 def test_render_fills_tokens_and_stamps_markers(tmp_path: Path) -> None:
@@ -98,3 +100,61 @@ def test_the_fold_check_sees_a_heading_inside_a_fold() -> None:
     assert headings_inside_folds("<details>\n\n| a |\n\n</details>\n\n## B\n") == []
     assert headings_inside_folds("```\n<details>\n```\n## B\n") == []
     assert headings_inside_folds("A `<details>` block.\n\n## B\n") == []
+
+
+def test_no_paragraph_line_starts_with_a_comment() -> None:
+    """Critic round 09 L01: in CommonMark a line that starts with "<!--" opens an HTML block, so
+    GitHub cut 21 paragraphs of the README, the WRITEUP and the two cards short and showed the
+    rest of each line as typed. A rendered number keeps a word before it on its line."""
+    import subprocess
+
+    root = Path(__file__).resolve().parents[2]
+    tracked = subprocess.run(
+        ["git", "ls-files", "*.md"], cwd=root, capture_output=True, text=True, check=True
+    ).stdout.split()
+    texts = {p: (root / p).read_text(encoding="utf-8", errors="ignore") for p in tracked}
+    found = {p: broken for p, text in texts.items() if (broken := broken_paragraph_lines(text))}
+    assert found == {}
+
+
+def test_the_paragraph_check_sees_a_comment_that_breaks_a_paragraph() -> None:
+    v = "<!--v:results/r.json#/n-->3<!--/v-->"
+    # a rendered number at the start of a line inside a paragraph, or of a paragraph
+    assert broken_paragraph_lines(f"The gate saw\n{v} flags.\n") == [2]
+    assert broken_paragraph_lines(f"{v} phone screens.\n") == [1]
+    # the same inside a list item, where the line is indented
+    assert broken_paragraph_lines(f"- It saw\n  {v} flags.\n") == [2]
+    # two rendered numbers on a line are not one long comment
+    assert broken_paragraph_lines(f"From\n{v} to {v}\n") == [2]
+    # a number with a word before it holds the paragraph together
+    assert broken_paragraph_lines(f"The gate\nsaw {v} flags.\n") == []
+    # a claim comment alone between blank lines, or after a full stop, is fine
+    claim = "<!-- claim: results/r.json#/n = 3 -->"
+    assert broken_paragraph_lines(f"Text.\n\n{claim}\n{claim}\n\nMore.\n") == []
+    assert broken_paragraph_lines(f"It is real.\n{claim}\nProof: a file.\n") == []
+    # but not in the middle of a sentence
+    assert broken_paragraph_lines(f"The gate kept\n{claim}\n35 flags.\n") == [2]
+    # a comment in a code fence, a table cell or an HTML block is not a paragraph line
+    assert broken_paragraph_lines(f"```\nText\n{v} x\n```\n") == []
+    assert broken_paragraph_lines(f"| a |\n|---|\n| {v} |\n") == []
+    assert broken_paragraph_lines(f"<table>\n<tr><td>\n{v} x\n</td></tr>\n</table>\n") == []
+
+
+def test_render_refuses_to_write_a_line_that_breaks_a_paragraph(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import scripts.render_readme as rr
+
+    doc = tmp_path / "DOC.md"
+    before = "The gate saw\n<!--v:results/r.json#/n-->3<!--/v--> flags.\n"
+    doc.write_text(before, encoding="utf-8")
+    (tmp_path / "results").mkdir()
+    (tmp_path / "results" / "r.json").write_text(json.dumps({"n": 4}))
+    monkeypatch.setattr(rr, "ROOT", tmp_path)
+    monkeypatch.setattr("sys.argv", ["render_readme.py", "--readme", str(doc)])
+    assert rr.main() == 1
+    assert doc.read_text(encoding="utf-8") == before, "a doc with a broken line must stay as it was"
+    assert f"{doc}:2:" in capsys.readouterr().out
+    doc.write_text(before.replace("saw\n", "saw "), encoding="utf-8")
+    assert rr.main() == 0
+    assert "saw <!--v:results/r.json#/n-->4<!--/v--> flags." in doc.read_text(encoding="utf-8")

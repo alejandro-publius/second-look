@@ -12,8 +12,8 @@ We train nothing. The checker calls four vision models from Anthropic's API, unc
 Haiku 4.5 (`claude-haiku-4-5-20251001`), Claude Sonnet 5 (`claude-sonnet-5`), Claude Opus 5.5
 (`claude-opus-5-5`) and Claude Fable 5.1 (`claude-fable-5-1`), as listed in `evals/models.yaml`.
 
-- **One photo, one question.** The photo is resized to
-  <!--v:results/model_sweep_20260924T054756Z.json#/settings/resize_long_side_px-->1092<!--/v--> pixels on its
+- **One photo, one question.** The photo is resized
+  to <!--v:results/model_sweep_20260924T054756Z.json#/settings/resize_long_side_px-->1092<!--/v--> pixels on its
   long side. The question is the frozen wording a volunteer reads, from `content/features.yaml`.
 - **The instruction,** word for word: "You are looking at one photo of a stream taken by a
   volunteer. Answer one question about what is visible in the photo. If the photo does not show a
@@ -21,8 +21,8 @@ Haiku 4.5 (`claude-haiku-4-5-20251001`), Claude Sonnet 5 (`claude-sonnet-5`), Cl
 - **The answer** is forced into yes, no or can't tell, with a note of at most 160 characters
   (`force_answer` in `core/checker.py`). Anything else becomes can't tell and counts as
   malformed, so a bad answer can never count as a right one.
-- **Settings** are stored with each run: temperature 0 where a model accepts it, and
-  <!--v:results/model_sweep_20260924T054756Z.json#/runs-->3<!--/v--> runs of every photo.
+- **Settings** are stored with each run: temperature 0 where a model accepts it,
+  and <!--v:results/model_sweep_20260924T054756Z.json#/runs-->3<!--/v--> runs of every photo.
 
 ## What it may do
 
@@ -38,9 +38,9 @@ Haiku 4.5 (`claude-haiku-4-5-20251001`), Claude Sonnet 5 (`claude-sonnet-5`), Cl
 
 Where it runs today: on the live site the checker is off (`CHECKER_ENABLED`), so both servers
 pass no flags and no model is called. The video walks send the footage run's answers through the
-same gate when they are built, and today
-<!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of the
-<!--v:results/footage_pool.json#/walks-->3<!--/v--> walks carries a checker question: the gate kept no flag
+same gate when they are built, and
+today <!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of
+the <!--v:results/footage_pool.json#/walks-->3<!--/v--> walks carries a checker question: the gate kept no flag
 on the frames the walks use (`content/walks.yaml`). Everywhere else the models are only
 measured: on the 16 test photos and on frames from open creek footage.
 
@@ -89,20 +89,20 @@ as wrong. The file is <!--v:results/model_card.json#/benchmark/file-->results/be
 | Claude Opus 5.5 | <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/all/correct-->33<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/all/n-->48<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/all/low_pct-->55<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/all/high_pct-->80<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/artificial_bank/correct-->12<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/artificial_bank/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/artificial_bank/low_pct-->76<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/artificial_bank/high_pct-->100<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/dug_out_channel/correct-->9<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/dug_out_channel/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/dug_out_channel/low_pct-->47<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/dug_out_channel/high_pct-->91<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/invasive_plant/correct-->0<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/invasive_plant/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/invasive_plant/low_pct-->0<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/invasive_plant/high_pct-->24<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/pipe_running/correct-->12<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/pipe_running/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/pipe_running/low_pct-->76<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/pipe_running/high_pct-->100<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-opus-5-5/cant_tell_pct-->31<!--/v--> percent |
 | Claude Fable 5.1 | <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/all/correct-->34<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/all/n-->48<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/all/low_pct-->57<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/all/high_pct-->82<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/artificial_bank/correct-->12<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/artificial_bank/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/artificial_bank/low_pct-->76<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/artificial_bank/high_pct-->100<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/correct-->10<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/low_pct-->55<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/high_pct-->95<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/invasive_plant/correct-->0<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/invasive_plant/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/invasive_plant/low_pct-->0<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/invasive_plant/high_pct-->24<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/pipe_running/correct-->12<!--/v--> of <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/pipe_running/n-->12<!--/v--> (<!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/pipe_running/low_pct-->76<!--/v--> to <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/pipe_running/high_pct-->100<!--/v-->) | <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/cant_tell_pct-->27<!--/v--> percent |
 
-Twelve answers per feature is small. An interval such as
-<!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/low_pct-->55<!--/v--> to
-<!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/high_pct-->95<!--/v-->
+Twelve answers per feature is small. An interval such
+as <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/low_pct-->55<!--/v-->
+to <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/high_pct-->95<!--/v-->
 percent means the test cannot tell a good model from a very good one. Read the intervals, not the
 point numbers.
 
-**On creek footage.** The four models also answered every feature question on
-<!--v:results/footage_latest.json#/pool/frames-->46<!--/v--> frames from
-<!--v:results/footage_latest.json#/pool/videos-->5<!--/v--> openly licensed videos in
-<!--v:results/footage_latest.json#/pool/countries-->3<!--/v--> countries. No frame has a label
+**On creek footage.** The four models also answered every feature question
+on <!--v:results/footage_latest.json#/pool/frames-->46<!--/v--> frames
+from <!--v:results/footage_latest.json#/pool/videos-->5<!--/v--> openly licensed videos
+in <!--v:results/footage_latest.json#/pool/countries-->3<!--/v--> countries. No frame has a label
 (<!--v:results/footage_latest.json#/pool/labelled_frames-->0<!--/v--> labelled), so this measures agreement
 between models, not accuracy. The pair that agreed least, Haiku 4.5 and Fable 5.1, gave the same
-answer on
-<!--v:results/footage_latest.json#/agreement/dug_out_channel/pairs/claude-haiku-4-5-20251001 vs claude-fable-5-1/agree-->15<!--/v-->
+answer
+on <!--v:results/footage_latest.json#/agreement/dug_out_channel/pairs/claude-haiku-4-5-20251001 vs claude-fable-5-1/agree-->15<!--/v-->
 of <!--v:results/footage_latest.json#/agreement/dug_out_channel/frames-->46<!--/v--> frames for a dug-out
 channel. Four frames drawn by code, a white one, a black one, a room made of flat rectangles and a
 screenshot of text (`evals/fixtures/__init__.py`), got can't tell as each model's majority answer
@@ -113,16 +113,16 @@ the majority answers, not each reply).
 
 - **A run once measured our config instead of the models.** The first paid sweep sent an answer
   tool whose allowed values came from YAML, where an unquoted yes and no are booleans. The models
-  were told to answer `true` or `false`, and
-  <!--v:results/model_sweep_20260924T030451Z.json#/counts/malformed-->73<!--/v--> of
-  <!--v:results/model_sweep_20260924T030451Z.json#/counts/answers-->144<!--/v--> answers were malformed. The
+  were told to answer `true` or `false`,
+  and <!--v:results/model_sweep_20260924T030451Z.json#/counts/malformed-->73<!--/v-->
+  of <!--v:results/model_sweep_20260924T030451Z.json#/counts/answers-->144<!--/v--> answers were malformed. The
   values are now quoted and pinned by
   `evals/tests/test_model_sweep.py::test_the_answer_tool_allows_exactly_the_three_words_as_strings`;
   the run done again had <!--v:results/model_sweep_20260924T031128Z.json#/counts/malformed-->0<!--/v-->
   malformed. Both runs stay in `results/`.
-- **No model passes invasive plants.** In the sweep behind the pass table,
-  <!--v:results/model_card.json#/by_feature/invasive_plant/cant_tell-->47<!--/v--> of the
-  <!--v:results/model_card.json#/by_feature/invasive_plant/answers-->48<!--/v--> answers on the plant photos
+- **No model passes invasive plants.** In the sweep behind the pass
+  table, <!--v:results/model_card.json#/by_feature/invasive_plant/cant_tell-->47<!--/v--> of
+  the <!--v:results/model_card.json#/by_feature/invasive_plant/answers-->48<!--/v--> answers on the plant photos
   were can't tell. The plant photos are close views of a plant with no water in them, and the instruction
   says to answer can't tell when the photo does not show a stream. The notes show it: several name
   the plant, for example "possibly invasive Himalayan blackberry, but no stream is visible", and
@@ -140,10 +140,10 @@ the majority answers, not each reply).
   | Pipe running | <!--v:results/model_card.json#/by_feature/pipe_running/answers-->48<!--/v--> | <!--v:results/model_card.json#/by_feature/pipe_running/yes-->22<!--/v--> | <!--v:results/model_card.json#/by_feature/pipe_running/no-->23<!--/v--> | <!--v:results/model_card.json#/by_feature/pipe_running/cant_tell-->3<!--/v--> | <!--v:results/model_card.json#/by_feature/pipe_running/correct-->43<!--/v--> |
 
 - **Models disagree on footage.** On the same frames, Haiku 4.5 answered yes for a dug-out
-  channel on a share of
-  <!--v:results/footage_latest.json#/agreement/dug_out_channel/yes_share/claude-haiku-4-5-20251001-->0.2<!--/v-->
-  of them and Opus 5.5 on a share of
-  <!--v:results/footage_latest.json#/agreement/dug_out_channel/yes_share/claude-opus-5-5-->0.0<!--/v-->.
+  channel on a share
+  of <!--v:results/footage_latest.json#/agreement/dug_out_channel/yes_share/claude-haiku-4-5-20251001-->0.2<!--/v-->
+  of them and Opus 5.5 on a share
+  of <!--v:results/footage_latest.json#/agreement/dug_out_channel/yes_share/claude-opus-5-5-->0.0<!--/v-->.
   Without labels we cannot say which is right.
 - **A pass can be luck.** Four photos, three runs. A pass on a feature says the model got these
   four photos right, not that it sees that feature in general.
@@ -154,20 +154,20 @@ the majority answers, not each reply).
 ## Cost
 
 Every paid call is one line in `results/cost_log.jsonl`, with its tokens and its price; the fake
-runs spend nothing. All paid calls together:
-<!--v:results/model_card.json#/cost/real_calls-->5017<!--/v--> calls for
-<!--v:results/model_card.json#/cost/real_usd-->41.1<!--/v--> USD, of which footage
-<!--v:results/model_card.json#/cost/real_usd_by_purpose/footage-->34.2<!--/v--> USD, the sweeps
-<!--v:results/model_card.json#/cost/real_usd_by_purpose/model_sweep-->3.7<!--/v--> USD and the benchmarks
-<!--v:results/model_card.json#/cost/real_usd_by_purpose/benchmark-->3.2<!--/v--> USD. That includes the run
+runs spend nothing. All paid calls
+together: <!--v:results/model_card.json#/cost/real_calls-->5017<!--/v--> calls
+for <!--v:results/model_card.json#/cost/real_usd-->41.1<!--/v--> USD, of which
+footage <!--v:results/model_card.json#/cost/real_usd_by_purpose/footage-->34.2<!--/v--> USD, the
+sweeps <!--v:results/model_card.json#/cost/real_usd_by_purpose/model_sweep-->3.7<!--/v--> USD and the
+benchmarks <!--v:results/model_card.json#/cost/real_usd_by_purpose/benchmark-->3.2<!--/v--> USD. That includes the run
 that measured our config and the three-model run before Opus 5.5 and Fable 5.1 joined.
 
-- The four-model run: the sweep
-  <!--v:results/model_sweep_20260924T054756Z.json#/counts/cost_usd-->2.2<!--/v--> USD, the benchmark
-  <!--v:results/benchmark_20260924T054939Z.json#/cost_usd-->2.2<!--/v--> USD and the footage
-  <!--v:results/footage_latest.json#/cost/usd-->23.6<!--/v--> USD.
-- Per 100 footage frames, four models, direct calls at the full price:
-  <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD. The batch interface costs
+- The four-model run: the
+  sweep <!--v:results/model_sweep_20260924T054756Z.json#/counts/cost_usd-->2.2<!--/v--> USD, the
+  benchmark <!--v:results/benchmark_20260924T054939Z.json#/cost_usd-->2.2<!--/v--> USD and the
+  footage <!--v:results/footage_latest.json#/cost/usd-->23.6<!--/v--> USD.
+- Per 100 footage frames, four models, direct calls at the full
+  price: <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD. The batch interface costs
   half as much, but a batch once waited three hours in the queue.
 - The live site calls no model, so a volunteer's check costs nothing in model calls.
 
@@ -176,22 +176,22 @@ that measured our config and the three-model run before Opus 5.5 and Fable 5.1 j
 `parse_flags` in `core/gate.py` takes any model output and returns flags or reasons, never an
 error. A flag survives only if it names a known feature that this model passed, with a
 confidence between 0 and 1 and a short plain note. Everything else is dropped with a reason in
-plain words. On the footage run the gate saw
-<!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags, kept
-<!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> and dropped
-<!--v:results/footage_latest.json#/gate/dropped-->29<!--/v-->, every one of those for a feature the model had
-not passed: Haiku 4.5 on pipes
-<!--v:results/footage_latest.json#/gate/drop_reasons/feature pipe_running not passed by model claude-haiku-4-5-20251001-->24<!--/v-->
-times, Fable 5.1 on dug-out channels
-<!--v:results/footage_latest.json#/gate/drop_reasons/feature dug_out_channel not passed by model claude-fable-5-1-->3<!--/v-->
-and Haiku 4.5 on plants
-<!--v:results/footage_latest.json#/gate/drop_reasons/feature invasive_plant not passed by model claude-haiku-4-5-20251001-->2<!--/v-->.
+plain words. On the footage run the gate
+saw <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags,
+kept <!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> and
+dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v-->, every one of those for a feature the model had
+not passed: Haiku 4.5 on
+pipes <!--v:results/footage_latest.json#/gate/drop_reasons/feature pipe_running not passed by model claude-haiku-4-5-20251001-->24<!--/v-->
+times, Fable 5.1 on dug-out
+channels <!--v:results/footage_latest.json#/gate/drop_reasons/feature dug_out_channel not passed by model claude-fable-5-1-->3<!--/v-->
+and Haiku 4.5 on
+plants <!--v:results/footage_latest.json#/gate/drop_reasons/feature invasive_plant not passed by model claude-haiku-4-5-20251001-->2<!--/v-->.
 
 The kept flags by feature, counted again from the run's raw answers (`results/model_card.json`):
-built banks <!--v:results/model_card.json#/footage_kept/by_feature/artificial_bank-->3<!--/v-->, dug-out channel
-<!--v:results/model_card.json#/footage_kept/by_feature/dug_out_channel-->32<!--/v-->, plants
-<!--v:results/model_card.json#/footage_kept/by_feature/invasive_plant-->0<!--/v--> and pipes
-<!--v:results/model_card.json#/footage_kept/by_feature/pipe_running-->0<!--/v-->; the check has no question for a dug-out
+built banks <!--v:results/model_card.json#/footage_kept/by_feature/artificial_bank-->3<!--/v-->, dug-out
+channel <!--v:results/model_card.json#/footage_kept/by_feature/dug_out_channel-->32<!--/v-->,
+plants <!--v:results/model_card.json#/footage_kept/by_feature/invasive_plant-->0<!--/v--> and
+pipes <!--v:results/model_card.json#/footage_kept/by_feature/pipe_running-->0<!--/v-->; the check has no question for a dug-out
 channel, so a flag there asks nothing.
 
 The gate's own tests throw arbitrary output at it, including huge numbers, deep nesting, a
