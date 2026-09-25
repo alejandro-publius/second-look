@@ -114,18 +114,13 @@ export async function offer(env: Part2Env, body: Record<string, unknown>, qa: bo
     return ok({ declined: true });
   }
 
-  const stratum = STRATA.includes(part1.arm) ? part1.arm : "untrained";
-  const taken = await env.DB.prepare(
-    "UPDATE part2_counter SET next_position = next_position + 1 WHERE stratum = ? RETURNING next_position",
-  )
-    .bind(stratum)
-    .first<{ next_position: number }>();
-  if (taken === null) return no(500, "The randomization counter for the second look is missing.");
-  const slot = await env.DB.prepare("SELECT arm, block_id FROM part2_slot WHERE stratum = ? AND position = ?")
-    .bind(stratum, Number(taken.next_position) - 1)
-    .first<{ arm: string; block_id: number }>();
-  if (slot === null) return no(500, "The randomization sequence for the second look has run out.");
-  const arm = slot.arm;
+  // A QA sitting (the x-qa-key header) may name its arm, so a live check covers both arms, and
+  // then takes no slot: the real sequence stays exactly as scripts/seed_part2_arms.py wrote it.
+  const qaArm = qa && typeof body.qa_arm === "string" && PART2_ARMS.includes(body.qa_arm) ? body.qa_arm : null;
+  const picked = qaArm ? { arm: qaArm, block_id: -1 } : await takeSlot(env, part1.arm);
+  if ("detail" in picked) return no(500, picked.detail);
+  const arm = picked.arm;
+  const slot = picked;
   const order = shuffled(PART2_ITEM_IDS);
   const id = existing?.id ?? randomHex(16);
   if (existing !== null) {
@@ -146,6 +141,22 @@ export async function offer(env: Part2Env, body: Record<string, unknown>, qa: bo
   }
   const row = await part2For(env, id);
   return ok(row ? await state(env, row) : { part2_id: id, arm, item_order: order });
+}
+
+/** The next slot of this part 1 arm's sequence. */
+async function takeSlot(env: Part2Env, part1Arm: string): Promise<{ arm: string; block_id: number } | { detail: string }> {
+  const stratum = STRATA.includes(part1Arm) ? part1Arm : "untrained";
+  const taken = await env.DB.prepare(
+    "UPDATE part2_counter SET next_position = next_position + 1 WHERE stratum = ? RETURNING next_position",
+  )
+    .bind(stratum)
+    .first<{ next_position: number }>();
+  if (taken === null) return { detail: "The randomization counter for the second look is missing." };
+  const slot = await env.DB.prepare("SELECT arm, block_id FROM part2_slot WHERE stratum = ? AND position = ?")
+    .bind(stratum, Number(taken.next_position) - 1)
+    .first<{ arm: string; block_id: number }>();
+  if (slot === null) return { detail: "The randomization sequence for the second look has run out." };
+  return slot;
 }
 
 /** A first answer. The reply says only whether to ask. */

@@ -205,10 +205,22 @@ try {
   assert.equal((await api("GET", `/api/t2/resume?part2_id=${fresh.part2_id}`)).data.correct_total, 8);
   assert.equal((await api("GET", "/api/t2/counts")).data.by_arm[fresh.arm].completed, 1);
 
-  at("a QA part 1 makes a QA part 2");
+  at("a QA part 1 makes a QA part 2, and a QA check names its arm without taking a slot");
   const qa = await part1({ qa: true });
   await api("POST", "/api/t2/offer", { session_id: qa.session_id, decision: "start" });
   assert.deepEqual(d1(`SELECT is_test FROM part2_session WHERE session_id = '${qa.session_id}'`), [{ is_test: 1 }]);
+  const counters = () => d1("SELECT stratum, next_position FROM part2_counter ORDER BY stratum");
+  const before = counters();
+  for (const arm of ["assisted", "unassisted"]) {
+    const s = await part1({ qa: true });
+    const r = await api("POST", "/api/t2/offer", { session_id: s.session_id, decision: "start", qa_arm: arm }, { "x-qa-key": QA_KEY });
+    assert.equal(r.data.arm, arm);
+  }
+  assert.deepEqual(counters(), before, "a QA check with its own arm takes no slot");
+  const plain = await part1();
+  const ignored = await api("POST", "/api/t2/offer", { session_id: plain.session_id, decision: "start", qa_arm: "assisted" });
+  assert.equal(ignored.status, 200);
+  assert.notDeepEqual(counters(), before, "without the key, qa_arm is ignored and a slot is taken");
 
   at("the export carries the columns the analysis reads");
   const res = await fetch(`${BASE}/api/test/export?token=${EXPORT_TOKEN}`);

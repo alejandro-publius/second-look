@@ -1,0 +1,38 @@
+diff --git a/apps/web/app/judges/page.tsx b/apps/web/app/judges/page.tsx
+index 8d30457..918aff4 100644
+--- a/apps/web/app/judges/page.tsx
++++ b/apps/web/app/judges/page.tsx
+@@ -1,6 +1,7 @@
+ import type { Metadata } from "next";
+ import Link from "next/link";
+ import { FocusHeading } from "@/components/FocusHeading";
++import { JudgesAssistDoor } from "@/components/JudgesAssistDoor";
+ import { Row } from "@/components/ui/Row";
+ import { content } from "@/lib/content";
+ import { t } from "@/lib/t";
+@@ -79,6 +80,8 @@ export default function JudgesPage() {
+             value={t(d.note, d.params)}
+           />
+         ))}
++        {/* Part 2's judge mode (UPDATE_31 section 2 item 9): feel the checker's question. */}
++        <JudgesAssistDoor />
+       </nav>
+     </div>
+   );
+diff --git a/apps/web/tests/judges.spec.ts b/apps/web/tests/judges.spec.ts
+index 92a3635..1cb0f61 100644
+--- a/apps/web/tests/judges.spec.ts
++++ b/apps/web/tests/judges.spec.ts
+@@ -134,3 +134,12 @@ test("the poster says about four minutes with the lesson", async ({ page }) => {
+   await expect(page.getByRole("img", { name: "QR code that opens the test" })).toBeVisible();
+   await expect(page.locator("main")).not.toContainText(/two.minute|two minutes/i);
+ });
++
++test("the assisted second look door opens part 2's judge mode", async ({ page }) => {
++  await page.goto("/judges");
++  const door = page.getByRole("link", { name: "Assisted second look, try it" });
++  await expect(door).toHaveAttribute("href", "/t2/demo");
++  await door.click();
++  // Before the lock the page is shut and says why; after it, judge mode starts.
++  await expect(page.getByRole("heading", { name: /Judge mode opens on Sep 28|Assisted second look, judge mode/ })).toBeVisible();
++});
