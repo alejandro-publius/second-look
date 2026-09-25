@@ -47,7 +47,7 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    `content/regions/california-bay-area.yaml`, keeping `inaturalist_taxon_id`, or say which ones
    to move. Until then every creek says "There are no recent sightings on record."
 
-7. **Sun Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
+7. **Mon Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
    read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
 
 8. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own

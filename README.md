@@ -82,7 +82,7 @@ There are <!--v:results/screens.json#/screen_count-->32<!--/v--> phone screens a
 </tr>
 <tr>
 <td align="center"><img src="docs/screens/walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
-<td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
+<td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it, after answering Artificial for the bank<br><code>/city?walk=v02</code></td>
 </tr>
 </table>
 

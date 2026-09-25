@@ -92,5 +92,5 @@ Proof: https://github.com/alejandro-publius/second-look/actions
 ## Blockchain
 
 **20. Is this on a blockchain?**
-No. It is a hash-chained audit log: each line carries the hash of the one before, so a changed line breaks the chain. So far it records the key freeze, the launch wipe and the plan tag; the data lock joins it on Sep 28. No tokens, no consensus, no ledger shared with anyone. Since Sep 24 its last hash is stamped each day with OpenTimestamps, a public timestamp service that anchors many hashes in one Bitcoin transaction: a timestamp for our log, not a chain of ours (`/verify`, `proofs/`).
+No. It is a hash-chained audit log: each line carries the hash of the one before, so a changed line breaks the chain. So far it records the key freeze, the launch wipe and the plan tag; the data lock joins it on Sep 28. No tokens, no consensus, no ledger shared with anyone. Since Sep 24 its last hash is stamped with OpenTimestamps on each day the log has changed, a public timestamp service that anchors many hashes in one Bitcoin transaction: a timestamp for our log, not a chain of ours (`/verify`, `proofs/`).
 Proof: `audit/log.jsonl`; `uv run python scripts/verify_audit.py`; `docs/notes/plan_hash.md`.
