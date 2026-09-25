@@ -258,10 +258,14 @@ export function shownPhotos(): Photo[] {
   return Object.values(content.photos).sort((a, b) => a.id.localeCompare(b.id));
 }
 
-/** Every creek the regions name, by name: the ones /city can be opened on (CRITIC_11 W02). */
-export function knownCreeks(): { slug: string; name: string }[] {
+/**
+ * Every region pack in content/regions/, by name, with its creeks by name: the creeks /city can be
+ * opened on (CRITIC_11 W02). Bare /city lists them all, and a pack with no creek yet too, so a city
+ * added with make new-city shows up there (UPDATE_30 section 1 item 4).
+ */
+export function creeksByRegion(): { region: string; name: string; creeks: { slug: string; name: string }[] }[] {
   return Object.values(content.regions)
-    .flatMap((r) => r.creeks ?? [])
+    .map((r) => ({ region: r.region, name: r.name, creeks: [...(r.creeks ?? [])].sort((a, b) => a.name.localeCompare(b.name)) }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
