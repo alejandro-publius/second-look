@@ -20,7 +20,7 @@ import { observerLabel } from "../src/core/labels";
 import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
-import { WalkRecordError, isDemo, walkBundle, walkRecord } from "../src/core/walks";
+import { WalkRecordError, isDemo, walkBundle, walkChecks, walkFollowups, walkRecord } from "../src/core/walks";
 import { storeUpload, stripJpeg } from "../src/uploads";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -209,6 +209,28 @@ test("walks: the stored row of a finished walk, or the same reason to refuse it,
     if (!("error" in c.expected)) stored += 1;
   }
   assert.ok(stored > 0 && stored < doc.record_cases.length, "both kinds of case ran");
+});
+
+// Judge walk W01: a walk runs the creek check's follow-up rules on its answers, and the store
+// keeps the checks that ran. The phone, the Worker and Python run the same two functions.
+test("walks: the follow-ups a walk asks and the checks kept with it, or the same reason to refuse them, as Python", () => {
+  const doc = golden("walks");
+  const kinds = new Set<string>();
+  for (const c of doc.followups_cases) {
+    const chosen = walkFollowups(c.input.answers, CONTENT.followups, CONTENT.form_items as never);
+    let got: unknown;
+    try {
+      const out = walkChecks(c.input.answers, chosen, c.input.question_texts, c.input.given, c.input.final_rating);
+      got = { followups: chosen, checks: out.checks, final_rating: out.final_rating };
+      kinds.add(out.checks.length > 0 ? "checks" : "none");
+    } catch (err) {
+      assert.ok(err instanceof WalkRecordError, `${c.name}: ${String(err)}`);
+      got = { followups: chosen, error: err.message };
+      kinds.add("error");
+    }
+    same(got, c.expected, c.name);
+  }
+  assert.deepEqual([...kinds].sort(), ["checks", "error", "none"], "cases that keep checks, keep none, and refuse");
 });
 
 test("old Bundles: only ts- JSON files are deleted, and only the ones in that folder", () => {

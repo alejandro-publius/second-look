@@ -3,8 +3,9 @@
 // and never mirrored. Proved equal to Python by worker/golden/walks.json.
 
 import { REPO_URL, emitVisit } from "./fhir_emit";
+import { selectFollowups, type Followup, type SiteContext } from "./followups";
 import { sha256Hex } from "./sha256";
-import { instant, parseInstant, type AnswerValue, type Json, type Spot, type VisitRecord } from "./types";
+import { instant, parseInstant, type AnswerValue, type CheckResult, type FormItem, type Json, type Spot, type VisitRecord } from "./types";
 
 export const DEMO_TAG_SYSTEM = `${REPO_URL}/tags`;
 export const DEMO_TAG_CODE = "demo-walk";
@@ -123,4 +124,63 @@ export function walkRecord(walk: WalkRef, answers: Record<string, AnswerValue>, 
     delete_after: instant(clock + WALK_KEEP_DAYS * DAY_MS),
     bundle: walkBundle(walk, answers, at),
   };
+}
+
+// The follow-up questions of a walk (judge walk W01): the creek check's own rules over the walk's
+// answers, as core/walks.py. A clip has no place and no weather, so rain is unknown and the dry
+// pipe rule fails closed; nobody took the test for the walk, so there is no score; the checker's
+// flag on a clip is the walk's own build-time question, so no flag goes in. Proved equal to
+// Python by worker/golden/walks.json.
+export const WALK_SITE: SiteContext = { rain: "unknown" };
+const RATING_ITEM = "overall_rating";
+/** The answers each kind of follow-up takes on a walk. A walk uploads nothing. */
+export const WALK_FOLLOWUP_ANSWERS: Record<string, readonly string[]> = {
+  yesno: ["yes", "no", "cant_tell", "skipped"],
+  keep_rating: ["keep", "change", "skipped"],
+  look_again: ["looked", "skipped"],
+  photo: ["skipped"],
+};
+
+/** The follow-ups a walk asks: selectFollowups with rain unknown, no score and no flag. */
+export function walkFollowups(answers: Record<string, AnswerValue>, table: Record<string, unknown>, formItems: FormItem[]): Followup[] {
+  return selectFollowups(answers, WALK_SITE, null, [], table, formItems, false);
+}
+
+/** The checks a finished walk ran, with what the person answered, and its final rating, kept as
+ *  the creek check keeps them. Throws WalkRecordError with the same plain reasons as Python. The
+ *  caller checks finalRating is one of the form's ratings. */
+export function walkChecks(
+  answers: Record<string, AnswerValue>,
+  followups: Followup[],
+  questionTexts: string[],
+  given: Record<string, unknown>,
+  finalRating: string | null,
+): { checks: CheckResult[]; final_rating: string | null } {
+  if (questionTexts.length !== followups.length) throw new WalkRecordError("Every follow-up needs its question.");
+  const asked = new Set(followups.map((f) => f.rule_id));
+  for (const ruleId of Object.keys(given)) {
+    if (!asked.has(ruleId)) throw new WalkRecordError(`No follow-up called '${ruleId}' was asked in this walk.`);
+  }
+  const first = answers[RATING_ITEM];
+  const firstRating = typeof first === "string" ? first : null;
+  let final = firstRating;
+  const checks: CheckResult[] = followups.map((f, i) => {
+    const raw = given[f.rule_id];
+    let answer: string | null = null;
+    if (raw !== undefined && raw !== null) {
+      const allowed = WALK_FOLLOWUP_ANSWERS[f.kind] ?? [];
+      if (typeof raw !== "string" || !allowed.includes(raw)) throw new WalkRecordError(`${f.rule_id}: answer ${allowed.join(", ")}.`);
+      answer = raw;
+    }
+    if (f.kind === "keep_rating" && answer === "change") {
+      if (finalRating === null) throw new WalkRecordError("A changed rating needs the new rating.");
+      final = finalRating;
+    }
+    const detail: Record<string, string | number | null> = {};
+    for (const [k, v] of Object.entries(f.params)) detail[k] = typeof v === "string" || typeof v === "number" ? v : String(v);
+    detail.kind = f.kind;
+    return { rule_id: f.rule_id, asked: true, question_text: questionTexts[i], answer, detail };
+  });
+  if (finalRating !== null && finalRating !== final) throw new WalkRecordError("The final rating can differ from the first only when the rating check says change.");
+  return { checks, final_rating: final };
 }

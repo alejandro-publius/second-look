@@ -37,7 +37,7 @@ OUT = ROOT / "worker" / "src" / "content.json"
 # What the pure ports in worker/src/core read, and nothing else. The web app imports those ports
 # for the video walks, so this file ships to browsers: it must never hold the gold key.
 CORE_OUT = ROOT / "worker" / "src" / "core" / "core_content.json"
-CORE_KEYS = ("creeks", "fhir", "form_items", "rules", "sentences")
+CORE_KEYS = ("creeks", "fhir", "followups", "form_items", "rules", "sentences")
 
 
 def core_doc(doc: dict[str, Any]) -> dict[str, Any]:
