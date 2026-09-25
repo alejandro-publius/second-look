@@ -1,0 +1,129 @@
+{
+  "generated_at_utc": "2026-09-25T19:11:54Z",
+  "script": "evals/assist_analysis.py",
+  "synthetic": true,
+  "stamp": "SYNTHETIC",
+  "scenario": "nothing",
+  "plan_sha256": "83bfbad2c07a18f211223e7a3b5a8e1ff2ed28ace5e3a9d367f4ecac3703b124",
+  "exclusions": [
+    {
+      "order": 0,
+      "rule": "offered or started at or after the data lock",
+      "removed": 0,
+      "remaining": 132
+    },
+    {
+      "order": 1,
+      "rule": "did not finish all 8 items",
+      "removed": 0,
+      "remaining": 120
+    },
+    {
+      "order": 2,
+      "rule": "finished the 8 in under 20 seconds",
+      "removed": 0,
+      "remaining": 120
+    },
+    {
+      "order": 3,
+      "rule": "QA session, or its part 1 session was QA",
+      "removed": 0,
+      "remaining": 120
+    },
+    {
+      "order": 4,
+      "rule": "repeat part 2 session from the same browser token",
+      "removed": 0,
+      "remaining": 120
+    }
+  ],
+  "counts": {
+    "offered": 132,
+    "offered_by_part1_arm": {
+      "untrained": 66,
+      "trained": 66
+    },
+    "declined": 12,
+    "declined_by_part1_arm": {
+      "untrained": 6,
+      "trained": 6
+    },
+    "randomized": {
+      "unassisted": 60,
+      "assisted": 60
+    },
+    "started": {
+      "unassisted": 60,
+      "assisted": 60
+    },
+    "finished": {
+      "unassisted": 60,
+      "assisted": 60
+    },
+    "analysed": {
+      "unassisted": 60,
+      "assisted": 60
+    }
+  },
+  "primary": {
+    "n_assisted": 60,
+    "n_unassisted": 60,
+    "assisted_mean": 62.3,
+    "unassisted_mean": 61.0,
+    "difference": 1.2,
+    "ci_low": -5.2,
+    "ci_high": 7.7,
+    "permutation_p": 0.7548,
+    "rejects_at_alpha_05": false,
+    "bootstrap_resamples": 10000,
+    "permutations": 10000,
+    "seed": 20260926,
+    "status": "confirmatory",
+    "status_note": "at least 20 finished part 2 sessions in each arm, so the plan's one confirmatory test applies"
+  },
+  "secondary": {
+    "assisted_items": 480,
+    "question_shown": 154,
+    "question_shown_share": 0.3208,
+    "changed_after_question": 0,
+    "changed_share_of_shown": 0.0,
+    "accuracy_changed": null,
+    "accuracy_kept_after_question": 0.2403,
+    "right_to_wrong": 0,
+    "wrong_to_right": 0,
+    "changed_without_question": 0,
+    "accuracy_by_feature": {
+      "unassisted": {
+        "artificial_bank": 0.6083,
+        "dug_out_channel": 0.5417,
+        "invasive_plant": 0.6333,
+        "pipe_running": 0.6583
+      },
+      "assisted": {
+        "artificial_bank": 0.65,
+        "dug_out_channel": 0.6333,
+        "invasive_plant": 0.6083,
+        "pipe_running": 0.6
+      }
+    },
+    "accuracy_by_part1_arm": {
+      "unassisted": {
+        "trained": 0.625,
+        "untrained": 0.5958
+      },
+      "assisted": {
+        "trained": 0.6417,
+        "untrained": 0.6042
+      }
+    },
+    "median_seconds_per_item": {
+      "unassisted": 7.2875,
+      "assisted": 8.392
+    },
+    "cant_tell_share": {
+      "unassisted": 0.1083,
+      "assisted": 0.0917
+    }
+  },
+  "readme_row": "Does the checker's question help? assisted 60, unassisted 60, difference 1.2 points, interval -5.2 to 7.7"
+}
