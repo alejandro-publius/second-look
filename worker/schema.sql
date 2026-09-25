@@ -145,3 +145,20 @@ CREATE TABLE IF NOT EXISTS inaturalist_cache (
   body TEXT NOT NULL,
   fetched_at TEXT NOT NULL
 );
+
+-- A finished video walk's demo record (UPDATE_30 section 1 item 3), so its link opens on any
+-- device. A table of its own: nothing that counts, maps or mirrors creek checks reads it. The
+-- answers are coded values from the form's lists; there is no token, no position and no free
+-- text. Each row is deleted after delete_after, 30 days after it was stored. Safe to run again.
+CREATE TABLE IF NOT EXISTS walk_record (
+  record_id TEXT PRIMARY KEY,
+  walk_id TEXT NOT NULL,
+  answered_at TEXT NOT NULL,
+  answers_json TEXT NOT NULL,
+  bundle_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  delete_after TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS walk_record_created ON walk_record (created_at);
+CREATE INDEX IF NOT EXISTS walk_record_delete_after ON walk_record (delete_after);

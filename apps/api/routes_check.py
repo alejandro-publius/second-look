@@ -5,13 +5,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 
-from apps.api import check, inaturalist
+from apps.api import check, inaturalist, walk_store
 from apps.api import city as city_mod
 from apps.api.deps import DB, Now
 from apps.api.security import READ_LIMIT, STUDY_LIMIT, UPLOAD_LIMIT, rate_limited
+from core.walks import WALK_MAX_BYTES
 
 router = APIRouter(prefix="/api")
 
@@ -79,6 +80,27 @@ async def upload(file: UploadFile, db: DB, now: Now) -> dict[str, str]:
     if len(data) > check.MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="That photo is over 8 MB. Send a smaller one.")
     return check.store_upload(db, data, now=now)
+
+
+@router.post("/walk", dependencies=[Depends(rate_limited(STUDY_LIMIT))])
+async def walk(request: Request, db: DB, now: Now) -> dict[str, str]:
+    """A finished video walk's demo record: stored in its own table, never counted or mirrored.
+    The body is read here, one chunk past the cap at most, so a large one is refused unparsed."""
+    declared = request.headers.get("content-length")
+    if declared and declared.isdigit() and int(declared) > WALK_MAX_BYTES:
+        raise walk_store.TooLarge("That walk is too large to store.")
+    raw = b""
+    async for chunk in request.stream():
+        raw += chunk
+        if len(raw) > WALK_MAX_BYTES:
+            break
+    return walk_store.store_walk(db, raw, now=now)
+
+
+@router.get("/walk/{record_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])
+def walk_record(record_id: str, db: DB, now: Now) -> dict[str, Any]:
+    """One stored walk record, with its answers and its demo Bundle, until its delete date."""
+    return walk_store.walk_view(db, record_id, now=now)
 
 
 @router.get("/photo/{photo_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])

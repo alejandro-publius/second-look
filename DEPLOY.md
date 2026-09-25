@@ -116,6 +116,7 @@ deploys to https://depth.second-look-79t.pages.dev.
 | `upload` | one photo's id, a hash of its token, its type and size; the bytes are in KV |
 | `sandbox_cache` | the laboratory record `/two` shows, as `scripts/cache_their_records.py` fetched it |
 | `inaturalist_cache` | one creek's iNaturalist context line: per listed invasive plant, a count, the latest date and a link, as `scripts/cache_inaturalist.py` fetched it |
+| `walk_record` | one finished video walk's demo record: the walk id, the coded answers, the time and the demo Bundle, deleted 30 days after it was stored by the Worker's daily cron (`worker/wrangler.jsonc`, 04:17 UTC) and by every new walk; never counted and never mirrored |
 
 ## Secrets
 

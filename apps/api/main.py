@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, func, select
 
-from apps.api import check, core_calls, study
+from apps.api import check, core_calls, study, walk_store
 from apps.api.content import get_content
 from apps.api.db import engine, get_session, init_db
 from apps.api.models import SkeletonPing
@@ -76,6 +76,22 @@ def _conflict(_: Request, exc: Exception) -> JSONResponse:
 @app.exception_handler(check.Invalid)
 def _invalid(_: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+
+# A finished walk's record (apps/api/walk_store.py): the same answers the Worker gives.
+@app.exception_handler(walk_store.TooLarge)
+def _walk_too_large(_: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(status_code=413, content={"detail": str(exc)})
+
+
+@app.exception_handler(walk_store.Conflict)
+def _walk_conflict(_: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+
+@app.exception_handler(walk_store.TooMany)
+def _walk_too_many(_: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(status_code=429, content={"detail": str(exc)})
 
 
 @app.exception_handler(core_calls.RecordBuilderMissing)

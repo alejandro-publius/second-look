@@ -8,5 +8,6 @@
   ],
   "kv_namespaces": [
     { "binding": "PHOTOS", "id": "221e06ab5b54434ab5b4322712128ef3" }
-  ]
+  ],
+  "triggers": { "crons": ["17 4 * * *"] }
 }

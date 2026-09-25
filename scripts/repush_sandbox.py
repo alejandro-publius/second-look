@@ -71,7 +71,8 @@ def _is_visit_bundle(data: object) -> bool:
     tags = data.get("meta", {}).get("tag", [])
     if any(t.get("code") == "example" for t in tags):
         return False
-    # A video walk's record is a demo made on a phone. It is never stored, so never mirrored.
+    # A video walk's record is a demo. The store keeps it in walk_record, never in this folder,
+    # and a copy put here by hand is still refused, so it is never mirrored.
     if is_demo(data):
         return False
     types = [e.get("resource", {}).get("resourceType") for e in data.get("entry", [])]

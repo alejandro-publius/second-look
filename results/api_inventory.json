@@ -2,7 +2,7 @@
   "script": "scripts/api_inventory.py",
   "synthetic": false,
   "worker": {
-    "count": 25,
+    "count": 27,
     "routes": [
       {
         "method": "POST",
@@ -101,13 +101,21 @@
         "path": "/api/upload"
       },
       {
+        "method": "POST",
+        "path": "/api/walk"
+      },
+      {
+        "method": "GET",
+        "path": "/api/walk/{}"
+      },
+      {
         "method": "any",
         "path": "/health"
       }
     ]
   },
   "python": {
-    "count": 26,
+    "count": 28,
     "routes": [
       {
         "method": "POST",
@@ -260,13 +268,25 @@
         "file": "apps/api/routes_check.py"
       },
       {
+        "method": "POST",
+        "path": "/api/walk",
+        "limit": "study",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
+        "path": "/api/walk/{record_id}",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
         "method": "GET",
         "path": "/health",
         "limit": null,
         "file": "apps/api/main.py"
       }
     ],
-    "with_a_rate_limit": 20
+    "with_a_rate_limit": 22
   },
   "rate_limits": {
     "study": {
