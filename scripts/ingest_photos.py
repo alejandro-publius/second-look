@@ -114,7 +114,7 @@ def check_labels(rows: list[dict[str, str]], originals: Path) -> list[str]:
             problems.append(f"{where}: role must be one of {sorted(ROLES)}")
         if row["feature"] and row["feature"] not in FEATURES:
             problems.append(f"{where}: feature must be one of {list(FEATURES)} or empty")
-        if row["role"] in {"test", "lesson", "practice"} and not row["feature"]:
+        if row["role"] in {"test", "lesson", "practice", "part2"} and not row["feature"]:
             problems.append(f"{where}: a {row['role']} photo needs a feature")
         if row["gold_label"] not in GOLD_VALUES:
             problems.append(f"{where}: gold_label must be present, absent, ambiguous or empty")

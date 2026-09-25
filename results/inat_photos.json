@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-09-24T07:50:56Z",
+  "checked_at": "2026-09-25T19:05:36Z",
   "source": "https://api.inaturalist.org/v1/observations/<observation id>",
   "user_agent": "SecondLookInatCheck/0.1 (Second Look, https://github.com/alejandro-publius/second-look; contact 82622360+alejandro-publius@users.noreply.github.com)",
   "california_place_id": 14,
@@ -138,14 +138,44 @@
       "place_guess": "Alameda, California, United States",
       "taxon": "Hedera helix",
       "author_and_licence_match": true
+    },
+    {
+      "photo_id": "ph-p2-04",
+      "role": "part2",
+      "observation_id": 53222165,
+      "observation_url": "https://www.inaturalist.org/observations/53222165",
+      "manifest_author": "redrovertracy",
+      "manifest_license": "CC-BY-4.0",
+      "found": true,
+      "quality_grade": "research",
+      "research_grade": true,
+      "in_california": true,
+      "place_guess": "Long Beach, CA, USA",
+      "taxon": "Arundo donax",
+      "author_and_licence_match": true
+    },
+    {
+      "photo_id": "ph-p2-05",
+      "role": "part2",
+      "observation_id": 3504980,
+      "observation_url": "https://www.inaturalist.org/observations/3504980",
+      "manifest_author": "Anne Parsons",
+      "manifest_license": "CC0-1.0",
+      "found": true,
+      "quality_grade": "research",
+      "research_grade": true,
+      "in_california": true,
+      "place_guess": " Rancho San Antonio Open Space Preserve, CA, US",
+      "taxon": "Rosa californica",
+      "author_and_licence_match": true
     }
   ],
   "summary": {
-    "photos": 9,
-    "found": 9,
-    "research_grade": 9,
-    "in_california": 9,
-    "research_grade_in_california": 9,
-    "author_and_licence_match": 9
+    "photos": 11,
+    "found": 11,
+    "research_grade": 11,
+    "in_california": 11,
+    "research_grade_in_california": 11,
+    "author_and_licence_match": 11
   }
 }

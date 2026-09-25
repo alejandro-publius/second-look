@@ -36,7 +36,8 @@ LICENSE_ALLOWLIST = {
 # The licences that ask us to name the author wherever the photo appears. /credits does that.
 NEEDS_ATTRIBUTION = {lic for lic in LICENSE_ALLOWLIST if lic.startswith(("CC-BY", "own-CC-BY"))}
 REAL_LICENSES = LICENSE_ALLOWLIST - {"placeholder"}
-ROLES = {"warmup", "lesson", "practice", "test", "benchmark"}
+# part2 is the eight photos of the assisted second look (UPDATE_31): never in a lesson or the test.
+ROLES = {"warmup", "lesson", "practice", "test", "benchmark", "part2"}
 TEST_SIZE = 16
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
 
@@ -208,6 +209,12 @@ def _check_disjoint(photos: dict[str, Photo], problems: list[str]) -> None:
     test_hashes = {p.sha256 for p in test}
     test_scenes = {p.scene_id for p in test}
     for p in photos.values():
+        if p.role == "part2":
+            seen = [q for q in photos.values() if q.role in {"lesson", "practice", "test"}]
+            if p.sha256 in {q.sha256 for q in seen}:
+                problems.append(f"part2 photo {p.id} is also a lesson or test photo (same hash)")
+            if p.scene_id in {q.scene_id for q in seen}:
+                problems.append(f"part2 photo {p.id} shares scene {p.scene_id} with a shown photo")
         if p.role in {"lesson", "practice"}:
             if p.sha256 in test_hashes:
                 problems.append(f"{p.role} photo {p.id} is also a test photo (same hash)")

@@ -1,0 +1,18 @@
+# The eight items of part 2, the assisted second look (UPDATE_31). Two per feature, one present
+# and one absent. Photo ids point at photos/manifest.csv rows with role part2, which are never
+# shown in a lesson, a practice card or the test. Gold labels are the ones chosen at picking.
+# The question for each feature is the part 1 question, word for word from content/features.yaml.
+# Frozen in docs/analysis_plan_v2.md. Changing this file after prereg-v2 is a deviation.
+items:
+  - { id: a01, feature: artificial_bank, photo_id: ph-p2-01, gold: present }
+  - { id: a02, feature: artificial_bank, photo_id: ph-p2-02, gold: absent }
+  - { id: a03, feature: dug_out_channel, photo_id: ph-p2-08, gold: present }
+  - { id: a04, feature: dug_out_channel, photo_id: ph-p2-03, gold: absent }
+  - { id: a05, feature: invasive_plant, photo_id: ph-p2-04, gold: present }
+  - { id: a06, feature: invasive_plant, photo_id: ph-p2-05, gold: absent }
+  - { id: a07, feature: pipe_running, photo_id: ph-p2-06, gold: present }
+  - { id: a08, feature: pipe_running, photo_id: ph-p2-07, gold: absent }
+# The one model whose flags part 2 uses. It passed the most features in the committed pass table
+# (built banks, dug-out channel, pipes), so it has the most it may say. The pass table still
+# decides, item by item: a feature this model did not pass never produces a flag.
+checker_model: claude-opus-5-5
