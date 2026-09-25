@@ -1,0 +1,106 @@
+{
+ "what": "make go-public GO=dry (scripts/go_public.py --no-flip), UPDATE_30 section 8 item 1",
+ "checked_utc": "2026-09-25T17:53:59Z",
+ "commit": "0189dd0",
+ "where": "Not on GitHub: the gh token here has no delete_repo scope, so a throwaway GitHub mirror could not be deleted afterwards. Instead a local mirror (clone --mirror of this repository into a temp folder) and a working clone of it, on a local main at the branch tip. Its origin is the local mirror, so the fetch and the gitleaks scan read every branch this Mac holds (115), a superset of GitHub's. gh only read the real repository alejandro-publius/second-look: repo view, and the README rendered by GitHub's markdown API.",
+ "mode": "GO=dry (--no-flip)",
+ "failed": [
+  "submit"
+ ],
+ "expected": {
+  "submit": "submit-check fails on video_link until the video is uploaded (Sep 29) and on repo_public until the flip; go-public accepts only repo_public, so this line turns PASS once the video link is in README.md and docs/devpost.md.",
+  "start": "The working clone's main is this branch, so it is behind the real main; a dry run allows that, GO=yes refuses it."
+ },
+ "steps": [
+  {
+   "step": "start",
+   "result": "PASS",
+   "output": "on main at 0189dd0, a clean tree, 32 behind origin/main; fetched 115 branches, 1 tag and 0 pull request heads; the dry run reads HEAD in a throwaway worktree"
+  },
+  {
+   "step": "secrets",
+   "result": "PASS",
+   "output": "gitleaks: 522 commits on every branch, tag and pull request head and HEAD, no leaks; secrets: 0 found in the 974 files git would commit"
+  },
+  {
+   "step": "notes",
+   "result": "PASS",
+   "output": "removed 120 files under docs/internal and reworded 149 mentions in 26 files, in commit 99b14e8; 6 readers keep the path and cope without it"
+  },
+  {
+   "step": "tests",
+   "result": "PASS",
+   "output": "make lint clean; pytest: 2076 passed, 26 skipped, 9 xfailed in 172.33s (0:02:52)"
+  },
+  {
+   "step": "submit",
+   "result": "FAIL",
+   "output": "submit-check: 2 failed: video_link, repo_public; submit-check failed on ['video_link']"
+  },
+  {
+   "step": "readme",
+   "result": "PASS",
+   "output": "rendered by GitHub: 14 images and 131 links, every one answers; blocked to scripts, so open by hand: https://www.inaturalist.org/pages/terms (403, the site refuses scripts)"
+  },
+  {
+   "step": "changelog",
+   "result": "PASS",
+   "output": "CHANGELOG.md v1.0 names every day with commits from Sep 16 to yesterday (5 days)"
+  }
+ ],
+ "not_run": [
+  "push",
+  "flip",
+  "public",
+  "tag",
+  "release"
+ ],
+ "main_unchanged": "After the run the working clone was still at the same commit with a clean tree, and no worktree was left: the notes commit lived only in the throwaway worktree.",
+ "first_run": {
+  "commit": "dbfb026",
+  "checked_utc": "2026-09-25T17:45:42Z",
+  "failed": [
+   "tests",
+   "submit"
+  ],
+  "steps": [
+   {
+    "step": "start",
+    "result": "PASS",
+    "output": "on main at dbfb026, a clean tree, 32 behind origin/main; fetched 115 branches, 1 tags and 0 pull request heads; the dry run reads HEAD in a throwaway worktree"
+   },
+   {
+    "step": "secrets",
+    "result": "PASS",
+    "output": "gitleaks: 520 commits on every branch, tag and pull request head and HEAD, no leaks; Installed 111 packages in 348ms"
+   },
+   {
+    "step": "notes",
+    "result": "PASS",
+    "output": "removed 120 files under docs/internal and reworded 149 mentions in 26 files, in commit 7c16c43; 6 readers keep the path and cope without it"
+   },
+   {
+    "step": "tests",
+    "result": "FAIL",
+    "output": "pytest: FAILED scripts/tests/test_deploy_config.py::test_every_setting_the_code_reads_has_a_row_and_no_row_is_stale"
+   },
+   {
+    "step": "submit",
+    "result": "FAIL",
+    "output": "submit-check: 2 failed: video_link, repo_public; submit-check failed on ['video_link']"
+   },
+   {
+    "step": "readme",
+    "result": "PASS",
+    "output": "rendered by GitHub: 14 images and 131 links, every one answers; blocked to scripts, so open by hand: https://www.inaturalist.org/pages/terms (403, the site refuses scripts)"
+   },
+   {
+    "step": "changelog",
+    "result": "PASS",
+    "output": "CHANGELOG.md v1.0 names every day with commits from Sep 16 to yesterday (5 days)"
+   }
+  ],
+  "fixed_in": "0189dd0",
+  "what_was_fixed": "tests: the logged out pass read this shell's PATH, which the settings check (scripts/tests/test_deploy_config.py) rightly counts as a setting with no row in DEPLOY.md; it now gets the system folders and curl's own. Also: the secrets and tests lines showed uv's install note instead of the command's own last line, pytest ran twice quiet and printed no count, and '1 tags'."
+ }
+}

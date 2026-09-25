@@ -837,3 +837,16 @@ def test_make_go_public_maps_go_to_the_flags() -> None:
 def test_the_commit_message_says_history_keeps_the_notes() -> None:
     assert "history keeps them" in gp.COMMIT_MESSAGE
     assert "private" not in gp.COMMIT_MESSAGE
+
+
+def test_the_recorded_dry_run_ran_every_step_before_the_flip() -> None:
+    """results/go_public_dryrun.json: every step before the flip ran, each with one line, and each
+    failure it records is one the record explains as expected."""
+    report = json.loads((ROOT / "results" / "go_public_dryrun.json").read_text(encoding="utf-8"))
+    flip = gp.STEP_NAMES.index("push")
+    assert [s["step"] for s in report["steps"]] == gp.STEP_NAMES[:flip]
+    assert report["not_run"] == gp.STEP_NAMES[flip:]
+    for step in report["steps"]:
+        assert step["result"] in ("PASS", "FAIL", "SKIP") and "\n" not in step["output"]
+    failed = [s["step"] for s in report["steps"] if s["result"] == "FAIL"]
+    assert failed == report["failed"] and set(failed) <= set(report["expected"])
