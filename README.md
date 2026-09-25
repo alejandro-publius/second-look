@@ -154,7 +154,7 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 
 ## What the AI cannot do
 
-It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate, the heart of it, says how, and Three properties that follow names the test for each. Two more limits:
+It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate says how, and Three properties that follow names the test for each. Two more limits:
 
 | It cannot | Enforced by | Test |
 |---|---|---|
