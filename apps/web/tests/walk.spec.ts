@@ -40,6 +40,16 @@ test("every walk comes from a different country and is linked from /judges", asy
   if (walks.some((w) => w.country === "United Kingdom")) expect(names).toContain("A creek in the United Kingdom");
 });
 
+// CRITIC_11 V02: /walk and /judges said the clips show "a creek from another country", though one
+// walk is in the United States, where the Berkeley setup that /about describes is.
+test("the walks are said to be somewhere else, not from another country", async ({ page }) => {
+  for (const path of ["/walk", "/judges"]) {
+    await page.goto(`${BASE}${path}`);
+    await expect(page.getByRole("main"), path).not.toContainText(/another country/i);
+    await expect(page.getByRole("main"), path).toContainText("a short clip of a creek somewhere else");
+  }
+});
+
 test("a walk shows its credit, builds a demo record on the phone, and sends nothing", async ({ page }) => {
   const calls = await mockApi(page, {});
   const urls = watchRequests(page);
@@ -416,8 +426,11 @@ test("a walk says how to see a measure, and an honest walk ends on a marked exam
   await expect(example.getByRole("heading", { name: en["city.walk_example_title"], level: 2 })).toBeVisible();
   await expect(example).toContainText(en["city.walk_example_intro"]);
   await expect(example.locator(".row")).toHaveText(bankMeasures.map((m) => `${m.text}${featureNames["artificial_bank"]}. ${m.source}`));
-  const back = page.getByRole("main").getByRole("link", { name: en["city.walk_more"], exact: true });
+  // CRITIC_11 V02: the link says where it goes. It said "Try another door", and no page calls the
+  // judges' entries doors.
+  const back = page.getByRole("main").getByRole("link", { name: "Back to the judges' page", exact: true });
   await expect(back).toHaveAttribute("href", "/judges");
+  await expect(page.getByRole("main")).not.toContainText(/\bdoor\b/i);
   await back.click();
   await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
 });
