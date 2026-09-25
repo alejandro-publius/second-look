@@ -130,3 +130,14 @@ test.describe("with service workers allowed", () => {
     await context.setOffline(false);
   });
 });
+
+// Critic rounds 14 and 15 W08: /offline spoke only of the creek check and of "this phone", on a
+// desktop too, and did not say which pages open with no network. The pages it names are the ones
+// the service worker keeps (offline-budget.mjs OFFLINE_PAGES: /, /t, /check and /offline).
+test("/offline says which pages open with no network, and speaks of this device", async ({ page }) => {
+  await page.goto("/offline");
+  const main = page.getByRole("main");
+  await expect(main).toContainText("What opens here with no network: the start page, the creek check, and a test you had already started, as long as you do not reload it.");
+  await expect(main).toContainText("once this site has been opened on this device");
+  await expect(main).not.toContainText("this phone");
+});

@@ -110,7 +110,7 @@ await shot("check-photos");
 await click("Send");
 await page.getByRole("heading", { name: "One or two follow-ups" }).waitFor();
 await shot("check-followups");
-await page.getByRole("region", { name: "dry_pipe" }).getByRole("button", { name: "Yes", exact: true }).click();
+await page.getByRole("region", { name: "Pipe after dry days" }).getByRole("button", { name: "Yes", exact: true }).click();
 await click("Keep my rating");
 await click("Finish");
 await page.getByRole("heading", { name: "Saved" }).waitFor();

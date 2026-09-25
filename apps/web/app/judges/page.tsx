@@ -45,6 +45,9 @@ const DOORS: { href: string; label: string; note: string; params?: Record<string
   { href: "/two", label: "judges.two", note: "judges.two_note" },
   { href: "/how-we-know", label: "judges.how", note: "judges.how_note" },
   { href: `${REPO}#for-judges`, label: "judges.readme", note: "judges.readme_note" },
+  // The two docs the README's For judges table leads with, one tap from here (critic round 14 R12).
+  { href: `${REPO}/blob/main/docs/JUDGE_DAY.md`, label: "judges.day", note: "judges.day_note" },
+  { href: `${REPO}/blob/main/docs/submission/JUDGE_QA.md`, label: "judges.qa", note: "judges.qa_note" },
   { href: `${REPO}/blob/main/docs/REPORT.pdf`, label: "judges.report", note: "judges.report_note" },
   { href: `${REPO}/blob/main/docs/MODEL_CARD.md`, label: "judges.model_card", note: "judges.model_card_note" },
   { href: `${REPO}/blob/main/examples/footage-flag/README.md`, label: "judges.ai_example", note: "judges.ai_example_note" },

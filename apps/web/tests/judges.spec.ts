@@ -37,6 +37,9 @@ test("the repository doors link the README, the report, the model card, the foot
     ["The model card", `${REPO}/blob/main/docs/MODEL_CARD.md`],
     ["The checker at work on real creek footage", `${REPO}/blob/main/examples/footage-flag/README.md`],
     ["The code", REPO],
+    // Critic round 14 R12: the judge's day and the hard questions, one tap from the site.
+    ["A judge's day: what you should see at each step", `${REPO}/blob/main/docs/JUDGE_DAY.md`],
+    ["The hardest questions, with honest answers", `${REPO}/blob/main/docs/submission/JUDGE_QA.md`],
   ]) {
     const link = page.getByRole("link", { name, exact: true });
     await expect(link).toHaveAttribute("href", href);
@@ -133,4 +136,30 @@ test("the poster says about four minutes with the lesson", async ({ page }) => {
   await expect(page.getByText("Scan to find out. It takes about four minutes with the lesson. Anonymous.")).toBeVisible();
   await expect(page.getByRole("img", { name: "QR code that opens the test" })).toBeVisible();
   await expect(page.locator("main")).not.toContainText(/two.minute|two minutes/i);
+});
+
+// Critic rounds 14 and 15 (B01, C01, E01, F01, G01): since Sep 25 a finished walk is stored as a
+// demo record for 30 days, but /judges said nothing was stored but the test and a creek check, and
+// /privacy's list had no walk. Both now name it, and /privacy names the walk kept on the phone.
+test("/judges and /privacy say a finished walk's demo record is kept 30 days, and what stays on the phone", async ({ page }) => {
+  await mockApi(page);
+  const locale: Record<string, string> = content.locale;
+  await page.goto("/judges");
+  const intro = page.getByRole("main").locator("p").first();
+  await expect(intro).toContainText("a finished walk's demo record, kept 30 days and never counted");
+  await page.goto("/privacy");
+  const stored = page.getByRole("main").locator("ul").first().locator("li");
+  await expect(stored.filter({ hasText: /^Video walk:/ })).toHaveText(locale["privacy.stored_walk"]);
+  await expect(stored.filter({ hasText: /^Video walk:/ })).toContainText("Kept 30 days as a demo record, then deleted.");
+  await expect(stored.filter({ hasText: /^On your phone only:/ })).toContainText("a video walk you have not finished");
+});
+
+// Critic round 14 G03 and round 15 C03: half the people who take the test see the sixteen photos
+// before the lesson. The test door says so, where a judge meets it.
+test("the judges' test door says the server puts you in one of two groups at random", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  const nav = page.getByRole("navigation", { name: "For judges" });
+  const door = nav.locator(".row").filter({ has: page.getByRole("link", { name: "Take the test, about four minutes with its lesson" }) });
+  await expect(door).toContainText("The server puts you at random in one of two groups: one sees the lesson first, the other sees the sixteen photos first and is offered the lesson after its score.");
 });

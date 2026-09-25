@@ -1000,18 +1000,22 @@ def walk_vectors(table: dict[str, Any], form_items: list[dict[str, Any]]) -> dic
     """Update 14 3.7: a walk visit, built on the device, tagged as a demo on every resource."""
     walk = {"id": "v03", "spot_name": "The stretch in the clip", "creek_name": "A creek in a clip"}
 
-    def run(name: str, answers: dict[str, Any], at: datetime) -> dict[str, Any]:
-        bundle = walks.walk_bundle(walk, answers, at)
+    def run(
+        name: str, answers: dict[str, Any], at: datetime, final_rating: str | None = None
+    ) -> dict[str, Any]:
+        bundle = walks.walk_bundle(walk, answers, at, final_rating)
         assert check_bundle(bundle) == [] and walks.is_demo(bundle)
-        return case(
-            name,
-            {
-                "walk": walk,
-                "answers": answers,
-                "answered_at": at.isoformat().replace("+00:00", "Z"),
-            },
-            bundle,
-        )
+        inputs: dict[str, Any] = {
+            "walk": walk,
+            "answers": answers,
+            "answered_at": at.isoformat().replace("+00:00", "Z"),
+        }
+        # Only the cases after the rating check carry a final rating; the others are as before.
+        if final_rating is not None:
+            inputs["final_rating"] = final_rating
+        return case(name, inputs, bundle)
+
+    rated = {"overall_rating": "good", "bank_type": "present", "sewage_discharge": "present"}
 
     return {
         "function": "core.walks.walk_bundle",
@@ -1026,6 +1030,20 @@ def walk_vectors(table: dict[str, Any], form_items: list[dict[str, Any]]) -> dic
                 {"bank_type": "absent"},
                 datetime(2026, 9, 25, 8, 0, 0, 750000, tzinfo=UTC),
             ),
+            # Critic round 15 F02: the rating check changed the rating, so the record answers the
+            # rating question with the new one and names the first in the response's text.
+            run(
+                "a rating changed on the rating check",
+                rated,
+                datetime(2026, 9, 25, 9, 30, 0, tzinfo=UTC),
+                "moderate",
+            ),
+            run(
+                "a rating kept on the rating check",
+                rated,
+                datetime(2026, 9, 25, 9, 30, 0, tzinfo=UTC),
+                "good",
+            ),
         ],
         # Judge walk W01: the follow-ups a walk asks and the checks the store keeps with it. Both
         # servers and the phone run these two functions.
@@ -1035,67 +1053,82 @@ def walk_vectors(table: dict[str, Any], form_items: list[dict[str, Any]]) -> dic
         # reason it refuses one. Both servers build the row with this function.
         "record_function": "core.walks.walk_record",
         "record_cases": [
-            record_case(walk, name, answers, answered_at, now)
-            for name, answers, answered_at, now in (
-                (
-                    "a walk sent at once, with milliseconds",
-                    {"bank_type": "present", "water_height_m": 0.5},
-                    "2026-09-25T10:00:00.123Z",
-                    datetime(2026, 9, 25, 10, 0, 2, tzinfo=UTC),
-                ),
-                (
-                    "a walk made offline six days ago, in another zone",
-                    {"bank_type": "absent", "habitats": ["riffles"]},
-                    "2026-09-19T12:30:00+02:00",
-                    datetime(2026, 9, 25, 9, 0, 0, tzinfo=UTC),
-                ),
-                (
-                    "a phone clock four minutes ahead",
-                    {},
-                    "2026-09-25T10:04:00Z",
-                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
-                ),
-                (
-                    "a walk dated six minutes ahead",
-                    {"bank_type": "present"},
-                    "2026-09-25T10:06:00Z",
-                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
-                ),
-                (
-                    "a walk eight days old",
-                    {"bank_type": "present"},
-                    "2026-09-17T10:00:00Z",
-                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
-                ),
-                (
-                    "a time with no zone",
-                    {"bank_type": "present"},
-                    "2026-09-25T10:00:00",
-                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
-                ),
-                (
-                    "a date and no time",
-                    {"bank_type": "present"},
-                    "2026-09-25",
-                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
-                ),
-                (
-                    "a number, not a time",
-                    {"bank_type": "present"},
-                    1790000000,
-                    datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
-                ),
-            )
+            record_case(
+                walk,
+                "a stored walk whose rating was changed",
+                rated,
+                "2026-09-25T10:00:00Z",
+                datetime(2026, 9, 25, 10, 0, 1, tzinfo=UTC),
+                "poor",
+            ),
+            *(
+                record_case(walk, name, answers, answered_at, now)
+                for name, answers, answered_at, now in (
+                    (
+                        "a walk sent at once, with milliseconds",
+                        {"bank_type": "present", "water_height_m": 0.5},
+                        "2026-09-25T10:00:00.123Z",
+                        datetime(2026, 9, 25, 10, 0, 2, tzinfo=UTC),
+                    ),
+                    (
+                        "a walk made offline six days ago, in another zone",
+                        {"bank_type": "absent", "habitats": ["riffles"]},
+                        "2026-09-19T12:30:00+02:00",
+                        datetime(2026, 9, 25, 9, 0, 0, tzinfo=UTC),
+                    ),
+                    (
+                        "a phone clock four minutes ahead",
+                        {},
+                        "2026-09-25T10:04:00Z",
+                        datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                    ),
+                    (
+                        "a walk dated six minutes ahead",
+                        {"bank_type": "present"},
+                        "2026-09-25T10:06:00Z",
+                        datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                    ),
+                    (
+                        "a walk eight days old",
+                        {"bank_type": "present"},
+                        "2026-09-17T10:00:00Z",
+                        datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                    ),
+                    (
+                        "a time with no zone",
+                        {"bank_type": "present"},
+                        "2026-09-25T10:00:00",
+                        datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                    ),
+                    (
+                        "a date and no time",
+                        {"bank_type": "present"},
+                        "2026-09-25",
+                        datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                    ),
+                    (
+                        "a number, not a time",
+                        {"bank_type": "present"},
+                        1790000000,
+                        datetime(2026, 9, 25, 10, 0, 0, tzinfo=UTC),
+                    ),
+                )
+            ),
         ],
     }
 
 
 def record_case(
-    walk: dict[str, Any], name: str, answers: dict[str, Any], answered_at: object, now: datetime
+    walk: dict[str, Any],
+    name: str,
+    answers: dict[str, Any],
+    answered_at: object,
+    now: datetime,
+    final_rating: str | None = None,
 ) -> dict[str, Any]:
     """One stored walk row, or {"error": <the plain reason>} when the store refuses it."""
     try:
-        row = walks.walk_record(walk, answers, answered_at, now)
+        row = walks.walk_record(walk, answers, answered_at, now, final_rating)
     except walks.WalkRecordError as err:
         expected: dict[str, Any] = {"error": str(err)}
     else:
@@ -1107,6 +1140,8 @@ def record_case(
         "answered_at": answered_at,
         "now": now.isoformat().replace("+00:00", "Z"),
     }
+    if final_rating is not None:
+        inputs["final_rating"] = final_rating
     return case(name, inputs, expected)
 
 

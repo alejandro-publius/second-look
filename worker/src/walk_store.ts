@@ -122,15 +122,17 @@ export async function storeWalk(db: D1Database, request: Request, now: string) {
   if (walk === undefined) throw new NotFound("We do not know that walk.");
   if (!body.answers || typeof body.answers !== "object" || Array.isArray(body.answers)) throw new Invalid("answers must be an object of question ids and answers.");
   const answers = validateAnswers(body.answers as Record<string, unknown>);
+  // The follow-ups first: the Bundle carries the rating the rating check left (critic round 15
+  // F02), so the record a city reads says the rating the person kept.
+  const kept = followupsOf(body, answers);
   let row;
   try {
-    row = walkRecord(walk, answers, body.answered_at, now);
+    row = walkRecord(walk, answers, body.answered_at, now, kept === null ? null : kept.final_rating);
   } catch (err) {
     if (err instanceof WalkRecordError) throw new Invalid(err.message);
     throw err;
   }
   if (checkBundle(row.bundle as never).length > 0) throw new Invalid("That walk would make a record with a broken link inside it.");
-  const kept = followupsOf(body, answers);
   const text = answersText(answers);
   const keptText = kept === null ? null : JSON.stringify(kept.checks);
   await purgeWalks(db, now);
@@ -187,4 +189,11 @@ export async function walkView(db: D1Database, recordId: string, now: string) {
   const checks = await db.prepare("SELECT final_rating, checks_json FROM walk_checks WHERE record_id = ?").bind(recordId).first<ChecksRow>();
   const answers = JSON.parse(row.answers_json) as Record<string, unknown>;
   return { ...stored(row), answers, bundle: JSON.parse(row.bundle_json) as Record<string, unknown>, ...keptOf(checks, answers) };
+}
+
+/** GET /api/walk/{record_id}/fhir: the stored record's demo Bundle alone, as /api/spot/{id}/fhir
+ *  gives a creek check's, so the curl line on the record fetches the FHIR itself (critic round 14
+ *  B04). The same 404 as the record, for an unknown id or one past its date. */
+export async function walkFhir(db: D1Database, recordId: string, now: string) {
+  return (await walkView(db, recordId, now)).bundle;
 }

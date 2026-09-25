@@ -8,8 +8,8 @@ origin. The **Python API** (`apps/api/`, FastAPI) is the reference: the tests, t
 
 `scripts/api_inventory.py` reads both route lists out of the code, and
 `scripts/tests/test_api_docs.py` fails when a route has no row below, or a row has no route.
-The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->27<!--/v--> routes
-and the Python API <!--v:results/api_inventory.json#/python/count-->28<!--/v-->
+The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->28<!--/v--> routes
+and the Python API <!--v:results/api_inventory.json#/python/count-->29<!--/v-->
 (`results/api_inventory.json`).
 
 Every answer is JSON unless the row says otherwise. An error is `{"detail": "..."}` in plain
@@ -41,6 +41,7 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | GET | `/api/photo/{photo_id}` | One uploaded photo, served private and uncached. | nothing | `?t=` must be that photo's token, or the answer is 404 |
 | POST | `/api/walk` | A finished video walk, sent by the phone: `{walk_id, answers, answered_at, followup_answers, final_rating}`. Builds its demo record and returns its `record_id`. The store runs the creek check's follow-up rules on the answers itself (rain unknown, so the dry pipe question never; no score, no flag) and keeps the checks that ran with the phone's answers to them. A body with neither follow-up field keeps no checks. The same walk sent again returns the same id; other answers for the same walk and second get 409. Never counted and never mirrored to the sandbox. | a `walk_record` row (the walk id, the coded answers, the time, the demo Bundle) and a `walk_checks` row (the checks and the final rating), deleted together 30 days later | the body is 4096 bytes at most and holds nothing else; each answer must be a value from the form; a follow-up answer only for a question the rules asked, from the answers that question takes, and a final rating other than the first only with the rating check answered `change` (422 otherwise); the time at most 5 minutes ahead and 7 days old; 200 records a day on the whole server, then 429 |
 | GET | `/api/walk/{record_id}` | One stored walk record: its answers, its demo Bundle, and `checks`, `first_rating` and `final_rating` as `/api/spot` gives them for a visit, until its delete date. | nothing | none |
+| GET | `/api/walk/{record_id}/fhir` | The same stored walk record's demo Bundle alone, the FHIR its record's curl line fetches, until its delete date. It answers the rating question with the final rating, and names the first one in the response's text when the rating check changed it. | nothing | none |
 | any | `/api/creeks` | Every creek with a record, with the visit ids behind each count. | nothing | none |
 | any | `/api/city/{creek}` | The analyst's view of one creek: findings, what it needs in approved words, pipes worth testing, reaches, downstream notes. | nothing | none |
 | GET | `/api/spot/{spot_id}` | One spot's record: each answer beside the observer's score, the health card, the place and the downstream notes. | nothing | none |
@@ -88,6 +89,7 @@ the table. The last column names the limit from the table above, then any lock.
 | GET | `/api/photo/{photo_id}` | One uploaded photo with its token. | nothing | read; `?t=` must be the token, or 404 |
 | POST | `/api/walk` | A finished video walk's demo record and its follow-up checks, as the Worker stores them; expired rows go on each new store. | a `walk_record` row and a `walk_checks` row | study; the same body cap, follow-up rules, daily cap and time window as the Worker |
 | GET | `/api/walk/{record_id}` | One stored walk record until its delete date. | nothing | read |
+| GET | `/api/walk/{record_id}/fhir` | One stored walk record's demo Bundle alone, until its delete date. | nothing | read |
 | GET | `/api/creeks` | Every creek with a record. | nothing | read |
 | GET | `/api/city/{creek_id}` | The analyst's view of one creek. | nothing | read |
 | GET | `/api/inaturalist/{creek_id}` | The iNaturalist context line for one creek, from the `inaturalist_cache` table. It never asks iNaturalist itself. | nothing | read |

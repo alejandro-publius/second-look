@@ -22,9 +22,18 @@ const items: { id: string; text: string; type: string; options?: { label: string
 const feature = (id: string) => content.features.find((f: { id: string }) => f.id === id).name as string;
 
 /** The record's Bundle as the store builds it: the same port of core/walks.py the Worker runs. */
-const bundleFor = (walkId: string, answers: Record<string, AnswerValue>, answeredAt: string) => {
+const bundleFor = (walkId: string, answers: Record<string, AnswerValue>, answeredAt: string, finalRating: string | null = null) => {
   const w = content.walks.find((x: { id: string }) => x.id === walkId);
-  return walkBundle({ id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }, answers, answeredAt);
+  return walkBundle({ id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }, answers, answeredAt, finalRating);
+};
+
+/** The overall rating a record's QuestionnaireResponse answers, and that response's text. */
+const ratingIn = (bundle: { entry: { resource: Record<string, unknown> }[] }) => {
+  const qr = bundle.entry.map((e) => e.resource).find((r) => r.resourceType === "QuestionnaireResponse") as {
+    item: { linkId: string; answer: { valueCoding: { code: string } }[] }[];
+    text: { div: string };
+  };
+  return { code: qr.item.find((i) => i.linkId === "overall_rating")!.answer[0].valueCoding.code, text: qr.text.div };
 };
 
 /** The checks the store keeps with a walk (judge walk W01), as worker/src/walk_store.ts makes them:
@@ -181,8 +190,8 @@ test("a finished walk's record link opens in a fresh browser, on /spot and on /c
   // The phone sent the walk once, to the walk store, and nothing to the creek check's routes.
   const sent = calls.filter((c: { method: string }) => c.method === "POST").map((c: { path: string }) => c.path);
   expect(sent).toEqual(["/api/walk"]);
-  // Its curl line fetches the stored copy.
-  await expect(page.locator("pre.code").first()).toHaveText(`curl -s http://127.0.0.1:8100/api/walk/${recordId}`);
+  // Its curl line fetches the stored copy's Bundle, the FHIR itself (critic round 14 B04).
+  await expect(page.locator("pre.code").first()).toHaveText(`curl -s http://127.0.0.1:8100/api/walk/${recordId}/fhir`);
 
   // Another browser, with nothing of the first one's: the record, the same answers, the same FHIR.
   const other = await freshPage(browser, walkStore);
@@ -220,14 +229,18 @@ test("a walk asks the rating check, keeps the answer, and shows the checks that 
   await page.getByRole("button", { name: en["walk.start"] }).click();
   await answerWalkPlainly(page, content, { bank: "present", until: "followups" });
   const asked = page.getByTestId("walk-followups");
-  await expect(asked.getByRole("heading", { name: en["check.followups_title"] })).toBeVisible();
+  // One question, so one follow-up, not "One or two" (critic round 14 B04, round 15 F06).
+  await expect(asked.getByRole("heading", { name: en["check.followups_title_one"] })).toBeVisible();
   await expect(asked).toContainText(en["check.followups_intro"]);
   const question = fill(en["followup.rating_check"], { issues: "artificial banks" });
-  await expect(asked.getByRole("region", { name: "rating_check" })).toContainText(question);
-  await expect(asked.getByRole("region", { name: "dry_pipe" })).toHaveCount(0);
+  // The card is named by its check's plain name, never by the rule's code name.
+  await expect(asked.getByRole("region", { name: en["spot.rule_rating_check"] })).toContainText(question);
+  await expect(asked.getByRole("region", { name: "rating_check" })).toHaveCount(0);
+  await expect(asked.locator('[data-rule="dry_pipe"]')).toHaveCount(0);
   expect(calls.filter((c: { method: string }) => c.method === "POST")).toEqual([]);
   await asked.getByRole("button", { name: en["check.change_rating"] }).click();
   await asked.getByRole("button", { name: /^Poor:/ }).click();
+  await expect(asked.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_new"], { rating: en["spot.rating_word_poor"] }));
   await asked.getByRole("button", { name: en["check.finish"], exact: true }).click();
 
   // The phone's record: the checks that ran, worded as /spot words them.
@@ -242,12 +255,23 @@ test("a walk asks the rating check, keeps the answer, and shows the checks that 
   expect(post.body.followup_answers).toEqual({ rating_check: "change" });
   expect(post.body.final_rating).toBe("poor");
 
-  // The stored record, in another browser: the same checks.
+  // Critic round 15 F02: View as FHIR on the phone answers the rating question with Poor, the
+  // rating kept, and names the first rating; it no longer answers Good.
+  await page.getByRole("button", { name: en["spot.view_fhir"] }).click();
+  const made = JSON.parse(await page.locator("pre.code").last().innerText());
+  expect(ratingIn(made).code).toBe("poor");
+  expect(ratingIn(made).text).toContain("The first overall rating was good.");
+
+  // The stored record, in another browser: the same checks, and the same FHIR record.
   const href = (await page.getByTestId("walk-record-link").getAttribute("href"))!;
   const other = await freshPage(browser, walkStore);
   await other.goto(`${BASE}${href}`);
   await expect(other.getByRole("heading", { name: en["walk.stored_title"], level: 1 })).toBeVisible();
   await expect(other.getByTestId("checks-ran").locator("li")).toHaveText([`${en["spot.rule_rating_check"]}${question}${outcome}`]);
+  await other.getByRole("button", { name: en["spot.view_fhir"] }).click();
+  const stored = JSON.parse(await other.locator("pre.code").last().innerText());
+  expect(ratingIn(stored).code).toBe("poor");
+  expect(stored).toEqual(made);
   await other.context().close();
 });
 
@@ -293,7 +317,7 @@ test("a link to a walk record that is gone says so, on /spot and on /city", asyn
   await expect(page.getByText(/deleted 30 days after it is stored/)).toBeVisible();
   await page.goto(`${BASE}/city?walk=${walk.id}&record=walk-0000000000000000`);
   await expect(page.getByTestId("walk-record-missing")).toContainText("deleted 30 days after it is stored");
-  await expect(page.getByText(en["city.walk_empty"])).toBeVisible();
+  await expect(page.getByTestId("walk-city-empty")).toHaveText(en["city.walk_empty"].replace("{link}", en["city.walk_empty_link"]));
 });
 
 test("a walk the store refuses keeps its record on the page and says why", async ({ page }) => {
@@ -339,10 +363,103 @@ test("Start again forgets the walk on this device, and a new walk starts from th
   // The first question's Back returns to the clip; a finished walk's Start again clears it all.
   await answerWalkPlainly(page, content, { bank: "absent" });
   await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+  await page.getByRole("button", { name: en["walk.start_again_yes"], exact: true }).click();
   await expect(page.getByRole("button", { name: en["walk.start"] })).toBeVisible();
   await page.reload();
   await page.getByRole("button", { name: en["walk.start"] }).click();
   await expect(page.locator("h1#question")).toHaveText(items[0].text);
   await expect(page.getByRole("button", { name: items[0].options![1].label, exact: true })).toHaveAttribute("aria-pressed", "false");
   expect(await question(page)).toBe(items[0].text);
+});
+
+// Critic round 14 B02 and round 15 F03: the rating card looked the same before and after a tap. Keep
+// was filled orange from the start, so it looked chosen, and after Change and a new rating the
+// picker closed with nothing to show for it. Now Keep and Change look the same until one is
+// pressed, the pressed one is marked as a pick, and the card says which rating the record keeps.
+test("the rating card shows which answer was picked and the rating the record keeps", async ({ page }) => {
+  // No colour fades, so each look is read when it has settled.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await mockApi(page, { walkBundle: bundleFor, walkChecks: storeChecks });
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "present", until: "followups" });
+  const card = page.getByRole("region", { name: en["spot.rule_rating_check"] });
+  const keep = card.getByRole("button", { name: en["check.keep_rating"] });
+  const change = card.getByRole("button", { name: en["check.change_rating"] });
+  const look = (b: typeof keep) => b.evaluate((el) => { const s = getComputedStyle(el); return [s.backgroundColor, s.borderTopColor, s.boxShadow, s.color].join(" | "); });
+  await page.mouse.move(0, 0);
+  const before = [await look(keep), await look(change)];
+  expect(before[0], "Keep and Change look the same before a tap").toBe(before[1]);
+  await expect(card.getByTestId("rating-chosen")).toHaveText("");
+
+  await change.click();
+  await card.getByRole("button", { name: /^Moderate:/ }).click();
+  await page.mouse.move(0, 0);
+  await expect(change).toHaveAttribute("aria-pressed", "true");
+  await expect(card.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_new"], { rating: en["spot.rating_word_moderate"] }));
+  expect(await look(change), "the pressed answer is marked").not.toBe(before[1]);
+  expect(await look(keep), "the other one is not").toBe(before[0]);
+
+  await keep.click();
+  await page.mouse.move(0, 0);
+  await expect(keep).toHaveAttribute("aria-pressed", "true");
+  await expect(card.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_kept"], { rating: en["spot.rating_word_good"] }));
+  expect(await look(keep)).not.toBe(before[0]);
+  expect(await look(change)).toBe(before[1]);
+});
+
+// Critic round 15 Y02: one tap on Start again dropped a finished walk's record, and the only place
+// its link was shown, with no warning. It now asks first, says what goes and what stays, and Keep
+// this walk leaves everything as it was.
+test("Start again on a finished walk asks first, and says the stored record stays at its link", async ({ page }) => {
+  const walkStore = new Map<string, unknown>();
+  await mockApi(page, { walkStore, walkBundle: bundleFor });
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "absent" });
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+  const warn = page.getByTestId("walk-start-again-warn");
+  await expect(warn).toContainText(en["walk.start_again_warn"]);
+  await expect(warn).toContainText(/The stored record still opens at its link until \w{3} \d{1,2}, \d{4}\./);
+  await expect(page.getByRole("button", { name: en["walk.start_again_no"], exact: true })).toBeFocused();
+  await page.getByRole("button", { name: en["walk.start_again_no"], exact: true }).click();
+  await expect(warn).toHaveCount(0);
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  await page.reload();
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+});
+
+// Critic rounds 14 and 15 O02: in a fresh tab the demo creek said "Do the walk first" with no way
+// to the walk, and an unknown walk showed one line with no heading and no link.
+test("the walk's demo creek links to the walk in a fresh tab, and an unknown walk says so with a way on", async ({ page }) => {
+  await mockApi(page, {});
+  await page.goto(`${BASE}/city?walk=${walk.id}`);
+  const empty = page.getByTestId("walk-city-empty");
+  await expect(empty).toHaveText(en["city.walk_empty"].replace("{link}", en["city.walk_empty_link"]));
+  await expect(empty.getByRole("link", { name: en["city.walk_empty_link"] })).toHaveAttribute("href", `/walk/${walk.id}`);
+  await page.goto(`${BASE}/city?walk=v99`);
+  await expect(page.getByRole("heading", { level: 1, name: en["city.walk_unknown_title"] })).toBeVisible();
+  await expect(page.getByText(en["city.walk_unknown"])).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: en["walk.list_title"] })).toHaveAttribute("href", "/walk");
+});
+
+// Critic round 15 O02 item 4: a reloaded finished walk painted an empty clip frame under the
+// heading while it opened. Nothing but the heading and the opening line shows until it knows.
+test("a finished walk opens on its record with no clip painted first", async ({ page }) => {
+  await mockApi(page, {});
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "absent" });
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  await page.addInitScript(() => {
+    const seen: boolean[] = [];
+    (window as unknown as { __clipSeen: boolean[] }).__clipSeen = seen;
+    new MutationObserver(() => {
+      if (document.querySelector("video.walk-clip")) seen.push(true);
+    }).observe(document, { childList: true, subtree: true });
+  });
+  await page.reload();
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { __clipSeen: boolean[] }).__clipSeen.length)).toBe(0);
 });

@@ -2,7 +2,20 @@
 
 import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
 import type { Followup } from "@/lib/api";
-import { t } from "@/lib/t";
+import { has, t } from "@/lib/t";
+
+/** A follow-up's plain name, as "Checks that ran" titles it (spot.rule_*). The rule id is a code
+ *  name, so a screen reader must never announce it (critic round 14 B04, round 15 F06). */
+function ruleTitle(ruleId: string): string {
+  const key = `spot.rule_${ruleId}`;
+  return has(key) ? t(key) : t("spot.rule_other");
+}
+
+/** A stored rating (good, moderate, poor) as the word a person reads. */
+function ratingWord(value: string | null): string {
+  const key = `spot.rating_word_${value ?? ""}`;
+  return has(key) ? t(key) : (value ?? "");
+}
 
 /** What the rating follow-up holds: its answer, the rating the record will carry, and whether the picker is open. */
 export interface RatingFollowup {
@@ -51,7 +64,7 @@ export function FollowupCard({
   onRatingTap: (tap: RatingTap) => void;
 }) {
   return (
-    <section className="card stack" aria-label={followup.rule_id}>
+    <section className="card stack" aria-label={ruleTitle(followup.rule_id)} data-rule={followup.rule_id}>
       <p>
         <strong>{followup.question_text}</strong>
       </p>
@@ -68,13 +81,16 @@ export function FollowupCard({
           ))}
         </div>
       ) : null}
+      {/* Keep and Change look the same until one is pressed, and the pressed one is marked as a
+          pick, as an option is. Once a rating is settled, the card says which one the record keeps,
+          so a tap never seems to do nothing (critic round 14 B02, round 15 F03). */}
       {followup.kind === "keep_rating" ? (
         <div className="stack">
           <div className="btn-row">
-            <button type="button" className="btn" aria-pressed={value === "keep"} onClick={() => onRatingTap("keep")}>
+            <button type="button" className="btn btn-secondary" aria-pressed={value === "keep"} onClick={() => onRatingTap("keep")}>
               {t("check.keep_rating")}
             </button>
-            <button type="button" className="btn btn-secondary" aria-pressed={value === "change"} onClick={() => onRatingTap("change")}>
+            <button type="button" className="btn btn-secondary" aria-pressed={value === "change" || changingRating} onClick={() => onRatingTap("change")}>
               {t("check.change_rating")}
             </button>
           </div>
@@ -87,11 +103,18 @@ export function FollowupCard({
               ))}
             </div>
           ) : null}
+          <p className="small" role="status" data-testid="rating-chosen">
+            {!changingRating && finalRating && value === "keep"
+              ? t("check.rating_kept", { rating: ratingWord(finalRating) })
+              : !changingRating && finalRating && value === "change"
+                ? t("check.rating_new", { rating: ratingWord(finalRating) })
+                : ""}
+          </p>
         </div>
       ) : null}
       {followup.kind === "look_again" ? (
         <div className="btn-row">
-          <button type="button" className="btn" aria-pressed={value === "looked"} onClick={() => onAnswer("looked")}>
+          <button type="button" className="btn btn-secondary" aria-pressed={value === "looked"} onClick={() => onAnswer("looked")}>
             {t("check.looked_again")}
           </button>
           <button type="button" className="btn btn-secondary" aria-pressed={value === "skipped"} onClick={() => onAnswer("skipped")}>

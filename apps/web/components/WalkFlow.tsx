@@ -123,6 +123,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   const [followupAnswers, setFollowupAnswers] = useState<Record<string, string>>({});
   const [finalRating, setFinalRating] = useState<string | null>(null);
   const [changingRating, setChangingRating] = useState(false);
+  // Start again asks first on a finished walk, since it clears the record from this device.
+  const [confirmStartAgain, setConfirmStartAgain] = useState(false);
+  const keepWalk = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (confirmStartAgain) keepWalk.current?.focus();
+  }, [confirmStartAgain]);
   const items = useMemo(() => visibleItems(answers), [answers]);
   const ratingItem = content.form.items.find((i) => i.id === "overall_rating");
 
@@ -245,6 +251,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     setFollowupAnswers({});
     setFinalRating(null);
     setChangingRating(false);
+    setConfirmStartAgain(false);
     setLookedAgain(null);
     setResumed(false);
     setStored({ state: "sending" });
@@ -332,6 +339,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
             {t("walk.start")}
           </button>
           <p className="notice notice-warn">{t("walk.demo_notice")}</p>
+          {/* The host answers a range request with the whole file, so the browser cannot seek: a
+              move of the slider starts the clip again (critic round 15 W05). Said before the walk
+              starts, below Start, so the button stays on the first screen. */}
+          <p className="small muted" data-testid="walk-seek-note">
+            {t("walk.seek_note")}
+          </p>
         </>
       );
       break;
@@ -357,6 +370,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
                 if (stage.index === 0) setStage({ name: "watch" });
                 else setStage({ name: "items", index: stage.index - 1 });
               }}
+              plantRegion={walk.region ?? null}
             />
           </div>
         );
@@ -369,7 +383,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       const asked = walkQuestions(answers);
       body = (
         <section className="stack" aria-labelledby="walk-followups-title" data-testid="walk-followups">
-          <h2 id="walk-followups-title">{t("check.followups_title")}</h2>
+          <h2 id="walk-followups-title">{t(asked.length === 1 ? "check.followups_title_one" : "check.followups_title")}</h2>
           <p className="small muted">{t("check.followups_intro")}</p>
           {asked.map(({ card }) => (
             <FollowupCard
@@ -409,7 +423,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               {t("label.checker_noticed")}: {q.note}
             </p>
             <div className="btn-row">
-              <button type="button" className="btn" aria-pressed={lookedAgain === "looked"} onClick={() => setLookedAgain("looked")}>
+              <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "looked"} onClick={() => setLookedAgain("looked")}>
                 {t("check.looked_again")}
               </button>
               <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "skipped"} onClick={() => setLookedAgain("skipped")}>
@@ -425,9 +439,10 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       break;
     }
     case "record": {
-      const { bundle, problems } = buildRecord(walk, answers, stage.answeredAt);
       // The checks as the store keeps them: the same rules and the same answers (lib/walks.ts).
       const { kept: checked } = settleFollowups(answers, followupAnswers, finalRating);
+      // The FHIR record carries the rating the rating check left, as the stored one does.
+      const { bundle, problems } = buildRecord(walk, answers, stage.answeredAt, checked.final_rating);
       const recordId = stored.state === "stored" ? stored.record_id : null;
       const city = `/city?walk=${encodeURIComponent(walk.id)}${recordId ? `&record=${encodeURIComponent(recordId)}` : ""}`;
       return (
@@ -468,15 +483,34 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           <WalkAnswers answers={answers} title={t("walk.answers_title")} />
           <ChecksThatRan checks={checked.checks} ratings={checked} level="h2" />
           <p className="small muted">{checkerLine(walk)}</p>
-          <FhirView load={() => Promise.resolve(bundle)} curl={recordId ? `curl -s ${api.walkRecordUrl(recordId)}` : null} walk="phone" />
+          <FhirView load={() => Promise.resolve(bundle)} curl={recordId ? `curl -s ${api.walkFhirUrl(recordId)}` : null} walk="phone" />
           <p>
             <Link className="btn btn-block" href={city}>
               {t("walk.city_link")}
             </Link>
           </p>
-          <button type="button" className="btn btn-secondary btn-block" onClick={() => void startAgain()}>
-            {t("walk.start_again")}
-          </button>
+          {/* Start again clears the walk and its record from this device, and with them the only
+              place its link is shown, so it asks first and says what stays (critic round 15 Y02). */}
+          {confirmStartAgain ? (
+            <section className="card stack" data-testid="walk-start-again-warn" aria-label={t("walk.start_again")}>
+              <p>
+                {t("walk.start_again_warn")}
+                {stored.state === "stored" ? ` ${t("walk.start_again_warn_stored", { date: walkDay(stored.delete_after) })}` : ""}
+              </p>
+              <div className="btn-row">
+                <button ref={keepWalk} type="button" className="btn btn-secondary" onClick={() => setConfirmStartAgain(false)}>
+                  {t("walk.start_again_no")}
+                </button>
+                <button type="button" className="btn" onClick={() => void startAgain()}>
+                  {t("walk.start_again_yes")}
+                </button>
+              </div>
+            </section>
+          ) : (
+            <button type="button" className="btn btn-secondary btn-block" onClick={() => setConfirmStartAgain(true)}>
+              {t("walk.start_again")}
+            </button>
+          )}
           <p>
             <Link href="/walk">{t("walk.more")}</Link>
           </p>
@@ -485,10 +519,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     }
   }
 
+  // No clip while the walk is being opened: a finished walk opens on its record, which has none,
+  // so a reload no longer paints an empty clip first (critic round 15 O02 item 4).
   return (
     <div className="stack">
       <FocusHeading>{walk.creek_name}</FocusHeading>
-      <Clip walk={walk} />
+      {stage.name === "loading" ? null : <Clip walk={walk} />}
       {body}
     </div>
   );

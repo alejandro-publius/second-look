@@ -558,6 +558,7 @@ try {
   const streamed = await fetch(`${BASE}/api/walk`, { method: "POST", headers: { "content-type": "application/json" }, body: chunked, duplex: "half" });
   assert.equal(streamed.status, 413, "a body with no declared length is still measured");
   assert.equal((await api("GET", "/api/walk/walk-0000000000000000")).status, 404);
+  assert.equal((await api("GET", "/api/walk/walk-0000000000000000/fhir")).status, 404);
   assert.equal((await api("GET", "/api/walk/not-a-walk")).status, 404);
   assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: 1 }], "nothing refused was stored");
   // The daily cap, over the whole server: the day is filled to one short of it by hand.
@@ -608,11 +609,19 @@ try {
     {
       rule_id: "rating_check",
       asked: true,
-      question_text: "You rated this stream Good, but you also reported artificial banks, a sewage discharge. Do you want to keep your rating?",
+      question_text: "You rated this stream Good, but you also reported artificial banks and a sewage discharge. Do you want to keep your rating?",
       answer: "change",
-      detail: { issues: "artificial banks, a sewage discharge", first_rating: "good", kind: "keep_rating" },
+      detail: { issues: "artificial banks and a sewage discharge", first_rating: "good", kind: "keep_rating" },
     },
   ]);
+  // Critic round 15 F02: the stored FHIR record answers the rating question with the rating the
+  // person kept, and GET .../fhir gives that Bundle alone, the one the record's curl line fetches.
+  const ratedQr = ratedRead.bundle.entry.map((e) => e.resource).find((r) => r.resourceType === "QuestionnaireResponse");
+  assert.equal(ratedQr.item.find((i) => i.linkId === "overall_rating").answer[0].valueCoding.code, "poor", "the record carries the kept rating");
+  assert.match(ratedQr.text.div, /The first overall rating was good\./);
+  const ratedFhir = await api("GET", `/api/walk/${ratedWalk.data.record_id}/fhir`);
+  assert.equal(ratedFhir.status, 200);
+  assert.deepEqual(ratedFhir.data, ratedRead.bundle, "GET .../fhir is the stored Bundle");
   assert.deepEqual((await api("POST", "/api/walk", ratedBody)).data, ratedWalk.data, "sent again, the same record");
   assert.equal((await api("POST", "/api/walk", { ...ratedBody, followup_answers: { rating_check: "keep" }, final_rating: null })).status, 409);
   // A walk stored without follow-ups, as before, reads back with none and its own rating.

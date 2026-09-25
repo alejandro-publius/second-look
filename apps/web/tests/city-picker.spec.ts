@@ -91,3 +91,11 @@ test("pick a creek, go Back to the pick list, and pick another: each shows its o
   await page.getByRole("main").getByRole("link", { name: second.name, exact: true }).click();
   await seesCreek(page, second, asked, 2);
 });
+
+// Critic round 14 P02: bare /city is a pick list, but its tab said "What this creek needs".
+test("bare /city's tab title says to pick a creek", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/city");
+  await seesPicker(page);
+  await expect(page).toHaveTitle(`${en["city.pick_title"]}: Second Look`);
+});

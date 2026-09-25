@@ -131,9 +131,56 @@ function PipeRow({ pipe }: { pipe: CityPipe }) {
  * An empty "what this creek needs" is said out loud rather than left blank, because no measure
  * and no approved sentence look identical from the outside and mean very different things.
  */
+/**
+ * Keeps the tab's title while this screen shows. The page's title is fixed when it is built, the
+ * same for every query, and the framework writes it back once the page has loaded, so it is set
+ * again whenever it changes (critic round 14 P02).
+ */
+function useTabTitle(title: string | null) {
+  useEffect(() => {
+    if (title === null) return;
+    const apply = () => {
+      if (document.title !== title) document.title = title;
+    };
+    apply();
+    const watch = new MutationObserver(apply);
+    watch.observe(document.head, { subtree: true, childList: true, characterData: true });
+    return () => watch.disconnect();
+  }, [title]);
+}
+
+/** Every region pack with its creeks, each a plain link (CRITIC_13 W02). */
+function CreekPicker() {
+  return (
+    <>
+      {creeksByRegion().map((r) => (
+        <section key={r.region} className="stack">
+          <h2>{r.name}</h2>
+          {r.creeks.length === 0 ? (
+            <p className="muted">{t("city.pick_none")}</p>
+          ) : (
+            <ul>
+              {r.creeks.map((c) => (
+                <li key={c.slug}>
+                  <a href={`/city?creek=${encodeURIComponent(c.slug)}`}>{c.name}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+    </>
+  );
+}
+
 export function CityView({ creekId }: { creekId: string | null }) {
   const [view, setView] = useState<CityOut | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // An unknown creek gets the pick list as its way on (critic round 14 P02).
+  const [unknown, setUnknown] = useState(false);
+
+  // A link that names no creek is a pick list, so its tab says so (critic round 14 P02).
+  useTabTitle(creekId === "" ? `${t("city.pick_title")}: ${t("app.name")}` : null);
 
   useEffect(() => {
     if (!creekId) return;
@@ -145,8 +192,10 @@ export function CityView({ creekId }: { creekId: string | null }) {
         if (!live) return;
         // A 404 says in the API's own words that it has no record of the creek. Nothing was sent,
         // so "Something did not send" would be untrue (CRITIC_09 R05).
-        if (err instanceof ApiError && err.status === 404 && err.detail) setError(err.detail);
-        else setError(isNetworkError(err) ? t("error.network") : t("error.server"));
+        if (err instanceof ApiError && err.status === 404) {
+          setError(t("city.no_creek"));
+          setUnknown(true);
+        } else setError(isNetworkError(err) ? t("error.network") : t("error.server"));
       });
     return () => {
       live = false;
@@ -165,22 +214,7 @@ export function CityView({ creekId }: { creekId: string | null }) {
       <div className="stack">
         <h1>{t("city.pick_title")}</h1>
         <p>{t("city.pick")}</p>
-        {creeksByRegion().map((r) => (
-          <section key={r.region} className="stack">
-            <h2>{r.name}</h2>
-            {r.creeks.length === 0 ? (
-              <p className="muted">{t("city.pick_none")}</p>
-            ) : (
-              <ul>
-                {r.creeks.map((c) => (
-                  <li key={c.slug}>
-                    <a href={`/city?creek=${encodeURIComponent(c.slug)}`}>{c.name}</a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        ))}
+        <CreekPicker />
       </div>
     );
   }
@@ -192,6 +226,7 @@ export function CityView({ creekId }: { creekId: string | null }) {
           <Icon name="info" />
           <p>{error}</p>
         </div>
+        {unknown ? <CreekPicker /> : null}
       </div>
     );
   }
