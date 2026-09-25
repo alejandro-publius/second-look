@@ -140,7 +140,7 @@ It cannot write the record. It cannot speak on a feature it did not pass, or on 
 
 | It cannot | Enforced by | Test |
 |---|---|---|
-| Put its own words in front of a person | Its note is shown only as "the checker noticed", cut to 160 characters | [`core/checker.py`](core/checker.py), [`core/gate.py`](core/gate.py) |
+| Put more than a short labelled note in front of a person | The gate drops a note with markup, line breaks or text direction controls, and the page shows the note only after "the checker noticed", cut to 160 characters | [`core/tests/test_gate.py::test_note_with_markup_or_a_direction_control_is_dropped`](core/tests/test_gate.py), [`core/tests/test_checker.py::test_long_note_is_cut_to_160_and_flat`](core/tests/test_checker.py) |
 | State a risk for a named site | Every health or ecology sentence comes from [`content/approved_sentences.yaml`](content/approved_sentences.yaml) with a source | [`core/tests/test_healthcard.py`](core/tests/test_healthcard.py), [`core/tests/test_act.py`](core/tests/test_act.py) |
 
 ## The gate, the heart of it
