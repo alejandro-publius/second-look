@@ -1,5 +1,8 @@
 # Alex: what only you can do, in order
 
+Working notes: the team's own to-do list, kept public on purpose. What is true of the product is
+in the README.
+
 Everything on this page needs your voice, your eyes or your account. Everything else is done.
 Times are Pacific.
 
@@ -54,11 +57,12 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
 9. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
-   `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
-   makes the repository public.
+   `make go-public GO=yes`. It removes `docs/internal/`, the working notes between the team and
+   its AI tools, runs `make submit-check`, and only then makes the repository public. This page,
+   `docs/HANDOFF_NEXT.md` and `PLAN.md` stay, each marked as notes.
 
 10. **Wed Sep 30, by 18:00: submit.**
 
 Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23 (their own nameserver
 answers that it does not exist); we reported it as hl7-eu/oah issue 8. While it is gone, `/two`
-shows our record alone, and the sandbox re-push on Sep 28 cannot run.
+shows our record alone, and the daily sandbox re-push sends nothing until the name comes back.
