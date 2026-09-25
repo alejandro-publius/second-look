@@ -46,7 +46,7 @@ Our mark: strong. The paid model run is done, and `make reproduce` grades its nu
 | Frames from open creek footage, screened by Vision and by eye, every drop with its reason | `videos/frames.json`; `videos/review.json`; `evals/footage.py` |
 | Python and the TypeScript Worker proved equal by golden vectors, walks included | `evals/golden_vectors.py`; `worker/test/golden.test.ts` |
 
-Thin: the citizen observer is modelled as a Practitioner because R4 has no better fit; the question is open with the guide's authors (`docs/ig_proposal.md`). Their sandbox's name has not resolved since Sep 23 (hl7-eu/oah issue 8), so the mirror cannot be read there today; the read-back of Sep 21 stands in.
+Thin: the benchmark's intervals count its three runs of the same photos as new answers, so they are too narrow (`docs/MODEL_CARD.md`). From Sep 28 judge mode gives away the answer key, so a volunteer could carry a perfect score into their checks; see README, Known weaknesses. The citizen observer is modelled as a Practitioner because R4 has no better fit; the question is open with the guide's authors (`docs/ig_proposal.md`). Their sandbox's name has not resolved since Sep 23 (hl7-eu/oah issue 8), so the mirror cannot be read there today; the read-back of Sep 21 stands in.
 
 ## Usability and user experience (15%)
 
