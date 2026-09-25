@@ -95,6 +95,8 @@ SAFE_MAKE = {
     "done-check",
     "mutation",
     "report-pdf",
+    "rollback",  # a dry run unless ROLLBACK=yes, which no printed command sets
+    "video-final",  # run with its output sent to the work folder, never over the real cut
 }
 # The setup a judge types first. Each only installs into the clone, or installs the pre-commit tool.
 SETUP_PART = (
@@ -159,6 +161,19 @@ def port_free(port: int) -> bool:
         return s.connect_ex(("127.0.0.1", port)) != 0
 
 
+# make submit-check is red by design until Sep 30, on the video link and the repository being
+# public (docs/ACCEPTANCE.md row 14 prints exactly that). It passes here only when those two are
+# its only failures.
+SUBMIT_EXPECTED_RED = {"video_link", "repo_public"}
+
+
+def expected_red(cmd: str, tail: str) -> bool:
+    if cmd.strip() != "make submit-check":
+        return False
+    failed = set(re.findall(r"^FAIL\s+(\w+)", tail, re.M))
+    return bool(failed) and failed <= SUBMIT_EXPECTED_RED
+
+
 def run(cmd: str, cwd: Path, timeout: int = 900, env: dict[str, str] | None = None) -> dict:
     started = time.monotonic()
     try:
@@ -175,7 +190,12 @@ def run(cmd: str, cwd: Path, timeout: int = 900, env: dict[str, str] | None = No
         code, out = proc.returncode, proc.stdout + proc.stderr
     except subprocess.TimeoutExpired:
         code, out = -1, f"timed out after {timeout} s"
-    return {"code": code, "seconds": round(time.monotonic() - started, 1), "tail": out[-1500:]}
+    return {
+        "code": code,
+        "seconds": round(time.monotonic() - started, 1),
+        "tail": out[-1500:],
+        "out": out,
+    }
 
 
 SERVES_3100 = (
@@ -395,13 +415,20 @@ def main() -> int:
             r = mcp(cmd, tree)
         else:
             env = {"E2E_PORT": "8971"} if "worker-e2e" in cmd else {}
+            if "video-final" in cmd:
+                # It reads the footage and the screen recordings from ~/second-look-media, which
+                # are not in the repository, and writes the cut to a folder of this run only.
+                env = {
+                    "SECOND_LOOK_FINAL": str(tree.parent / "video-final-out"),
+                    "SECOND_LOOK_SCREENS": str(Path.home() / "second-look-media" / "screens"),
+                }
             r = run(cmd, tree, env=env)
             if cmd.startswith("make new-city"):
                 # It scaffolds a city into the clone: put the clone back, so every later command
                 # sees the committed tree (an extra city adds a record to validate, for one).
                 restore = run("git checkout -- . && git clean -fdq -- fhir content docs", tree)
                 r["tail"] += f" (clone restored: exit {restore['code']})"
-        result = "pass" if r["code"] == 0 else "fail"
+        result = "pass" if r["code"] == 0 or expected_red(cmd, r.get("out", r["tail"])) else "fail"
         rows.append(
             {
                 **c,

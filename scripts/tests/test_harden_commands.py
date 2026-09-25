@@ -44,3 +44,19 @@ def test_the_port_bound_suites_are_not_refused_by_policy() -> None:
     for cmd in ("make e2e", "make check", "make judge-check"):
         assert hc.policy(cmd) == "", cmd
         assert any(s in cmd for s in hc.SERVES_3100), cmd
+
+
+def test_submit_check_red_only_on_the_video_link_and_the_public_repo_counts_as_the_row_says() -> (
+    None
+):
+    # docs/ACCEPTANCE.md row 14: every item except the video link and the repo being public.
+    red = "PASS  license\nFAIL  video_link\nFAIL  repo_public\n"
+    assert hc.expected_red("make submit-check", red)
+    assert not hc.expected_red("make submit-check", red + "FAIL  secrets_scan\n")
+    assert not hc.expected_red("make submit-check", "PASS  license\n")
+    assert not hc.expected_red("make check", red)
+
+
+def test_rollback_and_the_video_are_run_not_skipped() -> None:
+    assert hc.policy("make rollback") == ""
+    assert hc.policy("make video-final") == ""
