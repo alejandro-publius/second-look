@@ -6,7 +6,7 @@
 # means testing is needed. The wording is always "worth testing", never a verdict.
 # Pairs set by Update 11C: an obvious outfall beside a stream with none, then a hidden outfall
 # beside a bend with none. Captions are written from what each source page says about its photo.
-# approved stays false until Alex approves.
+# approved stays false until a team member approves.
 feature: pipe_running
 approved: true
 approved_by: "Alex Velazquez"

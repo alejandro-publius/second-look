@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 
 // The iNaturalist context line (UPDATE_29 section 8): on the record page and /city only, below
@@ -101,4 +103,21 @@ test("the credits page names iNaturalist, its terms and what it said about each 
   await expect(page.getByText("Research grade, seen in California.")).toHaveCount(9);
   await expect(page.getByRole("link", { name: "iNaturalist terms of use" })).toHaveAttribute("href", "https://www.inaturalist.org/pages/terms");
   await expect(page.getByText("by Pinnacles National Park")).toBeVisible();
+});
+
+// UPDATE_30 section 3: the Bay Area list was approved on 2026-09-25 and the job ran that day. The
+// copy it fetched for Strawberry Creek's spot is in tests/fixtures, word for word, and the record
+// page and /city show it. On the live site the API withholds it until a finished check there has
+// answered the invasive plant question, as the lines above test.
+const realCopy = JSON.parse(readFileSync(join(__dirname, "fixtures", "inaturalist-strawberry-creek.json"), "utf8"));
+const firstPlant = realCopy.species[0];
+const firstLine = `${firstPlant.name}: seen ${firstPlant.count} times`;
+
+test("the copy the job fetched on Sep 25 renders on the Strawberry Creek record and on /city", async ({ page }) => {
+  expect(realCopy.species.length).toBeGreaterThan(0);
+  await mockApi(page, { inatBody: realCopy });
+  await page.goto("/spot?id=example");
+  await expect(region(page)).toContainText(firstLine);
+  await page.goto("/city?creek=example");
+  await expect(region(page)).toContainText(firstLine);
 });

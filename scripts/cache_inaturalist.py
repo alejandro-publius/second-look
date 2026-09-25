@@ -12,8 +12,8 @@ those observations on inaturalist.org, and stores that with the fetch time in th
 whose fetch fails stores nothing, so its last good copy stays.
 
 A creek whose region pack lists no plant with a taxon id is not asked about and not stored: the
-page then says "no recent sightings on record". Today the approved Bay Area pack lists none; the
-draft list in content/drafts/regions/ carries the ids for when Rachel approves it.
+page then says "no recent sightings on record". The Bay Area list was approved for the team on
+2026-09-25 (docs/DECISIONS.md) and carries an iNaturalist id for each plant.
 
 The summary is context. Nothing counts it and nothing decides from it: this file imports nothing
 from core/gate.py or core/followups.py (docs/adr/0011-inaturalist-context.md).

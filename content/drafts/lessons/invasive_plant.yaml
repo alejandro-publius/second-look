@@ -1,13 +1,13 @@
 # DRAFT lesson for invasive_plant. Written by W7b on 2026-09-20 from fetched sources (docs/notes/sources.md).
-# Rachel owns the wording. approved stays false until she flips it. Nothing here reaches a screen before that.
+# The team owns the wording. approved stays false until a team member flips it. Nothing here reaches a screen before that.
 # Photo ids are the gray placeholders. Each comment names the shot the caption expects, from the shot list.
 # Limits: rule_of_thumb 12 words or fewer, every caption and feedback 25 words or fewer. No health claims.
 # Cue sources: the Cal-IPC Inventory (ratings High, Moderate, Limited for plants that damage California
 # wildlands) and the OneAquaHealth Key Indicators Factsheet XI, "Invasive Alien Plants of the riparian
 # corridor", which says these plants "spread rapidly" and "thrive in disturbed, nutrient-enriched, or poorly
-# managed environments". The species list for the Bay Area is content/drafts/regions/california-bay-area.yaml.
-# Captions name no species. A species name goes on a caption only once Rachel has verified that photo.
-# An ecologist's likely objection, for Rachel: some native plants also grow in single stands (for example
+# managed environments". The species list for the Bay Area is content/regions/california-bay-area.yaml.
+# Captions name no species. A species name goes on a caption only once a team member has verified that photo.
+# An ecologist's likely objection, for the team: some native plants also grow in single stands (for example
 # cattails or willow thickets). The rule therefore sends people to the regional list, not to a verdict.
 feature: invasive_plant
 approved: false

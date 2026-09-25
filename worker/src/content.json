@@ -808,7 +808,30 @@
     "test.no": "No",
     "test.yes": "Yes"
   },
-  "region_plants": [],
+  "region_plants": [
+    "Ailanthus altissima",
+    "Algerian ivy",
+    "Arundo donax",
+    "Cape ivy",
+    "Conium maculatum",
+    "Cortaderia jubata",
+    "Delairea odorata",
+    "English ivy",
+    "Fennel",
+    "Foeniculum vulgare",
+    "French broom",
+    "Genista monspessulana",
+    "Giant reed",
+    "Hedera canariensis",
+    "Hedera helix",
+    "Himalayan blackberry",
+    "Jubata grass",
+    "Periwinkle",
+    "Poison hemlock",
+    "Rubus armeniacus",
+    "Tree of heaven",
+    "Vinca major"
+  ],
   "rules": {
     "features_in_order": [
       "artificial_bank",

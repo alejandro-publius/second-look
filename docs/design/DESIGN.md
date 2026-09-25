@@ -76,7 +76,7 @@ All in `apps/web/components/ui/`. Nothing else may style a button, a choice or a
 - **ChoiceList.** The one thing per page pattern. Large stacked buttons of equal weight, fixed order,
   one hit target each with no dead zone. Used for Yes, No, Can't tell, and for radio choices.
 - **PhotoFrame.** A photograph at one radius with an optional numbered mark layer. Marks come from the
-  lesson YAML as `x` and `y` fractions plus a label of five words or fewer, so Rachel places them
+  lesson YAML as `x` and `y` fractions plus a label of five words or fewer, so a team member places them
   without code. Marks are hidden until asked for, and the same marks are listed in words underneath so
   a screen reader gets them. An enlarge control opens the photo in the Sheet.
 - **Gauge.** The staff gauge. `total` blocks, `value` filled in `--flag`, square ends, a heavier tick

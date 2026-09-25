@@ -1,12 +1,12 @@
 # DRAFT lesson for artificial_bank. Written by W7b on 2026-09-20 from fetched sources (docs/notes/sources.md).
-# Rachel owns the wording. approved stays false until she flips it. Nothing here reaches a screen before that.
+# The team owns the wording. approved stays false until a team member flips it. Nothing here reaches a screen before that.
 # Photo ids are the gray placeholders. Each comment names the shot the caption expects, from the shot list.
 # Limits: rule_of_thumb 12 words or fewer, every caption and feedback 25 words or fewer. No health claims.
 # Cue source: River Habitat Survey manual 2003 (2022 reprint), Section E, "Reinforced bank (RI)": a bank
 # "artificially strengthened" with "concrete, sheet piling, corrugated iron, wood piling, gabion, brick/laid
 # stone, rip-rap". The app's own option reads "Artificial (concrete or stones with concrete)", so the lesson
 # centres on concrete. Loose laid stones with no concrete count as not built in content/form.yaml; gabions
-# (wire baskets) are a judgment call for Rachel to settle against the app wording.
+# (wire baskets) are a judgment call for the team to settle against the app wording.
 feature: artificial_bank
 approved: false
 rule_of_thumb: "Under the plants, look for concrete or stones set in concrete."

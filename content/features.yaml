@@ -1,4 +1,4 @@
-# The four features a volunteer is tested on. Data, so Rachel can edit without touching code.
+# The four features a volunteer is tested on. Data, so any team member can edit without touching code.
 # wording_status: frozen means the wording is the one written into docs/analysis_plan.md and
 # approved by the named person on the named date. Changing one after the tag is a deviation.
 # verified_against_app: true only where the app's own text backs it, see docs/notes/app_strings.md.

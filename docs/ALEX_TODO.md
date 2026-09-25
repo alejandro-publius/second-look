@@ -40,25 +40,18 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    `--name rachel`) opens a local page and writes `photos/labels_<name>.csv`; commit it, or tell
    us it is there.
 
-6. **By Sat Sep 26, 10 minutes, for Rachel: approve the Bay Area invasive list.** The creek pages
-   and `/city` show iNaturalist sightings of listed invasive plants near each creek, but only of
-   plants on an approved list. The draft is `content/drafts/regions/california-bay-area.yaml`
-   (11 species, each with its iNaturalist taxon id). If Rachel agrees, move those entries into
-   `content/regions/california-bay-area.yaml`, keeping `inaturalist_taxon_id`, or say which ones
-   to move. Until then every creek says "There are no recent sightings on record."
-
-7. **Mon Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
+6. **Mon Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
    read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
 
-8. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
+7. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
    account, with the licence line from `docs/devpost.md` in its description (the video is
    CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
-9. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
+8. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
    `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
    makes the repository public.
 
-10. **Wed Sep 30, by 18:00: submit.**
+9. **Wed Sep 30, by 18:00: submit.**
 
 Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23 (their own nameserver
 answers that it does not exist); we reported it as hl7-eu/oah issue 8. While it is gone, `/two`

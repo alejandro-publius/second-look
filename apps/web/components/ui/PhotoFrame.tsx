@@ -18,7 +18,7 @@ export interface Mark {
 
 /**
  * A photograph at one radius, with an optional numbered mark layer. Marks come from the lesson
- * YAML as x and y fractions plus a label of five words or fewer, so Rachel places them without
+ * YAML as x and y fractions plus a label of five words or fewer, so a team member places them without
  * code. They stay hidden until asked for, and the same marks are listed in words underneath, so a
  * screen reader gets what a sighted reader gets from the dots.
  */

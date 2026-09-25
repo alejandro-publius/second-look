@@ -1,0 +1,77 @@
+{
+ "since": "2023-09-25",
+ "radius_m": 300,
+ "years": 3,
+ "locations": 1,
+ "taxa": [
+  64017,
+  55882,
+  64113,
+  53208,
+  61317,
+  53403,
+  53326,
+  53052,
+  52998,
+  57278,
+  52714
+ ],
+ "source": "https://api.inaturalist.org/v1/observations",
+ "species": [
+  {
+   "taxon_id": 53326,
+   "name": "Periwinkle",
+   "latin_name": "Vinca major",
+   "count": 14,
+   "last_observed": "2026-03-04",
+   "url": "https://www.inaturalist.org/observations?id=185316134,200308803,200669168,241331319,261488824,261488906,262762118,263191665,274270093,279965997,334640716,334975362,339970545,341277014",
+   "linked": 14
+  },
+  {
+   "taxon_id": 53403,
+   "name": "French broom",
+   "latin_name": "Genista monspessulana",
+   "count": 10,
+   "last_observed": "2026-07-16",
+   "url": "https://www.inaturalist.org/observations?id=201833655,202314477,209198114,210317193,241366644,247273050,279966488,294575787,307601954,382391442",
+   "linked": 10
+  },
+  {
+   "taxon_id": 61317,
+   "name": "Himalayan blackberry",
+   "latin_name": "Rubus armeniacus",
+   "count": 10,
+   "last_observed": "2025-12-11",
+   "url": "https://www.inaturalist.org/observations?id=241940754,262290648,279965249,294575631,313002245,316651958,321161799,351067357,351067371,351067372",
+   "linked": 10
+  },
+  {
+   "taxon_id": 55882,
+   "name": "English ivy",
+   "latin_name": "Hedera helix",
+   "count": 6,
+   "last_observed": "2025-12-07",
+   "url": "https://www.inaturalist.org/observations?id=240019602,242784156,254601350,279967644,329939236,329939237",
+   "linked": 6
+  },
+  {
+   "taxon_id": 52998,
+   "name": "Poison hemlock",
+   "latin_name": "Conium maculatum",
+   "count": 2,
+   "last_observed": "2025-09-25",
+   "url": "https://www.inaturalist.org/observations?id=241939888,316651890",
+   "linked": 2
+  },
+  {
+   "taxon_id": 64113,
+   "name": "Algerian ivy",
+   "latin_name": "Hedera canariensis",
+   "count": 1,
+   "last_observed": "2025-12-16",
+   "url": "https://www.inaturalist.org/observations?id=330995130",
+   "linked": 1
+  }
+ ],
+ "fetched_at": "2026-09-25T15:56:37Z"
+}

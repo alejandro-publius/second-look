@@ -11,10 +11,16 @@ before any participant (`prereg-v1`), and every session that ends before the dat
 1. Make an account at Prolific (https://www.prolific.com), as a researcher, and add funds: about
    300 dollars covers 80 people at the reward below plus the panel's fee, with room to spare.
 2. Create a new study and fill it from the fields below.
-3. The panel asks whether the study has ethics approval or an exemption. Answer truthfully. It is
-   an anonymous usability test of a training tool, but whether your university's rules count a
-   paid one as human subjects research is yours to check; if they need a review, do not launch,
-   and the analysis reports whatever arrived through the public link.
+3. The ethics question, in one minute. The panel asks whether the study has ethics approval, an
+   exemption, or needs none. What is true, and what you can say in the box: it is a usability test
+   of our own training tool; it is anonymous, with consent on the first screen; it stores no name,
+   email, IP address, free text or other identifier; nothing about it is clinical or sensitive;
+   and the analysis plan was tagged and timestamped before any participant. Pick the option that
+   matches your own situation: if you run it as a team building a tool, not as university research,
+   and your panel's terms allow that, say no review is required and give those reasons; if you run
+   it as a student under a university whose rules call a paid study human subjects research, it
+   needs that review first, so do not launch, and the analysis reports whatever arrived through the
+   public link.
 4. Publish it. The study runs itself. Watch it with `make panel-status`.
 5. Before you approve any payment, compare the number of completion codes the panel shows as
    submitted with the completed `panel` sessions that `make panel-status` prints. The code is the

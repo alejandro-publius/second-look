@@ -96,7 +96,7 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 | ID | Item | Kind | Date | Outside cause | Cause test | Command |
 |---|---|---|---|---|---|---|
 | D23 | A second adversarial review, of the finished repo | CHECK | | | | `uv run python scripts/done_items.py review` |
-| D24 | Critic rounds in `docs/internal/reviews/`, the newest two reporting nothing above cosmetic | CHECK | | | | `uv run python scripts/done_items.py critics` |
+| D24 | Critic rounds in `docs/internal/reviews/`: the newest two on the same commit, no finding a skeptic confirmed at major or worse, and every confirmed minor fixed or in the README's Known weaknesses, as each round's Resolution says (UPDATE_30 section 2) | CHECK | | | | `uv run python scripts/done_items.py critics` |
 | D25 | The six-judge simulation, rerun on the finished repo | CHECK | | | | `uv run python scripts/done_items.py judge-sim` |
 | D26 | axe clean on every screen, with an `/accessibility` page that is live | CHECK | | | | `uv run python scripts/done_items.py axe && curl -fsS -o /dev/null https://second-look-79t.pages.dev/accessibility` |
 | D27 | Lighthouse on every page: each loads, performance 90 or more, accessibility 95 or more | CHECK | | | | `uv run python scripts/done_items.py lighthouse` |
@@ -143,7 +143,7 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 |---|---|---|---|---|---|---|
 | D49 | The panel study, software side: `?src=panel` shows a fixed completion code on the end screen, the consent sentence shows for that source only, every query parameter but `src` is stripped before anything is stored, `make panel-status` works, `docs/internal/PANEL_STUDY.md` has every part, and a deviation is logged | CHECK | | | | `uv run python scripts/done_items.py panel-prep` |
 | D50 | The analysis handles the panel source label and the lock as the tagged plan says, on synthetic data | CHECK | | | | `uv run python scripts/done_items.py panel-analysis` |
-| D51 | The panel study launched by Alex (Prolific or similar), by Sep 26 evening: completed sessions from `panel` on the live counts | HUMAN | | | | `curl -fsS https://second-look-79t.pages.dev/api/test/counts \| python3 -c "import json,sys; sys.exit(0 if json.load(sys.stdin)['by_source'].get('panel',0) > 0 else 1)"` |
+| D51 | The panel study launched by a team member (Prolific or similar), by Sep 26 evening: completed sessions from `panel` on the live counts | HUMAN | | | | `curl -fsS https://second-look-79t.pages.dev/api/test/counts \| python3 -c "import json,sys; sys.exit(0 if json.load(sys.stdin)['by_source'].get('panel',0) > 0 else 1)"` |
 | D52 | After the lock: the pre-registered analysis run once and its result in the README's human row and numbers table | DATED | 2026-09-28T01:00:00Z | | | `uv run python scripts/done_items.py human-row` |
 | D53 | Contributed back: a pull request to hl7-eu/oah with the citizen example and the proposal, two issues (the `morophology` spelling, the `SpecimenOah` collector), the sandbox DNS issue, each linked by number in the README | CHECK | | | | `uv run python scripts/done_items.py contributed-back` |
 | D54 | OpenTimestamps proofs for the `prereg-v1` tag object and `docs/analysis_plan.md` committed, and the audit chain head anchored daily | CHECK | | | | `uv run python scripts/done_items.py ots` |
@@ -158,4 +158,4 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 | D63 | A second labeller (optional): if a second label file exists, kappa per feature is reported | HUMAN | | | | `uv run python scripts/done_items.py second-labeller` |
 | D64 | iNaturalist context line on the record page and `/city`, cached in D1 by a daily Mac job, attributed, with an ADR, and degrading to "no recent sightings on record" | CHECK | | | | `uv run python scripts/done_items.py inaturalist` |
 | D65 | The loop again over everything new: the adversarial review, the six-judge simulation and the two clean critic rounds each read a commit that holds every UPDATE_29 file | CHECK | | | | `uv run python scripts/done_items.py rerun-after-update` |
-| D66 | Rachel approves the Bay Area invasive list (UPDATE_29 section 8), so the iNaturalist line can name sightings; until then it says there are none on record | HUMAN | | | | `uv run python scripts/done_items.py invasive-list` |
+| D66 | The Bay Area invasive list approved for the team (UPDATE_29 section 8; approved 2026-09-25, UPDATE_30 section 3), so the iNaturalist line can name sightings | CHECK | | | | `uv run python scripts/done_items.py invasive-list` |

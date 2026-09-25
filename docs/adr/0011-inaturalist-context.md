@@ -55,10 +55,10 @@ way their sandbox's DNS failure broke `/two` (ADR 0010).
 - The page works whether or not iNaturalist answers, and says how old its copy is.
 - A later volunteer can read the line on a creek's record page before starting their own check
   there, because the gate is per creek. The guided check itself never shows it.
-- Only plants on the approved region pack are asked about. Today that list is empty, so the job
-  asks nothing and every creek says there are no recent sightings on record. The draft list in
-  `content/drafts/regions/` carries a taxon id for each plant, so the line fills the day after
-  Rachel approves it, with no change to the code.
+- Only plants on the approved region pack are asked about. The Bay Area list was approved for the
+  team on 2026-09-25 with a taxon id for each of its 11 plants (UPDATE_30 section 3), and the job
+  stored Strawberry Creek's copy that day; it shows once a finished check there has answered the
+  invasive plant question.
 - Each observation keeps the licence its observer chose. We store and show a plant name, a count,
   a date and a link, and never a photo, a note, a person's name or a position.
 - A link names at most `MAX_LINK_IDS` observations, the newest, so a very busy creek links to part

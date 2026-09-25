@@ -64,9 +64,9 @@ creeks:
     assert cache.pack_creeks(tmp_path) == {"strawberry-creek": "bay"}
 
 
-def test_the_draft_list_carries_a_taxon_id_for_every_plant() -> None:
-    drafts = ROOT / "content" / "drafts" / "regions"
-    listed = cache.listed_plants(drafts)["california-bay-area"]
+def test_the_approved_list_carries_a_taxon_id_for_every_plant() -> None:
+    # Approved for the team on 2026-09-25 (UPDATE_30 section 3), so it lives in content/regions.
+    listed = cache.listed_plants()["california-bay-area"]
     assert len(listed) == 11
     assert {p.latin_name: p.taxon_id for p in listed}["Rubus armeniacus"] == 61317
 

@@ -378,6 +378,8 @@ export async function mockApi(page, options = {}) {
       // creek's record has not answered the invasive plant question) or "down" (the route fails).
       const kind = options.inat ?? "cached";
       if (kind === "down") return json({ detail: "The server could not take that." }, 500);
+      // options.inatBody: a stored copy as scripts/cache_inaturalist.py wrote it, served as shown.
+      if (options.inatBody) return json({ ...options.inatBody, creek: "strawberry-creek", shown: true, status: "cached", source: "https://www.inaturalist.org", terms: "https://www.inaturalist.org/pages/terms" });
       const creek = decodeURIComponent(path.slice("/api/inaturalist/".length));
       const stored = kind === "cached" || kind === "empty" || kind === "hidden";
       return json({

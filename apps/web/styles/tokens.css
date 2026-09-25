@@ -52,7 +52,7 @@
   --mark-num-size: 18px;
   --token-tracking: 0.08em;
   /* The landing crop. Two photographs side by side on a 390px phone are about 170px wide, so the
-     height is the only dial. Retune this once Rachel's real creek photographs land. */
+     height is the only dial. Retune this once the team's own creek photographs land. */
   --landing-photo-ratio: 3 / 4;
   --text-poster: 3rem;
 
