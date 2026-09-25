@@ -10,6 +10,7 @@ import hashlib
 import os
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -17,14 +18,20 @@ import pytest
 from evals import assist_analysis as aa
 from evals.common import ROOT, parse_utc
 
-FAST = {"n_boot": 1000, "n_perm": 1000}
+N_FAST = 1000
 PLAN_TEXT = (ROOT / "docs" / "analysis_plan_v2.md").read_text(encoding="utf-8")
 
 
-def scenario(tmp_path: Path, name: str) -> dict[str, object]:
+def scenario(tmp_path: Path, name: str) -> dict[str, Any]:
     folder = aa.make_synthetic(name, tmp_path / name)
     return aa.run(
-        input_dir=folder, out_dir=tmp_path, synthetic=True, stamp_name=name, scenario=name, **FAST
+        input_dir=folder,
+        out_dir=tmp_path,
+        synthetic=True,
+        stamp_name=name,
+        scenario=name,
+        n_boot=N_FAST,
+        n_perm=N_FAST,
     )
 
 
@@ -163,5 +170,12 @@ def test_a_real_run_refuses_now_and_never_reads_synthetic(tmp_path: Path) -> Non
     reason = aa.guard(unmarked, synthetic=False)
     assert reason is not None and reason.startswith("Refusing to run")
     with pytest.raises(aa.Refused):
-        aa.run(input_dir=unmarked, out_dir=tmp_path, synthetic=False, stamp_name="x", **FAST)
+        aa.run(
+            input_dir=unmarked,
+            out_dir=tmp_path,
+            synthetic=False,
+            stamp_name="x",
+            n_boot=N_FAST,
+            n_perm=N_FAST,
+        )
     assert aa.main(["--input", str(unmarked)]) == 3
