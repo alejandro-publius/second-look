@@ -640,7 +640,7 @@
   "part2.to_test": "Go to the test",
   "part2.demo_title": "Assisted second look, judge mode",
   "part2.demo_intro": "The eight photos of the second look, as the assisted group sees them, with feedback after every answer. Nothing here is stored.",
-  "part2.demo_shut_body": "Judge mode for the second look gives feedback on the photos the study uses, so it opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.",
+  "part2.demo_shut_body": "This judge mode tells you if each answer is right, on the same photos the study uses. So it opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.",
   "judges.assist": "Assisted second look, try it",
   "judges.assist_note": "Eight photos as the assisted group sees them. When the checker disagrees with you it asks you to look again, and you decide. Feedback after every answer, nothing stored. Opens on Sep 28."
 }
