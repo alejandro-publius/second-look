@@ -33,7 +33,7 @@ Nothing below needs an API key. Nothing below needs a network except the two row
 | 10 | Colour, spacing and tap targets come from tokens | `make design-check` | clean, with the contrast pairs computed and the tap targets measured |
 | 11 | The app builds as a static export | `make web-build` | `web build ok` |
 | 12 | Everything above, in one run | `make check` | `CHECK GREEN` |
-| 13 | The launch gate | `make preflight-launch` | `0 failed` |
+| 13 | The launch gate | `make preflight-launch` | `0 failed`, on the maintainer's Mac only: its backup check reads the receipt `make backup` leaves after it exports the live D1 database with the maintainer's login, so anywhere else that check fails |
 | 14 | The submission gate | `make submit-check` | every item except the video link and the repo being public |
 | 15 | One command for a judge | `make judge-check` | six lines, all PASS: the Python tests and the Worker's golden vector tests; `make reproduce` (row 16); the last HL7 validator run read from `results/fhir_validation.json` (it does not run the validator; row 3 does) and the golden Bundles checked against the emitter; the web build and the design check; the audit log; the secrets scan |
 | 16 | Every AI number rebuilt from the raw replies | `make reproduce` | `reproduce: ... every one matches`: each number in `results/` from a paid run graded again from the replies in `evals/fixtures/raw/`, each synthetic result made again from its seed, no network and no key; what cannot be regraded is named with its reason |
@@ -75,7 +75,7 @@ These are the ones worth arguing about, so each names the test that would go red
 |---|---|---|
 | Everything a contributor runs | `make check` | `CHECK GREEN` |
 | The Worker behaves end to end with a local D1 | `make worker-e2e` | exit code 0 |
-| The launch gate for the two-minute test | `make preflight-launch` | 0 failed |
+| The launch gate for the two-minute test | `make preflight-launch` | 0 failed, on the maintainer's Mac only, since its backup check needs a backup made with the maintainer's D1 login (row 13) |
 | The submission gate | `make submit-check` | fails only on `video_link` and `repo_public` until Sep 30, then nothing |
 | No video file is ever committed | `uv run pytest scripts/tests/test_no_video_files.py` | 4 passed |
 | The live site answers, and a phone check writes nothing | `SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-readonly.mjs` | every step PASS, the counts unchanged |
