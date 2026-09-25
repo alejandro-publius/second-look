@@ -417,7 +417,7 @@
   "verify.cmd_note": "To finish on its own, ots verify needs a Bitcoin node. Without one, it names the block to look up, and ots_status.py checks that block for you.",
   "judges.verify": "Check our records and their timestamps",
   "offline.title": "You are offline",
-  "offline.body": "The lesson and the creek check still work. Anything you send waits on this phone until you are back online.",
+  "offline.body": "The creek check still works once this site has been opened on this phone. Anything you send waits here until you are back online. The test needs a connection.",
   "gauge.count": "{value} of {total}",
   "gauge.score_label": "{feature}: {value} of {total} right",
   "gauge.score_expired_label": "{feature}: score has expired",
