@@ -425,9 +425,10 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       break;
     }
     case "record": {
-      const { bundle, problems } = buildRecord(walk, answers, stage.answeredAt);
       // The checks as the store keeps them: the same rules and the same answers (lib/walks.ts).
       const { kept: checked } = settleFollowups(answers, followupAnswers, finalRating);
+      // The FHIR record carries the rating the rating check left, as the stored one does.
+      const { bundle, problems } = buildRecord(walk, answers, stage.answeredAt, checked.final_rating);
       const recordId = stored.state === "stored" ? stored.record_id : null;
       const city = `/city?walk=${encodeURIComponent(walk.id)}${recordId ? `&record=${encodeURIComponent(recordId)}` : ""}`;
       return (
@@ -468,7 +469,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           <WalkAnswers answers={answers} title={t("walk.answers_title")} />
           <ChecksThatRan checks={checked.checks} ratings={checked} level="h2" />
           <p className="small muted">{checkerLine(walk)}</p>
-          <FhirView load={() => Promise.resolve(bundle)} curl={recordId ? `curl -s ${api.walkRecordUrl(recordId)}` : null} walk="phone" />
+          <FhirView load={() => Promise.resolve(bundle)} curl={recordId ? `curl -s ${api.walkFhirUrl(recordId)}` : null} walk="phone" />
           <p>
             <Link className="btn btn-block" href={city}>
               {t("walk.city_link")}

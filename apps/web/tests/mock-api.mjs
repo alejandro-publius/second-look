@@ -242,7 +242,7 @@ export const walkRecordId = (walkId, answeredAt) => "walk-" + createHash("sha256
  * offline (object with a mutable `value` flag; when true every API request fails like a dead network),
  * walkStore (a Map of stored walk records; hand the same one to two pages, in two browser contexts,
  * and a record one stores opens in the other, as on the real store), walkBundle (walkId, answers,
- * answeredAt) => the record's Bundle, walkChecks (answers, followup_answers, final_rating) =>
+ * answeredAt, finalRating) => the record's Bundle, walkChecks (answers, followup_answers, final_rating) =>
  * { checks, first_rating, final_rating } as the store keeps them, and walkRefuse ({ status, detail }:
  * every walk store is refused).
  * Returns the list of calls: { method, path, body }.
@@ -428,17 +428,19 @@ export async function mockApi(page, options = {}) {
         answered_at: answeredAt,
         delete_after: secondsOf(new Date(Date.now() + 30 * 86_400_000).toISOString()),
         answers: body.answers,
-        bundle: options.walkBundle ? options.walkBundle(body.walk_id, body.answers, body.answered_at) : { resourceType: "Bundle", type: "collection", entry: [] },
+        bundle: options.walkBundle ? options.walkBundle(body.walk_id, body.answers, body.answered_at, body.final_rating ?? null) : { resourceType: "Bundle", type: "collection", entry: [] },
         ...(options.walkChecks ? options.walkChecks(body.answers, body.followup_answers ?? {}, body.final_rating ?? null) : { checks: [], first_rating: null, final_rating: null }),
       };
       walkStore.set(record_id, row);
       return json({ record_id, walk_id: row.walk_id, answered_at: row.answered_at, delete_after: row.delete_after });
     }
     if (path.startsWith("/api/walk/")) {
-      const id = decodeURIComponent(path.slice("/api/walk/".length));
+      // GET /api/walk/{id}/fhir is the stored Bundle alone, the one the record's curl line fetches.
+      const fhir = path.endsWith("/fhir");
+      const id = decodeURIComponent(path.slice("/api/walk/".length, fhir ? -"/fhir".length : undefined));
       const row = walkStore.get(id);
       if (!row) return json({ detail: `We have no stored walk record called '${id}'. A walk record is deleted 30 days after it is stored.` }, 404);
-      return json(row);
+      return json(fhir ? row.bundle : row);
     }
     if (path === "/api/test/counts") return json({ by_arm: { untrained: { randomized: 0, completed: 0 }, trained: { randomized: 0, completed: 0 } }, by_source: {}, post_lock: 0 });
     return json({ detail: "unknown route in mock" }, 404);

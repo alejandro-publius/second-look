@@ -169,13 +169,17 @@ def store_walk(db: Session, raw: bytes, *, now: datetime) -> dict[str, str]:
     except ValidationError as exc:
         raise check.Invalid("Every answer must be a value from the form's lists.") from exc
     answers = check.validate_answers(typed)
+    # The follow-ups first: the Bundle carries the rating the rating check left (critic round 15
+    # F02), so the record a city reads says the rating the person kept.
+    kept = _followups_of(body, answers)
     try:
-        row = walk_record(walk, answers, body.get("answered_at"), now)
+        row = walk_record(
+            walk, answers, body.get("answered_at"), now, None if kept is None else kept[1]
+        )
     except WalkRecordError as exc:
         raise check.Invalid(str(exc)) from exc
     if check_bundle(row["bundle"]):
         raise check.Invalid("That walk would make a record with a broken link inside it.")
-    kept = _followups_of(body, answers)
     text = _answers_text(answers)
     kept_text = None if kept is None else _checks_text(kept[0])
     purge_expired(db, now)
@@ -248,3 +252,11 @@ def walk_view(db: Session, record_id: str, *, now: datetime) -> dict[str, Any]:
 
 def _instant(stamp: str) -> datetime:
     return datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+
+
+def walk_fhir(db: Session, record_id: str, *, now: datetime) -> dict[str, Any]:
+    """GET /api/walk/{record_id}/fhir: the stored record's demo Bundle alone, as /api/spot/{id}/fhir
+    gives a creek check's, so the curl line on the record fetches the FHIR itself (critic round 14
+    B04). The same 404 as the record, for an unknown id or one past its date."""
+    bundle: dict[str, Any] = walk_view(db, record_id, now=now)["bundle"]
+    return bundle

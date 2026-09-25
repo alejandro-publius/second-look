@@ -182,7 +182,7 @@ test("fhir_referral: the ServiceRequest and the example result, the same as Pyth
 test("walks: the same demo Bundle as Python, tagged on every resource, and structurally sound", () => {
   const doc = golden("walks");
   for (const c of doc.cases) {
-    const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at);
+    const bundle = walkBundle(c.input.walk, c.input.answers, c.input.answered_at, c.input.final_rating ?? null);
     same(bundle, c.expected, c.name);
     assert.deepEqual(checkBundle(bundle as never), [], `${c.name}: structural check`);
     assert.ok(isDemo(bundle), `${c.name}: the Bundle carries the demo tag`);
@@ -200,7 +200,7 @@ test("walks: the stored row of a finished walk, or the same reason to refuse it,
   for (const c of doc.record_cases) {
     let got: unknown;
     try {
-      got = walkRecord(c.input.walk, c.input.answers, c.input.answered_at, c.input.now);
+      got = walkRecord(c.input.walk, c.input.answers, c.input.answered_at, c.input.now, c.input.final_rating ?? null);
     } catch (err) {
       assert.ok(err instanceof WalkRecordError, `${c.name}: ${String(err)}`);
       got = { error: err.message };

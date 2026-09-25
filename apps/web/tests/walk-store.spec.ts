@@ -22,9 +22,18 @@ const items: { id: string; text: string; type: string; options?: { label: string
 const feature = (id: string) => content.features.find((f: { id: string }) => f.id === id).name as string;
 
 /** The record's Bundle as the store builds it: the same port of core/walks.py the Worker runs. */
-const bundleFor = (walkId: string, answers: Record<string, AnswerValue>, answeredAt: string) => {
+const bundleFor = (walkId: string, answers: Record<string, AnswerValue>, answeredAt: string, finalRating: string | null = null) => {
   const w = content.walks.find((x: { id: string }) => x.id === walkId);
-  return walkBundle({ id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }, answers, answeredAt);
+  return walkBundle({ id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }, answers, answeredAt, finalRating);
+};
+
+/** The overall rating a record's QuestionnaireResponse answers, and that response's text. */
+const ratingIn = (bundle: { entry: { resource: Record<string, unknown> }[] }) => {
+  const qr = bundle.entry.map((e) => e.resource).find((r) => r.resourceType === "QuestionnaireResponse") as {
+    item: { linkId: string; answer: { valueCoding: { code: string } }[] }[];
+    text: { div: string };
+  };
+  return { code: qr.item.find((i) => i.linkId === "overall_rating")!.answer[0].valueCoding.code, text: qr.text.div };
 };
 
 /** The checks the store keeps with a walk (judge walk W01), as worker/src/walk_store.ts makes them:
@@ -181,8 +190,8 @@ test("a finished walk's record link opens in a fresh browser, on /spot and on /c
   // The phone sent the walk once, to the walk store, and nothing to the creek check's routes.
   const sent = calls.filter((c: { method: string }) => c.method === "POST").map((c: { path: string }) => c.path);
   expect(sent).toEqual(["/api/walk"]);
-  // Its curl line fetches the stored copy.
-  await expect(page.locator("pre.code").first()).toHaveText(`curl -s http://127.0.0.1:8100/api/walk/${recordId}`);
+  // Its curl line fetches the stored copy's Bundle, the FHIR itself (critic round 14 B04).
+  await expect(page.locator("pre.code").first()).toHaveText(`curl -s http://127.0.0.1:8100/api/walk/${recordId}/fhir`);
 
   // Another browser, with nothing of the first one's: the record, the same answers, the same FHIR.
   const other = await freshPage(browser, walkStore);
@@ -242,12 +251,23 @@ test("a walk asks the rating check, keeps the answer, and shows the checks that 
   expect(post.body.followup_answers).toEqual({ rating_check: "change" });
   expect(post.body.final_rating).toBe("poor");
 
-  // The stored record, in another browser: the same checks.
+  // Critic round 15 F02: View as FHIR on the phone answers the rating question with Poor, the
+  // rating kept, and names the first rating; it no longer answers Good.
+  await page.getByRole("button", { name: en["spot.view_fhir"] }).click();
+  const made = JSON.parse(await page.locator("pre.code").last().innerText());
+  expect(ratingIn(made).code).toBe("poor");
+  expect(ratingIn(made).text).toContain("The first overall rating was good.");
+
+  // The stored record, in another browser: the same checks, and the same FHIR record.
   const href = (await page.getByTestId("walk-record-link").getAttribute("href"))!;
   const other = await freshPage(browser, walkStore);
   await other.goto(`${BASE}${href}`);
   await expect(other.getByRole("heading", { name: en["walk.stored_title"], level: 1 })).toBeVisible();
   await expect(other.getByTestId("checks-ran").locator("li")).toHaveText([`${en["spot.rule_rating_check"]}${question}${outcome}`]);
+  await other.getByRole("button", { name: en["spot.view_fhir"] }).click();
+  const stored = JSON.parse(await other.locator("pre.code").last().innerText());
+  expect(ratingIn(stored).code).toBe("poor");
+  expect(stored).toEqual(made);
   await other.context().close();
 });
 

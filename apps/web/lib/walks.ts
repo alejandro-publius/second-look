@@ -31,8 +31,10 @@ function ref(walk: Walk): WalkRef {
   return { id: walk.id, spot_name: walk.spot_name, creek_name: walk.creek_name };
 }
 
-export function buildRecord(walk: Walk, answers: Record<string, FormAnswer>, answeredAt: string) {
-  const bundle = walkBundle(ref(walk), answers as WalkAnswers, answeredAt);
+/** The walk's FHIR record, as the store builds it: with the rating the rating check left, which
+ *  the record answers the rating question with when it was changed (critic round 15 F02). */
+export function buildRecord(walk: Walk, answers: Record<string, FormAnswer>, answeredAt: string, finalRating: string | null = null) {
+  const bundle = walkBundle(ref(walk), answers as WalkAnswers, answeredAt, finalRating);
   return { bundle, problems: bundleProblems(bundle) };
 }
 

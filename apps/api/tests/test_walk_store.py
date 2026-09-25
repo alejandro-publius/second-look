@@ -263,9 +263,10 @@ def test_a_walk_record_is_deleted_after_its_days(client) -> None:
 
 @pytest.mark.parametrize("record_id", ["walk-0000000000000000", "spot-1", "walk-XYZ", "x" * 200])
 def test_an_unknown_record_is_a_plain_404(client, record_id) -> None:
-    r = client.get(f"/api/walk/{record_id}")
-    assert r.status_code == 404
-    assert "no stored walk record" in r.json()["detail"]
+    for path in (f"/api/walk/{record_id}", f"/api/walk/{record_id}/fhir"):
+        r = client.get(path)
+        assert r.status_code == 404, path
+        assert "no stored walk record" in r.json()["detail"]
 
 
 def test_the_walk_routes_carry_the_same_headers_and_cors_as_the_others(client) -> None:
@@ -323,6 +324,23 @@ def test_a_walk_keeps_the_checks_it_ran_and_its_final_rating(client) -> None:
             },
         }
     ]
+    # Critic round 15 F02: the stored FHIR record answers the rating question with the rating the
+    # person kept, and GET .../fhir gives that Bundle alone, the one the record's curl line fetches.
+    walk = content.walk_by_id(walk_id())
+    assert walk is not None
+    at = datetime(2026, 9, 25, 9, 58, 30, tzinfo=UTC)
+    assert record["bundle"] == walk_bundle(walk, RATED, at, "poor")
+    qr = next(
+        e["resource"]
+        for e in record["bundle"]["entry"]
+        if e["resource"]["resourceType"] == "QuestionnaireResponse"
+    )
+    rating = next(i for i in qr["item"] if i["linkId"] == "overall_rating")
+    assert rating["answer"][0]["valueCoding"]["code"] == "poor"
+    assert "The first overall rating was good." in qr["text"]["div"]
+    fhir = client.get(f"/api/walk/{stored.json()['record_id']}/fhir")
+    assert fhir.status_code == 200, fhir.text
+    assert fhir.json() == record["bundle"]
     # Sent again from the queue it is the same record; with another answer, it is refused.
     assert client.post("/api/walk", json=sent).json() == stored.json()
     kept = body(answers=RATED, followup_answers={"rating_check": "keep"}, final_rating="good")

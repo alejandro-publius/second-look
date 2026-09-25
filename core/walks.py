@@ -22,6 +22,7 @@ import re
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from xml.sax.saxutils import escape
 
 from core.fhir_emit import REPO_URL, emit_visit
 from core.followups import Followup, SiteContext, select_followups
@@ -31,6 +32,7 @@ DEMO_TAG_SYSTEM = f"{REPO_URL}/tags"
 DEMO_TAG_CODE = "demo-walk"
 DEMO_TAG_DISPLAY = "Demo visit from a video walk. Never counted and never sent to the sandbox."
 WALK_PREFIX = "walk-"
+RATING_ITEM = "overall_rating"
 
 # The stored demo record of a finished walk (UPDATE_30 section 1 item 3). docs/DATA_HANDLING.md
 # says the same numbers in words. worker/src/core/walks.ts holds the same five.
@@ -99,12 +101,39 @@ def tag_demo(bundle: Mapping[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _rating_changed_note(first: str, final: str) -> str:
+    return (
+        f"The first overall rating was {first}. "
+        f"On the rating check the volunteer changed it to {final}."
+    )
+
+
 def walk_bundle(
-    walk: Mapping[str, Any], answers: Mapping[str, Any], answered_at: datetime
+    walk: Mapping[str, Any],
+    answers: Mapping[str, Any],
+    answered_at: datetime,
+    final_rating: str | None = None,
 ) -> dict[str, Any]:
-    """The FHIR record of one walk visit, tagged as a demo."""
-    visit = walk_visit(walk, answers, answered_at)
-    return tag_demo(emit_visit(visit, test_sitting=None, emitted_at=answered_at))
+    """The FHIR record of one walk visit, tagged as a demo.
+
+    final_rating is the rating the rating check left (walk_checks). When it differs from the
+    walk's own overall rating, the record answers the rating question with it, and the response's
+    narrative names the first rating, so the record a city reads carries the rating the person
+    kept, not the one they took back (critic round 15 F02). The answers stay as given.
+    """
+    first = answers.get(RATING_ITEM)
+    changed = isinstance(first, str) and final_rating is not None and final_rating != first
+    rated = {**answers, RATING_ITEM: final_rating} if changed else answers
+    visit = walk_visit(walk, rated, answered_at)
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=answered_at)
+    if changed:
+        for entry in bundle["entry"]:
+            resource = entry["resource"]
+            if resource["resourceType"] == "QuestionnaireResponse":
+                div = resource["text"]["div"]
+                note = escape(_rating_changed_note(str(first), str(final_rating)))
+                resource["text"]["div"] = div.replace("</p></div>", f"</p><p>{note}</p></div>")
+    return tag_demo(bundle)
 
 
 def is_demo(bundle: Mapping[str, Any]) -> bool:
@@ -138,13 +167,18 @@ def walk_answered_at(text: object, now: datetime) -> datetime:
 
 
 def walk_record(
-    walk: Mapping[str, Any], answers: Mapping[str, Any], answered_at: object, now: datetime
+    walk: Mapping[str, Any],
+    answers: Mapping[str, Any],
+    answered_at: object,
+    now: datetime,
+    final_rating: str | None = None,
 ) -> dict[str, Any]:
     """The row the store keeps for a finished walk: its id, its times and its demo Bundle.
 
     The id is the walk visit's own id, so the stored record is the record the phone built, and
     the same walk sent twice from the queue is one record. The caller checks the answers against
-    the form first (apps/api/check.py, worker/src/check.ts).
+    the form first (apps/api/check.py, worker/src/check.ts), and the final rating with
+    walk_checks, whose final rating the Bundle carries.
     """
     at = walk_answered_at(answered_at, now)
     now = now if now.tzinfo else now.replace(tzinfo=UTC)
@@ -154,7 +188,7 @@ def walk_record(
         "answered_at": utc_stamp(at),
         "created_at": utc_stamp(now),
         "delete_after": utc_stamp(now + timedelta(days=WALK_KEEP_DAYS)),
-        "bundle": walk_bundle(walk, answers, at),
+        "bundle": walk_bundle(walk, answers, at, final_rating),
     }
 
 
@@ -165,7 +199,6 @@ def walk_record(
 # checker's flag on a clip is the walk's own question, gated at build time (scripts/build_walks.py),
 # so no flag goes in here. What is left to fire today is the rating check.
 WALK_SITE = SiteContext(rain="unknown")
-RATING_ITEM = "overall_rating"
 # The answers each kind of follow-up takes on a walk. A walk uploads nothing, so a photo question,
 # which cannot fire without a score anyway, can only be skipped.
 WALK_FOLLOWUP_ANSWERS: dict[str, tuple[str, ...]] = {

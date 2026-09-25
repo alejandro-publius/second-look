@@ -537,8 +537,10 @@ export const api = {
   walkRecord(record_id: string) {
     return withDetail<WalkRecordOut>("GET", `/api/walk/${encodeURIComponent(record_id)}`);
   },
-  walkRecordUrl(record_id: string) {
-    return absoluteApiUrl(`/api/walk/${encodeURIComponent(record_id)}`);
+  /** The stored walk record's Bundle alone (GET /api/walk/{id}/fhir), for the record's curl line:
+   *  /api/walk/{id} is the record with its answers and checks, not the FHIR (critic round 14 B04). */
+  walkFhirUrl(record_id: string) {
+    return absoluteApiUrl(`/api/walk/${encodeURIComponent(record_id)}/fhir`);
   },
   /** Multipart upload. The API strips EXIF and checks the real type; we only downsize. The token
    *  serves the photo back to the uploader only; we never store it. */
