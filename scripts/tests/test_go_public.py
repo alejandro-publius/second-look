@@ -228,10 +228,15 @@ class World:
         self.behind = "0"
         self.fetch_code = 0
         self.gitleaks = (0, "", "INF 612 commits scanned.\nINF no leaks found")
-        self.tree_scan = (0, "secrets: 0 found in the 900 files git would commit\n", "")
+        # uv notes on stderr that it installed the packages; the line must show the command's own.
+        self.tree_scan = (
+            0,
+            "secrets: 0 found in the 900 files git would commit\n",
+            "Installed 111 packages in 348ms",
+        )
         self.notes = "docs/internal/README.md\ndocs/internal/DONE.md\n"
         self.lint = (0, "All checks passed!\n", "")
-        self.pytest = (0, "3000 passed, 40 skipped in 190.00s\n", "")
+        self.pytest = (0, "3000 passed, 40 skipped in 190.00s\n", "Installed 111 packages in 348ms")
         self.submit = (2, submit_stdout("repo_public"), MAKE_ERROR)
         self.readable = True
         self.days = ["2026-09-20", "2026-09-20", "2026-09-10"]
@@ -401,6 +406,10 @@ def test_the_full_run_does_every_step_in_order(
     steps = [line.split()[1] for line in out.splitlines() if line.startswith(("PASS", "SKIP"))]
     assert steps == gp.STEP_NAMES
     assert "FAIL" not in out
+    # Each line says what the command itself said, in plain counts, not uv's install notes.
+    assert "Installed" not in out
+    assert "secrets: 0 found in the 900 files" in out and "pytest: 3000 passed" in out
+    assert "2 branches, 1 tag and 1 pull request head" in out
     order = [
         world.index("git", "fetch"),
         world.index("gitleaks"),
@@ -650,11 +659,16 @@ def test_the_real_changelog_starts_on_sep_16_and_parses() -> None:
 # The flip and the pass after it
 
 
-def test_the_public_pass_is_logged_out_and_reads_every_image(world: World) -> None:
+def test_the_public_pass_is_logged_out_and_reads_every_image(
+    world: World, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PATH", os.environ.get("PATH", "") + ":/this-session-only")
+    monkeypatch.setenv("GH_TOKEN", "a-token-this-session-has")
     assert go(world, "--yes") == 0
     curls = [(c, env) for c, _, env in world.calls if c[0] == "curl"]
     for cmd, env in curls:
         assert cmd[:2] == ["curl", "-q"], "-q first, so no .curlrc is read"
+        assert env is not None and "/this-session-only" not in env["PATH"]
         assert not {"-b", "--cookie", "-H", "--header", "-n", "--netrc", "-u"} & set(cmd)
         assert env is not None and set(env) <= {"PATH", "HOME", "LC_ALL"}
         assert not any("TOKEN" in k for k in env)

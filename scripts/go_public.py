@@ -163,6 +163,15 @@ def last_line(text: str) -> str:
     return lines[-1] if lines else "(no output)"
 
 
+def said(out: str, err: str) -> str:
+    """What a command said last: its own output, not uv's notes on stderr about installing."""
+    return last_line(out) if out.strip() else last_line(err)
+
+
+def counted(n: int, word: str) -> str:
+    return f"{n} {word}" if n == 1 else f"{n} {word}{'es' if word.endswith('ch') else 's'}"
+
+
 @dataclass
 class Step:
     name: str
@@ -303,7 +312,7 @@ def days_named(notes: str, year: int = FIRST_DAY.year) -> set[date]:
 def commit_days(root: Path) -> set[date] | None:
     """The Pacific days on which HEAD's history has commits, or None when git log fails."""
     env = {**os.environ, "TZ": "America/Los_Angeles"}
-    code, out = run(
+    code, out, _err = run_parts(
         ["git", "log", "--format=%cd", "--date=format-local:%Y-%m-%d", "HEAD"], root, env
     )
     if code != 0:
@@ -456,8 +465,8 @@ def step_start(root: Path, dry: bool) -> Step:
     _, sha = run(["git", "rev-parse", "--short", "HEAD"], root)
     seen = (
         f"on {branch} at {sha}, {'a clean tree' if not status else 'uncommitted changes'}, "
-        f"{behind} behind origin/main; fetched {branches} branches, {tags} tags and {pulls} "
-        "pull request heads"
+        f"{behind} behind origin/main; fetched {counted(branches, 'branch')}, "
+        f"{counted(tags, 'tag')} and {counted(pulls, 'pull request head')}"
     )
     if dry:
         return passed("start", seen + "; the dry run reads HEAD in a throwaway worktree")
@@ -490,15 +499,15 @@ def step_secrets(run_: Run) -> Step:
     commits = m.group(1) if m else "?"
     if code != 0:
         return failed("secrets", f"gitleaks over {commits} commits: {last_line(out)}")
-    code, tree = run(
+    code, tree, err = run_parts(
         ["uv", "run", "python", "scripts/submit_check.py", "--secrets-only"], run_.root
     )
     if code != 0:
-        return failed("secrets", f"the tree scan: {last_line(tree)}")
+        return failed("secrets", f"the tree scan: {said(tree, err)}")
     return passed(
         "secrets",
         f"gitleaks: {commits} commits on every branch, tag and pull request head and HEAD, "
-        f"no leaks; {last_line(tree)}",
+        f"no leaks; {said(tree, err)}",
     )
 
 
@@ -539,14 +548,15 @@ def step_notes(run_: Run) -> Step:
 
 
 def step_tests(run_: Run) -> Step:
-    code, out = run(["make", "lint"], run_.root)
+    code, out, err = run_parts(["make", "lint"], run_.root)
     if code != 0:
-        return failed("tests", f"make lint: {last_line(out)}")
-    code, out = run(["uv", "run", "pytest", "-q", "-p", "no:cacheprovider"], run_.root)
+        return failed("tests", f"make lint: {said(out, err)}")
+    # The project's own pytest options (-q, no cache folder) print the "N passed" line last.
+    code, out, err = run_parts(["uv", "run", "pytest"], run_.root)
     first = next((ln for ln in out.splitlines() if ln.startswith(("FAILED", "ERROR"))), "")
     if code != 0:
-        return failed("tests", f"pytest: {first or last_line(out)}")
-    return passed("tests", f"make lint clean; pytest: {last_line(out)}")
+        return failed("tests", f"pytest: {first or said(out, err)}")
+    return passed("tests", f"make lint clean; pytest: {said(out, err)}")
 
 
 def step_submit(run_: Run) -> Step:
@@ -599,7 +609,9 @@ def step_changelog(run_: Run) -> Step:
 
 
 def visibility(run_: Run) -> str | None:
-    code, out = run(["gh", "repo", "view", run_.slug, "--json", "visibility"], run_.root)
+    code, out, _err = run_parts(
+        ["gh", "repo", "view", run_.slug, "--json", "visibility"], run_.root
+    )
     try:
         return str(json.loads(out)["visibility"]).upper() if code == 0 else None
     except (json.JSONDecodeError, KeyError, TypeError):
@@ -632,7 +644,9 @@ def step_flip(run_: Run) -> Step:
 def logged_out_env() -> dict[str, str]:
     """No GitHub token, no curl config and a home with nothing in it: a stranger's view."""
     home = tempfile.mkdtemp(prefix="go-public-stranger-")
-    return {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": home, "LC_ALL": "C"}
+    # The system folders and curl's own, not this shell's PATH: nothing of this session goes along.
+    curl_dir = str(Path(shutil.which("curl") or "/usr/bin/curl").parent)
+    return {"PATH": f"{curl_dir}:/usr/bin:/bin", "HOME": home, "LC_ALL": "C"}
 
 
 def curl(url: str, env: Mapping[str, str], cwd: Path, body: bool = False) -> tuple[int, str, str]:
