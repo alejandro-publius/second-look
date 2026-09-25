@@ -18,7 +18,7 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 <!-- claim: results/fhir_validation.json#/terminology_checks_ran = True -->
 
-Which creek is healthier? Take the two-minute test (about four minutes with its lesson), no camera needed: **https://second-look-79t.pages.dev**
+Which creek is healthier? Take the test, about four minutes with its lesson, no camera needed: **https://second-look-79t.pages.dev**
 
 | Norman Creek | Nurton Brook |
 |---|---|
@@ -137,7 +137,7 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 |---|---|---|
 | A volunteer walks past a built bank | The lesson teaches the four features people miss, and the test measures each one; the score is stored with every answer | [`content/lessons/`](content/lessons/), [`core/scoring.py`](core/scoring.py), [`core/tests/test_scoring.py`](core/tests/test_scoring.py) |
 | Someone taps at random | Four items per feature, two present and two absent, so chance scores about 2 of 4; a low scorer who answers No is asked for a photo | [`content/test_items.yaml`](content/test_items.yaml), [`core/followups.py`](core/followups.py) rule `low_score` |
-| A pretty creek gets the best rating | A good rating beside a reported built bank, sewage or plant that does not belong triggers one question asking the person to keep or change it | [`content/followups.yaml`](content/followups.yaml) rule `rating_check`, [`core/tests/test_followups.py`](core/tests/test_followups.py) |
+| A pretty creek gets the best rating | A good rating beside a reported built bank, sewage or plant that does not belong triggers one question asking the person to keep or change it, in the creek check and in a video walk | [`content/followups.yaml`](content/followups.yaml) rule `rating_check`, [`core/tests/test_followups.py`](core/tests/test_followups.py), [`core/tests/test_walks.py`](core/tests/test_walks.py) |
 | A pipe report means nothing without the weather | The dry pipe question fires only after dry days from Open-Meteo, and is skipped when the weather is unknown | [`core/rainfall.py`](core/rainfall.py), [`core/tests/test_rainfall.py`](core/tests/test_rainfall.py) |
 | The model invents a feature | Model output becomes a Flag through the gate or is dropped; a fuzz test throws arbitrary output at it | [`core/gate.py`](core/gate.py), [`core/tests/test_gate.py`](core/tests/test_gate.py) |
 | The model was never good at that feature | A model may flag only a feature it passed on the same test as the people; the pass table is a committed file, and one from the fake client licenses nothing | [`results/model_pass_table.json`](results/model_pass_table.json), [`core/tests/test_checker.py`](core/tests/test_checker.py) |
@@ -657,7 +657,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 
 </details>
 
-You can run the same loop from your desk on a creek somewhere else: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone and tagged as a demo. When you finish, it is kept for 30 days so its link opens on any device, and it is never counted or sent to their sandbox.
+You can run the same loop from your desk on a creek somewhere else: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone and tagged as a demo. When you finish, it is kept for 30 days so its link opens on any device, and it is never counted or sent to their sandbox. A walk runs the creek check's own follow-up rules on your answers: answer Good after Artificial for the bank and it asks whether you want to keep your rating, and the record shows the checks that ran. A clip has no weather, so the dry pipe question is never asked. The clips are 540 lines at about 1 Mbps and load only when you press play.
 
 The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/README.md) shows one frame of real creek footage where the gate kept a model's flag, with the question that flag makes eligible and the model's note labelled "the checker noticed", and one frame where the gate dropped the flag, because that model had not passed that feature. Each step quotes the model's answer as committed in [`evals/fixtures/raw/`](evals/fixtures/raw/), and [`evals/footage_example.py`](evals/footage_example.py) writes the page from committed files, so `make check` fails if it drifts. The checker is off on the live site, so this is the paid footage run's record, not something a volunteer saw.
 
