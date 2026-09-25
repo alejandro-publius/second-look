@@ -2,10 +2,10 @@
   "file": "~/second-look-media/final/second-look-final.mp4",
   "committed": false,
   "made_by": "make video-final (scripts/video_final.py)",
-  "length_s": 235.5,
-  "length": "3:55",
+  "length_s": 225.5,
+  "length": "3:45",
   "under_4_min": true,
-  "bytes": 85111518,
+  "bytes": 77085623,
   "width": 1920,
   "height": 1080,
   "fps": 30,
@@ -19,13 +19,13 @@
   "sound": "silence, no music",
   "captions": {
     "file": "~/second-look-media/final/second-look-final.srt",
-    "sha256": "cfc7844189b183de8f749f237046e407b6049a7fa41e20f0c1b33d702fb0faae",
-    "cues": 47,
+    "sha256": "5d8ceaff23a214e84393a2e35212f09cc68a2d2d8c3d234c2899fcc9c6de2a91",
+    "cues": 45,
     "burned_in": true,
     "subtitles_track": false,
     "max_letters_a_second": 17.0
   },
-  "shotlist_sha256": "943f84d89b8bfdc34b5f9f35ed7d9127b5a0fb6015be888f6647fda92fa19728",
+  "shotlist_sha256": "a0fa2d343135b80aeb9c66b03dec489700284b4c73ee7d50a50fc84a443c8f97",
   "video_licence": "CC BY-SA 4.0",
   "end_card_link": "https://second-look-79t.pages.dev",
   "credits_card_s": 8.0,
@@ -55,7 +55,135 @@
     "\"Nurton Brook meander east of Pattingham, Staffordshire - geograph.org.uk - 6107365\" by Roger Kidd, CC BY-SA 2.0, Wikimedia Commons"
   ],
   "footage_folder": "~/second-look-media/clips",
-  "screens_folder": "~/second-look-depth/docs/video/clips",
+  "screens_folder": "~/second-look-media/screens",
+  "screen_recordings": {
+    "01-landing": {
+      "size": "390x844",
+      "seconds": 8.87,
+      "marks": {
+        "start": 0.0
+      },
+      "plays_from_s": [
+        0.0
+      ]
+    },
+    "03-rhs-manual": {
+      "size": "1280x800",
+      "seconds": 18.43,
+      "marks": {
+        "start": 0.5
+      },
+      "plays_from_s": [
+        0.5
+      ]
+    },
+    "04-lesson": {
+      "size": "390x844",
+      "seconds": 24.03,
+      "marks": {
+        "start": 2.6
+      },
+      "plays_from_s": [
+        2.6
+      ]
+    },
+    "05-test-items": {
+      "size": "390x844",
+      "seconds": 20.0,
+      "marks": {
+        "start": 0.8
+      },
+      "plays_from_s": [
+        0.8
+      ]
+    },
+    "06-end-score": {
+      "size": "390x844",
+      "seconds": 17.93,
+      "marks": {
+        "start": 2.4
+      },
+      "plays_from_s": [
+        2.4
+      ]
+    },
+    "07-readme-results": {
+      "size": "1280x800",
+      "seconds": 24.37,
+      "marks": {
+        "start": 0.4
+      },
+      "plays_from_s": [
+        0.4
+      ]
+    },
+    "08-how-we-know": {
+      "size": "390x844",
+      "seconds": 25.57,
+      "marks": {
+        "start": 0.0
+      },
+      "plays_from_s": [
+        0.0
+      ]
+    },
+    "extra-check": {
+      "size": "390x844",
+      "seconds": 28.07,
+      "marks": {
+        "start": 0.0,
+        "followups": 13.6
+      },
+      "plays_from_s": [
+        0.0,
+        13.6
+      ]
+    },
+    "10-record": {
+      "size": "390x844",
+      "seconds": 16.6,
+      "marks": {
+        "start": 0.0
+      },
+      "plays_from_s": [
+        0.0
+      ]
+    },
+    "12-city": {
+      "size": "390x844",
+      "seconds": 15.63,
+      "marks": {
+        "start": 0.0
+      },
+      "plays_from_s": [
+        0.0,
+        5.5
+      ]
+    },
+    "13-walk": {
+      "size": "390x844",
+      "seconds": 12.4,
+      "marks": {
+        "start": 0.0
+      },
+      "plays_from_s": [
+        0.0
+      ]
+    }
+  },
+  "left_out": [
+    {
+      "time": "2:55",
+      "screen": "11-two",
+      "why": "their sandbox does not answer: GET /api/two on the live site said theirs_status down on 2026-09-25, so the lab result the recording shows would be the mock's, and docs/video/VOICE_SCRIPT.md says to cut beat 11 then"
+    }
+  ],
+  "link_on_screen": [
+    [
+      79.86,
+      85.97
+    ]
+  ],
   "footage_clips_used": [
     "berkeley-strawberrycreek3",
     "natural-north-creek-bothell-wa-01",
@@ -139,12 +267,12 @@
         {
           "clip": "screen",
           "from_s": 0.0,
-          "seconds": 13.5
+          "seconds": 16.8
         },
         {
           "clip": "pipes-florhamparksewerageutilityoutfall",
           "from_s": 0.0,
-          "seconds": 6.5
+          "seconds": 3.2
         }
       ]
     },
@@ -224,17 +352,17 @@
         {
           "clip": "screen in a phone frame",
           "from_s": 0.0,
-          "seconds": 5.5
+          "seconds": 8.5
         },
         {
           "clip": "pipes-florhamparksewerageutilityoutfall",
           "from_s": 5.0,
-          "seconds": 4.5
+          "seconds": 3.5
         },
         {
           "clip": "screen in a phone frame",
-          "from_s": 5.5,
-          "seconds": 7.5
+          "from_s": 8.5,
+          "seconds": 5.5
         }
       ]
     },
@@ -253,22 +381,8 @@
       ]
     },
     {
-      "time": "2:55",
-      "starts_at_s": 177.03,
-      "seconds": 10.0,
-      "words_wait_s": 0,
-      "captions": 2,
-      "parts": [
-        {
-          "clip": "screen",
-          "from_s": 0.0,
-          "seconds": 10.0
-        }
-      ]
-    },
-    {
       "time": "3:05",
-      "starts_at_s": 187.03,
+      "starts_at_s": 177.03,
       "seconds": 20.0,
       "words_wait_s": 0,
       "captions": 4,
@@ -292,7 +406,7 @@
     },
     {
       "time": "3:25",
-      "starts_at_s": 207.03,
+      "starts_at_s": 197.03,
       "seconds": 10.47,
       "words_wait_s": 0,
       "captions": 2,
@@ -321,7 +435,7 @@
     },
     {
       "time": "3:35",
-      "starts_at_s": 217.5,
+      "starts_at_s": 207.5,
       "seconds": 10.0,
       "words_wait_s": 0,
       "captions": 2,
