@@ -7,7 +7,8 @@ import { t } from "@/lib/t";
 
 export const metadata: Metadata = { title: `${t("walk.list_title")}: ${t("app.name")}` };
 
-// "Check a creek from your desk": the four walks, one per country.
+// "Check a creek from your desk": the four walks, one per country. The creek's name names each
+// link, so its poster is decoration and has an empty alt text (CRITIC_09 Q04).
 export default function WalksPage() {
   const walks = content.walks ?? [];
   return (
@@ -17,7 +18,7 @@ export default function WalksPage() {
       {walks.length === 0 ? <p className="muted">{t("walk.none")}</p> : null}
       {walks.map((w) => (
         <Link key={w.id} href={`/walk/${w.id}`} className="card stack">
-          <Photo id={w.poster_photo_id} />
+          <Photo id={w.poster_photo_id} alt="" />
           <span>{w.creek_name}</span>
         </Link>
       ))}

@@ -33,11 +33,14 @@ test("security headers are set and the CSP allows only our origin and the API", 
   expect(csp).not.toContain("unsafe-eval");
   expect(csp).toContain("frame-ancestors 'none'");
   expect(headers["referrer-policy"]).toBe("no-referrer");
-  expect(headers["permissions-policy"]).toContain("geolocation=()");
-  expect(headers["permissions-policy"]).toContain("camera=()");
-  const check = await page.request.get("/check");
-  expect(check.headers()["permissions-policy"]).toContain("geolocation=(self)");
-  expect(check.headers()["permissions-policy"]).toContain("camera=(self)");
+  // A permissions policy belongs to the page that was loaded, and a tap on a link inside the app
+  // loads none, so every page allows location and the camera for our own origin, and nothing
+  // else (CRITIC_09 R01). The check itself is tested from /judges in check.spec.ts.
+  const policy = "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()";
+  for (const path of ["/", "/judges", "/check", "/quick"]) {
+    const res = await page.request.get(path);
+    expect(res.headers()["permissions-policy"], path).toBe(policy);
+  }
 });
 
 test("no CSP violations are reported on the main screens", async ({ page }) => {
@@ -55,7 +58,7 @@ test("no CSP violations are reported on the main screens", async ({ page }) => {
 
 test("every screen shows real strings, none missing from the locale", async ({ page }) => {
   await mockApi(page);
-  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/quick?spot=example", "/poster", "/offline", "/share/13", "/judges", "/credits"]) {
+  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/quick?spot=example", "/quick", "/poster", "/offline", "/share/13", "/judges", "/credits"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("body")).not.toContainText("[missing:");
@@ -87,6 +90,13 @@ test("every photograph a visitor can see is named on the credits page", async ({
     "href",
     "https://commons.wikimedia.org/wiki/File:StrawberryCreek9.JPG",
   );
+  // CRITIC_09 R05: every licence written one way, as people write it, never the manifest's codes.
+  const main = page.getByRole("main");
+  await expect(main).not.toContainText(/CC-BY|CC0-|public-domain/);
+  await expect(main.getByRole("link", { name: "CC BY-SA 2.0", exact: true }).first()).toHaveAttribute("href", "https://creativecommons.org/licenses/by-sa/2.0/");
+  await expect(main.getByText("Public domain", { exact: true }).first()).toBeVisible();
+  const names = (await main.locator('a[rel~="license"]').allInnerTexts()).map((n) => n.replace(/^Our video's licence: /, ""));
+  expect(names.filter((n) => !/^(CC BY(-SA)? \d\.\d|CC0 1\.0|Public domain)$/.test(n))).toEqual([]);
 
   // The judges' door and About both reach it. The participant's door deliberately does not.
   await page.goto("/judges");

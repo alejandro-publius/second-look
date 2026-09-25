@@ -4,6 +4,8 @@ import { FocusHeading } from "@/components/FocusHeading";
 import { Row } from "@/components/ui/Row";
 import { content } from "@/lib/content";
 import { t } from "@/lib/t";
+import { auditEntries, otsStatus } from "@/lib/verify-data";
+import { logStampDay } from "@/lib/verify-text";
 
 export const metadata: Metadata = { title: `${t("judges.title")}: ${t("app.name")}` };
 
@@ -19,18 +21,27 @@ const walk = content.walks[0];
 const walkHref = `/walk/${walk?.id ?? ""}`;
 const clip = { seconds: walk?.clip.seconds ?? "" };
 
+// A stamp shows each line of the audit log as it was on the day of the stamp, not the day it was
+// written, so the door says no line has changed since that day, read from the committed log and
+// results/ots.json when the page is built (CRITIC_09 Q03). With no stamp over the whole log it
+// claims none.
+const stampDay = logStampDay(auditEntries(), otsStatus().proofs);
+
 // The judges' front door. The participant's front door, /, carries the wordmark and About and
 // nothing else, so a person taking the test is never one tap from the answer key or the code.
 // Judge mode leads because it stores nothing. The real test is the study, so it comes second and
 // says so, and a judge's first tap never adds a session to the data. Every door has one line under
-// it: what it shows and about how long it takes (CRITIC_02 D03 and D11).
+// it: what it shows and about how long it takes (CRITIC_02 D03 and D11). The clip's length is on
+// one door only, and the door to the city view says it is the end of a walk (CRITIC_09 Q04).
+// The clips show natural creeks, so an honest walk finds little for a city to do. The city door
+// says how to see a measure, in the same words the walk itself shows (CRITIC_09 Q01).
 const DOORS: { href: string; label: string; note: string; params?: Record<string, string | number> }[] = [
   { href: "/demo", label: "judges.demo", note: "judges.demo_note" },
   { href: "/t?src=other", label: "judges.take_test", note: "judges.take_test_note" },
   { href: "/check", label: "judges.check", note: "judges.check_note" },
-  { href: "/walk", label: "judges.walks", note: "judges.walks_note", params: clip },
+  { href: "/walk", label: "judges.walks", note: "judges.walks_note" },
   { href: walkHref, label: "judges.record", note: "judges.record_note", params: clip },
-  { href: walkHref, label: "nav.city", note: "judges.city_note", params: { button: t("walk.city_link") } },
+  { href: walkHref, label: "judges.city", note: "judges.city_note", params: { button: t("walk.city_link"), honest: t("walk.honest_note") } },
   { href: "/two", label: "judges.two", note: "judges.two_note" },
   { href: "/how-we-know", label: "judges.how", note: "judges.how_note" },
   { href: `${REPO}#for-judges`, label: "judges.readme", note: "judges.readme_note" },
@@ -38,7 +49,7 @@ const DOORS: { href: string; label: string; note: string; params?: Record<string
   { href: `${REPO}/blob/main/docs/MODEL_CARD.md`, label: "judges.model_card", note: "judges.model_card_note" },
   { href: `${REPO}/blob/main/examples/footage-flag/README.md`, label: "judges.ai_example", note: "judges.ai_example_note" },
   { href: REPO, label: "judges.repo", note: "judges.repo_note" },
-  { href: "/verify", label: "judges.verify", note: "judges.verify_note" },
+  { href: "/verify", label: "judges.verify", note: stampDay ? "judges.verify_note" : "judges.verify_note_unstamped", params: { date: stampDay ?? "" } },
   { href: "/credits", label: "nav.credits", note: "judges.credits_note" },
 ];
 

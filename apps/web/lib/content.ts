@@ -235,6 +235,22 @@ export function licenseUrl(license: string): string | undefined {
   return LICENSE_URLS[license];
 }
 
+/**
+ * A licence as people write it, for display only: the manifest's CC-BY-SA-2.0 as CC BY-SA 2.0 and
+ * public-domain as Public domain, the way the video's credits already write them, so /credits
+ * names every licence one way (CRITIC_09 R05). The code itself still picks the deed link. A name
+ * already in words, such as CC BY-SA 4.0, is kept as it is. CC0 has only ever had version 1.0, so
+ * the video credits' plain CC0 is written CC0 1.0 like the photos' CC0-1.0.
+ */
+export function licenseName(license: string): string {
+  if (license === "public-domain") return "Public domain";
+  if (license === "CC0") return "CC0 1.0";
+  if (license.startsWith("CC0-")) return `CC0 ${license.slice("CC0-".length)}`;
+  const parts = license.replace(/^own-/, "").split("-");
+  if (parts[0] === "CC" && parts.length >= 3) return `CC ${parts.slice(1, -1).join("-")} ${parts[parts.length - 1]}`;
+  return license;
+}
+
 export function shownPhotos(): Photo[] {
   return Object.values(content.photos).sort((a, b) => a.id.localeCompare(b.id));
 }

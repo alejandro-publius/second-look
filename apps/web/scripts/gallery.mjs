@@ -17,6 +17,7 @@ import { chromium } from "@playwright/test";
 import { API_ORIGIN, BUILT_IN_DEFAULT, goldFor, mockApi } from "../tests/mock-api.mjs";
 import { liveRequestAllowed, localRequestAllowed } from "./gallery-guard.mjs";
 import { toPageTop, toRegionTop } from "./gallery-view.mjs";
+import { answerWalkPlainly } from "./gallery-walk.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const RAW = resolve(process.env.GALLERY_RAW || join(here, "..", "screens", "gallery"));
@@ -191,6 +192,12 @@ async function localRun(browser) {
     await shoot(page),
     "The end of the sample record: the What you can do card, with one thing to do for you, one for your pet and one for the city, and the source of each.",
   );
+  // The quick check opens from a record, with the record's spot in the link. With no spot it says
+  // so and shows no form (CRITIC_09 R04), and the live site has no stored spot, so the picture of
+  // the form comes from the mock, from the link the sample record gives.
+  await page.goto(`${LOCAL}/quick?spot=example`);
+  await page.getByRole("group", { name: content.locale["quick.colour"] }).waitFor();
+  gallery("quick", "/quick?spot=example", "local mock", await shoot(page), "The quick check: water colour, smell and the pipe, in three taps.");
   await context.close();
 }
 
@@ -229,20 +236,10 @@ async function liveRun(browser) {
       else await skip.first().click();
     }
     gallery("walk-in-progress", route, "live", await shoot(page), "A walk in progress: a question about the creek in the clip, with a progress count.");
-    for (let i = 0; i < 40; i++) {
-      if (await page.getByRole("heading", { name: "Your record from the clip" }).isVisible()) break;
-      if (await button(page, "Finish").isVisible()) {
-        await button(page, "Finish").click();
-        continue;
-      }
-      const skip = page.getByRole("button", { name: "Skip" });
-      const none = page.getByRole("button", { name: "None of these" });
-      const choice = page.getByRole("main").getByRole("group").first().getByRole("button");
-      if (await skip.first().isVisible()) await skip.first().click();
-      else if (await none.isVisible()) await none.click();
-      else if (await choice.first().isVisible()) await choice.first().click();
-      else await button(page, "Next").click();
-    }
+    // The clip shows a natural creek, so an honest walk asks nothing of a city. The picture of the
+    // city view comes from a walk that answers Artificial for the bank and reports no other damage,
+    // and its alt text says so (CRITIC_09 Q01).
+    await answerWalkPlainly(page, content, { bank: "present" });
     await page.getByRole("heading", { name: "Your record from the clip" }).waitFor();
     // From the top of the page, with the title in view, never from where the form left off.
     await toPageTop(page);
@@ -250,7 +247,7 @@ async function liveRun(browser) {
     await page.getByRole("link", { name: "See this creek as a city would" }).click();
     await page.waitForURL(/\/city/);
     await toRegionTop(page, content.locale["city.walk_needs"]);
-    gallery("walk-city", "/city?walk=" + firstWalk.id, "live", await shoot(page), "The walk seen as a city would see it: what this demo creek needs, in OneAquaHealth's own measures, each with its source.");
+    gallery("walk-city", "/city?walk=" + firstWalk.id, "live", await shoot(page), "The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source.");
   }
   gallery("check-start", "/check", "live", await visit("/check"), "The creek check: what it asks and a button to start.");
   await button(page, "Start the check").click();
@@ -262,7 +259,6 @@ async function liveRun(browser) {
   await page.getByLabel("Name for this spot").fill("Footbridge");
   await page.getByRole("button", { name: /^Next/ }).first().click();
   gallery("check-question", "/check", "live", await shoot(page), "The first question of the creek check, with the answers as big buttons.");
-  gallery("quick", "/quick", "live", await visit("/quick"), "The quick check: water colour, smell and the pipe, in three taps.");
   // The alt text says what the screen shows. Until somebody checks Strawberry Creek, the live
   // page has no visits and no measure on it, so the alt text says that instead.
   const cityShot = await visit("/city?creek=strawberry-creek");

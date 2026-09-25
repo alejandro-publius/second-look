@@ -95,3 +95,24 @@ test("judge mode is shut before the lock and open after it", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "Judge mode" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start judge mode" })).toBeVisible();
 });
+
+// CRITIC_09 R02: the judges' door said judge mode "shows the right answer" after each photo. It
+// says only right or not: the Worker sends back { correct } and never the answer. The door now says
+// what judge mode does, and this holds the door to what the screens show.
+test("the judges' door says what judge mode shows: right or not, never the answer", async ({ page }) => {
+  const en: Record<string, string> = GENERATED.locale;
+  const note = en["judges.demo_note"];
+  expect(note).toContain("whether you were right");
+  expect(note).not.toMatch(/right answer|the answer/i);
+  await mockApi(page);
+  await page.clock.install({ time: AFTER_LOCK });
+  await page.goto("/judges");
+  const door = page.locator(".row").filter({ has: page.getByRole("link", { name: en["judges.demo"], exact: true }) });
+  await expect(door.locator(".row-value")).toHaveText(note);
+  await door.getByRole("link", { name: en["judges.demo"], exact: true }).click();
+  await page.getByRole("button", { name: "Start judge mode" }).click();
+  // Can't tell is never right, and the line after it names no answer.
+  await page.getByRole("button", { name: "Can't tell", exact: true }).click();
+  await page.locator("[data-confirm]").click();
+  await expect(page.getByRole("status")).toHaveText(en["demo.feedback_wrong"]);
+});

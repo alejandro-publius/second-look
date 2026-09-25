@@ -62,3 +62,29 @@ export function howNumbers(passTable, footage, pool, featureOrder) {
   }
   return { pass, gate };
 }
+
+/** The feature the creek check has no question for, so a flag on it asks nothing. */
+export const NOT_ASKED = "dug_out_channel";
+
+/**
+ * How the gate's kept flags split, from results/model_card.json#/footage_kept/by_feature: the ones
+ * on a dug-out channel, which the creek check does not ask about, so they ask nothing, and the ones
+ * on the feature of the kept case the page shows below (CRITIC_09 J03). Null, and the page says
+ * nothing of a split, unless the model card is real, gives the same kept count as the gate, and the
+ * two parts add up to all of it, so "the other" on the page is always the rest.
+ *
+ * @param {any} modelCard the parsed results/model_card.json, or null
+ * @param {{ kept: number } | null} gate the gate numbers howNumbers gave
+ * @param {string | null | undefined} shownFeature the feature of the kept case shown below
+ * @returns {{ nothing: number, shown: number } | null}
+ */
+export function keptSplit(modelCard, gate, shownFeature) {
+  const kept = modelCard?.footage_kept;
+  const by = kept?.by_feature;
+  if (!isReal(modelCard) || !gate || !by || typeof by !== "object" || !shownFeature || shownFeature === NOT_ASKED) return null;
+  const nothing = by[NOT_ASKED];
+  const shown = by[shownFeature];
+  if (![nothing, shown, kept.kept, gate.kept].every(isCount)) return null;
+  if (kept.kept !== gate.kept || nothing + shown !== gate.kept) return null;
+  return { nothing, shown };
+}

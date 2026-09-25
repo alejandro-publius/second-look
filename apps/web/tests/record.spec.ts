@@ -109,6 +109,24 @@ test("/quick/example posts the fixed enums", async ({ page }) => {
   await expect(page.getByRole("link", { name: "See the record" })).toHaveAttribute("href", "/spot?id=example");
 });
 
+// CRITIC_09 R04: /quick with no spot showed the whole form, and Send could only end on "try
+// again", since the API has no route for an empty spot. With no spot it now says where the quick
+// check opens from and links the full check, and there is nothing to send.
+test("/quick with no spot says to open it from a record, links the check, and has no form", async ({ page }) => {
+  const calls = await mockApi(page);
+  await page.goto("/quick");
+  await expect(page.getByRole("heading", { name: "Quick check", level: 1 })).toBeVisible();
+  await expect(page.getByText("Open the quick check from a creek record.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Water colour" })).toHaveCount(0);
+  await expect(page.getByText("Step 1 of 4")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Send" })).toHaveCount(0);
+  const link = page.getByRole("main").getByRole("link", { name: "Start a creek check", exact: true });
+  await expect(link).toHaveAttribute("href", "/check");
+  await link.click();
+  await expect(page.getByRole("heading", { name: "Creek check" })).toBeVisible();
+  expect(calls.filter((c: { path: string }) => c.path.startsWith("/api/quick"))).toEqual([]);
+});
+
 test("share card route returns an SVG built from the score and rejects bad scores", async ({ request }) => {
   const ok = await request.get("/api/share/13");
   expect(ok.status()).toBe(200);
@@ -219,6 +237,22 @@ test("/city with no creek says so rather than showing an empty page", async ({ p
   await expect(page.getByText("Nobody has checked this creek yet.")).toBeVisible();
 });
 
+// CRITIC_09 R05: /city?creek=<unknown> said "Something did not send", though nothing was sent and
+// the API had answered in its own words. A 404 now shows that sentence; a server error says the
+// server could not take it, and only a failed connection speaks of the connection.
+test("/city with a creek the API does not know shows the API's own sentence", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/city?creek=no-such-creek");
+  await expect(page.getByRole("status")).toHaveText("We have no record for that creek yet.");
+  await expect(page.getByText("Something did not send")).toHaveCount(0);
+  await page.route("**/api/city/**", (route) => route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ detail: "boom" }) }));
+  await page.goto("/city?creek=no-such-creek");
+  await expect(page.getByRole("status")).toHaveText("The server could not take that. Try again in a moment.");
+  await page.route("**/api/city/**", (route) => route.abort());
+  await page.goto("/city?creek=no-such-creek");
+  await expect(page.getByRole("status")).toHaveText("Something did not send. Check your connection and try again.");
+});
+
 // /two shows a volunteer record beside a laboratory reading from another place, so the door must
 // not promise the same creek (REVIEW_03 R34).
 test("the judges' door names /two for what it shows", async ({ page }) => {
@@ -245,13 +279,19 @@ test("/spot asks only for the id in the link, and says when the link names none"
 // The live creek's own page stays empty until a real check arrives, so the city door opens the walk
 // whose end has the full city view, and its line says both (CRITIC_02 D05). The creek's page still
 // answers by its readable slug.
+// CRITIC_09 Q04 and Q01: the door says it is the end of a walk, and how to see a measure on clips
+// of natural creeks, in the words the walk itself shows.
 test("the judges' city door opens the walk that ends in the city view, and names the empty creek", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");
-  const row = page.locator(".row").filter({ has: page.getByRole("link", { name: "For a city", exact: true }) });
+  const door = "What a city sees, at the end of a walk";
+  const row = page.locator(".row").filter({ has: page.getByRole("link", { name: door, exact: true }) });
   await expect(row).toContainText('press "See this creek as a city would"');
+  await expect(row).toContainText(
+    "These clips show natural creeks, so an honest check finds little to fix. To see what a city is told, answer as if the creek were damaged: Artificial for the bank, or Yes to a pipe.",
+  );
   await expect(row).toContainText("The page /city?creek=strawberry-creek stays empty until the first real creek check.");
-  await row.getByRole("link", { name: "For a city", exact: true }).click();
+  await row.getByRole("link", { name: door, exact: true }).click();
   await expect(page).toHaveURL(/\/walk\/v02$/);
   await page.goto("/city?creek=strawberry-creek");
   await expect(page.getByRole("heading", { name: "What this creek needs", level: 1 })).toBeVisible();

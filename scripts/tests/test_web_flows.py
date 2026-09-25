@@ -198,6 +198,16 @@ def test_the_reasons_then_the_source_take_one_stop_and_never_one_after_a_questio
         assert line.endswith("removal of barriers."), line
 
 
+# What lib/walks.ts's exampleNeeds hands the view, stubbed: the example an honest walk ends on
+# (CRITIC_09 Q01). It shows only when the walks found nothing that needs a measure.
+EXAMPLE = "An example measure"
+EXAMPLE_NEEDS = (
+    " exampleNeeds: () => [{ sentence_id: 'x', text: "
+    + json.dumps(EXAMPLE)
+    + ", source: 'A source', because: ['artificial_bank'] }],"
+)
+
+
 def test_the_walk_city_view_names_barriers_by_a_short_label_with_one_stop_after_it() -> None:
     # CRITIC_03 E06: the walk's city view read "barriers?. OneAquaHealth Policy Brief". CRITIC_04
     # F04: it then titled the finding with the raw form question, next to "Pipes and drain
@@ -231,11 +241,14 @@ def test_the_walk_city_view_names_barriers_by_a_short_label_with_one_stop_after_
         f"{{ content: {{ form: {{ items: {json.dumps(items)} }} }}, featureById: () => undefined,"
         " walkById: () => ({ creek_name: 'A creek' }) },"
         " { savedWalkVisits: () => [], hasMeasure: (f) => f === 'barriers',"
-        " demoCreek: () => ({ visits: [{}],"
+        + EXAMPLE_NEEDS
+        + " demoCreek: () => ({ visits: [{}],"
         " findings: [{ spot_id: 's', feature: 'barriers', visit_ids: ['v1'] }],"
         f" needs: [{json.dumps(need)}] }}) }},"
         " 'v02')"
     )
+    # A walk that found something to fix shows no example.
+    assert [r for r in rows if r.get("label") == EXAMPLE] == []
     values = [r["value"] for r in rows if r.get("label") == sentence["text"]]
     source = re.sub(r"\s*https?://\S+", "", sentence["source"]).strip()
     assert values == [f"{label}. {source}"], values
@@ -257,11 +270,15 @@ def test_the_walk_city_view_lists_a_plant_beside_a_line_that_no_measure_answers_
         + json.dumps(name)
         + " }), walkById: () => ({ creek_name: 'A creek' }) },"
         " { savedWalkVisits: () => [], hasMeasure: (f) => f !== 'invasive_plant',"
-        " demoCreek: () => ({ visits: [{}],"
+        + EXAMPLE_NEEDS
+        + " demoCreek: () => ({ visits: [{}],"
         " findings: [{ spot_id: 's', feature: 'invasive_plant', visit_ids: ['v1'] }],"
         " needs: [] }) },"
         " 'v02')"
     )
+    # Nothing needs a measure, so the view ends on the example, marked as one (CRITIC_09 Q01).
+    (example,) = [r for r in rows if r.get("label") == EXAMPLE]
+    assert example["value"].endswith(". A source")
     (plant,) = [r for r in rows if r.get("label") == name]
     seen_once = LOCALE["city.walk_seen"].replace("{n}", "1")
     parts = [p for p in plant["value"]["props"]["children"] if isinstance(p, str)]

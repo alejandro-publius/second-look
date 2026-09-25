@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FocusHeading } from "@/components/FocusHeading";
 import { Row } from "@/components/ui/Row";
-import { content, licenseUrl, shownPhotos, type InatChecks } from "@/lib/content";
+import { content, licenseName, licenseUrl, shownPhotos, type InatChecks } from "@/lib/content";
 import { t } from "@/lib/t";
 
 export const metadata: Metadata = { title: `${t("credits.title")}: ${t("app.name")}` };
@@ -50,10 +50,10 @@ export default function CreditsPage() {
                 <>
                   {licenseUrl(p.license) ? (
                     <a href={licenseUrl(p.license)} rel="license noreferrer">
-                      {p.license}
+                      {licenseName(p.license)}
                     </a>
                   ) : (
-                    p.license
+                    licenseName(p.license)
                   )}
                   {inat.photos[p.id] ? <>. {inatVerdict(inat.photos[p.id])}</> : null}
                 </>
@@ -99,10 +99,10 @@ export default function CreditsPage() {
                     <br />
                     {licenseUrl(v.license) ? (
                       <a href={licenseUrl(v.license)} rel="license noreferrer">
-                        {v.license}
+                        {licenseName(v.license)}
                       </a>
                     ) : (
-                      v.license
+                      licenseName(v.license)
                     )}
                   </>
                 }
@@ -132,7 +132,7 @@ export default function CreditsPage() {
                     </a>
                     <br />
                     <a href={v.license_url} rel="license noreferrer">
-                      {v.license}
+                      {licenseName(v.license)}
                     </a>
                   </>
                 }

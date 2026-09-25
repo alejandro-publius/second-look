@@ -54,6 +54,19 @@ export function hasMeasure(feature: string): boolean {
   return Object.prototype.hasOwnProperty.call(MEASURE_FOR_FEATURE, feature);
 }
 
+/** The feature the walk's city view uses for its example when the walks found nothing to fix. */
+export const EXAMPLE_FEATURE = "artificial_bank";
+
+/**
+ * What one reported finding would ask of a city: the same function the city view runs on real
+ * findings, over one made-up finding, so the measures and their sources come from the act rules
+ * and the approved sentences, never from words written here (CRITIC_09 Q01).
+ */
+export function exampleNeeds(feature: string = EXAMPLE_FEATURE): Need[] {
+  const finding: Finding = { spot_id: "example", feature, observers: [], visit_ids: [], first_seen: "", last_seen: "", passed_observers: [] };
+  return needsFromFindings([finding], CORE_CONTENT.sentences as Record<string, unknown>[]);
+}
+
 /** The demo creek for /city: what the walks made on this device found, and what the creek needs. */
 export function demoCreek(walk: Walk): { visits: VisitRecord[]; findings: Finding[]; needs: Need[] } {
   const visits = savedWalkVisits()

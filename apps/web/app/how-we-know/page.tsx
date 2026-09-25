@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Photo } from "@/components/Photo";
 import { Row } from "@/components/ui/Row";
 import { content, featureById, licenseUrl } from "@/lib/content";
-import { GATE_FILES, PASS_FILE, footageExample, howWeKnowNumbers } from "@/lib/how-data";
+import { GATE_FILES, MODEL_CARD_FILE, PASS_FILE, footageExample, howKeptSplit, howWeKnowNumbers } from "@/lib/how-data";
 import { modelName } from "@/lib/models";
 import { t } from "@/lib/t";
 
@@ -95,6 +95,9 @@ function runDay(iso: string): string {
 export default function HowWeKnowPage() {
   const { pass, gate } = howWeKnowNumbers(content.features.map((f) => f.id));
   const example = footageExample();
+  // Most kept flags are on a dug-out channel, which the check never asks about, so they ask nothing.
+  // The page says how many, and that the rest are the kept case below (CRITIC_09 J03).
+  const split = howKeptSplit(gate, example?.kept?.feature);
   return (
     <article className="stack">
       <h1>{t("how.title")}</h1>
@@ -146,9 +149,12 @@ export default function HowWeKnowPage() {
               dropped: gate.dropped,
               kept: gate.kept,
             })}
+            {split ? ` ${t("how.gate_split", { nothing: split.nothing, kept: gate.kept, shown: split.shown })}` : null}
           </p>
           <p>{t("how.gate_rule")}</p>
-          <p className="small muted">{t("how.from", { files: GATE_FILES.join(", "), date: runDay(gate.date) })}</p>
+          <p className="small muted">
+            {t("how.from", { files: [...GATE_FILES, ...(split ? [MODEL_CARD_FILE] : [])].join(", "), date: runDay(gate.date) })}
+          </p>
         </section>
       ) : null}
       {/* The footage example, read from examples/footage-flag/example.json when the page is built

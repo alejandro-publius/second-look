@@ -22,13 +22,13 @@ The phone screens of Second Look, in one drawn frame, captured by `make screens`
 <td align="center"><img src="walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
 </tr>
 <tr>
-<td align="center"><img src="walk-city.webp" width="200" alt="The walk seen as a city would see it: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
+<td align="center"><img src="walk-city.webp" width="200" alt="The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
 <td align="center"><img src="check-start.webp" width="200" alt="The creek check: what it asks and a button to start."><br>Creek check<br><code>/check</code></td>
 <td align="center"><img src="check-location.webp" width="200" alt="The creek check asks where you are: use the phone's location or drop a pin."><br>Where are you?<br><code>/check</code></td>
 <td align="center"><img src="check-question.webp" width="200" alt="The first question of the creek check, with the answers as big buttons."><br>First question<br><code>/check</code></td>
 </tr>
 <tr>
-<td align="center"><img src="quick.webp" width="200" alt="The quick check: water colour, smell and the pipe, in three taps."><br>Quick check<br><code>/quick</code></td>
+<td align="center"><img src="quick.webp" width="200" alt="The quick check: water colour, smell and the pipe, in three taps."><br>Quick check<br><code>/quick?spot=example</code> (mock)</td>
 <td align="center"><img src="spot-record.webp" width="200" alt="A sample creek record: what the volunteer saw, and the observer score that goes with it."><br>A sample record<br><code>/spot?id=example</code> (mock)</td>
 <td align="center"><img src="spot-fhir.webp" width="200" alt="The same record opened with View as FHIR: the Observation the record is stored as."><br>View as FHIR<br><code>/spot?id=example</code> (mock)</td>
 <td align="center"><img src="city.webp" width="200" alt="The city view of Strawberry Creek before anyone has checked it: no visits yet, and no OneAquaHealth measure shown yet."><br>City view<br><code>/city?creek=strawberry-creek</code></td>

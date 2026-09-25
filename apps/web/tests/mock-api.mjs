@@ -352,7 +352,8 @@ export async function mockApi(page, options = {}) {
     if (path.startsWith("/api/fhir/referral/")) return json({ detail: "No referral: this pipe is not on the list." }, 404);
     if (path.startsWith("/api/city/")) {
       const creek = decodeURIComponent(path.slice("/api/city/".length));
-      if (creek !== "example" && creek !== "strawberry-creek") return json({ detail: "not found" }, 404);
+      // The Worker's own words for a creek it has no record of (worker/src/city.ts).
+      if (creek !== "example" && creek !== "strawberry-creek") return json({ detail: "We have no record for that creek yet." }, 404);
       return json(exampleCity);
     }
     if (path === "/api/fhir/validation") return json(exampleValidation);

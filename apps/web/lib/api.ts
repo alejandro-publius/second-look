@@ -360,9 +360,12 @@ export interface QuickRequest {
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  /** The API's own sentence for the person, from a 4xx answer's { detail }, when it gave one. */
+  detail?: string;
+  constructor(status: number, message: string, detail?: string) {
     super(message);
     this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -401,6 +404,21 @@ async function request<T>(method: string, path: string, body?: unknown, retries 
       await sleep(300 * 2 ** attempt);
     }
   }
+}
+
+/**
+ * A GET whose 4xx answer carries a sentence for the person in { detail }, kept on the error so the
+ * page can show it: /city?creek=<unknown> said "Something did not send" when the API had answered
+ * "We have no record for that creek yet." (CRITIC_09 R05). Only the city view uses it; request()
+ * above, which the test flow runs on, is left as it is.
+ */
+async function getWithDetail<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_ORIGIN}${path}`, { method: "GET", headers: qaHeaders(undefined), credentials: "omit", cache: "no-store" });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { detail?: unknown } | null;
+    throw new ApiError(res.status, `GET ${path} failed with ${res.status}`, typeof body?.detail === "string" ? body.detail : undefined);
+  }
+  return (await res.json()) as T;
 }
 
 export const api = {
@@ -456,7 +474,7 @@ export const api = {
     return request<FhirValidationOut>("GET", "/api/fhir/validation");
   },
   city(creek_id: string) {
-    return request<CityOut>("GET", `/api/city/${encodeURIComponent(creek_id)}`);
+    return getWithDetail<CityOut>(`/api/city/${encodeURIComponent(creek_id)}`);
   },
   /** A path the city view handed us, such as a pipe's referral or its example result. */
   fhirAt(path: string) {

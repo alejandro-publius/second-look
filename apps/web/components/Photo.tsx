@@ -6,7 +6,9 @@ import { firstUrl } from "../photo-sources.mjs";
 import { photoById } from "@/lib/content";
 
 // wide: a still from a video, shown whole at 16 by 9 rather than cut to the 4 by 3 of a photograph.
-export function Photo({ id, large = false, priority = false, first = false, wide = false }: { id: string; large?: boolean; priority?: boolean; first?: boolean; wide?: boolean }) {
+// alt: only to override the manifest's alt text, as "" where a link beside the photo already
+// names what it shows, so a screen reader does not read "photo of a creek" first (CRITIC_09 Q04).
+export function Photo({ id, large = false, priority = false, first = false, wide = false, alt }: { id: string; large?: boolean; priority?: boolean; first?: boolean; wide?: boolean; alt?: string }) {
   const p = photoById(id);
   if (!p) {
     return <div className="photo" role="img" aria-label={`missing photo ${id}`} />;
@@ -15,7 +17,7 @@ export function Photo({ id, large = false, priority = false, first = false, wide
     <img
       className={["photo", large ? "photo-large" : "", wide ? "photo-wide" : ""].filter(Boolean).join(" ")}
       src={p.url}
-      alt={p.alt}
+      alt={alt ?? p.alt}
       width={p.width}
       height={p.height}
       loading={priority ? "eager" : "lazy"}

@@ -59,6 +59,9 @@ test("the judges' doors give the test about four minutes and the walk its clip, 
   );
   await expect(nav).not.toContainText(/two.minute|one.minute/i);
   await expect(page.getByText(/two minute test/i)).toHaveCount(0);
+  // CRITIC_09 Q04: the clip's length on one door only, not on two doors in a row.
+  const withClip = await nav.locator(".row").filter({ hasText: `${walk.clip.seconds} second` }).count();
+  expect(withClip).toBe(1);
 });
 
 // CRITIC_03 E05 and E06: the /two door says what the page shows while the OneAquaHealth sandbox
@@ -99,6 +102,19 @@ test("/judges and /about open with a line that names no time, and the landing pa
   }
   await page.goto("/");
   await expect(page.getByRole("main").getByText(locale["app.one_sentence"])).toBeVisible();
+});
+
+// CRITIC_09 R03: "Volunteers never have" was untrue: some volunteer programs certify people for a
+// method before their data counts. About now says what no program we know of does: a score for
+// each feature, kept with every observation.
+test("About says some volunteer programs certify people, and what none we know of does", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/about");
+  const main = page.getByRole("main");
+  await expect(main).toContainText(
+    "Professional stream surveyors pass a test before their data counts. Some volunteer programs certify people for a method, such as water chemistry. None we know of measures how well each volunteer sees each feature, or keeps that score with every observation.",
+  );
+  await expect(main).not.toContainText("never have");
 });
 
 test("About links the judges' door", async ({ page }) => {

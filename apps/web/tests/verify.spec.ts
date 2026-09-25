@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { anchorFor, hashedText, headsAgainstLog, parseLog, sha256Hex, verifyChain, type AuditEntry, type OtsProof } from "../lib/chain";
-import { anchorText, proofName, proofStatus } from "../lib/verify-text";
+import { anchorText, logStampDay, proofName, proofStatus } from "../lib/verify-text";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
@@ -177,4 +177,29 @@ test("status words: every OpenTimestamps status, including those the committed f
   expect(anchorText(head)).toBe("Stamped on 2026-09-24. Waiting for a Bitcoin block.");
   expect(anchorText({ ...head, status: "confirmed", bitcoin: block })).toBe("In Bitcoin block 915000, 2026-09-24.");
   expect(anchorText({ ...head, status: "unchecked", bitcoin: block })).toBe("Named in Bitcoin block 915000, not checked yet.");
+});
+
+// CRITIC_09 Q03: /judges said /verify proves no line was changed after it was written, but the
+// only stamps came days after the lines. A stamp shows each line as it was on the day of the
+// stamp. The door now says no line has changed since that day, read from the log and
+// results/ots.json, and /verify says what a stamp does not show.
+test("the judges' door and /verify say a stamp covers the lines from its own day, not from when they were written", async ({ page }) => {
+  const en: Record<string, string> = JSON.parse(readFileSync(join(REPO, "content", "locales", "en.json"), "utf8"));
+  const last = log[log.length - 1];
+  const head = headsAgainstLog(ots.proofs, log).find((p) => p.status === "confirmed" && (p.audit_seq ?? 0) >= last.seq)!;
+  const day = new Date(head.bitcoin!.block_time_utc!).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  expect(logStampDay(log, ots.proofs)).toBe(day);
+  // A line after the last stamp, a stamp still waiting for its block, or no stamp: no day to name.
+  const extra: AuditEntry = { ...last, seq: last.seq + 1, prev_hash: last.hash, hash: "f".repeat(64) };
+  expect(logStampDay([...log, extra], ots.proofs)).toBeNull();
+  expect(logStampDay(log, ots.proofs.map((p) => ({ ...p, status: "pending" as const })))).toBeNull();
+  expect(logStampDay(log, [])).toBeNull();
+
+  await mockApi(page);
+  await page.goto("/judges");
+  const door = page.locator(".row").filter({ has: page.getByRole("link", { name: en["judges.verify"], exact: true }) });
+  await expect(door.locator(".row-value")).toHaveText(en["judges.verify_note"].replace("{date}", day));
+  await expect(door).not.toContainText("after it was written");
+  await page.goto("/verify");
+  await expect(page.getByTestId("stamp-day")).toHaveText(en["verify.stamp_day"]);
 });

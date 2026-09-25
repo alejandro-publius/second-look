@@ -31,7 +31,7 @@ const options = { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020
 const out = ts.transpileModule(src, { compilerOptions: options }).outputText;
 const stubs = {
   "node:path": path,
-  "./security-headers.mjs": { buildHeaders: () => ({ everywhere: [], fieldPermissions: {} }) },
+  "./security-headers.mjs": { buildHeaders: () => ({ everywhere: [] }) },
 };
 const mod = { exports: {} };
 const req = (name) => stubs[name] ?? {};
