@@ -27,7 +27,13 @@ test("every walk comes from a different country and is linked from /judges", asy
   expect(new Set(walks.map((w) => w.country)).size).toBe(walks.length);
   await page.goto(`${BASE}/judges`);
   await page.getByRole("link", { name: "Check a creek from your desk" }).click();
-  for (const w of walks) await expect(page.getByRole("link", { name: w.creek_name })).toBeVisible();
+  // CRITIC_09 Q04: each link is named by its creek alone. The poster is decoration, so its alt
+  // text is empty, and the name no longer starts with "photo of a creek".
+  for (const w of walks) {
+    const link = page.getByRole("link", { name: w.creek_name, exact: true });
+    await expect(link).toBeVisible();
+    await expect(link.locator("img")).toHaveAttribute("alt", "");
+  }
   // "A creek in the United Kingdom", never "A creek in United Kingdom" (REVIEW_03 R41).
   const names = await page.getByRole("main").getByRole("link").allInnerTexts();
   expect(names.filter((n) => /\bin United\b/.test(n))).toEqual([]);
