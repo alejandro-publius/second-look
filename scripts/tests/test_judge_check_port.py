@@ -139,7 +139,8 @@ def test_a_port_left_in_use_after_the_design_check_fails_the_step(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     root = fake_build(monkeypatch, tmp_path)
-    monkeypatch.setenv("WEB_PORT", str(free_port()))
+    port = free_port()
+    monkeypatch.setenv("WEB_PORT", str(port))
     left: list[HTTPServer] = []
 
     def design_check(argv: list[str], cwd: Path, env: dict[str, str]) -> tuple[int, str]:
@@ -156,7 +157,7 @@ def test_a_port_left_in_use_after_the_design_check_fails_the_step(
             server.shutdown()
             server.server_close()
     assert not step.ok
-    assert step.lines[-1].endswith("is still in use after the design check stopped its server")
+    assert step.lines[-1] == f"port {port} is still in use after the web step"
 
 
 def test_two_web_steps_in_one_checkout_take_turns(

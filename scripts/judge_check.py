@@ -316,7 +316,7 @@ def step_web(root: Path, env: dict[str, str], quick: bool) -> Step:
         if wait_port_free(port):
             step.lines.append(f"served on port {port}{busy}, which is free again")
         else:
-            step.fail(f"port {port} is still in use after the design check stopped its server")
+            step.fail(f"port {port} is still in use after the web step")
     return step
 
 
