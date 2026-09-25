@@ -549,6 +549,8 @@ def test_the_walk_city_shot_follows_a_walk_that_reported_only_a_built_bank() -> 
     assert json.dumps(WALK_CITY_ALT) in source[city : city + 400]
     screens = (ROOT / "docs" / "screens" / "README.md").read_text(encoding="utf-8")
     assert f'<img src="walk-city.webp" width="200" alt="{WALK_CITY_ALT}">' in screens
+    # CRITIC_11 V02: the visible caption says it too, not the alt text alone.
+    assert "<br>The walk as a city sees it, after answering Artificial for the bank<br>" in screens
 
 
 def test_the_quick_check_shot_shows_the_form_from_a_record_link_on_the_mock() -> None:

@@ -345,7 +345,54 @@ test("the gallery's shot of a walk's city view shows the first measure whole, wi
   const box = (await first.boundingBox())!;
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y + box.height).toBeLessThanOrEqual(844);
+  // CRITIC_11 U02: the page is too short to bring the region to the top, and the shot stopped
+  // where the page ends, cutting "Checks from this phone: 1" through the middle at the top edge.
+  // It now stops at the top of a whole line instead, so no text is cut there.
+  expect(await textCutAtTop(page)).toEqual([]);
 });
+
+// CRITIC_11 U02: the same step on a page made too short to bring its region to the top, with lines
+// of text of a fractional height above it, so the step must find a line's top for itself.
+test("the gallery's step to a region stops at a whole line when the page is too short", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const lines = Array.from({ length: 40 }, (_, i) => `<p style="margin:0">Line ${i + 1} of the text above</p>`).join("");
+  await page.setContent(
+    `<head><meta name="viewport" content="width=device-width, initial-scale=1"></head>` +
+      `<body style="margin:0;font:17px/25.5px sans-serif">${lines}<section aria-label="Needs" style="height:120px"><h2 style="margin:0">Needs</h2></section></body>`,
+  );
+  expect(await page.evaluate(() => window.innerHeight)).toBe(844);
+  const most = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+  const regionTop = await page.getByRole("region", { name: "Needs" }).evaluate((el) => el.getBoundingClientRect().top);
+  // Too short: the region cannot come to the top, and where the page ends the edge cuts a line.
+  expect(most).toBeLessThan(regionTop - 12);
+  expect(most % 25.5).not.toBe(0);
+  await toRegionTop(page, "Needs");
+  expect(await textCutAtTop(page)).toEqual([]);
+  // As far down as it can go without cutting one: less than a line short of the end of the page.
+  const y = await page.evaluate(() => window.scrollY);
+  expect(y).toBeLessThanOrEqual(most);
+  expect(most - y).toBeLessThan(25.5 + 12);
+  // The region's heading is on screen, whole.
+  const box = (await page.getByRole("heading", { name: "Needs" }).boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.y + box.height).toBeLessThanOrEqual(844);
+});
+
+/** The text lines on screen that the top edge cuts through: part above it, part below. */
+async function textCutAtTop(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const cut: string[] = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const text = n.textContent?.trim();
+      if (!text) continue;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      for (const r of Array.from(range.getClientRects())) if (r.top < -1 && r.bottom > 1) cut.push(text);
+    }
+    return cut;
+  });
+}
 
 // CRITIC_09 Q01: the clips show natural creeks, so a walk answered as the clip shows it found
 // nothing, and the city view said so twice and stopped. The walk now says, before the check starts,
