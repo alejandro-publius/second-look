@@ -74,4 +74,4 @@ Our mark: strong. Free to run, a follower city scaffolds in seconds, and a city 
 | Free to run on Cloudflare, no card | `docs/notes/hosting.md` |
 | The example offered back to their guide | `docs/ig_proposal.md` |
 
-Thin: four photos per feature is coarse, and the photos come from open collections in several countries, not from the creek a Berkeley volunteer stands in.
+Thin: four photos per feature is coarse, and the photos come from open collections in several countries, not from the creek a Berkeley volunteer stands in. The daily jobs, the backups, the uptime check and the one run of the analysis after the lock run on one team member's laptop, not yet on the Worker's own schedule; see README, Known weaknesses.
