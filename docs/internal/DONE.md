@@ -113,7 +113,7 @@ BLOCKED-IF with a cause outside the repo and a cause test.
 |---|---|---|---|---|---|---|
 | D34 | `docs/devpost.md` verified by verify_claims, with claims in it | CHECK | | | | `uv run python scripts/verify_claims.py --file docs/devpost.md \| grep -Eq '^verify-claims: [1-9][0-9]* claim'` |
 | D35 | `make submit-check` red only on video_link and repo_public | CHECK | | | | `uv run python scripts/done_items.py submit-pack` |
-| D36 | `make go-public` prepared: its tests pass and its dry run names this repo | CHECK | | | | `repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner) && make -n go-public >/dev/null && uv run python scripts/go_public.py \| grep -qF "gh repo edit $repo --visibility public" && uv run pytest -q scripts/tests/test_go_public.py` |
+| D36 | `make go-public` does the day in order (UPDATE_30 8.1): its tests pass, GO=dry maps to --no-flip, its plan names this repo's flip | CHECK | | | | `repo=$(gh repo view --json nameWithOwner --jq .nameWithOwner) && make -n go-public GO=dry \| grep -q -- --no-flip && uv run python scripts/go_public.py \| grep -qF "gh repo edit $repo --visibility public" && uv run pytest -q scripts/tests/test_go_public.py` |
 | D37 | `docs/ALEX_TODO.md` with only human steps | CHECK | | | | `uv run python scripts/done_items.py alex-todo` |
 
 ## Dated items
@@ -189,3 +189,8 @@ Items that run a browser prove it through CI: the spec is on `main` and the newe
 | D87 | The Mac stays plugged in and awake through Oct 15 (UPDATE_30 7.4) | HUMAN | | | | `pmset -g batt \| grep -q "'AC Power'" && pmset -g custom \| awk '/^AC Power/{a=1} a && $1=="sleep"{found=1; ok=($2==0)} END{exit !(found && ok)}'` |
 | D88 | docs/JUDGE_DAY.md: the 45 second and 10 minute paths, with the fallback while their sandbox is down (UPDATE_30 7.3) | CHECK | | | | `grep -q "## In 45 seconds" docs/JUDGE_DAY.md && grep -q "## In 10 minutes" docs/JUDGE_DAY.md && grep -q "## If their sandbox is still down" docs/JUDGE_DAY.md` |
 | D89 | The ethics step in the panel study doc says what the panel asks and what is true, in one paragraph (UPDATE_30 5.3) | CHECK | | | | `grep -q "The ethics question, in one minute" docs/internal/PANEL_STUDY.md` |
+| D90 | A go-public dry run recorded in `results/go_public_dryrun.json`: every step before the flip ran, each failure one it explains | CHECK | | | | `uv run pytest -q scripts/tests/test_go_public.py -k recorded_dry_run` |
+| D91 | submit-check holds the Devpost text to the form (UPDATE_30 8.2) | CHECK | | | | `test "$(uv run python scripts/submit_check.py \| grep -cE '^PASS  devpost_(track_statement\|fields\|numbers\|report\|team)\b')" = 5` |
+| D92 | `docs/SUBMISSION_DAY.md`: Sep 30 in order with times, commands and checks, Monday's dry run, the any-window sentence | CHECK | | | | `grep -q 'can be run from any Claude Code window on the Mac' docs/SUBMISSION_DAY.md && grep -q '^## Mon Sep 28' docs/SUBMISSION_DAY.md && grep -q '^## Wed Sep 30' docs/SUBMISSION_DAY.md && grep -q 'docs/REPORT.pdf' docs/SUBMISSION_DAY.md` |
+| D93 | `CHANGELOG.md` names every day with commits from Sep 16 to yesterday; its v1.0 section is the release notes | CHECK | | | | `uv run python -c "from pathlib import Path; from scripts import go_public as g; s = g.step_changelog(g.Run(root=Path.cwd())); print(s.line()); raise SystemExit(s.failed)"` |
+| D94 | After the flip: the v1.0 tag and its GitHub release, notes from `CHANGELOG.md` (UPDATE_30 8.4) | HUMAN | | | | `gh release view v1.0 --repo alejandro-publius/second-look --json tagName --jq .tagName \| grep -qx v1.0` |

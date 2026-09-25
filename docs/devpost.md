@@ -88,7 +88,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-1254 characters
+1252 characters
 
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->

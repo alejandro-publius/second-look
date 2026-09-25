@@ -661,6 +661,8 @@ The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/RE
 
 The engineering challenges, each with the file and test that prove it: [`WRITEUP.md`](WRITEUP.md). How to deploy, with every setting: [`DEPLOY.md`](DEPLOY.md). Decisions as records: [`docs/adr/`](docs/adr/README.md).
 
+The repository opens with `make go-public GO=yes`, in the order [`docs/SUBMISSION_DAY.md`](docs/SUBMISSION_DAY.md) gives; `make go-public GO=dry` rehearses every step before the flip in a throwaway worktree, and its last run is [`results/go_public_dryrun.json`](results/go_public_dryrun.json).
+
 <details>
 <summary>The tools, the people and the record of how it was made</summary>
 
@@ -691,6 +693,7 @@ fhir/        the pinned guide, our FSH, golden records, the sandbox ledger
 scripts/     checks, gates, the footage pipeline, the sandbox mirror
 tools/diagrams/  the pinned Mermaid renderer: make diagrams-render draws docs/diagrams, make diagrams checks them
 docs/        product docs; docs/internal/ holds the working notes, removed before the repo opens
+CHANGELOG.md  what shipped, day by day, Sep 16 to 30; the v1.0 release notes come from it
 ```
 
 ## Licence
