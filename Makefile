@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation
+.PHONY: precache-budget report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -265,6 +265,13 @@ reproduce:
 # running on 3100, so it is not inside make check.
 budget:
 	cd $(WEB) && node scripts/budget.mjs
+
+# UPDATE_30 section 1 item 1: what a first visit downloads in the background. The two tests in
+# apps/web/tests/offline-budget.spec.ts run against this checkout's production build on 3100, the
+# first writing its measurement to results/precache_budget.json, and fail above 3 MB or if the
+# test stops working offline. make e2e runs the same tests without writing the file.
+precache-budget:
+	cd $(WEB) && PRECACHE_BUDGET_OUT=$(CURDIR)/results/precache_budget.json npx playwright test tests/offline-budget.spec.ts
 
 backup:
 	bash scripts/backup_d1.sh

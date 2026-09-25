@@ -71,7 +71,37 @@ test.describe("with service workers allowed", () => {
           }),
         { timeout: 30_000 },
       )
-      .toEqual(expect.arrayContaining(["/t", "/check", "/photos/ph-warmup-03.jpg"]));
+      .toEqual(expect.arrayContaining(["/t", "/check", "/photos/offline/ph-warmup-03-640.avif"]));
+  });
+
+  // UPDATE_30 section 1 item 1: the worker before it kept every full-size photo, about 24 MB, in
+  // its precache. A phone that still has them loses them when the new worker takes over, and a
+  // cache left by an older version of the site goes too.
+  test("a new worker drops what its list no longer names, and older caches", async ({ page }) => {
+    const ready = () => page.waitForFunction(async () => (await navigator.serviceWorker.ready).active?.state === "activated", null, { timeout: 30_000 });
+    const precache = () =>
+      page.evaluate(async () => {
+        const names = await caches.keys();
+        const cache = await caches.open(names.find((n) => n.endsWith("-precache"))!);
+        return { names, paths: (await cache.keys()).map((r) => new URL(r.url).pathname) };
+      });
+    await page.goto("/");
+    await ready();
+    const fresh = await precache();
+    // As a phone that ran the old worker: a full-size photo in this precache, and an old cache.
+    await page.evaluate(async () => {
+      const name = (await caches.keys()).find((n) => n.endsWith("-precache"))!;
+      await (await caches.open(name)).put("/photos/ph-bank-01.jpg", new Response("old photo", { headers: { "content-type": "image/jpeg" } }));
+      await (await caches.open("sl-0000000000000000-precache")).put("/t", new Response("old page"));
+      await (await navigator.serviceWorker.getRegistration())!.unregister();
+    });
+    expect((await precache()).paths).toContain("/photos/ph-bank-01.jpg");
+    await page.reload();
+    await ready();
+    const after = await precache();
+    const version = fresh.names.find((n) => n.endsWith("-precache"))!.replace(/-precache$/, "");
+    expect(after.names.filter((n) => !n.startsWith(`${version}-`))).toEqual([]);
+    expect(after.paths.sort()).toEqual(fresh.paths.sort());
   });
 
   // CRITIC_11 W01: the worker cached the pages at install but not the JavaScript, CSS and fonts
