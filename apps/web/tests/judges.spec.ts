@@ -125,12 +125,12 @@ test("About links the judges' door", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
 });
 
-// The poster's duration is its own string; the landing page's button is a frozen string of the
-// test flow and keeps its words (landing.spec.ts).
+// The poster quotes the test's time from time.test (times.spec.ts); the landing page's button is a
+// frozen string of the test flow and keeps its words (landing.spec.ts).
 test("the poster says about four minutes with the lesson", async ({ page }) => {
   await mockApi(page);
   await page.goto("/poster");
-  await expect(page.getByText("Scan to find out. About four minutes with the lesson. Anonymous.")).toBeVisible();
+  await expect(page.getByText("Scan to find out. It takes about four minutes with the lesson. Anonymous.")).toBeVisible();
   await expect(page.getByRole("img", { name: "QR code that opens the test" })).toBeVisible();
   await expect(page.locator("main")).not.toContainText(/two.minute|two minutes/i);
 });

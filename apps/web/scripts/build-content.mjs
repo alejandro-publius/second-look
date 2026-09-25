@@ -12,6 +12,7 @@ import { load as yamlLoad } from "js-yaml";
 import { BACKGROUND_BUDGET_BYTES, OFFLINE_PAGES } from "../offline-budget.mjs";
 import { derivedSources, OFFLINE_URL_DIR, offlineCopies } from "../photo-sources.mjs";
 import { inatChecks } from "./inat-checks.mjs";
+import { localeRefProblems, resolveLocale } from "./locale-refs.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, "..");
@@ -193,7 +194,7 @@ function main() {
   const testItems = testItemsFile.items ?? [];
   const warmup = testItemsFile.warmup ?? [];
   const followups = readYaml(join(contentDir, "followups.yaml"));
-  const locale = JSON.parse(readFileSync(join(contentDir, "locales", "en.json"), "utf8"));
+  const localeAsWritten = JSON.parse(readFileSync(join(contentDir, "locales", "en.json"), "utf8"));
   const glossary = readYaml(join(contentDir, "glossary.yaml")).terms ?? [];
   const lessons = {};
   for (const f of readdirSync(join(contentDir, "lessons")).sort()) {
@@ -205,7 +206,14 @@ function main() {
   }
 
   // Hash first, over the full content, so it matches the server. Then strip.
-  const content_hash = contentHash({ features, form, test_items: testItems, followups, locale, lessons });
+  const content_hash = contentHash({ features, form, test_items: testItems, followups, locale: localeAsWritten, lessons });
+
+  // Everything after the hash reads the strings as a person sees them: a string that quotes
+  // another by its key, as {time.test}, holds that string's words (scripts/locale-refs.mjs). The
+  // consent version is over those words too, so it moves only when what the consent says moves.
+  const refProblems = localeRefProblems(localeAsWritten);
+  if (refProblems.length > 0) fail(`content/locales/en.json: ${refProblems.join("; ")}`);
+  const locale = resolveLocale(localeAsWritten);
 
   const consentKeys = Object.keys(locale).filter((k) => k.startsWith("consent.")).sort();
   const consent_version = "en-" + createHash("sha256").update(consentKeys.map((k) => `${k}=${locale[k]}`).join("\n")).digest("hex").slice(0, 12);
