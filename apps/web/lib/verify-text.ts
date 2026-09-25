@@ -1,7 +1,7 @@
 // The words /verify shows for an OpenTimestamps proof, from results/ots.json. Pure, so
 // tests/verify.spec.ts can check every status, including the ones the committed file has not
 // reached yet: a proof is pending for hours before a Bitcoin block confirms it.
-import { proofDate, type OtsProof } from "./chain";
+import { anchorFor, headsAgainstLog, proofDate, type AuditEntry, type OtsProof } from "./chain";
 import { t } from "./t";
 
 const day = (utc?: string) => utc?.slice(0, 10) ?? "";
@@ -18,6 +18,22 @@ export function proofStatus(p: OtsProof): string {
   if (p.status === "unchecked") return t("verify.status.unchecked", { height });
   if (p.status === "broken") return t("verify.status.broken");
   return t("verify.status.pending");
+}
+
+/**
+ * The day, as "Sep 24", of the confirmed stamp that covers the whole audit log, or null when no
+ * confirmed stamp covers its last line. A stamp shows each line as it was on the day of the stamp,
+ * not the day it was written, so the /judges door says "no line has changed since" this day and
+ * no more (CRITIC_09 Q03).
+ */
+export function logStampDay(entries: AuditEntry[], proofs: OtsProof[]): string | null {
+  const last = entries[entries.length - 1];
+  if (!last) return null;
+  const p = anchorFor(last.seq, entries, headsAgainstLog(proofs, entries));
+  const when = p?.status === "confirmed" ? p.bitcoin?.block_time_utc : undefined;
+  if (!when) return null;
+  const d = new Date(when);
+  return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
 /** What a line of the audit log says about the proof that covers it, if one does. */

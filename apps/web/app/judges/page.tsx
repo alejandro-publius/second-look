@@ -4,6 +4,8 @@ import { FocusHeading } from "@/components/FocusHeading";
 import { Row } from "@/components/ui/Row";
 import { content } from "@/lib/content";
 import { t } from "@/lib/t";
+import { auditEntries, otsStatus } from "@/lib/verify-data";
+import { logStampDay } from "@/lib/verify-text";
 
 export const metadata: Metadata = { title: `${t("judges.title")}: ${t("app.name")}` };
 
@@ -18,6 +20,12 @@ const REPO = "https://github.com/alejandro-publius/second-look";
 const walk = content.walks[0];
 const walkHref = `/walk/${walk?.id ?? ""}`;
 const clip = { seconds: walk?.clip.seconds ?? "" };
+
+// A stamp shows each line of the audit log as it was on the day of the stamp, not the day it was
+// written, so the door says no line has changed since that day, read from the committed log and
+// results/ots.json when the page is built (CRITIC_09 Q03). With no stamp over the whole log it
+// claims none.
+const stampDay = logStampDay(auditEntries(), otsStatus().proofs);
 
 // The judges' front door. The participant's front door, /, carries the wordmark and About and
 // nothing else, so a person taking the test is never one tap from the answer key or the code.
@@ -41,7 +49,7 @@ const DOORS: { href: string; label: string; note: string; params?: Record<string
   { href: `${REPO}/blob/main/docs/MODEL_CARD.md`, label: "judges.model_card", note: "judges.model_card_note" },
   { href: `${REPO}/blob/main/examples/footage-flag/README.md`, label: "judges.ai_example", note: "judges.ai_example_note" },
   { href: REPO, label: "judges.repo", note: "judges.repo_note" },
-  { href: "/verify", label: "judges.verify", note: "judges.verify_note" },
+  { href: "/verify", label: "judges.verify", note: stampDay ? "judges.verify_note" : "judges.verify_note_unstamped", params: { date: stampDay ?? "" } },
   { href: "/credits", label: "nav.credits", note: "judges.credits_note" },
 ];
 

@@ -32,6 +32,9 @@ export default async function VerifyPage() {
       <h2>{t("verify.ots_title")}</h2>
       <p>{t("verify.ots_what")}</p>
       <p>{t("verify.ots_why")}</p>
+      {/* The stamps come days after some lines were written, so a stamp proves nothing about the
+          days before it (CRITIC_09 Q03). */}
+      <p data-testid="stamp-day">{t("verify.stamp_day")}</p>
       <ul className="stack verify-proofs" aria-label={t("verify.ots_title")}>
         {[...plan, ...heads].map((p) => (
           <li key={p.proof} className="card" data-testid={`proof-${p.what}`}>

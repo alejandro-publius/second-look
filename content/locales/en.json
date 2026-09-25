@@ -360,7 +360,7 @@
   "model.claude-fable-5-1": "Claude Fable 5.1",
   "verify.title": "Check our records",
   "verify.meta": "Check the audit log of Second Look line by line, and see its OpenTimestamps proofs.",
-  "verify.intro": "Some steps must never change after the fact: freezing the answer key, wiping test data before launch, and tagging the analysis plan. Each one is a line in our audit log. Here you can check that no line was changed.",
+  "verify.intro": "Some steps must never change after the fact: freezing the answer key, wiping test data before launch, and tagging the analysis plan. Each one is a line in our audit log. Here you can check that no line has changed since it was stamped.",
   "verify.log_title": "The audit log",
   "verify.log_body": "Each line has a receipt. The receipt is a hash of the line, and the line holds the receipt before it. Change one line and its receipt stops matching, and so does every receipt after it. This is an audit log, not a blockchain.",
   "verify.chain_ok": "The chain holds. Your browser just checked all {count} lines, and each receipt matches its line and the line before it.",
@@ -472,7 +472,7 @@
   "judges.ai_example": "The checker at work on real creek footage",
   "judges.ai_example_note": "One frame where the gate let a model's flag through and one where it stopped it, from the model's committed answer to the question a person would be asked. About three minutes to read. Opens on Sep 30, when the repository goes public.",
   "judges.model_card_note": "What each vision model passed, where it fails, what it costs and what it may never do. About five minutes to read. Opens on Sep 30, when the repository goes public.",
-  "judges.verify_note": "Proves no line of our audit log was changed after it was written. Your browser checks it again as the page opens. Under a minute.",
+  "judges.verify_note": "Shows that no line of our audit log has changed since {date}, when it was stamped in Bitcoin. Your browser checks the chain again as the page opens. Under a minute.",
   "judges.credits_note": "Every photo and clip we show, who made it and its licence. Under a minute.",
   "nav.judges": "For judges",
   "consent.hosts": "Cloudflare, which serves this site, keeps its own short-lived connection records, which include internet addresses. We do not.",
@@ -595,5 +595,7 @@
   "city.walk_more": "Try another door",
   "how.gate_split": "{nothing} of the {kept} kept flags are on a dug-out channel, which the check does not ask about, so they ask nothing. The other {shown} are the kept case shown below.",
   "quick.no_spot": "Open the quick check from a creek record. It adds to a spot that someone has already checked.",
-  "quick.no_spot_link": "Start a creek check"
+  "quick.no_spot_link": "Start a creek check",
+  "judges.verify_note_unstamped": "Shows every line of our audit log and its timestamps. Your browser checks the chain again as the page opens. Under a minute.",
+  "verify.stamp_day": "A stamp shows each line as it was on the day of the stamp, not the day it was written."
 }
