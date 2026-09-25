@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { toPageTop, toRegionTop } from "../scripts/gallery-view.mjs";
+import { answerWalkPlainly } from "../scripts/gallery-walk.mjs";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
@@ -286,35 +287,68 @@ test("the gallery's shot of a walk's record has the page title whole in view", a
   expect(box.y + box.height).toBeLessThanOrEqual(844);
 });
 
+// The built-bank measures as the act rules and the approved sentences give them: the words of
+// each and its source up to the web address, as the city view shows a source.
+const core = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "worker", "src", "core", "core_content.json"), "utf8"));
+const bankMeasures: { text: string; source: string }[] = (core.rules.measure_for_feature.artificial_bank as string[])
+  .map((id) => core.sentences.find((s: { id: string }) => s.id === id))
+  .sort((a: { id: string }, b: { id: string }) => (a.id < b.id ? -1 : 1))
+  .map((s: { text: string; source: string }) => ({ text: s.text, source: s.source.replace(/\s*https?:\/\/\S+/g, "").trim() }));
+
 // CRITIC_07 J04: the gallery's shot of the walk's city view cut the first measure off before its
 // source. The gallery now puts the needs region at the top (scripts/gallery-view.mjs); this makes
 // the same city view at the gallery's phone size, takes the same step, and checks the first
 // measure is whole on screen, source and all.
+// CRITIC_09 Q01: the gallery tapped the first button everywhere, which answers Yes to every yes or
+// no question, so its picture showed dams, pipes and plants the clip does not show. It now answers
+// Artificial for the bank and reports no other damage (scripts/gallery-walk.mjs), which this runs
+// too: the one finding is the built bank, and the needs are the built-bank measures and no others.
 test("the gallery's shot of a walk's city view shows the first measure whole, with its source", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockApi(page, {});
   await page.goto(`${BASE}/walk/${walks[0].id}`);
   await page.getByRole("button", { name: "Start the check" }).click();
-  await page.getByRole("button", { name: "U shape" }).click();
-  for (let i = 0; i < 60; i++) {
-    if (await page.getByRole("heading", { name: "Your record from the clip" }).isVisible()) break;
-    if (await page.getByRole("button", { name: "Finish" }).isVisible()) {
-      await page.getByRole("button", { name: "Finish" }).click();
-      continue;
-    }
-    const skip = page.getByRole("button", { name: "Skip" });
-    const none = page.getByRole("button", { name: "None of these" });
-    const choice = page.getByRole("main").getByRole("group").first().getByRole("button");
-    if (await skip.first().isVisible()) await skip.first().click();
-    else if (await none.isVisible()) await none.click();
-    else if (await choice.first().isVisible()) await choice.first().click();
-    else await page.getByRole("button", { name: "Next", exact: true }).click();
-  }
+  await answerWalkPlainly(page, content, { bank: "present" });
   await page.getByRole("link", { name: "See this creek as a city would" }).click();
+  const found = page.getByRole("region", { name: en["city.walk_findings"] });
+  await expect(found.locator(".row")).toHaveCount(1);
+  await expect(found.locator(".row")).toHaveText(`${featureNames["artificial_bank"]}${en["city.walk_seen"].replace("{n}", "1")}`);
+  const needs = page.getByRole("region", { name: en["city.walk_needs"] });
+  await expect(needs.locator(".row")).toHaveText(bankMeasures.map((m) => `${m.text}${featureNames["artificial_bank"]}. ${m.source}`));
+  // A walk that found something to fix shows no example.
+  await expect(page.getByTestId("walk-example")).toHaveCount(0);
   await toRegionTop(page, en["city.walk_needs"]);
-  const first = page.getByRole("region", { name: en["city.walk_needs"] }).locator(".row").first();
+  const first = needs.locator(".row").first();
   await expect(first).toContainText("OneAquaHealth Policy Brief");
   const box = (await first.boundingBox())!;
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y + box.height).toBeLessThanOrEqual(844);
+});
+
+// CRITIC_09 Q01: the clips show natural creeks, so a walk answered as the clip shows it found
+// nothing, and the city view said so twice and stopped. The walk now says, before the check starts,
+// how to see what a city is told, and the city view shows, marked as an example, what one reported
+// built bank would ask for, from the same rules and approved sentences. It ends with a way back to
+// the judges' doors (CRITIC_09 Q04).
+test("a walk says how to see a measure, and an honest walk ends on a marked example of one", async ({ page }) => {
+  await mockApi(page, {});
+  await page.goto(`${BASE}/walk/${walks[0].id}`);
+  const note = page.getByTestId("walk-honest-note");
+  await expect(note).toHaveText(en["walk.honest_note"]);
+  // It comes before the button that starts the check.
+  const start = page.getByRole("button", { name: en["walk.start"] });
+  expect(await note.evaluate((el, button) => !!(el.compareDocumentPosition(button!) & Node.DOCUMENT_POSITION_FOLLOWING), await start.elementHandle())).toBe(true);
+  await start.click();
+  await answerWalkPlainly(page, content, { bank: "absent" });
+  await page.getByRole("link", { name: "See this creek as a city would" }).click();
+  await expect(page.getByRole("region", { name: en["city.walk_findings"] })).toContainText(en["city.walk_nothing"]);
+  await expect(page.getByRole("region", { name: en["city.walk_needs"] })).toContainText(en["city.walk_nothing"]);
+  const example = page.getByRole("region", { name: en["city.walk_example_title"] });
+  await expect(example.getByRole("heading", { name: en["city.walk_example_title"], level: 2 })).toBeVisible();
+  await expect(example).toContainText(en["city.walk_example_intro"]);
+  await expect(example.locator(".row")).toHaveText(bankMeasures.map((m) => `${m.text}${featureNames["artificial_bank"]}. ${m.source}`));
+  const back = page.getByRole("main").getByRole("link", { name: en["city.walk_more"], exact: true });
+  await expect(back).toHaveAttribute("href", "/judges");
+  await back.click();
+  await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
 });

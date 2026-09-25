@@ -104,6 +104,9 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       body = (
         <>
           <p>{t("walk.intro")}</p>
+          {/* The clips show natural creeks, so an honest check finds little for a city to do. This
+              says how to see a measure before the check starts (CRITIC_09 Q01). */}
+          <p data-testid="walk-honest-note">{t("walk.honest_note")}</p>
           <p className="notice notice-warn">{t("walk.demo_notice")}</p>
           <button type="button" className="btn btn-block" onClick={() => setStage({ name: "items", index: 0 })}>
             {t("walk.start")}

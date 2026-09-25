@@ -459,9 +459,9 @@
   "judges.repo_note": "Every line of code, every test and every result behind this site. make judge-check runs the checks again in about five minutes, with no key. Opens on Sep 30, when the repository goes public.",
   "judges.demo_note": "Shows the right answer after each of the sixteen photos, and stores nothing. It opens on Sep 28. About three minutes.",
   "judges.check_note": "The guided check a volunteer does at a creek, with follow-up questions picked by code, never by a model. About three minutes.",
-  "judges.walks_note": "The same check, done while you watch a short clip of a creek in another country. A {seconds} second clip, then the full check.",
+  "judges.walks_note": "The same creek check, done while you watch a short clip of a creek in another country. About three minutes, like the check itself.",
   "judges.record_note": "Ends in the record your answers make, with View as FHIR. It is built on your phone and never sent.",
-  "judges.city_note": "Finish this walk, then press \"{button}\" to see what the creek needs in OneAquaHealth's own measures. About a minute more than the walk. The page /city?creek=strawberry-creek stays empty until the first real creek check.",
+  "judges.city_note": "Finish this walk, then press \"{button}\" to see what the creek needs in OneAquaHealth's own measures. {honest} About a minute more than the walk. The page /city?creek=strawberry-creek stays empty until the first real creek check.",
   "judges.two_note": "Shows that a volunteer answer fits the same record shape as a lab result, and says how far to trust it. While the OneAquaHealth sandbox is down, our record shows alone. Under a minute.",
   "judges.how_note": "Which features each vision model passed, and what the gate did on real creek footage, read from our results files. About a minute.",
   "judges.readme": "The guide for judges in our README",
@@ -587,5 +587,10 @@
   "city.finding_barriers": "Dams, weirs and other barriers",
   "credits.video_title": "Footage in our video",
   "credits.video_intro": "The creek clips and photos in our video are not ours. They come from Wikimedia Commons. Each one is listed here with the person who made it and its licence. Some of them are CC BY-SA, so our video is shared under that kind of licence too.",
-  "credits.video_licence": "Our video's licence: {licence}"
+  "credits.video_licence": "Our video's licence: {licence}",
+  "judges.city": "What a city sees, at the end of a walk",
+  "walk.honest_note": "These clips show natural creeks, so an honest check finds little to fix. To see what a city is told, answer as if the creek were damaged: Artificial for the bank, or Yes to a pipe.",
+  "city.walk_example_title": "An example, not from your answers",
+  "city.walk_example_intro": "If one check had reported a built bank, this creek would need:",
+  "city.walk_more": "Try another door"
 }

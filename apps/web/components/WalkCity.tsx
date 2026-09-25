@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { Row } from "./ui/Row";
 import { content, featureById, walkById } from "@/lib/content";
 import { has, t } from "@/lib/t";
 import { reasonsThenSource } from "@/lib/text";
-import { demoCreek, hasMeasure, savedWalkVisits } from "@/lib/walks";
+import { demoCreek, exampleNeeds, hasMeasure, savedWalkVisits } from "@/lib/walks";
 
 /**
  * A finding's name: a short label from the locale when the finding has one (city.finding_<key>),
@@ -34,6 +35,7 @@ export function WalkCity({ walkId }: { walkId: string }) {
     () => "",
   );
   const demo = useMemo(() => (walk && saved ? demoCreek(walk) : null), [walk, saved]);
+  const example = useMemo(() => exampleNeeds(), []);
   if (!walk) return <p className="notice notice-warn">{t("city.none")}</p>;
   return (
     <div className="stack">
@@ -77,8 +79,23 @@ export function WalkCity({ walkId }: { walkId: string }) {
               <Row key={n.sentence_id} label={n.text} value={reasonsThenSource(n.because.map(findingName), n.source)} />
             ))}
           </section>
+          {/* The clips show natural creeks, so an honest walk asks nothing of a city. Rather than
+              end on nothing, the view shows what one reported built bank would ask for, marked as
+              an example, from the same rules and approved sentences as the box above (CRITIC_09 Q01). */}
+          {demo.needs.length === 0 ? (
+            <section className="card stack" aria-label={t("city.walk_example_title")} data-testid="walk-example">
+              <h2>{t("city.walk_example_title")}</h2>
+              <p>{t("city.walk_example_intro")}</p>
+              {example.map((n) => (
+                <Row key={n.sentence_id} label={n.text} value={reasonsThenSource(n.because.map(findingName), n.source)} />
+              ))}
+            </section>
+          ) : null}
         </>
       )}
+      <p>
+        <Link href="/judges">{t("city.walk_more")}</Link>
+      </p>
     </div>
   );
 }

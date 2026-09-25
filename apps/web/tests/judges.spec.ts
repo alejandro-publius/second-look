@@ -59,6 +59,9 @@ test("the judges' doors give the test about four minutes and the walk its clip, 
   );
   await expect(nav).not.toContainText(/two.minute|one.minute/i);
   await expect(page.getByText(/two minute test/i)).toHaveCount(0);
+  // CRITIC_09 Q04: the clip's length on one door only, not on two doors in a row.
+  const withClip = await nav.locator(".row").filter({ hasText: `${walk.clip.seconds} second` }).count();
+  expect(withClip).toBe(1);
 });
 
 // CRITIC_03 E05 and E06: the /two door says what the page shows while the OneAquaHealth sandbox
