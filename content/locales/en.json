@@ -457,7 +457,7 @@
   "judges.how": "How we know it works",
   "judges.repo": "The code",
   "judges.repo_note": "Every line of code, every test and every result behind this site. make judge-check runs the checks again in about five minutes, with no key. Opens on Sep 30, when the repository goes public.",
-  "judges.demo_note": "Shows the right answer after each of the sixteen photos, and stores nothing. It opens on Sep 28. About three minutes.",
+  "judges.demo_note": "Says whether you were right after each of the sixteen photos, then shows your score on each feature and the lessons for any you missed. It stores nothing. It opens on Sep 28. About three minutes.",
   "judges.check_note": "The guided check a volunteer does at a creek, with follow-up questions picked by code, never by a model. About three minutes.",
   "judges.walks_note": "The same creek check, done while you watch a short clip of a creek in another country. About three minutes, like the check itself.",
   "judges.record_note": "Ends in the record your answers make, with View as FHIR. It is built on your phone and never sent.",
