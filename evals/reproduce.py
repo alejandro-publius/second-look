@@ -249,6 +249,34 @@ def check_calls(
     return costs
 
 
+def check_assist(run: Any, root: Path, log: Sequence[dict[str, Any]]) -> Check:
+    """Part 2's stored answers regraded from the raw replies, and the flags built again."""
+    from evals import assist_flags
+
+    fixture = root / "evals" / "fixtures" / "raw" / run.fixture_name
+    check = Check(f"results/{run.results_name}", f"evals/fixtures/raw/{run.fixture_name}")
+    doc = load(f"results/{run.results_name}", root)
+    items, checker = assist_flags.load_items(root)
+    key = {i.id: (i.feature, i.gold) for i in items}
+    records = sweep_records(fixture, run, key)
+    regraded = [asdict(r) for r in records]
+    check.compare(doc["answers"], regraded)
+    counts = sweep_counts(records)
+    check.compare(doc["counts"], {k: counts[k] for k in doc["counts"]})
+    check_calls(check, run, fixture_calls(fixture), log)
+    flags = load("results/assist_flags.json", root)
+    if flags.get("answers_file") == f"results/{run.results_name}":
+        again = assist_flags.build_flags(
+            items,
+            {"real": True, "answers": regraded},
+            load("results/model_pass_table.json", root),
+            model_id=checker,
+            answers_file=flags["answers_file"],
+        )
+        check.compare(flags, again)
+    return check
+
+
 def check_sweep(run: Any, root: Path, log: Sequence[dict[str, Any]]) -> tuple[Check, list[Any]]:
     fixture = root / "evals" / "fixtures" / "raw" / run.fixture_name
     check = Check(f"results/{run.results_name}", f"evals/fixtures/raw/{run.fixture_name}")
@@ -561,7 +589,9 @@ def check_inventory(root: Path) -> Check:
     check = Check("results/", "evals/paid_runs.py")
     listed = {run.results_name for run in PAID_RUNS}
     for path in sorted((root / "results").glob("*.json")):
-        if not re.match(r"(model_sweep|benchmark|footage)_\d{8}T\d{6}Z\.json$", path.name):
+        if not re.match(
+            r"(model_sweep|benchmark|footage|assist_answers)_\d{8}T\d{6}Z\.json$", path.name
+        ):
             continue
         doc = json.loads(path.read_text(encoding="utf-8"))
         if doc.get("real") is True and path.name not in listed:
@@ -609,6 +639,8 @@ def paid_checks(root: Path) -> list[Check]:
             checks.append(check_footage(run, root, log, table))
         elif run.kind == "benchmark":
             checks.append(check_benchmark(run, root, log))
+        elif run.kind == "assist_answers":
+            checks.append(check_assist(run, root, log))
     checks.extend(check_pass_table(sweeps, root))
     checks.append(check_footage_latest(root))
     checks.append(check_cost_log(root, log, claimed))

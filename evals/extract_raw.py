@@ -87,7 +87,9 @@ def header(
     return {
         "fixture": "the raw model responses of one paid run, for make reproduce",
         "run": f"results/{run.results_name}",
-        "script": f"evals/{run.kind}.py",
+        "script": "evals/assist_flags.py"
+        if run.kind == "assist_answers"
+        else f"evals/{run.kind}.py",
         "generated_at_utc": doc["generated_at_utc"],
         "billing": run.billing,
         "prices_per_million": {m: list(p) for m, p in run.prices.items()},
@@ -135,7 +137,10 @@ def fixture_lines(
     if doc.get("real") is not True:
         raise ValueError(f"{run.results_name} is not a paid run")
     calls = calls_of(run, log, runs, results)
-    if run.kind == "model_sweep" or (run.kind == "benchmark" and doc.get("answers")):
+    # assist_answers: part 2's eight items (evals/assist_flags.py --collect), kept like a sweep.
+    if run.kind in ("model_sweep", "assist_answers") or (
+        run.kind == "benchmark" and doc.get("answers")
+    ):
         lines = [header(run, doc, calls, REPLIES_KEPT)]
         lines += [reply_line(a) for a in doc["answers"]]
         lines += [call_line(n, line) for n, line in calls]
