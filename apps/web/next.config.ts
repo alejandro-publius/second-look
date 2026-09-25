@@ -8,7 +8,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 // One definition, shared with scripts/build-headers.mjs, which writes public/_headers for
 // Cloudflare Pages. A static export gets no headers from Next, so the two must not drift.
-const { everywhere, fieldPermissions } = buildHeaders({ apiOrigin, isDev });
+const { everywhere } = buildHeaders({ apiOrigin, isDev });
 
 // NEXT_EXPORT=1 builds the static site Cloudflare Pages serves. The default stays standalone for
 // docker compose. `next start` and the Playwright suite serve .next itself, not the standalone copy.
@@ -37,8 +37,6 @@ const nextConfig: NextConfig = {
         async headers() {
           return [
             { source: "/:path*", headers: everywhere },
-            { source: "/check", headers: [fieldPermissions] },
-            { source: "/quick", headers: [fieldPermissions] },
             { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache" }] },
           ];
         },

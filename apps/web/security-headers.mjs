@@ -33,13 +33,15 @@ export function buildHeaders({ apiOrigin, isDev = false }) {
     { key: "Referrer-Policy", value: "no-referrer" },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "X-Frame-Options", value: "DENY" },
-    { key: "Permissions-Policy", value: "geolocation=(), camera=(), microphone=(), payment=(), usb=()" },
+    // Only the creek check and the quick return check ask for location or a camera photo, but a
+    // permissions policy belongs to the page that was loaded, and a tap on a Next link loads none.
+    // With geolocation=() here, a check opened from /judges could never find the phone's position
+    // and said the person had refused (CRITIC_09 R01). So every page allows our own origin, and
+    // every other feature stays off.
+    { key: "Permissions-Policy", value: "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()" },
   ];
 
-  // Only the creek check and the quick return check ask for location or a camera photo.
-  const fieldPermissions = { key: "Permissions-Policy", value: "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()" };
-
-  return { csp, everywhere, fieldPermissions };
+  return { csp, everywhere };
 }
 
 /**
@@ -94,7 +96,7 @@ export function linkEntry(entry) {
 
 /** The Cloudflare Pages _headers format: a path, then one indented header line each. */
 export function headersFile({ apiOrigin, preloads = {} }) {
-  const { everywhere, fieldPermissions } = buildHeaders({ apiOrigin });
+  const { everywhere } = buildHeaders({ apiOrigin });
   const block = (path, list) => `${path}\n${list.map((h) => `  ${h.key}: ${h.value}`).join("\n")}\n`;
   const link = (entries) => ({ key: "Link", value: entries.map(linkEntry).join(", ") });
   const text = [
@@ -102,8 +104,6 @@ export function headersFile({ apiOrigin, preloads = {} }) {
     "",
     block("/*", everywhere),
     ...Object.entries(preloads).map(([path, urls]) => block(path, [link(urls)])),
-    block("/check", [fieldPermissions]),
-    block("/quick", [fieldPermissions]),
     "/sw.js\n  Cache-Control: no-cache\n",
     // The share cards are written as extensionless files by the static export, so Pages would
     // guess application/octet-stream and no chat window would render the preview.

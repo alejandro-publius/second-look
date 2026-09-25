@@ -33,11 +33,14 @@ test("security headers are set and the CSP allows only our origin and the API", 
   expect(csp).not.toContain("unsafe-eval");
   expect(csp).toContain("frame-ancestors 'none'");
   expect(headers["referrer-policy"]).toBe("no-referrer");
-  expect(headers["permissions-policy"]).toContain("geolocation=()");
-  expect(headers["permissions-policy"]).toContain("camera=()");
-  const check = await page.request.get("/check");
-  expect(check.headers()["permissions-policy"]).toContain("geolocation=(self)");
-  expect(check.headers()["permissions-policy"]).toContain("camera=(self)");
+  // A permissions policy belongs to the page that was loaded, and a tap on a link inside the app
+  // loads none, so every page allows location and the camera for our own origin, and nothing
+  // else (CRITIC_09 R01). The check itself is tested from /judges in check.spec.ts.
+  const policy = "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()";
+  for (const path of ["/", "/judges", "/check", "/quick"]) {
+    const res = await page.request.get(path);
+    expect(res.headers()["permissions-policy"], path).toBe(policy);
+  }
 });
 
 test("no CSP violations are reported on the main screens", async ({ page }) => {

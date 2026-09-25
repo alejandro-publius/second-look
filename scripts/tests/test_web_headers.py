@@ -120,6 +120,25 @@ def test_the_preload_asks_for_exactly_what_the_page_shows() -> None:
     }
 
 
+PERMISSIONS = (
+    "  Permissions-Policy: geolocation=(self), camera=(self), microphone=(), payment=(), usb=()"
+)
+
+
+def test_every_page_allows_location_and_the_camera_for_our_own_origin_only() -> None:
+    """CRITIC_09 R01: a permissions policy belongs to the page that was loaded, and a tap on a
+    link inside the app loads none. With geolocation=() on every page but /check, a check opened
+    from /judges could never find the phone's position. One policy for every page, the committed
+    file included, and no page rule that changes it."""
+    built = call("m.headersFile({ apiOrigin: '' })")
+    committed = (WEB / "public" / "_headers").read_text(encoding="utf-8")
+    for text in (built, committed):
+        lines = [ln for ln in text.splitlines() if "Permissions-Policy" in ln]
+        assert lines == [PERMISSIONS]
+        every_page = text.split("\n/*\n", 1)[1].split("\n\n", 1)[0]
+        assert PERMISSIONS in every_page.splitlines()
+
+
 def test_a_headers_line_longer_than_pages_reads_fails_the_build() -> None:
     long = ", ".join(f"/photos/a-{w}.avif {w}w" for w in range(1, 120))
     photo = {"url": "/photos/a.jpg", "sources": [{"type": "image/avif", "srcset": long}]}

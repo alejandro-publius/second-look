@@ -162,3 +162,24 @@ test("a saved contributor token travels with the check", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "One or two follow-ups" })).toBeVisible();
   expect(calls.find((c) => c.path === "/api/check/draft")!.body.contributor_token).toBe("MOCKTOKEN1234567");
 });
+
+// CRITIC_09 R01: a permissions policy belongs to the page that was loaded, and a tap on a Next link
+// loads no new page. Every page but /check and /quick sent geolocation=(), so Use my location
+// failed on the check a judge opens from /judges, and then said the person had refused it. Each
+// way into the check from inside the app is a tap like that, so each is tried here, with location
+// allowed and a fake position set, as on a phone where the person said yes.
+test.describe("Use my location works on a check opened by a tap inside the app", () => {
+  test.use({ permissions: ["geolocation"], geolocation: { latitude: 37.8719, longitude: -122.2585 } });
+  for (const from of ["/judges", "/offline", "/spot?id=example"]) {
+    test(`from ${from}`, async ({ page }) => {
+      await mockApi(page);
+      await page.goto(from);
+      await page.getByRole("main").getByRole("link", { name: "Creek check", exact: true }).click();
+      await expect(page.getByRole("heading", { name: "Creek check" })).toBeVisible();
+      await page.getByRole("button", { name: "Start the check" }).click();
+      await page.getByRole("button", { name: "Use my location" }).click();
+      await expect(page.getByRole("status")).toHaveText("Position found and rounded.");
+      await expect(page.getByText("Rounded position: 37.87, -122.26")).toBeVisible();
+    });
+  }
+});
