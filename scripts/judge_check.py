@@ -10,9 +10,13 @@ somebody's credit.
 The six steps:
 
 1. Tests. The whole Python suite and the Worker's golden vector suite.
-2. Reproduce. make reproduce grades every AI number in results/ again from the raw model replies
+2. Reproduce. make reproduce grades the AI numbers in results/ again from the raw model replies
    committed in evals/fixtures/raw/ and the synthetic ones from their seeds, and fails if one
-   differs (UPDATE_29 section 4).
+   differs (UPDATE_29 section 4). Not every number can be: the two paid benchmark runs kept counts,
+   not replies, so their right-answer counts, their share of cant_tell answers and their count of
+   malformed replies are checked only as recorded, and three old files are not regraded at all.
+   make reproduce says so in a note under each file, and this step prints every one of those
+   notes in its summary and writes them into the step's text, never only the last line.
 3. FHIR. The result of the last HL7 validator run, read from the committed
    results/fhir_validation.json (this step does not run the validator; make fhir-validate does),
    and the golden Bundles checked byte for byte against what the emitter produces today.
@@ -89,6 +93,9 @@ class Step:
     ok: bool = True
     lines: list[str] = field(default_factory=list)
     seconds: float = 0.0
+    # What the step's own tool says is not proved, printed under the step in the summary and kept
+    # in the step's text: make reproduce's notes on numbers kept as recorded, and its skips.
+    notes: list[str] = field(default_factory=list)
 
     def fail(self, line: str) -> None:
         self.ok = False
@@ -145,6 +152,38 @@ def step_tests(root: Path, env: dict[str, str]) -> Step:
     return step
 
 
+# make reproduce's line for one file (evals/reproduce.py, report): "ok   <path>: ...",
+# "skip <path>: not regraded: <why>" or "FAIL <path>: ...", then any "       note: ..." lines.
+REPRODUCE_FILE = re.compile(r"^(ok  |skip|FAIL) (\S+): (.*)$")
+
+
+def joined(paths: list[str]) -> str:
+    return paths[0] if len(paths) == 1 else f"{', '.join(paths[:-1])} and {paths[-1]}"
+
+
+def reproduce_notes(out: str) -> list[str]:
+    """Every note make reproduce prints under a file, and every file it skips, one line each.
+
+    Its last line counts values and files and says "every one matches". Read alone, it hides that
+    some numbers were never graded from a reply: the paid benchmark runs kept counts, not replies
+    (judge walk 01, R02). A note printed under several files is said once, naming them all, in
+    the order make reproduce printed them.
+    """
+    grouped: dict[str, list[str]] = {}
+    path = ""
+    for line in out.splitlines():
+        m = REPRODUCE_FILE.match(line)
+        if m:
+            path = m.group(2)
+            if m.group(1) == "skip":
+                grouped.setdefault(m.group(3), []).append(path)
+            continue
+        text = line.strip()
+        if text.startswith("note: ") and path:
+            grouped.setdefault(text.removeprefix("note: "), []).append(path)
+    return [f"note on {joined(paths)}: {text}" for text, paths in grouped.items()]
+
+
 def step_reproduce(root: Path, env: dict[str, str]) -> Step:
     step = Step("reproduce")
     rc, out = run(["make", "--no-print-directory", "reproduce"], root, env)
@@ -154,6 +193,7 @@ def step_reproduce(root: Path, env: dict[str, str]) -> Step:
         step.lines.extend(failed[:4])
     else:
         step.lines.append(last_line(out))
+    step.notes = reproduce_notes(out)
     return step
 
 
@@ -381,7 +421,8 @@ def step_secrets(root: Path, env: dict[str, str]) -> Step:
 
 
 def write_summary(out: Path, root: Path, steps: list[Step], last: str) -> None:
-    """The summary the README shows (results/judge_check.json): one line per step, as printed."""
+    """The summary the README shows (results/judge_check.json): one line per step, as printed,
+    with the step's notes after its lines, so the README never shows a step without them."""
     commit = subprocess.run(
         ["git", "rev-parse", "--short", "HEAD"], cwd=root, capture_output=True, text=True
     ).stdout.strip()
@@ -392,7 +433,7 @@ def write_summary(out: Path, root: Path, steps: list[Step], last: str) -> None:
             {
                 "name": s.name,
                 "ok": s.ok,
-                "text": "; ".join(s.lines),
+                "text": "; ".join(s.lines + s.notes),
                 "seconds": round(s.seconds),
             }
             for s in steps
@@ -431,7 +472,7 @@ def main(argv: list[str] | None = None) -> int:
         step.seconds = time.monotonic() - started
         steps.append(step)
         mark = "ok  " if step.ok else "FAIL"
-        for line in step.lines:
+        for line in step.lines + step.notes:
             print(f"  {mark} {step.name}: {line}")
 
     print()
@@ -440,6 +481,9 @@ def main(argv: list[str] | None = None) -> int:
         mark = "PASS" if step.ok else "FAIL"
         headline = step.lines[0] if step.lines else ""
         print(f"{mark}  {step.name:<10} {step.seconds:5.1f}s  {headline}")
+        # The notes stay in the summary: a PASS line alone would read as "every number regraded".
+        for note in step.notes:
+            print(f"{'':25}{note}")
     last = (
         f"judge-check: {len(failed)} of {len(steps)} steps failed"
         if failed
