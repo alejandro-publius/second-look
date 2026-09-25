@@ -15,7 +15,7 @@ from sqlmodel import Session, select
 from apps.api import content, walk_store
 from apps.api.db import engine
 from apps.api.fhir_store import store_dir, stored_bundle_paths
-from apps.api.models import SpotRow, VisitRow, WalkRecordRow
+from apps.api.models import SpotRow, VisitRow, WalkChecksRow, WalkRecordRow
 from apps.api.tests.conftest import freeze_now
 from core.walks import (
     DEMO_TAG_CODE,
@@ -210,6 +210,19 @@ def test_the_largest_walk_the_form_allows_fits_under_the_size_cap(client) -> Non
     assert len(payload.encode()) < WALK_MAX_BYTES, len(payload.encode())
     r = client.post("/api/walk", content=payload, headers={"content-type": "application/json"})
     assert r.status_code == 200, r.text
+    # With the rating check asked and answered too (judge walk W01).
+    rated = {**answers, "overall_rating": "good", "sewage_discharge": "present"}
+    payload = json.dumps(
+        body(
+            answers=rated,
+            answered_at="2026-09-25T09:59:00Z",
+            followup_answers={"rating_check": "change"},
+            final_rating="moderate",
+        )
+    )
+    assert len(payload.encode()) < WALK_MAX_BYTES, len(payload.encode())
+    r = client.post("/api/walk", content=payload, headers={"content-type": "application/json"})
+    assert r.status_code == 200, r.text
 
 
 def test_the_daily_cap_stops_new_walks_until_the_next_day(client, monkeypatch) -> None:
@@ -273,3 +286,103 @@ def test_the_walk_routes_carry_the_same_headers_and_cors_as_the_others(client) -
         f"/api/walk/{stored.json()['record_id']}", headers={"Origin": "https://x.example"}
     )
     assert "access-control-allow-origin" not in other.headers
+
+
+# Judge walk W01: a walk runs the creek check's follow-up rules on its answers, and the store keeps
+# the checks that ran with the record, as a creek check keeps its own. The judge's answers: overall
+# Good, the bank Artificial and a sewage discharge, which is the rating check's trigger.
+RATED = {**ANSWERS, "overall_rating": "good", "sewage_discharge": "present"}
+RATING_QUESTION = (
+    "You rated this stream Good, but you also reported artificial banks, a sewage discharge. "
+    "Do you want to keep your rating?"
+)
+
+
+def checks_rows() -> int:
+    with Session(engine) as db:
+        return int(db.exec(select(func.count()).select_from(WalkChecksRow)).one())
+
+
+def test_a_walk_keeps_the_checks_it_ran_and_its_final_rating(client) -> None:
+    freeze_now(NOW)
+    sent = body(answers=RATED, followup_answers={"rating_check": "change"}, final_rating="poor")
+    stored = client.post("/api/walk", json=sent)
+    assert stored.status_code == 200, stored.text
+    record = client.get(f"/api/walk/{stored.json()['record_id']}").json()
+    assert record["first_rating"] == "good" and record["final_rating"] == "poor"
+    assert record["checks"] == [
+        {
+            "rule_id": "rating_check",
+            "asked": True,
+            "question_text": RATING_QUESTION,
+            "answer": "change",
+            "detail": {
+                "issues": "artificial banks, a sewage discharge",
+                "first_rating": "good",
+                "kind": "keep_rating",
+            },
+        }
+    ]
+    # Sent again from the queue it is the same record; with another answer, it is refused.
+    assert client.post("/api/walk", json=sent).json() == stored.json()
+    kept = body(answers=RATED, followup_answers={"rating_check": "keep"}, final_rating="good")
+    assert client.post("/api/walk", json=kept).status_code == 409
+    assert rows() == 1 and checks_rows() == 1
+
+
+def test_a_question_left_unanswered_is_kept_as_asked(client) -> None:
+    freeze_now(NOW)
+    stored = client.post("/api/walk", json=body(answers=RATED, followup_answers={}))
+    assert stored.status_code == 200, stored.text
+    record = client.get(f"/api/walk/{stored.json()['record_id']}").json()
+    assert [(c["rule_id"], c["asked"], c["answer"]) for c in record["checks"]] == [
+        ("rating_check", True, None)
+    ]
+    assert record["final_rating"] == "good"
+
+
+def test_a_walk_sent_without_follow_ups_keeps_no_checks(client) -> None:
+    """A body from before walks asked any: stored as before, with no checks and its own rating."""
+    freeze_now(NOW)
+    stored = client.post("/api/walk", json=body(answers=RATED))
+    assert stored.status_code == 200, stored.text
+    record = client.get(f"/api/walk/{stored.json()['record_id']}").json()
+    assert record["checks"] == []
+    assert record["first_rating"] == record["final_rating"] == "good"
+    assert checks_rows() == 0
+
+
+@pytest.mark.parametrize(
+    ("followup_answers", "final_rating", "detail"),
+    [
+        ({"dry_pipe": "yes"}, None, "No follow-up called 'dry_pipe' was asked in this walk."),
+        ({"rating_check": "yes"}, None, "rating_check: answer keep, change, skipped."),
+        ({"rating_check": "change"}, None, "A changed rating needs the new rating."),
+        ({"rating_check": "keep"}, "poor", "only when the rating check says change"),
+        ({"rating_check": "change"}, "splendid", "must be good, moderate or poor"),
+        ({"rating_check": "change"}, ["poor"], "must be good, moderate or poor"),
+        (["rating_check"], None, "followup_answers must be an object"),
+    ],
+)
+def test_the_store_decides_what_was_asked_and_checks_each_answer(
+    client, followup_answers, final_rating, detail
+) -> None:
+    freeze_now(NOW)
+    sent = body(answers=RATED, followup_answers=followup_answers, final_rating=final_rating)
+    r = client.post("/api/walk", json=sent)
+    assert r.status_code == 422, r.text
+    assert detail in r.json()["detail"]
+    assert rows() == 0 and checks_rows() == 0
+
+
+def test_the_checks_of_a_walk_are_deleted_with_it(client) -> None:
+    freeze_now(NOW)
+    sent = body(answers=RATED, followup_answers={"rating_check": "keep"})
+    record_id = client.post("/api/walk", json=sent).json()["record_id"]
+    assert checks_rows() == 1
+    freeze_now(NOW + timedelta(days=WALK_KEEP_DAYS))
+    new_at = (NOW + timedelta(days=WALK_KEEP_DAYS, seconds=-30)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    assert client.post("/api/walk", json=body(answered_at=new_at)).status_code == 200
+    with Session(engine) as db:
+        assert db.get(WalkChecksRow, record_id) is None
+    assert checks_rows() == 0
