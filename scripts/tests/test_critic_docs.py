@@ -149,6 +149,27 @@ def test_the_readme_route_table_names_the_walk_routes_the_worker_serves() -> Non
     assert "`GET /api/walk/{record_id}`" in row and "30 days" in row, row
 
 
+def test_known_weaknesses_says_a_walk_clip_restarts_while_nothing_serves_it_in_parts() -> None:
+    # Round 15 W05: the live clips answer a range request with 200 and the whole file, so a seek
+    # starts the clip again. Nothing in the Worker or the site's headers serves them in parts; the
+    # day something does, this line and the weakness go together.
+    places = [
+        *(ROOT / "worker" / "src").rglob("*.ts"),
+        ROOT / "apps" / "web" / "public" / "_headers",
+    ]
+    served_in_parts = [
+        str(p.relative_to(ROOT))
+        for p in places
+        if p.is_file() and re.search(r"(?i)content-range|accept-ranges", text(p))
+    ]
+    weak = heading_body(text(README), "Known weaknesses")
+    said = [s for s in sentences(weak) if re.search(r"\bwalk clip restarts\b", s)]
+    if served_in_parts:
+        assert said == [], f"{served_in_parts} serve clips in parts; drop the weakness"
+    else:
+        assert said and "range request" in said[0], said
+
+
 def test_a_readme_section_in_the_report_names_only_sections_the_report_has() -> None:
     # A05: the report took "What the AI cannot do" from the README, and it sent the reader to
     # "The gate, the heart of it", a README heading the report does not have (its 2.2 is "The
