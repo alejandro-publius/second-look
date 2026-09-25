@@ -407,16 +407,24 @@ async function request<T>(method: string, path: string, body?: unknown, retries 
 }
 
 /**
- * A GET whose 4xx answer carries a sentence for the person in { detail }, kept on the error so the
+ * A call whose 4xx answer carries a sentence for the person in { detail }, kept on the error so the
  * page can show it: /city?creek=<unknown> said "Something did not send" when the API had answered
- * "We have no record for that creek yet." (CRITIC_09 R05). Only the city view uses it; request()
- * above, which the test flow runs on, is left as it is.
+ * "We have no record for that creek yet." (CRITIC_09 R05), and the quick check said "The server
+ * could not take that" when the API had answered "We do not know that spot." (CRITIC_10 T02). Only
+ * the city view and the quick check use it; request() above, which the test flow runs on, is left
+ * as it is.
  */
-async function getWithDetail<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_ORIGIN}${path}`, { method: "GET", headers: qaHeaders(undefined), credentials: "omit", cache: "no-store" });
+async function withDetail<T>(method: "GET" | "POST", path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${API_ORIGIN}${path}`, {
+    method,
+    headers: qaHeaders(body),
+    body: body === undefined ? undefined : JSON.stringify(body),
+    credentials: "omit",
+    cache: "no-store",
+  });
   if (!res.ok) {
-    const body = (await res.json().catch(() => null)) as { detail?: unknown } | null;
-    throw new ApiError(res.status, `GET ${path} failed with ${res.status}`, typeof body?.detail === "string" ? body.detail : undefined);
+    const answer = (await res.json().catch(() => null)) as { detail?: unknown } | null;
+    throw new ApiError(res.status, `${method} ${path} failed with ${res.status}`, typeof answer?.detail === "string" ? answer.detail : undefined);
   }
   return (await res.json()) as T;
 }
@@ -474,7 +482,7 @@ export const api = {
     return request<FhirValidationOut>("GET", "/api/fhir/validation");
   },
   city(creek_id: string) {
-    return getWithDetail<CityOut>(`/api/city/${encodeURIComponent(creek_id)}`);
+    return withDetail<CityOut>("GET", `/api/city/${encodeURIComponent(creek_id)}`);
   },
   /** A path the city view handed us, such as a pipe's referral or its example result. */
   fhirAt(path: string) {
@@ -490,7 +498,7 @@ export const api = {
     return request<InatOut>("GET", `/api/inaturalist/${encodeURIComponent(creek)}`);
   },
   quick(spot_id: string, body: QuickRequest) {
-    return request<{ ok?: boolean; visit_id?: string }>("POST", `/api/quick/${encodeURIComponent(spot_id)}`, body);
+    return withDetail<{ ok?: boolean; visit_id?: string }>("POST", `/api/quick/${encodeURIComponent(spot_id)}`, body);
   },
   /** Multipart upload. The API strips EXIF and checks the real type; we only downsize. The token
    *  serves the photo back to the uploader only; we never store it. */

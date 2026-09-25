@@ -127,6 +127,52 @@ test("/quick with no spot says to open it from a record, links the check, and ha
   expect(calls.filter((c: { path: string }) => c.path.startsWith("/api/quick"))).toEqual([]);
 });
 
+// CRITIC_10 T02: /quick's static page said "Loading the record", though it never loads one, and
+// with a spot that has no record it showed a form whose Send could only fail, with "The server
+// could not take that". The static line is neutral now; the page asks the API for the spot first
+// and, when there is none, shows the no-spot notice; and a 404 on Send shows the API's own words.
+test("/quick's static page says only Loading, never that it loads a record", async ({ request }) => {
+  for (const path of ["/quick", "/quick?spot=example"]) {
+    const html = await (await request.get(path)).text();
+    expect(html).toContain(">Loading...<");
+    expect(html).not.toContain("Loading the record");
+  }
+});
+
+test("/quick for a spot with no record shows the no-spot notice and no form", async ({ page }) => {
+  const calls = await mockApi(page);
+  await page.goto("/quick?spot=nosuch");
+  await expect(page.getByRole("heading", { name: "Quick check", level: 1 })).toBeVisible();
+  await expect(page.getByText("Open the quick check from a creek record.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: "Start a creek check", exact: true })).toHaveAttribute("href", "/check");
+  await expect(page.getByRole("group", { name: "Water colour" })).toHaveCount(0);
+  await expect(page.getByText("Step 1 of 4")).toHaveCount(0);
+  expect(calls.filter((c: { path: string }) => c.path === "/api/spot/nosuch")).toHaveLength(1);
+  expect(calls.filter((c: { path: string }) => c.path.startsWith("/api/quick"))).toEqual([]);
+});
+
+test("/quick shows the API's own words when Send is refused with a 404, and keeps the score token", async ({ page }) => {
+  const calls = await mockApi(page);
+  // The spot is gone by the time Send goes: the Worker's words for that (worker/src/check.ts).
+  const sent: Record<string, unknown>[] = [];
+  await page.route(`${API_ORIGIN}/api/quick/**`, (route) => {
+    sent.push(route.request().postDataJSON());
+    return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ detail: "We do not know that spot." }) });
+  });
+  await page.addInitScript(() => localStorage.setItem("sl_contributor_token", "MOCKTOKEN1234567"));
+  await page.goto("/quick?spot=example");
+  await page.getByRole("button", { name: "Muddy" }).click();
+  await page.getByRole("button", { name: "Bad smell" }).click();
+  await page.getByRole("button", { name: "Yes", exact: true }).click();
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toHaveText("We do not know that spot.");
+  await expect(page.getByText("The server could not take that.", { exact: false })).toHaveCount(0);
+  expect(calls.filter((c: { path: string }) => c.path === "/api/spot/example")).toHaveLength(1);
+  // Sent with the token, then again without it; the token was not the trouble, so it is kept.
+  expect(sent.map((b) => b.contributor_token ?? null)).toEqual(["MOCKTOKEN1234567", null]);
+  expect(await page.evaluate(() => localStorage.getItem("sl_contributor_token"))).toBe("MOCKTOKEN1234567");
+});
+
 test("share card route returns an SVG built from the score and rejects bad scores", async ({ request }) => {
   const ok = await request.get("/api/share/13");
   expect(ok.status()).toBe(200);

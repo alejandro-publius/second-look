@@ -132,12 +132,14 @@ export function QuickCheck({ spotId }: { spotId: string }) {
       try {
         await api.quick(spotId, { ...body, ...(photo_id ? { photo_id } : {}) });
       } catch (err) {
-        // An unknown contributor token is a 404 with a plain sentence. Drop it and send without.
+        // An unknown contributor token is a 404 with a plain sentence. Send again without it, and
+        // forget the token only once that goes through: an unknown spot is a 404 as well, and then
+        // the token was never the trouble (CRITIC_10 T02).
         if (err instanceof ApiError && err.status === 404 && token) {
-          clearContributorToken();
           const { contributor_token: _dropped, ...rest } = body;
           void _dropped;
           await api.quick(spotId, { ...rest, ...(photo_id ? { photo_id } : {}) });
+          clearContributorToken();
         } else throw err;
       }
       setState("done");
@@ -151,7 +153,10 @@ export function QuickCheck({ spotId }: { spotId: string }) {
           // fall through
         }
       }
-      setError(isNetworkError(err) ? t("error.network") : t("error.server"));
+      // A 404 says in the API's own words what it does not know, such as the spot, as the city view
+      // does. "Try again in a moment" would never work there (CRITIC_10 T02).
+      if (err instanceof ApiError && err.status === 404 && err.detail) setError(err.detail);
+      else setError(isNetworkError(err) ? t("error.network") : t("error.server"));
       setState("error");
     }
   }

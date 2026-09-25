@@ -270,6 +270,7 @@
   "quick.send": "Send",
   "quick.done": "Saved. Thank you.",
   "quick.view_record": "See the record",
+  "quick.loading": "Loading...",
   "poster.title": "Poster",
   "poster.scan": "Scan to find out. About four minutes with the lesson. Anonymous.",
   "poster.qr_alt": "QR code that opens the test",
