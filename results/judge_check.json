@@ -1,35 +1,35 @@
 {
-  "commit": "c28bb88",
-  "ran_at_utc": "2026-09-25T20:17:48Z",
+  "commit": "57b1e42",
+  "ran_at_utc": "2026-09-25T22:18:47Z",
   "steps": [
     {
       "name": "tests",
       "ok": true,
-      "text": "python: 2319 passed, 2 skipped, 9 xfailed in 228.59s (0:03:48); worker: pass 17",
-      "seconds": 231
+      "text": "python: 2345 passed, 2 skipped, 9 xfailed in 204.06s (0:03:24); worker: pass 17",
+      "seconds": 206
     },
     {
       "name": "reproduce",
       "ok": true,
-      "text": "reproduce: 28603 values in 23 files regraded from raw replies and seeds, with no network and no key; every one matches; 3 files not regraded and 5 notes, each named above; note on results/benchmark_20260924T031225Z.json and results/benchmark_20260924T054939Z.json: the right-answer counts per feature, the share of cant_tell answers and the count of malformed replies are as recorded: the run kept counts, not answers, so no reply is left to grade them from; the accuracies, intervals and cost are regraded; note on results/footage_20260924T032230Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 144 calls is regraded; note on results/footage_20260924T060539Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 192 calls is regraded; note on results/cost_log.jsonl: 41.11 USD paid in all, every line accounted for; note on results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has; note on results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file; note on results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has",
-      "seconds": 23
+      "text": "28603 values in 23 files regraded from raw replies and seeds, with no network and no key; every one matches; 3 files not regraded and 5 notes, each named below; note on results/benchmark_20260924T031225Z.json and results/benchmark_20260924T054939Z.json: the right-answer counts per feature, the share of cant_tell answers and the count of malformed replies are as recorded: the run kept counts, not answers, so no reply is left to grade them from; the accuracies, intervals and cost are regraded; note on results/footage_20260924T032230Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 144 calls is regraded; note on results/footage_20260924T060539Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 192 calls is regraded; note on results/cost_log.jsonl: 41.11 USD paid in all, every line accounted for; note on results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has; note on results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file; note on results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has",
+      "seconds": 21
     },
     {
       "name": "fhir",
       "ok": true,
       "text": "last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4",
-      "seconds": 1
+      "seconds": 0
     },
     {
       "name": "web",
       "ok": true,
-      "text": "next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).; served on port 3100, which is free again",
+      "text": "next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s).; served on port 3100, which is free again",
       "seconds": 11
     },
     {
       "name": "audit log",
       "ok": true,
-      "text": "audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3",
+      "text": "3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3",
       "seconds": 0
     },
     {
@@ -39,6 +39,6 @@
       "seconds": 7
     }
   ],
-  "seconds": 274,
+  "seconds": 246,
   "last": "judge-check: 6 of 6 steps passed, offline, with no key"
 }
