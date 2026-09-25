@@ -56,6 +56,7 @@ How this answers the organizers' five headers: *The problem* and *Innovation and
 | Flags the gate stopped | not asked: an answer on the test is scored, never flagged | <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags dropped, <!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> kept, because a model may flag only a feature it passed |
 | One checker question about one frame, in cents | not asked | Claude Haiku 4.5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-haiku-4-5-20251001-->0.2<!--/v-->, Claude Sonnet 5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-sonnet-5-->0.4<!--/v-->, Claude Opus 5.5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-opus-5-5-->1.0<!--/v-->, Claude Fable 5.1 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-fable-5-1-->2.3<!--/v--> |
 | Cost per 100 frames, each asked the four questions three times by all four models, with the run's adversarial frames counted in | not asked | <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD, with direct calls at the full price |
+| What a phone downloads in the background on a first visit, so the test and the creek check work offline | <!--v:results/precache_budget.json#/megabytes-->2.3<!--/v--> MB in <!--v:results/precache_budget.json#/files-->59<!--/v--> files, under the budget of <!--v:results/precache_budget.json#/budget_megabytes-->3<!--/v--> MB: the pages of the test and the creek check, and a phone-size copy of each of the test's <!--v:results/precache_budget.json#/photos/files-->38<!--/v--> photos | not asked |
 
 Which features each model passed on the 16-photo test: all four photos of a feature right in at least two of three runs ([`results/model_pass_table.json`](results/model_pass_table.json)).
 
@@ -253,7 +254,8 @@ flowchart TB
   WORKER -- "human answers,<br/>ratings, follow-up answers" --> BUILD
   BUILD -- "a visit record" --> EMIT
   EMIT -- "one Bundle per visit" --> D1
-  WPAGE -- "answers, as a demo Bundle<br/>on the phone, never sent" --> EMIT
+  WPAGE -- "answers, as a demo Bundle<br/>built on the phone" --> EMIT
+  WPAGE -- "a finished walk, kept<br/>30 days as a demo,<br/>never counted" --> WORKER
   EMIT -- "sample Bundles from<br/>both emitters" --> VALID
   EMIT -- "visit Bundles as<br/>conditional creates" --> MIRROR
   LIB -- "what our data set is<br/>and where it lives" --> MIRROR
@@ -382,7 +384,7 @@ The same four as images, for places that do not draw Mermaid: [`docs/diagrams/lo
 
 | Part | Built with |
 |---|---|
-| Web app | Next.js 16 and React 19, a static export on Cloudflare Pages, a service worker that keeps the creek check working offline once the site has been opened, self-hosted fonts, no third party script |
+| Web app | Next.js 16 and React 19, a static export on Cloudflare Pages, a service worker that keeps the creek check, and a test once it has started, working offline after one visit, for a background download of <!--v:results/precache_budget.json#/megabytes-->2.3<!--/v--> MB, self-hosted fonts, no third party script |
 | API, live | a TypeScript Worker on Cloudflare Workers, with D1 for records and Workers KV for photos |
 | API, reference | Python 3.12, FastAPI, SQLModel and Alembic, SQLite locally and Postgres in docker compose |
 | Pure logic | [`core/`](core/): the gate, the follow-ups, scoring, labels, the FHIR emitter; ported to TypeScript and proved equal by golden vectors |
@@ -401,7 +403,7 @@ FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and buil
 <details>
 <summary>Every route, what it is for</summary>
 
-The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->25<!--/v--> routes, under `/api` on the site's own origin. The Python API in [`apps/api/`](apps/api/) is the reference, with <!--v:results/api_inventory.json#/python/count-->26<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in [`docs/API.md`](docs/API.md); a test fails when a route is added without a row there.
+The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->27<!--/v--> routes, under `/api` on the site's own origin. The Python API in [`apps/api/`](apps/api/) is the reference, with <!--v:results/api_inventory.json#/python/count-->28<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in [`docs/API.md`](docs/API.md); a test fails when a route is added without a row there.
 
 | Route | What it is for |
 |---|---|
@@ -524,7 +526,7 @@ The full list, kept current, is [`docs/REAL_VS_SYNTHETIC.md`](docs/REAL_VS_SYNTH
 |---|---|
 | The test flow, its scoring and the photos in it | real, openly licensed photos from several countries |
 | Frames from open creek footage | real, cut from openly licensed video; labels only where the video's own description supports one, never called a gold standard |
-| A video walk's record | real shape, demo content, made on the phone and never stored |
+| A video walk's record | real shape, demo content, made on the phone and kept 30 days as a demo so its link opens anywhere, never counted |
 | The golden Strawberry Creek visit | example, hand shaped from a worked visit |
 | A referral for a pipe worth testing | real, computed on request from stored visits |
 | The laboratory result coming back | example, tagged and labelled EXAMPLE everywhere |
@@ -555,6 +557,8 @@ make judge-check
 
 `make judge-check` needs no key and no network: it runs the Python tests and the Worker's golden vectors, grades every AI number again from the raw replies (`make reproduce`), reads the last HL7 validator run, builds the web app with its design check, verifies the audit log and scans for secrets, in about five minutes after the setup (`make fhir-validate` runs the validator itself, with Java). Its last recorded run, at commit <!--v:results/judge_check.json#/commit-->9aee034<!--/v-->, took <!--v:results/judge_check.json#/seconds-->210<!--/v--> seconds after the setup ([`results/judge_check.json`](results/judge_check.json), written by [`scripts/judge_check.py`](scripts/judge_check.py) with its `--out` option):
 
+The web step builds the app and measures it on port 3100, or, when something else holds 3100 (such as `make demo-offline`), on a free port it picks and names, and it frees that port after. Two judge-checks in one checkout take turns at the web step.
+
 - **<!--v:results/judge_check.json#/steps/0/name-->tests<!--/v-->**: <!--v:results/judge_check.json#/steps/0/text-->python: 2046 passed, 1 skipped, 9 xfailed in 165.13s (0:02:45); worker: pass 15<!--/v-->
 - **<!--v:results/judge_check.json#/steps/1/name-->reproduce<!--/v-->**: <!--v:results/judge_check.json#/steps/1/text-->reproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches<!--/v-->
 - **<!--v:results/judge_check.json#/steps/2/name-->fhir<!--/v-->**: <!--v:results/judge_check.json#/steps/2/text-->last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4<!--/v-->
@@ -576,6 +580,8 @@ make demo-offline
 [`scripts/seed_demo.py`](scripts/seed_demo.py) fills `data/demo` through the API's own routes with every socket to another machine refused, and fails if one was tried: two test sittings that never count, three creek checks on Strawberry Creek, and one pipe worth testing. Then the API serves that folder on port 8000 and the site runs on http://localhost:3100. Open http://localhost:3100/city?creek=strawberry-creek. The first two lines, `uv sync` and the web app's install, are the only steps that use the network.
 
 `make dev` runs the same two servers on an empty local database, with the network. Deploying, the D1 schema, the secrets by name, the jobs on the Mac and a table of every setting the code reads are in [`DEPLOY.md`](DEPLOY.md). Pre-commit hooks for the fast checks: `uv tool install pre-commit && pre-commit install`.
+
+`WEB_PORT=3200 make demo-offline` (or `make dev`) moves the site to another port; `make e2e` and the design check read the same variable. Every production deploy is recorded in [`docs/notes/hosting.md`](docs/notes/hosting.md), and `make rollback` puts back the last Worker version and site build that passed the phone tests (a dry run unless `ROLLBACK=yes`).
 
 ## For judges
 
@@ -601,7 +607,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 - `/t`: consent, the warm-up pair, the lesson, 16 items with Yes, No and Can't tell, the score per feature, the share card.
 - `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` shows the photos in one fixed order, for the screen recording.
 - `/check`: the guided creek check, one question per screen, with follow-ups chosen by [`core/followups.py`](core/followups.py); once the site has been opened on a phone, it keeps working offline and sends when the phone is back online.
-- `/walk`: a creek from your desk, a clip of a creek in Russia, the United Kingdom or the United States, the same check, a demo record made on the phone.
+- `/walk`: a creek from your desk, a clip of a creek in Russia, the United Kingdom or the United States, the same check, a demo record made on the phone with a link that opens it anywhere.
 - `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card. It needs a stored record, so on the live site today it is empty; [`docs/screens/`](docs/screens/README.md) shows it on a local build.
 - `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach. It is empty until the first real check; `make demo-offline` shows it full.
 - `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so.
@@ -631,7 +637,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 
 </details>
 
-You can run the same loop from your desk on a creek somewhere else: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
+You can run the same loop from your desk on a creek somewhere else: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone and tagged as a demo. When you finish, it is kept for 30 days so its link opens on any device, and it is never counted or sent to their sandbox.
 
 The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/README.md) shows one frame of real creek footage where the gate kept a model's flag, with the question that flag makes eligible and the model's note labelled "the checker noticed", and one frame where the gate dropped the flag, because that model had not passed that feature. Each step quotes the model's answer as committed in [`evals/fixtures/raw/`](evals/fixtures/raw/), and [`evals/footage_example.py`](evals/footage_example.py) writes the page from committed files, so `make check` fails if it drifts. The checker is off on the live site, so this is the paid footage run's record, not something a volunteer saw.
 
@@ -639,6 +645,7 @@ The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/RE
 
 - One labeller. The gold labels came from the picks file Alex wrote with the planner, a Claude chat (commit 81e62ed), and no second, blind label exists yet, so read every accuracy as agreement with this key ([`docs/DATA_CARD.md`](docs/DATA_CARD.md), [`docs/deviations.md`](docs/deviations.md)).
 - Four photos per feature is coarse: it shows a person what to practise and flags an answer worth a second look, but it is too coarse to weight votes by feature. In our simulation with made-up people ([`results/consensus_coarseness.json`](results/consensus_coarseness.json)), weights from each feature's own photos did worse than a plain majority in all <!--v:results/consensus_coarseness.json#/summary/at_headline_size/n_patterns_where_feature_only_clearly_loses-->5<!--/v--> skill patterns.
+- A test started online keeps going if the network drops, from smaller copies of its photos, but a reload while offline starts the sitting again, and the end of the lesson is not sent again once the network is back.
 - The official app has no question for a dug-out channel, so the creek check asks none: that score is kept but stands beside no answer, and the city measure it would lead to waits for one. Plants that do not belong have no city measure of their own.
 - Of the <!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> footage flags the gate kept, <!--v:results/model_card.json#/footage_kept/by_feature/dug_out_channel-->32<!--/v--> are on a dug-out channel, so they ask nothing. The other <!--v:results/model_card.json#/footage_kept/by_feature/artificial_bank-->3<!--/v--> are one model's runs on built banks, all on one frame of creek water over stones, seen from above, where the other models that passed built banks said can't tell. Passing four photos did not stop that flag, which is why a flag can only ask ([`examples/footage-flag/`](examples/footage-flag/README.md)).
 - The photos come from open collections in several countries and seasons, not from the creeks a Berkeley visitor will stand in.

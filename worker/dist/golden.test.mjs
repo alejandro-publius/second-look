@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "90828d6977093b75",
+  content_hash: "dd63f5f1302b1668",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -817,7 +817,30 @@ var content_default = {
     "test.no": "No",
     "test.yes": "Yes"
   },
-  region_plants: [],
+  region_plants: [
+    "Ailanthus altissima",
+    "Algerian ivy",
+    "Arundo donax",
+    "Cape ivy",
+    "Conium maculatum",
+    "Cortaderia jubata",
+    "Delairea odorata",
+    "English ivy",
+    "Fennel",
+    "Foeniculum vulgare",
+    "French broom",
+    "Genista monspessulana",
+    "Giant reed",
+    "Hedera canariensis",
+    "Hedera helix",
+    "Himalayan blackberry",
+    "Jubata grass",
+    "Periwinkle",
+    "Poison hemlock",
+    "Rubus armeniacus",
+    "Tree of heaven",
+    "Vinca major"
+  ],
   rules: {
     features_in_order: [
       "artificial_bank",
@@ -1092,6 +1115,23 @@ var content_default = {
       feature: "pipe_running",
       gold: "absent",
       id: "t16"
+    }
+  ],
+  walks: [
+    {
+      creek_name: "A creek in Russia",
+      id: "v02",
+      spot_name: "The stretch in the clip"
+    },
+    {
+      creek_name: "A creek in the United Kingdom",
+      id: "v03",
+      spot_name: "The stretch in the clip"
+    },
+    {
+      creek_name: "A creek in the United States",
+      id: "v07",
+      spot_name: "The stretch in the clip"
     }
   ],
   warmup_ids: [
@@ -3187,8 +3227,13 @@ function pickActions(sentences, seed) {
 // src/core/walks.ts
 var DEMO_TAG_SYSTEM = `${REPO_URL}/tags`;
 var DEMO_TAG_CODE = "demo-walk";
-var DEMO_TAG_DISPLAY = "Demo visit from a video walk. Made on the device, never stored or counted.";
+var DEMO_TAG_DISPLAY = "Demo visit from a video walk. Never counted and never sent to the sandbox.";
 var WALK_PREFIX = "walk-";
+var WALK_KEEP_DAYS = 30;
+var WALK_PAST_DAYS = 7;
+var WALK_FUTURE_SECONDS = 300;
+var ANSWERED_AT_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/;
+var DAY_MS = 864e5;
 function walkSpot(walk) {
   const wid = `${WALK_PREFIX}${walk.id}`;
   return {
@@ -3239,6 +3284,28 @@ function walkBundle(walk, answers, answeredAt) {
 function isDemo(bundle) {
   const tags = bundle.meta?.tag ?? [];
   return tags.some((t) => t.system === DEMO_TAG_SYSTEM && t.code === DEMO_TAG_CODE);
+}
+var WalkRecordError = class extends Error {
+};
+function walkAnsweredAt(text, now) {
+  if (typeof text !== "string" || !ANSWERED_AT_RE.test(text)) throw new WalkRecordError("answered_at must be a time like 2026-09-25T10:00:00Z.");
+  const at = parseInstant(text);
+  const clock = parseInstant(now);
+  if (at > clock + WALK_FUTURE_SECONDS * 1e3) throw new WalkRecordError("That walk is dated in the future. Check the phone's clock.");
+  if (at < clock - WALK_PAST_DAYS * DAY_MS) throw new WalkRecordError(`That walk is more than ${WALK_PAST_DAYS} days old, so it is not stored.`);
+  return instant(at);
+}
+function walkRecord(walk, answers, answeredAt, now) {
+  const at = walkAnsweredAt(answeredAt, now);
+  const clock = parseInstant(now);
+  return {
+    record_id: walkVisitId(walk.id, at),
+    walk_id: walk.id,
+    answered_at: at,
+    created_at: instant(clock),
+    delete_after: instant(clock + WALK_KEEP_DAYS * DAY_MS),
+    bundle: walkBundle(walk, answers, at)
+  };
 }
 
 // src/check.ts
@@ -3508,6 +3575,23 @@ test("walks: the same demo Bundle as Python, tagged on every resource, and struc
     }
     writeBundle(bundle);
   }
+});
+test("walks: the stored row of a finished walk, or the same reason to refuse it, as Python", () => {
+  const doc = golden("walks");
+  assert.ok(doc.record_cases.length >= 5, "cases that store and cases that refuse");
+  let stored = 0;
+  for (const c of doc.record_cases) {
+    let got;
+    try {
+      got = walkRecord(c.input.walk, c.input.answers, c.input.answered_at, c.input.now);
+    } catch (err) {
+      assert.ok(err instanceof WalkRecordError, `${c.name}: ${String(err)}`);
+      got = { error: err.message };
+    }
+    same(got, c.expected, c.name);
+    if (!("error" in c.expected)) stored += 1;
+  }
+  assert.ok(stored > 0 && stored < doc.record_cases.length, "both kinds of case ran");
 });
 test("old Bundles: only ts- JSON files are deleted, and only the ones in that folder", () => {
   const dir = mkdtempSync(join(tmpdir(), "sl-instances-"));
