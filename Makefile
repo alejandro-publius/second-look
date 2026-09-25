@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := uv run python
 WEB := apps/web
 
-.PHONY: report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation
+.PHONY: report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough video-final video-frames go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -235,6 +235,16 @@ video-clips:
 
 video-rough:
 	$(PY) scripts/video_rough.py
+
+# UPDATE_30 section 4. The final cut, captions only, or with the voice when
+# ~/second-look-media/voice/ holds voice.m4a, voice.wav or voice.mp3. It writes the mp4, its .srt
+# and the thumbnail to ~/second-look-media/final/, never into the repository, and the summary to
+# docs/video/final_cut.json. video-frames takes one frame every 10 s of it for a review.
+video-final:
+	$(PY) scripts/video_final.py $(if $(SCREENS),--screens $(SCREENS),)
+
+video-frames:
+	$(PY) scripts/video_final.py --frames-into $(or $(FRAMES),$(HOME)/second-look-media/final/frames)
 
 # Update 14 section 8 item 2. Says what it would do; with GO=yes, on main on Sep 30, removes the
 # working notes, runs submit-check, and only then makes the repository public.
