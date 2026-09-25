@@ -90,6 +90,13 @@ test("every photograph a visitor can see is named on the credits page", async ({
     "href",
     "https://commons.wikimedia.org/wiki/File:StrawberryCreek9.JPG",
   );
+  // CRITIC_09 R05: every licence written one way, as people write it, never the manifest's codes.
+  const main = page.getByRole("main");
+  await expect(main).not.toContainText(/CC-BY|CC0-|public-domain/);
+  await expect(main.getByRole("link", { name: "CC BY-SA 2.0", exact: true }).first()).toHaveAttribute("href", "https://creativecommons.org/licenses/by-sa/2.0/");
+  await expect(main.getByText("Public domain", { exact: true }).first()).toBeVisible();
+  const names = (await main.locator('a[rel~="license"]').allInnerTexts()).map((n) => n.replace(/^Our video's licence: /, ""));
+  expect(names.filter((n) => !/^(CC BY(-SA)? \d\.\d|CC0 1\.0|Public domain)$/.test(n))).toEqual([]);
 
   // The judges' door and About both reach it. The participant's door deliberately does not.
   await page.goto("/judges");
