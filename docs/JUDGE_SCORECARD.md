@@ -67,7 +67,7 @@ Our mark: strong. Free to run, a follower city scaffolds in seconds, and a city 
 
 | What to look at | Where |
 |---|---|
-| OneAquaHealth's five steps for a follower city, run the way a follower city would on Berkeley | README, How OneAquaHealth is used |
+| OneAquaHealth's five steps for a follower city, set up for Berkeley the way a follower city would; no volunteer has been trained or tested and no real visit exists yet | README, Feasibility: set up for Berkeley the way a follower city would |
 | A second city scaffold, its lists still to fill | `fhir/fsh/city-heraklion.fsh`; `content/regions/heraklion.yaml` |
 | Free to run on Cloudflare, no card | `docs/notes/hosting.md` |
 | The example offered back to their guide | `docs/ig_proposal.md` |

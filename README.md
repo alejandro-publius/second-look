@@ -465,9 +465,17 @@ Sent to OneAquaHealth's implementation guide on 2026-09-24, in the open:
 - [hl7-eu/oah issue 8](https://github.com/hl7-eu/oah/issues/8): their sandbox's name stopped resolving on 2026-09-23, with the evidence from their own nameserver.
 - A read only MCP server over our own records, so any software agent can ask for a creek's records with the resource ids behind every answer. [`examples/mcp/README.md`](examples/mcp/README.md).
 
-### Feasibility: run on Berkeley the way a follower city would
+### Feasibility: set up for Berkeley the way a follower city would
 
-OneAquaHealth calls a city that adopts the method a follower city. Berkeley has not adopted it; we ran the five steps on its creeks as a follower city would: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in about four minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the three-question return check (`/quick`). `make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
+OneAquaHealth calls a city that adopts the method a follower city. Berkeley has not adopted it. We set up the five steps for Berkeley's creeks the way a follower city would, and this is how far each one got:
+
+1. Name the streams: done, as nested Locations.
+2. Adopt the form: done; it mirrors their app.
+3. Train and test the volunteers, in about four minutes: the lesson and the test are live, and no volunteer has been trained or tested yet.
+4. Collect and validate every visit against their profiles: the check is live and CI validates the records the code makes, and no real visit exists yet.
+5. Publish to the sandbox with a Library entry, and repeat with the three-question return check: publishing ran with the hand-made example visit, and the return check opens from a creek record (`/quick?spot=<id>`).
+
+`make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
 
 ### One Digital Health and FAIR
 
