@@ -28,7 +28,7 @@ Our mark: strong. Testing observers is old in professional surveys; doing it in 
 | A volunteer is tested per feature and the score is stored with the data, like a lab's quality checks | README, Why trust a volunteer, and the AI?; `docs/devpost.md`, Innovation and practical value |
 | The AI takes the same test and may only speak on a feature it passed | `core/gate.py`; `results/model_pass_table.json` |
 | Follow-ups chosen by code from answers, scores and the weather, two at most | `core/followups.py`; `/check` |
-| The whole loop from a desk: a clip of a creek in another country, the same check, a record made on the phone and never stored | `/walk`; `core/walks.py`; `content/walks.yaml` |
+| The whole loop from a desk: a clip of a creek somewhere else, the same check, a record made on the phone and never stored | `/walk`; `core/walks.py`; `content/walks.yaml` |
 
 Thin: the AI is held to the same test, and no model passed plants that do not belong, so the checker never speaks on plants; four photos per feature is a small test (README, Numbers at a glance; `docs/MODEL_CARD.md`).
 
