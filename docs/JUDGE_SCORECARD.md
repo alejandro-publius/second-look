@@ -2,7 +2,7 @@
 
 The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin, as of 2026-09-24. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
 
-The eight-page technical report, [`docs/REPORT.pdf`](REPORT.pdf), says the same at more length.
+The technical report, [`docs/REPORT.pdf`](REPORT.pdf), says the same at more length.
 
 ## Impact and alignment with the OneAquaHealth mission (30%)
 
