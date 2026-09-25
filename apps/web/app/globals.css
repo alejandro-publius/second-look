@@ -239,6 +239,16 @@ main > .landing-hero {
   border-color: var(--ink);
 }
 
+/* A button that answers a question shows the answer picked, as an option does (critic round 14
+   B02): both answers look the same until one is pressed. */
+.btn[aria-pressed="true"],
+.btn[aria-pressed="true"]:hover {
+  background: var(--surface-sunk);
+  color: var(--ink);
+  border-color: var(--flag);
+  box-shadow: inset 0 0 0 var(--border) var(--flag);
+}
+
 .btn-quiet {
   background: transparent;
   color: var(--ink);

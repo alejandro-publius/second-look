@@ -114,7 +114,9 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
 
   await expect(page.getByRole("heading", { name: "One or two follow-ups" })).toBeVisible();
   await expect(page.getByText("It has not rained here for 5 days.")).toBeVisible();
-  await page.getByRole("region", { name: "dry_pipe" }).getByRole("button", { name: "Yes", exact: true }).click();
+  // Each card is named by its check, never by its rule's code name (critic round 14 B04).
+  await expect(page.getByRole("region", { name: "dry_pipe" })).toHaveCount(0);
+  await page.getByRole("region", { name: "Pipe after dry days" }).getByRole("button", { name: "Yes", exact: true }).click();
   await page.getByRole("button", { name: "Change my rating" }).click();
   await page.getByRole("button", { name: /^Moderate:/ }).click();
   await page.getByRole("button", { name: "Finish" }).click();

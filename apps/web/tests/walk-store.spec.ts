@@ -229,14 +229,18 @@ test("a walk asks the rating check, keeps the answer, and shows the checks that 
   await page.getByRole("button", { name: en["walk.start"] }).click();
   await answerWalkPlainly(page, content, { bank: "present", until: "followups" });
   const asked = page.getByTestId("walk-followups");
-  await expect(asked.getByRole("heading", { name: en["check.followups_title"] })).toBeVisible();
+  // One question, so one follow-up, not "One or two" (critic round 14 B04, round 15 F06).
+  await expect(asked.getByRole("heading", { name: en["check.followups_title_one"] })).toBeVisible();
   await expect(asked).toContainText(en["check.followups_intro"]);
   const question = fill(en["followup.rating_check"], { issues: "artificial banks" });
-  await expect(asked.getByRole("region", { name: "rating_check" })).toContainText(question);
-  await expect(asked.getByRole("region", { name: "dry_pipe" })).toHaveCount(0);
+  // The card is named by its check's plain name, never by the rule's code name.
+  await expect(asked.getByRole("region", { name: en["spot.rule_rating_check"] })).toContainText(question);
+  await expect(asked.getByRole("region", { name: "rating_check" })).toHaveCount(0);
+  await expect(asked.locator('[data-rule="dry_pipe"]')).toHaveCount(0);
   expect(calls.filter((c: { method: string }) => c.method === "POST")).toEqual([]);
   await asked.getByRole("button", { name: en["check.change_rating"] }).click();
   await asked.getByRole("button", { name: /^Poor:/ }).click();
+  await expect(asked.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_new"], { rating: en["spot.rating_word_poor"] }));
   await asked.getByRole("button", { name: en["check.finish"], exact: true }).click();
 
   // The phone's record: the checks that ran, worded as /spot words them.
@@ -365,4 +369,40 @@ test("Start again forgets the walk on this device, and a new walk starts from th
   await expect(page.locator("h1#question")).toHaveText(items[0].text);
   await expect(page.getByRole("button", { name: items[0].options![1].label, exact: true })).toHaveAttribute("aria-pressed", "false");
   expect(await question(page)).toBe(items[0].text);
+});
+
+// Critic round 14 B02 and round 15 F03: the rating card looked the same before and after a tap. Keep
+// was filled orange from the start, so it looked chosen, and after Change and a new rating the
+// picker closed with nothing to show for it. Now Keep and Change look the same until one is
+// pressed, the pressed one is marked as a pick, and the card says which rating the record keeps.
+test("the rating card shows which answer was picked and the rating the record keeps", async ({ page }) => {
+  // No colour fades, so each look is read when it has settled.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await mockApi(page, { walkBundle: bundleFor, walkChecks: storeChecks });
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "present", until: "followups" });
+  const card = page.getByRole("region", { name: en["spot.rule_rating_check"] });
+  const keep = card.getByRole("button", { name: en["check.keep_rating"] });
+  const change = card.getByRole("button", { name: en["check.change_rating"] });
+  const look = (b: typeof keep) => b.evaluate((el) => { const s = getComputedStyle(el); return [s.backgroundColor, s.borderTopColor, s.boxShadow, s.color].join(" | "); });
+  await page.mouse.move(0, 0);
+  const before = [await look(keep), await look(change)];
+  expect(before[0], "Keep and Change look the same before a tap").toBe(before[1]);
+  await expect(card.getByTestId("rating-chosen")).toHaveText("");
+
+  await change.click();
+  await card.getByRole("button", { name: /^Moderate:/ }).click();
+  await page.mouse.move(0, 0);
+  await expect(change).toHaveAttribute("aria-pressed", "true");
+  await expect(card.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_new"], { rating: en["spot.rating_word_moderate"] }));
+  expect(await look(change), "the pressed answer is marked").not.toBe(before[1]);
+  expect(await look(keep), "the other one is not").toBe(before[0]);
+
+  await keep.click();
+  await page.mouse.move(0, 0);
+  await expect(keep).toHaveAttribute("aria-pressed", "true");
+  await expect(card.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_kept"], { rating: en["spot.rating_word_good"] }));
+  expect(await look(keep)).not.toBe(before[0]);
+  expect(await look(change)).toBe(before[1]);
 });

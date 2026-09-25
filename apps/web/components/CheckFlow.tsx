@@ -232,7 +232,7 @@ export function CheckFlow() {
     case "followups":
       return (
         <div className="stack">
-          <FocusHeading>{t("check.followups_title")}</FocusHeading>
+          <FocusHeading>{t(stage.draft.followups.length === 1 ? "check.followups_title_one" : "check.followups_title")}</FocusHeading>
           <p className="small muted">{t("check.followups_intro")}</p>
           {stage.draft.followups.map((f) => (
             <FollowupCard

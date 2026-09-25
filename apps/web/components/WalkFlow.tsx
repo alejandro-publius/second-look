@@ -370,7 +370,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       const asked = walkQuestions(answers);
       body = (
         <section className="stack" aria-labelledby="walk-followups-title" data-testid="walk-followups">
-          <h2 id="walk-followups-title">{t("check.followups_title")}</h2>
+          <h2 id="walk-followups-title">{t(asked.length === 1 ? "check.followups_title_one" : "check.followups_title")}</h2>
           <p className="small muted">{t("check.followups_intro")}</p>
           {asked.map(({ card }) => (
             <FollowupCard
@@ -410,7 +410,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               {t("label.checker_noticed")}: {q.note}
             </p>
             <div className="btn-row">
-              <button type="button" className="btn" aria-pressed={lookedAgain === "looked"} onClick={() => setLookedAgain("looked")}>
+              <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "looked"} onClick={() => setLookedAgain("looked")}>
                 {t("check.looked_again")}
               </button>
               <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "skipped"} onClick={() => setLookedAgain("skipped")}>
