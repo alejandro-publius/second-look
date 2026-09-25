@@ -13,6 +13,7 @@ import hashlib
 import json
 import re
 import shutil
+import zlib
 from pathlib import Path
 
 import pytest
@@ -218,9 +219,32 @@ def test_a_figure_is_the_committed_drawing_itself_with_its_caption(tmp_path: Pat
         br.figure(tmp_path, "docs/diagrams/missing.svg", "x", inputs)
 
 
-def test_code_breaks_only_after_a_slash() -> None:
+def test_code_breaks_only_after_a_slash_or_before_a_test_name() -> None:
     html = br.breakable_code("<p><code>core/fhir_emit.py</code> and a/b</p>")
     assert html == "<p><code>core/<wbr>fhir_emit.py</code> and a/b</p>"
+    test = br.breakable_code("<code>core/tests/test_gate.py::test_a_long_name</code>")
+    assert test == "<code>core/<wbr>tests/<wbr>test_gate.py::<wbr>test_a_long_name</code>"
+
+
+def fake_pdf(scale: str, pages: int = 2) -> bytes:
+    """Pages shaped as Chromium writes them: the page's transform, then the body's."""
+    body = f".23999999 0 0 -.23999999 0 842.88 cm\nq\n{scale} 0 0 {scale} 187.5 175 cm\n"
+    content = zlib.compress((body + "BT /F1 10 Tf (x) Tj ET\n").encode("ascii"))
+    return b"%PDF-1.4\n" + (b"<< /Type /Page >>\nstream\n" + content + b"\nendstream\n") * pages
+
+
+def test_a_report_chromium_shrank_to_fit_the_page_is_refused() -> None:
+    """A table of test names wider than the page made Chromium print every page at 87%, so the
+    body text fell from 9.4 to 8.2 pt with no error anywhere (critic round 09, while fixing L05)."""
+    assert br.page_scales(fake_pdf("3.125")) == pytest.approx([0.75, 0.75])
+    assert br.shrunk(fake_pdf("3.125"), 2) is None
+    assert "shrank the pages to 87%" in (br.shrunk(fake_pdf("2.7166803"), 2) or "")
+    assert "found on 2 of 3 pages" in (br.shrunk(fake_pdf("3.125"), 3) or "")
+
+
+def test_the_committed_pdf_prints_at_full_size() -> None:
+    pdf = ROOT / br.PDF
+    assert br.shrunk(pdf.read_bytes(), br.pdf_pages(pdf)) is None
 
 
 def test_a_folded_readme_table_is_printed_open() -> None:

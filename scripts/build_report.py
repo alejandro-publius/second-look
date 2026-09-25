@@ -32,6 +32,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -245,10 +246,12 @@ def figure(root: Path, rel: str, caption: str, inputs: set[str]) -> str:
 
 def breakable_code(fragment: str) -> str:
     """A line may break after a slash inside code, and nowhere else in a word: a file name wraps
-    as core/ fhir_emit.py, never as core/fhir_emit.p y (critic round 01, C19)."""
+    as core/ fhir_emit.py, never as core/fhir_emit.p y (critic round 01, C19). It may also break
+    after the :: between a test file and a test's name, or a table of tests is wider than the
+    page and Chromium shrinks every page to fit it (critic round 09, L05)."""
     return re.sub(
         r"<code>(.*?)</code>",
-        lambda m: "<code>" + m.group(1).replace("/", "/<wbr>") + "</code>",
+        lambda m: "<code>" + m.group(1).replace("/", "/<wbr>").replace("::", "::<wbr>") + "</code>",
         fragment,
         flags=re.S,
     )
@@ -301,6 +304,41 @@ def sources_sha256(root: Path = ROOT, assembled: Assembled | None = None) -> str
 def pdf_pages(path: Path) -> int:
     """Page objects in the PDF. Chromium writes each page as an uncompressed /Type /Page."""
     return len(re.findall(rb"/Type\s*/Page(?!s)", path.read_bytes()))
+
+
+STREAM_RE = re.compile(rb"stream\r?\n(.*?)\r?\nendstream", re.S)
+SCALE_CM_RE = re.compile(rb"(-?[\d.]+) 0 0 -?[\d.]+ -?[\d.]+ -?[\d.]+ cm")
+
+
+def page_scales(pdf: bytes) -> list[float]:
+    """Points per CSS pixel on each page, read from the first two transforms of each page's
+    content stream (the page's own, then the body's). Chromium prints 1 px as 0.75 pt; when
+    something on a page is wider than the page, it shrinks every page to fit, and the number
+    falls below 0.75, so all the text prints smaller (critic round 09: a table of tests)."""
+    scales = []
+    for raw in STREAM_RE.findall(pdf):
+        try:
+            text = zlib.decompress(raw)
+        except zlib.error:
+            continue
+        found = SCALE_CM_RE.findall(text)
+        if b" Tf" in text and len(found) >= 2:
+            scales.append(abs(float(found[0])) * float(found[1]))
+    return scales
+
+
+def shrunk(pdf: bytes, pages: int) -> str | None:
+    """Why the printed pages are not at full size, in plain words, or None when they are."""
+    scales = page_scales(pdf)
+    if len(scales) != pages:
+        return f"the page scale was found on {len(scales)} of {pages} pages"
+    smallest = min(scales)
+    if smallest < PT_PER_CSS_PX * 0.995:
+        return (
+            f"Chromium shrank the pages to {smallest / PT_PER_CSS_PX:.0%} to fit something wider "
+            "than the page, so every line prints smaller; let it wrap"
+        )
+    return None
 
 
 def pandoc_version() -> str:
@@ -420,6 +458,8 @@ def stamp_problems(root: Path = ROOT) -> list[str]:
         problems.append(f"the stamp says {stamp.get('pages')} pages and the PDF has {pages}")
     if stamp.get("pdf_sha256") != hashlib.sha256(pdf.read_bytes()).hexdigest():
         problems.append(f"{PDF} is not the file its stamp describes; run make report-pdf")
+    if why := shrunk(pdf.read_bytes(), pages):
+        problems.append(f"{PDF}: {why}")
     try:
         now = sources_sha256(root)
     except ReportError as exc:
@@ -461,6 +501,8 @@ def build(root: Path = ROOT) -> dict[str, object]:
             raise ReportError(
                 f"the report came out at {pages} pages, not {MIN_PAGES} to {MAX_PAGES}"
             )
+        if why := shrunk(out.read_bytes(), pages):
+            raise ReportError(why)
         (root / PDF).write_bytes(out.read_bytes())
     stamp: dict[str, object] = {
         "generated_by": "make report-pdf: scripts/build_report.py",
