@@ -42,6 +42,7 @@ def test_the_budget_in_the_code_is_the_briefs() -> None:
 def test_the_recorded_first_visit_is_under_the_budget() -> None:
     r = result()
     assert r["budget_bytes"] == budget_in_code()
+    assert r["budget_megabytes"] * 1_000_000 == r["budget_bytes"]
     assert 0 < r["bytes"] <= r["budget_bytes"]
     assert r["under_budget"] is True
     assert abs(r["megabytes"] - r["bytes"] / 1_000_000) <= 0.005
