@@ -332,7 +332,7 @@
     }
   },
   "cost": {
-    "calls": 5065,
+    "calls": 5161,
     "fake_calls": 48,
     "first_real_call_utc": "2026-09-24T03:04:49+00:00",
     "footage_cents_per_call": {
@@ -342,11 +342,12 @@
       "claude-opus-5-5": 0.96,
       "claude-sonnet-5": 0.43
     },
-    "last_real_call_utc": "2026-09-24T06:05:39+00:00",
+    "last_real_call_utc": "2026-09-25T23:06:54+00:00",
     "log": "results/cost_log.jsonl",
-    "real_calls": 5017,
-    "real_usd": 41.1059,
+    "real_calls": 5113,
+    "real_usd": 41.6096,
     "real_usd_by_purpose": {
+      "assist_answers": 0.5036,
       "benchmark": 3.1976,
       "footage": 34.1902,
       "model_sweep": 3.7158,

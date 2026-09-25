@@ -81,6 +81,8 @@ PAID_RUNS: tuple[PaidRun, ...] = (
     PaidRun("model_sweep", "20260924T054756Z", "direct", PRICES_WITH_OPUS_5_5, _AFTER),
     PaidRun("benchmark", "20260924T054939Z", "direct", PRICES_WITH_OPUS_5_5, _AFTER),
     PaidRun("footage", "20260924T060539Z", "direct", PRICES_WITH_OPUS_5_5, _AFTER),
+    # Part 2's eight items (UPDATE_31, evals/assist_flags.py --collect), through the Batch API.
+    PaidRun("assist_answers", "20260925T230654Z", "batch", PRICES_WITH_OPUS_5_5, _AFTER),
 )
 
 # The one real call in the cost log that belongs to no results file: a single smoke call on

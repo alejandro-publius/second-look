@@ -1,0 +1,124 @@
+{
+  "answers_file": "results/assist_answers_20260925T230654Z.json",
+  "checker_model": "claude-opus-5-5",
+  "items": [
+    {
+      "feature": "artificial_bank",
+      "flag": {
+        "confidence": 1.0,
+        "note": "The channel has sloped concrete walls on both sides and a concrete bed, running under an arched bridge. Only a thin trickle of water is visible.",
+        "points_to": "present"
+      },
+      "item_id": "a01",
+      "model_answers": [
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "reason": "kept by the gate"
+    },
+    {
+      "feature": "artificial_bank",
+      "flag": {
+        "confidence": 1.0,
+        "note": "The banks are natural. On the left is an eroded bank of earth and rock under grass, and on the right is thick vegetation and trees. No concrete or set stone is",
+        "points_to": "absent"
+      },
+      "item_id": "a02",
+      "model_answers": [
+        "no",
+        "no",
+        "no"
+      ],
+      "reason": "kept by the gate"
+    },
+    {
+      "feature": "dug_out_channel",
+      "flag": {
+        "confidence": 1.0,
+        "note": "The channel runs dead straight through the woods, with a uniform width and steep, even banks. That looks like a dug ditch, not a natural winding stream.",
+        "points_to": "present"
+      },
+      "item_id": "a03",
+      "model_answers": [
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "reason": "kept by the gate"
+    },
+    {
+      "feature": "dug_out_channel",
+      "flag": {
+        "confidence": 0.6667,
+        "note": "Forest stream winds in a curving bend with uneven natural banks and fallen wood in the channel. No straight cut or dug-out, engineered banks are visible.",
+        "points_to": "absent"
+      },
+      "item_id": "a04",
+      "model_answers": [
+        "no",
+        "cant_tell",
+        "no"
+      ],
+      "reason": "kept by the gate"
+    },
+    {
+      "feature": "invasive_plant",
+      "flag": null,
+      "item_id": "a05",
+      "model_answers": [
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "reason": "flag 1: feature invasive_plant not passed by model claude-opus-5-5"
+    },
+    {
+      "feature": "invasive_plant",
+      "flag": null,
+      "item_id": "a06",
+      "model_answers": [
+        "cant_tell",
+        "cant_tell",
+        "cant_tell"
+      ],
+      "reason": "the model's answer was cant_tell"
+    },
+    {
+      "feature": "pipe_running",
+      "flag": {
+        "confidence": 1.0,
+        "note": "A concrete outfall with a grated opening at its base empties onto a wet concrete apron that runs into the stream in the foreground.",
+        "points_to": "present"
+      },
+      "item_id": "a07",
+      "model_answers": [
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "reason": "kept by the gate"
+    },
+    {
+      "feature": "pipe_running",
+      "flag": {
+        "confidence": 1.0,
+        "note": "A small stream bends through woodland past mossy banks, rocks and a small riffle. I don't see any pipe, culvert or drain outlet anywhere.",
+        "points_to": "absent"
+      },
+      "item_id": "a08",
+      "model_answers": [
+        "no",
+        "no",
+        "no"
+      ],
+      "reason": "kept by the gate"
+    }
+  ],
+  "n_flags": 6,
+  "pass_table_generated_at_utc": "2026-09-24T05:47:56+00:00",
+  "real": true,
+  "rule": "one flag per item when the checker gave the same yes or no in 2 of 3 runs and the gate kept it, which it does only for a feature the checker passed",
+  "script": "evals/assist_flags.py",
+  "synthetic": false
+}
