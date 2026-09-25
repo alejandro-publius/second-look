@@ -155,8 +155,8 @@ the majority answers, not each reply).
 
 Every paid call is one line in `results/cost_log.jsonl`, with its tokens and its price; the fake
 runs spend nothing. All paid calls
-together: <!--v:results/model_card.json#/cost/real_calls-->5017<!--/v--> calls
-for <!--v:results/model_card.json#/cost/real_usd-->41.1<!--/v--> USD, of which
+together: <!--v:results/model_card.json#/cost/real_calls-->5113<!--/v--> calls
+for <!--v:results/model_card.json#/cost/real_usd-->41.6<!--/v--> USD, of which
 footage <!--v:results/model_card.json#/cost/real_usd_by_purpose/footage-->34.2<!--/v--> USD, the
 sweeps <!--v:results/model_card.json#/cost/real_usd_by_purpose/model_sweep-->3.7<!--/v--> USD and the
 benchmarks <!--v:results/model_card.json#/cost/real_usd_by_purpose/benchmark-->3.2<!--/v--> USD. That includes the run

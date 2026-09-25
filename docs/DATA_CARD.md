@@ -18,7 +18,7 @@ what the manifests say (`evals/tests/test_data_card.py::test_the_committed_file_
 | Footage videos | the videos those frames and the walks come from | <!--v:results/data_card.json#/videos/rows-->5<!--/v--> | `videos/manifest.csv` |
 | Film footage | the clips and photos in the demo film | <!--v:results/data_card.json#/film_footage/rows-->13<!--/v--> | `docs/video/footage.csv` |
 
-In all, `photos/manifest.csv` has <!--v:results/data_card.json#/photos/rows-->84<!--/v--> rows, one per
+In all, `photos/manifest.csv` has <!--v:results/data_card.json#/photos/rows-->92<!--/v--> rows, one per
 image, and `make manifest-check` fails when an image under `photos/` has no row or its hash does
 not match. The smaller AVIF and WebP copies of the two warm-up photos have their own rows in
 `photos/derived/manifest.csv`. No video file is committed: the videos stay in a cache outside the
@@ -27,8 +27,8 @@ repository, and only the stills cut from them are committed, in `photos/benchmar
 ## Sources
 
 **Photos.** By the host of each row's source page: Wikimedia
-Commons <!--v:results/data_card.json#/photos/by_source/Wikimedia Commons-->35<!--/v-->,
-iNaturalist <!--v:results/data_card.json#/photos/by_source/iNaturalist-->9<!--/v-->, and frames from YouTube
+Commons <!--v:results/data_card.json#/photos/by_source/Wikimedia Commons-->41<!--/v-->,
+iNaturalist <!--v:results/data_card.json#/photos/by_source/iNaturalist-->11<!--/v-->, and frames from YouTube
 videos <!--v:results/data_card.json#/photos/by_source/YouTube-->40<!--/v-->. The test photos come from Wikimedia
 Commons (<!--v:results/data_card.json#/photos/test/by_source/Wikimedia Commons-->12<!--/v-->) and
 iNaturalist (<!--v:results/data_card.json#/photos/test/by_source/iNaturalist-->4<!--/v-->).
@@ -75,11 +75,11 @@ Every author of a photo a visitor sees is credited on `/credits`, and every auth
 |---|---|
 | CC BY 2.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-2.0-->1<!--/v--> |
 | CC BY 3.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-3.0-->47<!--/v--> |
-| CC BY 4.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-4.0-->7<!--/v--> |
-| CC BY-SA 2.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-SA-2.0-->15<!--/v--> |
+| CC BY 4.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-4.0-->8<!--/v--> |
+| CC BY-SA 2.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-SA-2.0-->19<!--/v--> |
 | CC BY-SA 3.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-SA-3.0-->5<!--/v--> |
-| CC BY-SA 4.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-SA-4.0-->6<!--/v--> |
-| CC0 1.0 | <!--v:results/data_card.json#/photos/by_licence/CC0-1.0-->2<!--/v--> |
+| CC BY-SA 4.0 | <!--v:results/data_card.json#/photos/by_licence/CC-BY-SA-4.0-->7<!--/v--> |
+| CC0 1.0 | <!--v:results/data_card.json#/photos/by_licence/CC0-1.0-->4<!--/v--> |
 | Public domain | <!--v:results/data_card.json#/photos/by_licence/public-domain-->1<!--/v--> |
 
 - All <!--v:results/data_card.json#/photos/benchmark/rows-->46<!--/v--> footage frames are CC BY 3.0: the
@@ -117,8 +117,8 @@ labeller. What the record in git shows about how the labels were set:
   `scripts/merge_labels.py` compares the two files and reports Cohen's kappa per feature.
 
 **The evidence.** Every row carries `label_evidence`
-(<!--v:results/data_card.json#/photos/with_label_evidence-->84<!--/v-->
-of <!--v:results/data_card.json#/photos/rows-->84<!--/v-->): the source page's own words that back the label.
+(<!--v:results/data_card.json#/photos/with_label_evidence-->92<!--/v-->
+of <!--v:results/data_card.json#/photos/rows-->92<!--/v-->): the source page's own words that back the label.
 For example, the first built bank photo's Commons page says "This part of the creek is encased in
 a concrete channel." A frame's evidence is the video's description, and says when that
 description supports no label.

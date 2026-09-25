@@ -403,7 +403,7 @@ FHIR R4 4.0.1 under OneAquaHealth's guide, pinned at hl7-eu/oah b907cf0 and buil
 <details>
 <summary>Every route, what it is for</summary>
 
-The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->27<!--/v--> routes, under `/api` on the site's own origin. The Python API in [`apps/api/`](apps/api/) is the reference, with <!--v:results/api_inventory.json#/python/count-->28<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in [`docs/API.md`](docs/API.md); a test fails when a route is added without a row there.
+The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_inventory.json#/worker/count-->34<!--/v--> routes, under `/api` on the site's own origin. The Python API in [`apps/api/`](apps/api/) is the reference, with <!--v:results/api_inventory.json#/python/count-->28<!--/v--> routes. Every route, what it does, what it stores and its limit or lock is in [`docs/API.md`](docs/API.md); a test fails when a route is added without a row there.
 
 | Route | What it is for |
 |---|---|
