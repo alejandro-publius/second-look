@@ -195,6 +195,9 @@ class World:
 
     def deploy_web(self, args: list[str], cwd: Path | None, env: Mapping[str, str] | None) -> Done:
         self.live["pages"] = self.commit7()
+        # What the build would ship: the tree as committed, with no other job's file in it.
+        self.shipped = git(self.root, "status", "--porcelain", "--untracked-files=all")
+        self.shipped_ots = (self.root / "results/ots.json").read_text()
         (self.root / "apps/web/public/_headers").write_text("rewritten by the build\n")
         dr.record(
             "web",
@@ -513,6 +516,27 @@ def test_nobody_kept_writes_the_sentence_and_no_table(tmp_path: Path) -> None:
     assert json.loads(git(world.root, "show", "origin/main:results/usability_20260928.json"))[
         "primary"
     ]["status"].startswith("not computed")
+
+
+def test_the_deploy_ships_the_commit_and_the_other_jobs_files_come_back(world: World) -> None:
+    assert world.lock().run() == 0
+    assert world.shipped_ots == '{"proofs": 1}\n', "the site was built with an uncommitted file"
+    assert "proofs/audit-head-2026-09-28.ots" not in world.shipped
+    mac_files_untouched(world)
+
+
+def test_a_newer_copy_on_origin_wins_and_the_jobs_copy_is_kept_aside(world: World) -> None:
+    other = world.tmp / "other"
+    git(world.tmp, "clone", "-q", "-b", "depth", str(world.origin), str(other))
+    (other / "results/ots.json").write_text('{"proofs": 3}\n')
+    git(other, "commit", "-q", "-am", "the anchor job's results, committed elsewhere")
+    git(other, "push", "-q", "origin", "depth", "depth:main")
+    assert world.lock().run() == 0
+    assert (world.root / "results/ots.json").read_text() == '{"proofs": 3}\n'
+    assert (world.root / "proofs/audit-head-2026-09-28.ots").read_text() == "new proof\n"
+    kept = list(world.backups.glob("set-aside-*/results/ots.json"))
+    assert kept and kept[0].read_text() == '{"proofs": 2}\n'
+    assert "origin/depth changed these" in (world.backups / "lock.log").read_text()
 
 
 def test_it_runs_once_only(world: World) -> None:

@@ -7,7 +7,9 @@ until it has succeeded once. In order:
  1. refuse before the lock, by the real clock (tests hand it another clock; nothing else can);
  2. refuse if the lock analysis already ran (a real results/usability_<date>.json exists);
  3. fetch, and fast-forward this checkout to origin/depth. It refuses if the checkout holds local
-    changes other than the files the other Mac jobs write, and the log names them;
+    changes other than the files the other Mac jobs write, and the log names them. Those files
+    are set aside for the run, so make check, the commit and the deploy see exactly what is
+    committed, and put back at the end (a copy origin/depth changed meanwhile is kept aside);
  4. check before touching anything: main can move to depth by fast-forward, wrangler and gh are
     logged in, the QA key is there, and what is live on production is a good row in the deploy
     record with its files kept, so there is something to go back to;
@@ -267,9 +269,9 @@ def sha256_file(path: Path) -> str:
 
 @dataclass
 class Start:
-    head: str
-    kept: dict[str, bytes | None]
-    untracked: set[str]
+    head: str  # where the checkout is once it is current, which a failure returns to
+    before: str  # where it was when the job began, before the fast-forward
+    kept: dict[str, bytes | None]  # the other Mac jobs' files, set aside for the run
 
 
 class Lock:
@@ -338,31 +340,42 @@ class Lock:
         status = self.must(
             step, self.git("status", "--porcelain=v1", "-z", "--untracked-files=all"), "git status"
         )
-        changed = porcelain(status.out)
+        changed = sorted(set(porcelain(status.out)))
         theirs = mac_jobs.mac_job_files()
         other = [p for p in changed if not allowed(p, theirs)]
         if other:
             raise Failed(step, "local changes other than the Mac jobs' files: " + ", ".join(other))
+        # The other jobs' files are set aside for the whole run, so make check, the commit and
+        # the deploy all see exactly what is committed; put_back returns them at the end.
+        kept: dict[str, bytes | None] = {}
+        for rel in changed:
+            path = self.root / rel
+            kept[rel] = path.read_bytes() if path.is_file() else None
+        before = self.head()
+        self.start = Start(before, before, kept)
+        for rel in changed:
+            if self.git("cat-file", "-e", f"HEAD:{rel}").ok:
+                self.must(
+                    step,
+                    self.git("restore", "--source=HEAD", "--staged", "--worktree", "--", rel),
+                    "git restore",
+                )
+            else:
+                (self.root / rel).unlink(missing_ok=True)
         if changed:
-            self.log("left as they are, written by the other Mac jobs: " + ", ".join(changed))
+            self.log(
+                "set aside until the end, written by the other Mac jobs: " + ", ".join(changed)
+            )
         fetched = self.out.run(["git", "fetch", "origin", "depth", "main"], cwd=self.root)
         self.must(step, fetched, "git fetch origin")
-        before = self.head()
         self.must(step, self.git("merge", "--ff-only", "origin/depth"), "fast-forward")
         after = self.head()
+        self.start = Start(after, before, kept)
         self.log(
             f"fast-forwarded from {before[:7]} to {after[:7]}"
             if before != after
             else f"already at origin/depth, {after[:7]}"
         )
-        untracked_now = self.must(
-            step, self.git("ls-files", "--others", "--exclude-standard"), "git ls-files"
-        )
-        kept: dict[str, bytes | None] = {}
-        for rel in changed:
-            path = self.root / rel
-            kept[rel] = path.read_bytes() if path.is_file() else None
-        self.start = Start(after, kept, set(untracked_now.out.splitlines()))
 
     def preflight(self) -> None:
         step = "preflight"
@@ -648,18 +661,34 @@ class Lock:
 
     def undo_repo(self, start: Start) -> str:
         self.git("reset", "-q", "--hard", start.head)
-        now = self.git("ls-files", "--others", "--exclude-standard").out.splitlines()
-        for rel in now:
-            if rel not in start.untracked and rel not in start.kept:
-                (self.root / rel).unlink(missing_ok=True)
+        # The run began with no untracked file but the other jobs', which are set aside.
+        for rel in self.git("ls-files", "--others", "--exclude-standard").out.splitlines():
+            (self.root / rel).unlink(missing_ok=True)
+        self.put_back(start)
+        return f"The checkout is back at {start.head[:7]}, with the other jobs' files kept."
+
+    def put_back(self, start: Start) -> None:
+        """Return the other jobs' files, unless origin/depth brought a newer copy of one."""
+        dropped = []
+        aside = self.backups / f"set-aside-{self.started_at.strftime('%Y%m%dT%H%M%SZ')}"
         for rel, data in start.kept.items():
+            if not self.git("diff", "--quiet", start.before, "HEAD", "--", rel).ok:
+                dropped.append(rel)
+                if data is not None:  # nothing is lost: the job's copy is kept outside the repo
+                    (aside / rel).parent.mkdir(parents=True, exist_ok=True)
+                    (aside / rel).write_bytes(data)
+                continue
             path = self.root / rel
             if data is None:
                 path.unlink(missing_ok=True)
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(data)
-        return f"The checkout is back at {start.head[:7]}, with the other jobs' files kept."
+        if dropped:
+            self.log(
+                "origin/depth changed these, so its copy stands; the other job's copy is in "
+                f"{aside}: " + ", ".join(dropped)
+            )
 
     # -- is this Mac ready? -------------------------------------------------
 
@@ -715,6 +744,8 @@ class Lock:
             done_before = self.already_done()
             if done_before:
                 self.log(f"nothing to do after the fast-forward: {done_before}")
+                assert self.start is not None
+                self.put_back(self.start)
                 return 0
             self.preflight()
             self.backup()
@@ -738,6 +769,8 @@ class Lock:
                 only=[HOSTING],
             )
             self.push(dry=False)
+            assert self.start is not None
+            self.put_back(self.start)
         except Failed as failure:
             self.undo(failure)
             return 1

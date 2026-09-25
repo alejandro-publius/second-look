@@ -26,8 +26,11 @@ Where else they write: the uptime job writes an outage to `~/second-look-backups
 the sandbox, uptime and hl7 jobs keep what they saw last in `~/second-look-backups/state/`; the
 lock job keeps a copy of the exported study tables in `~/second-look-backups/lock-<time>/`. In the
 checkout, only the anchor job (`proofs/`, `results/ots.json`) and the re-push
-(`fhir/sandbox_ledger.jsonl`) write files, and they commit nothing. The lock job leaves exactly
-those alone and refuses any other local change.
+(`fhir/sandbox_ledger.jsonl`) write files, and they commit nothing. The lock job refuses any other
+local change; it sets exactly those files aside while it checks, commits and deploys, so the site
+is built from what is committed, and puts them back at the end. If `origin/depth` brought a newer
+copy of one meanwhile, that copy stands and the job's own goes to
+`~/second-look-backups/set-aside-<time>/`, so nothing is lost.
 
 ## Install, once, from the checkout the jobs run from
 
