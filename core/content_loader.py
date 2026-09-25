@@ -43,8 +43,9 @@ IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
 # Smaller copies of a manifest photo (Update 22 section 1 answer 2). They sit in photos/derived/
 # with a manifest of their own. Each row names its source row and the source's sha256, so a copy
 # is traced to a photo that already passed every rule. scripts/derive_photos.py writes them and
-# scripts/check_manifest.py checks them. Only warm-up photos get copies: the test photos are
-# study material, frozen since prereg-v1.
+# scripts/check_manifest.py checks them. Only warm-up photos get these copies, which pages show
+# online: the test photos are study material, frozen since prereg-v1. The offline copies below
+# are the one exception, and a page never shows them while it has a network.
 DERIVED_DIR = "derived"
 DERIVED_COLUMNS = [
     "file",
@@ -59,6 +60,15 @@ DERIVED_COLUMNS = [
 ]
 DERIVED_ROLES = {"warmup"}
 DERIVED_MAX_BYTES = 250_000
+
+# Phone-size copies for the test offline (UPDATE_30 section 1 item 1). One small AVIF of every
+# photo the two-minute test shows, in photos/offline/ with a manifest of the same columns. They are
+# never shown online: the test still shows the JPEGs, and the service worker keeps only these, so
+# a first visit downloads a few megabytes instead of every JPEG, and hands a copy to the page only
+# when the network is gone.
+OFFLINE_DIR = "offline"
+OFFLINE_ROLES = {"warmup", "lesson", "practice", "test"}
+OFFLINE_MAX_BYTES = 90_000
 
 
 class ContentError(Exception):
@@ -117,13 +127,23 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def derived_rows(root: Path) -> list[dict[str, str]]:
-    """The rows of photos/derived/manifest.csv, or none when there is no such file."""
-    manifest = root / "photos" / DERIVED_DIR / "manifest.csv"
+def copy_rows(root: Path, folder: str) -> list[dict[str, str]]:
+    """The rows of photos/<folder>/manifest.csv, or none when there is no such file."""
+    manifest = root / "photos" / folder / "manifest.csv"
     if not manifest.exists():
         return []
     with manifest.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
+
+
+def derived_rows(root: Path) -> list[dict[str, str]]:
+    """The rows of photos/derived/manifest.csv, or none when there is no such file."""
+    return copy_rows(root, DERIVED_DIR)
+
+
+def offline_rows(root: Path) -> list[dict[str, str]]:
+    """The rows of photos/offline/manifest.csv, or none when there is no such file."""
+    return copy_rows(root, OFFLINE_DIR)
 
 
 def _flag_false(value: str) -> bool:
@@ -173,7 +193,7 @@ def _load_manifest(root: Path, problems: list[str]) -> dict[str, Photo]:
     listed = {str((root / "photos" / p.file).resolve()) for p in photos.values()}
     # A smaller copy counts as listed only through a row that names a photo we have, at the
     # sha256 we have. scripts/check_manifest.py checks the rest of what a copy must be.
-    for row in derived_rows(root):
+    for row in derived_rows(root) + offline_rows(root):
         source = photos.get(row.get("source_id", ""))
         if source is not None and source.sha256 == row.get("source_sha256"):
             listed.add(str((root / "photos" / row.get("file", "")).resolve()))

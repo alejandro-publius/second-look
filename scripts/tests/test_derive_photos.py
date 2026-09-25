@@ -291,3 +291,108 @@ def test_the_committed_copies_are_under_the_cap_and_only_of_the_two_warmup_photo
     assert {(r["format"], int(r["width"])) for r in rows} == {
         (fmt, w) for fmt, widths in derive_photos.WIDTHS.items() for w in widths
     }
+
+
+# UPDATE_30 section 1 item 1: one phone-size AVIF of every photo of the test, in photos/offline/,
+# for the service worker to keep in place of the full-size photos. The same rules as the copies
+# above, with the roles of the test and a cap of their own.
+OFFLINE_WIDTHS: dict[str, tuple[int, ...]] = {"avif": (160,)}
+
+
+def make_offline_copies(root: Path, role: str = "test") -> list[derive_photos.Copy]:
+    source = root / "photos" / "warmup" / f"{SOURCE_ID}.jpg"
+    sha = check_manifest.sha256_of(source)
+    write_manifest(root, [row(SOURCE_ID, f"warmup/{SOURCE_ID}.jpg", sha, role)])
+    copies = derive_photos.derive(
+        root, ids=(SOURCE_ID,), widths=OFFLINE_WIDTHS, spec=derive_photos.OFFLINE
+    )
+    derive_photos.write(root, copies, content_loader.OFFLINE_DIR)
+    return copies
+
+
+def save_offline_rows(root: Path, rows: list[dict[str, str]]) -> None:
+    path = root / "photos" / "offline" / "manifest.csv"
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=content_loader.DERIVED_COLUMNS, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def test_an_offline_copy_of_a_test_photo_passes_the_manifest_check(repo: Path) -> None:
+    copies = make_offline_copies(repo)
+    assert [c.file for c in copies] == ["offline/ph-warmup-01-160.avif"]
+    assert content_loader.offline_rows(repo)[0]["source_id"] == SOURCE_ID
+    assert check_manifest.main(repo) == 0
+    loaded: list[str] = []
+    content_loader._load_manifest(repo, loaded)
+    assert loaded == []
+
+
+def test_a_benchmark_photo_gets_no_offline_copy(
+    repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    make_offline_copies(repo)
+    source = repo / "photos" / "warmup" / f"{SOURCE_ID}.jpg"
+    sha = check_manifest.sha256_of(source)
+    write_manifest(repo, [row(SOURCE_ID, f"warmup/{SOURCE_ID}.jpg", sha, "benchmark")])
+    with pytest.raises(derive_photos.DeriveError, match="offline copies are for the photos of"):
+        derive_photos.derive(
+            repo, ids=(SOURCE_ID,), widths=OFFLINE_WIDTHS, spec=derive_photos.OFFLINE
+        )
+    out = problems(repo, capsys)
+    assert "copy of a benchmark photo: photos/offline/ph-warmup-01-160.avif" in out
+
+
+def test_an_offline_copy_over_its_cap_fails_the_manifest_check(
+    repo: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    make_offline_copies(repo)
+    monkeypatch.setattr(content_loader, "OFFLINE_MAX_BYTES", 100)
+    out = problems(repo, capsys)
+    assert "copy over 100 bytes: photos/offline/ph-warmup-01-160.avif" in out
+
+
+def test_an_offline_copy_without_its_row_fails_both_checks(
+    repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    make_offline_copies(repo)
+    save_offline_rows(repo, [])
+    assert "no offline manifest row: photos/offline/ph-warmup-01-160.avif" in problems(repo, capsys)
+    found: list[str] = []
+    content_loader._load_manifest(repo, found)
+    assert found == ["photo without manifest row: photos/offline/ph-warmup-01-160.avif"]
+
+
+def test_an_offline_copy_is_avif_only(repo: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    [avif] = make_offline_copies(repo)
+    with Image.open(repo / "photos" / "warmup" / f"{SOURCE_ID}.jpg") as source:
+        data = derive_photos.encode(derive_photos.scaled(source, 160), "webp", 75)
+    (repo / "photos" / "offline" / "ph-warmup-01-160.webp").write_bytes(data)
+    extra = {
+        **avif.row(),
+        "file": "offline/ph-warmup-01-160.webp",
+        "format": "webp",
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "bytes": str(len(data)),
+    }
+    save_offline_rows(repo, [*content_loader.offline_rows(repo), extra])
+    out = problems(repo, capsys)
+    assert "copy not named <source id>-<width>.<format>: photos/offline/ph-warmup-01-160.webp" in (
+        out
+    )
+
+
+def test_every_photo_of_the_test_has_its_offline_copy_under_the_cap() -> None:
+    """The committed copies: one AVIF of each warm-up, lesson, practice and test photo, made from
+    the photo as it is now. build-content.mjs also fails the web build on a missing one."""
+    root = derive_photos.ROOT
+    rows = content_loader.offline_rows(root)
+    by_id = derive_photos.manifest_rows(root)
+    wanted = {i for i, r in by_id.items() if r["role"] in content_loader.OFFLINE_ROLES}
+    assert sorted(r["source_id"] for r in rows) == sorted(wanted)
+    for r in rows:
+        assert r["source_sha256"] == by_id[r["source_id"]]["sha256"], r["file"]
+        assert r["format"] == "avif", r["file"]
+        assert int(r["width"]) == derive_photos.OFFLINE_WIDTH, r["file"]
+        assert int(r["bytes"]) <= content_loader.OFFLINE_MAX_BYTES, r["file"]
+        assert (root / "photos" / r["file"]).exists(), r["file"]
