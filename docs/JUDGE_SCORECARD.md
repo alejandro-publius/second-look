@@ -34,7 +34,7 @@ Thin: the AI is held to the same test, and no model passed plants that do not be
 
 ## Technical implementation (20%)
 
-Our mark: strong. The paid model run is done and every AI number is graded again from its raw replies by `make reproduce`.
+Our mark: strong. The paid model run is done, and `make reproduce` grades its numbers again from the raw replies wherever the run kept them: the pass table, the sweeps and the footage run. The benchmark run kept counts and no replies, so its right-answer counts, its share of can't tell answers and its count of malformed replies are checked only as recorded, and the command prints a note saying so; so are the footage runs' answers on the adversarial frames.
 
 
 | What to look at | Where |
@@ -42,7 +42,7 @@ Our mark: strong. The paid model run is done and every AI number is graded again
 | FHIR R4 against their guide at b907cf0, validated in CI, zero errors in the latest run | `results/fhir_validation.json`; `make fhir-validate` |
 | Their sandbox mirrored with conditional creates, a tag on everything, a ledger of ids | `fhir/sandbox_ledger.jsonl`; `docs/notes/sandbox_library.md`, the read-back |
 | A read-only MCP server over our own records | `apps/mcp/server.py`; `examples/mcp/transcript.md` |
-| One command, no key, no network | `make judge-check` |
+| One command, no key, no network; its summary prints each note on a number it could check only as recorded | `make judge-check` |
 | Frames from open creek footage, screened by Vision and by eye, every drop with its reason | `videos/frames.json`; `videos/review.json`; `evals/footage.py` |
 | Python and the TypeScript Worker proved equal by golden vectors, walks included | `evals/golden_vectors.py`; `worker/test/golden.test.ts` |
 

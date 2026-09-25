@@ -82,7 +82,7 @@ Each number carries a claim that points into `results/`, and `scripts/verify_cla
 Proof: `make verify-claims`.
 
 **18. Can a judge check it without a key or the network?**
-Yes: `make judge-check` runs the tests, grades the AI numbers in `results/` again from the committed raw model replies (`make reproduce`), reads the last HL7 validator run against the pinned guide, the web build and design gate, the audit chain and a secret scan, with no key.
+Yes, with one limit it names. `make judge-check` runs the tests, grades the AI numbers in `results/` again from the committed raw model replies wherever a run kept them (`make reproduce`), reads the last HL7 validator run against the pinned guide, the web build and design gate, the audit chain and a secret scan, with no key. The benchmark runs kept counts, not replies, so their right-answer counts, their share of can't tell answers and their count of malformed replies are checked only as recorded: `make reproduce` prints a note under each such file, and judge-check prints those notes in its summary. The footage runs' answers on the adversarial frames are as recorded too, and three old synthetic files are not graded again.
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**
