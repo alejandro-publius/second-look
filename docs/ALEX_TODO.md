@@ -45,16 +45,20 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    the display is off". Keep the lid open. The data lock (Sun Sep 27, 18:10 PDT), the uptime check
    every 10 minutes and the daily jobs run only while it is awake.
 
-7. **Mon Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
-   read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
+7. **Mon Sep 28: the dry-run submission.** Fill every Devpost field except the video from
+   `docs/devpost.md`, attach `docs/REPORT.pdf`, save the draft, and read it on your phone as a
+   judge would. Then `make go-public GO=dry`, which changes nothing. The times and what to check
+   after each step are in `docs/SUBMISSION_DAY.md`. Judge mode opens that day; check `/demo` on
+   your phone.
 
 8. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
    account, with the licence line from `docs/devpost.md` in its description (the video is
    CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
-9. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
-   `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
-   makes the repository public.
+9. **Wed Sep 30, morning: go public.** Follow `docs/SUBMISSION_DAY.md` in order: on `main`,
+   `make go-public GO=dry`, then `make go-public GO=yes`. It scans the whole history for secrets,
+   removes the working notes, runs the tests and `make submit-check`, checks the README's images
+   and links, and only then makes the repository public, checks it logged out, and tags v1.0.
 
 10. **Wed Sep 30, by 18:00: submit.**
 
