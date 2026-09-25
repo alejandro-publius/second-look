@@ -1,18 +1,18 @@
 {
-  "commit": "ffb1e98",
-  "ran_at_utc": "2026-09-25T03:15:46Z",
+  "commit": "9aee034",
+  "ran_at_utc": "2026-09-25T04:37:22Z",
   "steps": [
     {
       "name": "tests",
       "ok": true,
-      "text": "python: 2044 passed, 1 skipped, 9 xfailed in 162.91s (0:02:42); worker: pass 15",
-      "seconds": 165
+      "text": "python: 2046 passed, 1 skipped, 9 xfailed in 165.13s (0:02:45); worker: pass 15",
+      "seconds": 168
     },
     {
       "name": "reproduce",
       "ok": true,
       "text": "reproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches",
-      "seconds": 21
+      "seconds": 22
     },
     {
       "name": "fhir",
@@ -23,7 +23,7 @@
     {
       "name": "web",
       "ok": true,
-      "text": "next build ok; design-check: clean. 87 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s).",
+      "text": "next build ok; design-check: clean. 88 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).",
       "seconds": 11
     },
     {
@@ -39,6 +39,6 @@
       "seconds": 8
     }
   ],
-  "seconds": 205,
+  "seconds": 210,
   "last": "judge-check: 6 of 6 steps passed, offline, with no key"
 }
