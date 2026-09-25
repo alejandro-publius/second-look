@@ -572,6 +572,8 @@
   "walk.not_tested": "No score in a demo record",
   "walk.score_note": "A volunteer who kept a score from the test carries it with every answer, as {link} shows.",
   "walk.score_link": "the example record",
+  "walk.start_again": "Start again",
+  "city.walk_back": "Back to your record",
   "city.walk_title": "Demo creek: {name}",
   "city.walk_notice": "A demo creek, made from the video walks on this phone only. It is not stored and not counted.",
   "city.walk_visits": "Checks from this phone: {n}",

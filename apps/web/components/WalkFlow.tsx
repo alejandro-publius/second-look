@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { AnswerLine } from "./AnswerLine";
 import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
@@ -12,7 +12,7 @@ import { answerRows } from "@/lib/answers";
 import type { AnswerValue } from "@/lib/api";
 import { content, featureById, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
 import { t } from "@/lib/t";
-import { buildRecord, saveWalkVisit, type WalkAnswers } from "@/lib/walks";
+import { buildRecord, clearWalkVisits, lastWalkVisitJson, saveWalkVisit, type WalkAnswers, type WalkVisitSaved } from "@/lib/walks";
 
 type Stage =
   | { name: "watch" }
@@ -77,9 +77,36 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   const [lookedAgain, setLookedAgain] = useState<string | null>(null);
   const items = useMemo(() => visibleItems(answers), [answers]);
 
-  function finish() {
+  // A walk this tab already finished opens on its record, rebuilt from the saved answers, so the
+  // browser's Back from the city view no longer loses it (CRITIC_10 S01). Session storage exists
+  // only in the browser, so the static page shows the clip and the record follows. `seen` is the
+  // saved walk this page has opened or set aside already, so each is opened once.
+  const saved = useSyncExternalStore(
+    () => () => undefined,
+    () => lastWalkVisitJson(walk.id),
+    () => null,
+  );
+  const [seen, setSeen] = useState<string | null>(null);
+  if (saved !== null && saved !== seen && stage.name === "watch") {
+    const visit = JSON.parse(saved) as WalkVisitSaved;
+    setSeen(saved);
+    setAnswers(visit.answers as Record<string, AnswerValue>);
+    setStage({ name: "record", answeredAt: visit.answered_at });
+  }
+
+  function startAgain() {
+    clearWalkVisits(walk.id);
+    setSeen(saved);
+    setAnswers({});
+    setLookedAgain(null);
+    setStage({ name: "watch" });
+  }
+
+  // The answers to save come in as an argument: after the last question, `answers` still holds the
+  // state from before it, so the saved walk lacked its last answer (CRITIC_10 S01).
+  function finish(final: Record<string, AnswerValue>) {
     const answeredAt = new Date().toISOString();
-    saveWalkVisit({ walk_id: walk.id, answers: answers as WalkAnswers, answered_at: answeredAt });
+    saveWalkVisit({ walk_id: walk.id, answers: final as WalkAnswers, answered_at: answeredAt });
     setStage({ name: "record", answeredAt });
   }
 
@@ -93,7 +120,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     const pos = nextItems.findIndex((i) => i.id === item.id);
     if (pos + 1 < nextItems.length) setStage({ name: "items", index: pos + 1 });
     else if (walk.question) setStage({ name: "question" });
-    else finish();
+    else finish(next);
   }
 
   // The clip is mounted once, above whatever the stage shows, so it keeps playing while the person
@@ -153,7 +180,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               </button>
             </div>
           </section>
-          <button type="button" className="btn btn-block" onClick={finish}>
+          <button type="button" className="btn btn-block" onClick={() => finish(answers)}>
             {t("check.finish")}
           </button>
         </>
@@ -196,6 +223,9 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               {t("walk.city_link")}
             </Link>
           </p>
+          <button type="button" className="btn btn-secondary btn-block" onClick={startAgain}>
+            {t("walk.start_again")}
+          </button>
           <p>
             <Link href="/walk">{t("walk.more")}</Link>
           </p>

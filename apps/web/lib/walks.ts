@@ -49,6 +49,25 @@ export function savedWalkVisits(): WalkVisitSaved[] {
   }
 }
 
+/**
+ * The last walk this tab finished for one clip, as a JSON string so React can compare it from one
+ * render to the next, or null when there is none. The walk page opens on its record, so the
+ * browser's Back from the city view no longer loses it (CRITIC_10 S01).
+ */
+export function lastWalkVisitJson(walkId: string): string | null {
+  const mine = savedWalkVisits().filter((v) => v.walk_id === walkId);
+  return mine.length ? JSON.stringify(mine[mine.length - 1]) : null;
+}
+
+/** Start again: forgets the walks this tab finished for one clip. The other clips keep theirs. */
+export function clearWalkVisits(walkId: string): void {
+  try {
+    sessionStorage.setItem(KEY, JSON.stringify(savedWalkVisits().filter((v) => v.walk_id !== walkId)));
+  } catch {
+    // Private windows can refuse storage. The screen still goes back to the start.
+  }
+}
+
 /** True when one of OneAquaHealth's measures answers this finding. A plant has none (CRITIC_06 H01). */
 export function hasMeasure(feature: string): boolean {
   return Object.prototype.hasOwnProperty.call(MEASURE_FOR_FEATURE, feature);

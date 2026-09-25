@@ -256,6 +256,8 @@ test("a feelings slider nobody moved stays out of the walk's record", async ({ p
   const feelings = formItems.find((it) => it.id === "feelings")!.text;
   for (const moved of [false, true]) {
     await page.goto(`${BASE}/walk/${walks[0].id}`);
+    // The second time, this tab holds the first walk, so the page opens on its record (CRITIC_10 S01).
+    if (moved) await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
     await page.getByRole("button", { name: "Start the check" }).click();
     await answerWalk(page, async () => {
       const shown = page.locator("output[for^='slider-']");

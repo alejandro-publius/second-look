@@ -93,6 +93,12 @@ export function WalkCity({ walkId }: { walkId: string }) {
           ) : null}
         </>
       )}
+      {/* The walk page opens on the record this tab made (CRITIC_10 S01). */}
+      {demo && demo.visits.length > 0 ? (
+        <p>
+          <Link href={`/walk/${encodeURIComponent(walk.id)}`}>{t("city.walk_back")}</Link>
+        </p>
+      ) : null}
       <p>
         <Link href="/judges">{t("city.walk_more")}</Link>
       </p>
