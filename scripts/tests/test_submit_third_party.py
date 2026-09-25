@@ -11,25 +11,51 @@ from scripts import submit_check, third_party
 
 REPO = Path(__file__).parents[2]
 STATEMENT = (REPO / "docs" / "track_statement.md").read_text().strip()
-HEADERS = "".join(f"\n## {h}\n\ntext\n" for h in submit_check.HEADERS)
+HEADERS = "".join(f"\n## {h}\n\n```text\ntext\n```\n" for h in submit_check.HEADERS)
 MAP_LINE = "How this answers the organizers' five headers: " + "; ".join(
     f"*{h}* under a section" for h in submit_check.HEADERS
 )
 
 
-def fake_runner(visibility: str = "PRIVATE", claims_rc: int = 0) -> submit_check.Runner:
+def fake_runner(
+    visibility: str = "PRIVATE", claims_rc: int = 0, devpost_claims_rc: int = 0
+) -> submit_check.Runner:
     def run(argv: list[str]) -> tuple[int, str]:
         if argv[0] == "gh":
             return 0, json.dumps({"visibility": visibility})
         if argv[:2] == ["git", "ls-files"]:
             return 1, ""  # not a git repo: fall back to walking the folder
         if "verify_claims.py" in " ".join(argv):
-            return claims_rc, "verify-claims: 0 claim(s) checked" if claims_rc == 0 else "synthetic"
+            rc = devpost_claims_rc if "--file" in argv else claims_rc
+            return rc, "verify-claims: 0 claim(s) checked" if rc == 0 else "drifted"
         if argv[0] == "ffprobe":
             return 0, "225.5"
         return 0, ""
 
     return run
+
+
+def devpost_text(*, video: bool = True, headers: str = HEADERS) -> str:
+    """A Devpost text that passes every check: the statement first, every field filled, the
+    report attached and the team named. The five headers come as one block, so a test can
+    reorder them."""
+    fields = {
+        name: "Plain words for this field."
+        for name in submit_check.DEVPOST_FIELDS
+        if name not in submit_check.HEADERS
+    }
+    fields[submit_check.TRACK_FIELD] = STATEMENT
+    fields[submit_check.LIVE_FIELD] = "https://example.org/demo"
+    fields[submit_check.VIDEO_FIELD] = (
+        "https://youtu.be/fake" if video else "[VIDEO LINK: paste the upload URL here on the day]"
+    )
+    body = "".join(f"\n## {name}\n\n```text\n{text}\n```\n" for name, text in fields.items())
+    video_line = "\nVideo: https://youtu.be/fake\n" if video else ""
+    return (
+        f"{STATEMENT}\n\n# Devpost\n{video_line}{headers}{body}\n"
+        "## Technical report\n\nAttach `docs/REPORT.pdf` where Devpost takes a file.\n\n"
+        "## Team\n\nAlex Velazquez and Rachel Selbrede.\n"
+    )
 
 
 def build_root(tmp_path: Path, *, video: bool = True, headers: str = HEADERS) -> Path:
@@ -39,9 +65,8 @@ def build_root(tmp_path: Path, *, video: bool = True, headers: str = HEADERS) ->
     video_line = "\nVideo: https://youtu.be/fake\n" if video else ""
     # The five headers live in the Devpost text; the README names each one in its map line.
     (root / "README.md").write_text(f"{STATEMENT}\n\n# Second Look\n{video_line}\n{MAP_LINE}\n")
-    (root / "docs" / "devpost.md").write_text(
-        f"Demo: https://example.org/demo\n{video_line}{headers}"
-    )
+    (root / "docs" / "devpost.md").write_text(devpost_text(video=video, headers=headers))
+    (root / "docs" / "REPORT.pdf").write_bytes(b"%PDF-1.7\nnot a real report\n")
     (root / "LICENSE").write_text("MIT License\n\nCopyright 2026\n")
     return root
 
@@ -180,3 +205,175 @@ def test_an_mit_license_file_names_the_license(tmp_path: Path) -> None:
     assert third_party.npm_license({}, pkg) == "MIT (from its license file)"
     (pkg / "license").write_text("Apache License\nVersion 2.0\n")
     assert third_party.npm_license({}, pkg) == third_party.NOT_STATED
+
+
+# UPDATE_30 section 8 item 2: the Devpost text as the form will hold it.
+
+
+def devpost_failures(root: Path, **runner: int) -> dict[str, list[str]]:
+    checks = submit_check.run_checks(
+        root, runner=fake_runner("PUBLIC", **runner), fetch=lambda url: 200
+    )
+    return {c.name: c.reasons for c in checks if not c.passed}
+
+
+def edit_devpost(root: Path, old: str, new: str) -> None:
+    path = root / "docs" / "devpost.md"
+    text = path.read_text()
+    assert old in text, old
+    path.write_text(text.replace(old, new, 1))
+
+
+def test_the_devpost_text_starts_with_the_track_statement(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    assert devpost_failures(root) == {}
+    edit_devpost(root, STATEMENT + "\n\n# Devpost", "# Devpost\n\n" + STATEMENT)
+    assert list(devpost_failures(root)) == ["devpost_track_statement"]
+
+    root = build_root(tmp_path / "b")
+    # The paste field says less than the statement: line one of the description must be all of it.
+    edit_devpost(
+        root, f"```text\n{STATEMENT}\n```", "```text\nTrack 3, AI-Supported Assessment.\n```"
+    )
+    reasons = devpost_failures(root)["devpost_track_statement"]
+    assert reasons == [
+        f"the '{submit_check.TRACK_FIELD}' field is not the track statement word for word"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "says"),
+    [
+        ("## Built with\n", "## Built by\n", "has no 'Built with' field"),
+        ("```text\nPlain words for this field.\n```", "```text\n\n```", "is empty"),
+        ("Plain words for this field.", "TODO: write this.", "placeholder: TODO"),
+        ("Plain words for this field.", "See [SCREENSHOT HERE].", "placeholder: [SCREENSHOT HERE]"),
+        (
+            "Tagline (under 200 characters)\n\n```text\nPlain words for this field.",
+            "Tagline (under 200 characters)\n\n```text\n" + "x" * 200,
+            "has 200 characters, not under 200",
+        ),
+    ],
+)
+def test_every_devpost_field_is_filled(tmp_path: Path, old: str, new: str, says: str) -> None:
+    root = build_root(tmp_path)
+    edit_devpost(root, old, new)
+    reasons = devpost_failures(root)["devpost_fields"]
+    assert any(says in r for r in reasons), reasons
+
+
+def test_a_link_and_a_wrong_count_are_not_failures(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    edit_devpost(root, "## Built with\n", "## Built with\n\n99 characters\n")
+    edit_devpost(root, "Plain words for this field.", "Its [model card](https://example.org/m).")
+    checks = submit_check.run_checks(root, runner=fake_runner("PUBLIC"), fetch=lambda url: 200)
+    fields = next(c for c in checks if c.name == "devpost_fields")
+    assert fields.passed
+    assert fields.notes == ["'Built with' says 99 characters and has 27"]
+
+
+def test_the_video_slot_fails_only_the_video_check(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    # The link is pasted in the Video link field and the README, but the slot inside the
+    # demonstration field was left behind.
+    edit_devpost(
+        root,
+        "## A clear demonstration of what was built\n\n```text\ntext",
+        ("## A clear demonstration of what was built\n\n```text\nVideo: [VIDEO LINK]"),
+    )
+    failures = devpost_failures(root)
+    assert list(failures) == ["video_link"]
+    assert failures["video_link"] == ["docs/devpost.md still holds the video's slot [VIDEO LINK]"]
+
+    root = build_root(tmp_path / "b")
+    edit_devpost(root, "```text\nhttps://youtu.be/fake\n```", "```text\nsoon\n```")
+    assert devpost_failures(root)["video_link"] == [
+        "the 'Video link' field in docs/devpost.md holds no link"
+    ]
+
+
+def test_every_number_in_a_field_has_a_claim_or_is_a_fixed_fact(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    edit_devpost(root, "```text\ntext\n```", "```text\nThe gate dropped 29 of 64 flags.\n```")
+    reasons = devpost_failures(root)["devpost_numbers"]
+    assert [r.split(" says ")[1].split(" ")[0] for r in reasons] == ["29", "64"]
+
+    # A marker in the same section covers its number; a marker elsewhere does not.
+    root = build_root(tmp_path / "b")
+    edit_devpost(
+        root,
+        "## The problem\n\n```text\ntext",
+        (
+            "## The problem\n\n<!-- claim: results/x.json#/dropped = 29 -->\n"
+            "<!-- claim: results/x.json#/candidates = 64 -->\n\n```text\n"
+            "The gate dropped 29 of 64 flags, on FHIR R4 4.0.1 with SUSHI 3.20.1 and hl7-eu at "
+            "b907cf0, on cloudflare-d1, per https://example.org/v2/9 and /walk/v02"
+        ),
+    )
+    assert "devpost_numbers" not in devpost_failures(root)
+    edit_devpost(
+        root,
+        "## Innovation and practical value\n\n```text\ntext",
+        ("## Innovation and practical value\n\n```text\nAgain 29 flags"),
+    )
+    reasons = devpost_failures(root)["devpost_numbers"]
+    assert len(reasons) == 1 and "'Innovation and practical value' field says 29" in reasons[0]
+
+
+def test_verify_claims_over_the_devpost_text_runs_in_submit_check(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    reasons = devpost_failures(root, devpost_claims_rc=1)["devpost_numbers"]
+    assert reasons == ["verify_claims --file docs/devpost.md failed: drifted"]
+
+
+def test_a_fixed_fact_from_code_is_checked_against_the_code(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    edit_devpost(root, "```text\ntext\n```", "```text\nUploads are deleted after 30 days.\n```")
+    (root / "worker" / "src").mkdir(parents=True)
+    (root / "worker" / "src" / "uploads.ts").write_text("export const KEEP_DAYS = 30;\n")
+    assert devpost_failures(root) == {}
+    (root / "worker" / "src" / "uploads.ts").write_text("export const KEEP_DAYS = 14;\n")
+    assert devpost_failures(root)["devpost_numbers"] == [
+        "the Devpost text says 30 days, and worker/src/uploads.ts no longer sets it"
+    ]
+
+
+def test_the_report_is_named_as_an_attachment_and_is_a_pdf(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    edit_devpost(root, "Attach `docs/REPORT.pdf`", "Link `docs/REPORT.pdf`")
+    assert devpost_failures(root)["devpost_report"] == [
+        "docs/devpost.md does not name docs/REPORT.pdf as an attachment"
+    ]
+    root = build_root(tmp_path / "b")
+    (root / "docs" / "REPORT.pdf").write_text("# not a pdf\n")
+    assert devpost_failures(root)["devpost_report"] == ["docs/REPORT.pdf is not a PDF"]
+    (root / "docs" / "REPORT.pdf").unlink()
+    assert devpost_failures(root)["devpost_report"] == ["docs/REPORT.pdf is missing"]
+
+
+def test_the_team_lists_both_members(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    edit_devpost(root, "Alex Velazquez and Rachel Selbrede.", "Alex Velazquez.")
+    assert devpost_failures(root)["devpost_team"] == [
+        "the Team section does not name Rachel Selbrede"
+    ]
+
+
+def test_demo_url_is_the_live_link_field(tmp_path: Path) -> None:
+    root = build_root(tmp_path)
+    edit_devpost(
+        root, "```text\nhttps://example.org/demo\n```", "```text\nhttps://example.org/live\n```"
+    )
+    assert submit_check.demo_url(root, None) == "https://example.org/live"
+    assert submit_check.demo_url(root, "https://env.example") == "https://env.example"
+
+
+def test_the_real_devpost_text_passes_every_devpost_check() -> None:
+    """Today's text fails nothing but the video's slot, which only the video_link check reads."""
+    text = (REPO / "docs" / "devpost.md").read_text(encoding="utf-8")
+    assert submit_check.devpost_track_problems(text, STATEMENT) == []
+    assert submit_check.devpost_field_problems(text) == ([], [])
+    assert submit_check.devpost_number_problems(REPO, text) == []
+    assert submit_check.devpost_report_problems(REPO, text) == []
+    assert submit_check.devpost_team_problems(text) == []
+    assert set(submit_check.DEVPOST_FIELDS) <= set(submit_check.devpost_sections(text))
