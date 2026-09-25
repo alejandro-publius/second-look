@@ -233,5 +233,45 @@ def test_the_page_says_the_checker_is_off_live_and_credits_each_frame() -> None:
         row = DOC[name]["manifest_row"]
         assert (ROOT / "photos" / row["file"]).is_file()
         assert f"](../../photos/{row['file']})" in PAGE
-        for key in ("source_url", "author", "license"):
+        for key in ("source_url", "author"):
             assert row[key] and row[key] in PAGE
+        # The licence as /credits writes it, not the manifest's code (critic round 15 N02).
+        assert f"licence {CREDITS_NAMES[row['license']]}." in PAGE
+        assert f"licence {row['license']}." not in PAGE
+
+
+# How apps/web/lib/content.ts licenseName, which /credits uses, writes each manifest code.
+CREDITS_NAMES = {
+    "CC-BY-2.0": "CC BY 2.0",
+    "CC-BY-3.0": "CC BY 3.0",
+    "CC-BY-4.0": "CC BY 4.0",
+    "own-CC-BY-4.0": "CC BY 4.0",
+    "CC-BY-SA-2.0": "CC BY-SA 2.0",
+    "CC-BY-SA-3.0": "CC BY-SA 3.0",
+    "CC-BY-SA-4.0": "CC BY-SA 4.0",
+    "CC0-1.0": "CC0 1.0",
+    "CC0": "CC0 1.0",
+    "public-domain": "Public domain",
+}
+
+
+def test_every_manifest_licence_is_named_the_way_credits_names_it() -> None:
+    import csv
+
+    with (ROOT / footage_example.MANIFEST).open(encoding="utf-8") as f:
+        codes = {row["license"] for row in csv.DictReader(f)}
+    assert codes <= set(CREDITS_NAMES), codes - set(CREDITS_NAMES)
+    for code, name in CREDITS_NAMES.items():
+        assert footage_example.licence_name(code) == name, code
+
+
+def test_the_alt_text_says_where_each_frame_was_filmed_in_plain_english() -> None:
+    # Critic round 15 N02: "filmed in United States".
+    assert footage_example.place("United States") == "the United States"
+    assert footage_example.place("United Kingdom") == "the United Kingdom"
+    assert footage_example.place("Russia") == "Russia"
+    for name in ("kept", "dropped"):
+        row = DOC[name]["manifest_row"]
+        where = footage_example.place(row["coarse_location"])
+        assert f"a still from a creek video filmed in {where}]" in PAGE
+    assert "filmed in United" not in PAGE
