@@ -138,8 +138,8 @@ def main() -> int:
             continue
         if display(value) != shown:
             problems.append(
-                f"rendered number drifted: {rel}#{pointer} README shows {shown}, results say "
-                f"{display(value)}; run scripts/render_readme.py"
+                f"rendered number drifted: {rel}#{pointer} {target.name} shows {shown}, "
+                f"results say {display(value)}; run make render-readme, which renders every doc"
             )
         checked += 1
     for m in BLOCK_RE.finditer(text):

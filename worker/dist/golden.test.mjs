@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "9d0410261a364f11",
+  content_hash: "6e5e077e15ff23bc",
   creeks: [
     {
       name: "Strawberry Creek",

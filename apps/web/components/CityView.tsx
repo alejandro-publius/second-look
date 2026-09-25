@@ -136,7 +136,7 @@ function PipeRow({ pipe }: { pipe: CityPipe }) {
  * same for every query, and the framework writes it back once the page has loaded, so it is set
  * again whenever it changes (critic round 14 P02).
  */
-function useTabTitle(title: string | null) {
+export function useTabTitle(title: string | null) {
   useEffect(() => {
     if (title === null) return;
     const apply = () => {

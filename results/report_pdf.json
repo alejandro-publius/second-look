@@ -8,7 +8,7 @@
   "pages": 9,
   "pandoc": "pandoc 3.9.0.2",
   "pdf": "docs/REPORT.pdf",
-  "pdf_sha256": "2d9b81b2da4a3983e52396a613a95708ba26b1f0e5867e6c939594966ffdc879",
+  "pdf_sha256": "c7bd29f8d467517ca141f831e3bc682f4905e690c026cd28679780e15e6c048a",
   "playwright": "1.63.0",
   "sources": [
     "README.md",
@@ -30,5 +30,5 @@
     "results/model_sweep_20260924T054756Z.json",
     "results/precache_budget.json"
   ],
-  "sources_sha256": "546be3fb0b982c8a853b52e59c7fb023b8b953b3e11bdbf7a45da23270fbd86c"
+  "sources_sha256": "16c96e5a61ae303cf2ec702ee25da589d466d0246ad9fbdeb6e6a148f71ab1b0"
 }

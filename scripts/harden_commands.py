@@ -239,8 +239,14 @@ SERVES_3100 = (
 )
 
 
+WEB_PORT_PREFIX = re.compile(r"^WEB_PORT=(\d{4,5}) (.+)$")
+
+
 def policy(cmd: str) -> str:
     """Empty when the command may run; otherwise the reason it is not run."""
+    moved = WEB_PORT_PREFIX.match(cmd)
+    if moved:  # the README's WEB_PORT=3200 make demo-offline: a port, then a command
+        return policy(moved.group(2))
     low = cmd.lower()
     if "..." in cmd or "<" in cmd:
         return "a template with a placeholder in it, not a command to run as printed"
@@ -278,10 +284,16 @@ def policy(cmd: str) -> str:
     return "not on the safe list"
 
 
-def make_dev(tree: Path, offline: bool = False) -> dict:
-    """make dev, or make demo-offline: two servers that never exit, passed when both answer."""
-    api_port, web_port = 8000, 3100
+def make_dev(tree: Path, offline: bool = False, asked_port: int | None = None) -> dict:
+    """make dev, or make demo-offline: two servers that never exit, passed when both answer. With
+    asked_port (WEB_PORT=3200 make demo-offline), the site must answer on that port."""
+    api_port, web_port = 8000, asked_port or 3100
     moved = ""
+    if asked_port and offline:
+        if not port_free(api_port):
+            api_port = 8962
+        cmds = [(f"WEB_PORT={asked_port} make demo-offline DEMO_API_PORT={api_port}", tree)]
+        return _serve(cmds, api_port, web_port, offline, "")
     if not (port_free(api_port) and port_free(web_port)):
         api_port, web_port = (8962, 8963) if offline else (8960, 8961)
         moved = (
@@ -295,6 +307,12 @@ def make_dev(tree: Path, offline: bool = False) -> dict:
             (f"uv run python -m uvicorn apps.api.main:app --port {api_port}", tree),
             (f"npm run dev -- -p {web_port}", tree / "apps" / "web"),
         ]
+    return _serve(cmds, api_port, web_port, offline, moved)
+
+
+def _serve(
+    cmds: list[tuple[str, Path]], api_port: int, web_port: int, offline: bool, moved: str
+) -> dict:
     procs = [
         subprocess.Popen(
             c,
@@ -504,6 +522,8 @@ def main() -> int:
             r = make_dev(tree)
         elif cmd.strip() == "make demo-offline":
             r = make_dev(tree, offline=True)
+        elif (m := WEB_PORT_PREFIX.match(cmd.strip())) and m.group(2) == "make demo-offline":
+            r = make_dev(tree, offline=True, asked_port=int(m.group(1)))
         elif "apps.mcp.server" in cmd:
             r = mcp(cmd, tree)
         else:

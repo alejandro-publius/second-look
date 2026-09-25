@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useTabTitle } from "./CityView";
 import { FocusHeading } from "./FocusHeading";
 import { Row } from "./ui/Row";
 import { ApiError, api } from "@/lib/api";
@@ -117,6 +118,8 @@ export function WalkCityView({ walk, demo, back, missing }: { walk: Walk; demo: 
  */
 export function WalkCity({ walkId, recordId }: { walkId: string; recordId: string }) {
   const walk = walkById(walkId);
+  // The page's title is written for a creek; name the walk, or say there is none (round 16 J02).
+  useTabTitle(walk ? `${t("city.walk_title", { name: walk.creek_name })}: ${t("app.name")}` : `${t("city.walk_unknown_title")}: ${t("app.name")}`);
   // Null until IndexedDB and the store have answered, so the page never says to do the walk first
   // to someone whose walk is on its way.
   const [loaded, setLoaded] = useState<{ mine: WalkVisitSaved | null; linked: WalkVisitSaved | null; missing: string | null } | null>(null);

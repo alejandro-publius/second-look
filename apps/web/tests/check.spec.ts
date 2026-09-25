@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
+const en: Record<string, string> = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8")).locale;
+
 /** Drops a pin (the denied-location path) and names the spot. */
 async function placePin(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Start the check" }).click();
@@ -255,4 +257,22 @@ test("a spot outside the Bay Area is offered no plant list, and the Photos scree
   await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
   await expect(page.getByText("0 photos ready")).toBeVisible();
   await expect(page.getByText(/photo\(s\)/)).toHaveCount(0);
+});
+
+// Critic round 16 K01: the spot's name is public, and the screen said nothing about it; and after
+// Use my location, Drop a pin instead kept "Position found and rounded." over empty pin fields.
+test.describe("the location step says the spot's name is public, and a pin clears the found line", () => {
+  test.use({ permissions: ["geolocation"], geolocation: { latitude: 37.8719, longitude: -122.2585 } });
+  test("found, then a pin", async ({ page }) => {
+    await mockApi(page);
+    await page.goto("/check");
+    await page.getByRole("button", { name: "Start the check" }).click();
+    await page.getByRole("button", { name: "Use my location" }).click();
+    await expect(page.getByRole("status")).toHaveText("Position found and rounded.");
+    await expect(page.getByText(en["check.pin_name_public"])).toBeVisible();
+    await expect(page.getByLabel("Name for this spot")).toHaveAttribute("aria-describedby", "spot-name-public");
+    await page.getByRole("button", { name: "Drop a pin instead" }).click();
+    await expect(page.getByText("Position found and rounded.")).toHaveCount(0);
+    await expect(page.getByText(en["check.pin_name_public"])).toBeVisible();
+  });
 });

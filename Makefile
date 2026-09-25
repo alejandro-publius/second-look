@@ -34,7 +34,7 @@ demo-offline:
 	@echo "demo-offline: API on :$(DEMO_API_PORT), site on http://localhost:$(DEMO_WEB_PORT)/city?creek=strawberry-creek. Stop with Ctrl-C."
 	@bash -c 'trap "kill 0" EXIT; env $(DEMO_ENV) uv run --offline python -m uvicorn apps.api.main:app --port $(DEMO_API_PORT) & (cd $(WEB) && node scripts/build-content.mjs && env $(DEMO_ENV) NEXT_PUBLIC_API_ORIGIN=http://localhost:$(DEMO_API_PORT) npx next dev -p $(DEMO_WEB_PORT)) & wait'
 
-check: lint types test manifest-check dash-check readability diagrams verify-claims consensus-check worker-check fhir-validate web-build design-check
+check: lint types test manifest-check dash-check readability diagrams worker-check fhir-validate verify-claims consensus-check web-build design-check
 	@echo "CHECK GREEN"
 
 # Update 10 answer A3. Python is the reference: it writes worker/src/content.json and the golden
@@ -133,8 +133,11 @@ report-pdf:
 # The test counts the README cites (UPDATE_27 block 24): Python tests, Worker golden cases,
 # Playwright tests and the Worker e2e sections, into results/test_counts.json. Not in make check,
 # because every branch that adds a test would turn it red; run it last, before render-readme.
+# It renders every doc after counting, since a count is quoted in several (CI went red twice when
+# only the README was rendered and committed).
 test-counts:
 	$(PY) scripts/count_tests.py
+	@$(MAKE) --no-print-directory render-readme
 
 # UPDATE_22 section 1 answer 1: can four photos per feature weight a group's votes? A synthetic
 # simulation, about 15 seconds. It writes results/consensus_coarseness.json and the table

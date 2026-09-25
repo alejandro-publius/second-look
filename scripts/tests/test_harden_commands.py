@@ -117,3 +117,8 @@ def test_the_committed_command_tables_hold_no_machine_path_and_are_what_render_w
         hc.write(doc, tmp_path, name)
         assert (tmp_path / f"{name}.md").read_text(encoding="utf-8") == page, name
         assert (tmp_path / f"{name}.json").read_text(encoding="utf-8") == committed, name
+
+
+def test_a_leading_web_port_is_a_setting_and_the_rest_is_judged() -> None:
+    assert hc.policy("WEB_PORT=3200 make demo-offline") == ""
+    assert hc.policy("WEB_PORT=3200 make go-public GO=yes") != ""

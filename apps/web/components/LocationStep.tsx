@@ -92,7 +92,15 @@ export function LocationStep({ onNext, onBack }: { onNext: (spot: SpotRef) => vo
         <button type="button" className="btn" onClick={useMyLocation}>
           {t("check.location_use")}
         </button>
-        <button type="button" className="btn btn-secondary" onClick={() => setMode("pin")}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => {
+            // The pin is not rounded, so a "found and rounded" line from a tap before is stale.
+            setStatus(null);
+            setMode("pin");
+          }}
+        >
           {t("check.pin_instead")}
         </button>
       </div>
@@ -120,8 +128,11 @@ export function LocationStep({ onNext, onBack }: { onNext: (spot: SpotRef) => vo
           ) : null}
           <label className="field">
             <span className="field-label">{t("check.pin_name")}</span>
-            <input className="text-input" type="text" value={name} onChange={(e) => setName(e.target.value)} name="spot_name" autoComplete="off" maxLength={80} />
+            <input className="text-input" type="text" value={name} onChange={(e) => setName(e.target.value)} name="spot_name" autoComplete="off" maxLength={80} aria-describedby="spot-name-public" />
           </label>
+          <p className="small muted" id="spot-name-public">
+            {t("check.pin_name_public")}
+          </p>
           {error ? (
             <p className="notice notice-warn" role="alert">
               {error}

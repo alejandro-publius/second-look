@@ -72,3 +72,10 @@ a day with commits has none. The numbers live in the README, checked against `re
 - `docs/JUDGE_DAY.md`: a judge's path in 45 seconds and in 10 minutes.
 - `make go-public` does the whole day in order, with a dry run that touches nothing; submit-check
   holds the Devpost text to the form; this changelog.
+- A video walk is kept as a demo record for 30 days, so its link opens on any device; it survives
+  Back and a reload, and runs the creek check's follow-up questions.
+- A first visit downloads 2.3 MB in the background instead of 24 MB, and a started test and the
+  creek check keep working offline.
+- On the Mac: the data lock and analysis job for Sep 27, uptime every 10 minutes, the daily
+  sandbox retry, and `make rollback`.
+- The captions-only video, built by `make video-final`, and critic rounds 14 to 17.

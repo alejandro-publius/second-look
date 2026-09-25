@@ -17,7 +17,7 @@ The key came from the picks file Alex Velazquez wrote with the planner, a Claude
 Proof: `docs/DATA_CARD.md`; `docs/deviations.md`; `photos/manifest.csv` column `label_evidence`.
 
 **4. "Invasive" depends on where you are. Whose list?**
-A Bay Area list from the Cal-IPC Inventory, approved for the team by Alex Velazquez on 2026-09-25 after each species was checked against its Cal-IPC profile. The creek check's plant question, "Which ones?", offers the species on that list and Not sure, so no free text is stored. The iNaturalist line shows research grade sightings of listed plants near a creek once a finished check there has answered the plant question; none has yet, so it shows nothing so far. The region file is swappable per city.
+A Bay Area list from the Cal-IPC Inventory, approved for the team by Alex Velazquez on 2026-09-25 after each species was checked against its Cal-IPC profile. The creek check's plant question, "Which ones?", offers the species on that list, Can't tell and None of these, and the list only where the spot is in the Bay Area; elsewhere, and on a video walk, it offers Can't tell and None of these and says the list is for the Bay Area. No free text is stored. The iNaturalist line shows research grade sightings of listed plants near a creek once a finished check there has answered the plant question; none has yet, so it shows nothing so far. The region file is swappable per city.
 Proof: `content/regions/california-bay-area.yaml` (`approved: true`, `approved_by`, a Cal-IPC link per species); `content/form.yaml`, item `invasive_which`; `docs/adr/0011-inaturalist-context.md`.
 
 ## FHIR standards
@@ -86,7 +86,7 @@ Yes, with one limit it names. `make judge-check` runs the tests, grades the AI n
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**
-Answer on the day from the Actions tab. It was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's), and once more on Sep 24 from 0326e78 to bef7015, when a test count moved and WRITEUP.md and docs/ACCEPTANCE.md kept the old one. A test now fails if a doc with a rendered number is left out of `make render-readme` or `make verify-claims` (`scripts/tests/test_render_readme.py::test_every_doc_with_a_rendered_number_is_rendered_and_checked`). The README's first badge shows the newest run on `main`.
+Answer on the day from the Actions tab. It was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's). It was red on Sep 24 from 0326e78 to bef7015, and on Sep 25 at e9898ed and 635955f, when a test count moved and WRITEUP.md and docs/ACCEPTANCE.md were rendered but not committed; since then `make test-counts` renders every doc itself and `verify-claims` names the doc that drifted. On Sep 25 two browser tests also timed out or raced on depth (90c4045 and 65a4a29) and were made robust. It was green on both branches again from a7b563a.
 Proof: https://github.com/alejandro-publius/second-look/actions
 
 ## Blockchain
