@@ -96,20 +96,23 @@ def test_a_walk_record_is_never_counted_never_a_creek_and_never_mirrored(client,
     freeze_now(NOW)
     counts = client.get("/api/test/counts").json()
     creeks = client.get("/api/creeks").json()
-    two = client.get("/api/two").json()
+    two = client.get("/api/two").json()["ours"]
+    # The FHIR store folder is shared by the whole test run, so this compares before and after.
+    files = stored_bundle_paths()
+    mirrored = repush_sandbox.load_bundles(store_dir())
     stored = client.post("/api/walk", json=body())
     assert stored.status_code == 200
     # Not in the study counts, not a creek of its own, not the latest record /two shows.
     assert client.get("/api/test/counts").json() == counts
     assert client.get("/api/creeks").json() == creeks
-    assert client.get("/api/two").json()["ours_example"] == two["ours_example"] is True
+    assert client.get("/api/two").json()["ours"] == two
     assert client.get(f"/api/city/walk-{walk_id()}").status_code == 404
     # Not a spot, not a visit, not a file in the FHIR store the sandbox mirror reads.
     with Session(engine) as db:
         assert db.exec(select(SpotRow)).all() == []
         assert db.exec(select(VisitRow)).all() == []
-    assert stored_bundle_paths() == []
-    assert repush_sandbox.load_bundles(store_dir()) == []
+    assert stored_bundle_paths() == files
+    assert repush_sandbox.load_bundles(store_dir()) == mirrored
     # And a copy of it put in that folder by hand is still refused by the mirror.
     bundle = client.get(f"/api/walk/{stored.json()['record_id']}").json()["bundle"]
     folder = Path(tmp_path) / "store"
