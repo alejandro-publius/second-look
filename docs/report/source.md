@@ -31,7 +31,7 @@ guide. No person has taken the test yet, and this report makes no claim about pe
 
 ## 2. Method
 
-{{figure:docs/diagrams/ai-gate.svg|How a model's answer becomes a flag, or nothing}}
+How a model's answer becomes a flag, or nothing, is drawn in [`docs/diagrams/ai-gate.svg`](docs/diagrams/ai-gate.svg). It is too wide to print here with text you can read, and 2.2 gives the same steps in words.
 
 ### 2.1 The test
 
@@ -50,6 +50,10 @@ the first paid model run on Sep 23. The dates here are Pacific time.
 ### 2.3 What the AI cannot do
 
 {{section:README.md#What the AI cannot do}}
+
+### 2.4 Three properties that follow
+
+{{section:README.md#Three properties that follow}}
 
 ## 3. Evidence
 
@@ -74,7 +78,7 @@ against the text by `scripts/verify_claims.py` in CI. Failed runs stay in `resul
 
 ## 4. The FHIR mapping
 
-{{figure:docs/diagrams/fhir-graph.svg|The records one visit makes, and how the score reaches every Observation}}
+The records one visit makes, and how the score reaches every Observation, are drawn in [`docs/diagrams/fhir-graph.svg`](docs/diagrams/fhir-graph.svg). It is too wide to print here with text you can read; the list of what one visit produces, later in this section, names the same records.
 
 {{section:README.md#How OneAquaHealth is used}}
 
@@ -84,13 +88,13 @@ One creek visit becomes these resources (`docs/fhir_mapping.md`):
 
 {{section:docs/fhir_mapping.md#Codes: theirs where they exist, ours where they do not}}
 
+### One Digital Health and FAIR
+
+{{section:README.md#One Digital Health and FAIR}}
+
 ## 5. Limitations
 
 {{section:README.md#Known weaknesses}}
-
-The labels have a limit of their own. The test key came from the photo picks, with one labeller,
-and no blind second label exists yet (`docs/DATA_CARD.md`). Until one does, read every accuracy
-figure here as agreement with this key.
 
 ## 6. Contributions
 

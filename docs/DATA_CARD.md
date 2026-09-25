@@ -26,10 +26,10 @@ repository, and only the stills cut from them are committed, in `photos/benchmar
 
 ## Sources
 
-**Photos.** By the host of each row's source page: Wikimedia Commons
-<!--v:results/data_card.json#/photos/by_source/Wikimedia Commons-->35<!--/v-->, iNaturalist
-<!--v:results/data_card.json#/photos/by_source/iNaturalist-->9<!--/v-->, and frames from YouTube videos
-<!--v:results/data_card.json#/photos/by_source/YouTube-->40<!--/v-->. The test photos come from Wikimedia
+**Photos.** By the host of each row's source page: Wikimedia
+Commons <!--v:results/data_card.json#/photos/by_source/Wikimedia Commons-->35<!--/v-->,
+iNaturalist <!--v:results/data_card.json#/photos/by_source/iNaturalist-->9<!--/v-->, and frames from YouTube
+videos <!--v:results/data_card.json#/photos/by_source/YouTube-->40<!--/v-->. The test photos come from Wikimedia
 Commons (<!--v:results/data_card.json#/photos/test/by_source/Wikimedia Commons-->12<!--/v-->) and
 iNaturalist (<!--v:results/data_card.json#/photos/test/by_source/iNaturalist-->4<!--/v-->).
 
@@ -55,9 +55,9 @@ frames for a person, <!--v:results/footage_pool.json#/frames_dropped_in_last_cut
 for text on screen and <!--v:results/footage_pool.json#/frames_dropped_in_last_cut/no water-->284<!--/v-->
 with no water in view. <!--v:results/footage_pool.json#/videos_failed-->59<!--/v--> videos failed, most
 because too few frames passed the screen. A person looked at every kept frame before it was
-committed. What is left: <!--v:results/footage_pool.json#/frames_kept-->46<!--/v--> frames from
-<!--v:results/footage_pool.json#/videos_kept-->5<!--/v--> videos in
-<!--v:results/footage_pool.json#/countries_kept-->3<!--/v--> countries.
+committed. What is left: <!--v:results/footage_pool.json#/frames_kept-->46<!--/v--> frames
+from <!--v:results/footage_pool.json#/videos_kept-->5<!--/v--> videos
+in <!--v:results/footage_pool.json#/countries_kept-->3<!--/v--> countries.
 
 **Film footage.** The planner's list in `docs/video/footage.csv`, all from Wikimedia Commons
 (<!--v:results/data_card.json#/film_footage/by_source/Wikimedia Commons-->13<!--/v--> rows), fetched by
@@ -103,8 +103,8 @@ page. Laid stone is kept out of the test set, because the official app, the Rive
 and our form would each file it differently; `make manifest-check` fails on a test photo whose
 source names it.
 
-**Who labelled.** One labeller. The second label column is filled on
-<!--v:results/data_card.json#/photos/with_second_label-->0<!--/v--> rows, so no agreement figure exists, and `results/key_hash.json` records <!--v:results/key_hash.json#/labellers-->1<!--/v-->
+**Who labelled.** One labeller. The second label column is filled
+on <!--v:results/data_card.json#/photos/with_second_label-->0<!--/v--> rows, so no agreement figure exists, and `results/key_hash.json` records <!--v:results/key_hash.json#/labellers-->1<!--/v-->
 labeller. What the record in git shows about how the labels were set:
 
 - A photo's gold label is the label chosen when it was picked.
@@ -117,8 +117,8 @@ labeller. What the record in git shows about how the labels were set:
   `scripts/merge_labels.py` compares the two files and reports Cohen's kappa per feature.
 
 **The evidence.** Every row carries `label_evidence`
-(<!--v:results/data_card.json#/photos/with_label_evidence-->84<!--/v--> of
-<!--v:results/data_card.json#/photos/rows-->84<!--/v-->): the source page's own words that back the label.
+(<!--v:results/data_card.json#/photos/with_label_evidence-->84<!--/v-->
+of <!--v:results/data_card.json#/photos/rows-->84<!--/v-->): the source page's own words that back the label.
 For example, the first built bank photo's Commons page says "This part of the creek is encased in
 a concrete channel." A frame's evidence is the video's description, and says when that
 description supports no label.

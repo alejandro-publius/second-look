@@ -30,12 +30,12 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 
 ## The problem
 
-700 characters
+793 characters
 
 ```text
 People judge a creek the way they judge a park: tidy and green reads as healthy. OneAquaHealth's project lead said it in the first workshop. Volunteers catch smell, foam and colour, and walk past concrete banks, a channel that was dug out, and pretty plants that do not belong. So the best-looking creek can get the best rating and deserve the worst.
 
-Professional surveyors fixed this long ago. In the UK's River Habitat Survey, only surveys from accredited surveyors are entered on the database, and accreditation means a course and a test. Volunteers have never had that. Their observations arrive with no mark of how far to trust them, so a city cannot tell a careful observer from a hopeful one.
+Professional surveyors fixed this long ago. In the UK's River Habitat Survey, only surveys from accredited surveyors are entered on the database, and accreditation means a course and a test. Some volunteer programs certify people for a method, such as water chemistry. None we know of measures how well each volunteer sees each feature, or keeps that score with every observation, so a city cannot tell a careful observer from a hopeful one.
 ```
 
 ## How the solution aligns with OneAquaHealth
@@ -85,7 +85,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-984 characters
+1103 characters
 
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->
@@ -97,7 +97,7 @@ Judges start here: https://second-look-79t.pages.dev/judges
 /t: consent, warm-up, lesson, 16 photos, a score per feature.
 /demo: judge mode with feedback after each answer.
 /check: the guided creek check, one question per screen, with follow-ups chosen by code.
-/walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. /city?creek=strawberry-creek stays empty until the first real check.
+/walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. The clips show natural creeks, so a measure appears when the walk reports damage, for example Artificial for the bank. /city?creek=strawberry-creek stays empty until the first real check.
 /two: a volunteer Observation of ours in the viewer built for a lab result; their sandbox's lab record joins it when their name resolves again.
 /walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a record made on your phone that is never stored.
 
@@ -171,7 +171,7 @@ The video is released under CC BY-SA 4.0, because several of the creek clips in 
 2. `docs/screens/score.webp`: the score per feature.
 3. `docs/screens/walk.webp`: a video walk, a creek in another country.
 4. `docs/screens/spot-health.webp`: the health card, one action for the person, one for the pet and one for the city, each with its source (a sample record, from a local build).
-5. `docs/screens/walk-city.webp`: the creek a walk just checked, seen as a city would, with what it needs in OneAquaHealth's own measures and their source.
+5. `docs/screens/walk-city.webp`: the creek a walk just checked, seen as a city would after answering Artificial for the bank, with what it needs in OneAquaHealth's own measures and their source. The clips show natural creeks, so a measure appears when the walk reports damage, as it does here.
 
 ## Team
 

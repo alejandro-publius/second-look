@@ -13,7 +13,7 @@ Proof P2 passed on 2026-09-20. The HL7 validator (6.10.4, FHIR 4.0.1) checked ou
 | Observation, one per answered item | their `ObservationIndicatorsOah` | `status final`, `subject` the spot, `performer` the Practitioner, `effectiveDateTime`, `derivedFrom` the visit response, a coded or quantity value. |
 | Provenance | base R4 | `target` every Observation of the visit, `agent` author = Practitioner and assembler = our software Device, `entity` source = the visit response and the test sitting. This is the path from any answer to the score of the person who gave it. |
 | Organization, Device | base R4 | us, and the software. |
-| Bundle, type collection | base R4 | everything above. The emitter will also produce a transaction Bundle with conditional creates for the sandbox mirror. |
+| Bundle, type collection | base R4 | everything above. The emitter also produces a transaction Bundle with conditional creates for the sandbox mirror (`to_transaction` in `core/fhir_emit.py`). |
 
 ## Codes: theirs where they exist, ours where they do not
 

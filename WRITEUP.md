@@ -24,9 +24,9 @@ the answers, the weather, the person's score and the flags, and asks two questio
 `build_record`, the only way a record is made, has no parameter that could carry a flag, a model
 id or model text.
 
-On the footage run, the gate dropped
-<!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of
-<!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags, every one for a feature
+On the footage run, the gate
+dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v-->
+of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags, every one for a feature
 that model had not passed, and kept <!--v:results/footage_latest.json#/gate/kept-->35<!--/v-->.
 
 **Proof.** `core/tests/test_gate.py::test_fuzz_model_output_never_reaches_answers_or_labels`,
@@ -64,18 +64,18 @@ the languages too: Python's `round()` rounds an exact half to the even number an
 chosen inputs and writes their outputs to `worker/golden/`: the follow-up selector, the labels, the
 health card, the pin guards, the city functions, the region placement, the FHIR emitter and the
 hash and rounding helpers. The TypeScript in `worker/src/core/` must reproduce every output
-exactly: <!--v:results/test_counts.json#/worker_golden/cases-->125<!--/v--> cases in
-<!--v:results/test_counts.json#/worker_golden/files-->8<!--/v--> files, replayed by
-<!--v:results/test_counts.json#/worker_golden/node_tests-->15<!--/v--> tests. `worker/src/core/pyround.ts`
+exactly: <!--v:results/test_counts.json#/worker_golden/cases-->125<!--/v--> cases
+in <!--v:results/test_counts.json#/worker_golden/files-->8<!--/v--> files, replayed
+by <!--v:results/test_counts.json#/worker_golden/node_tests-->15<!--/v--> tests. `worker/src/core/pyround.ts`
 rounds the way Python does. Randomization is not ported at all: `scripts/seed_arms.py` writes
 `core/allocator.py`'s own sequence into a D1 table and the Worker takes the next slot. The Bundles
 the TypeScript emitter writes go through the HL7 validator with the Python ones.
 
 **Proof.** `make worker-check`, which fails when the golden files or `worker/src/content.json` no
 longer match what the Python writes, then runs `worker/test/golden.test.ts`;
-`evals/tests/test_golden_vectors.py`; `results/fhir_validation.json`, with
-<!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors over
-<!--v:results/fhir_validation.json#/files_validated-->14<!--/v--> records.
+`evals/tests/test_golden_vectors.py`; `results/fhir_validation.json`,
+with <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors
+over <!--v:results/fhir_validation.json#/files_validated-->14<!--/v--> records.
 
 ## 4. The answer key stays out of the web bundle
 
@@ -135,9 +135,9 @@ marked as generated, never the real export. Changes after the tag go in `docs/de
 
 **What was hard.** The first paid run sent the models an answer tool whose allowed values were read
 from YAML. Unquoted `yes` and `no` are booleans in YAML, so the models were told the answer must be
-`true`, `false` or `"cant_tell"`. They answered `true`, and
-<!--v:results/model_sweep_20260924T030451Z.json#/counts/malformed-->73<!--/v--> of
-<!--v:results/model_sweep_20260924T030451Z.json#/counts/answers-->144<!--/v--> answers were counted as
+`true`, `false` or `"cant_tell"`. They answered `true`,
+and <!--v:results/model_sweep_20260924T030451Z.json#/counts/malformed-->73<!--/v-->
+of <!--v:results/model_sweep_20260924T030451Z.json#/counts/answers-->144<!--/v--> answers were counted as
 malformed. That run measured our config, not the models. Batches also sat in the queue for hours.
 
 **What we did.** The values are quoted, and a test pins them to the three strings. The test double
@@ -185,11 +185,11 @@ tracing it to its source's SHA-256, and `scripts/check_manifest.py` checks that 
 picture and carries no metadata. Only image bytes changed, logged as a deviation.
 
 Measured on the same throttled phone profile at a pixel ratio of 2, without Early Hints, the photo
-bytes on the first screen went from
-<!--v:results/warmup_photos.json#/runs/before/dpr/2/median_photo_bytes-->1459038<!--/v--> to
-<!--v:results/warmup_photos.json#/runs/after/dpr/2/median_photo_bytes-->253409<!--/v-->, and the median load time
-from <!--v:results/warmup_photos.json#/runs/before/dpr/2/median_load_ms-->8445<!--/v--> ms to
-<!--v:results/warmup_photos.json#/runs/after/dpr/2/median_load_ms-->2504<!--/v--> ms
+bytes on the first screen went
+from <!--v:results/warmup_photos.json#/runs/before/dpr/2/median_photo_bytes-->1459038<!--/v-->
+to <!--v:results/warmup_photos.json#/runs/after/dpr/2/median_photo_bytes-->253409<!--/v-->, and the median load time
+from <!--v:results/warmup_photos.json#/runs/before/dpr/2/median_load_ms-->8445<!--/v--> ms
+to <!--v:results/warmup_photos.json#/runs/after/dpr/2/median_load_ms-->2504<!--/v--> ms
 (`results/warmup_photos.json`, written by `apps/web/scripts/first-screen.mjs`).
 
 **Proof.** `scripts/tests/test_web_headers.py::test_a_photo_with_smaller_copies_preloads_its_avif_set_and_not_the_jpeg`,

@@ -32,6 +32,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -66,6 +67,21 @@ LOCAL_LINK_RE = re.compile(r"\[([^\]]+)\]\((?!https?://|#|mailto:|data:)([^)\s]+
 # a data address, so the PDF needs no file beside it and the source hash covers the drawing.
 FIGURE_RE = re.compile(r"^\{\{figure:([\w./-]+\.svg)\|([^}]+)\}\}$")
 DASHES = (chr(0x2013), chr(0x2014))
+# How big a figure prints. The print script sets an A4 page with 16 mm side margins, and
+# report.css caps a picture at the text width and 5 inches high; test_report_pdf.py holds these
+# to both files. A figure whose smallest text would print under MIN_FIGURE_TEXT_PT is refused:
+# the gate sequence once printed its labels at 2.7 pt (critic round 09 L04).
+PT_PER_MM = 72 / 25.4
+TEXT_WIDTH_PT = (210 - 2 * 16) * PT_PER_MM
+FIGURE_MAX_HEIGHT_PT = 5 * 72
+PT_PER_CSS_PX = 0.75
+MIN_FIGURE_TEXT_PT = 6.0
+SVG_ROOT_RE = re.compile(r"<svg\b[^>]*>", re.S)
+VIEWBOX_RE = re.compile(r'viewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"')
+TEXT_TAG_RE = re.compile(r"<(text|tspan)\b([^>]*)>", re.S)
+SIZE_ATTR_RE = re.compile(r'\bfont-size="\s*([\d.]+)(?:px)?\s*"')
+SIZE_STYLE_RE = re.compile(r"font-size:\s*([\d.]+)px")
+CLASS_RULE_RE = re.compile(r"#[\w-]+ \.([\w-]+)\{([^}]*)\}")
 
 
 class ReportError(Exception):
@@ -155,21 +171,87 @@ def unfolded(text: str) -> str:
     return re.sub(r"^<summary>(.*?)</summary>[ \t]*$", r"*\1*\n", text, flags=re.M)
 
 
+def _explicit_size(attrs: str) -> float | None:
+    style = re.search(r'\bstyle="([^"]*)"', attrs)
+    found = SIZE_STYLE_RE.search(style.group(1)) if style else None
+    found = found or SIZE_ATTR_RE.search(attrs)
+    return float(found.group(1)) if found else None
+
+
+def figure_text_pt(svg: str) -> float | None:
+    """The smallest text an SVG prints, in points, once the page scales it to fit; None when it
+    has no text. A text takes its own font size, else its class's rule in the drawing's style,
+    else the drawing's own size; a tspan counts only when it sets a size of its own."""
+    root_tag = SVG_ROOT_RE.search(svg)
+    if root_tag is None:
+        raise ReportError("the figure is not an SVG drawing")
+    texts = TEXT_TAG_RE.findall(svg)
+    if not texts and "<foreignObject" not in svg:
+        return None
+    box = VIEWBOX_RE.search(root_tag.group(0))
+    if box is None or float(box.group(1)) <= 0 or float(box.group(2)) <= 0:
+        raise ReportError("the figure has no viewBox, so the size of its printed text is unknown")
+    width, height = float(box.group(1)), float(box.group(2))
+    root_id = re.search(r'\bid="([^"]+)"', root_tag.group(0))
+    own = (
+        re.search(rf"#{re.escape(root_id.group(1))}\{{[^}}]*?font-size:\s*([\d.]+)px", svg)
+        if root_id
+        else None
+    )
+    default = float(own.group(1)) if own else 16.0
+    by_class = {
+        name: float(rule.group(1))
+        for name, body in CLASS_RULE_RE.findall(svg)
+        if (rule := SIZE_STYLE_RE.search(body))
+    }
+    sizes = [default] if "<foreignObject" in svg else []
+    for tag, attrs in texts:
+        size = _explicit_size(attrs)
+        if size is None and tag == "text":
+            classes = re.search(r'\bclass="([^"]*)"', attrs)
+            names = classes.group(1).split() if classes else []
+            size = next((by_class[n] for n in names if n in by_class), default)
+        if size is not None:
+            sizes.append(size)
+    # The printed width: the text width, or less when the 5 inch cap on height binds first, or
+    # when the drawing sets a width of its own in pixels.
+    printed = min(TEXT_WIDTH_PT, FIGURE_MAX_HEIGHT_PT * width / height)
+    for fixed in (
+        re.search(r"max-width:\s*([\d.]+)px", root_tag.group(0)),
+        re.search(r'\swidth="([\d.]+)(?:px)?"', root_tag.group(0)),
+    ):
+        if fixed:
+            printed = min(printed, float(fixed.group(1)) * PT_PER_CSS_PX)
+    return min(sizes) * printed / width
+
+
 def figure(root: Path, rel: str, caption: str, inputs: set[str]) -> str:
     path = root / rel
     if not path.is_file():
         raise ReportError(f"{SOURCE} names the figure {rel}, which does not exist")
     inputs.add(rel)
+    try:
+        smallest = figure_text_pt(path.read_text(encoding="utf-8"))
+    except ReportError as exc:
+        raise ReportError(f"{rel}: {exc}") from exc
+    if smallest is not None and smallest < MIN_FIGURE_TEXT_PT:
+        raise ReportError(
+            f"{rel} would print its smallest text at {smallest:.1f} pt, under "
+            f"{MIN_FIGURE_TEXT_PT:.0f} pt, because it is too wide for the page; leave it out "
+            "and say where to open it, or draw it narrower"
+        )
     data = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"![{caption}](data:image/svg+xml;base64,{data})\n\n*Figure: {caption}.*"
 
 
 def breakable_code(fragment: str) -> str:
     """A line may break after a slash inside code, and nowhere else in a word: a file name wraps
-    as core/ fhir_emit.py, never as core/fhir_emit.p y (critic round 01, C19)."""
+    as core/ fhir_emit.py, never as core/fhir_emit.p y (critic round 01, C19). It may also break
+    after the :: between a test file and a test's name, or a table of tests is wider than the
+    page and Chromium shrinks every page to fit it (critic round 09, L05)."""
     return re.sub(
         r"<code>(.*?)</code>",
-        lambda m: "<code>" + m.group(1).replace("/", "/<wbr>") + "</code>",
+        lambda m: "<code>" + m.group(1).replace("/", "/<wbr>").replace("::", "::<wbr>") + "</code>",
         fragment,
         flags=re.S,
     )
@@ -222,6 +304,41 @@ def sources_sha256(root: Path = ROOT, assembled: Assembled | None = None) -> str
 def pdf_pages(path: Path) -> int:
     """Page objects in the PDF. Chromium writes each page as an uncompressed /Type /Page."""
     return len(re.findall(rb"/Type\s*/Page(?!s)", path.read_bytes()))
+
+
+STREAM_RE = re.compile(rb"stream\r?\n(.*?)\r?\nendstream", re.S)
+SCALE_CM_RE = re.compile(rb"(-?[\d.]+) 0 0 -?[\d.]+ -?[\d.]+ -?[\d.]+ cm")
+
+
+def page_scales(pdf: bytes) -> list[float]:
+    """Points per CSS pixel on each page, read from the first two transforms of each page's
+    content stream (the page's own, then the body's). Chromium prints 1 px as 0.75 pt; when
+    something on a page is wider than the page, it shrinks every page to fit, and the number
+    falls below 0.75, so all the text prints smaller (critic round 09: a table of tests)."""
+    scales = []
+    for raw in STREAM_RE.findall(pdf):
+        try:
+            text = zlib.decompress(raw)
+        except zlib.error:
+            continue
+        found = SCALE_CM_RE.findall(text)
+        if b" Tf" in text and len(found) >= 2:
+            scales.append(abs(float(found[0])) * float(found[1]))
+    return scales
+
+
+def shrunk(pdf: bytes, pages: int) -> str | None:
+    """Why the printed pages are not at full size, in plain words, or None when they are."""
+    scales = page_scales(pdf)
+    if len(scales) != pages:
+        return f"the page scale was found on {len(scales)} of {pages} pages"
+    smallest = min(scales)
+    if smallest < PT_PER_CSS_PX * 0.995:
+        return (
+            f"Chromium shrank the pages to {smallest / PT_PER_CSS_PX:.0%} to fit something wider "
+            "than the page, so every line prints smaller; let it wrap"
+        )
+    return None
 
 
 def pandoc_version() -> str:
@@ -341,6 +458,8 @@ def stamp_problems(root: Path = ROOT) -> list[str]:
         problems.append(f"the stamp says {stamp.get('pages')} pages and the PDF has {pages}")
     if stamp.get("pdf_sha256") != hashlib.sha256(pdf.read_bytes()).hexdigest():
         problems.append(f"{PDF} is not the file its stamp describes; run make report-pdf")
+    if why := shrunk(pdf.read_bytes(), pages):
+        problems.append(f"{PDF}: {why}")
     try:
         now = sources_sha256(root)
     except ReportError as exc:
@@ -382,6 +501,8 @@ def build(root: Path = ROOT) -> dict[str, object]:
             raise ReportError(
                 f"the report came out at {pages} pages, not {MIN_PAGES} to {MAX_PAGES}"
             )
+        if why := shrunk(out.read_bytes(), pages):
+            raise ReportError(why)
         (root / PDF).write_bytes(out.read_bytes())
     stamp: dict[str, object] = {
         "generated_by": "make report-pdf: scripts/build_report.py",

@@ -72,7 +72,7 @@ The test runs as a pre-registered study that stays open: it is the volunteer's o
 
 ## Gallery
 
-<!--v:results/screens.json#/screen_count-->32<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->24<!--/v--> come from the live site; the <!--v:results/screens.json#/local_mock_count-->8<!--/v--> marked (mock) come from a local build with the mock API, so no screenshot joined the study. `make screens` makes them again, and [`results/screens.json`](results/screens.json) lists each. The photos are credited on /credits.
+There are <!--v:results/screens.json#/screen_count-->32<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->24<!--/v--> come from the live site; the <!--v:results/screens.json#/local_mock_count-->8<!--/v--> marked (mock) come from a local build with the mock API, so no screenshot joined the study. `make screens` makes them again, and [`results/screens.json`](results/screens.json) lists each. The photos are credited on /credits.
 
 <table>
 <tr>
@@ -82,7 +82,7 @@ The test runs as a pre-registered study that stays open: it is the volunteer's o
 </tr>
 <tr>
 <td align="center"><img src="docs/screens/walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
-<td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
+<td align="center"><img src="docs/screens/walk-city.webp" width="200" alt="The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it<br><code>/city?walk=v02</code></td>
 </tr>
 </table>
 
@@ -108,7 +108,7 @@ For the licence section: the screenshots, the GIF and the social preview show ph
 
 People judge a creek the way they judge a park. Tidy and green reads as healthy. OneAquaHealth's project lead said it in the first workshop: volunteers catch smell, foam and colour, and walk past concrete banks, a channel that was dug out, and pretty plants that do not belong. So the best-looking creek can get the best rating and deserve the worst.
 
-Professional surveyors fixed this long ago. In the UK's River Habitat Survey, "only surveys from accredited surveyors will be entered on the RHS database", and accreditation means attending a course and passing a test (RHS manual 2003, pages 3 and 20; see [`docs/notes/sources.md`](docs/notes/sources.md)). Volunteers have never had that. Their observations arrive with no mark of how far to trust them.
+Professional surveyors fixed this long ago. In the UK's River Habitat Survey, "only surveys from accredited surveyors will be entered on the RHS database", and accreditation means attending a course and passing a test (RHS manual 2003, pages 3 and 20; see [`docs/notes/sources.md`](docs/notes/sources.md)). Some volunteer programs certify people for a method, such as water chemistry. None we know of measures how well each volunteer sees each feature, or keeps that score with every observation. So a volunteer's observation arrives with no mark of how well its observer sees.
 
 Measure each volunteer, per feature, and store the measure with the data. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer, never a blended grade or a probability. Follow-up questions are chosen by code from the answers, the person's scores and the weather, two at most: "It has not rained here for N days. Is anything coming out of that pipe?" The AI takes the same test as the people and earns the right to ask one question, feature by feature.
 
@@ -136,11 +136,11 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 
 ## What the AI cannot do
 
-It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate's steps below say how, and Three properties that follow names the test for each. Two more limits:
+It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate, the heart of it, says how, and Three properties that follow names the test for each. Two more limits:
 
 | It cannot | Enforced by | Test |
 |---|---|---|
-| Put its own words in front of a person | Its note is shown only as "the checker noticed", cut to 160 characters | [`core/checker.py`](core/checker.py), [`core/gate.py`](core/gate.py) |
+| Put more than a short labelled note in front of a person | The gate drops a note with markup, line breaks or text direction controls, and the page shows the note only after "the checker noticed", cut to 160 characters | [`core/tests/test_gate.py::test_note_with_markup_or_a_direction_control_is_dropped`](core/tests/test_gate.py), [`core/tests/test_checker.py::test_long_note_is_cut_to_160_and_flat`](core/tests/test_checker.py) |
 | State a risk for a named site | Every health or ecology sentence comes from [`content/approved_sentences.yaml`](content/approved_sentences.yaml) with a source | [`core/tests/test_healthcard.py`](core/tests/test_healthcard.py), [`core/tests/test_act.py`](core/tests/test_act.py) |
 
 ## The gate, the heart of it
@@ -448,7 +448,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | The HL7 validator with their guide, terminology on | Sample records from both emitters in CI; golden vectors hold the live emitter to them | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`fhir/ig.lock`](fhir/ig.lock) |
 | Their sandbox | Conditional creates with our tag and a ledger, and a Library entry for the data set | [`scripts/repush_sandbox.py`](scripts/repush_sandbox.py), [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl) |
 | Their decision tool's measures | What a creek needs, in their words, from the Policy Brief, page 9 | [`content/approved_sentences.yaml`](content/approved_sentences.yaml), `/city` |
-| The five One Digital Health dimensions and FAIR | Stated in words below | this section |
+| The five One Digital Health dimensions and FAIR | Stated in words under One Digital Health and FAIR | this section |
 | The follower city recipe | `make new-city NAME=Aarhus COUNTRY=Denmark LAT=56.1629 LON=10.2039` scaffolds a new city in seconds; Heraklion was made that way, as a dry example | [`scripts/new_city.py`](scripts/new_city.py), [`docs/cities/`](docs/cities/) |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | [`core/fhir_referral.py`](core/fhir_referral.py) |
 | Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek, research grade sightings of the region's listed invasive plants near its spots, shown once a finished check on that creek has answered the plant question, never in the check and never counted; the Bay Area list waits on a check, so it reports none yet. | [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) |
@@ -465,9 +465,17 @@ Sent to OneAquaHealth's implementation guide on 2026-09-24, in the open:
 - [hl7-eu/oah issue 8](https://github.com/hl7-eu/oah/issues/8): their sandbox's name stopped resolving on 2026-09-23, with the evidence from their own nameserver.
 - A read only MCP server over our own records, so any software agent can ask for a creek's records with the resource ids behind every answer. [`examples/mcp/README.md`](examples/mcp/README.md).
 
-### Feasibility: run on Berkeley the way a follower city would
+### Feasibility: set up for Berkeley the way a follower city would
 
-OneAquaHealth calls a city that adopts the method a follower city. Berkeley has not adopted it; we ran the five steps on its creeks as a follower city would: name the streams as nested Locations; adopt the form, which mirrors their app; train and test the volunteers in about four minutes; collect and validate every visit against their profiles; publish to the sandbox with a Library entry and repeat with the three-question return check (`/quick`). `make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
+OneAquaHealth calls a city that adopts the method a follower city. Berkeley has not adopted it. We set up the five steps for Berkeley's creeks the way a follower city would, and this is how far each one got:
+
+1. Name the streams: done, as nested Locations.
+2. Adopt the form: done; it mirrors their app.
+3. Train and test the volunteers, in about four minutes: the lesson and the test are live, and no volunteer has been trained or tested yet.
+4. Collect and validate every visit against their profiles: the check is live and CI validates the records the code makes, and no real visit exists yet.
+5. Publish to the sandbox with a Library entry, and repeat with the three-question return check: publishing ran with the hand-made example visit, and the return check opens from a creek record (`/quick?spot=<id>`).
+
+`make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card.
 
 ### One Digital Health and FAIR
 
@@ -594,7 +602,9 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 - `/walk`: a creek from your desk, a clip from another country, the same check, a demo record made on the phone.
 - `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card. It needs a stored record, so on the live site today it is empty; [`docs/screens/`](docs/screens/README.md) shows it on a local build.
 - `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach. It is empty until the first real check; `make demo-offline` shows it full.
-- `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so. `/quick`, `/poster`, `/judges`, `/credits`.
+- `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so.
+- `/quick?spot=<id>`: the three-question return check. It opens from a creek record, so like `/spot?id=` it needs a stored record.
+- `/poster`, `/judges`, `/credits`.
 - A read only MCP server over our own records: [`examples/mcp/README.md`](examples/mcp/README.md).
 
 </details>
@@ -613,7 +623,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 | What code asked next | The follow-up selector chose the questions from the answers, the weather and the person's score. No model call is in that path. | [`core/followups.py`](core/followups.py), [`core/tests/test_followups.py`](core/tests/test_followups.py) |
 | What validated | The whole Bundle, against OneAquaHealth's guide at b907cf0 with terminology on. | [`results/fhir_validation.json`](results/fhir_validation.json), `make fhir-validate` |
 | What went to their sandbox | Every resource by conditional create, tagged as ours, with a ledger of ids, and a Library entry that points back here. | [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl); the read-back, [`docs/notes/sandbox_library.md`](docs/notes/sandbox_library.md), with its screenshot [`docs/notes/sandbox-library.png`](docs/notes/sandbox-library.png); when their name resolves again (hl7-eu/oah issue 8), `curl -H "Accept: application/fhir+json" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466` |
-| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so; the page a walk opens (`/city?walk=v02`) shows what the creek needs, and `make demo-offline` shows the full view. | `/city?creek=strawberry-creek`, [`docs/screens/walk-city.webp`](docs/screens/walk-city.webp) |
+| What the city then saw | What the creek needs, in OneAquaHealth's own restoration measures from their Policy Brief, page 9, each with its source. The live creek has no visits yet and says so. The walk clips show natural creeks, so on the page a walk opens (`/city?walk=v02`) a measure appears when the walk reports damage, for example Artificial for the bank; `make demo-offline` shows the full view. | `/city?creek=strawberry-creek`, [`docs/screens/walk-city.webp`](docs/screens/walk-city.webp) |
 
 </details>
 
