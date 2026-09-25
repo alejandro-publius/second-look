@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-24T10:51:45+00:00",
+  "generated_at_utc": "2026-09-25T01:16:37+00:00",
   "script": "scripts/mutation.py",
   "synthetic": false,
   "tool": "mutmut",
@@ -8,6 +8,12 @@
   "tests": "core/tests, as set in pyproject.toml [tool.mutmut]",
   "threshold_percent": 85.0,
   "score_rule": "killed divided by every change checked, times 100, to one decimal; a timeout or any other outcome counts as not caught",
+  "sources_sha256": {
+    "core/gate.py": "ac9c68bd55cd3bde510b69d8b1d6e5372fae93d93f3a566bb25fe9d68f884507",
+    "core/followups.py": "893a5d0c904853f4c2c2b1344ba0d86cf21b28cbdff2d381144c24952ac34cd8",
+    "core/scoring.py": "88598f458a5dc42b0a275c2b479ef7e2ed81f32d612182192bfa4f199a9a53ab",
+    "core/fhir_emit.py": "1bca47d8b2f06debc81d4c7210c72733848775add4ce3716b1c67867a91e761a"
+  },
   "modules": {
     "core/gate.py": {
       "mutants": 229,
@@ -23,8 +29,8 @@
       ]
     },
     "core/followups.py": {
-      "mutants": 324,
-      "killed": 319,
+      "mutants": 337,
+      "killed": 332,
       "survived": 5,
       "timeout": 0,
       "other": {},
@@ -132,8 +138,8 @@
       "score_percent": 98.7
     },
     "followups": {
-      "mutants": 324,
-      "killed": 319,
+      "mutants": 337,
+      "killed": 332,
       "survived": 5,
       "timeout": 0,
       "score_percent": 98.5
@@ -154,8 +160,8 @@
     }
   },
   "total": {
-    "mutants": 2149,
-    "killed": 2075,
+    "mutants": 2162,
+    "killed": 2088,
     "survived": 74,
     "timeout": 0,
     "score_percent": 96.6

@@ -18,11 +18,18 @@ def load(rel: str) -> dict:
     return data
 
 
-def test_dependabot_covers_uv_both_npm_folders_and_the_actions() -> None:
+def test_dependabot_covers_uv_every_npm_folder_and_the_actions() -> None:
+    # Every npm folder, the diagram renderer too (CRITIC_08 K03).
     config = load(".github/dependabot.yml")
     assert config["version"] == 2
     seen = {(u["package-ecosystem"], u["directory"]) for u in config["updates"]}
-    assert seen == {("uv", "/"), ("npm", "/apps/web"), ("npm", "/worker"), ("github-actions", "/")}
+    assert seen == {
+        ("uv", "/"),
+        ("npm", "/apps/web"),
+        ("npm", "/worker"),
+        ("npm", "/tools/diagrams"),
+        ("github-actions", "/"),
+    }
 
 
 def test_dependabot_is_weekly_with_a_small_pull_request_limit() -> None:

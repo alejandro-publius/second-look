@@ -823,7 +823,17 @@ def check_dependabot(root: Path) -> list[str]:
         if u.get("package-ecosystem") == "npm":
             dirs = u.get("directories") or [u.get("directory", "")]
             npm_dirs |= {str(d).strip("/") for d in dirs}
-    for need in ("apps/web", "worker"):
+    # Every folder with a package lock, not a fixed list: tools/diagrams was left out, and its
+    # renderer's npm ci printed four high advisories at the end of the judge's setup line
+    # (CRITIC_08 K03).
+    locked = {
+        p.parent.relative_to(root).as_posix()
+        for p in root.glob("**/package-lock.json")
+        if not any(
+            part == "node_modules" or part.startswith(".") for part in p.relative_to(root).parts
+        )
+    }
+    for need in sorted({"apps/web", "worker"} | locked):
         if "npm" in kinds and need not in npm_dirs:
             problems.append(f"Dependabot's npm updates leave out {need}")
     return problems

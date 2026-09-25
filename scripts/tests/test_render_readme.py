@@ -56,3 +56,45 @@ def test_every_doc_with_a_rendered_number_is_rendered_and_checked() -> None:
     assert marked, "no doc with a rendered value was found"
     assert sorted(marked - rendered) == [], "rendered values that make render-readme misses"
     assert sorted(marked - checked) == [], "rendered values that make verify-claims misses"
+
+
+def headings_inside_folds(text: str) -> list[str]:
+    """Headings that sit inside an open <details>, where GitHub hides them until the fold opens."""
+    import re
+
+    depth, hidden, fence = 0, [], False
+    for n, line in enumerate(text.splitlines(), 1):
+        if line.lstrip().startswith("```"):
+            fence = not fence
+            continue
+        if fence:
+            continue
+        tags = re.sub(r"`[^`]*`", "", line)  # a tag named in a code span is prose, not a fold
+        depth += len(re.findall(r"<details\b", tags)) - len(re.findall(r"</details>", tags))
+        if depth > 0 and re.match(r"#{1,6} ", line):
+            hidden.append(f"{n}: {line}")
+    return hidden
+
+
+def test_no_heading_hides_inside_a_fold() -> None:
+    """Critic round 08 K01: a fold's closing tag landed two sections too low, and GitHub hid "Why
+    trust a volunteer, and the AI?" and "What the AI cannot do" inside the lesson photos' fold.
+    A fold holds a table or a picture, never a section, in any tracked Markdown file."""
+    import subprocess
+
+    root = Path(__file__).resolve().parents[2]
+    tracked = subprocess.run(
+        ["git", "ls-files", "*.md"], cwd=root, capture_output=True, text=True, check=True
+    ).stdout.split()
+    texts = {p: (root / p).read_text(encoding="utf-8", errors="ignore") for p in tracked}
+    found = {p: hidden for p, text in texts.items() if (hidden := headings_inside_folds(text))}
+    assert found == {}
+
+
+def test_the_fold_check_sees_a_heading_inside_a_fold() -> None:
+    assert headings_inside_folds("<details>\n<summary>a</summary>\n\n## B\n\n</details>\n") == [
+        "4: ## B"
+    ]
+    assert headings_inside_folds("<details>\n\n| a |\n\n</details>\n\n## B\n") == []
+    assert headings_inside_folds("```\n<details>\n```\n## B\n") == []
+    assert headings_inside_folds("A `<details>` block.\n\n## B\n") == []

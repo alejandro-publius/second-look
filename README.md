@@ -102,6 +102,8 @@ Photos: Laurie Avocado, CC BY 2.0, and Jonathan Hutchins, CC BY-SA 2.0, both fro
 
 For the licence section: the screenshots, the GIF and the social preview show photos by other people under their own licences (CC BY and CC BY-SA, credited on /credits and in photos/manifest.csv). The social preview and the pipe lesson photo are shared under CC BY-SA 4.0 because their photos are CC BY-SA.
 
+</details>
+
 ## Why trust a volunteer, and the AI?
 
 People judge a creek the way they judge a park. Tidy and green reads as healthy. OneAquaHealth's project lead said it in the first workshop: volunteers catch smell, foam and colour, and walk past concrete banks, a channel that was dug out, and pretty plants that do not belong. So the best-looking creek can get the best rating and deserve the worst.
@@ -134,16 +136,12 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 
 ## What the AI cannot do
 
+It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate's steps below say how, and Three properties that follow names the test for each. Two more limits:
+
 | It cannot | Enforced by | Test |
 |---|---|---|
-| Decide anything stored | The record builder accepts human answers only | [`core/tests/test_gate.py`](core/tests/test_gate.py), the fuzz test on stored answers |
-| Speak on a feature it did not pass | [`core/checker.py`](core/checker.py) refuses to ask, and [`core/gate.py`](core/gate.py) drops the flag | [`core/tests/test_checker.py::test_unpassed_feature_returns_nothing_even_when_the_model_is_confident`](core/tests/test_checker.py) |
-| Speak on a fake pass table | The gate reads `"real": true` or licenses nothing | [`core/tests/test_checker.py::test_synthetic_pass_table_never_licenses_a_flag_by_default`](core/tests/test_checker.py) |
-| Ask more than one question, or ask first | Follow-up selection is a pure function, two questions at most, the model's at most one, shown after the person answers | [`core/tests/test_followups.py`](core/tests/test_followups.py) |
 | Put its own words in front of a person | Its note is shown only as "the checker noticed", cut to 160 characters | [`core/checker.py`](core/checker.py), [`core/gate.py`](core/gate.py) |
 | State a risk for a named site | Every health or ecology sentence comes from [`content/approved_sentences.yaml`](content/approved_sentences.yaml) with a source | [`core/tests/test_healthcard.py`](core/tests/test_healthcard.py), [`core/tests/test_act.py`](core/tests/test_act.py) |
-
-</details>
 
 ## The gate, the heart of it
 
@@ -186,7 +184,7 @@ flowchart LR
   ACT["ACT<br/>what the creek needs"]
   TRAIN -- "a score<br/>per feature" --> CHECK
   CHECK -- "the person's<br/>answers" --> VERIFY
-  VERIFY -- "answers,<br/>score, flags" --> RECORD
+  VERIFY -- "answers, score,<br/>follow-up answers" --> RECORD
   RECORD -- "records<br/>by creek" --> ACT
 ```
 
@@ -329,7 +327,7 @@ flowchart TB
 
 </details>
 
-**The AI gate.** Every arrow is a call in [`core/checker.py`](core/checker.py), [`core/gate.py`](core/gate.py) or [`core/followups.py`](core/followups.py). On the live creek check the checker is off and the Worker passes no flags, so no model is in that request path. The walks run the same gate when they are built, in [`scripts/build_walks.py`](scripts/build_walks.py).
+**The AI gate.** Every arrow is a call in [`core/checker.py`](core/checker.py), [`core/gate.py`](core/gate.py) or [`core/followups.py`](core/followups.py).
 
 <details>
 <summary>The gate, call by call, as a diagram</summary>
@@ -497,14 +495,14 @@ Every number is graded by code and written to [`results/`](results/); [`scripts/
 
 ### Tests
 
-`make check` runs everything below except the browser suite and the Worker end to end, and prints `CHECK GREEN`. The counts are taken by [`scripts/count_tests.py`](scripts/count_tests.py) into [`results/test_counts.json`](results/test_counts.json).
+`make check` runs everything below except the browser suite, the Worker end to end and the mutation run, and prints `CHECK GREEN`. The counts are taken by [`scripts/count_tests.py`](scripts/count_tests.py) into [`results/test_counts.json`](results/test_counts.json).
 
 - **Python:** <!--v:results/test_counts.json#/python/tests-->2039<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
 - **Ports:** <!--v:results/test_counts.json#/worker_golden/cases-->125<!--/v--> golden cases written by the Python reference, which the TypeScript Worker must reproduce exactly, in <!--v:results/test_counts.json#/worker_golden/node_tests-->15<!--/v--> tests (`make worker-check`).
 - **Browser:** <!--v:results/test_counts.json#/playwright/tests-->114<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->20<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
 - **Worker end to end:** <!--v:results/test_counts.json#/worker_e2e/sections-->14<!--/v--> sections that drive the real Worker's routes under `wrangler dev` with a local D1 and KV (`make worker-e2e`, in CI).
 - **Records:** the HL7 validator checks sample Bundles from Python and from the Worker against OneAquaHealth's guide: <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors (`make fhir-validate`).
-- **Mutation:** small bugs planted on purpose in four modules, the gate, the follow-up selector, scoring and the FHIR emitter (`make mutation`, mutmut): the gate caught <!--v:results/mutation.json#/by_name/gate/killed-->226<!--/v--> of <!--v:results/mutation.json#/by_name/gate/mutants-->229<!--/v-->, the follow-up picker <!--v:results/mutation.json#/by_name/followups/killed-->319<!--/v--> of <!--v:results/mutation.json#/by_name/followups/mutants-->324<!--/v-->, scoring <!--v:results/mutation.json#/by_name/scoring/killed-->53<!--/v--> of <!--v:results/mutation.json#/by_name/scoring/mutants-->53<!--/v-->, the FHIR record writer <!--v:results/mutation.json#/by_name/fhir_emit/killed-->1477<!--/v--> of <!--v:results/mutation.json#/by_name/fhir_emit/mutants-->1543<!--/v-->; each must catch <!--v:results/mutation.json#/threshold_percent-->85.0<!--/v--> percent or more ([`results/mutation.json`](results/mutation.json)). [`core/checker.py`](core/checker.py), [`core/rainfall.py`](core/rainfall.py) and the Worker's TypeScript ports are not in this run.
+- **Mutation:** small bugs planted on purpose in four modules, the gate, the follow-up selector, scoring and the FHIR emitter (`make mutation`, mutmut): the gate caught <!--v:results/mutation.json#/by_name/gate/killed-->226<!--/v--> of <!--v:results/mutation.json#/by_name/gate/mutants-->229<!--/v-->, the follow-up picker <!--v:results/mutation.json#/by_name/followups/killed-->332<!--/v--> of <!--v:results/mutation.json#/by_name/followups/mutants-->337<!--/v-->, scoring <!--v:results/mutation.json#/by_name/scoring/killed-->53<!--/v--> of <!--v:results/mutation.json#/by_name/scoring/mutants-->53<!--/v-->, the FHIR record writer <!--v:results/mutation.json#/by_name/fhir_emit/killed-->1477<!--/v--> of <!--v:results/mutation.json#/by_name/fhir_emit/mutants-->1543<!--/v-->; each must catch <!--v:results/mutation.json#/threshold_percent-->85.0<!--/v--> percent or more ([`results/mutation.json`](results/mutation.json)). [`core/checker.py`](core/checker.py), [`core/rainfall.py`](core/rainfall.py) and the Worker's TypeScript ports are not in this run.
 
 ## What is real and what is synthetic
 

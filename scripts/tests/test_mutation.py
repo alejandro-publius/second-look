@@ -172,3 +172,13 @@ def test_a_run_starts_from_an_empty_folder_with_no_key(
     assert seen["stale_left"] is False
     assert seen["argv"][1:4] == ["-m", "mutmut", "run"]
     assert seen["key"] is None
+
+
+def test_the_committed_run_measured_the_code_as_it_is_now() -> None:
+    """CRITIC_08 K04: the README quoted follow-up picker numbers from a run made before
+    core/followups.py changed. The run records a hash of each module it mutates; when a module
+    changes, run make mutation again and commit results/mutation.json."""
+    doc = json.loads((ROOT / "results" / "mutation.json").read_text(encoding="utf-8"))
+    assert doc.get("sources_sha256") == mutation.sources_sha256(ROOT), (
+        "a module changed since results/mutation.json was made; run make mutation"
+    )

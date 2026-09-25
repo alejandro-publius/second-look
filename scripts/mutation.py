@@ -19,6 +19,7 @@ Run: uv run python scripts/mutation.py            (make mutation)
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.metadata
 import json
 import os
@@ -99,6 +100,12 @@ def read_run(mutants: Path) -> dict[str, dict[str, Any]]:
     return out
 
 
+def sources_sha256(root: Path = ROOT) -> dict[str, str]:
+    """The SHA-256 of each module the run mutates, so a result can be matched to the code it
+    measured; a test fails when a module has changed since (CRITIC_08 K04)."""
+    return {m: hashlib.sha256((root / m).read_bytes()).hexdigest() for m in MODULES}
+
+
 def document(modules: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
     total = Counter[str]()
     for counts in modules.values():
@@ -114,6 +121,7 @@ def document(modules: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
         "tests": "core/tests, as set in pyproject.toml [tool.mutmut]",
         "threshold_percent": THRESHOLD_PERCENT,
         "score_rule": SCORE_RULE,
+        "sources_sha256": sources_sha256(),
         "modules": {m: dict(modules[m]) for m in MODULES if m in modules},
         # The same counts under a short name with no slash, so the README can cite them: a claim
         # pointer cannot step through a key such as "core/gate.py".

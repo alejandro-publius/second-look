@@ -11,13 +11,7 @@ order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA k
 `PLAN.md`, this file, `docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest
 `docs/internal/updates/`.
 
-Where it stands (Sep 24, 16:26Z): everything is merged, deployed and green on `main`. REVIEW_03's
-59 findings are fixed with proofs; the six-judge rerun scored 7.33 against 5.73; critic rounds 01 to
-04 went blocker, blocker, major, minor, each worked through (the critic rounds in `docs/internal/reviews/`).
-Measured on the live site: axe clean on 60 views, Lighthouse 93 or more on all 20 pages, no dead
-link, every README command runs in a fresh clone, no flaky test over three runs. `make done-check`
-is RED only on D24, which needs the two newest critic rounds at cosmetic or below; round 05 is out.
-The rest is BLOCKED (dated Sep 28, and their sandbox) or HUMAN (`docs/ALEX_TODO.md`).
+Where it stands (Sep 24, 01:24Z): everything is merged, deployed and green on `main` and `depth` (CI at 86e3c0c). REVIEW_03's 59 findings are fixed with proofs; the six-judge rerun scored 7.33 against 5.73; critic rounds 01 to 08 went blocker, blocker, major, minor, minor, minor, major, major, each worked through (`docs/internal/reviews/`); from round 08 a round is several critics at once, one on the repository and two on the live product, because a single critic stalled. Round 07's major was CI red on `main` from 0326e78 to bef7015: a test count moved and two docs kept the old one; `RENDERED_DOCS` now covers every doc with a rendered value, a test holds it, and after every `make test-counts` the loop runs `make render-readme verify-claims`, never the README render alone. Measured on the live site: axe clean on 60 views, Lighthouse 93 or more on all 20 pages, no dead link, every README command runs in a fresh clone, no flaky test over three runs. `make done-check` is RED only on D24 until two critic rounds in a row report cosmetic or below. The rest is BLOCKED (dated Sep 28, and their sandbox) or HUMAN (`docs/ALEX_TODO.md`).
 
 Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamps) and
 `com.secondlook.inaturalist` (07:45; it asks nothing until Rachel approves the Bay Area plant

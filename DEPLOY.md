@@ -236,6 +236,6 @@ on, and the two bindings. The web build's security headers are one definition,
 ## Dependabot
 
 `.github/dependabot.yml` asks each week for updates to the Python packages (through `uv`, from
-`pyproject.toml` and `uv.lock`), the npm packages of `apps/web` and of `worker`, and the GitHub
+`pyproject.toml` and `uv.lock`), the npm packages of `apps/web`, of `worker` and of the diagram renderer in `tools/diagrams`, and the GitHub
 Actions in the workflows, with a small limit on open pull requests. A Dependabot pull request
 runs the same `make check` as any other and is merged by a person, never automatically.

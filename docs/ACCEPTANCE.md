@@ -77,7 +77,7 @@ These are the ones worth arguing about, so each names the test that would go red
 | The Worker behaves end to end with a local D1 | `make worker-e2e` | exit code 0 |
 | The launch gate for the two-minute test | `make preflight-launch` | 0 failed |
 | The submission gate | `make submit-check` | fails only on `video_link` and `repo_public` until Sep 30, then nothing |
-| No video file is ever committed | `uv run pytest -q scripts/tests/test_no_video_files.py` | 2 passed |
+| No video file is ever committed | `uv run pytest scripts/tests/test_no_video_files.py` | 4 passed |
 | The live site answers, and a phone check writes nothing | `SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-readonly.mjs` | every step PASS, the counts unchanged |
 
 ## What a failure here means

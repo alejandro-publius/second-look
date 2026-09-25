@@ -47,11 +47,6 @@ the first paid model run on Sep 23. The dates here are Pacific time.
 
 {{section:README.md#The gate, the heart of it}}
 
-In the build measured here, {{claim:results/footage_pool.json#/walks_with_a_checker_question}} of
-the {{claim:results/footage_pool.json#/walks}} walks carries a checker question: the gate kept no
-flag on the frames the walks use (`content/walks.yaml`). So today no model flag reaches a person,
-in the walks or on the live site.
-
 ### 2.3 What the AI cannot do
 
 {{section:README.md#What the AI cannot do}}
