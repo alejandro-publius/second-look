@@ -85,10 +85,10 @@ def _issue_label(item: Mapping[str, Any] | None, item_id: str, value: object) ->
 
 
 def _joined(parts: Sequence[str]) -> str:
-    """A list as a person says it: "a", "a and b", "a, b and c" (critic round 14 B04)."""
-    if len(parts) < 2:
-        return "".join(parts)
-    return f"{', '.join(parts[:-1])} and {parts[-1]}"
+    """A list of one or more as a person says it: "a", "a and b", "a, b and c" (critic round 14
+    B04)."""
+    *rest, last = parts
+    return f"{', '.join(rest)} and {last}" if rest else last
 
 
 def _feature_plain_name(feature: str) -> str:

@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-25T02:19:57+00:00",
+  "generated_at_utc": "2026-09-25T21:37:27+00:00",
   "script": "scripts/mutation.py",
   "synthetic": false,
   "tool": "mutmut",
@@ -10,7 +10,7 @@
   "score_rule": "killed divided by every change checked, times 100, to one decimal; a timeout or any other outcome counts as not caught",
   "sources_sha256": {
     "core/gate.py": "ac9c68bd55cd3bde510b69d8b1d6e5372fae93d93f3a566bb25fe9d68f884507",
-    "core/followups.py": "893a5d0c904853f4c2c2b1344ba0d86cf21b28cbdff2d381144c24952ac34cd8",
+    "core/followups.py": "bfa4b040982d1b3e8594669efdea9d6612ec090ae246740ed2e64eb6ec0d392a",
     "core/scoring.py": "88598f458a5dc42b0a275c2b479ef7e2ed81f32d612182192bfa4f199a9a53ab",
     "core/fhir_emit.py": "8830baa08767587eec44160a6131eb2d166b570204c4bb86f6a60485ff58bd76"
   },
@@ -29,8 +29,8 @@
       ]
     },
     "core/followups.py": {
-      "mutants": 337,
-      "killed": 332,
+      "mutants": 341,
+      "killed": 336,
       "survived": 5,
       "timeout": 0,
       "other": {},
@@ -138,8 +138,8 @@
       "score_percent": 98.7
     },
     "followups": {
-      "mutants": 337,
-      "killed": 332,
+      "mutants": 341,
+      "killed": 336,
       "survived": 5,
       "timeout": 0,
       "score_percent": 98.5
@@ -160,8 +160,8 @@
     }
   },
   "total": {
-    "mutants": 2165,
-    "killed": 2091,
+    "mutants": 2169,
+    "killed": 2095,
     "survived": 74,
     "timeout": 0,
     "score_percent": 96.6

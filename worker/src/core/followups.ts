@@ -65,10 +65,12 @@ function issueLabel(item: FormItem | null, itemId: string, value: unknown): stri
   return itemId.replace(/_/g, " ");
 }
 
-/** A list as a person says it: "a", "a and b", "a, b and c" (critic round 14 B04). As core/followups.py _joined. */
+/** A list of one or more as a person says it: "a", "a and b", "a, b and c" (critic round 14
+ *  B04). As core/followups.py _joined. */
 function joined(parts: string[]): string {
-  if (parts.length < 2) return parts.join("");
-  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+  const rest = parts.slice(0, -1);
+  const last = parts[parts.length - 1];
+  return rest.length > 0 ? `${rest.join(", ")} and ${last}` : last;
 }
 
 function dryPipe(rule: Rule, answers: Answers, site: SiteContext): Followup | null {
