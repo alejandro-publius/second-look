@@ -44,8 +44,15 @@ Video walks (`/walk`, a creek from your desk; UPDATE_30 section 1 items 2 and 3)
   form's lists, the time the walk was finished, the time it was stored, its delete date and its
   FHIR Bundle, tagged as a demo on every resource. No contributor token, no position, no photo,
   no free text and nothing about the browser. The route refuses a body over 4096 bytes, any
-  field but those three, an answer the form does not allow, and a time more than 5 minutes
-  ahead or 7 days old, and it takes at most 200 walk records a day on the whole server.
+  field but those three and the two below, an answer the form does not allow, and a time more
+  than 5 minutes ahead or 7 days old, and it takes at most 200 walk records a day on the whole
+  server.
+- `walk_checks`: the follow-up questions the creek check's rules asked on the walk's answers and
+  what the person answered, as a creek check keeps its own in `check_result`, and the final
+  rating. The phone sends the answers (`followup_answers`) and the rating (`final_rating`); the
+  store runs the rules itself and refuses an answer to a question it did not ask or an answer
+  the question does not take. A row holds the rule, the question as the locale words it, the
+  coded answer and the rating, one row per walk record, stored with it and deleted with it.
 - A walk record is never counted: it is in no study table, it is not a spot or a visit, so no
   creek's numbers, no `/city?creek=` view and no count include it. It is never sent to
   OneAquaHealth's sandbox: the mirror reads visit Bundles only and refuses anything with the
@@ -125,6 +132,7 @@ if we change hosts, change both this file and the consent text.
   row past its date once a day, at 04:17 UTC (the cron in `worker/wrangler.jsonc`), and again
   whenever a new walk is stored; the Python API deletes them whenever a new walk is stored. A
   daily backup taken before that keeps a row until the backup itself is deleted (see Backups).
+- `walk_checks`: deleted with its walk record, in the same step, by both servers.
 - A walk's answers on the phone: in the browser until Start again, or until the person clears
   the site's data. They are never sent anywhere before the walk is finished.
 

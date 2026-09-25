@@ -43,7 +43,8 @@ export interface WalkState {
   walk_id: string;
   answers: Record<string, AnswerValue>;
   /** Where the walk opens: the index of the next unanswered question among those showing, or
-   *  their count when every one is behind it and only the checker's question is left. */
+   *  their count when every one is behind it and only the follow-ups or the checker's question are
+   *  left. */
   next: number;
   /** Set when the walk is finished. The record is built from the answers and this time. */
   answered_at: string | null;
@@ -51,6 +52,10 @@ export interface WalkState {
   queue_id: number | null;
   record_id: string | null;
   delete_after: string | null;
+  /** The answers to the follow-up questions the rules asked, and the rating the rating check left
+   *  (judge walk W01). A walk kept before walks asked any has neither. */
+  followup_answers?: Record<string, string>;
+  final_rating?: string | null;
 }
 
 function openDb(): Promise<IDBDatabase> {

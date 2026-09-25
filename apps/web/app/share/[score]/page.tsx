@@ -33,9 +33,11 @@ export default async function SharePage({ params }: { params: Promise<{ score: s
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="share-card" src={`/api/share/${n}`} alt={t("end.share_card_alt", { correct: n, total: TOTAL })} width={1200} height={630} />
       <p>{t("share.beat")}</p>
+      {/* Its own button, not the landing page's frozen one, which says two minutes: this one
+          quotes the test's time from time.test like the consent it opens (judge walk W09). */}
       <p>
         <Link href="/t?src=friends" className="btn btn-block">
-          {t("landing.cta")}
+          {t("share.cta")}
         </Link>
       </p>
       <p className="muted">{t("landing.no_camera")}</p>

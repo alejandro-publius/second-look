@@ -10,7 +10,7 @@ import type { FeatureScoreOut } from "@/lib/api";
 import type { WarmupItem } from "@/lib/content";
 import { content, featureById } from "@/lib/content";
 import { PANEL_COMPLETION_CODE, usePanel } from "@/lib/panel";
-import { siteUrl } from "@/lib/session";
+import { getContributorToken, siteUrl } from "@/lib/session";
 import { t } from "@/lib/t";
 
 /**
@@ -49,6 +49,11 @@ export function WarmupReveal({ pair = content.warmup }: { pair?: WarmupItem[] })
  */
 export function ScoreScreen({ scores, correctTotal, token, children }: { scores: FeatureScoreOut[]; correctTotal: number; token?: string; children?: React.ReactNode }) {
   const [copied, setCopied] = useState<"none" | "share" | "token" | "failed">("none");
+  // A score travels with later creek checks only through a kept contributor token: the server
+  // makes one only when Keep my score was ticked. The screen shown again after a reload has no
+  // fresh token, so the one this phone kept counts too. Without either, saying the score is saved
+  // would be untrue (judge walk W02).
+  const [kept] = useState(() => Boolean(token) || getContributorToken() !== null);
   // The panel study's completion code, after the score and for that source only (UPDATE_29).
   const panel = usePanel();
   const total = scores.reduce((n, s) => n + s.total, 0) || 16;
@@ -94,7 +99,7 @@ export function ScoreScreen({ scores, correctTotal, token, children }: { scores:
         </p>
       ) : null}
       <WarmupReveal />
-      <p>{t("end.score_for")}</p>
+      <p data-testid="score-kept">{kept ? t("end.score_for") : t("end.score_not_kept")}</p>
       <p>{t("end.last_line")}</p>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="share-card" src={cardUrl} alt={t("end.share_card_alt", { correct: correctTotal, total })} width={1200} height={630} />

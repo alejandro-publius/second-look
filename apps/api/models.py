@@ -204,3 +204,15 @@ class WalkRecordRow(SQLModel, table=True):
     bundle_json: str = Field(sa_column=Column(Text, nullable=False))
     created_at: datetime = Field(sa_column=_tz_column(index=True))
     delete_after: datetime = Field(sa_column=_tz_column(index=True))
+
+
+class WalkChecksRow(SQLModel, table=True):
+    """The follow-up checks a finished walk ran, as a creek check keeps its own in check_result, and
+    its final rating (judge walk W01). One row per walk record, stored with it and deleted with it
+    (apps/api/walk_store.py). The questions are the locale's, the answers coded values."""
+
+    __tablename__ = "walk_checks"
+
+    record_id: str = Field(primary_key=True, max_length=32)
+    final_rating: str | None = Field(default=None, max_length=16)
+    checks_json: str = Field(sa_column=Column(Text, nullable=False))

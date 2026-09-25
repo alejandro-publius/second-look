@@ -8,6 +8,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -337,6 +338,7 @@ def load_content(root: Path | str = ".", *, strict: bool = True) -> Content:
     _check_disjoint(photos, problems)
     _check_test_items(test_items, photos, problems)
     _check_warmup(warmup_items, photos, problems)
+    problems.extend(f"locales/en.json: {p}" for p in locale_ref_problems(locale))
 
     content = Content(
         root=root,
@@ -355,6 +357,42 @@ def load_content(root: Path | str = ".", *, strict: bool = True) -> Content:
     if strict and problems:
         raise ContentError("\n".join(problems))
     return content
+
+
+# A locale string may quote another string by its key, written as {time.test}. How long a thing
+# takes is written once, under time., and every screen that quotes it reads it from there (judge
+# walk W09). A key with a dot is never a fill-in: the fill-ins are {name} with no dot. The web build
+# resolves the same way (apps/web/scripts/locale-refs.mjs). Content.locale stays as written,
+# because the content hash, which both servers and the web build compute, is over the file.
+LOCALE_REF_RE = re.compile(r"\{([a-z_]+(?:\.[a-z0-9_]+)+)\}")
+
+
+def locale_ref_problems(locale: dict[str, Any]) -> list[str]:
+    """Each reference to a key the locale lacks, or to a string that quotes another in turn."""
+    problems: list[str] = []
+    for key, value in locale.items():
+        if not isinstance(value, str):
+            continue
+        for ref in LOCALE_REF_RE.findall(value):
+            quoted = locale.get(ref)
+            if not isinstance(quoted, str):
+                problems.append(f"{key} quotes {ref}, which the locale does not have")
+            elif LOCALE_REF_RE.search(quoted):
+                problems.append(f"{key} quotes {ref}, which quotes another string in turn")
+    return problems
+
+
+def resolve_locale(locale: dict[str, Any]) -> dict[str, Any]:
+    """The locale as a person reads it: every {a.b} replaced by the string it names."""
+    problems = locale_ref_problems(locale)
+    if problems:
+        raise ContentError("\n".join(problems))
+    return {
+        key: LOCALE_REF_RE.sub(lambda m: str(locale[m.group(1)]), value)
+        if isinstance(value, str)
+        else value
+        for key, value in locale.items()
+    }
 
 
 def placeholder_report(content: Content) -> list[str]:

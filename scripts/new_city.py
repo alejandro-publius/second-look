@@ -29,6 +29,7 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 
+from core.content_loader import resolve_locale
 from core.fhir_emit import FHIR_BASE, ID_SYSTEM_LOCATION
 from core.regions import slugify
 
@@ -321,9 +322,11 @@ def scaffold(
     if existing and not force:
         raise CityExists(f"{slug} exists ({existing[0].relative_to(root)}); use --force to redo it")
     locale_path = root / "content" / "locales" / "en.json"
-    locale = json.loads(locale_path.read_text(encoding="utf-8")) if locale_path.exists() else {}
+    raw = json.loads(locale_path.read_text(encoding="utf-8")) if locale_path.exists() else {}
+    # As a person reads them: poster.scan quotes the test's time from time.test (judge walk W09).
+    locale = resolve_locale(raw)
     hook = locale.get("landing.hook", "Which creek is healthier?")
-    scan = locale.get("poster.scan", "Scan to find out. Two minutes. Anonymous.")
+    scan = locale.get("poster.scan", "Scan to find out. Anonymous.")
     url = f"{site.rstrip('/')}/?src=poster"
     written: list[Path] = []
     for key, text in (

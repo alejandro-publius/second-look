@@ -347,11 +347,15 @@ export interface InatOut {
   terms: string;
 }
 
-/** POST /api/walk: a finished video walk, sent once so its record opens on any device. */
+/** POST /api/walk: a finished video walk, sent once so its record opens on any device. The store
+ *  runs the follow-up rules on the answers itself and checks these against them (judge walk W01);
+ *  a walk queued before walks asked any carries neither. */
 export interface WalkStoreRequest {
   walk_id: string;
   answers: Record<string, AnswerValue>;
   answered_at: string;
+  followup_answers?: Record<string, string>;
+  final_rating?: string | null;
 }
 
 /** What the store answers: the record's id, which is the walk visit's own id, and its delete date. */
@@ -362,10 +366,14 @@ export interface WalkStoredOut {
   delete_after: string;
 }
 
-/** GET /api/walk/{record_id}: one stored walk record, with its answers and its demo Bundle. */
+/** GET /api/walk/{record_id}: one stored walk record, with its answers and its demo Bundle, and
+ *  the checks it ran with its two ratings, as /api/spot gives them for a visit. */
 export interface WalkRecordOut extends WalkStoredOut {
   answers: Record<string, AnswerValue>;
   bundle: Record<string, unknown>;
+  checks?: CheckResultOut[];
+  first_rating?: string | null;
+  final_rating?: string | null;
 }
 
 export type QuickColour = "clear" | "muddy" | "foam" | "coloured" | "cant_tell";

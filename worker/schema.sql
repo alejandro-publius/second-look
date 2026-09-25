@@ -162,3 +162,13 @@ CREATE TABLE IF NOT EXISTS walk_record (
 
 CREATE INDEX IF NOT EXISTS walk_record_created ON walk_record (created_at);
 CREATE INDEX IF NOT EXISTS walk_record_delete_after ON walk_record (delete_after);
+
+-- The follow-up checks a finished walk ran, as a creek check keeps its own in check_result, and
+-- its final rating (judge walk W01). One row per walk record, written in the same batch as it and
+-- deleted with it. The questions are the locale's, the answers coded values; no free text.
+-- Additive and safe to run again.
+CREATE TABLE IF NOT EXISTS walk_checks (
+  record_id TEXT PRIMARY KEY,
+  final_rating TEXT,
+  checks_json TEXT NOT NULL
+);

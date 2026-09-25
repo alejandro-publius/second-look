@@ -1,7 +1,8 @@
 import { devices, expect, test, type Browser, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { walkBundle } from "../../../worker/src/core/walks";
+import { fill } from "../../../worker/src/core/labels";
+import { walkBundle, walkChecks, walkFollowups } from "../../../worker/src/core/walks";
 import type { AnswerValue } from "../../../worker/src/core/types";
 import { answerWalkPlainly } from "../scripts/gallery-walk.mjs";
 import { mockApi } from "./mock-api.mjs";
@@ -13,6 +14,8 @@ import { BASE } from "./helpers";
 // through that queue to the store, which keeps it as a demo record, so its link opens in another
 // browser, on /spot?id=<id> and on /city under the walk's demo creek.
 const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
+// The follow-up table and the form as the ports read them, as worker/src/core/core_content.json holds them.
+const CORE = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "worker", "src", "core", "core_content.json"), "utf8"));
 const en: Record<string, string> = content.locale;
 const walk: { id: string; creek_name: string; spot_name: string } = content.walks[0];
 const items: { id: string; text: string; type: string; options?: { label: string }[] }[] = content.form.items;
@@ -24,10 +27,18 @@ const bundleFor = (walkId: string, answers: Record<string, AnswerValue>, answere
   return walkBundle({ id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }, answers, answeredAt);
 };
 
+/** The checks the store keeps with a walk (judge walk W01), as worker/src/walk_store.ts makes them:
+ *  the rules through the same port, each question filled from the locale as questionText fills it. */
+const storeChecks = (answers: Record<string, AnswerValue>, given: Record<string, unknown>, finalRating: string | null) => {
+  const chosen = walkFollowups(answers, CORE.followups as Record<string, unknown>, CORE.form_items as never);
+  const out = walkChecks(answers, chosen, chosen.map((f) => fill(en[f.question_key], f.params)), given, finalRating);
+  return { checks: out.checks, first_rating: typeof answers.overall_rating === "string" ? answers.overall_rating : null, final_rating: out.final_rating };
+};
+
 async function freshPage(browser: Browser, walkStore: Map<string, unknown>): Promise<Page> {
   const context = await browser.newContext({ ...devices["iPhone 13"], serviceWorkers: "block" });
   const page = await context.newPage();
-  await mockApi(page, { walkStore, walkBundle: bundleFor });
+  await mockApi(page, { walkStore, walkBundle: bundleFor, walkChecks: storeChecks });
   return page;
 }
 
@@ -195,6 +206,64 @@ test("a finished walk's record link opens in a fresh browser, on /spot and on /c
   await expect(found.locator(".row")).toHaveText([`${feature("artificial_bank")}${en["city.walk_seen"].replace("{n}", "1")}`]);
   await expect(other.getByRole("main").getByRole("link", { name: en["city.walk_back_stored"], exact: true })).toHaveAttribute("href", `/spot?id=${recordId}`);
   await other.context().close();
+});
+
+// Judge walk W01: the walk is the same creek check, so it runs the creek check's follow-up rules
+// on its answers. Overall Good with an artificial bank is the rating check's trigger; a clip has no
+// weather, so the dry pipe question is never asked. The question shows as the creek check shows
+// it, the answer goes to the store with the walk, and "Checks that ran" shows on the phone's
+// record and on the stored one, as /spot shows it for a creek check.
+test("a walk asks the rating check, keeps the answer, and shows the checks that ran on both records", async ({ page, browser }) => {
+  const walkStore = new Map<string, unknown>();
+  const calls = await mockApi(page, { walkStore, walkBundle: bundleFor, walkChecks: storeChecks });
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "present", until: "followups" });
+  const asked = page.getByTestId("walk-followups");
+  await expect(asked.getByRole("heading", { name: en["check.followups_title"] })).toBeVisible();
+  await expect(asked).toContainText(en["check.followups_intro"]);
+  const question = fill(en["followup.rating_check"], { issues: "artificial banks" });
+  await expect(asked.getByRole("region", { name: "rating_check" })).toContainText(question);
+  await expect(asked.getByRole("region", { name: "dry_pipe" })).toHaveCount(0);
+  expect(calls.filter((c: { method: string }) => c.method === "POST")).toEqual([]);
+  await asked.getByRole("button", { name: en["check.change_rating"] }).click();
+  await asked.getByRole("button", { name: /^Poor:/ }).click();
+  await asked.getByRole("button", { name: en["check.finish"], exact: true }).click();
+
+  // The phone's record: the checks that ran, worded as /spot words them.
+  await expect(page.getByRole("heading", { name: en["walk.done_title"], level: 1 })).toBeVisible();
+  const ran = page.getByTestId("checks-ran");
+  await expect(ran.getByRole("heading", { name: en["spot.checks"], level: 2 })).toBeVisible();
+  const outcome = fill(en["spot.outcome_changed"], { from: en["spot.rating_word_good"], to: en["spot.rating_word_poor"] });
+  await expect(ran.locator("li")).toHaveText([`${en["spot.rule_rating_check"]}${question}${outcome}`]);
+  // Sent with the walk, and only what the store takes.
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  const post = calls.find((c: { method: string; path: string }) => c.method === "POST" && c.path === "/api/walk")!;
+  expect(post.body.followup_answers).toEqual({ rating_check: "change" });
+  expect(post.body.final_rating).toBe("poor");
+
+  // The stored record, in another browser: the same checks.
+  const href = (await page.getByTestId("walk-record-link").getAttribute("href"))!;
+  const other = await freshPage(browser, walkStore);
+  await other.goto(`${BASE}${href}`);
+  await expect(other.getByRole("heading", { name: en["walk.stored_title"], level: 1 })).toBeVisible();
+  await expect(other.getByTestId("checks-ran").locator("li")).toHaveText([`${en["spot.rule_rating_check"]}${question}${outcome}`]);
+  await other.context().close();
+});
+
+test("a walk whose answers call for no follow-up goes straight to its record, with no checks", async ({ page }) => {
+  const walkStore = new Map<string, unknown>();
+  const calls = await mockApi(page, { walkStore, walkBundle: bundleFor, walkChecks: storeChecks });
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "absent", until: "followups" });
+  await expect(page.getByRole("heading", { name: en["walk.done_title"], level: 1 })).toBeVisible();
+  await expect(page.getByTestId("walk-followups")).toHaveCount(0);
+  await expect(page.getByTestId("checks-ran")).toHaveCount(0);
+  await expect(page.getByTestId("walk-record-link")).toBeVisible();
+  const post = calls.find((c: { method: string; path: string }) => c.method === "POST" && c.path === "/api/walk")!;
+  expect(post.body.followup_answers).toEqual({});
+  expect(post.body.final_rating).toBeNull();
 });
 
 test("the walk's demo creek in a new tab of the same browser shows the walk, counted once", async ({ page }) => {

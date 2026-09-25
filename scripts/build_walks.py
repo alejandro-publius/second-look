@@ -64,6 +64,10 @@ DEFAULT_CACHE = Path.home() / "second-look-cache" / "videos"
 WANTED = 4
 WINDOW_S = 40
 MAX_BYTES = 20_000_000
+# The clip's lines and its ceiling: about 1 Mbps, so a slow phone line can play it (W05).
+CLIP_HEIGHT = 540
+CLIP_MAXRATE = "1000k"
+CLIP_BUFSIZE = "2000k"
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
@@ -259,15 +263,25 @@ def walk_checker(
     return checker
 
 
+def clip_command(src: Path, dest: Path, start: int, seconds: int, crf: int) -> list[str]:
+    """The ffmpeg line for one clip: 540 lines, H.264, at most about 1 Mbps, index at the front.
+
+    A clip plays on a phone, often on a slow line. At 720 lines and 2.5 Mbps a 1.6 Mbps line
+    stalled 26 times in 30 seconds (judge walk W05). crf keeps an easy clip smaller still, and
+    maxrate caps a busy one at CLIP_MAXRATE, so no clip needs more than about 1 Mbps to play.
+    """
+    return [
+        "ffmpeg", "-y", "-loglevel", "error", "-ss", str(start), "-t", str(seconds),
+        "-i", str(src), "-an", "-vf", f"scale=-2:{CLIP_HEIGHT}", "-c:v", "libx264",
+        "-preset", "slow", "-crf", str(crf), "-maxrate", CLIP_MAXRATE, "-bufsize", CLIP_BUFSIZE,
+        "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-map_metadata", "-1", str(dest),
+    ]  # fmt: skip
+
+
 def cut_clip(src: Path, dest: Path, start: int, seconds: int = WINDOW_S) -> int:
     dest.parent.mkdir(parents=True, exist_ok=True)
     for crf in (28, 32, 36):
-        cmd = [
-            "ffmpeg", "-y", "-loglevel", "error", "-ss", str(start), "-t", str(seconds),
-            "-i", str(src), "-an", "-vf", "scale=-2:720", "-c:v", "libx264", "-preset", "veryfast",
-            "-crf", str(crf), "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-            "-map_metadata", "-1", str(dest),
-        ]  # fmt: skip
+        cmd = clip_command(src, dest, start, seconds, crf)
         subprocess.run(cmd, check=True)
         if dest.stat().st_size < MAX_BYTES:
             return dest.stat().st_size

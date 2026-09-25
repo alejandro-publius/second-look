@@ -22,7 +22,8 @@ points to; this page follows it and adds the security side. Every route, with it
   handed to the uploader, and deleted after 30 days.
 - **One laboratory record** copied from the OneAquaHealth sandbox for `/two`.
 - **A finished video walk's demo record,** so its link opens on any device: the walk's id, the
-  answers as coded values, the time and its FHIR Bundle, tagged as a demo, in a table of its own.
+  answers as coded values, the time, its FHIR Bundle, tagged as a demo, and the follow-up checks
+  the rules asked with their coded answers, in tables of their own.
   No token, no position, no free text. At most 200 a day, deleted after 30 days, never counted
   and never mirrored (`POST /api/walk`, `docs/DATA_HANDLING.md`).
 

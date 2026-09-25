@@ -18,7 +18,11 @@ def root(tmp_path: Path) -> Path:
     locales.mkdir(parents=True)
     (locales / "en.json").write_text(
         json.dumps(
-            {"landing.hook": "Which creek is healthier?", "poster.scan": "Scan. Two minutes."}
+            {
+                "landing.hook": "Which creek is healthier?",
+                "time.test": "about four minutes",
+                "poster.scan": "Scan. It takes {time.test}.",
+            }
         )
     )
     return tmp_path
@@ -94,7 +98,9 @@ def test_the_poster_uses_our_words_the_city_name_and_leaves_photo_slots_empty(
     )
     html = (root / "docs" / "cities" / "heraklion" / "poster.html").read_text()
     assert "<h1>Heraklion: Which creek is healthier?</h1>" in html
-    assert "Scan. Two minutes." in html and "https://x.test/?src=poster" in html
+    # The poster quotes the test's time from time.test, as the web build does (judge walk W09).
+    assert "Scan. It takes about four minutes." in html and "https://x.test/?src=poster" in html
+    assert "{time." not in html
     assert "<svg>qr</svg>" in html
     assert html.count("goes here") == 2, "two empty slots, no borrowed photo"
     assert "photos/" not in html

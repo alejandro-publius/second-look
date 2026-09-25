@@ -1064,6 +1064,442 @@
       "name": "a walk where the person saw nothing and skipped the rest"
     }
   ],
+  "followups_cases": [
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": null,
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {},
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "the rating check fires and the dry pipe rule fails closed"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "keep",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "keep"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "kept rating"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "keep",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "good",
+        "given": {
+          "rating_check": "keep"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "kept rating, the final rating sent"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "change",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "moderate",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "moderate",
+        "given": {
+          "rating_check": "change"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "changed rating"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "skipped",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "skipped"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "skipped"
+    },
+    {
+      "expected": {
+        "error": "A changed rating needs the new rating.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "change"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "a changed rating with no new rating"
+    },
+    {
+      "expected": {
+        "error": "The final rating can differ from the first only when the rating check says change.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "poor",
+        "given": {
+          "rating_check": "keep"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "a kept rating sent with another"
+    },
+    {
+      "expected": {
+        "error": "rating_check: answer keep, change, skipped.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "yes"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "an answer the question does not take"
+    },
+    {
+      "expected": {
+        "error": "rating_check: answer keep, change, skipped.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": true
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "an answer that is not text"
+    },
+    {
+      "expected": {
+        "error": "No follow-up called 'dry_pipe' was asked in this walk.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks, a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "dry_pipe": "yes"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "a question that was not asked"
+    },
+    {
+      "expected": {
+        "checks": [],
+        "final_rating": "poor",
+        "followups": []
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "poor",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {},
+        "question_texts": []
+      },
+      "name": "a poor rating asks nothing"
+    },
+    {
+      "expected": {
+        "error": "The final rating can differ from the first only when the rating check says change.",
+        "followups": []
+      },
+      "input": {
+        "answers": {
+          "overall_rating": "poor"
+        },
+        "final_rating": "good",
+        "given": {},
+        "question_texts": []
+      },
+      "name": "nothing asked, a new rating sent"
+    },
+    {
+      "expected": {
+        "checks": [],
+        "final_rating": null,
+        "followups": []
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present"
+        },
+        "final_rating": null,
+        "given": {},
+        "question_texts": []
+      },
+      "name": "no rating at all"
+    }
+  ],
+  "followups_function": "core.walks.walk_followups, core.walks.walk_checks",
   "function": "core.walks.walk_bundle",
   "generated_by": "evals/golden_vectors.py",
   "record_cases": [
