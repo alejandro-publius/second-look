@@ -130,7 +130,7 @@ Names only. No value is in the repository: `.env.example` is tracked and `.env` 
 | `QA_KEY` | a Worker secret; the ignored `.env` in each checkout | marks a sitting as a test when sent as the `x-qa-key` header, so a live check never counts |
 | `EXPORT_TOKEN` | a Worker secret; the ignored `.env` | opens `/api/test/export`; without it the route is 404 |
 | `ANTHROPIC_API_KEY` | the ignored `.env` in `~/second-look-depth` only, never exported in a shell | lets `make ai-run` call the models; nothing else reads it |
-| `CLOUDFLARE_D1_READ_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets, not yet set | let `.github/workflows/backup.yml` export D1; the workflow runs by hand only until they exist |
+| `CLOUDFLARE_D1_READ_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets, not yet set | let `.github/workflows/backup.yml` export D1; the workflow runs by hand only, and only while the repository is private, and it is unused: the daily backup is `com.secondlook.backup` below |
 | `wrangler login` (not a variable) | wrangler's own store on the Mac | deploys, the D1 backup and the daily cache job |
 
 Both servers treat a secret shorter than 16 characters as not set (`apps/api/settings.py`,

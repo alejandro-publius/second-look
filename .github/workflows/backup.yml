@@ -1,13 +1,15 @@
-# A daily dump of the live D1 database, kept as a private artifact. Nobody computes outcomes
-# from a backup: only evals/usability_analysis.py does that, and it refuses before the data lock
-# and without the prereg-v1 tag. See docs/DATA_HANDLING.md.
+# A dump of the live D1 database as a GitHub Actions artifact, made only by hand and only while the
+# repository is private. Anyone signed in to GitHub can download a public repository's artifacts,
+# and this one turns public on Sep 30, so on a public repository the job is skipped and the dump
+# stays out of Actions artifacts. An artifact made while private turns public with the repository,
+# so make none before the flip. Nobody computes outcomes from a backup: only
+# evals/usability_analysis.py does that, and it refuses before the data lock and without the
+# prereg-v1 tag. See docs/DATA_HANDLING.md, Backups.
 name: backup
 
-# Backups run on the Mac through launchd (scripts/backup_d1.sh), not here.
-# Manual only until the two secrets exist (Update 10 answer A2). A scheduled run without them
-# would fail every morning and teach everyone to ignore a red tick. Put the schedule back the
-# day Alex adds CLOUDFLARE_D1_READ_TOKEN and CLOUDFLARE_ACCOUNT_ID, then run it once and do the
-# restore drill; the launch gate in scripts/preflight.py reads results/backup_drill.json.
+# The daily backup runs on the Mac through launchd (scripts/backup_d1.sh), not here.
+# Manual only: it needs CLOUDFLARE_D1_READ_TOKEN and CLOUDFLARE_ACCOUNT_ID, which were never added
+# (Update 10 answer A2), and a schedule on the public repository would publish the dump.
 on:
   workflow_dispatch:
 
@@ -16,6 +18,8 @@ permissions:
 
 jobs:
   export:
+    # Critic round 14 A03: never on a public repository, where the artifact would not be private.
+    if: ${{ github.event.repository.private }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
