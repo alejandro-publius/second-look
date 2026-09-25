@@ -33,15 +33,26 @@ interface Fetched {
 function watchWorker(context: BrowserContext) {
   const fetched: Fetched[] = [];
   const pending: Promise<void>[] = [];
+  // Each read is bounded and never throws: when the worker stops (Chromium closes an idle one), a
+  // pending read can reject with "Worker closed" or never settle, which made CI hang for two
+  // minutes on depth at 90c4045. A read that fails still records the path, and its size then
+  // comes from the stored copy in Cache Storage, so nothing is undercounted.
+  const within = <T,>(p: Promise<T>, ms = 5_000) =>
+    Promise.race([p.catch(() => null), new Promise<null>((done) => setTimeout(() => done(null), ms))]);
   context.on("requestfinished", (req) => {
     if (!req.serviceWorker()) return;
+    const path = new URL(req.url()).pathname;
     pending.push(
       (async () => {
-        const res = await req.response();
-        if (!res) return;
-        const body = await res.body().catch(() => Buffer.alloc(0));
-        const wire = Math.max(0, (await req.sizes()).responseBodySize);
-        fetched.push({ path: new URL(req.url()).pathname, body: body.length, length: Number(res.headers()["content-length"] ?? 0), wire });
+        const res = await within(req.response());
+        const body = res ? await within(res.body()) : null;
+        const sizes = await within(req.sizes());
+        fetched.push({
+          path,
+          body: body ? body.length : 0,
+          length: res ? Number(res.headers()["content-length"] ?? 0) : 0,
+          wire: sizes ? Math.max(0, sizes.responseBodySize) : 0,
+        });
       })(),
     );
   });
