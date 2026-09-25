@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Photo } from "@/components/Photo";
 import { Row } from "@/components/ui/Row";
-import { content, featureById, licenseUrl } from "@/lib/content";
+import { content, featureById, licenseName, licenseUrl } from "@/lib/content";
 import { GATE_FILES, MODEL_CARD_FILE, PASS_FILE, footageExample, howKeptSplit, howWeKnowNumbers } from "@/lib/how-data";
 import { modelName } from "@/lib/models";
 import { t } from "@/lib/t";
@@ -61,10 +61,10 @@ function FrameCredit({ c }: { c: Case }) {
       {t("how.example_credit", { author: c.credit.author })}{" "}
       {url ? (
         <a href={url} rel="license noreferrer">
-          {c.credit.license}
+          {licenseName(c.credit.license)}
         </a>
       ) : (
-        c.credit.license
+        licenseName(c.credit.license)
       )}
       {". "}
       <a href={c.credit.source_url} rel="noreferrer nofollow">

@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { API_ORIGIN, assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
+
+const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
 
 test("landing paints without the API and wakes it afterwards", async ({ page }) => {
   const urls = watchRequests(page);
@@ -97,6 +101,19 @@ test("every photograph a visitor can see is named on the credits page", async ({
   await expect(main.getByText("Public domain", { exact: true }).first()).toBeVisible();
   const names = (await main.locator('a[rel~="license"]').allInnerTexts()).map((n) => n.replace(/^Our video's licence: /, ""));
   expect(names.filter((n) => !/^(CC BY(-SA)? \d\.\d|CC0 1\.0|Public domain)$/.test(n))).toEqual([]);
+
+  // CRITIC_11 V02 and R05: every other page that prints a licence writes it the same way: each
+  // walk's clip credit, the frame credits on /how-we-know and the poster's photo credits.
+  const walkIds: string[] = (content.walks ?? []).map((w: { id: string }) => w.id);
+  expect(walkIds.length).toBeGreaterThan(0);
+  for (const path of [...walkIds.map((id) => `/walk/${id}`), "/how-we-know", "/poster"]) {
+    await page.goto(path);
+    const body = page.locator("body");
+    await expect(body, path).toContainText(/CC BY(-SA)? \d\.\d/);
+    await expect(body, path).not.toContainText(/CC-BY|CC0-|public-domain/);
+    const shown = await body.locator('a[rel~="license"]').allInnerTexts();
+    expect(shown.filter((n) => !/^(CC BY(-SA)? \d\.\d|CC0 1\.0|Public domain)$/.test(n)), path).toEqual([]);
+  }
 
   // The judges' door and About both reach it. The participant's door deliberately does not.
   await page.goto("/judges");

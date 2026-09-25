@@ -175,10 +175,13 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   const credit = async (card: Locator, c: { manifest_row: { author: string; license: string; source_url: string } }) => {
     const line = card.getByTestId("frame-credit");
     await expect(line).toContainText(fill("how.example_credit", { author: c.manifest_row.author }));
-    await expect(line.getByRole("link", { name: c.manifest_row.license, exact: true })).toHaveAttribute(
+    // CRITIC_11 V02: the licence as people write it, as /credits writes it, never the manifest's code.
+    expect(c.manifest_row.license).toBe("CC-BY-3.0");
+    await expect(line.getByRole("link", { name: "CC BY 3.0", exact: true })).toHaveAttribute(
       "href",
       "https://creativecommons.org/licenses/by/3.0/",
     );
+    await expect(line).not.toContainText(c.manifest_row.license);
     await expect(line.getByRole("link", { name: en["credits.source"], exact: true })).toHaveAttribute("href", c.manifest_row.source_url);
   };
 

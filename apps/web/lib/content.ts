@@ -238,9 +238,11 @@ export function licenseUrl(license: string): string | undefined {
 /**
  * A licence as people write it, for display only: the manifest's CC-BY-SA-2.0 as CC BY-SA 2.0 and
  * public-domain as Public domain, the way the video's credits already write them, so /credits
- * names every licence one way (CRITIC_09 R05). The code itself still picks the deed link. A name
- * already in words, such as CC BY-SA 4.0, is kept as it is. CC0 has only ever had version 1.0, so
- * the video credits' plain CC0 is written CC0 1.0 like the photos' CC0-1.0.
+ * names every licence one way (CRITIC_09 R05), and so does every other page that prints one: the
+ * walk credit, the frame credits on /how-we-know and the poster (CRITIC_11 R05). The code itself
+ * still picks the deed link. A name already in words, such as CC BY-SA 4.0, is kept as it is. CC0
+ * has only ever had version 1.0, so the video credits' plain CC0 is written CC0 1.0 like the
+ * photos' CC0-1.0.
  */
 export function licenseName(license: string): string {
   if (license === "public-domain") return "Public domain";

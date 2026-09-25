@@ -10,7 +10,7 @@ import { Photo } from "./Photo";
 import { Progress } from "./Progress";
 import { answerRows } from "@/lib/answers";
 import type { AnswerValue } from "@/lib/api";
-import { content, featureById, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
+import { content, featureById, licenseName, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
 import { t } from "@/lib/t";
 import { buildRecord, saveWalkVisit, type WalkAnswers } from "@/lib/walks";
 
@@ -36,10 +36,10 @@ function Clip({ walk }: { walk: Walk }) {
         {t("walk.credit", { title: walk.title, author: walk.author })}{" "}
         {licenseUrl(walk.license) ? (
           <a href={licenseUrl(walk.license)} rel="license noreferrer">
-            {walk.license}
+            {licenseName(walk.license)}
           </a>
         ) : (
-          walk.license
+          licenseName(walk.license)
         )}
         {". "}
         <a href={walk.source_url} rel="noreferrer nofollow">
