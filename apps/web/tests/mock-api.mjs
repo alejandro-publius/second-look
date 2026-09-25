@@ -254,6 +254,7 @@ export async function mockApi(page, options = {}) {
       { rule_id: "rating_check", question_text: "You rated this stream Good, but you also reported built banks. Do you want to keep your rating?", kind: "keep_rating" },
     ];
   const responses = new Map();
+  const part2 = options.part2Store ?? new Map();
   // Enough session state for a reload to resume, the way the real API does.
   const sessions = new Map();
   let sessionCount = 0;
@@ -436,6 +437,54 @@ export async function mockApi(page, options = {}) {
       if (!row) return json({ detail: `We have no stored walk record called '${id}'. A walk record is deleted 30 days after it is stored.` }, 404);
       return json(row);
     }
+    // Part 2 (UPDATE_31). Flags live here, as on the Worker: the page only ever hears { ask }.
+    if (path.startsWith("/api/t2/")) {
+      const flags = options.part2Flags ?? PART2_FLAGS;
+      const askFor = (p2, item, answer) => p2.arm === "assisted" && flags[item] !== undefined && answer !== (flags[item] === "present" ? "yes" : "no");
+      if (path === "/api/t2/offer") {
+        const s = sessions.get(body.session_id);
+        if (!s) return json({ detail: "We do not know that session." }, 404);
+        if (!s.completed) return json({ detail: "The second look opens after the score screen of the first test." }, 409);
+        if (body.decision === "decline") return json({ declined: true });
+        let p2 = [...part2.values()].find((x) => x.session_id === body.session_id);
+        if (!p2) {
+          p2 = { part2_id: "p2-" + (part2.size + 1), session_id: body.session_id, arm: options.part2Arm ?? "assisted", item_order: PART2_IDS.slice(), rows: new Map(), completed: false };
+          part2.set(p2.part2_id, p2);
+        }
+        return json(part2State(p2));
+      }
+      if (path === "/api/t2/resume") {
+        const p2 = part2.get(url.searchParams.get("part2_id"));
+        return p2 ? json(part2State(p2)) : json({ detail: "unknown" }, 404);
+      }
+      const p2 = part2.get(body?.part2_id);
+      if (path === "/api/t2/answer") {
+        if (!p2) return json({ detail: "unknown" }, 404);
+        const had = p2.rows.get(body.item_id);
+        if (had) return had.first === body.answer ? json({ ask: had.shown }) : json({ detail: "first stays" }, 409);
+        const ask = askFor(p2, body.item_id, body.answer);
+        p2.rows.set(body.item_id, { first: body.answer, final: ask ? null : body.answer, shown: ask, choice: "" });
+        return json({ ask });
+      }
+      if (path === "/api/t2/choice") {
+        const row = p2?.rows.get(body.item_id);
+        if (!row || !row.shown) return json({ detail: "no question" }, 409);
+        if (row.final !== null) return json({ detail: "first stays" }, 409);
+        row.choice = body.choice;
+        row.final = body.choice === "keep" ? row.first : body.changed_to;
+        return json({ ok: true });
+      }
+      if (path === "/api/t2/complete") {
+        if (!p2) return json({ detail: "unknown" }, 404);
+        const settled = PART2_IDS.filter((i) => p2.rows.get(i)?.final);
+        if (settled.length < 8 && !body.final && !p2.completed && (body.answered_count ?? 0) > settled.length) {
+          return json({ need_resend: PART2_IDS.filter((i) => !settled.includes(i)), stored_count: settled.length });
+        }
+        p2.completed = true;
+        return json({ correct_total: part2Correct(p2), total: 8 });
+      }
+      if (path === "/api/t2/demo") return json({ ask: askFor({ arm: "assisted" }, body.item_id, body.answer), correct: isCorrect(body.answer, part2Gold(body.item_id)) });
+    }
     if (path === "/api/test/counts") return json({ by_arm: { untrained: { randomized: 0, completed: 0 }, trained: { randomized: 0, completed: 0 } }, by_source: {}, post_lock: 0 });
     return json({ detail: "unknown route in mock" }, 404);
   };
@@ -443,6 +492,27 @@ export async function mockApi(page, options = {}) {
   await page.route(`${API_ORIGIN}/**`, handle);
   await page.route(`${BUILT_IN_DEFAULT}/**`, handle);
   return calls;
+}
+
+// Part 2's mock items: a01 to a08, odd present and even absent, as in content/part2_items.yaml.
+export const PART2_IDS = Array.from({ length: 8 }, (_, i) => `a0${i + 1}`);
+export const part2Gold = (itemId) => (Number(itemId.slice(1)) % 2 === 1 ? "present" : "absent");
+// The mock's flags: a01 agrees with its gold, a02 and a03 point the wrong way, a07 agrees.
+export const PART2_FLAGS = { a01: "present", a02: "present", a03: "absent", a07: "present" };
+
+function part2Correct(p2) {
+  return PART2_IDS.filter((i) => {
+    const row = p2.rows.get(i);
+    return row?.final && isCorrect(row.final, part2Gold(i));
+  }).length;
+}
+
+function part2State(p2) {
+  const settled = PART2_IDS.filter((i) => p2.rows.get(i)?.final);
+  const pending = p2.item_order.find((i) => p2.rows.has(i) && !p2.rows.get(i).final) ?? null;
+  const out = { part2_id: p2.part2_id, arm: p2.arm, item_order: p2.item_order, answered: settled, pending, completed: p2.completed, total: 8 };
+  if (p2.completed) out.correct_total = part2Correct(p2);
+  return out;
 }
 
 /** Collects every request the page makes so a test can prove none left our origin or the mocked API. */

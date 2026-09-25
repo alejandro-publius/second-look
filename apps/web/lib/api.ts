@@ -379,6 +379,40 @@ export interface QuickRequest {
   photo_id?: string;
 }
 
+export interface Part2State {
+  part2_id: string;
+  arm: "assisted" | "unassisted";
+  item_order: string[];
+  answered: string[];
+  pending: string | null;
+  completed: boolean;
+  total: number;
+  correct_total?: number;
+}
+
+export interface Part2AnswerRequest {
+  part2_id: string;
+  item_id: string;
+  answer: TestAnswer;
+  t_first_ms: number;
+  position: number;
+}
+
+export interface Part2ChoiceRequest {
+  part2_id: string;
+  item_id: string;
+  choice: "keep" | "change";
+  changed_to?: TestAnswer;
+  t_final_ms: number;
+}
+
+export interface Part2Complete {
+  correct_total?: number;
+  total?: number;
+  need_resend?: string[];
+  stored_count?: number;
+}
+
 export class ApiError extends Error {
   status: number;
   /** The API's own sentence for the person, from a 4xx answer's { detail }, when it gave one. */
@@ -483,6 +517,32 @@ export const api = {
   },
   demoAnswer(item_id: string, answer: TestAnswer) {
     return request<DemoAnswerResponse>("POST", "/api/demo/answer", { item_id, answer }, 1);
+  },
+  // Part 2, the assisted second look (UPDATE_31). The server keeps the flags and answers each
+  // first answer with whether to ask; nothing here learns which way a flag points.
+  part2Offer(session_id: string, decision: "start" | "decline") {
+    return request<Part2State | { declined: true }>("POST", "/api/t2/offer", { session_id, decision }, 2);
+  },
+  part2Answer(body: Part2AnswerRequest) {
+    return request<{ ask: boolean }>("POST", "/api/t2/answer", body, 3);
+  },
+  /** A repeat of the same choice is 200. A 409 means the first choice stands; treat it as done. */
+  async part2Choice(body: Part2ChoiceRequest): Promise<void> {
+    try {
+      await request<{ ok: boolean }>("POST", "/api/t2/choice", body, 3);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) return;
+      throw err;
+    }
+  },
+  part2Complete(part2_id: string, answered_count: number, final = false) {
+    return request<Part2Complete>("POST", "/api/t2/complete", { part2_id, answered_count, final }, 2);
+  },
+  part2Resume(part2_id: string) {
+    return request<Part2State>("GET", `/api/t2/resume?part2_id=${encodeURIComponent(part2_id)}`, undefined, 2);
+  },
+  part2Demo(item_id: string, answer: TestAnswer) {
+    return request<{ ask: boolean; correct: boolean }>("POST", "/api/t2/demo", { item_id, answer }, 1);
   },
   checkDraft(body: DraftRequest) {
     return request<DraftResponse>("POST", "/api/check/draft", body);
