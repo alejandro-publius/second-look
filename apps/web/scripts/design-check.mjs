@@ -3,8 +3,10 @@
 // built app on the phone viewport, over the stage 1 screens only. SKIP_TAP=1 skips that part.
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { connect, createServer } from "node:net";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { WEB_ORIGIN, WEB_PORT } from "./web-port.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const web = resolve(here, "..");
@@ -229,18 +231,67 @@ for (const f of [...tsxFiles, ...contentFiles]) {
   }
 }
 
-// 11. Tap targets on the phone viewport, stage 1 screens only.
+// 11. Tap targets on the phone viewport, stage 1 screens only. This build is served on WEB_PORT
+// (3100 unless set; make judge-check picks a free one). A port that something else already holds is
+// refused, not measured: that server is not this build (CRITIC_13 N01).
 let tapNote = "skipped (SKIP_TAP=1)";
 if (process.env.SKIP_TAP !== "1") {
-  const started = spawn("npm", ["run", "start"], { cwd: web, stdio: "ignore", detached: true, env: { ...process.env, NEXT_PUBLIC_API_ORIGIN: "http://127.0.0.1:8100", NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100", NEXT_PUBLIC_BUILD_HASH: "test", NEXT_TELEMETRY_DISABLED: "1" } });
+  if (!(await portFree(WEB_PORT))) {
+    fails.push(`apps/web:1 port ${WEB_PORT} is in use by another process, so the tap targets were not measured: stop it (make dev and make demo-offline use 3100) or set WEB_PORT to a free port`);
+  } else {
+    await measureTaps();
+  }
+}
+
+/** True when nothing answers on the port and this process could bind it on 127.0.0.1. */
+async function portFree(port) {
+  const answers = await new Promise((done) => {
+    const socket = connect({ host: "127.0.0.1", port });
+    socket.once("connect", () => {
+      socket.destroy();
+      done(true);
+    });
+    socket.once("error", () => done(false));
+  });
+  if (answers) return false;
+  return new Promise((done) => {
+    const server = createServer();
+    server.once("error", () => done(false));
+    server.listen(port, "127.0.0.1", () => server.close(() => done(true)));
+  });
+}
+
+async function measureTaps() {
+  const started = spawn("npm", ["run", "start"], { cwd: web, stdio: "ignore", detached: true, env: { ...process.env, WEB_PORT: String(WEB_PORT), NEXT_PUBLIC_API_ORIGIN: "http://127.0.0.1:8100", NEXT_PUBLIC_SITE_URL: WEB_ORIGIN, NEXT_PUBLIC_BUILD_HASH: "test", NEXT_TELEMETRY_DISABLED: "1" } });
+  // The server runs in its own process group, so one signal stops npm, next and its children. It is
+  // stopped on the way out, on Ctrl-C and when judge-check stops this script too.
+  let exited = false;
+  started.once("exit", () => {
+    exited = true;
+  });
+  const stop = () => {
+    try {
+      process.kill(-started.pid);
+    } catch {
+      // already gone
+    }
+  };
+  for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
+    process.once(signal, () => {
+      stop();
+      process.exit(1);
+    });
+  }
   const deadline = Date.now() + 60_000;
   let up = false;
-  while (Date.now() < deadline && !up) {
-    const probe = spawnSync("curl", ["-sS", "-o", "/dev/null", "-w", "%{http_code}", "http://127.0.0.1:3100/"], { encoding: "utf8" });
+  while (Date.now() < deadline && !up && !exited) {
+    const probe = spawnSync("curl", ["-sS", "-o", "/dev/null", "-w", "%{http_code}", `${WEB_ORIGIN}/`], { encoding: "utf8" });
     up = probe.stdout === "200";
-    if (!up) spawnSync("sleep", ["1"]);
+    if (!up) await new Promise((r) => setTimeout(r, 1000));
   }
-  if (!up) {
+  if (exited) {
+    fails.push(`apps/web:1 the app stopped before it answered on port ${WEB_PORT}, so the tap targets were not measured`);
+  } else if (!up) {
     fails.push("apps/web:1 could not start the app to measure tap targets");
   } else {
     const run = spawnSync("npx", ["playwright", "test", "tests/design.spec.ts", "--reporter=line"], { cwd: web, encoding: "utf8", env: { ...process.env, PW_REUSE: "1" } });
@@ -256,11 +307,10 @@ if (process.env.SKIP_TAP !== "1") {
       tapNote = (out.match(/^\s*\d+ passed.*$/m) || ["passed"])[0].trim();
     }
   }
-  try {
-    process.kill(-started.pid);
-  } catch {
-    // already gone
-  }
+  stop();
+  // Wait until the port is free again, so whatever runs next may take it.
+  const freed = Date.now() + 15_000;
+  while (Date.now() < freed && !(await portFree(WEB_PORT))) await new Promise((r) => setTimeout(r, 250));
 }
 
 if (fails.length) {
