@@ -199,8 +199,34 @@ submit-check:
 # docs/internal/DONE.md and prints PASS, RED, BLOCKED or HUMAN per item, then the line
 # "RED: <n> BLOCKED: <n> HUMAN: <n>". Red until the work is done, so it is not part of make check.
 # The panel study (docs/internal/PANEL_STUDY.md): completed sessions by source and arm, live.
+# scripts/panel_status.py --issue also puts them under the status issue's top paragraph.
 panel-status:
 	$(PY) scripts/panel_status.py
+
+# UPDATE_30 section 5.1: the data lock in one command, from the backup to the line on the status
+# issue (scripts/lock_analysis.py says each step). It refuses before 2026-09-28T01:00:00Z by the
+# real clock, runs the pre-registered analysis once, and on any failure puts production and this
+# checkout back and says why on the status issue and in ~/second-look-backups/lock.log.
+.PHONY: lock-analysis lock-analysis-ready lock-analysis-install mac-jobs-install mac-jobs-today
+lock-analysis:
+	$(PY) scripts/lock_analysis.py
+
+# What would stop the lock job, checked on any day without changing anything: the branch, local
+# changes, the tools make check needs, the logins, the QA key, and a deploy record to go back to.
+lock-analysis-ready:
+	$(PY) scripts/lock_analysis.py --ready
+
+# The launchd jobs (docs/internal/MAC_JOBS.md), all run from one checkout, ~/second-look-depth
+# unless JOBS_ROOT says otherwise. lock-analysis-install installs only the one-off lock job.
+JOBS_ROOT ?= $(HOME)/second-look-depth
+mac-jobs-install:
+	$(PY) scripts/mac_jobs.py install --root $(JOBS_ROOT)
+
+lock-analysis-install:
+	$(PY) scripts/mac_jobs.py install --root $(JOBS_ROOT) --only lock
+
+mac-jobs-today:
+	$(PY) scripts/mac_jobs.py today
 
 done-check:
 	$(PY) scripts/done_check.py
@@ -295,6 +321,12 @@ screens:
 
 deploy:
 	bash scripts/deploy.sh
+
+# UPDATE_30 section 7.2: the last known good Worker version and Pages build, from the deploy
+# record in docs/notes/hosting.md. A dry run that prints what it would do, unless ROLLBACK=yes.
+.PHONY: rollback
+rollback:
+	$(PY) scripts/rollback.py $(if $(filter yes,$(ROLLBACK)),--yes,)
 
 # The depth branch's own preview on Cloudflare Pages (Update 10 rule B and answer A1). The export
 # is built with an empty API origin, so the browser talks to one origin and the API is reached

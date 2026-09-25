@@ -115,7 +115,9 @@ merge, both halves go in one session, in this order, and not the other way round
 
 1. Apply the new D1 tables. They are additive only, every one is `CREATE TABLE IF NOT EXISTS`:
    `cd worker && npx wrangler d1 execute second-look --remote --file schema.sql`.
-2. Deploy the Worker: `cd worker && npx wrangler deploy`. The study routes are unchanged in it.
+2. Deploy the Worker: `bash scripts/deploy.sh worker`, which runs step 1 and then
+   `cd worker && npx wrangler deploy`, and writes the new version into the deploy record below.
+   The study routes are unchanged in it.
 3. Run the study contract tests and the phone end to end tests against production:
    `uv run pytest -q apps/api/tests/test_study.py` for the contract, and
    `SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-check.mjs` on the phone
@@ -127,6 +129,12 @@ merge, both halves go in one session, in this order, and not the other way round
    `/api/test/counts` answer through the Pages origin, `/api/share/13` is still an SVG, and the
    policy reads `connect-src 'self'`.
 
+`make lock-analysis` (`scripts/lock_analysis.py`), which a launchd job runs at
+2026-09-28T01:10:00Z, deploys in this order after the lock's commit, with the read-only phone
+check after the site, then confirms judge mode opened, and only then pushes `depth` and `main` in
+one atomic push. The push comes last so that a failed step can roll production back to the
+deploy record's rows below without rewriting history.
+
 ## The sandbox mirror after launch (Update 10C answer 3)
 
 Real creek visits are mirrored once, as one tagged batch after data lock, not as they arrive:
@@ -137,6 +145,27 @@ recorded, again on Sep 30 and again on Oct 1, because anyone can delete records 
 updates the Library entry's count and its list of Provenances to what that run put on the
 server: `SANDBOX_MIRROR_ENABLED=true uv run python scripts/repush_sandbox.py --library
 --evidence docs/notes/sandbox_library.md`.
+
+## Deploys and rollback (UPDATE_30 section 7.2)
+
+`scripts/deploy.sh` writes a row here after every production deploy, through
+`scripts/deploy_record.py`: the Worker's version id, or the Pages deployment's id with the folder
+under `~/second-look-backups/deploys/` that keeps the exact files that went up. Pages has no
+rollback on the command line, so going back means uploading those same files again. A row says
+`no` until the phone tests have passed against production; then
+`uv run python scripts/deploy_record.py good` marks it `yes`, and the record is committed.
+
+`make rollback` prints what it would do: for the Worker, `wrangler rollback` to the newest good
+version that is not live; for the site, the newest good build that is not live, uploaded again
+with its own commit. `make rollback ROLLBACK=yes` does it, then reads `/health`. D1 tables are
+never rolled back; every change to them is additive. `uv run python scripts/deploy_record.py
+check-live` exits 0 when what is live now is a good row with its files kept, which the data lock
+job checks before it deploys anything.
+
+<!-- deploys:start -->
+| When (UTC) | Part | Commit | Id | Archive | Checked |
+|---|---|---|---|---|---|
+<!-- deploys:end -->
 
 ## What is not done
 

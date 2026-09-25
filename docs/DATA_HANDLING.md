@@ -129,9 +129,14 @@ edge, which never hand an address to our code, and a line in docs/deviations.md.
 The raw database is backed up once a day by `.github/workflows/backup.yml`, which runs
 `wrangler d1 export` against the `second-look` database and keeps the dump as a private GitHub
 Actions artifact. The token it uses is scoped to D1 read on this one account and nothing else.
-`scripts/backup_db.sh` still covers the compose stack. Nobody computes outcomes from a backup. The only code that computes outcomes is
+`scripts/backup_db.sh` still covers the compose stack. Nobody computes outcomes from a backup
+before the lock. The only code that computes outcomes is
 `evals/usability_analysis.py`, which refuses to run before data lock (2026-09-28T01:00:00Z)
-and refuses to run without the `prereg-v1` tag. A restore drill was run once before launch;
+and refuses to run without the `prereg-v1` tag. At the lock, `make lock-analysis` takes one more
+backup on this Mac and exports the two study tables from it (`scripts/study_export.py`, the same
+files the export route gives), so the one pre-registered run reads exactly the snapshot that is
+kept. That export stays outside the repo: in `data/export`, which git ignores, and in a copy next
+to the backup in `~/second-look-backups/`. A restore drill was run once before launch;
 docs/internal/BUILD_LOG.md records it.
 
 ## The audit log
