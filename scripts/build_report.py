@@ -66,6 +66,21 @@ LOCAL_LINK_RE = re.compile(r"\[([^\]]+)\]\((?!https?://|#|mailto:|data:)([^)\s]+
 # a data address, so the PDF needs no file beside it and the source hash covers the drawing.
 FIGURE_RE = re.compile(r"^\{\{figure:([\w./-]+\.svg)\|([^}]+)\}\}$")
 DASHES = (chr(0x2013), chr(0x2014))
+# How big a figure prints. The print script sets an A4 page with 16 mm side margins, and
+# report.css caps a picture at the text width and 5 inches high; test_report_pdf.py holds these
+# to both files. A figure whose smallest text would print under MIN_FIGURE_TEXT_PT is refused:
+# the gate sequence once printed its labels at 2.7 pt (critic round 09 L04).
+PT_PER_MM = 72 / 25.4
+TEXT_WIDTH_PT = (210 - 2 * 16) * PT_PER_MM
+FIGURE_MAX_HEIGHT_PT = 5 * 72
+PT_PER_CSS_PX = 0.75
+MIN_FIGURE_TEXT_PT = 6.0
+SVG_ROOT_RE = re.compile(r"<svg\b[^>]*>", re.S)
+VIEWBOX_RE = re.compile(r'viewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"')
+TEXT_TAG_RE = re.compile(r"<(text|tspan)\b([^>]*)>", re.S)
+SIZE_ATTR_RE = re.compile(r'\bfont-size="\s*([\d.]+)(?:px)?\s*"')
+SIZE_STYLE_RE = re.compile(r"font-size:\s*([\d.]+)px")
+CLASS_RULE_RE = re.compile(r"#[\w-]+ \.([\w-]+)\{([^}]*)\}")
 
 
 class ReportError(Exception):
@@ -155,11 +170,75 @@ def unfolded(text: str) -> str:
     return re.sub(r"^<summary>(.*?)</summary>[ \t]*$", r"*\1*\n", text, flags=re.M)
 
 
+def _explicit_size(attrs: str) -> float | None:
+    style = re.search(r'\bstyle="([^"]*)"', attrs)
+    found = SIZE_STYLE_RE.search(style.group(1)) if style else None
+    found = found or SIZE_ATTR_RE.search(attrs)
+    return float(found.group(1)) if found else None
+
+
+def figure_text_pt(svg: str) -> float | None:
+    """The smallest text an SVG prints, in points, once the page scales it to fit; None when it
+    has no text. A text takes its own font size, else its class's rule in the drawing's style,
+    else the drawing's own size; a tspan counts only when it sets a size of its own."""
+    root_tag = SVG_ROOT_RE.search(svg)
+    if root_tag is None:
+        raise ReportError("the figure is not an SVG drawing")
+    texts = TEXT_TAG_RE.findall(svg)
+    if not texts and "<foreignObject" not in svg:
+        return None
+    box = VIEWBOX_RE.search(root_tag.group(0))
+    if box is None or float(box.group(1)) <= 0 or float(box.group(2)) <= 0:
+        raise ReportError("the figure has no viewBox, so the size of its printed text is unknown")
+    width, height = float(box.group(1)), float(box.group(2))
+    root_id = re.search(r'\bid="([^"]+)"', root_tag.group(0))
+    own = (
+        re.search(rf"#{re.escape(root_id.group(1))}\{{[^}}]*?font-size:\s*([\d.]+)px", svg)
+        if root_id
+        else None
+    )
+    default = float(own.group(1)) if own else 16.0
+    by_class = {
+        name: float(rule.group(1))
+        for name, body in CLASS_RULE_RE.findall(svg)
+        if (rule := SIZE_STYLE_RE.search(body))
+    }
+    sizes = [default] if "<foreignObject" in svg else []
+    for tag, attrs in texts:
+        size = _explicit_size(attrs)
+        if size is None and tag == "text":
+            classes = re.search(r'\bclass="([^"]*)"', attrs)
+            names = classes.group(1).split() if classes else []
+            size = next((by_class[n] for n in names if n in by_class), default)
+        if size is not None:
+            sizes.append(size)
+    # The printed width: the text width, or less when the 5 inch cap on height binds first, or
+    # when the drawing sets a width of its own in pixels.
+    printed = min(TEXT_WIDTH_PT, FIGURE_MAX_HEIGHT_PT * width / height)
+    for fixed in (
+        re.search(r"max-width:\s*([\d.]+)px", root_tag.group(0)),
+        re.search(r'\swidth="([\d.]+)(?:px)?"', root_tag.group(0)),
+    ):
+        if fixed:
+            printed = min(printed, float(fixed.group(1)) * PT_PER_CSS_PX)
+    return min(sizes) * printed / width
+
+
 def figure(root: Path, rel: str, caption: str, inputs: set[str]) -> str:
     path = root / rel
     if not path.is_file():
         raise ReportError(f"{SOURCE} names the figure {rel}, which does not exist")
     inputs.add(rel)
+    try:
+        smallest = figure_text_pt(path.read_text(encoding="utf-8"))
+    except ReportError as exc:
+        raise ReportError(f"{rel}: {exc}") from exc
+    if smallest is not None and smallest < MIN_FIGURE_TEXT_PT:
+        raise ReportError(
+            f"{rel} would print its smallest text at {smallest:.1f} pt, under "
+            f"{MIN_FIGURE_TEXT_PT:.0f} pt, because it is too wide for the page; leave it out "
+            "and say where to open it, or draw it narrower"
+        )
     data = base64.b64encode(path.read_bytes()).decode("ascii")
     return f"![{caption}](data:image/svg+xml;base64,{data})\n\n*Figure: {caption}.*"
 

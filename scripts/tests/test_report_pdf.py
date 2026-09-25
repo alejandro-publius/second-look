@@ -243,3 +243,67 @@ def test_a_table_left_as_pipe_text_stops_the_build() -> None:
     assert br.raw_tables(glued) == ["|---|"]
     assert br.raw_tables("<table><tr><td>a</td></tr></table>") == []
     assert br.raw_tables("<pre><code>| a |\n|---|</code></pre>") == []
+
+
+# How big a figure prints (critic round 09 L04) ---------------------------------------------------
+
+
+def svg(width: float, height: float, body: str, style: str = "", cap: str = "") -> str:
+    """A drawing shaped the way the Mermaid CLI writes one; cap is its own max-width style."""
+    return (
+        f'<svg id="d" width="100%" xmlns="http://www.w3.org/2000/svg" '
+        f'style="{cap}" viewBox="0 0 {width} {height}">'
+        f"<style>#d{{font-family:arial;font-size:16px;}}{style}</style>{body}</svg>"
+    )
+
+
+def test_a_figure_too_wide_to_read_is_refused(tmp_path: Path) -> None:
+    """The gate sequence, 2979.5 units wide, printed its labels at 2.7 pt and its step numbers at
+    2.0 pt. A figure whose smallest text would print under 6 pt stops the build."""
+    drawings = tmp_path / "docs" / "diagrams"
+    drawings.mkdir(parents=True)
+    wide = svg(3000, 1000, "<text>a label</text>", cap="max-width: 3000px;")
+    (drawings / "wide.svg").write_text(wide, encoding="utf-8")
+    with pytest.raises(br.ReportError, match=r"2\.7 pt, under 6 pt"):
+        br.figure(tmp_path, "docs/diagrams/wide.svg", "Wide", set())
+    (drawings / "narrow.svg").write_text(svg(600, 300, "<text>a label</text>"), encoding="utf-8")
+    assert br.figure(tmp_path, "docs/diagrams/narrow.svg", "Narrow", set()).startswith("![Narrow]")
+    # the two drawings the report once printed, as they are committed
+    for rel in ("docs/diagrams/ai-gate.svg", "docs/diagrams/fhir-graph.svg"):
+        with pytest.raises(br.ReportError, match="under 6 pt"):
+            br.figure(ROOT, rel, "x", set())
+
+
+def test_the_printed_text_size_counts_every_way_a_drawing_sets_one() -> None:
+    # 600 units across the 504.6 pt text width: a unit prints at 0.84 pt
+    scale = br.TEXT_WIDTH_PT / 600
+    assert br.figure_text_pt(svg(600, 300, "<text>x</text>")) == pytest.approx(16 * scale)
+    small = '<text>x</text><text font-size="8px">1</text>'
+    assert br.figure_text_pt(svg(600, 300, small)) == pytest.approx(8 * scale)
+    inline = '<text style="text-anchor: middle; font-size: 7px">x</text>'
+    assert br.figure_text_pt(svg(600, 300, inline)) == pytest.approx(7 * scale)
+    by_class = svg(600, 300, '<text class="tiny">x</text>', "#d .tiny{font-size:5px;}")
+    assert br.figure_text_pt(by_class) == pytest.approx(5 * scale)
+    # a style for something that is not text, such as Mermaid's tooltip, does not count
+    tooltip = svg(600, 300, "<text>x</text>", "#d .mermaidTooltip{font-size:12px;}")
+    assert br.figure_text_pt(tooltip) == pytest.approx(16 * scale)
+    # a tall drawing is held to 5 inches high, so it prints narrower than the text width
+    assert br.figure_text_pt(svg(600, 1200, "<text>x</text>")) == pytest.approx(16 * 180 / 600)
+    # and a drawing that caps its own width in pixels prints no wider than that
+    capped = svg(600, 300, "<text>x</text>", cap="max-width: 600px;")
+    assert br.figure_text_pt(capped) == pytest.approx(16 * 600 * 0.75 / 600)
+    # a drawing with no text has nothing to read; one with text and no viewBox cannot be judged
+    assert br.figure_text_pt("<svg xmlns='http://www.w3.org/2000/svg'/>") is None
+    with pytest.raises(br.ReportError, match="viewBox"):
+        br.figure_text_pt("<svg><text>x</text></svg>")
+
+
+def test_the_figure_check_uses_the_page_the_report_is_printed_on() -> None:
+    printer = (ROOT / br.PRINTER).read_text(encoding="utf-8")
+    assert 'format: "A4"' in printer
+    assert 'left: "16mm", right: "16mm"' in printer
+    assert br.TEXT_WIDTH_PT == pytest.approx((210 - 32) * 72 / 25.4)
+    css = (ROOT / br.STYLESHEET).read_text(encoding="utf-8")
+    img = re.search(r"^img \{(.*?)\}", css, re.S | re.M)
+    assert img and "max-width: 100%;" in img.group(1) and "max-height: 5in;" in img.group(1)
+    assert br.FIGURE_MAX_HEIGHT_PT == 5 * 72
