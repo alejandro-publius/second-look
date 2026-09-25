@@ -592,5 +592,6 @@
   "walk.honest_note": "These clips show natural creeks, so an honest check finds little to fix. To see what a city is told, answer as if the creek were damaged: Artificial for the bank, or Yes to a pipe.",
   "city.walk_example_title": "An example, not from your answers",
   "city.walk_example_intro": "If one check had reported a built bank, this creek would need:",
-  "city.walk_more": "Try another door"
+  "city.walk_more": "Try another door",
+  "how.gate_split": "{nothing} of the {kept} kept flags are on a dug-out channel, which the check does not ask about, so they ask nothing. The other {shown} are the kept case shown below."
 }

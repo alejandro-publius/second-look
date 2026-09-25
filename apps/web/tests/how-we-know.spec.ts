@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { footageCases } from "../lib/footage-example.mjs";
-import { howNumbers } from "../lib/how-numbers.mjs";
+import { howNumbers, keptSplit } from "../lib/how-numbers.mjs";
 
 // CRITIC_02 D03: /how-we-know shows the pass table and what the gate did on real footage, read
 // from results/ when the page is built, never typed by hand (hard rule 12). The first test reads
@@ -49,6 +49,10 @@ test("/how-we-know shows the pass table and the gate on real footage as the file
     page.getByText(fill("how.from", { files: "results/model_pass_table.json", date: day(table.generated_at_utc) })),
   ).toBeVisible();
 
+  // CRITIC_09 J03: after "kept 35", how many of those are on a dug-out channel and ask nothing, and
+  // how many are the kept case below, from results/model_card.json.
+  const card = result("model_card.json");
+  const kept = example().kept.feature;
   await expect(page.getByTestId("gate-numbers")).toHaveText(
     exactly(
       fill("how.gate", {
@@ -57,9 +61,23 @@ test("/how-we-know shows the pass table and the gate on real footage as the file
         candidates: footage.gate.candidates,
         dropped: footage.gate.dropped,
         kept: footage.gate.kept,
-      }),
+      }) +
+        " " +
+        fill("how.gate_split", {
+          nothing: card.footage_kept.by_feature.dug_out_channel,
+          kept: footage.gate.kept,
+          shown: card.footage_kept.by_feature[kept],
+        }),
     ),
   );
+  await expect(
+    page.getByText(
+      fill("how.from", {
+        files: "results/footage_latest.json, results/footage_pool.json, results/model_card.json",
+        date: day(footage.generated_at_utc),
+      }),
+    ),
+  ).toBeVisible();
 
   // Nobody typed a number into the page's own words: every number comes in through a placeholder.
   const typed = Object.entries(en).filter(([k, v]) => k.startsWith("how.") && /\d/.test(v.replace(/\{\w+\}/g, "")));
@@ -104,6 +122,38 @@ test("the page's reader follows the files: a changed copy changes the numbers, a
   expect(howNumbers(table, { ...footage, real: false }, pool, order).gate).toBeNull();
   expect(howNumbers(table, footage, { ...pool, real: false }, order).gate).toBeNull();
   expect(howNumbers(null, null, null, order)).toEqual({ pass: null, gate: null });
+});
+
+// CRITIC_09 J03: the split of the kept flags follows results/model_card.json. A changed copy
+// changes the words, and a copy whose parts do not add up to the gate's kept count shows none.
+test("the page's reader follows the model card's split of the kept flags", () => {
+  const card = result("model_card.json");
+  const gate = howNumbers(result("model_pass_table.json"), result("footage_latest.json"), result("footage_pool.json"), order).gate!;
+  const feature = example().kept.feature;
+  const by = card.footage_kept.by_feature;
+  expect(keptSplit(card, gate, feature)).toEqual({ nothing: by.dug_out_channel, shown: by[feature] });
+
+  // Two flags move from the kept case to the dug-out channel.
+  const moved = structuredClone(card);
+  moved.footage_kept.by_feature.dug_out_channel += 2;
+  moved.footage_kept.by_feature[feature] -= 2;
+  const out = keptSplit(moved, gate, feature)!;
+  expect(out).toEqual({ nothing: by.dug_out_channel + 2, shown: by[feature] - 2 });
+  const words = fill("how.gate_split", { nothing: out.nothing, kept: gate.kept, shown: out.shown });
+  expect(words).toContain(`${by.dug_out_channel + 2} of the ${gate.kept} kept flags`);
+  expect(words).toContain(`The other ${by[feature] - 2} are`);
+
+  // Parts that are not the whole, a kept count the gate does not give, or a card that is not real.
+  const short = structuredClone(card);
+  short.footage_kept.by_feature.dug_out_channel -= 1;
+  expect(keptSplit(short, gate, feature)).toBeNull();
+  const other = structuredClone(card);
+  other.footage_kept.kept += 1;
+  expect(keptSplit(other, gate, feature)).toBeNull();
+  expect(keptSplit({ ...card, real: false }, gate, feature)).toBeNull();
+  expect(keptSplit(card, null, feature)).toBeNull();
+  expect(keptSplit(card, gate, null)).toBeNull();
+  expect(keptSplit(card, gate, "dug_out_channel")).toBeNull();
 });
 
 // CRITIC_03 D04: no volunteer has seen a checker question, because the checker is off on the live

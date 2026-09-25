@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { footageCases } from "./footage-example.mjs";
-import { howNumbers } from "./how-numbers.mjs";
+import { howNumbers, keptSplit } from "./how-numbers.mjs";
 
 // next build and next dev run in apps/web, so the repository root is two folders up.
 const REPO = join(process.cwd(), "..", "..");
@@ -21,6 +21,14 @@ function readResult(path: string): unknown {
 
 export function howWeKnowNumbers(featureOrder: string[]) {
   return howNumbers(readResult(PASS_FILE), readResult(GATE_FILES[0]), readResult(GATE_FILES[1]), featureOrder);
+}
+
+/** Where the split of the kept flags comes from (CRITIC_09 J03). */
+export const MODEL_CARD_FILE = "results/model_card.json";
+
+/** How the gate's kept flags split: on a dug-out channel, and on the kept case shown below. */
+export function howKeptSplit(gate: { kept: number } | null, shownFeature: string | null | undefined) {
+  return keptSplit(readResult(MODEL_CARD_FILE), gate, shownFeature);
 }
 
 /** The footage example, written by evals/footage_example.py (CRITIC_03 D04). */
