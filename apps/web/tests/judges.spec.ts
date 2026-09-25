@@ -104,6 +104,19 @@ test("/judges and /about open with a line that names no time, and the landing pa
   await expect(page.getByRole("main").getByText(locale["app.one_sentence"])).toBeVisible();
 });
 
+// CRITIC_09 R03: "Volunteers never have" was untrue: some volunteer programs certify people for a
+// method before their data counts. About now says what no program we know of does: a score for
+// each feature, kept with every observation.
+test("About says some volunteer programs certify people, and what none we know of does", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/about");
+  const main = page.getByRole("main");
+  await expect(main).toContainText(
+    "Professional stream surveyors pass a test before their data counts. Some volunteer programs certify people for a method, such as water chemistry. None we know of measures how well each volunteer sees each feature, or keeps that score with every observation.",
+  );
+  await expect(main).not.toContainText("never have");
+});
+
 test("About links the judges' door", async ({ page }) => {
   await mockApi(page);
   await page.goto("/about");

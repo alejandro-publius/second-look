@@ -280,7 +280,7 @@
   "about.title": "About",
   "about.cta": "Take the test",
   "about.lead": "Second Look teaches you to see the creek damage people usually miss, then tests you on it. Your score travels with every observation you make, so a city knows how much to trust it.",
-  "about.p1": "Professional stream surveyors pass a test before their data counts. Volunteers never have. Second Look gives volunteers a short lesson and a sixteen-photo test on four kinds of creek damage, and saves the score with every observation they make.",
+  "about.p1": "Professional stream surveyors pass a test before their data counts. Some volunteer programs certify people for a method, such as water chemistry. None we know of measures how well each volunteer sees each feature, or keeps that score with every observation. Second Look gives volunteers a short lesson and a sixteen-photo test on four kinds of creek damage, and saves the score with every observation they make.",
   "about.p2": "The test is a usability study with a pre-registered analysis plan. Half the people see the lesson first and half see it after. We publish the result either way.",
   "about.p3": "Built for the OneAquaHealth hackathon, track 3, AI-Supported Assessment. It runs on Berkeley the way a follower city would, though the city has not adopted it. Strawberry Creek is the creek we worked through.",
   "about.licence": "Code is MIT. Our own photos and copy are CC BY 4.0.",
