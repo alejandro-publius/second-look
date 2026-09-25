@@ -106,3 +106,19 @@ def test_the_for_judges_section_links_the_pages_written_for_judges() -> None:
     judges = section(text(README), "For judges")
     for page in ("docs/JUDGE_DAY.md", "docs/submission/JUDGE_QA.md", "docs/KNOWN_BUGS.md"):
         assert f"({page})" in judges, page
+
+
+def test_no_public_page_says_the_public_counts_read_zero() -> None:
+    # Since 2026-09-25T17:48:55Z the public counts read 1 randomized and 1 completed: our own judge
+    # walk's sitting, which the plan's exclusions leave out (docs/deviations.md). A page may still
+    # say nobody has taken the test, which stays true of people.
+    counts_zero = re.compile(r"\bcounts?\b[^.;]*?\b(?:reads?|shows?)\s+(?:0|zero)\b", re.I)
+    said = [
+        f"{p.relative_to(ROOT)}: {s}"
+        for p in JUDGE_PAGES
+        for s in sentences(text(p))
+        if counts_zero.search(s)
+    ]
+    assert said == [], said
+    log = text(ROOT / "docs" / "deviations.md")
+    assert "2026-09-25T17:48:55Z" in log, "the judge walk's sitting is not in the deviations log"

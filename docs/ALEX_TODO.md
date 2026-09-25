@@ -3,8 +3,9 @@
 Everything on this page needs your voice, your eyes or your account. Everything else is done.
 Times are Pacific.
 
-Done for you on Sep 23 and 24: the two machine sittings are marked as tests (the public counts
-read 0), the model ids and prices were confirmed and the paid AI run, four models from Sep 24, is
+Done for you on Sep 23 and 24: the two machine sittings of Sep 21 and 22 are marked as tests (on
+Sep 25 our own judge walk finished one more sitting with the hidden field filled, which the plan's
+exclusions leave out; `docs/deviations.md`), the model ids and prices were confirmed and the paid AI run, four models from Sep 24, is
 in the README (its cost is logged in `results/cost_log.jsonl`), and the QA key is set on the Worker with a copy as `QA_KEY` in
 `~/second-look/.env` and `~/second-look-depth/.env`. Copy that key and your API key to your
 password manager when you can. Nobody films at a creek: the creek shots are open footage from

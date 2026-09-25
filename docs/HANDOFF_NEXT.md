@@ -32,7 +32,7 @@ not checked: run `make check` before moving `main`. Production runs `main`: the 
 4f4cee43) and Pages with the API on its own origin. Keys live only in the ignored `.env` files:
 `QA_KEY` in both checkouts, `ANTHROPIC_API_KEY` in `~/second-look-depth/.env`.
 
-Done in this run: the two machine sittings marked as tests (counts read 0); the weighting
+Done in this run: the two machine sittings marked as tests (the counts then read 0); the weighting
 simulation committed and the README saying what it shows; the paid AI run (6 of 12 features
 passed, 13.09 USD of the 40 dollar cap, `results/cost_log.jsonl`) and the README's AI table;
 smaller AVIF and WebP copies of the two warm-up photos; pull request #8 merged (3 of 21 patches);
