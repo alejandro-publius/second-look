@@ -9,7 +9,15 @@ and no scratch voice:
   beat by their length. A beat runs as long as the shot list says, or longer if its words need
   more time to read at MAX_CPS letters a second;
 - every footage clip keeps the credit line scripts/cut_footage.py drew in its lower left corner,
-  so each credit is on screen while its footage shows. The caption sits above it;
+  so each credit is on screen while its footage shows. The caption sits above it; a caption over
+  screen recordings alone sits lower, since they carry no credit line;
+- each screen recording starts where its marks file says its use begins (past the consent and
+  warm-up screens), a part of the shot list whose From names a mark starts there, and a recording
+  shorter than its part holds its last frame instead of starting over. A phone recording is drawn
+  PHONE_H pixels tall from the top, the same size bare or in the phone outline, clear of a low
+  caption;
+- the live link on screen while a caption says "the link on screen";
+- a beat in LEFT_OUT is not in the cut, with the reason in the summary;
 - the end card over the last shot: the live link, the repository and "This video is CC BY-SA 4.0";
 - a credits card after it with every footage credit, and the photos and walk clip that the screen
   recordings show;
@@ -19,11 +27,12 @@ A voice file in ~/second-look-media/voice/ (voice.m4a, voice.wav or voice.mp3, t
 that order) replaces the captions' own timing. Which way it fits depends on the files:
 
 - "each beat": voice_beats.txt beside the voice gives the second each beat starts in the voice, one
-  line per beat (an Audacity label export works: only the first number on a line is read). Each
+  line per beat (an Audacity label export works: only the first number on a line is read), for the
+  beats in the cut, or for every beat of the shot list when a left out beat was read anyway. Each
   beat gets its own stretch of voice and keeps its shot list length, or grows to hold it;
 - "whole voice": with no voice_beats.txt the voice plays unbroken from the first words, after any
   quiet at its start, and each beat is cut to where its words should fall, by its share of the
-  script's letters.
+  script's letters. A left out beat is taken as not read, as docs/video/VOICE_SCRIPT.md asks.
 
 With a voice the captions are no longer burned in: they go into the mp4 as a subtitles track. The
 captions are always written beside the mp4 as an .srt. Nothing here writes a video file into the
@@ -57,6 +66,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from scripts.fetch_footage import FETCHED
 from scripts.video_rough import (
+    BACKDROP,
     FIT,
     FPS,
     PHONE,
@@ -70,6 +80,7 @@ from scripts.video_rough import (
     duration,
     ff,
     footage_parts,
+    phone_frame,
     piece_video,
     plan,
     rows,
@@ -109,11 +120,32 @@ INK = (255, 255, 255)
 CARD = (24, 44, 52)
 CAPTION_SIZE = 46
 CAPTION_LIFT = 120  # the footage credit sits in the bottom 100 pixels; the caption stays above it
+CAPTION_LOW = 24  # over screen recordings only, which carry no credit line
+CAPTION_BOX = (0, 0, 0, 230)  # about 90 percent solid, so no page text shows through the words
 ENCODE = ("-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p")
+
+# A phone recording (390 by 844) is drawn this size, bare or inside the phone outline: the same size
+# everywhere, and short enough that its bottom buttons stay above a low caption of two lines.
+PHONE_H = 886
+PHONE_W = 410
+PHONE_TOP = 10  # a bare phone recording's top edge; in the outline, the outline's top edge
+OUTLINE_TOP = 48  # the outline's frame above the screen, as scripts/video_rough.py draws it
+# While a caption says this, the live link is on screen beside the phone (the Devpost player has
+# nothing below the video, so "the link below" pointed at nothing).
+LINK_CUE = "the link on screen"
+
+# Beats the shot list keeps but the cut leaves out, by screen recording, with the reason.
+LEFT_OUT = {
+    "11-two": (
+        "their sandbox does not answer: GET /api/two on the live site said theirs_status down on "
+        "2026-09-25, so the lab result the recording shows would be the mock's, and "
+        "docs/video/VOICE_SCRIPT.md says to cut beat 11 then"
+    ),
+}
 
 END_CARD = (
     "Second Look",
-    "Take the two-minute test:",
+    "Take the two-minute test (about four minutes with its lesson):",
     LIVE_LINK,
     f"Code: {REPO_LINK}",
     "No camera needed.",
@@ -261,6 +293,35 @@ def read_marks(text: str, beats: int, voice_s: float) -> list[float]:
     return marks
 
 
+def marks_count(text: str) -> int:
+    return sum(1 for line in text.splitlines() if line.strip() and not line.strip().startswith("#"))
+
+
+def voice_stretches(
+    text: str, every: list[Beat], kept: list[Beat], voice_s: float
+) -> tuple[list[float], list[float]]:
+    """Where each beat of the cut starts and ends in the voice, from voice_beats.txt.
+
+    The file has a line for each beat of the cut, or a line for every beat of the shot list when a
+    left out beat was read anyway; that beat's stretch of the voice is then dropped.
+    """
+    n = marks_count(text)
+    if len(every) != len(kept):
+        if n == len(every):
+            marks = read_marks(text, len(every), voice_s)
+            ends = [*marks[1:], voice_s]
+            keep = [i for i, b in enumerate(every) if b in kept]
+            return [marks[i] for i in keep], [ends[i] for i in keep]
+        if n != len(kept):
+            out = ", ".join(b.time for b in every if b not in kept)
+            raise CutError(
+                f"{MARKS_NAME} has {n} marks; the cut has {len(kept)} beats, "
+                f"or {len(every)} counting the beats left out ({out})"
+            )
+    marks = read_marks(text, len(kept), voice_s)
+    return marks, [*marks[1:], voice_s]
+
+
 SILENCE_END = re.compile(r"silence_end:\s*([\d.]+)")
 SILENCE_START = re.compile(r"silence_start:\s*(-?[\d.]+)")
 
@@ -286,7 +347,8 @@ class Beat:
     parts: tuple[Part, ...]
 
 
-def beats_from(text: str) -> list[Beat]:
+def beats_from(text: str, leave_out: dict[str, str] | None = None) -> list[Beat]:
+    """The shot list's beats in order, without those whose screen recording is in leave_out."""
     table = footage_parts(text)
     out = []
     for b in rows(text):
@@ -295,7 +357,8 @@ def beats_from(text: str) -> list[Beat]:
     unknown = sorted(set(table) - {b.time for b in out})
     if unknown:
         raise CutError(f"the footage table names beats the shot list has not: {unknown}")
-    return out
+    skip = LEFT_OUT if leave_out is None else leave_out
+    return [b for b in out if b.screen not in skip]
 
 
 @dataclass(frozen=True)
@@ -340,12 +403,14 @@ def plan_cut(
     voice_offset: float = 0.0,
     credits_s: float = CREDITS_S,
     max_s: float = MAX_S,
+    ends: list[float] | None = None,
 ) -> CutPlan:
     """Where every beat starts, how long it runs, and when each caption shows.
 
     No voice: each beat runs its shot list length, or longer if its words need it at MAX_CPS.
-    Marks: each beat holds its own stretch of voice. A voice with no marks: the voice runs unbroken
-    and each beat ends where its share of the script's letters ends in the voice.
+    Marks: each beat holds its own stretch of voice, to the next mark or to its end in `ends`. A
+    voice with no marks: the voice runs unbroken and each beat ends where its share of the script's
+    letters ends in the voice.
     """
     if not beats:
         raise CutError("no beats in the shot list")
@@ -363,11 +428,12 @@ def plan_cut(
             length, lead, pieces = plan(list(b.parts), b.shot_seconds, reading_seconds(b.words))
         elif mode == "each beat":
             assert marks is not None and voice_s is not None
-            v_from, v_to = marks[i], (voice_s if last else marks[i + 1])
+            v_from = marks[i]
+            v_to = ends[i] if ends else (voice_s if last else marks[i + 1])
             length, lead, pieces = plan(list(b.parts), b.shot_seconds, v_to - v_from)
         else:
-            ends = lead_1 + speech * sum(letters[: i + 1]) / sum(letters)
-            target = ends + (TAIL_S if last else 0.0) - at
+            ends_at = lead_1 + speech * sum(letters[: i + 1]) / sum(letters)
+            target = ends_at + (TAIL_S if last else 0.0) - at
             length, lead, pieces = plan(list(b.parts), max(target, 0.1), 0.0)
         length = frames(length)
         words_from = at + lead
@@ -481,6 +547,18 @@ def credit_sections(fetched: dict[str, Any], used: list[str]) -> list[tuple[str,
     ]
 
 
+def over_screens_only(beat: PlannedBeat, cue: Cue) -> bool:
+    """True when only screen recordings play under a caption, so it can sit low: none has a credit
+    line to keep clear."""
+    at = beat.start
+    for p in beat.pieces:
+        end = at + p.seconds
+        if p.clip not in (SCREEN, PHONE) and at < cue.end - 0.001 and end > cue.start + 0.001:
+            return False
+        at = end
+    return True
+
+
 def footage_used(cut: CutPlan) -> list[str]:
     seen: list[str] = []
     for b in cut.beats:
@@ -509,6 +587,44 @@ def missing_inputs(
         raw = screens / "raw" / f"{name}.webm"
         if not ((screens / f"{name}.mp4").is_file() or raw.is_file()):
             out.append(f"screen recording {screens / name}.mp4 (make video-clips)")
+            continue
+        marks = screen_marks(screens, name)
+        for b in (b for b in cut.beats if b.screen == name):
+            for p in b.pieces:
+                if p.mark and p.mark not in marks:
+                    out.append(f"no mark '{p.mark}' for {name} (make video-clips records it again)")
+    return out
+
+
+def screen_marks(screens: Path, name: str) -> dict[str, float]:
+    """The marks apps/web/scripts/record-clips.mjs wrote beside a recording; "start" is 0 if none.
+
+    The raw webm's marks when there is a raw webm, since that is the recording the cut uses.
+    """
+    raw = screens / "raw" / f"{name}.webm"
+    path = raw.with_suffix(".marks.json") if raw.is_file() else screens / f"{name}.marks.json"
+    marks = {"start": 0.0}
+    if path.is_file():
+        marks.update({str(k): float(v) for k, v in json.loads(path.read_text("utf-8")).items()})
+    return marks
+
+
+def screen_starts(pieces: tuple[Piece, ...] | list[Piece], marks: dict[str, float]) -> list[float]:
+    """Where each piece starts in its clip. Screen pieces begin at the recording's "start" mark and
+    carry on from one to the next, unless a piece names a mark of its own; footage keeps its start.
+    """
+    at = marks.get("start", 0.0)
+    out = []
+    for p in pieces:
+        if p.clip not in (SCREEN, PHONE):
+            out.append(p.start)
+            continue
+        if p.mark:
+            if p.mark not in marks:
+                raise CutError(f"the screen recording has no mark '{p.mark}': make video-clips")
+            at = marks[p.mark]
+        out.append(round(at, 3))
+        at += p.seconds
     return out
 
 
@@ -537,25 +653,62 @@ def caption_lines(text: str) -> list[str]:
     return wrap(draw, text, font(CAPTION_SIZE), W - 320)
 
 
-def caption_png(path: Path, text: str) -> None:
-    """One caption, centred, on a dark box fitted to it, above the footage credit line."""
+def caption_box(text: str, low: bool = False) -> tuple[float, float, float, float]:
+    """The caption's dark box, left, top, right, bottom: above the footage credit line, or near the
+    bottom edge when only screen recordings, which have no credit line, play under it."""
+    lines = caption_lines(text)
+    draw = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    widest = max(draw.textlength(line, font=font(CAPTION_SIZE)) for line in lines)
+    bottom = H - (CAPTION_LOW if low else CAPTION_LIFT)
+    top = bottom - (CAPTION_SIZE + 14) * len(lines) - 28
+    return (W - widest) / 2 - 28, top, (W + widest) / 2 + 28, bottom
+
+
+def caption_png(path: Path, text: str, low: bool = False) -> None:
+    """One caption, centred, on a dark box fitted to it that no page text shows through."""
     lines = caption_lines(text)
     if len(lines) > 2:
         raise CutError(f"a caption needs {len(lines)} lines, two at most: {text}")
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     f = font(CAPTION_SIZE)
-    line_h = CAPTION_SIZE + 14
-    widest = max(draw.textlength(line, font=f) for line in lines)
-    bottom = H - CAPTION_LIFT
-    top = bottom - line_h * len(lines) - 28
-    draw.rounded_rectangle(
-        [(W - widest) / 2 - 28, top, (W + widest) / 2 + 28, bottom], radius=14, fill=(0, 0, 0, 185)
-    )
-    y = top + 14
+    box = caption_box(text, low)
+    draw.rounded_rectangle(box, radius=14, fill=CAPTION_BOX)
+    y = box[1] + 14
     for line in lines:
         draw.text(((W - draw.textlength(line, font=f)) / 2, y), line, font=f, fill=INK)
-        y += line_h
+        y += CAPTION_SIZE + 14
+    img.save(path)
+
+
+def phone_box() -> tuple[int, int, int, int]:
+    """Where a bare phone recording is drawn: left, top, right, bottom."""
+    left = (W - PHONE_W) // 2
+    return left, PHONE_TOP, left + PHONE_W, PHONE_TOP + PHONE_H
+
+
+LINK_LINES = (("Try it now:", 40, False), (LIVE_LINK.removeprefix("https://"), 46, True))
+
+
+def link_box() -> tuple[float, float, float, float]:
+    """The live link's card, to the right of the phone, clear of the page and of any caption."""
+    draw = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    widest = max(draw.textlength(t, font=font(s, bold=b)) for t, s, b in LINK_LINES)
+    left = phone_box()[2] + 50
+    top = 330.0
+    height = sum(s + 22 for _, s, _ in LINK_LINES) + 40
+    return left, top, left + widest + 60, top + height
+
+
+def link_png(path: Path) -> None:
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    box = link_box()
+    draw.rounded_rectangle(box, radius=18, fill=CAPTION_BOX)
+    y = box[1] + 26
+    for text, size, bold in LINK_LINES:
+        draw.text((box[0] + 30, y), text, font=font(size, bold=bold), fill=INK)
+        y += size + 22
     img.save(path)
 
 
@@ -656,16 +809,80 @@ def voice_quiet_start(voice: Path) -> float:
     return leading_silence(log)
 
 
-def screen_clip(screens: Path, name: str, work: Path) -> Path | None:
-    """The beat's recording; a raw webm newer than its mp4 is converted in the work folder."""
+@dataclass(frozen=True)
+class Screen:
+    """A beat's screen recording, ready to cut: 30 fps at its recorded size, and its marks."""
+
+    path: Path
+    width: int
+    height: int
+    seconds: float
+    marks: dict[str, float]
+
+    @property
+    def phone(self) -> bool:
+        return self.height > self.width
+
+
+def screen_clip(screens: Path, name: str, work: Path) -> Screen | None:
+    """The beat's recording. A raw webm is converted in the work folder at its own size, so a
+    phone page is scaled once, not padded to 16:9 first; an mp4 with no raw webm is used as it is.
+    """
     mp4 = screens / f"{name}.mp4"
     raw = screens / "raw" / f"{name}.webm"
-    if raw.is_file() and (not mp4.is_file() or raw.stat().st_mtime > mp4.stat().st_mtime):
-        out = work / f"screen-{name}.mp4"
-        if not out.exists():
-            ff("-i", str(raw), "-an", "-vf", FIT, "-c:v", "libx264", "-crf", "20", str(out))
-        return out
-    return mp4 if mp4.is_file() else None
+    if raw.is_file():
+        path = work / f"screen-{name}.mp4"
+        if not path.exists():
+            ff("-i", str(raw), "-an", "-vf", f"fps={FPS},format=yuv420p", "-c:v", "libx264",
+               "-crf", "16", str(path))  # fmt: skip
+    elif mp4.is_file():
+        path = mp4
+    else:
+        return None
+    info = probe(path)
+    video = next(s for s in info["streams"] if s["codec_type"] == "video")
+    return Screen(
+        path, video["width"], video["height"], float(info["format"]["duration"]),
+        screen_marks(screens, name),
+    )  # fmt: skip
+
+
+def screen_video(
+    work: Path, name: str, piece: Piece, start: float, screen: Screen, over: Path | None
+) -> Path:
+    """One screen piece as a silent mp4 of exactly its length. It plays from `start` and, if the
+    recording ends first, holds its last frame: a recording never starts over in the middle of a
+    beat. A phone page is PHONE_H tall, from the top bare, or inside the phone outline.
+    """
+    out = work / f"{name}.mp4"
+    at = max(0.0, min(start, screen.seconds - 0.25))  # a start past the end holds the last frame
+    hold = f"tpad=stop_mode=clone:stop_duration={piece.seconds + 1:.2f}"
+    # An mp4 made by the rough cut is already padded to 16:9: cut the phone page back out.
+    page = "" if screen.phone else "crop=trunc(ih*390/844/2)*2:ih,"
+    size = f"scale={PHONE_W}:{PHONE_H},setsar=1"
+    inputs = ["-ss", f"{at:.3f}", "-i", str(screen.path)]
+    if piece.clip == PHONE:
+        frame = work / "phone-outline.png"
+        if not frame.exists():
+            phone_frame(frame, PHONE_W, PHONE_H, PHONE_TOP + OUTLINE_TOP)
+        inputs += ["-i", str(frame)]
+        graph = (
+            f"color=c={BACKDROP}:s={W}x{H}:r={FPS}[bg];[0:v]{hold},{page}{size}[s];"
+            f"[bg][s]overlay=(W-w)/2:{PHONE_TOP + OUTLINE_TOP}[a];[a][1:v]overlay=0:0[p]"
+        )
+    elif screen.phone:
+        left, top, _, _ = phone_box()
+        graph = f"[0:v]{hold},{size},pad={W}:{H}:{left}:{top}:color={BACKDROP}[p]"
+    else:
+        graph = f"[0:v]{hold},{FIT}[p]"
+    if over:
+        inputs += ["-i", str(over)]
+        graph += f";[p][{inputs.count('-i') - 1}:v]overlay=0:0,format=yuv420p,setsar=1[v]"
+    else:
+        graph += ";[p]fps=30,format=yuv420p,setsar=1[v]"
+    ff(*inputs, "-filter_complex", graph, "-map", "[v]", "-an",
+       "-frames:v", str(round(piece.seconds * FPS)), "-r", str(FPS), *ENCODE, str(out))  # fmt: skip
+    return out
 
 
 Shown = list[tuple[float, float, Path]]  # a caption's start and end in its beat, and its picture
@@ -760,15 +977,17 @@ def sha256(text: str) -> str:
 
 def plan_for(paths: Paths, credits_s: float = CREDITS_S) -> tuple[CutPlan, Path | None]:
     """The plan, and the voice it lays in, if there is one."""
-    beats = beats_from(paths.shotlist.read_text(encoding="utf-8"))
+    text = paths.shotlist.read_text(encoding="utf-8")
+    beats = beats_from(text)
     voice = find_voice(paths.voice_dir)
     if voice is None:
         return plan_cut(beats, credits_s=credits_s), None
     voice_s = duration(voice)
     marks_file = paths.voice_dir / MARKS_NAME
     if marks_file.is_file():
-        marks = read_marks(marks_file.read_text(encoding="utf-8"), len(beats), voice_s)
-        return plan_cut(beats, voice_s, marks, credits_s=credits_s), voice
+        every = beats_from(text, leave_out={})
+        marks, ends = voice_stretches(marks_file.read_text("utf-8"), every, beats, voice_s)
+        return plan_cut(beats, voice_s, marks, credits_s=credits_s, ends=ends), voice
     offset = voice_quiet_start(voice)
     return plan_cut(beats, voice_s, voice_offset=offset, credits_s=credits_s), voice
 
@@ -783,28 +1002,48 @@ def build(paths: Paths, credits_s: float = CREDITS_S) -> dict[str, Any]:
     captions = srt(cut.cues)
     srt_path = paths.out.with_suffix(".srt")
     paths.out.parent.mkdir(parents=True, exist_ok=True)
+    screens_seen: dict[str, dict[str, Any]] = {}
     with tempfile.TemporaryDirectory(prefix="second-look-final-") as tmp:
         work = Path(tmp)
         end_card = work / "end_card.png"
         end_card_png(end_card)
+        link = work / "link.png"
+        link_png(link)
         segments = []
         for i, b in enumerate(cut.beats):
             screen = screen_clip(paths.screens, b.screen, work)
+            starts = screen_starts(b.pieces, screen.marks if screen else {})
             files = []
             for j, piece in enumerate(b.pieces):
                 last = i == len(cut.beats) - 1 and j == len(b.pieces) - 1
+                over = end_card if last else None
+                if piece.clip in (SCREEN, PHONE) and screen is not None:
+                    name = f"p{i:03d}_{j}"
+                    files.append(screen_video(work, name, piece, starts[j], screen, over))
+                    continue
+                shown_screen = screen.path if screen else None
                 path, gap = piece_video(
-                    work, f"p{i:03d}_{j}", piece, screen, paths.footage, end_card if last else None
+                    work, f"p{i:03d}_{j}", piece, shown_screen, paths.footage, over
                 )
                 if gap:
                     raise CutError(f"{b.time}: {gap}")
                 files.append(path)
+            if screen is not None:
+                screens_seen[b.screen] = {
+                    "size": f"{screen.width}x{screen.height}",
+                    "seconds": round(screen.seconds, 2),
+                    "marks": screen.marks,
+                    "plays_from_s": [s for p, s in zip(b.pieces, starts, strict=True)
+                                     if p.clip in (SCREEN, PHONE)],
+                }  # fmt: skip
             shown = []
-            if burn:
-                for k, cue in enumerate(c for c in cut.cues if c.beat == b.time):
+            for k, cue in enumerate(c for c in cut.cues if c.beat == b.time):
+                if burn:
                     png = work / f"cap{i:03d}_{k}.png"
-                    caption_png(png, cue.text)
+                    caption_png(png, cue.text, low=over_screens_only(b, cue))
                     shown.append((cue.start - b.start, cue.end - b.start, png))
+                if LINK_CUE in cue.text:
+                    shown.append((cue.start - b.start, cue.end - b.start, link))
             segments.append(beat_video(work, i, files, b.seconds, shown))
         card = work / "credits.png"
         sections = credit_sections(fetched, footage_used(cut))
@@ -865,6 +1104,15 @@ def build(paths: Paths, credits_s: float = CREDITS_S) -> dict[str, Any]:
         "thumbnail_credits": thumb_credits,
         "footage_folder": home(paths.footage),
         "screens_folder": home(paths.screens),
+        "screen_recordings": screens_seen,
+        "left_out": [
+            {"time": b.time, "screen": b.screen, "why": LEFT_OUT[b.screen]}
+            for b in beats_from(paths.shotlist.read_text(encoding="utf-8"), leave_out={})
+            if b.screen in LEFT_OUT
+        ],
+        "link_on_screen": [
+            [round(c.start, 2), round(c.end, 2)] for c in cut.cues if LINK_CUE in c.text
+        ],  # fmt: skip
         "footage_clips_used": footage_used(cut),
         "beats": [
             {

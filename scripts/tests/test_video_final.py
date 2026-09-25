@@ -18,13 +18,19 @@ import pytest
 
 from scripts.fetch_footage import FETCHED, FOOTAGE_CSV
 from scripts.video_final import (
+    CAPTION_BOX,
+    CAPTION_LIFT,
     END_CARD,
     END_CARD_LICENCE,
     FONT,
+    LEFT_OUT,
+    LINK_CUE,
     LIVE_LINK,
     MAX_CPS,
     MAX_S,
     MIN_S,
+    PHONE_H,
+    PHONE_TOP,
     SUMMARY,
     TAIL_S,
     VIDEO_LICENCE,
@@ -34,7 +40,9 @@ from scripts.video_final import (
     audio_graph,
     beats_from,
     build,
+    caption_box,
     caption_lines,
+    caption_png,
     clean,
     credit_sections,
     credits_card_png,
@@ -43,16 +51,21 @@ from scripts.video_final import (
     footage_credits,
     footage_used,
     leading_silence,
+    link_box,
     missing_inputs,
+    over_screens_only,
+    phone_box,
     plan_cut,
     read_marks,
+    screen_starts,
     sha256,
     split_cues,
     srt,
     stamp,
     thumbnail_png,
+    voice_stretches,
 )
-from scripts.video_rough import SCREEN, SHOTLIST, Part
+from scripts.video_rough import BACKDROP, PHONE, SCREEN, SHOTLIST, Part, Piece, footage_parts
 
 TEXT = SHOTLIST.read_text(encoding="utf-8")
 BEATS = beats_from(TEXT)
@@ -153,6 +166,105 @@ def test_the_committed_summary_matches_the_script_it_was_built_from() -> None:
         assert [b["time"] for b in summary["beats"]] == [b.time for b in CUT.beats]
 
 
+# ---- what a judge saw in the first cut (UPDATE_30 section 4, the frames review) ----------------
+
+
+def test_the_test_is_two_minutes_and_about_four_with_its_lesson_wherever_it_is_timed() -> None:
+    # The first cut said "about four minutes" at 0:46 and "the two-minute test" at the end.
+    readme = (SHOTLIST.parents[2] / "README.md").read_text(encoding="utf-8")
+    wording = "two-minute test (about four minutes with its lesson)"
+    assert wording in readme
+    assert any(wording in line for line in END_CARD)
+    timed = [c.text for c in CUT.cues if re.search(r"\bfour minutes|about four\b", c.text)]
+    assert timed, "a caption says how long the test takes"
+    for text in timed:
+        assert re.search(r"two minutes|two-minute", text) and "lesson" in text, text
+
+
+def test_no_caption_points_below_the_video_and_the_link_shows_when_one_points_at_it() -> None:
+    # On Devpost nothing is below the player.
+    assert not [c for c in CUT.cues if "link below" in c.text]
+    pointing = [c for c in CUT.cues if "link" in c.text]
+    assert pointing and all(LINK_CUE in c.text for c in pointing)
+    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    assert summary["link_on_screen"] == [[round(c.start, 2), round(c.end, 2)] for c in pointing]
+    left, top, right, bottom = link_box()
+    assert phone_box()[2] < left and right <= 1920 and 0 <= top and bottom <= 1080
+
+
+def test_the_check_beat_says_its_wording_is_draft_and_never_that_it_follows_the_app() -> None:
+    words = next(b.words for b in BEATS if "one question at a time" in b.words)
+    assert "follows the official" not in words
+    assert "draft" in words
+
+
+def test_a_left_out_beat_is_not_in_the_cut_and_the_summary_says_why() -> None:
+    every = beats_from(TEXT, leave_out={})
+    gone = [b for b in every if b.screen in LEFT_OUT]
+    assert [b.screen for b in gone] == ["11-two"]
+    assert "sandbox does not answer" in LEFT_OUT["11-two"]
+    assert [b for b in every if b not in gone] == BEATS
+    said = " ".join(c.text for c in CUT.cues)
+    assert clean(gone[0].words)[:40] not in said
+    summary = json.loads(SUMMARY.read_text(encoding="utf-8"))
+    assert summary["left_out"] == [{"time": "2:55", "screen": "11-two", "why": LEFT_OUT["11-two"]}]
+
+
+def test_voice_beats_may_count_the_left_out_beat_and_its_stretch_is_dropped() -> None:
+    every = beats_from(TEXT, leave_out={})
+    gone = next(i for i, b in enumerate(every) if b not in BEATS)
+    read_all = [10.0 * i for i in range(len(every))]
+    marks, ends = voice_stretches("\n".join(map(str, read_all)), every, BEATS, 200.0)
+    assert len(marks) == len(ends) == len(BEATS)
+    assert ends[gone - 1] == read_all[gone], "the beat before it stops where the left out one began"
+    assert marks[gone] == read_all[gone + 1]
+    cut = plan_cut(BEATS, voice_s=200.0, marks=marks, ends=ends, max_s=1000)
+    assert cut.beats[gone - 1].voice_to == read_all[gone]
+    skipped = [10.0 * i for i in range(len(BEATS))]
+    assert voice_stretches("\n".join(map(str, skipped)), every, BEATS, 200.0)[0] == skipped
+    with pytest.raises(CutError, match="counting the beats left out"):
+        voice_stretches("0\n5\n", every, BEATS, 200.0)
+
+
+def test_screen_parts_start_at_their_marks_and_carry_on() -> None:
+    pieces = [
+        Piece(SCREEN, 0.0, 5.0, ""),
+        Piece("footage", 2.5, 3.0, ""),
+        Piece(PHONE, 5.0, 4.0, "", "followups"),
+        Piece(SCREEN, 9.0, 2.0, ""),
+    ]
+    assert screen_starts(pieces, {"start": 1.5, "followups": 12.0}) == [1.5, 2.5, 12.0, 16.0]
+    assert screen_starts(pieces[:2], {}) == [0.0, 2.5]
+    with pytest.raises(CutError, match="no mark 'followups'"):
+        screen_starts(pieces, {"start": 0.0})
+    check = footage_parts(TEXT)[next(b.time for b in BEATS if b.screen == "extra-check")]
+    assert [p.mark for p in check if p.clip == PHONE] == ["", "followups"]
+
+
+def test_captions_hide_the_page_behind_them_and_keep_clear_of_credits_and_phone_pages(
+    tmp_path: Path,
+) -> None:
+    from PIL import Image
+
+    assert CAPTION_BOX[3] >= 0.88 * 255, "a box that lets page text through the words"
+    png = tmp_path / "caption.png"
+    caption_png(png, "Words over a page.")
+    left, top, _, bottom = caption_box("Words over a page.")
+    with Image.open(png) as img:
+        pixel = img.getpixel((int(left) + 4, int((top + bottom) / 2)))
+    assert isinstance(pixel, tuple) and pixel[3] == CAPTION_BOX[3]
+    phone_bottom = phone_box()[3]
+    assert PHONE_TOP + PHONE_H == phone_bottom
+    beats = {b.time: b for b in CUT.beats}
+    for cue in CUT.cues:
+        low = over_screens_only(beats[cue.beat], cue)
+        box = caption_box(cue.text, low)
+        if low:  # only screen recordings under it: below any phone page, inside the frame
+            assert phone_bottom < box[1] and box[3] <= 1080, cue.text
+        else:  # footage under it: above the credit line in the bottom 100 pixels
+            assert box[3] <= 1080 - 100 and box[3] == 1080 - CAPTION_LIFT, cue.text
+
+
 # ---- credits -----------------------------------------------------------------------------------
 
 
@@ -215,6 +327,11 @@ def test_a_missing_clip_or_credit_stops_the_build_before_any_grey_card(tmp_path:
         (footage / f"{clip}.mp4").write_bytes(b"x")
     for b in CUT.beats:
         (screens / f"{b.screen}.mp4").write_bytes(b"x")
+    # The check beat's last part starts at a mark of its recording; with no marks file it has none.
+    assert missing_inputs(CUT, footage, screens, FETCHED_DATA) == [
+        "no mark 'followups' for extra-check (make video-clips records it again)"
+    ]
+    (screens / "extra-check.marks.json").write_text('{"start": 0, "followups": 12.5}')
     assert missing_inputs(CUT, footage, screens, FETCHED_DATA) == []
     fewer = {"clips": FETCHED_DATA["clips"][1:]}
     assert any("no credit" in m for m in missing_inputs(CUT, footage, screens, fewer))
@@ -478,3 +595,71 @@ def test_a_tiny_cut_builds_silent_then_with_a_tone_for_a_voice(tmp_path: Path) -
     frames = extract_frames(paths.out, tmp_path / "frames", every=2)
     assert [f.name for f in frames] == ["frame_000.png", "frame_002.png", "frame_004.png",
                                         "frame_006.png"]  # fmt: skip
+
+
+PHONE_TINY = """
+| Time | Clip file | Seconds | On screen | Alex says | Needs |
+|---|---|---|---|---|---|
+| 0:00 | bb-phone.mp4 | 3 | a phone screen | "Try it at the link on screen." | screen and footage |
+
+| Part | Beat | Clip | From | Seconds | Shows |
+|---|---|---|---|---|---|
+| 1.1 | 0:00 | tiny-footage | 0 | 0.5 before the words | a clip |
+| 1.2 | 0:00 | screen | | rest | the phone screen |
+"""
+
+
+def colour_at(video: Path, t: float, xy: tuple[int, int]) -> tuple[int, int, int]:
+    from PIL import Image
+
+    png = video.with_name(f"at-{t:.2f}.png")
+    run("ffmpeg", "-y", "-loglevel", "error", "-ss", f"{t:.2f}", "-i", str(video),
+        "-frames:v", "1", str(png))  # fmt: skip
+    with Image.open(png) as img:
+        rgb: tuple[int, int, int] = img.convert("RGB").getpixel(xy)  # type: ignore[assignment]
+    return rgb
+
+
+@pytest.mark.skipif(not FFMPEG, reason="needs ffmpeg and ffprobe")
+def test_a_short_phone_recording_starts_at_its_mark_holds_its_last_frame_and_shows_the_link(
+    tmp_path: Path,
+) -> None:
+    footage, screens = tmp_path / "footage", tmp_path / "screens"
+    (screens / "raw").mkdir(parents=True)
+    footage.mkdir()
+    run("ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
+        "testsrc=size=1920x1080:rate=30:duration=1", "-pix_fmt", "yuv420p",
+        str(footage / "tiny-footage.mp4"))  # fmt: skip
+    # A one second phone recording as record-clips.mjs writes it: red for half a second, then
+    # blue, and a marks file that says its use starts at 0.6 seconds, in the blue.
+    run("ffmpeg", "-y", "-loglevel", "error",
+        "-f", "lavfi", "-i", "color=c=red:s=390x844:r=30:d=0.5",
+        "-f", "lavfi", "-i", "color=c=blue:s=390x844:r=30:d=0.5",
+        "-filter_complex", "[0:v][1:v]concat=n=2:v=1[v]", "-map", "[v]",
+        "-c:v", "libvpx", "-b:v", "1M", str(screens / "raw" / "bb-phone.webm"))  # fmt: skip
+    (screens / "raw" / "bb-phone.marks.json").write_text('{"start": 0.6}', encoding="utf-8")
+    shotlist = tmp_path / "SHOTLIST.md"
+    shotlist.write_text(PHONE_TINY, encoding="utf-8")
+    fetched = tmp_path / "fetched.json"
+    credit = '"Tiny" by Test, CC0, Wikimedia Commons'
+    fetched.write_text(json.dumps({"clips": [{"clip": "tiny-footage.mp4", "credit": credit}]}))
+    paths = Paths(shotlist=shotlist, fetched=fetched, footage=footage, screens=screens,
+                  voice_dir=tmp_path / "voice", out=tmp_path / "final" / "cut.mp4",
+                  summary=None, thumbnail=None)  # fmt: skip
+    summary = build(paths, credits_s=1.0)
+    assert summary["screen_recordings"]["bb-phone"]["plays_from_s"] == [0.6]
+
+    # The screen part runs from 0.5 s to 3 s. Looping from 0 would show red at 0.6 and 1.7 s,
+    # looping from the mark red at 1.1 s: the blue must hold all through.
+    x = 1920 // 2
+    for t in (0.6, 1.1, 1.7, 2.8):
+        r, g, b = colour_at(paths.out, t, (x, PHONE_TOP + 40))
+        assert b > 150 and r < 90, (t, (r, g, b))
+    # The phone page is PHONE_H tall from the top, with the backdrop under it.
+    grey = tuple(int(BACKDROP[i : i + 2], 16) for i in (2, 4, 6))
+    under = colour_at(paths.out, 1.5, (x, PHONE_TOP + PHONE_H + 4))
+    assert all(abs(a - b) <= 12 for a, b in zip(under, grey, strict=True)), under
+    # While the caption says "the link on screen", the link's dark card is beside the phone.
+    left, top, right, bottom = link_box()
+    card = colour_at(paths.out, 1.5, (int(right) - 8, int((top + bottom) / 2)))
+    assert max(card) < 25, card
