@@ -64,7 +64,7 @@ the languages too: Python's `round()` rounds an exact half to the even number an
 chosen inputs and writes their outputs to `worker/golden/`: the follow-up selector, the labels, the
 health card, the pin guards, the city functions, the region placement, the FHIR emitter and the
 hash and rounding helpers. The TypeScript in `worker/src/core/` must reproduce every output
-exactly: <!--v:results/test_counts.json#/worker_golden/cases-->146<!--/v--> cases
+exactly: <!--v:results/test_counts.json#/worker_golden/cases-->149<!--/v--> cases
 in <!--v:results/test_counts.json#/worker_golden/files-->8<!--/v--> files, replayed
 by <!--v:results/test_counts.json#/worker_golden/node_tests-->17<!--/v--> tests. `worker/src/core/pyround.ts`
 rounds the way Python does. Randomization is not ported at all: `scripts/seed_arms.py` writes
