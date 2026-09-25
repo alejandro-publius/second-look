@@ -597,7 +597,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 | Architecture, the deep version | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | The technical report, about fifteen minutes to read | [`docs/REPORT.pdf`](docs/REPORT.pdf) |
 | Our own scorecard, weaknesses included | [`docs/JUDGE_SCORECARD.md`](docs/JUDGE_SCORECARD.md) |
-| The demo script | [`docs/video/SHOTLIST.md`](docs/video/SHOTLIST.md), read aloud from [`docs/video/VOICE_SCRIPT.md`](docs/video/VOICE_SCRIPT.md) |
+| The demo script and how the video is built | [`docs/video/SHOTLIST.md`](docs/video/SHOTLIST.md), read aloud from [`docs/video/VOICE_SCRIPT.md`](docs/video/VOICE_SCRIPT.md); built by `make video-final` ([`docs/video/README.md`](docs/video/README.md)) |
 
 ### What was built, screen by screen
 
@@ -675,7 +675,7 @@ AI coding tools wrote most of the code and text here: Claude Code, working from 
 ## Credits
 
 - The photos in the test and the lessons are openly licensed, each credited at the exact licence version in [`photos/manifest.csv`](photos/manifest.csv) and on the app's `/credits` page.
-- The creek footage in the video comes from Wikimedia Commons, and the three walks are cut from CC BY 3.0 videos on YouTube; every clip and photo is credited on screen, in [`docs/video/CREDITS.md`](docs/video/CREDITS.md) and on `/credits`. The video is released under CC BY-SA 4.0.
+- The creek footage in the video comes from Wikimedia Commons, and the three walks are cut from CC BY 3.0 videos on YouTube; every clip and photo is credited on screen, in [`docs/video/CREDITS.md`](docs/video/CREDITS.md) and on `/credits`. The video is released under CC BY-SA 4.0. The captions only cut is built by `make video-final` and uploaded as [`docs/video/UPLOAD.md`](docs/video/UPLOAD.md) says; its length, its captions file's hash and whether a voice was used are in [`docs/video/final_cut.json`](docs/video/final_cut.json). Its screen clips were recorded from a build of the deployed commit with the mock API, so none added a session anywhere.
 - OneAquaHealth's implementation guide (hl7-eu/oah), their sandbox and their Citizen Science App's question wording; Open-Meteo for rainfall; the Cal-IPC Inventory for the Bay Area plant list.
 - Dependencies and their licences: [`docs/THIRD_PARTY.md`](docs/THIRD_PARTY.md).
 
