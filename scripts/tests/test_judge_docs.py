@@ -38,6 +38,30 @@ def section(body: str, heading: str) -> str:
     return body[start : end if end > 0 else len(body)]
 
 
+def test_the_docs_say_what_the_bay_area_pack_says() -> None:
+    # R01: the list was approved on Sep 25, and four pages still called it a draft waiting for one
+    # person, one with a proof path that no longer existed.
+    import yaml
+
+    pack = yaml.safe_load(text(ROOT / "content" / "regions" / "california-bay-area.yaml"))
+    about = {
+        f"{p.relative_to(ROOT)}: {s}": s
+        for p in JUDGE_PAGES
+        for s in sentences(text(p))
+        if "Bay Area" in s and re.search(r"\blist\b", s)
+    }
+    assert about, "no page says anything about the Bay Area list"
+    if pack.get("approved") is True:
+        stale = [k for k, s in about.items() if re.search(r"\bdraft\b|\bwaits? (on|for)\b", s)]
+        assert stale == [], stale
+        date = str(pack["approved_by"]).rsplit(", ", 1)[-1]
+        readme = [s for s in sentences(text(README)) if "Bay Area" in s and "approved" in s]
+        assert any(date in s for s in readme), f"the README never says the list was approved {date}"
+    else:
+        claimed = [k for k, s in about.items() if re.search(r"\bapproved for the team\b", s)]
+        assert claimed == [], claimed
+
+
 def test_no_public_page_says_every_ai_number_is_graded_from_a_reply() -> None:
     # R02: the benchmark runs kept counts, not replies, so their counts are checked as recorded.
     said = [

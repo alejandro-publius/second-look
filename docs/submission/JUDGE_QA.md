@@ -17,8 +17,8 @@ The key came from the picks file Alex Velazquez wrote with the planner, a Claude
 Proof: `docs/DATA_CARD.md`; `docs/deviations.md`; `photos/manifest.csv` column `label_evidence`.
 
 **4. "Invasive" depends on where you are. Whose list?**
-A Bay Area draft list from the Cal-IPC Inventory, which waits for Rachel's check before it counts. Until then no plant is named as invasive on a creek, the check's plant question asks for Can't tell, and the iNaturalist line reports no sightings. The region file is swappable per city.
-Proof: `content/drafts/regions/california-bay-area.yaml` (the draft); `content/regions/california-bay-area.yaml` (approved: false, empty).
+A Bay Area list from the Cal-IPC Inventory, approved for the team by Alex Velazquez on 2026-09-25 after each species was checked against its Cal-IPC profile. The creek check's plant question, "Which ones?", offers the species on that list and Not sure, so no free text is stored. The iNaturalist line shows research grade sightings of listed plants near a creek once a finished check there has answered the plant question; none has yet, so it shows nothing so far. The region file is swappable per city.
+Proof: `content/regions/california-bay-area.yaml` (`approved: true`, `approved_by`, a Cal-IPC link per species); `content/form.yaml`, item `invasive_which`; `docs/adr/0011-inaturalist-context.md`.
 
 ## FHIR standards
 

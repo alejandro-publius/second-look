@@ -14,8 +14,8 @@ order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA k
 Where it stands (Sep 25, 05:07Z): everything is merged, deployed and green on `main` and `depth`. REVIEW_03's 59 findings are fixed with proofs; the six-judge rerun scored 7.33 against 5.73. Critic rounds 01 to 13 are in `docs/internal/reviews/`; from round 08 a round is three critics at once (the repository, and the live product in two parts), and rounds 10 and 11, then 12 and 13, ran in pairs on the same commit. Rounds 12 and 13 reported minor and minor at worst. Measured on the live site: axe clean, Lighthouse 93 or more on all 20 pages (Sep 24), no dead link, every README command runs in a fresh clone. `make done-check` ends with the counts in the newest report in `docs/internal/reports/`; what is left is dated (Sep 28) or waits on a person (`docs/ALEX_TODO.md`). Dependabot's update pull requests wait for a person.
 
 Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamps) and
-`com.secondlook.inaturalist` (07:45; it asks nothing until Rachel approves the Bay Area plant
-list, D66). Their logs are in `~/second-look-backups/logs/`.
+`com.secondlook.inaturalist` (07:45; it asked nothing until the Bay Area plant list was approved
+for the team on Sep 25, D66). Their logs are in `~/second-look-backups/logs/`.
 
 Traps: after any change to `content/locales/en.json`, run `scripts/build_worker_content.py`. The
 web build rewrites the tracked `apps/web/public/_headers`; restore it before committing. A change

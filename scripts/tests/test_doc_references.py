@@ -23,8 +23,12 @@ DOCS = [
     ROOT / "docs" / "DATA_CARD.md",
     ROOT / "docs" / "MODEL_CARD.md",
     ROOT / "docs" / "THREAT_MODEL.md",
-    # The known bugs page (judge walk 01, R08).
+    # The pages written for judges, and the known bugs page (judge walk 01, R01, R08 and R12):
+    # Q4 of the judge Q&A once gave a proof path that did not exist.
     ROOT / "docs" / "KNOWN_BUGS.md",
+    ROOT / "docs" / "JUDGE_DAY.md",
+    ROOT / "docs" / "JUDGE_SCORECARD.md",
+    ROOT / "docs" / "submission" / "JUDGE_QA.md",
     *sorted((ROOT / "docs" / "adr").glob("*.md")),
 ]
 PATH_RE = re.compile(r"`([A-Za-z0-9_.\[\]-]+(?:/[A-Za-z0-9_.\[\]-]+)+/?)(?:::(\w+))?`")
