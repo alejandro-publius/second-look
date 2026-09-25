@@ -1,12 +1,12 @@
 {
-  "commit": "a010d11",
-  "ran_at_utc": "2026-09-25T01:27:40Z",
+  "commit": "ffb1e98",
+  "ran_at_utc": "2026-09-25T03:15:46Z",
   "steps": [
     {
       "name": "tests",
       "ok": true,
-      "text": "python: 2032 passed, 1 skipped, 9 xfailed in 154.81s (0:02:34); worker: pass 15",
-      "seconds": 157
+      "text": "python: 2044 passed, 1 skipped, 9 xfailed in 162.91s (0:02:42); worker: pass 15",
+      "seconds": 165
     },
     {
       "name": "reproduce",
@@ -18,13 +18,13 @@
       "name": "fhir",
       "ok": true,
       "text": "last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4",
-      "seconds": 0
+      "seconds": 1
     },
     {
       "name": "web",
       "ok": true,
       "text": "next build ok; design-check: clean. 87 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s).",
-      "seconds": 10
+      "seconds": 11
     },
     {
       "name": "audit log",
@@ -36,9 +36,9 @@
       "name": "secrets",
       "ok": true,
       "text": "working tree: nothing shaped like a live key; gitleaks: history clean",
-      "seconds": 7
+      "seconds": 8
     }
   ],
-  "seconds": 196,
+  "seconds": 205,
   "last": "judge-check: 6 of 6 steps passed, offline, with no key"
 }
