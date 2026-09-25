@@ -602,7 +602,9 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 - `/walk`: a creek from your desk, a clip from another country, the same check, a demo record made on the phone.
 - `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card. It needs a stored record, so on the live site today it is empty; [`docs/screens/`](docs/screens/README.md) shows it on a local build.
 - `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach. It is empty until the first real check; `make demo-offline` shows it full.
-- `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so. `/quick`, `/poster`, `/judges`, `/credits`.
+- `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so.
+- `/quick?spot=<id>`: the three-question return check. It opens from a creek record, so like `/spot?id=` it needs a stored record.
+- `/poster`, `/judges`, `/credits`.
 - A read only MCP server over our own records: [`examples/mcp/README.md`](examples/mcp/README.md).
 
 </details>
