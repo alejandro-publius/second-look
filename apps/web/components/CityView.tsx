@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { InatContext } from "./InatContext";
@@ -7,6 +8,7 @@ import { Icon } from "./ui/Icon";
 import { Row } from "./ui/Row";
 import { Skeleton } from "./ui/Skeleton";
 import { api, ApiError, isNetworkError, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
+import { knownCreeks } from "@/lib/content";
 import { t } from "@/lib/t";
 import { reasonsThenSource } from "@/lib/text";
 
@@ -130,7 +132,7 @@ function PipeRow({ pipe }: { pipe: CityPipe }) {
  * An empty "what this creek needs" is said out loud rather than left blank, because no measure
  * and no approved sentence look identical from the outside and mean very different things.
  */
-export function CityView({ creekId }: { creekId: string }) {
+export function CityView({ creekId }: { creekId: string | null }) {
   const [view, setView] = useState<CityOut | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -154,17 +156,35 @@ export function CityView({ creekId }: { creekId: string }) {
 
   // Every state has the page's one level-one heading, the loading and empty ones too (axe
   // page-has-heading-one on /city, docs/internal/reviews/A11Y_00.md).
-  if (!creekId || error) {
+  // A link that names no creek, such as bare /city, says so and links each creek the regions name,
+  // rather than speak of "this creek" without naming one (CRITIC_11 W02).
+  if (creekId === "") {
+    return (
+      <div className="stack">
+        <h1>{t("city.title")}</h1>
+        <p>{t("city.pick")}</p>
+        <ul>
+          {knownCreeks().map((c) => (
+            <li key={c.slug}>
+              <Link href={`/city?creek=${encodeURIComponent(c.slug)}`}>{c.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  if (error) {
     return (
       <div className="stack">
         <h1>{t("city.title")}</h1>
         <div className="notice notice-warn" role="status">
           <Icon name="info" />
-          <p>{error ?? t("city.none")}</p>
+          <p>{error}</p>
         </div>
       </div>
     );
   }
+  // Not read from the address yet (null), or waiting for the API.
   if (!view) {
     return (
       <div className="stack">

@@ -69,6 +69,28 @@ test("every screen shows real strings, none missing from the locale", async ({ p
   }
 });
 
+// CRITIC_11 W02: an address with no page showed the framework's stock 404, whose inline styles the
+// site's own CSP blocks, with no way on but the wordmark. It is now the site's own page, with a
+// link to the start and one to the judges' page. The static export writes it as 404.html, which
+// Cloudflare Pages serves for any address with no file.
+test("an address with no page gets the site's own page, with a way on", async ({ page }) => {
+  const violations: string[] = [];
+  page.on("console", (m) => {
+    if (m.text().includes("Content Security Policy")) violations.push(m.text());
+  });
+  const res = await page.goto("/no-such-page");
+  expect(res!.status()).toBe(404);
+  await expect(page.getByRole("heading", { level: 1, name: "No page here" })).toBeVisible();
+  const main = page.getByRole("main");
+  await expect(main.getByRole("link", { name: "Go to the start", exact: true })).toHaveAttribute("href", "/");
+  await expect(main.getByRole("link", { name: "The page for judges", exact: true })).toHaveAttribute("href", "/judges");
+  await expect(page.locator("body")).not.toContainText("This page could not be found");
+  await expect(main.locator("[style]")).toHaveCount(0);
+  await main.getByRole("link", { name: "The page for judges", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
+  expect(violations).toEqual([]);
+});
+
 test("every photograph a visitor can see is named on the credits page", async ({ page }) => {
   await mockApi(page);
   await page.goto("/credits");

@@ -115,6 +115,7 @@ export interface Region {
   name: string;
   approved: boolean;
   invasive_plants: { common_name: string; latin_name: string; source: string }[];
+  creeks?: { slug: string; name: string }[];
 }
 
 export interface Content {
@@ -255,6 +256,13 @@ export function licenseName(license: string): string {
 
 export function shownPhotos(): Photo[] {
   return Object.values(content.photos).sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/** Every creek the regions name, by name: the ones /city can be opened on (CRITIC_11 W02). */
+export function knownCreeks(): { slug: string; name: string }[] {
+  return Object.values(content.regions)
+    .flatMap((r) => r.creeks ?? [])
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function walkById(id: string): Walk | undefined {
