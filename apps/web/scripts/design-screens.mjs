@@ -1,16 +1,17 @@
 // The stage 1 screens, at the phone size the study will actually run on, into docs/screens/.
 // Viewport shots, not full page, because what is above the fold is the thing being judged.
-// Needs the production server on 3100 (npm run build && npm run start).
+// Needs the production server on 3100 or WEB_PORT (npm run build && npm run start).
 import { mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { mockApi } from "../tests/mock-api.mjs";
+import { WEB_ORIGIN } from "./web-port.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = resolve(here, "..", "..", "..", "docs", "screens");
 mkdirSync(out, { recursive: true });
-const base = process.env.SCREENS_URL || "http://127.0.0.1:3100";
+const base = process.env.SCREENS_URL || WEB_ORIGIN;
 const PHONE = { width: 390, height: 844 };
 
 const browser = await chromium.launch();

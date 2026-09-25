@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { BASE } from "./helpers";
 
 test("manifest and service worker are served from our origin", async ({ request }) => {
   const manifest = await request.get("/manifest.webmanifest");
@@ -57,7 +58,7 @@ test.describe("with service workers allowed", () => {
     const swEvent = context.waitForEvent("serviceworker", { timeout: 30_000 });
     await page.goto("/");
     const worker = await swEvent;
-    expect(worker.url()).toBe("http://127.0.0.1:3100/sw.js");
+    expect(worker.url()).toBe(`${BASE}/sw.js`);
     await page.evaluate(() => navigator.serviceWorker.ready);
     await expect
       .poll(

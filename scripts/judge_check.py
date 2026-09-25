@@ -16,7 +16,12 @@ The six steps:
 3. FHIR. The result of the last HL7 validator run, read from the committed
    results/fhir_validation.json (this step does not run the validator; make fhir-validate does),
    and the golden Bundles checked byte for byte against what the emitter produces today.
-4. Web. The app builds, and the design gate passes: tokens, contrast and tap targets.
+4. Web. The app builds, and the design gate passes: tokens, contrast and tap targets. The tap
+   targets are measured on this build served on port 3100 (or WEB_PORT), or on a free port the
+   script picks when something else holds it; it prints which, and checks the port is free again
+   after.
+   Two judge-checks in one checkout share apps/web/.next, so this step holds a lock on
+   apps/web and the second one waits for the first to finish it.
 5. Audit log. The hash chain walks from the genesis hash to the last entry with no break.
 6. Secrets. gitleaks over the history when it is installed, and a scan of the working tree for
    anything shaped like a key.
@@ -28,14 +33,17 @@ Run: uv run python scripts/judge_check.py
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import time
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -188,6 +196,96 @@ def step_fhir(root: Path, env: dict[str, str]) -> Step:
     return step
 
 
+# The port the web app serves on unless WEB_PORT says otherwise (apps/web/scripts/web-port.mjs).
+DEFAULT_WEB_PORT = 3100
+# The web step's lock, inside apps/web/node_modules: one per checkout, ignored by git, and kept by
+# next build, which empties .next.
+WEB_LOCK = Path("node_modules") / ".judge-check-web.lock"
+
+
+def port_free(port: int) -> bool:
+    """True when nothing answers on 127.0.0.1:port and a server could bind it.
+
+    SO_REUSEADDR, as Node sets it for a server: a port whose last connections are still closing
+    counts as free, and one that another server listens on does not.
+    """
+    with socket.socket() as probe:
+        probe.settimeout(1.0)
+        if probe.connect_ex(("127.0.0.1", port)) == 0:
+            return False
+    with socket.socket() as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sock.bind(("127.0.0.1", port))
+        except OSError:
+            return False
+    return True
+
+
+def preferred_web_port() -> int:
+    """WEB_PORT when it is set, as for every other web command, or else 3100."""
+    raw = os.environ.get("WEB_PORT", "").strip()
+    return int(raw) if raw.isdigit() and 0 < int(raw) < 65536 else DEFAULT_WEB_PORT
+
+
+def pick_web_port(preferred: int | None = None) -> int:
+    """The preferred port when it is free, or else one the system hands out (CRITIC_13 N01)."""
+    preferred = preferred_web_port() if preferred is None else preferred
+    if port_free(preferred):
+        return preferred
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
+
+
+def wait_port_free(port: int, seconds: float = 15.0) -> bool:
+    deadline = time.monotonic() + seconds
+    while not port_free(port):
+        if time.monotonic() > deadline:
+            return False
+        time.sleep(0.25)
+    return True
+
+
+@contextmanager
+def web_lock(web: Path) -> Iterator[None]:
+    """Hold this checkout's web lock: one judge-check at a time builds and measures apps/web.
+
+    Two judge-checks in one checkout share apps/web/.next and the files the build writes, so a
+    second one waits here until the first has built, measured and stopped its server. The lock is
+    the operating system's, so it goes when its process ends, however it ends.
+    """
+    path = web / WEB_LOCK
+    with path.open("w", encoding="utf-8") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(
+                "judge-check: another judge-check in this checkout is on its web step; "
+                "waiting for it to finish",
+                flush=True,
+            )
+            fcntl.flock(handle, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+def run_stoppable(argv: list[str], cwd: Path, env: dict[str, str]) -> tuple[int, str]:
+    """run(), but a judge-check that is stopped stops this child too, and so its web server."""
+    proc = subprocess.Popen(
+        argv, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
+    try:
+        out, _ = proc.communicate()
+    except BaseException:
+        proc.terminate()
+        proc.wait()
+        raise
+    return proc.returncode, out
+
+
 def step_web(root: Path, env: dict[str, str], quick: bool) -> Step:
     step = Step("web")
     web = root / "apps" / "web"
@@ -197,16 +295,28 @@ def step_web(root: Path, env: dict[str, str], quick: bool) -> Step:
     if not (web / "node_modules").exists():
         step.fail("apps/web/node_modules is missing; run npm install in apps/web first")
         return step
-    rc, out = run(["npm", "run", "build", "--silent"], web, env)
-    if rc != 0:
-        step.fail(f"the web build failed: {last_line(out)}")
-        return step
-    step.lines.append("next build ok")
-    rc, out = run(["node", "scripts/design-check.mjs"], web, env)
-    if rc != 0:
-        step.fail(f"design-check failed: {last_line(out)}")
-    else:
-        step.lines.append(last_line(out))
+    with web_lock(web):
+        rc, out = run(["npm", "run", "build", "--silent"], web, env)
+        if rc != 0:
+            step.fail(f"the web build failed: {last_line(out)}")
+            return step
+        step.lines.append("next build ok")
+        # Picked inside the lock, just before the design check starts its server on it.
+        preferred = preferred_web_port()
+        port = pick_web_port(preferred)
+        busy = "" if port == preferred else f" ({preferred} is in use)"
+        print(f"judge-check: the web step serves this build on port {port}{busy}", flush=True)
+        rc, out = run_stoppable(
+            ["node", "scripts/design-check.mjs"], web, {**env, "WEB_PORT": str(port)}
+        )
+        if rc != 0:
+            step.fail(f"design-check failed: {last_line(out)}")
+        else:
+            step.lines.append(last_line(out))
+        if wait_port_free(port):
+            step.lines.append(f"served on port {port}{busy}, which is free again")
+        else:
+            step.fail(f"port {port} is still in use after the web step")
     return step
 
 

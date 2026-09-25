@@ -103,3 +103,20 @@ def test_run_as_a_script_it_still_asks_for_site_url() -> None:
     done = node(str(SCRIPT))
     assert done.returncode != 0
     assert "set SITE_URL" in done.stderr
+
+
+def test_the_pick_list_creeks_come_from_every_region_in_the_build(tmp_path: Path) -> None:
+    # UPDATE_30 section 1 item 4: the live check taps each creek on bare /city, so it reads them
+    # from every region the web build holds, and names none when there is no build.
+    content = tmp_path / "content.json"
+    regions = {
+        "a": {"creeks": [{"slug": "strawberry-creek", "name": "Strawberry Creek"}]},
+        "b": {"creeks": []},
+        "c": {"creeks": [{"slug": "other-creek", "name": "Other Creek"}]},
+    }
+    content.write_text(json.dumps({"regions": regions}), encoding="utf-8")
+    assert call(f"m.pickListCreeks({json.dumps(str(content))})") == [
+        {"slug": "strawberry-creek", "name": "Strawberry Creek"},
+        {"slug": "other-creek", "name": "Other Creek"},
+    ]
+    assert call(f"m.pickListCreeks({json.dumps(str(tmp_path / 'none.json'))})") == []

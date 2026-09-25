@@ -54,6 +54,19 @@ export function chooseWalk(walkId, contentPath = CONTENT) {
   return { id: "", from: "" };
 }
 
+/**
+ * Every creek the pick list on bare /city links, from the regions in the web build, in their
+ * order: [{ slug, name }]. None when there is no web build here (UPDATE_30 section 1 item 4).
+ */
+export function pickListCreeks(contentPath = CONTENT) {
+  try {
+    const regions = Object.values(JSON.parse(readFileSync(contentPath, "utf8")).regions ?? {});
+    return regions.flatMap((r) => r.creeks ?? []).map((c) => ({ slug: String(c.slug), name: String(c.name) }));
+  } catch {
+    return [];
+  }
+}
+
 async function main() {
   const site = (process.env.SITE_URL ?? "").replace(/\/$/, "");
   const api = (process.env.API_URL ?? site).replace(/\/$/, "");
@@ -141,6 +154,18 @@ async function main() {
     await page.goto(`${site}/city?creek=strawberry-creek`);
     await page.locator("h2").first().waitFor({ timeout: 15000 });
   });
+  // Bare /city's pick list: each creek link must open that creek, not only change the address
+  // (CRITIC_13 W02).
+  const picks = pickListCreeks();
+  if (picks.length === 0) console.log("live-readonly: SKIP the /city pick list: generated/content.json names no creek");
+  for (const creek of picks) {
+    await step(`bare /city's link to ${creek.name} opens that creek`, async () => {
+      await page.goto(`${site}/city`);
+      await page.getByRole("main").getByRole("link", { name: creek.name, exact: true }).click();
+      await page.waitForURL(`**/city?creek=${encodeURIComponent(creek.slug)}`, { timeout: 15000 });
+      await page.getByText(`reported at ${creek.name}`).waitFor({ timeout: 15000 });
+    });
+  }
   await step("lab and volunteer side by side, from the API", async () => {
     await page.goto(`${site}/two`);
     // Our record shows whenever our API answers.

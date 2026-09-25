@@ -5,10 +5,11 @@
 // The last one is measured as the landing route's JavaScript minus a near static page on the same
 // app, so the App Router's own baseline is not counted against us. The 90 KB total was dropped
 // because the framework floor alone is above it and we are not rebuilding the front door.
-// Needs the production server on 3100. Prints the numbers and fails if one is over.
+// Needs the production server on 3100 (or WEB_PORT). Prints the numbers and fails if one is over.
 import { chromium } from "@playwright/test";
+import { WEB_ORIGIN } from "./web-port.mjs";
 
-const base = process.env.BUDGET_URL || "http://127.0.0.1:3100";
+const base = process.env.BUDGET_URL || WEB_ORIGIN;
 // Lighthouse's mobile profile: 1.6 Mbit/s down, 750 kbit/s up, 150 ms round trip, 4x slower CPU.
 const NET = { offline: false, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8, latency: 150 };
 // ours: chunks the landing loads that the framework baseline page does not.

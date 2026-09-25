@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { InatContext } from "./InatContext";
@@ -8,7 +7,7 @@ import { Icon } from "./ui/Icon";
 import { Row } from "./ui/Row";
 import { Skeleton } from "./ui/Skeleton";
 import { api, ApiError, isNetworkError, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
-import { knownCreeks } from "@/lib/content";
+import { creeksByRegion } from "@/lib/content";
 import { t } from "@/lib/t";
 import { reasonsThenSource } from "@/lib/text";
 
@@ -156,20 +155,32 @@ export function CityView({ creekId }: { creekId: string | null }) {
 
   // Every state has the page's one level-one heading, the loading and empty ones too (axe
   // page-has-heading-one on /city, docs/internal/reviews/A11Y_00.md).
-  // A link that names no creek, such as bare /city, says so and links each creek the regions name,
-  // rather than speak of "this creek" without naming one (CRITIC_11 W02).
+  // A link that names no creek, such as bare /city, says so and lists every region pack with its
+  // creeks, rather than speak of "this creek" without naming one (CRITIC_11 W02).
+  // The creek links are plain links, so each one loads its page whole. This page reads its query
+  // once, and a client side move to /city with a new query kept the pick list on screen whenever
+  // the router had not fetched the creek's page ahead of the tap, as on a slow phone (CRITIC_13 W02).
   if (creekId === "") {
     return (
       <div className="stack">
-        <h1>{t("city.title")}</h1>
+        <h1>{t("city.pick_title")}</h1>
         <p>{t("city.pick")}</p>
-        <ul>
-          {knownCreeks().map((c) => (
-            <li key={c.slug}>
-              <Link href={`/city?creek=${encodeURIComponent(c.slug)}`}>{c.name}</Link>
-            </li>
-          ))}
-        </ul>
+        {creeksByRegion().map((r) => (
+          <section key={r.region} className="stack">
+            <h2>{r.name}</h2>
+            {r.creeks.length === 0 ? (
+              <p className="muted">{t("city.pick_none")}</p>
+            ) : (
+              <ul>
+                {r.creeks.map((c) => (
+                  <li key={c.slug}>
+                    <a href={`/city?creek=${encodeURIComponent(c.slug)}`}>{c.name}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
       </div>
     );
   }

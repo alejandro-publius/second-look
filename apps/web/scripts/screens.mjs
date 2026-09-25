@@ -1,15 +1,16 @@
 // Walks every screen on a phone viewport against the fake API and writes screenshots to screens/.
-// Needs the production server on port 3100 (npm run build && npm run start). Playwright only.
+// Needs the production server on port 3100, or WEB_PORT (npm run build && npm run start). Playwright only.
 import { mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, devices } from "@playwright/test";
 import { mockApi } from "../tests/mock-api.mjs";
+import { WEB_ORIGIN } from "./web-port.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = resolve(here, "..", "screens");
 mkdirSync(out, { recursive: true });
-const base = process.env.SCREENS_URL || "http://127.0.0.1:3100";
+const base = process.env.SCREENS_URL || WEB_ORIGIN;
 
 const browser = await chromium.launch();
 const context = await browser.newContext({ ...devices["iPhone 13"], serviceWorkers: "block" });

@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { WEB_ORIGIN } from "./scripts/web-port.mjs";
 
 // Tests run against a production build on port 3100 so the real CSP headers are in force.
+// WEB_PORT moves it (scripts/web-port.mjs); package.json's start script reads the same variable.
 // The API origin is a fake one that every test mocks with page.route; nothing is ever sent there.
 export const API_ORIGIN = "http://127.0.0.1:8100";
 
@@ -18,22 +20,22 @@ export default defineConfig({
   use: {
     ...devices["iPhone 13"],
     browserName: "chromium",
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: WEB_ORIGIN,
     serviceWorkers: "block",
     trace: "retain-on-failure",
   },
   webServer: {
     command: "npm run build && npm run start",
-    url: "http://127.0.0.1:3100/",
-    // This checkout's own build: when something already answers on 3100 (make dev, make
+    url: `${WEB_ORIGIN}/`,
+    // This checkout's own build: when something already answers on the port (make dev, make
     // demo-offline, another session), the run stops with a port in use error instead of testing it.
-    // The one exception is scripts/design-check.mjs, which starts this build on 3100 itself just
+    // The one exception is scripts/design-check.mjs, which starts this build on the port itself just
     // before and says so with PW_REUSE=1.
     reuseExistingServer: process.env.PW_REUSE === "1",
     timeout: 240_000,
     env: {
       NEXT_PUBLIC_API_ORIGIN: API_ORIGIN,
-      NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100",
+      NEXT_PUBLIC_SITE_URL: WEB_ORIGIN,
       NEXT_PUBLIC_BUILD_HASH: "test",
       NEXT_TELEMETRY_DISABLED: "1",
     },

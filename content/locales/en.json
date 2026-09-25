@@ -514,6 +514,8 @@
   "city.flagged_note": "These are kept out of every number above. Nothing is deleted.",
   "city.none": "Nobody has checked this creek yet.",
   "city.pick": "This link names no creek. Pick a creek to see what it needs.",
+  "city.pick_title": "Pick a creek",
+  "city.pick_none": "No creek is mapped here yet.",
   "city.findings_none": "Nobody has reported a built bank, pipe, barrier or invasive plant here yet.",
   "city.dry_days": "after {n} dry days",
   "city.dry_day_one": "after 1 dry day",

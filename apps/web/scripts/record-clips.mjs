@@ -3,7 +3,7 @@
 // Judge mode is recorded with Playwright's clock set after the lock: the lock constant is
 // overridden in this test environment only, and the app is untouched.
 //
-// Needs: npm run build && npm run start (port 3100). Writes webm to docs/video/clips/raw, then
+// Needs: npm run build && npm run start (port 3100, or WEB_PORT). Writes webm to docs/video/clips/raw, then
 // scripts/video_rough.py converts them to 30 fps mp4 in docs/video/clips/ (never committed).
 // Clip names follow docs/video/SHOTLIST.md; extra-* clips are cutaways no beat names.
 import { mkdirSync, readFileSync, renameSync } from "node:fs";
@@ -11,11 +11,12 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { mockApi } from "../tests/mock-api.mjs";
+import { WEB_ORIGIN } from "./web-port.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = resolve(process.env.CLIPS_RAW || join(here, "..", "..", "..", "docs", "video", "clips", "raw"));
 mkdirSync(out, { recursive: true });
-const base = process.env.SCREENS_URL || "http://127.0.0.1:3100";
+const base = process.env.SCREENS_URL || WEB_ORIGIN;
 const content = JSON.parse(readFileSync(resolve(here, "..", "generated", "content.json"), "utf8"));
 const walk = (content.walks ?? [])[0];
 // Playwright records at CSS pixels and pads, never scales, a page into a larger video size, so a
