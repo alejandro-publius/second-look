@@ -126,6 +126,16 @@ def test_acceptance_says_every_fhir_run_asks_the_terminology_server() -> None:
     assert all(re.search(rf"\bevery run asks {re.escape(host)}\b", s) for s in said), said
 
 
+def test_deploy_says_the_anchor_job_stamps_only_a_changed_hash() -> None:
+    # X01: DEPLOY.md said the job stamps the last hash daily, with no condition, while the script
+    # stamps nothing when the last hash is the one the newest proof already holds.
+    script = text(ROOT / "scripts" / "anchor_audit_head.py")
+    assert 'done[-1][1] == last["hash"]' in script and "nothing to stamp" in script
+    rows = text(ROOT / "DEPLOY.md").splitlines()
+    row = next(ln for ln in rows if ln.startswith("| `com.secondlook.anchor`"))
+    assert re.search(r"\bonly on a day that hash has changed since the last stamp\b", row), row
+
+
 def test_a_readme_section_in_the_report_names_only_sections_the_report_has() -> None:
     # A05: the report took "What the AI cannot do" from the README, and it sent the reader to
     # "The gate, the heart of it", a README heading the report does not have (its 2.2 is "The
