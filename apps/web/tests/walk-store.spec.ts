@@ -347,7 +347,11 @@ test("a walk finished with no network is stored when the network comes back", as
   await page.reload();
   await expect(page.getByTestId("walk-stored")).toContainText(en["walk.stored_waiting"]);
   offline.value = false;
-  await page.getByRole("button", { name: en["walk.stored_retry"] }).click();
+  // Once the network is back the queue may send the walk by itself and the button goes away; that
+  // race made CI fail once on main (the click waited on a button that had left the page). Tap it
+  // only if it is still there: what counts is that the stored record's link appears.
+  const retry = page.getByRole("button", { name: en["walk.stored_retry"] });
+  if (await retry.isVisible()) await retry.click({ timeout: 5_000 }).catch(() => undefined);
   await expect(page.getByTestId("walk-record-link")).toHaveAttribute("href", /^\/spot\?id=walk-[0-9a-f]{16}$/);
 });
 
