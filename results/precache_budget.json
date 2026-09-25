@@ -1,0 +1,21 @@
+{
+  "what": "Every response body the service worker fetched in the 30 seconds after a first visit to / on the phone profile, uncompressed, with nothing cached before",
+  "made_by": "apps/web/tests/offline-budget.spec.ts through make precache-budget",
+  "page": "/",
+  "profile": "Playwright iPhone 13 in Chromium, service workers allowed",
+  "waited_seconds": 30,
+  "budget_bytes": 3000000,
+  "bytes": 2300462,
+  "megabytes": 2.3,
+  "files": 59,
+  "photos": {
+    "files": 38,
+    "bytes": 1441542
+  },
+  "wire_bytes": 1510734,
+  "cache_storage_bytes": 2293455,
+  "under_budget": true,
+  "measured_at_utc": "2026-09-25T16:30:46Z",
+  "commit": "fee99f9bc7a974bb23f4e835d3ecf229c2207d74",
+  "tree_clean": true
+}
