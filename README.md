@@ -573,10 +573,10 @@ uv sync && (cd apps/web && npm ci && npx playwright install chromium) && (cd wor
 make judge-check
 ```
 
-`make judge-check` needs no key and no network: it runs the Python tests and the Worker's golden vectors, grades the AI numbers again from the raw replies where a run kept them (`make reproduce`, whose notes it prints under its summary: the benchmark's right-answer counts, its share of can't tell answers and its count of malformed replies are checked only as recorded, as Evals says), reads the last HL7 validator run, builds the web app with its design check, verifies the audit log and scans for secrets, in about five minutes after the setup (`make fhir-validate` runs the validator itself, with Java). Its last recorded run, at commit <!--v:results/judge_check.json#/commit-->57b1e42<!--/v-->, took <!--v:results/judge_check.json#/seconds-->246<!--/v--> seconds after the setup ([`results/judge_check.json`](results/judge_check.json), written by [`scripts/judge_check.py`](scripts/judge_check.py) with its `--out` option):
+`make judge-check` needs no key and no network: it runs the Python tests and the Worker's golden vectors, grades the AI numbers again from the raw replies where a run kept them (`make reproduce`, whose notes it prints under its summary: the benchmark's right-answer counts, its share of can't tell answers and its count of malformed replies are checked only as recorded, as Evals says), reads the last HL7 validator run, builds the web app with its design check, verifies the audit log and scans for secrets, in about five minutes after the setup (`make fhir-validate` runs the validator itself, with Java). Its last recorded run, at commit <!--v:results/judge_check.json#/commit-->473ae2c<!--/v-->, took <!--v:results/judge_check.json#/seconds-->250<!--/v--> seconds after the setup ([`results/judge_check.json`](results/judge_check.json), written by [`scripts/judge_check.py`](scripts/judge_check.py) with its `--out` option):
 
 <!--block:judge-check results/judge_check.json-->
-- **tests**: python: 2345 passed, 2 skipped, 9 xfailed in 204.06s (0:03:24); worker: pass 17
+- **tests**: python: 2346 passed, 2 skipped, 9 xfailed in 206.17s (0:03:26); worker: pass 17
 - **reproduce**: 28603 values in 23 files regraded from raw replies and seeds, with no network and no key; every one matches; 3 files not regraded and 5 notes, each named below
   - results/benchmark_20260924T031225Z.json and results/benchmark_20260924T054939Z.json: the right-answer counts per feature, the share of cant_tell answers and the count of malformed replies are as recorded: the run kept counts, not answers, so no reply is left to grade them from; the accuracies, intervals and cost are regraded
   - results/footage_20260924T032230Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 144 calls is regraded
@@ -585,8 +585,8 @@ make judge-check
   - results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has
   - results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file
   - results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has
-- **fhir**: last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4
-- **web**: next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s); served on port 3100, which is free again
+- **fhir**: last validator run: 15 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4
+- **web**: next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s); served on port 3100, which is free again
 - **audit log**: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3
 - **secrets**: working tree: nothing shaped like a live key; gitleaks: history clean
 - judge-check: 6 of 6 steps passed, offline, with no key

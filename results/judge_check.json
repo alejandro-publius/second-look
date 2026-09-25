@@ -1,12 +1,12 @@
 {
-  "commit": "57b1e42",
-  "ran_at_utc": "2026-09-25T22:18:47Z",
+  "commit": "473ae2c",
+  "ran_at_utc": "2026-09-25T23:36:13Z",
   "steps": [
     {
       "name": "tests",
       "ok": true,
-      "text": "python: 2345 passed, 2 skipped, 9 xfailed in 204.06s (0:03:24); worker: pass 17",
-      "seconds": 206
+      "text": "python: 2346 passed, 2 skipped, 9 xfailed in 206.17s (0:03:26); worker: pass 17",
+      "seconds": 209
     },
     {
       "name": "reproduce",
@@ -17,13 +17,13 @@
     {
       "name": "fhir",
       "ok": true,
-      "text": "last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4",
+      "text": "last validator run: 15 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4",
       "seconds": 0
     },
     {
       "name": "web",
       "ok": true,
-      "text": "next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.2s).; served on port 3100, which is free again",
+      "text": "next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).; served on port 3100, which is free again",
       "seconds": 11
     },
     {
@@ -36,9 +36,9 @@
       "name": "secrets",
       "ok": true,
       "text": "working tree: nothing shaped like a live key; gitleaks: history clean",
-      "seconds": 7
+      "seconds": 8
     }
   ],
-  "seconds": 246,
+  "seconds": 250,
   "last": "judge-check: 6 of 6 steps passed, offline, with no key"
 }
