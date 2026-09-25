@@ -229,7 +229,8 @@ export const exampleValidation = { ran_at_utc: "2026-09-20T22:58:03+00:00", vali
 
 // A finished walk's stored record (UPDATE_30 section 1 item 3): the id is the walk visit's own,
 // sha256 of "<walk id>|<time to the second>", as core/walks.py and worker/src/core/walks.ts make it.
-const WALK_KEYS = ["walk_id", "answers", "answered_at"];
+// Since judge walk W01 a walk also sends its follow-up answers and the rating the rating check left.
+const WALK_KEYS = ["walk_id", "answers", "answered_at", "followup_answers", "final_rating"];
 const secondsOf = (iso) => {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? null : d.toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -241,7 +242,9 @@ export const walkRecordId = (walkId, answeredAt) => "walk-" + createHash("sha256
  * offline (object with a mutable `value` flag; when true every API request fails like a dead network),
  * walkStore (a Map of stored walk records; hand the same one to two pages, in two browser contexts,
  * and a record one stores opens in the other, as on the real store), walkBundle (walkId, answers,
- * answeredAt) => the record's Bundle, and walkRefuse ({ status, detail }: every walk store is refused).
+ * answeredAt) => the record's Bundle, walkChecks (answers, followup_answers, final_rating) =>
+ * { checks, first_rating, final_rating } as the store keeps them, and walkRefuse ({ status, detail }:
+ * every walk store is refused).
  * Returns the list of calls: { method, path, body }.
  */
 export async function mockApi(page, options = {}) {
@@ -426,6 +429,7 @@ export async function mockApi(page, options = {}) {
         delete_after: secondsOf(new Date(Date.now() + 30 * 86_400_000).toISOString()),
         answers: body.answers,
         bundle: options.walkBundle ? options.walkBundle(body.walk_id, body.answers, body.answered_at) : { resourceType: "Bundle", type: "collection", entry: [] },
+        ...(options.walkChecks ? options.walkChecks(body.answers, body.followup_answers ?? {}, body.final_rating ?? null) : { checks: [], first_rating: null, final_rating: null }),
       };
       walkStore.set(record_id, row);
       return json({ record_id, walk_id: row.walk_id, answered_at: row.answered_at, delete_after: row.delete_after });
