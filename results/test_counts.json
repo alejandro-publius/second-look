@@ -1,11 +1,11 @@
 {
   "script": "scripts/count_tests.py",
   "synthetic": false,
-  "generated_at_utc": "2026-09-25T22:14:26+00:00",
-  "measured_at_commit": "ee66e45",
+  "generated_at_utc": "2026-09-25T23:01:42+00:00",
+  "measured_at_commit": "d9b9a5b",
   "tree_had_changes": false,
   "python": {
-    "tests": 2356,
+    "tests": 2357,
     "files": 132,
     "command": "uv run pytest --collect-only -q"
   },
@@ -15,7 +15,7 @@
     "node_tests": 17
   },
   "playwright": {
-    "tests": 168,
+    "tests": 169,
     "spec_files": 25,
     "command": "npx playwright test --list"
   },
