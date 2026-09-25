@@ -34,6 +34,13 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | any | `/api/test/counts` | Sittings randomized and completed per arm and per source, tests left out. | nothing | none |
 | any | `/api/test/export` | `sessions.csv` and `responses.csv` in one zip. | nothing | `?token=` must match `EXPORT_TOKEN`, or the answer is 404 |
 | POST | `/api/demo/answer` | Judge mode: says only whether an answer was right, never the gold label. | nothing | the data lock: 403 before 2026-09-28T01:00:00Z |
+| POST | `/api/t2/offer` | Part 2, the assisted second look: Start or No thanks after part 1's score. Start randomizes once per part 1 sitting from the pre-registered slots of that part 1 arm; a QA sitting may name its arm and takes no slot. | a `part2_session` row (part 1 arm, arm, item order, or the decline) | 409 until the part 1 sitting has reached its score screen |
+| POST | `/api/t2/answer` | One first answer to one part 2 photo. Answers only whether the checker's question appears, never which way the checker leans. The first answer stays. | a `part2_response` row (first answer, whether the question was shown, timing, position) | none |
+| POST | `/api/t2/choice` | Keep or Change after the question; the person's pick is stored. | the row's final answer, choice and time | 409 when no question was shown or a choice is already stored |
+| POST | `/api/t2/complete` | Ends part 2 and returns the score out of 8, or the photos to send again. | `part2_session.completed_at` | none |
+| any | `/api/t2/resume` | Where a reloaded part 2 was, with the photo whose question was showing. Read only. | nothing | none |
+| any | `/api/t2/counts` | Part 2 started and finished per arm, and the declines, tests left out. | nothing | none |
+| POST | `/api/t2/demo` | Part 2's judge mode: whether the question would appear, and whether an answer was right. | nothing | the data lock: 403 before 2026-09-28T01:00:00Z |
 | POST | `/api/check/draft` | A creek check's answers: makes the spot if it is new, asks Open-Meteo about rain, and picks at most two follow-up questions by code. | a `spot` row if new (a coarse point unless the person placed the pin), a draft `visit` row (coded answers, first rating, the questions asked, the contributor token if given) | none |
 | POST | `/api/check/finalize` | The answers to the follow-ups and the final rating; builds the FHIR Bundle. | `check_result` rows, the final rating, a `fhir_bundle` row | refuses an answer to a question it never asked |
 | POST | `/api/quick/{spot_id}` | The three-question return check at a known spot: colour, smell, pipe running. | a `visit` row of kind quick | none |

@@ -26,6 +26,7 @@ def test_every_port_has_a_file_and_every_case_has_the_three_parts() -> None:
     files = sorted(p.name for p in (ROOT / "worker" / "golden").glob("*.json"))
     assert files == [
         "act.json",
+        "assist.json",
         "fhir_emit.json",
         "followups.json",
         "healthcard.json",

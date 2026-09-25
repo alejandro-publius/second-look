@@ -35,6 +35,18 @@ RESPONSE_HEAD = [
     "session_id", "item_id", "feature", "gold", "answer", "correct", "rt_ms", "position",
     "first_choice", "final_choice", "t_first_ms", "t_confirm_ms", "n_changes",
 ]  # fmt: skip
+# Part 2 (UPDATE_31): exportFiles in worker/src/part2.ts, read by evals/assist_analysis.py.
+PART2_SESSION_HEAD = [
+    "part2_id", "session_id", "part1_arm", "arm", "block_id", "offered_at_utc", "declined",
+    "started_at_utc", "completed_at_utc", "test_seconds", "client_token_hash", "is_test",
+    "post_lock",
+]  # fmt: skip
+PART2_RESPONSE_HEAD = [
+    "part2_id", "item_id", "feature", "gold", "position", "first_answer", "final_answer",
+    "question_shown", "choice", "t_first_ms", "t_final_ms", "correct",
+]  # fmt: skip
+PART2_SESSIONS_SQL = "SELECT * FROM part2_session ORDER BY offered_at"
+PART2_RESPONSES_SQL = "SELECT * FROM part2_response ORDER BY part2_id, position"
 SESSIONS_SQL = "SELECT * FROM session ORDER BY started_at"
 RESPONSES_SQL = "SELECT * FROM response ORDER BY session_id, position"
 EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
@@ -229,11 +241,89 @@ def export_texts(
     return "\r\n".join(session_lines) + "\r\n", "\r\n".join(response_lines) + "\r\n"
 
 
+def part2_rows(
+    conn: sqlite3.Connection,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]] | None:
+    """Part 2's two SELECTs, or None for a backup taken before part 2's tables existed."""
+    try:
+        sessions = [dict(r) for r in conn.execute(PART2_SESSIONS_SQL)]
+        responses = [dict(r) for r in conn.execute(PART2_RESPONSES_SQL)]
+    except sqlite3.OperationalError:
+        return None
+    return sessions, responses
+
+
+def part2_export_texts(
+    sessions: list[dict[str, Any]], responses: list[dict[str, Any]]
+) -> tuple[str, str]:
+    """part2_sessions.csv and part2_responses.csv, as exportFiles in worker/src/part2.ts."""
+    content = json.loads(CONTENT.read_text(encoding="utf-8"))
+    gold_of = {str(i["id"]): str(i["gold"]) for i in content["part2_items"]}
+    feature_of = {str(i["id"]): str(i["feature"]) for i in content["part2_items"]}
+    first_at: dict[str, str] = {}
+    for r in responses:
+        pid, at = js_string(r["part2_id"]), js_string(r["received_at"])
+        if pid not in first_at or at < first_at[pid]:
+            first_at[pid] = at
+    session_lines = [csv_row(list(PART2_SESSION_HEAD))]
+    for s in sessions:
+        seconds: Any = ""
+        first = first_at.get(js_string(s["id"]))
+        if s.get("completed_at") and first:
+            ms = js_date_ms(js_string(s["completed_at"])) - js_date_ms(first)
+            seconds = js_round((ms / 1000) * 10) / 10
+        session_lines.append(
+            csv_row(
+                [
+                    s["id"],
+                    s["session_id"],
+                    s["part1_arm"],
+                    nullish(s.get("arm")),
+                    nullish(s.get("block_id")),
+                    s["offered_at"],
+                    s["declined"],
+                    nullish(s.get("started_at")),
+                    nullish(s.get("completed_at")),
+                    seconds,
+                    s["client_token_hash"],
+                    s["is_test"],
+                    s["post_lock"],
+                ]
+            )  # fmt: skip
+        )
+    response_lines = [csv_row(list(PART2_RESPONSE_HEAD))]
+    for r in responses:
+        item_id = js_string(r["item_id"])
+        gold = gold_of.get(item_id)
+        final = "" if r.get("final_answer") is None else js_string(r["final_answer"])
+        right = 1 if final and gold and is_correct(final, gold) else 0
+        response_lines.append(
+            csv_row(
+                [
+                    r["part2_id"],
+                    item_id,
+                    feature_of.get(item_id, ""),
+                    gold or "",
+                    r["position"],
+                    r["first_answer"],
+                    final,
+                    r["question_shown"],
+                    nullish(r.get("choice")),
+                    nullish(r.get("t_first_ms")),
+                    nullish(r.get("t_final_ms")),
+                    right,
+                ]
+            )  # fmt: skip
+        )
+    return "\r\n".join(session_lines) + "\r\n", "\r\n".join(response_lines) + "\r\n"
+
+
 def export(sql_path: Path, out_dir: Path) -> dict[str, Any]:
     """Write sessions.csv and responses.csv from a backup file; say how many rows each holds."""
     conn = load_dump(sql_path)
     try:
         sessions, responses = rows(conn)
+        part2 = part2_rows(conn)
     finally:
         conn.close()
     session_text, response_text = export_texts(sessions, responses)
@@ -243,7 +333,14 @@ def export(sql_path: Path, out_dir: Path) -> dict[str, Any]:
         f.write(session_text)
     with (out_dir / "responses.csv").open("w", encoding="utf-8", newline="") as f:
         f.write(response_text)
-    return {"sessions": len(sessions), "responses": len(responses)}
+    counts: dict[str, Any] = {"sessions": len(sessions), "responses": len(responses)}
+    if part2 is not None:
+        texts = part2_export_texts(*part2)
+        for name, text in zip(("part2_sessions.csv", "part2_responses.csv"), texts, strict=True):
+            with (out_dir / name).open("w", encoding="utf-8", newline="") as f:
+                f.write(text)
+        counts["part2_sessions"], counts["part2_responses"] = len(part2[0]), len(part2[1])
+    return counts
 
 
 def main(argv: list[str] | None = None) -> int:

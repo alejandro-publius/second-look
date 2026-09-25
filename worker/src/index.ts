@@ -541,9 +541,17 @@ export default {
         return await exportZip(env);
       }
       // Part 2, the assisted second look (worker/src/part2.ts). The flags stay here.
-      if (path.startsWith("/api/t2/")) {
-        const reply = await part2Route(env, request, path, url, body);
-        if (reply) return json(env, reply.body, reply.status);
+      if (path === "/api/t2/offer" && request.method === "POST") return reply(env, await part2.offer(env, body, sameSecret(request.headers.get("x-qa-key"), env.QA_KEY)));
+      if (path === "/api/t2/answer" && request.method === "POST") return reply(env, await part2.answer(env, body));
+      if (path === "/api/t2/choice" && request.method === "POST") return reply(env, await part2.choice(env, body));
+      if (path === "/api/t2/complete" && request.method === "POST") return reply(env, await part2.complete(env, body));
+      if (path === "/api/t2/resume") return reply(env, await part2.resume(env, url.searchParams.get("part2_id") ?? ""));
+      if (path === "/api/t2/counts") return reply(env, await part2.counts(env));
+      if (path === "/api/t2/demo" && request.method === "POST") {
+        // Shut until the data lock, like part 1's judge mode: before it, the feedback would hand
+        // anyone part 2's answer key.
+        if (lockClock(env) < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
+        return reply(env, part2.demo(body));
       }
       if (path === "/api/demo/answer" && request.method === "POST") {
         // Shut until the data lock, as the page says (review finding F86): before it, sixteen of
@@ -567,21 +575,9 @@ export default {
   },
 };
 
-async function part2Route(env: Env, request: Request, path: string, url: URL, body: Record<string, unknown>) {
-  const post = request.method === "POST";
-  if (path === "/api/t2/offer" && post) return part2.offer(env, body, sameSecret(request.headers.get("x-qa-key"), env.QA_KEY));
-  if (path === "/api/t2/answer" && post) return part2.answer(env, body);
-  if (path === "/api/t2/choice" && post) return part2.choice(env, body);
-  if (path === "/api/t2/complete" && post) return part2.complete(env, body);
-  if (path === "/api/t2/resume") return part2.resume(env, url.searchParams.get("part2_id") ?? "");
-  if (path === "/api/t2/counts") return part2.counts(env);
-  if (path === "/api/t2/demo" && post) {
-    // Shut until the data lock, like part 1's judge mode: before it, the feedback would hand
-    // anyone part 2's answer key.
-    if (lockClock(env) < DATA_LOCK_UTC) return { status: 403, body: { detail: "Judge mode opens on Sep 28." } };
-    return part2.demo(body);
-  }
-  return null;
+/** A part 2 handler's answer as a response. */
+function reply(env: Env, r: { status: number; body: Record<string, unknown> }): Response {
+  return json(env, r.body, r.status);
 }
 
 /** The time judge mode's lock is read against: the real clock, unless E2E_NOW holds a time. Only

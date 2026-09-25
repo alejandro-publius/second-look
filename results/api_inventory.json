@@ -2,7 +2,7 @@
   "script": "scripts/api_inventory.py",
   "synthetic": false,
   "worker": {
-    "count": 27,
+    "count": 34,
     "routes": [
       {
         "method": "POST",
@@ -63,6 +63,34 @@
       {
         "method": "any",
         "path": "/api/spot/{}/fhir"
+      },
+      {
+        "method": "POST",
+        "path": "/api/t2/answer"
+      },
+      {
+        "method": "POST",
+        "path": "/api/t2/choice"
+      },
+      {
+        "method": "POST",
+        "path": "/api/t2/complete"
+      },
+      {
+        "method": "any",
+        "path": "/api/t2/counts"
+      },
+      {
+        "method": "POST",
+        "path": "/api/t2/demo"
+      },
+      {
+        "method": "POST",
+        "path": "/api/t2/offer"
+      },
+      {
+        "method": "any",
+        "path": "/api/t2/resume"
       },
       {
         "method": "POST",

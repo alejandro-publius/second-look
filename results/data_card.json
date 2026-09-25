@@ -35,19 +35,19 @@
     "by_licence": {
       "CC-BY-2.0": 1,
       "CC-BY-3.0": 47,
-      "CC-BY-4.0": 7,
-      "CC-BY-SA-2.0": 15,
+      "CC-BY-4.0": 8,
+      "CC-BY-SA-2.0": 19,
       "CC-BY-SA-3.0": 5,
-      "CC-BY-SA-4.0": 6,
-      "CC0-1.0": 2,
+      "CC-BY-SA-4.0": 7,
+      "CC0-1.0": 4,
       "public-domain": 1
     },
     "by_source": {
-      "Wikimedia Commons": 35,
+      "Wikimedia Commons": 41,
       "YouTube": 40,
-      "iNaturalist": 9
+      "iNaturalist": 11
     },
-    "labelled": 36,
+    "labelled": 44,
     "lesson": {
       "absent": 8,
       "by_licence": {
@@ -88,7 +88,9 @@
     },
     "marked_synthetic": 0,
     "marked_with_faces": 0,
-    "other_roles": [],
+    "other_roles": [
+      "part2"
+    ],
     "practice": {
       "absent": 0,
       "by_licence": {
@@ -119,7 +121,7 @@
       "rows": 4,
       "unlabelled": 0
     },
-    "rows": 84,
+    "rows": 92,
     "test": {
       "absent": 8,
       "by_licence": {
@@ -172,7 +174,7 @@
       "rows": 2,
       "unlabelled": 2
     },
-    "with_label_evidence": 84,
+    "with_label_evidence": 92,
     "with_second_label": 0
   },
   "real": true,

@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const worker = join(here, "..");
-const PORT = Number(process.env.E2E_PART2_PORT ?? 8795);
+const PORT = 8795; // beside e2e.mjs's 8791 to 8793, so the two can run at once
 const AFTER_PORT = PORT + 1;
 const QA_KEY = "e2e-qa-key-0123456789abcdef";
 const EXPORT_TOKEN = "e2e-export-token-0123456789abcdef";

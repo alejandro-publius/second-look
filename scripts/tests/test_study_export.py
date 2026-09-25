@@ -122,7 +122,12 @@ def sample_sessions() -> list[dict[str, Any]]:
     ]
 
 
-def worker_export(tmp_path: Path, sessions: list[dict], responses: list[dict]) -> tuple[str, str]:
+def worker_export(
+    tmp_path: Path,
+    sessions: list[dict],
+    responses: list[dict],
+    part2: tuple[list[dict], list[dict]] = ([], []),
+) -> tuple[str, str]:
     """What the Worker's own export route writes for these rows."""
     bundle = tmp_path / "worker.mjs"
     subprocess.run(
@@ -139,7 +144,16 @@ def worker_export(tmp_path: Path, sessions: list[dict], responses: list[dict]) -
         cwd=ROOT / "worker",
     )
     data = tmp_path / "rows.json"
-    data.write_text(json.dumps({"sessions": sessions, "responses": responses}))
+    data.write_text(
+        json.dumps(
+            {
+                "sessions": sessions,
+                "responses": responses,
+                "part2_sessions": part2[0],
+                "part2_responses": part2[1],
+            }
+        )
+    )
     harness = tmp_path / "harness.mjs"
     harness.write_text(
         f"""
@@ -151,6 +165,8 @@ const statement = (sql) => ({{
   async all() {{
     if (sql === {json.dumps(se.SESSIONS_SQL)}) return {{ results: rows.sessions }};
     if (sql === {json.dumps(se.RESPONSES_SQL)}) return {{ results: rows.responses }};
+    if (sql === {json.dumps(se.PART2_SESSIONS_SQL)}) return {{ results: rows.part2_sessions }};
+    if (sql === {json.dumps(se.PART2_RESPONSES_SQL)}) return {{ results: rows.part2_responses }};
     throw new Error("unexpected query: " + sql);
   }},
   async first() {{ throw new Error("unexpected first: " + sql); }},
@@ -165,6 +181,8 @@ writeFileSync({json.dumps(str(tmp_path / "export.zip"))}, Buffer.from(await res.
     )
     subprocess.run(["node", str(harness)], check=True, capture_output=True, text=True)
     with zipfile.ZipFile(io.BytesIO((tmp_path / "export.zip").read_bytes())) as zf:
+        (tmp_path / "part2_sessions.csv").write_bytes(zf.read("part2_sessions.csv"))
+        (tmp_path / "part2_responses.csv").write_bytes(zf.read("part2_responses.csv"))
         return zf.read("sessions.csv").decode(), zf.read("responses.csv").decode()
 
 
@@ -187,7 +205,12 @@ def test_the_export_from_a_backup_is_the_live_routes_export_byte_for_byte(tmp_pa
 def test_export_writes_both_files_with_the_workers_line_ends(tmp_path: Path) -> None:
     dump = make_dump(tmp_path, sample_sessions(), {})
     counts = se.export(dump, tmp_path / "export")
-    assert counts == {"sessions": 4, "responses": 16 * 3 + 5}
+    assert counts == {
+        "sessions": 4,
+        "responses": 16 * 3 + 5,
+        "part2_sessions": 0,
+        "part2_responses": 0,
+    }
     raw = (tmp_path / "export" / "sessions.csv").read_bytes()
     assert raw.startswith(b"session_id,arm,block_id,") and raw.endswith(b"\r\n")
     assert raw.count(b"\r\n") == 5
@@ -214,3 +237,44 @@ def test_numbers_are_written_as_javascript_writes_them(value: float, text: str) 
 
 def test_math_round_sends_halves_up_like_javascript() -> None:
     assert se.js_round(2.5) == 3.0 and se.js_round(-2.5) == -2.0 and se.js_round(0.5) == 1.0
+
+
+def part2_sample(conn: sqlite3.Connection) -> None:
+    """Part 2 rows that cover a decline, both arms, a pending question, Keep and Change."""
+    rows = [
+        ("p1", "a1", "trained", "assisted", 0, '["a01","a02"]', "2026-09-26T10:05:00Z", 0,
+         "2026-09-26T10:05:00Z", "2026-09-26T10:06:31.450Z", "tok1", 0, 0),
+        ("p2", "a2", "untrained", None, None, None, "2026-09-26T09:05:00Z", 1, None, None,
+         "tok2", 0, 0),
+        ("p3", "a3", "trained", "unassisted", -1, '["a01"]', "2026-09-26T11:00:00Z", 0,
+         "2026-09-26T11:00:00Z", None, "tok3", 1, 0),
+    ]  # fmt: skip
+    conn.executemany(f"INSERT INTO part2_session VALUES ({','.join('?' * 13)})", rows)
+    answers = [
+        ("p1", "a01", 0, "no", "no", 1, "keep", 4000, 6100, "2026-09-26T10:05:10.100Z"),
+        ("p1", "a02", 1, "no", "yes", 1, "change", 3000, 5000, "2026-09-26T10:05:20.000Z"),
+        ("p1", "a03", 2, "cant_tell", None, 1, "", 2500, None, "2026-09-26T10:05:30.000Z"),
+        ("p3", "a01", 0, "yes", "yes", 0, "", 900, 900, "2026-09-26T11:00:05.000Z"),
+    ]  # fmt: skip
+    conn.executemany(f"INSERT INTO part2_response VALUES ({','.join('?' * 10)})", answers)
+
+
+@pytest.mark.skipif(not ESBUILD.exists(), reason="run (cd worker && npm ci) first")
+@pytest.mark.skipif(shutil.which("node") is None, reason="needs node")
+def test_part2_files_from_a_backup_are_the_live_routes_byte_for_byte(tmp_path: Path) -> None:
+    conn = se.load_dump(make_dump(tmp_path, sample_sessions(), {}))
+    part2_sample(conn)
+    sessions, responses = se.rows(conn)
+    part2 = se.part2_rows(conn)
+    assert part2 is not None
+    ours = se.part2_export_texts(*part2)
+    worker_export(tmp_path, sessions, responses, part2)
+    assert ours[0] == (tmp_path / "part2_sessions.csv").read_bytes().decode()
+    assert ours[1] == (tmp_path / "part2_responses.csv").read_bytes().decode()
+    assert ",81.4," in ours[0] and "p2,a2,untrained,,,2026-09-26T09:05:00Z,1," in ours[0]
+    assert ours[0].splitlines()[0].split(",") == se.PART2_SESSION_HEAD
+
+
+def test_a_backup_from_before_part2_has_no_part2_files(tmp_path: Path) -> None:
+    conn = sqlite3.connect(":memory:")
+    assert se.part2_rows(conn) is None

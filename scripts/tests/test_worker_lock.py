@@ -59,4 +59,8 @@ def test_only_the_e2e_run_sets_the_test_clock() -> None:
             continue
         if "E2E_NOW" in path.read_text(encoding="utf-8", errors="replace"):
             setters.append(rel)
-    assert setters == ["worker/src/index.ts", "worker/test/e2e.mjs"]
+    assert setters == [
+        "worker/src/index.ts",
+        "worker/test/e2e.mjs",
+        "worker/test/part2_e2e.mjs",
+    ]

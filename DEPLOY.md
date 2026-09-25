@@ -93,6 +93,8 @@ deploys to https://depth.second-look-79t.pages.dev.
    `scripts/seed_arms.py` from `core/allocator.py`: it empties `arm_slot`, writes the
    pre-registered arm sequence and makes the counter row. Never apply it to a database people have
    used; the counter row survives, but the sequence is the study's.
+   `worker/part2_arms.sql` (`scripts/seed_part2_arms.py`) is the same for part 2's two sequences,
+   applied once, only while `part2_slot` is empty.
 3. Set the two Worker secrets below with `npx wrangler secret put <NAME>` in `worker/`, from a
    random value (`openssl rand -hex 32`) that you keep in your own `.env`.
 
@@ -118,6 +120,10 @@ deploys to https://depth.second-look-79t.pages.dev.
 | `sandbox_cache` | the laboratory record `/two` shows, as `scripts/cache_their_records.py` fetched it |
 | `inaturalist_cache` | one creek's iNaturalist context line: per listed invasive plant, a count, the latest date and a link, as `scripts/cache_inaturalist.py` fetched it |
 | `walk_record` | one finished video walk's demo record: the walk id, the coded answers, the time and the demo Bundle, deleted 30 days after it was stored by the Worker's daily cron (`worker/wrangler.jsonc`, 04:17 UTC) and by every new walk; never counted and never mirrored |
+| `part2_slot` | one slot of part 2's pre-registered arm sequences, one per part 1 arm, from `worker/part2_arms.sql` (`scripts/seed_part2_arms.py`) |
+| `part2_counter` | the next part 2 slot per part 1 arm |
+| `part2_session` | one part 2, the assisted second look, per part 1 sitting: the part 1 arm, the arm, the item order, or a decline (UPDATE_31) |
+| `part2_response` | one part 2 answer: the first answer, whether the checker's question was shown, the choice and the final answer, the timings |
 
 ## Secrets
 
