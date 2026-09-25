@@ -1,0 +1,51 @@
+{
+  "generated_at_utc": "2026-09-25T19:08:25Z",
+  "script": "evals/power_v2.py",
+  "synthetic": false,
+  "stamp": "power_v2",
+  "model": {
+    "items": 8,
+    "unassisted_mean_accuracy": 0.6,
+    "between_person_sd_of_accuracy": 0.1,
+    "skill_distribution": "Beta with the stated mean and sd, one draw per person",
+    "item_model": "8 independent coin flips at the person's skill",
+    "test": "two-sided permutation test on the difference in means",
+    "alpha": 0.05,
+    "simulated_data_sets_per_case": 2000,
+    "permutations_per_data_set": 1000,
+    "seed": 20260926
+  },
+  "cases": {
+    "40_per_arm_12_points": {
+      "n_per_arm": 40,
+      "difference_points": 12,
+      "power": 0.766,
+      "simulation_se": 0.009,
+      "purpose": "power"
+    },
+    "40_per_arm_10_points": {
+      "n_per_arm": 40,
+      "difference_points": 10,
+      "power": 0.621,
+      "simulation_se": 0.011,
+      "purpose": "power"
+    },
+    "20_per_arm_12_points": {
+      "n_per_arm": 20,
+      "difference_points": 12,
+      "power": 0.449,
+      "simulation_se": 0.011,
+      "purpose": "power"
+    },
+    "40_per_arm_0_points": {
+      "n_per_arm": 40,
+      "difference_points": 0,
+      "power": 0.044,
+      "simulation_se": 0.005,
+      "purpose": "type 1 error check, should sit near alpha"
+    }
+  },
+  "power_40_per_arm_12_points": 0.766,
+  "power_20_per_arm_12_points": 0.449,
+  "false_positive_rate_40_per_arm": 0.044
+}
