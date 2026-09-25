@@ -512,6 +512,31 @@ def test_the_walk_record_shot_is_taken_from_the_top_of_the_page() -> None:
     assert "await toPageTop(page);" in source[record:shot]
 
 
+WALK_CITY_ALT = (
+    "The walk seen as a city would see it, after answering Artificial for the bank: what this "
+    "demo creek needs, in OneAquaHealth's own measures, each with its source."
+)
+
+
+def test_the_walk_city_shot_follows_a_walk_that_reported_only_a_built_bank() -> None:
+    # CRITIC_09 Q01: the gallery tapped the first button on every screen, which answers Yes to every
+    # yes or no question, so its picture showed dams, pipes and plants the natural clip does not
+    # show. It now answers the walk with scripts/gallery-walk.mjs, Artificial for the bank and no
+    # other damage, which apps/web/tests/walk.spec.ts runs too, and the alt text says so.
+    source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
+    assert 'import { answerWalkPlainly } from "./gallery-walk.mjs";' in source
+    progress = source.index('gallery("walk-in-progress"')
+    record = source.index('gallery("walk-record"')
+    walk = source[progress:record]
+    assert 'await answerWalkPlainly(page, content, { bank: "present" });' in walk
+    # Nothing else answers a question between the two shots.
+    assert ".click()" not in walk
+    city = source.index('gallery("walk-city"')
+    assert json.dumps(WALK_CITY_ALT) in source[city : city + 400]
+    screens = (ROOT / "docs" / "screens" / "README.md").read_text(encoding="utf-8")
+    assert f'<img src="walk-city.webp" width="200" alt="{WALK_CITY_ALT}">' in screens
+
+
 def test_the_walk_city_shot_is_taken_from_the_needs_region() -> None:
     # CRITIC_07 J04: the city view's shot cut the first measure off before its source. The step is
     # tested in apps/web/tests/walk.spec.ts; this checks the gallery takes it before the shot.
