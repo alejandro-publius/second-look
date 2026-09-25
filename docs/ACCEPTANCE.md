@@ -17,7 +17,9 @@ export JAVA17_HOME=/opt/homebrew/opt/openjdk@17   # the FHIR validator needs Jav
 brew install gitleaks                              # make check scans the history for secrets
 ```
 
-Nothing below needs an API key. Three rows in the first table need a network: the first run of rows 3 and 12 fetches their guide, SUSHI and the HL7 validator, and asks tx.fhir.org for terminology; row 14 opens the live site and asks GitHub whether the repository is public. The gates further down say which need a network or a browser.
+The setup needs Node 20 or later with npm, and row 18 (`make worker-e2e`) needs Node 22 or later, because the Worker's wrangler refuses to start on anything older.
+
+Nothing below needs an API key. Three rows in the first table need a network: rows 3 and 12 need one on every run, because the first run fetches their guide, SUSHI and the HL7 validator, and every run asks tx.fhir.org for terminology; row 14 opens the live site and asks GitHub whether the repository is public. The gates further down say which need a network or a browser.
 
 ## The gates
 

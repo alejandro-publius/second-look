@@ -564,7 +564,7 @@ Everything, with the known gaps and how to report a problem: [`SECURITY.md`](SEC
 
 ## Quickstart
 
-Needs git, [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12) and Node 20 or later with npm. No Java, no key, no network after the setup.
+Needs git, [uv](https://docs.astral.sh/uv/) (it fetches Python 3.12) and Node 20 or later with npm; `make worker-e2e` needs Node 22 or later, because the Worker's wrangler refuses to start on anything older ([`DEPLOY.md`](DEPLOY.md)). No Java, no key, no network after the setup.
 
 ```
 git clone https://github.com/alejandro-publius/second-look && cd second-look

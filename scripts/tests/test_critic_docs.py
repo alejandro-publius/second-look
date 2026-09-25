@@ -101,6 +101,31 @@ def test_known_weaknesses_says_the_test_photos_have_smaller_copies_when_they_do(
     assert any(re.search(r"\bkeeps a smaller copy of each test\b", s) for s in about), about
 
 
+def test_the_setup_names_the_node_the_worker_end_to_end_needs() -> None:
+    # E03: wrangler exits below Node 22, and the README allowed Node 20 for every command.
+    import json
+
+    lock = json.loads(text(ROOT / "worker" / "package-lock.json"))
+    wanted = lock["packages"]["node_modules/wrangler"]["engines"]["node"]
+    major = re.fullmatch(r">=(\d+)(?:\.\d+)*", wanted.strip())
+    assert major, wanted
+    needs = f"`make worker-e2e` needs Node {major.group(1)} or later"
+    quickstart = heading_body(text(README), "Quickstart")
+    assert needs in quickstart
+    setup = text(ROOT / "docs" / "ACCEPTANCE.md").split("\n## The gates\n", 1)[0]
+    assert f"needs Node {major.group(1)} or later" in setup and "worker-e2e" in setup
+
+
+def test_acceptance_says_every_fhir_run_asks_the_terminology_server() -> None:
+    # U01: scripts/fhir_validate.py asks the terminology server on every run, not only the first.
+    from scripts import fhir_validate
+
+    host = fhir_validate.DEFAULT_TX.removeprefix("https://")
+    said = [s for s in sentences(text(ROOT / "docs" / "ACCEPTANCE.md")) if host in s]
+    assert said, f"ACCEPTANCE no longer names {host}"
+    assert all(re.search(rf"\bevery run asks {re.escape(host)}\b", s) for s in said), said
+
+
 def test_a_readme_section_in_the_report_names_only_sections_the_report_has() -> None:
     # A05: the report took "What the AI cannot do" from the README, and it sent the reader to
     # "The gate, the heart of it", a README heading the report does not have (its 2.2 is "The
