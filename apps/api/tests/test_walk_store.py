@@ -294,7 +294,7 @@ def test_the_walk_routes_carry_the_same_headers_and_cors_as_the_others(client) -
 # Good, the bank Artificial and a sewage discharge, which is the rating check's trigger.
 RATED = {**ANSWERS, "overall_rating": "good", "sewage_discharge": "present"}
 RATING_QUESTION = (
-    "You rated this stream Good, but you also reported artificial banks, a sewage discharge. "
+    "You rated this stream Good, but you also reported artificial banks and a sewage discharge. "
     "Do you want to keep your rating?"
 )
 
@@ -318,7 +318,7 @@ def test_a_walk_keeps_the_checks_it_ran_and_its_final_rating(client) -> None:
             "question_text": RATING_QUESTION,
             "answer": "change",
             "detail": {
-                "issues": "artificial banks, a sewage discharge",
+                "issues": "artificial banks and a sewage discharge",
                 "first_rating": "good",
                 "kind": "keep_rating",
             },

@@ -65,6 +65,12 @@ function issueLabel(item: FormItem | null, itemId: string, value: unknown): stri
   return itemId.replace(/_/g, " ");
 }
 
+/** A list as a person says it: "a", "a and b", "a, b and c" (critic round 14 B04). As core/followups.py _joined. */
+function joined(parts: string[]): string {
+  if (parts.length < 2) return parts.join("");
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+}
+
 function dryPipe(rule: Rule, answers: Answers, site: SiteContext): Followup | null {
   if (site.rain !== "dry") return null;
   if (site.dry_days === null || site.dry_days === undefined || site.dry_days < 1) return null;
@@ -89,7 +95,7 @@ function ratingCheck(rule: Rule, answers: Answers, formItems: FormItem[]): Follo
     rule_id: "rating_check",
     kind: "keep_rating",
     question_key: String(rule.question_key ?? "followup.rating_check"),
-    params: { issues: issues.join(", "), first_rating: BEST_RATING },
+    params: { issues: joined(issues), first_rating: BEST_RATING },
   };
 }
 

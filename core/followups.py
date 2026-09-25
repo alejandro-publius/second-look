@@ -84,6 +84,13 @@ def _issue_label(item: Mapping[str, Any] | None, item_id: str, value: object) ->
     return item_id.replace("_", " ")
 
 
+def _joined(parts: Sequence[str]) -> str:
+    """A list as a person says it: "a", "a and b", "a, b and c" (critic round 14 B04)."""
+    if len(parts) < 2:
+        return "".join(parts)
+    return f"{', '.join(parts[:-1])} and {parts[-1]}"
+
+
 def _feature_plain_name(feature: str) -> str:
     return feature.replace("_", " ")
 
@@ -123,7 +130,7 @@ def _rating_check(
         rule_id="rating_check",
         kind="keep_rating",
         question_key=str(rule.get("question_key", "followup.rating_check")),
-        params={"issues": ", ".join(issues), "first_rating": BEST_RATING},
+        params={"issues": _joined(issues), "first_rating": BEST_RATING},
     )
 
 

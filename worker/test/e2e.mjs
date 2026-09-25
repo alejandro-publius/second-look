@@ -609,9 +609,9 @@ try {
     {
       rule_id: "rating_check",
       asked: true,
-      question_text: "You rated this stream Good, but you also reported artificial banks, a sewage discharge. Do you want to keep your rating?",
+      question_text: "You rated this stream Good, but you also reported artificial banks and a sewage discharge. Do you want to keep your rating?",
       answer: "change",
-      detail: { issues: "artificial banks, a sewage discharge", first_rating: "good", kind: "keep_rating" },
+      detail: { issues: "artificial banks and a sewage discharge", first_rating: "good", kind: "keep_rating" },
     },
   ]);
   // Critic round 15 F02: the stored FHIR record answers the rating question with the rating the

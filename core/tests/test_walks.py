@@ -174,7 +174,7 @@ def test_a_walk_asks_the_rating_check_and_never_the_dry_pipe_question() -> None:
     # Rain is unknown for a clip, so the dry pipe rule fails closed although a pipe was reported;
     # no score and no flag, so the low score and checker rules have nothing to read.
     assert [f.rule_id for f in chosen] == ["rating_check"]
-    assert chosen[0].params["issues"] == "artificial banks, a sewage discharge"
+    assert chosen[0].params["issues"] == "artificial banks and a sewage discharge"
     assert _followups({**JUDGE, "overall_rating": "moderate"}) == []
 
 
@@ -189,7 +189,7 @@ def test_a_walk_keeps_its_checks_as_the_creek_check_does() -> None:
             "question_text": "Keep it?",
             "answer": "change",
             "detail": {
-                "issues": "artificial banks, a sewage discharge",
+                "issues": "artificial banks and a sewage discharge",
                 "first_rating": "good",
                 "kind": "keep_rating",
             },

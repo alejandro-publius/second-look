@@ -60,7 +60,7 @@ def test_an_item_missing_from_the_form_is_named_by_its_id_in_plain_words() -> No
     others = [item for item in FORM_ITEMS if item["id"] != "impervious_right"]
     assert (
         issues_for(good_with("bank_type", "impervious_right"), others)
-        == "artificial banks, impervious right"
+        == "artificial banks and impervious right"
     )
 
 
@@ -141,7 +141,7 @@ def test_each_issue_takes_its_own_fallback_and_they_keep_the_fixed_order() -> No
         "sewage_discharge", "invasive_species", "impervious_right", "impervious_left", "bank_type"
     )
     assert issues_for(answers, items) == (
-        "Concrete, impervious left, impervious right, invasive plants, Any sewage?"
+        "Concrete, impervious left, impervious right, invasive plants and Any sewage?"
     )
 
 

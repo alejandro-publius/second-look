@@ -2171,7 +2171,7 @@
             "asked": true,
             "detail": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge",
+              "issues": "artificial banks and a sewage discharge",
               "kind": "keep_rating"
             },
             "question_text": "question 1 for rating_check",
@@ -2184,7 +2184,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2214,7 +2214,7 @@
             "asked": true,
             "detail": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge",
+              "issues": "artificial banks and a sewage discharge",
               "kind": "keep_rating"
             },
             "question_text": "question 1 for rating_check",
@@ -2227,7 +2227,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2259,7 +2259,7 @@
             "asked": true,
             "detail": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge",
+              "issues": "artificial banks and a sewage discharge",
               "kind": "keep_rating"
             },
             "question_text": "question 1 for rating_check",
@@ -2272,7 +2272,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2304,7 +2304,7 @@
             "asked": true,
             "detail": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge",
+              "issues": "artificial banks and a sewage discharge",
               "kind": "keep_rating"
             },
             "question_text": "question 1 for rating_check",
@@ -2317,7 +2317,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2349,7 +2349,7 @@
             "asked": true,
             "detail": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge",
+              "issues": "artificial banks and a sewage discharge",
               "kind": "keep_rating"
             },
             "question_text": "question 1 for rating_check",
@@ -2362,7 +2362,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2394,7 +2394,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2426,7 +2426,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2458,7 +2458,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2490,7 +2490,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
@@ -2522,7 +2522,7 @@
             "kind": "keep_rating",
             "params": {
               "first_rating": "good",
-              "issues": "artificial banks, a sewage discharge"
+              "issues": "artificial banks and a sewage discharge"
             },
             "question_key": "followup.rating_check",
             "rule_id": "rating_check"
