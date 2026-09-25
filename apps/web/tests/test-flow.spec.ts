@@ -73,6 +73,8 @@ test("trained arm: consent, warm-up, lesson, 16 items, score with token", async 
   await expect(byFeature.getByText("Built banks", { exact: true })).toBeVisible();
   await expect(byFeature.getByText(/^\d of 4$/).first()).toBeVisible();
   await expect(page.getByText("One visit is a snapshot. Repeated visits make a story.")).toBeVisible();
+  // Keep my score was ticked and a token came back, so the score is saved with later checks.
+  await expect(page.getByTestId("score-kept")).toHaveText(content.locale["end.score_for"]);
 
   // The warm-up reveal. The badge sits on the photograph itself, never on a position, because on
   // a phone the two stack and the order they were shown in may be shuffled (Update 11D item 1).
@@ -107,11 +109,31 @@ test("untrained arm: test first, then the lesson offered as a thank you", async 
   await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();
   await expect(page.getByText("8 of 16 right")).toBeVisible();
   await expect(page.getByTestId("contributor-token")).toHaveCount(0);
+  // Keep my score was left unticked, so nothing links this score to a creek check. The screen
+  // says so, and never that the score is saved (judge walk W02).
+  await expect(page.getByTestId("score-kept")).toHaveText(content.locale["end.score_not_kept"]);
+  await expect(page.getByText(content.locale["end.score_for"])).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "As a thank you" })).toBeVisible();
   await page.getByRole("button", { name: "Show me" }).click();
   await finishLesson(page);
   await expect(page.getByRole("heading", { name: "Thank you" })).toBeVisible();
   expect(assertOnlyOurOrigins(urls, BASE)).toEqual([]);
+});
+
+test("a kept score still says it is saved when the end screen comes back after a reload", async ({ page }) => {
+  await mockApi(page, { lessonFirst: false });
+  await page.goto("/t");
+  await passConsent(page);
+  await pickWarmup(page);
+  await answerAllItems(page, () => "Yes");
+  await page.getByLabel(/Keep my score for creek visits/).check();
+  await page.getByRole("button", { name: "See my score" }).click();
+  await expect(page.getByTestId("score-kept")).toHaveText(content.locale["end.score_for"]);
+  // The end screen again, from the server's score: no fresh token, but this phone kept one.
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();
+  await expect(page.getByTestId("contributor-token")).toHaveCount(0);
+  await expect(page.getByTestId("score-kept")).toHaveText(content.locale["end.score_for"]);
 });
 
 test("a response that fails is retried and the score still arrives", async ({ page }) => {

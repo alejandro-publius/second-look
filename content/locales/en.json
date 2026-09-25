@@ -432,6 +432,7 @@
   "landing.guess_kept": "Kept on this phone. It becomes your first answer once you agree to take part.",
   "test.keys_hint": "On a keyboard, press Y, N or C to choose, then Enter.",
   "end.score_for": "Your score is saved with every creek check you make for the next 90 days.",
+  "end.score_not_kept": "Your score was not kept. If you tick Keep my score next time, it is saved with every creek check you make for the next 90 days.",
   "offline.saved_here": "Saved on this phone. It will send when you are back online.",
   "notfound.title": "No page here",
   "notfound.body": "There is no page at this address. The link may be old, or cut short.",
