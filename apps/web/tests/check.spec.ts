@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
@@ -56,6 +58,21 @@ async function answerForm(page: import("@playwright/test").Page, { moveJoy = tru
   await page.getByRole("button", { name: /^Good:/ }).click();
   await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
 }
+
+// CRITIC_10 T03: /check said "We have not yet checked the questions marked draft against that
+// app", which suggests some are not draft, when content/form.yaml marks every one unchecked. The
+// note says so. If a question is ever checked against the app, the first line fails, and the note
+// must change with it.
+test("/check says none of its questions has been checked against the app, as the form says", async ({ page }) => {
+  const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
+  const items: { verified_against_app: boolean }[] = content.form.items;
+  expect(items.length).toBeGreaterThan(0);
+  expect(items.filter((i) => i.verified_against_app !== false)).toEqual([]);
+  await mockApi(page);
+  await page.goto("/check");
+  await expect(page.getByText("None of these questions has been checked against that app yet, so each is marked draft wording.")).toBeVisible();
+  await expect(page.getByText("questions marked draft")).toHaveCount(0);
+});
 
 test("guided check: one question per screen, follow-ups in place, finalize", async ({ page }) => {
   const urls = watchRequests(page);

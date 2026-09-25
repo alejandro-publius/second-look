@@ -109,7 +109,7 @@
   "demo.done_title": "Done",
   "check.title": "Creek check",
   "check.intro": "One question per screen, in the same order as the OneAquaHealth app. About three minutes. Photos welcome.",
-  "check.unverified_note": "We have not yet checked the questions marked draft against that app.",
+  "check.unverified_note": "None of these questions has been checked against that app yet, so each is marked draft wording.",
   "check.start": "Start the check",
   "check.progress": "Question {n} of {total}",
   "check.location_title": "Where are you?",
