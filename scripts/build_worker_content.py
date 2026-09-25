@@ -15,8 +15,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from apps.api import content
 from core.act import MEASURE_FOR_FEATURE, PIPE_OBSERVERS_NEEDED, SAME_SPOT_METRES, TEST_NAME_WORDS
+from core.assist import flag_side
 from core.fhir_emit import (
     OAH_DISPLAYS,
     OAH_LOCATION_PROFILE,
@@ -52,6 +55,23 @@ def core_doc(doc: dict[str, Any]) -> dict[str, Any]:
 LOCALE_PREFIXES = ("followup.", "label.", "test.yes", "test.no", "test.cant_tell", "error.")
 
 
+def part2_items() -> list[dict[str, str]]:
+    doc = yaml.safe_load((ROOT / "content" / "part2_items.yaml").read_text(encoding="utf-8"))
+    return [
+        {"id": str(i["id"]), "feature": str(i["feature"]), "gold": str(i["gold"])}
+        for i in doc["items"]
+    ]
+
+
+def part2_flags() -> dict[str, str | None]:
+    """Item id to the side its flag points at, read through core.assist.flag_side."""
+    path = ROOT / "results" / "assist_flags.json"
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    if doc and doc.get("real") is not True:
+        doc = {}  # a synthetic flags file licenses no question, like a synthetic pass table
+    return {i["id"]: flag_side(doc, i["id"]) for i in part2_items()}
+
+
 def build() -> dict[str, Any]:
     loaded = content.get_content()
     items = [
@@ -80,6 +100,10 @@ def build() -> dict[str, Any]:
         "features": sorted({item["feature"] for item in items}),
         "test_items": items,
         "warmup_ids": sorted(content.warmup_ids()),
+        # Part 2 (UPDATE_31): the eight items with their gold, and the side each committed flag
+        # points at. The flags stay on the server: the browser only learns whether to ask.
+        "part2_items": part2_items(),
+        "part2_flags": part2_flags(),
         # Update 10 answer A3: the tables the TypeScript ports read.
         "feature_list": [
             {

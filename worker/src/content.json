@@ -808,6 +808,58 @@
     "test.no": "No",
     "test.yes": "Yes"
   },
+  "part2_flags": {
+    "a01": null,
+    "a02": null,
+    "a03": null,
+    "a04": null,
+    "a05": null,
+    "a06": null,
+    "a07": null,
+    "a08": null
+  },
+  "part2_items": [
+    {
+      "feature": "artificial_bank",
+      "gold": "present",
+      "id": "a01"
+    },
+    {
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "id": "a02"
+    },
+    {
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "id": "a03"
+    },
+    {
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "id": "a04"
+    },
+    {
+      "feature": "invasive_plant",
+      "gold": "present",
+      "id": "a05"
+    },
+    {
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "id": "a06"
+    },
+    {
+      "feature": "pipe_running",
+      "gold": "present",
+      "id": "a07"
+    },
+    {
+      "feature": "pipe_running",
+      "gold": "absent",
+      "id": "a08"
+    }
+  ],
   "region_plants": [
     "Ailanthus altissima",
     "Algerian ivy",

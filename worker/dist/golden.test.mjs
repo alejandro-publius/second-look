@@ -817,6 +817,58 @@ var content_default = {
     "test.no": "No",
     "test.yes": "Yes"
   },
+  part2_flags: {
+    a01: null,
+    a02: null,
+    a03: null,
+    a04: null,
+    a05: null,
+    a06: null,
+    a07: null,
+    a08: null
+  },
+  part2_items: [
+    {
+      feature: "artificial_bank",
+      gold: "present",
+      id: "a01"
+    },
+    {
+      feature: "artificial_bank",
+      gold: "absent",
+      id: "a02"
+    },
+    {
+      feature: "dug_out_channel",
+      gold: "present",
+      id: "a03"
+    },
+    {
+      feature: "dug_out_channel",
+      gold: "absent",
+      id: "a04"
+    },
+    {
+      feature: "invasive_plant",
+      gold: "present",
+      id: "a05"
+    },
+    {
+      feature: "invasive_plant",
+      gold: "absent",
+      id: "a06"
+    },
+    {
+      feature: "pipe_running",
+      gold: "present",
+      id: "a07"
+    },
+    {
+      feature: "pipe_running",
+      gold: "absent",
+      id: "a08"
+    }
+  ],
   region_plants: [
     "Ailanthus altissima",
     "Algerian ivy",
@@ -2315,6 +2367,49 @@ function notesBelow(findings, reachOfSpot, creek, labels) {
   return out;
 }
 
+// src/core/assist.ts
+var ANSWERS = ["yes", "no", "cant_tell"];
+var SIDES = ["present", "absent"];
+var QUESTION = "The checker noticed something here. Look again?";
+var AssistError = class extends Error {
+};
+var sideAnswer = (side) => side === "present" ? "yes" : "no";
+var isMapping = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+function flagSide(flags, itemId) {
+  if (!isMapping(flags) || typeof itemId !== "string") return null;
+  const items = flags.items;
+  if (!Array.isArray(items)) return null;
+  for (const entry3 of items) {
+    if (!isMapping(entry3) || entry3.item_id !== itemId) continue;
+    const flag = entry3.flag;
+    if (isMapping(flag) && typeof flag.points_to === "string" && SIDES.includes(flag.points_to)) return flag.points_to;
+    return null;
+  }
+  return null;
+}
+function questionNeeded(arm, side, first) {
+  if (arm !== "assisted" || typeof side !== "string" || !SIDES.includes(side)) return false;
+  if (typeof first !== "string" || !ANSWERS.includes(first)) return false;
+  return first !== sideAnswer(side);
+}
+var blank = (v) => v === null || v === void 0 || v === "";
+function settle(first, asked, choice = null, changedTo = null) {
+  if (typeof first !== "string" || !ANSWERS.includes(first)) throw new AssistError("We do not know that answer.");
+  if (!asked) {
+    if (!blank(choice) || !blank(changedTo)) throw new AssistError("No question was asked for this photo, so there is nothing to choose.");
+    return { first_answer: first, final_answer: first, question_shown: false, choice: "" };
+  }
+  if (choice === "keep") {
+    if (!blank(changedTo) && changedTo !== first) throw new AssistError("Keep keeps the first answer.");
+    return { first_answer: first, final_answer: first, question_shown: true, choice: "keep" };
+  }
+  if (choice === "change") {
+    if (typeof changedTo !== "string" || !ANSWERS.includes(changedTo)) throw new AssistError("We do not know that answer.");
+    return { first_answer: first, final_answer: changedTo, question_shown: true, choice: "change" };
+  }
+  throw new AssistError("Choose Keep or Change.");
+}
+
 // src/core/pyround.ts
 function pyRound(x, digits) {
   if (!Number.isFinite(x)) return x;
@@ -3468,6 +3563,22 @@ test("helpers: sha256, Python rounding, fhir_id", () => {
   for (const c of doc.sha256) same(sha256Hex(c.input.text), c.expected, `sha256 ${c.name}`);
   for (const c of doc.round) same(pyRound(c.input.value, c.input.digits), c.expected, `round ${c.name}`);
   for (const c of doc.fhir_id) same(fhirId(...c.input.parts), c.expected, `fhir_id ${c.name}`);
+});
+test("assist: part 2's question and the stored row, the flag never an answer", () => {
+  const doc = golden("assist");
+  same(QUESTION, doc.question, "the question's words");
+  for (const c of doc.flag_side) same(flagSide(c.input.flags, c.input.item_id), c.expected, `flag_side ${c.name}`);
+  for (const c of doc.question_needed) same(questionNeeded(c.input.arm, c.input.side, c.input.first), c.expected, `ask ${c.name}`);
+  for (const c of doc.settle) {
+    let got;
+    try {
+      got = settle(c.input.first, c.input.asked, c.input.choice, c.input.changed_to);
+    } catch (e) {
+      if (!(e instanceof AssistError)) throw e;
+      got = { error: e.message };
+    }
+    same(got, c.expected, `settle ${c.name}`);
+  }
 });
 test("followups: the selector, over the repository's own table and form", () => {
   const doc = golden("followups");

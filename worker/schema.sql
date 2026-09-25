@@ -162,3 +162,50 @@ CREATE TABLE IF NOT EXISTS walk_record (
 
 CREATE INDEX IF NOT EXISTS walk_record_created ON walk_record (created_at);
 CREATE INDEX IF NOT EXISTS walk_record_delete_after ON walk_record (delete_after);
+
+-- Part 2, the assisted second look (UPDATE_31, docs/analysis_plan_v2.md). One row per part 1
+-- session that was offered it and chose: declined rows have no arm. The slots come from
+-- worker/part2_arms.sql, written by scripts/seed_part2_arms.py from core/allocator.py, one
+-- sequence per part 1 arm. Safe to run again.
+CREATE TABLE IF NOT EXISTS part2_slot (
+  stratum TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  arm TEXT NOT NULL,
+  block_id INTEGER NOT NULL,
+  PRIMARY KEY (stratum, position)
+);
+
+CREATE TABLE IF NOT EXISTS part2_counter (
+  stratum TEXT PRIMARY KEY,
+  next_position INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS part2_session (
+  id TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL UNIQUE,
+  part1_arm TEXT NOT NULL,
+  arm TEXT,
+  block_id INTEGER,
+  item_order TEXT,
+  offered_at TEXT NOT NULL,
+  declined INTEGER NOT NULL DEFAULT 0,
+  started_at TEXT,
+  completed_at TEXT,
+  client_token_hash TEXT NOT NULL,
+  is_test INTEGER NOT NULL DEFAULT 0,
+  post_lock INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS part2_response (
+  part2_id TEXT NOT NULL,
+  item_id TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  first_answer TEXT NOT NULL,
+  final_answer TEXT,
+  question_shown INTEGER NOT NULL,
+  choice TEXT NOT NULL DEFAULT '',
+  t_first_ms INTEGER,
+  t_final_ms INTEGER,
+  received_at TEXT NOT NULL,
+  PRIMARY KEY (part2_id, item_id)
+);

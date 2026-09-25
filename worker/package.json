@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "esbuild test/golden.test.ts --bundle --platform=node --format=esm --outfile=dist/golden.test.mjs --log-level=warning && node --test dist/golden.test.mjs",
     "e2e": "node test/e2e.mjs",
-    "dev": "wrangler dev --local --port 8787"
+    "dev": "wrangler dev --local --port 8787",
+    "e2e:part2": "node test/part2_e2e.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260921.1",

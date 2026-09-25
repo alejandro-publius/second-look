@@ -14,6 +14,7 @@ import { Invalid, NotFound, createDraft, finalize, latestBundleForSpot, loadVisi
 import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, referralView } from "./city";
 import { TooLarge, photoResponse, storeUpload } from "./uploads";
 import { two } from "./two";
+import * as part2 from "./part2";
 import { Conflict, TooMany, purgeWalks, storeWalk, walkView } from "./walk_store";
 import { inaturalistView } from "./inaturalist";
 
@@ -432,6 +433,8 @@ async function exportZip(env: Env) {
   const zip = zipOf([
     { name: "sessions.csv", text: sessionLines.join("\r\n") + "\r\n" },
     { name: "responses.csv", text: responseLines.join("\r\n") + "\r\n" },
+    // Part 2 (UPDATE_31): two more files, read by evals/assist_analysis.py.
+    ...(await part2.exportFiles(env, csvRow)),
   ]);
   return new Response(zip, {
     status: 200,
@@ -537,6 +540,11 @@ export default {
         if (!sameSecret(url.searchParams.get("token"), env.EXPORT_TOKEN)) return json(env, { detail: "Not found." }, 404);
         return await exportZip(env);
       }
+      // Part 2, the assisted second look (worker/src/part2.ts). The flags stay here.
+      if (path.startsWith("/api/t2/")) {
+        const reply = await part2Route(env, request, path, url, body);
+        if (reply) return json(env, reply.body, reply.status);
+      }
       if (path === "/api/demo/answer" && request.method === "POST") {
         // Shut until the data lock, as the page says (review finding F86): before it, sixteen of
         // these would hand anyone the live test's answer key.
@@ -558,6 +566,23 @@ export default {
     await purgeWalks(env.DB, nowIso());
   },
 };
+
+async function part2Route(env: Env, request: Request, path: string, url: URL, body: Record<string, unknown>) {
+  const post = request.method === "POST";
+  if (path === "/api/t2/offer" && post) return part2.offer(env, body, sameSecret(request.headers.get("x-qa-key"), env.QA_KEY));
+  if (path === "/api/t2/answer" && post) return part2.answer(env, body);
+  if (path === "/api/t2/choice" && post) return part2.choice(env, body);
+  if (path === "/api/t2/complete" && post) return part2.complete(env, body);
+  if (path === "/api/t2/resume") return part2.resume(env, url.searchParams.get("part2_id") ?? "");
+  if (path === "/api/t2/counts") return part2.counts(env);
+  if (path === "/api/t2/demo" && post) {
+    // Shut until the data lock, like part 1's judge mode: before it, the feedback would hand
+    // anyone part 2's answer key.
+    if (lockClock(env) < DATA_LOCK_UTC) return { status: 403, body: { detail: "Judge mode opens on Sep 28." } };
+    return part2.demo(body);
+  }
+  return null;
+}
 
 /** The time judge mode's lock is read against: the real clock, unless E2E_NOW holds a time. Only
  *  worker/test/e2e.mjs sets it, on wrangler dev --local, so the shut side and the open side both

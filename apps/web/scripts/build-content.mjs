@@ -23,7 +23,8 @@ const publicPhotos = join(webRoot, "public", "photos");
 const publicIcons = join(webRoot, "public", "icons");
 
 // Roles a person can see in the app. Benchmark photos stay on the server side.
-const SHOWN_ROLES = new Set(["warmup", "lesson", "practice", "test"]);
+// part2 is the assisted second look (UPDATE_31): shown only on /t2, after part 1.
+const SHOWN_ROLES = new Set(["warmup", "lesson", "practice", "test", "part2"]);
 
 function readYaml(path) {
   return yamlLoad(readFileSync(path, "utf8")) ?? {};
@@ -304,6 +305,12 @@ function main() {
     return { id, feature, photo_id };
   });
   for (const w of warmup) if (!photos[w.photo_id]) fail(`warmup ${w.id} uses unknown photo ${w.photo_id}`);
+  // Part 2's items with the gold stripped. The flags never come here: the Worker alone decides
+  // whether to ask, so nothing in the browser says which way a flag points.
+  const part2Items = (readYaml(join(contentDir, "part2_items.yaml")).items ?? []).map(({ id, feature, photo_id }) => {
+    if (!photos[photo_id] || photos[photo_id].role !== "part2") fail(`part 2 item ${id} uses photo ${photo_id} that is not a part2 photo`);
+    return { id, feature, photo_id };
+  });
   if (warmup.filter((w) => w.more_natural === true).length !== 1) fail("exactly one warm-up photo must be more_natural");
   for (const [fid, lesson] of Object.entries(lessons)) {
     for (const pair of lesson.contrast_pairs ?? []) {
@@ -390,6 +397,7 @@ function main() {
     features,
     form,
     test_items: strippedItems,
+    part2_items: part2Items,
     // more_natural travels with the pair so the reveal can badge the right photo wherever it
     // sits. It is not an answer to a scored item, so it gives nothing away before the test.
     warmup: warmup.map(({ id, photo_id, more_natural }) => ({ id, photo_id, more_natural: more_natural === true })),

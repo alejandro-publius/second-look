@@ -124,6 +124,7 @@ export interface Content {
   features: Feature[];
   form: { version: number; sections: FormSection[]; items: FormItem[] };
   test_items: TestItem[];
+  part2_items: TestItem[];
   warmup: WarmupItem[];
   glossary: GlossaryTerm[];
   regions: Record<string, Region>;

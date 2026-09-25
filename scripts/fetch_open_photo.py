@@ -268,7 +268,9 @@ def main(argv: list[str] | None = None) -> int:
         choices=["artificial_bank", "dug_out_channel", "invasive_plant", "pipe_running", "warmup"],
     )
     parser.add_argument(
-        "--role", required=True, choices=["warmup", "lesson", "practice", "test", "benchmark", "part2"]
+        "--role",
+        required=True,
+        choices=["warmup", "lesson", "practice", "test", "benchmark", "part2"],
     )
     parser.add_argument("--batch", default="open", help="manifest id batch, default open")
     parser.add_argument("--scene", default="", help="scene id, when it shares a spot with another")
