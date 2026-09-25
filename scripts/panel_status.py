@@ -1,6 +1,8 @@
 """How the panel study is doing: completed sessions by source and by arm, from the live counts.
 
-Reads only the public counts endpoint, the same one the site shows; test sessions are never in it.
+Reads only the public counts endpoints, the ones the site shows; test sessions are never in them.
+Part 2, the assisted second look (UPDATE_31), has its own: started and finished by arm, and the
+number who declined it. Before part 2 is deployed that endpoint is missing and the line says so.
 
   uv run python scripts/panel_status.py            the live site
   uv run python scripts/panel_status.py --issue    also put the counts on the status issue
@@ -29,6 +31,7 @@ TARGET = 80
 # The plan's one confirmatory test needs this many completed sessions in each arm (item 7).
 MIN_PER_ARM = 20
 ARMS = ("trained", "untrained")
+PART2_ARMS = ("assisted", "unassisted")
 START = "<!-- panel-counts -->"
 END = "<!-- /panel-counts -->"
 STATE = Path.home() / "second-look-backups" / "state" / "panel_counts.json"
@@ -51,7 +54,22 @@ def render(counts: dict[str, Any]) -> str:
     panel = int(by_source.get("panel", 0))
     lines.append(f"Panel: {panel} of the {TARGET} completed sessions the study asks for.")
     lines.append(threshold_line(counts))
+    lines.append(part2_line(counts))
     return "\n".join(lines)
+
+
+def part2_line(counts: dict[str, Any]) -> str:
+    """Part 2 by arm: started and finished, and the declines. Counts only, never an answer."""
+    part2 = counts.get("part2")
+    if not isinstance(part2, dict):
+        return "Part 2: no counts yet, the second look is not live."
+    by_arm = part2.get("by_arm") or {}
+    arms = ", ".join(
+        f"{arm} {int((by_arm.get(arm) or {}).get('completed', 0))} finished of "
+        f"{int((by_arm.get(arm) or {}).get('randomized', 0))} started"
+        for arm in PART2_ARMS
+    )
+    return f"Part 2 by arm: {arms}; {int(part2.get('declined', 0))} declined."
 
 
 def threshold_line(counts: dict[str, Any]) -> str:
@@ -74,7 +92,7 @@ def issue_block(counts: dict[str, Any], when: str) -> str:
     arms = ", ".join(f"{arm} {completed(counts, arm)}" for arm in ARMS)
     return (
         f"{START}\n**Panel study, {when}:** completed sessions by arm: {arms}; by source: "
-        f"{sources}. {threshold_line(counts)} (`make panel-status`)\n{END}"
+        f"{sources}. {threshold_line(counts)} {part2_line(counts)} (`make panel-status`)\n{END}"
     )
 
 
@@ -92,7 +110,12 @@ def put_block(body: str, block: str) -> str:
 def key(counts: dict[str, Any]) -> str:
     """What must change for the issue to be edited again: the arms and the sources, not the time."""
     return json.dumps(
-        {"by_arm": counts.get("by_arm"), "by_source": counts.get("by_source")}, sort_keys=True
+        {
+            "by_arm": counts.get("by_arm"),
+            "by_source": counts.get("by_source"),
+            "part2": counts.get("part2"),
+        },
+        sort_keys=True,
     )
 
 
@@ -124,8 +147,8 @@ def update_issue(
     return "panel-status: the status issue shows the new counts"
 
 
-def read_counts(out: Outward, site: str) -> dict[str, Any] | None:
-    reply = out.get(f"{site}/api/test/counts")
+def read_part2(out: Outward, site: str) -> dict[str, Any] | None:
+    reply = out.get(f"{site}/api/t2/counts")
     if reply.status != 200:
         return None
     try:
@@ -133,6 +156,20 @@ def read_counts(out: Outward, site: str) -> dict[str, Any] | None:
     except ValueError:
         return None
     return doc if isinstance(doc, dict) and "by_arm" in doc else None
+
+
+def read_counts(out: Outward, site: str) -> dict[str, Any] | None:
+    part2 = read_part2(out, site)
+    reply = out.get(f"{site}/api/test/counts")
+    if reply.status != 200:
+        return None
+    try:
+        doc = reply.json()
+    except ValueError:
+        return None
+    if not (isinstance(doc, dict) and "by_arm" in doc):
+        return None
+    return {**doc, "part2": part2} if part2 is not None else doc
 
 
 def main(argv: list[str] | None = None, out: Outward | None = None) -> int:

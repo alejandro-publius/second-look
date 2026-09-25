@@ -317,3 +317,18 @@ def test_panel_status_issue_flag_reads_the_counts_and_edits(
     assert panel_status.main(["--issue"], out=out) == 0 and len(out.issue_edits) == 1
     assert out.fetched[-1] == ("GET", f"{panel_status.SITE}/api/test/counts")
     assert (tmp_path / "panel.json").exists()
+
+
+def test_panel_status_shows_part2_by_arm_or_says_it_is_not_live() -> None:
+    assert "not live" in panel_status.render(COUNTS)
+    part2 = {
+        "by_arm": {
+            "assisted": {"randomized": 5, "completed": 4},
+            "unassisted": {"randomized": 6, "completed": 6},
+        },
+        "declined": 3,
+    }
+    text = panel_status.render({**COUNTS, "part2": part2})
+    assert "Part 2 by arm: assisted 4 finished of 5 started, unassisted 6 finished of 6" in text
+    assert "3 declined" in text
+    assert "3 declined" in panel_status.issue_block({**COUNTS, "part2": part2}, "t")
