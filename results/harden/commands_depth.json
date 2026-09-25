@@ -24,7 +24,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 0.1,
-   "detail": "uv run python scripts/check_diagrams.py\ndiagrams: 6 Mermaid block(s) parse, by the structural check\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "uv run python scripts/check_diagrams.py\ndiagrams: 6 Mermaid block(s) parse, by the structural check\n"
   },
   {
    "doc": "README.md",
@@ -34,7 +34,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 86.9,
-   "detail": "nerated/resources/Bundle-sl-visit-1-bundle.json\n 00:00.168\n  Validate /private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/fhir/golden/example-lab-result-strawberry-creek-1.json\n 00:00.147\n  Validate /private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/fhir/golden/library-second-look.json\n 00:00.439\n  Validate /private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/fhir/golden/referral-strawberry-creek-1.json\n 00:00.061\n  Validate /private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/fhir/golden/visit-strawberry-creek-1.json\n 00:00.102\n  Validate /private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/fhir/golden/visit-strawberry-creek-1.transaction.json\n 00:00.190\nDone. Times: Loading: 00:13.977, validation: 00:01.967 (#7). Memory = 492Mb\n\nDone. Times: Loading: 00:13.977, validation: 00:01.967 (#7). Max Memory = 3Gb\nfhir-validate: 7 file(s), 0 error(s), 37 warning(s), terminology checks ran; details in results/fhir_validation.json\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "nerated/resources/Bundle-sl-visit-1-bundle.json\n 00:00.168\n  Validate fhir/golden/example-lab-result-strawberry-creek-1.json\n 00:00.147\n  Validate fhir/golden/library-second-look.json\n 00:00.439\n  Validate fhir/golden/referral-strawberry-creek-1.json\n 00:00.061\n  Validate fhir/golden/visit-strawberry-creek-1.json\n 00:00.102\n  Validate fhir/golden/visit-strawberry-creek-1.transaction.json\n 00:00.190\nDone. Times: Loading: 00:13.977, validation: 00:01.967 (#7). Memory = 492Mb\n\nDone. Times: Loading: 00:13.977, validation: 00:01.967 (#7). Max Memory = 3Gb\nfhir-validate: 7 file(s), 0 error(s), 37 warning(s), terminology checks ran; details in results/fhir_validation.json\n"
   },
   {
    "doc": "README.md",
@@ -54,7 +54,7 @@
    "result": "fail",
    "exit": 2,
    "seconds": 110.9,
-   "detail": "(ran with SKIP_TAP=1: the tap target step on port 3100 skipped)   tests: python: .............................................................s.......    [100%]\n  ok   tests: worker: pass 10\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nTraceback (most recent call last):\n  File \"/private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/scripts/judge_check.py\", line 271, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/scripts/judge_check.py\", line 250, in main\n    step = make()\n           ^^^^^^\n  File \"/private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/scripts/judge_check.py\", line 244, in <lambda>\n    lambda: step_fhir(root, env),\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"/private/tmp/claude-501/-Users-alexvintera-second-look-harden/94f672e2-c917-410e-ac4c-c03a21f1e110/scratchpad/cmds-depth/tree/scripts/judge_check.py\", line 132, in step_fhir\n    files = int(data.get(\"files\", 0) or len(data.get(\"results\", []) or []))\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'\nmake: *** [judge-check] Error 1\n"
+   "detail": "(ran with SKIP_TAP=1: the tap target step on port 3100 skipped)   tests: python: .............................................................s.......    [100%]\n  ok   tests: worker: pass 10\nTraceback (most recent call last):\n  File \"scripts/judge_check.py\", line 271, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"scripts/judge_check.py\", line 250, in main\n    step = make()\n           ^^^^^^\n  File \"scripts/judge_check.py\", line 244, in <lambda>\n    lambda: step_fhir(root, env),\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"scripts/judge_check.py\", line 132, in step_fhir\n    files = int(data.get(\"files\", 0) or len(data.get(\"results\", []) or []))\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'\nmake: *** [judge-check] Error 1\n"
   },
   {
    "doc": "README.md",
@@ -64,7 +64,7 @@
    "result": "fail",
    "exit": 2,
    "seconds": 63.7,
-   "detail": "(ran with SKIP_TAP=1: the tap target step on port 3100 skipped) ent path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [verify-claims] Error 1\n"
+   "detail": "(ran with SKIP_TAP=1: the tap target step on port 3100 skipped) make: *** [verify-claims] Error 1\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -74,7 +74,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 0.0,
-   "detail": "warning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nResolved 96 packages in 4ms\nChecked 91 packages in 2ms\n"
+   "detail": "Resolved 96 packages in 4ms\nChecked 91 packages in 2ms\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -94,7 +94,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 50.4,
-   "detail": "uv run pytest\n........................................................................ [ 10%]\n........................................................................ [ 20%]\n........................................................................ [ 30%]\n........................................................................ [ 40%]\n........................................................................ [ 50%]\n........................................................................ [ 60%]\n........................................................................ [ 70%]\n........................................................................ [ 80%]\n........................................................................ [ 90%]\n.............................................................s.......    [100%]\n716 passed, 1 skipped in 48.79s\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "uv run pytest\n........................................................................ [ 10%]\n........................................................................ [ 20%]\n........................................................................ [ 30%]\n........................................................................ [ 40%]\n........................................................................ [ 50%]\n........................................................................ [ 60%]\n........................................................................ [ 70%]\n........................................................................ [ 80%]\n........................................................................ [ 90%]\n.............................................................s.......    [100%]\n716 passed, 1 skipped in 48.79s\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -104,7 +104,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 1.9,
-   "detail": "er_content.py --check\nbuild-worker-content: worker/src/content.json is current\nuv run python evals/golden_vectors.py --check\ngolden-vectors: 8 files current\ncd worker && npm run typecheck --silent && npm test --silent\n\u2714 helpers: sha256, Python rounding, fhir_id (2.443334ms)\n\u2714 followups: the selector, over the repository's own table and form (0.600834ms)\n\u2714 labels: k of 4, the date, the expired sentence (0.83325ms)\n\u2714 healthcard: approved sentences only, the same pick for the same seed (0.996ms)\n\u2714 act: findings, needs, pipes worth testing, and both pin guards (2.1345ms)\n\u2714 act: the downstream note, only where flows_into is set (0.942708ms)\n\u2714 regions: placement on a creek and a reach, and the reaches below (0.617417ms)\n\u2714 fhir_emit: the same Bundle as Python, and it passes the structural check (5.401375ms)\n\u2714 fhir_referral: the ServiceRequest and the example result, the same as Python (2.780458ms)\n\u2714 walks: the same demo Bundle as Python, tagged on every resource, and structurally sound (1.585209ms)\n\u2139 tests 10\n\u2139 suites 0\n\u2139 pass 10\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 107.995292\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "er_content.py --check\nbuild-worker-content: worker/src/content.json is current\nuv run python evals/golden_vectors.py --check\ngolden-vectors: 8 files current\ncd worker && npm run typecheck --silent && npm test --silent\n\u2714 helpers: sha256, Python rounding, fhir_id (2.443334ms)\n\u2714 followups: the selector, over the repository's own table and form (0.600834ms)\n\u2714 labels: k of 4, the date, the expired sentence (0.83325ms)\n\u2714 healthcard: approved sentences only, the same pick for the same seed (0.996ms)\n\u2714 act: findings, needs, pipes worth testing, and both pin guards (2.1345ms)\n\u2714 act: the downstream note, only where flows_into is set (0.942708ms)\n\u2714 regions: placement on a creek and a reach, and the reaches below (0.617417ms)\n\u2714 fhir_emit: the same Bundle as Python, and it passes the structural check (5.401375ms)\n\u2714 fhir_referral: the ServiceRequest and the example result, the same as Python (2.780458ms)\n\u2714 walks: the same demo Bundle as Python, tagged on every resource, and structurally sound (1.585209ms)\n\u2139 tests 10\n\u2139 suites 0\n\u2139 pass 10\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 107.995292\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -114,7 +114,7 @@
    "result": "fail",
    "exit": 2,
    "seconds": 0.1,
-   "detail": "uv run python scripts/verify_claims.py --synthetic\nrendered number drifted: results/fhir_validation.json#/files_validated README shows 14, results say 7; run scripts/render_readme.py\nrendered number drifted: results/fhir_validation.json#/walk_records_validated README shows 2, results say 0; run scripts/render_readme.py\nverify-claims: 2 problem(s)\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [verify-claims] Error 1\n"
+   "detail": "uv run python scripts/verify_claims.py --synthetic\nrendered number drifted: results/fhir_validation.json#/files_validated README shows 14, results say 7; run scripts/render_readme.py\nrendered number drifted: results/fhir_validation.json#/walk_records_validated README shows 2, results say 0; run scripts/render_readme.py\nverify-claims: 2 problem(s)\nmake: *** [verify-claims] Error 1\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -124,7 +124,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 0.1,
-   "detail": "uv run python scripts/verify_audit.py\naudit-log: 3 entries, chain intact, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "uv run python scripts/verify_audit.py\naudit-log: 3 entries, chain intact, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -134,7 +134,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 0.2,
-   "detail": "uv run python scripts/check_manifest.py\nmanifest-check: 84 image(s), all with matching rows\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "uv run python scripts/check_manifest.py\nmanifest-check: 84 image(s), all with matching rows\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -144,7 +144,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 0.1,
-   "detail": "uv run python scripts/check_readability.py\nreadability: 97 strings, average grade 5.20 (cap 7.0), hardest 11.0 (cap 11.0), 3 exception(s)\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "uv run python scripts/check_readability.py\nreadability: 97 strings, average grade 5.20 (cap 7.0), hardest 11.0 (cap 11.0), 3 exception(s)\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -154,7 +154,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 0.1,
-   "detail": "uv run python scripts/check_dashes.py\ndash-check: no em or en dashes in tracked files\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "uv run python scripts/check_dashes.py\ndash-check: no em or en dashes in tracked files\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -184,7 +184,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 15.9,
-   "detail": "econd_labels: no second label for test photo ph-bank-01\n  NOTE   second_labels: no second label for test photo ph-bank-02\n  NOTE   second_labels: no second label for test photo ph-bank-03\n  NOTE   second_labels: no second label for test photo ph-bank-04\n  NOTE   second_labels: no second label for test photo ph-channel-01\n  NOTE   second_labels: no second label for test photo ph-channel-02\n  NOTE   second_labels: no second label for test photo ph-channel-03\n  NOTE   second_labels: no second label for test photo ph-channel-04\n  NOTE   second_labels: no second label for test photo ph-plant-01\n  NOTE   second_labels: no second label for test photo ph-plant-02\n  NOTE   second_labels: no second label for test photo ph-plant-03\n  NOTE   second_labels: no second label for test photo ph-plant-04\n  NOTE   second_labels: no second label for test photo ph-pipe-01\n  NOTE   second_labels: no second label for test photo ph-pipe-02\n  NOTE   second_labels: no second label for test photo ph-pipe-03\n  NOTE   second_labels: no second label for test photo ph-pipe-04\n  NOTE   key_agreement: one labeller set the whole key, so no agreement figure is reported: named in docs/analysis_plan.md and under Known weaknesses\n\nchecks: 17 run, 15 passed, 0 failed, 17 notes\npreflight: 0 failed, of which 0 need a human\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "econd_labels: no second label for test photo ph-bank-01\n  NOTE   second_labels: no second label for test photo ph-bank-02\n  NOTE   second_labels: no second label for test photo ph-bank-03\n  NOTE   second_labels: no second label for test photo ph-bank-04\n  NOTE   second_labels: no second label for test photo ph-channel-01\n  NOTE   second_labels: no second label for test photo ph-channel-02\n  NOTE   second_labels: no second label for test photo ph-channel-03\n  NOTE   second_labels: no second label for test photo ph-channel-04\n  NOTE   second_labels: no second label for test photo ph-plant-01\n  NOTE   second_labels: no second label for test photo ph-plant-02\n  NOTE   second_labels: no second label for test photo ph-plant-03\n  NOTE   second_labels: no second label for test photo ph-plant-04\n  NOTE   second_labels: no second label for test photo ph-pipe-01\n  NOTE   second_labels: no second label for test photo ph-pipe-02\n  NOTE   second_labels: no second label for test photo ph-pipe-03\n  NOTE   second_labels: no second label for test photo ph-pipe-04\n  NOTE   key_agreement: one labeller set the whole key, so no agreement figure is reported: named in docs/analysis_plan.md and under Known weaknesses\n\nchecks: 17 run, 15 passed, 0 failed, 17 notes\npreflight: 0 failed, of which 0 need a human\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -194,7 +194,7 @@
    "result": "fail",
    "exit": 2,
    "seconds": 2.1,
-   "detail": "uv run python scripts/submit_check.py\nPASS  track_statement\nPASS  five_headers\nFAIL  video_link\n      README.md has no line with the word video and a link\nPASS  video_duration  (no --video file given, so the 3 to 5 minute check was skipped)\nPASS  license\nPASS  demo_url  (NEXT_PUBLIC_SITE_URL unset and no demo link in docs/devpost.md; skipped)\nFAIL  secrets_scan\n      gitleaks flagged the history at core/tests/test_harden_followups_properties.py:83, results/key_hash.json:5, worker/test/e2e.mjs:18, evals/golden_vectors.py:564, worker/golden/fhir_emit.json:1818, worker/src/index.ts:25, docs/reviews/REVIEW_01.md:629; if these are fake test values, add their fingerprints to .gitleaksignore\nFAIL  verify_claims\n      verify_claims without --synthetic failed: verify-claims: 2 problem(s)\nPASS  audit_log  (3 entries, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3)\nFAIL  repo_public\n      cannot tell if the repo is public (gh said: none of the git remotes configured for this repository point to a known GitHub host. To tell gh about a new GitHub host, please use `gh auth login`)\nsubmit-check: 4 failed: video_link, secrets_scan, verify_claims, repo_public\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\nmake: *** [submit-check] Error 1\n"
+   "detail": "uv run python scripts/submit_check.py\nPASS  track_statement\nPASS  five_headers\nFAIL  video_link\n      README.md has no line with the word video and a link\nPASS  video_duration  (no --video file given, so the 3 to 5 minute check was skipped)\nPASS  license\nPASS  demo_url  (NEXT_PUBLIC_SITE_URL unset and no demo link in docs/devpost.md; skipped)\nFAIL  secrets_scan\n      gitleaks flagged the history at core/tests/test_harden_followups_properties.py:83, results/key_hash.json:5, worker/test/e2e.mjs:18, evals/golden_vectors.py:564, worker/golden/fhir_emit.json:1818, worker/src/index.ts:25, docs/reviews/REVIEW_01.md:629; if these are fake test values, add their fingerprints to .gitleaksignore\nFAIL  verify_claims\n      verify_claims without --synthetic failed: verify-claims: 2 problem(s)\nPASS  audit_log  (3 entries, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3)\nFAIL  repo_public\n      cannot tell if the repo is public (gh said: none of the git remotes configured for this repository point to a known GitHub host. To tell gh about a new GitHub host, please use `gh auth login`)\nsubmit-check: 4 failed: video_link, secrets_scan, verify_claims, repo_public\nmake: *** [submit-check] Error 1\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
@@ -238,7 +238,7 @@
    "result": "pass",
    "exit": 0,
    "seconds": 0.5,
-   "detail": "..                                                                       [100%]\nwarning: `VIRTUAL_ENV=/Users/alexvintera/second-look-harden/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead\n"
+   "detail": "..                                                                       [100%]\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",

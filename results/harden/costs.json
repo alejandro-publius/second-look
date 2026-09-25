@@ -1,10 +1,187 @@
 {
- "checked_utc": "2026-09-22T18:27:32Z",
+ "checked_utc": "2026-09-25T21:16:34Z",
  "log": "results/cost_log.jsonl",
- "lines": 48,
- "real_lines": 0,
+ "lines": 5065,
+ "real_lines": 5017,
  "not_real_lines_by_purpose": {
   "benchmark": 48
  },
- "groups": []
+ "groups": [
+  {
+   "purpose": "benchmark",
+   "model": "claude-fable-5-1",
+   "calls": 48,
+   "cost_usd": 1.36791,
+   "per_assessment_usd": 0.028498,
+   "per_100_usd": 2.8498,
+   "frames": false,
+   "input_tokens": 81486,
+   "output_tokens": 11061
+  },
+  {
+   "purpose": "benchmark",
+   "model": "claude-haiku-4-5-20251001",
+   "calls": 96,
+   "cost_usd": 0.230745,
+   "per_assessment_usd": 0.002404,
+   "per_100_usd": 0.2404,
+   "frames": false,
+   "input_tokens": 175500,
+   "output_tokens": 11049
+  },
+  {
+   "purpose": "benchmark",
+   "model": "claude-opus-5",
+   "calls": 48,
+   "cost_usd": 0.636525,
+   "per_assessment_usd": 0.013261,
+   "per_100_usd": 1.3261,
+   "frames": false,
+   "input_tokens": 81390,
+   "output_tokens": 9183
+  },
+  {
+   "purpose": "benchmark",
+   "model": "claude-opus-5-5",
+   "calls": 48,
+   "cost_usd": 0.509304,
+   "per_assessment_usd": 0.010611,
+   "per_100_usd": 1.0611,
+   "frames": false,
+   "input_tokens": 81486,
+   "output_tokens": 9168
+  },
+  {
+   "purpose": "benchmark",
+   "model": "claude-sonnet-5",
+   "calls": 96,
+   "cost_usd": 0.453116,
+   "per_assessment_usd": 0.00472,
+   "per_100_usd": 0.472,
+   "frames": false,
+   "input_tokens": 169308,
+   "output_tokens": 11450
+  },
+  {
+   "purpose": "footage",
+   "model": "claude-fable-5-1",
+   "calls": 600,
+   "cost_usd": 13.93178,
+   "per_assessment_usd": 0.02322,
+   "per_100_usd": 2.322,
+   "frames": true,
+   "input_tokens": 902178,
+   "output_tokens": 98200
+  },
+  {
+   "purpose": "footage",
+   "model": "claude-haiku-4-5-20251001",
+   "calls": 1200,
+   "cost_usd": 2.601396,
+   "per_assessment_usd": 0.002168,
+   "per_100_usd": 0.2168,
+   "frames": true,
+   "input_tokens": 1960956,
+   "output_tokens": 128088
+  },
+  {
+   "purpose": "footage",
+   "model": "claude-opus-5",
+   "calls": 600,
+   "cost_usd": 6.73884,
+   "per_assessment_usd": 0.011231,
+   "per_100_usd": 1.1231,
+   "frames": true,
+   "input_tokens": 900978,
+   "output_tokens": 89358
+  },
+  {
+   "purpose": "footage",
+   "model": "claude-opus-5-5",
+   "calls": 600,
+   "cost_usd": 5.780972,
+   "per_assessment_usd": 0.009635,
+   "per_100_usd": 0.9635,
+   "frames": true,
+   "input_tokens": 902178,
+   "output_tokens": 108613
+  },
+  {
+   "purpose": "footage",
+   "model": "claude-sonnet-5",
+   "calls": 1200,
+   "cost_usd": 5.137182,
+   "per_assessment_usd": 0.004281,
+   "per_100_usd": 0.4281,
+   "frames": true,
+   "input_tokens": 1883556,
+   "output_tokens": 137007
+  },
+  {
+   "purpose": "model_sweep",
+   "model": "claude-fable-5-1",
+   "calls": 48,
+   "cost_usd": 1.35786,
+   "per_assessment_usd": 0.028289,
+   "per_100_usd": 2.8289,
+   "frames": false,
+   "input_tokens": 81486,
+   "output_tokens": 10860
+  },
+  {
+   "purpose": "model_sweep",
+   "model": "claude-haiku-4-5-20251001",
+   "calls": 144,
+   "cost_usd": 0.289623,
+   "per_assessment_usd": 0.002011,
+   "per_100_usd": 0.2011,
+   "frames": false,
+   "input_tokens": 263202,
+   "output_tokens": 16977
+  },
+  {
+   "purpose": "model_sweep",
+   "model": "claude-opus-5",
+   "calls": 96,
+   "cost_usd": 0.972452,
+   "per_assessment_usd": 0.01013,
+   "per_100_usd": 1.013,
+   "frames": false,
+   "input_tokens": 162636,
+   "output_tokens": 19463
+  },
+  {
+   "purpose": "model_sweep",
+   "model": "claude-opus-5-5",
+   "calls": 48,
+   "cost_usd": 0.517904,
+   "per_assessment_usd": 0.01079,
+   "per_100_usd": 1.079,
+   "frames": false,
+   "input_tokens": 81486,
+   "output_tokens": 9598
+  },
+  {
+   "purpose": "model_sweep",
+   "model": "claude-sonnet-5",
+   "calls": 144,
+   "cost_usd": 0.577946,
+   "per_assessment_usd": 0.004014,
+   "per_100_usd": 0.4014,
+   "frames": false,
+   "input_tokens": 253818,
+   "output_tokens": 18741
+  },
+  {
+   "purpose": "smoke",
+   "model": "claude-haiku-4-5-20251001",
+   "calls": 1,
+   "cost_usd": 0.002387,
+   "per_assessment_usd": 0.002387,
+   "per_100_usd": 0.2387,
+   "frames": false,
+   "input_tokens": 1902,
+   "output_tokens": 97
+  }
+ ]
 }
