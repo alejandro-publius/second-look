@@ -64,6 +64,8 @@ class FakeOutward(Outward):
 
     def resolves(self, host: str) -> bool:
         self.calls.append(["resolve", host])
+        self.cwds.append(None)
+        self.envs.append({})
         return self.hosts.get(host, False)
 
     def comment(self, text: str) -> Done:

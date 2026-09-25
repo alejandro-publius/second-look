@@ -1,0 +1,784 @@
+"""make lock-analysis: the data lock, from the backup to the line on the status issue.
+
+UPDATE_30 section 5.1. launchd runs it once at 2026-09-28T01:10:00Z (scripts/mac_jobs.py, the job
+`lock`), ten minutes after the lock in core/lock.py; anyone can run it by hand after the lock
+until it has succeeded once. In order:
+
+ 1. refuse before the lock, by the real clock (tests hand it another clock; nothing else can);
+ 2. refuse if the lock analysis already ran (a real results/usability_<date>.json exists);
+ 3. fetch, and fast-forward this checkout to origin/depth. It refuses if the checkout holds local
+    changes other than the files the other Mac jobs write, and the log names them;
+ 4. check before touching anything: main can move to depth by fast-forward, wrangler and gh are
+    logged in, the QA key is there, and what is live on production is a good row in the deploy
+    record with its files kept, so there is something to go back to;
+ 5. back up D1 (scripts/backup_d1.sh) and export the study tables from that backup
+    (scripts/study_export.py) into data/export, with a copy kept next to the backup;
+ 6. run the pre-registered analysis once, exactly as tagged: evals/usability_analysis.py with no
+    option, which itself refuses unless the plan is byte for byte the one tagged prereg-v1;
+ 7. put the human row into the README (the counts per arm and per source label, or the sentence
+    that nobody finished), render every number, rebuild the report and verify every claim;
+ 8. make check; commit on depth; main will be that same commit (a fast-forward);
+ 9. prove the push would be taken (git push --dry-run --atomic), deploy in the order of
+    docs/notes/hosting.md with the phone tests after each half, and confirm judge mode opened;
+10. mark the deploy good in the record, commit it, push depth and main in one atomic push;
+11. a line on the status issue, and the panel counts in its body.
+
+The push comes after the deploy, not before: a pushed commit cannot be taken back without
+rewriting history (hard rule 15), and a deploy can. So on any failure up to and including the
+push, it rolls production back to what was live when it started, resets this checkout to where it
+started (keeping the other jobs' files), and writes the failure to the status issue and to
+~/second-look-backups/lock.log. Nothing is ever half pushed: the push is atomic.
+
+Everything that leaves this Mac goes through scripts/outward.py; commands that stay on it go
+through Local. The tests replace both (scripts/tests/test_lock_analysis.py).
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+from core.lock import DATA_LOCK_UTC
+from scripts import deploy_record as dr
+from scripts import mac_jobs, panel_status, study_export
+from scripts import rollback as rb
+from scripts.outward import Done, Outward
+
+ROOT = Path(__file__).resolve().parents[1]
+SITE = "https://second-look-79t.pages.dev"
+SCRIPT = "scripts/lock_analysis.py"
+RECORD = "results/lock_analysis.json"
+HOSTING = "docs/notes/hosting.md"
+HUMAN_START = "<!-- human-row -->"
+HUMAN_END = "<!-- /human-row -->"
+# The README paragraph that holds the place of the human row until the lock.
+HUMAN_LEAD = "The test runs as a pre-registered study that stays open"
+NOBODY_YET = "Nobody has taken the test yet, so nothing here measures people."
+NOBODY_FINISHED = "Nobody finished the test before the lock, so nothing here measures people."
+SOMEBODY = "What people did before the lock is in the human row below the AI tables."
+# make check's web build and FHIR validation rewrite these two; they are not the lock's to commit.
+REWRITTEN_BY_CHECK = ("apps/web/public/_headers", "results/fhir_validation.json")
+SOURCE_WORDS = {
+    "panel": "the research panel",
+    "poster": "a poster",
+    "chat": "a chat link",
+    "friends": "friends",
+    "creek_group": "a creek group",
+    "other": "another link",
+    "unknown": "no label",
+}
+Clock = Callable[[], datetime]
+
+
+def real_clock() -> datetime:
+    return datetime.now(UTC)
+
+
+def stamp(ts: datetime) -> str:
+    return ts.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+class Failed(Exception):
+    def __init__(self, step: str, detail: str) -> None:
+        super().__init__(f"{step}: {detail}")
+        self.step = step
+        self.detail = detail
+
+
+class Local:
+    """Commands that stay on this Mac: git in this checkout, make, uv run."""
+
+    def run(
+        self,
+        argv: Sequence[str],
+        *,
+        cwd: Path,
+        env: Mapping[str, str] | None = None,
+        timeout: float = 3600,
+    ) -> Done:
+        try:
+            proc = subprocess.run(
+                list(argv),
+                cwd=cwd,
+                env={**os.environ, **(env or {})},
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as e:
+            return Done(127, "", f"{argv[0]}: {e}")
+        return Done(proc.returncode, proc.stdout, proc.stderr)
+
+
+# ---------------------------------------------------------------------------
+# The README's human row
+# ---------------------------------------------------------------------------
+
+
+def people_kept(result: dict[str, Any]) -> int:
+    counts = result.get("counts") or {}
+    return int(counts.get("completed_trained", 0)) + int(counts.get("completed_untrained", 0))
+
+
+def human_row(result: dict[str, Any], rel: str) -> str:
+    """The README text for the one real result: claim tokens only, filled by render_readme."""
+    md = rel.removesuffix(".json") + ".md"
+
+    def claim(pointer: str) -> str:
+        return "{{claim:" + rel + "#" + pointer + "}}"
+
+    # Only counts after the plan's exclusions: the counts before them hold the QA sittings too.
+    if people_kept(result) == 0:
+        body = (
+            "No finished test from a person was kept before the data lock at "
+            f"{claim('/plan/data_lock_utc')}: {claim('/counts/completed_trained')} with the "
+            f"lesson and {claim('/counts/completed_untrained')} without it, so there is no human "
+            f"row. The one pre-registered run, with what each of the plan's rules removed, is in "
+            f"[`{md}`]({md})."
+        )
+        return f"{HUMAN_START}\n\n{body}\n\n{HUMAN_END}"
+    primary = result.get("primary") or {}
+    lines = [
+        HUMAN_START,
+        "",
+        f"People, before the data lock at {claim('/plan/data_lock_utc')}, in the one "
+        f"pre-registered run ([`{md}`]({md})):",
+        "",
+        "| People | With the lesson | Without it |",
+        "|---|---|---|",
+        f"| Finished the test, kept by the plan's rules | {claim('/counts/completed_trained')} | "
+        f"{claim('/counts/completed_untrained')} |",
+    ]
+    if primary.get("trained_mean") is not None and primary.get("untrained_mean") is not None:
+        lines.append(
+            "| Share of the 16 answered right, on average, in percent | "
+            f"{claim('/primary/trained_mean')} | {claim('/primary/untrained_mean')} |"
+        )
+    for label in sorted(result.get("by_source") or {}):
+        words = SOURCE_WORDS.get(label, label)
+        lines.append(
+            f"| Kept, who came through {words} (`{label}`) | "
+            f"{claim(f'/by_source/{label}/trained')} | {claim(f'/by_source/{label}/untrained')} |"
+        )
+    lines += ["", status_line(primary, claim), "", HUMAN_END]
+    return "\n".join(lines)
+
+
+def status_line(primary: dict[str, Any], claim: Callable[[str], str]) -> str:
+    """One line: a test, a description, or nothing to compare. The plan's rule, item 7."""
+    status = str(primary.get("status", ""))
+    if status == "confirmatory":
+        return (
+            "Each arm kept 20 or more people, so the plan's one test applies: the lesson moved "
+            f"the share answered right by {claim('/primary/difference')} points, with a 95 "
+            f"percent interval from {claim('/primary/ci_low')} to {claim('/primary/ci_high')}."
+        )
+    if status == "descriptive":
+        return (
+            "Fewer than 20 people were kept in an arm, so this is a description, not a test, "
+            "as the plan says."
+        )
+    return "An arm kept nobody, so there is no difference to work out; this is a description."
+
+
+def place_human_row(readme: str, row: str, finished: bool) -> str:
+    """The README with the human row in its place, and the numbers' summary sentence updated."""
+    a, b = readme.find(HUMAN_START), readme.find(HUMAN_END)
+    if a >= 0 and b > a:
+        out = readme[:a] + row + readme[b + len(HUMAN_END) :]
+    else:
+        m = re.search(rf"^{re.escape(HUMAN_LEAD)}.*$", readme, re.M)
+        if not m:
+            raise Failed("readme", "the README has no paragraph for the human row")
+        out = readme[: m.start()] + row + readme[m.end() :]
+    return out.replace(NOBODY_YET, SOMEBODY if finished else NOBODY_FINISHED)
+
+
+def real_results(root: Path) -> list[Path]:
+    """Real analysis results already in results/: after the lock there must be exactly one."""
+    found = []
+    for path in sorted((root / "results").glob("usability_*.json")):
+        if not re.fullmatch(r"usability_\d{8}\.json", path.name):
+            continue
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        if isinstance(doc, dict) and doc.get("synthetic") is False:
+            found.append(path)
+    return found
+
+
+def allowed(path: str, patterns: Sequence[str]) -> bool:
+    return any(path.startswith(p) if p.endswith("/") else path == p for p in patterns)
+
+
+def porcelain(text: str) -> list[str]:
+    """Paths from `git status --porcelain=v1 -z`, both sides of a rename."""
+    paths: list[str] = []
+    parts = text.split("\0")
+    i = 0
+    while i < len(parts):
+        entry = parts[i]
+        i += 1
+        if len(entry) < 4:
+            continue
+        paths.append(entry[3:])
+        if entry[0] in "RC":
+            paths.append(parts[i])
+            i += 1
+    return paths
+
+
+def qa_key_from(root: Path) -> str | None:
+    """The QA key from the environment or this checkout's .env. It is never printed."""
+    key = os.environ.get("QA_KEY")
+    if key:
+        return key
+    env = root / ".env"
+    if env.is_file():
+        for line in env.read_text(encoding="utf-8").splitlines():
+            name, _, value = line.partition("=")
+            if name.strip() == "QA_KEY" and value.strip():
+                return value.strip().strip('"').strip("'")
+    return None
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# The job
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Start:
+    head: str
+    kept: dict[str, bytes | None]
+    untracked: set[str]
+
+
+class Lock:
+    def __init__(
+        self,
+        *,
+        root: Path,
+        out: Outward,
+        local: Local,
+        clock: Clock = real_clock,
+        backups: Path | None = None,
+        qa_key: Callable[[], str | None] = lambda: None,
+        say: Callable[[str], None] = print,
+    ) -> None:
+        self.root = root
+        self.out = out
+        self.local = local
+        self.clock = clock
+        self.backups = backups or Path.home() / "second-look-backups"
+        self.log_path = self.backups / "lock.log"
+        self.read_qa_key = qa_key
+        self.qa_key: str | None = None
+        self.say = say
+        self.start: Start | None = None
+        self.started_at = clock()
+        self.backup_file: Path | None = None
+        self.result: dict[str, Any] = {}
+        self.result_rel = ""
+        self.targets: tuple[dr.Row | None, dr.Row | None] = (None, None)
+        self.deploy_started = False
+        self.pushed = False
+
+    # -- small helpers -----------------------------------------------------
+
+    def log(self, line: str) -> None:
+        text = f"{stamp(self.clock())} lock: {line}"
+        self.say(text)
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.log_path.open("a", encoding="utf-8") as f:
+            f.write(text + "\n")
+
+    def git(self, *args: str) -> Done:
+        return self.local.run(["git", *args], cwd=self.root, timeout=600)
+
+    def must(self, step: str, done: Done, what: str) -> Done:
+        if not done.ok:
+            raise Failed(step, f"{what} failed: {done.tail()}")
+        return done
+
+    def head(self) -> str:
+        return self.must("git", self.git("rev-parse", "HEAD"), "git rev-parse").out.strip()
+
+    # -- the steps ---------------------------------------------------------
+
+    def already_done(self) -> str | None:
+        found = real_results(self.root)
+        if found:
+            return f"the lock analysis already ran: {found[0].relative_to(self.root)}"
+        return None
+
+    def freshen(self) -> None:
+        step = "fresh checkout"
+        branch = self.must(step, self.git("rev-parse", "--abbrev-ref", "HEAD"), "git").out.strip()
+        if branch != "depth":
+            raise Failed(step, f"the checkout is on {branch}, not depth")
+        status = self.must(
+            step, self.git("status", "--porcelain=v1", "-z", "--untracked-files=all"), "git status"
+        )
+        changed = porcelain(status.out)
+        theirs = mac_jobs.mac_job_files()
+        other = [p for p in changed if not allowed(p, theirs)]
+        if other:
+            raise Failed(step, "local changes other than the Mac jobs' files: " + ", ".join(other))
+        if changed:
+            self.log("left as they are, written by the other Mac jobs: " + ", ".join(changed))
+        fetched = self.out.run(["git", "fetch", "origin", "depth", "main"], cwd=self.root)
+        self.must(step, fetched, "git fetch origin")
+        before = self.head()
+        self.must(step, self.git("merge", "--ff-only", "origin/depth"), "fast-forward")
+        after = self.head()
+        self.log(
+            f"fast-forwarded from {before[:7]} to {after[:7]}"
+            if before != after
+            else f"already at origin/depth, {after[:7]}"
+        )
+        untracked_now = self.must(
+            step, self.git("ls-files", "--others", "--exclude-standard"), "git ls-files"
+        )
+        kept: dict[str, bytes | None] = {}
+        for rel in changed:
+            path = self.root / rel
+            kept[rel] = path.read_bytes() if path.is_file() else None
+        self.start = Start(after, kept, set(untracked_now.out.splitlines()))
+
+    def preflight(self) -> None:
+        step = "preflight"
+        ff = self.git("merge-base", "--is-ancestor", "origin/main", "HEAD")
+        if not ff.ok:
+            raise Failed(step, "origin/main has commits depth does not; merge forward by hand")
+        self.must(
+            step,
+            self.out.run(["npx", "wrangler", "whoami"], cwd=self.root / "worker"),
+            "wrangler whoami",
+        )
+        self.must(step, self.out.run(["gh", "auth", "status"], cwd=self.root), "gh auth status")
+        self.qa_key = self.read_qa_key()
+        if not self.qa_key:
+            raise Failed(
+                step, "no QA_KEY in the environment or .env, so the phone check cannot run"
+            )
+        hosting = self.root / HOSTING
+        rows = dr.load(hosting)
+        live_w, live_p = dr.live_worker(self.out, self.root), dr.live_pages(self.out, self.root)
+        # A recorded deploy that passes the read-only phone check now counts as good.
+        readonly = self.out.run(
+            ["node", "apps/web/scripts/live-readonly.mjs"], cwd=self.root, env={"SITE_URL": SITE}
+        )
+        self.must(
+            step, readonly, "the read-only phone check against production before the lock work"
+        )
+        live_commit = (live_p or {}).get("commit", "")[:7]
+
+        def is_live(r: dr.Row) -> bool:
+            if r.part == "worker":
+                return r.id == live_w
+            return bool(live_commit) and r.commit[:7] == live_commit
+
+        marked = [replace(r, checked=True) if is_live(r) else r for r in rows]
+        if marked != rows:
+            dr.save(marked, hosting)
+            self.log("the live deploy passed the phone check, so its rows are marked good")
+        w, p, problems = dr.good_for_live(marked, live_w, live_p)
+        if problems:
+            raise Failed(step, "; ".join(problems))
+        self.targets = (w, p)
+        assert w is not None and p is not None
+        self.log(f"production to return to on failure: Worker {w.id}, Pages {p.id} ({p.commit})")
+
+    def backup(self) -> None:
+        step = "backup"
+        done = self.out.run(
+            ["bash", "scripts/backup_d1.sh"],
+            cwd=self.root,
+            env={"BACKUP_DIR": str(self.backups)},
+            timeout=900,
+        )
+        self.must(step, done, "scripts/backup_d1.sh")
+        try:
+            meta = json.loads((self.backups / "last_backup.json").read_text(encoding="utf-8"))
+            made = datetime.fromisoformat(str(meta["generated_at_utc"]).replace("Z", "+00:00"))
+            path = Path(str(meta["file"]))
+        except (OSError, ValueError, KeyError) as e:
+            raise Failed(step, f"no readable last_backup.json: {e}") from e
+        if made < self.started_at.replace(microsecond=0) or not path.is_file():
+            raise Failed(step, f"the newest backup, {path.name}, is not from this run")
+        self.backup_file = path
+        self.log(f"backed up D1 to {path.name}")
+
+    def export(self) -> None:
+        assert self.backup_file is not None
+        out_dir = self.root / "data" / "export"
+        counts = study_export.export(self.backup_file, out_dir)
+        keep = self.backups / f"lock-{self.clock().strftime('%Y%m%dT%H%M%SZ')}"
+        keep.mkdir(parents=True, exist_ok=True)
+        os.chmod(keep, 0o700)
+        for name in ("sessions.csv", "responses.csv"):
+            shutil.copy2(out_dir / name, keep / name)
+            os.chmod(keep / name, 0o600)
+        self.log(
+            f"exported {counts['sessions']} sessions and {counts['responses']} responses from "
+            f"{self.backup_file.name}; a copy is in {keep.name}"
+        )
+
+    def analysis(self) -> None:
+        step = "analysis"
+        done = self.local.run(
+            ["uv", "run", "python", "evals/usability_analysis.py"], cwd=self.root, timeout=1800
+        )
+        self.must(step, done, "evals/usability_analysis.py")
+        m = re.search(r"^wrote json: (.+)$", done.out, re.M)
+        if not m:
+            raise Failed(step, "the analysis did not say where it wrote its result")
+        path = Path(m.group(1).strip())
+        path = path if path.is_absolute() else self.root / path
+        self.result = json.loads(path.read_text(encoding="utf-8"))
+        if self.result.get("synthetic") is not False:
+            raise Failed(step, f"{path.name} is not a real result")
+        self.result_rel = path.relative_to(self.root).as_posix()
+        export = self.root / "data" / "export"
+        record = {
+            "generated_at_utc": stamp(self.clock()),
+            "script": SCRIPT,
+            "synthetic": False,
+            "stamp": self.result.get("stamp"),
+            "analysis": self.result_rel,
+            "status": (self.result.get("primary") or {}).get("status"),
+            "backup_file": self.backup_file.name if self.backup_file else None,
+            "export_sha256": {
+                n: sha256_file(export / n) for n in ("sessions.csv", "responses.csv")
+            },
+            "checkout_at_start": self.start.head if self.start else None,
+        }
+        (self.root / RECORD).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        self.log(f"ran the pre-registered analysis once: {self.result_rel}, {record['status']}")
+
+    def readme(self) -> None:
+        step = "readme"
+        finished = people_kept(self.result) > 0
+        path = self.root / "README.md"
+        text = path.read_text(encoding="utf-8")
+        path.write_text(
+            place_human_row(text, human_row(self.result, self.result_rel), finished),
+            encoding="utf-8",
+        )
+
+        # The README quotes the report's page count and the report quotes the README, so render
+        # and rebuild until both settle, then check every claim.
+        def make(target: str) -> None:
+            self.must(step, self.local.run(["make", target], cwd=self.root), f"make {target}")
+
+        make("render-readme")
+        make("report-pdf")
+        before = path.read_bytes()
+        make("render-readme")
+        if path.read_bytes() != before:
+            make("report-pdf")
+            make("render-readme")
+        if "{{claim:" in path.read_text(encoding="utf-8"):
+            raise Failed(step, "a number in the human row found no value in the result")
+        make("verify-claims")
+        self.log(
+            "the README's human row is in, "
+            + ("with people" if finished else "saying nobody finished")
+        )
+
+    def check(self) -> None:
+        done = self.local.run(["make", "check"], cwd=self.root, timeout=5400)
+        self.must("make check", done, "make check")
+        self.git("checkout", "--", *REWRITTEN_BY_CHECK)
+        self.log("make check is green")
+
+    def commit(self, message: str, only: Sequence[str] | None = None) -> str:
+        step = "commit"
+        assert self.start is not None
+        status = self.must(
+            step, self.git("status", "--porcelain=v1", "-z", "--untracked-files=all"), "git status"
+        )
+        mine = [p for p in porcelain(status.out) if p not in self.start.kept]
+        if only is not None:
+            mine = [p for p in mine if p in only]
+        if not mine:
+            raise Failed(step, "nothing to commit")
+        self.must(step, self.git("add", "--all", "--", *mine), "git add")
+        self.must(step, self.git("commit", "-q", "-m", message), "git commit")
+        head = self.head()
+        self.log(f"committed {head[:7]} on depth: {len(mine)} file(s)")
+        return head
+
+    def deploy(self) -> None:
+        env = {"ALLOW_BRANCH": "yes"}
+        self.deploy_started = True
+        self.must(
+            "deploy worker",
+            self.out.run(["bash", "scripts/deploy.sh", "worker"], cwd=self.root, env=env),
+            "scripts/deploy.sh worker",
+        )
+        self.log("the Worker is deployed")
+        step = "phone tests after the Worker"
+        self.must(
+            step,
+            self.local.run(
+                ["uv", "run", "pytest", "-q", "apps/api/tests/test_study.py"], cwd=self.root
+            ),
+            "the study contract tests",
+        )
+        live = self.out.run(
+            ["node", "apps/web/scripts/live-check.mjs"],
+            cwd=self.root,
+            env={"SITE_URL": SITE, "QA_KEY": self.qa_key or ""},
+        )
+        self.must(step, live, "the phone check with the QA key")
+        self.must(
+            "deploy web",
+            self.out.run(["bash", "scripts/deploy.sh", "web"], cwd=self.root, env=env),
+            "scripts/deploy.sh web",
+        )
+        self.log("the site is deployed")
+        step = "phone tests after the site"
+        readonly = self.out.run(
+            ["node", "apps/web/scripts/live-readonly.mjs"], cwd=self.root, env={"SITE_URL": SITE}
+        )
+        self.must(step, readonly, "the read-only phone check")
+        for path in ("/health", "/api/test/counts"):
+            reply = self.out.get(f"{SITE}{path}")
+            if reply.status != 200:
+                raise Failed(step, f"{SITE}{path} answered {reply.status or reply.error}")
+        # The site's build rewrote these, as make check's did; they are not part of the lock.
+        self.git("checkout", "--", *REWRITTEN_BY_CHECK)
+        self.log("the phone tests pass against production")
+
+    def judge_mode(self) -> None:
+        step = "judge mode"
+        page = self.out.run(
+            ["node", "apps/web/scripts/demo-open-check.mjs"], cwd=self.root / "apps" / "web"
+        )
+        self.must(step, page, "the /demo check (the shut page must be gone)")
+        reply = self.out.http(
+            f"{SITE}/api/demo/answer",
+            method="POST",
+            body=json.dumps({"item_id": "lock-job-check", "answer": "yes"}).encode(),
+            headers={"content-type": "application/json"},
+        )
+        # Open, the route answers an unknown item with 404; shut, with 403 whatever it is asked.
+        if reply.status != 404:
+            raise Failed(step, f"/api/demo/answer answered {reply.status or reply.error}, not 404")
+        self.log("judge mode is open on production: /demo shows it and /api/demo/answer answers")
+
+    def mark_good(self) -> None:
+        hosting = self.root / HOSTING
+        rows = dr.load(hosting)
+        dr.save(dr.mark_good(rows, self.head()[:7]), hosting)
+
+    def push(self, dry: bool) -> None:
+        argv = ["git", "push", "--atomic", *(["--dry-run"] if dry else []), "origin",
+                "HEAD:refs/heads/depth", "HEAD:refs/heads/main"]  # fmt: skip
+        step = "push dry run" if dry else "push"
+        self.must(step, self.out.run(argv, cwd=self.root, timeout=600), " ".join(argv[:4]))
+        if not dry:
+            self.pushed = True
+            self.log(f"pushed {self.head()[:7]} to depth and main in one atomic push")
+
+    def status_line(self) -> str:
+        counts = self.result.get("counts") or {}
+        status = (self.result.get("primary") or {}).get("status")
+        return (
+            f"Data lock done ({stamp(self.clock())}): the pre-registered analysis ran once "
+            f"({self.result_rel}, {status}); completed and kept, trained "
+            f"{counts.get('completed_trained', 0)} and untrained "
+            f"{counts.get('completed_untrained', 0)}. "
+            f"Commit {self.head()[:7]} is on depth and main, deployed, the phone tests pass, "
+            "and judge mode is open."
+        )
+
+    # -- undo --------------------------------------------------------------
+
+    def undo(self, failure: Failed) -> None:
+        notes = []
+        if self.deploy_started:
+            notes.append(self.undo_production())
+        if self.start is not None:
+            notes.append(self.undo_repo(self.start))
+        line = (
+            f"FAILED at {failure.step}: {failure.detail}. " + " ".join(notes) +
+            " Nothing was pushed. Fix it, then run make lock-analysis again."
+        )  # fmt: skip
+        self.log(line)
+        posted = self.out.comment(f"Data lock job: {line} (log: ~/second-look-backups/lock.log)")
+        if not posted.ok:
+            self.log(f"could not write to the status issue either: {posted.tail()}")
+
+    def undo_production(self) -> str:
+        worker_row, web_row = self.targets
+        live_w, live_p = dr.live_worker(self.out, self.root), dr.live_pages(self.out, self.root)
+        back_w = worker_row if worker_row and live_w != worker_row.id else None
+        live_commit = (live_p or {}).get("commit", "")[:7]
+        back_p = web_row if web_row and live_commit != web_row.commit[:7] else None
+        if back_w is None and back_p is None:
+            return "Production was not changed."
+        ok = rb.carry_out(rb.to_targets(back_w, back_p, self.root), self.out, self.log)
+        parts = ", ".join(p for p, r in (("the Worker", back_w), ("the site", back_p)) if r)
+        return (
+            f"Production was rolled back ({parts})."
+            if ok
+            else f"Production could NOT be rolled back ({parts}); run make rollback ROLLBACK=yes."
+        )
+
+    def undo_repo(self, start: Start) -> str:
+        self.git("reset", "-q", "--hard", start.head)
+        now = self.git("ls-files", "--others", "--exclude-standard").out.splitlines()
+        for rel in now:
+            if rel not in start.untracked and rel not in start.kept:
+                (self.root / rel).unlink(missing_ok=True)
+        for rel, data in start.kept.items():
+            path = self.root / rel
+            if data is None:
+                path.unlink(missing_ok=True)
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+        return f"The checkout is back at {start.head[:7]}, with the other jobs' files kept."
+
+    # -- is this Mac ready? -------------------------------------------------
+
+    def readiness(self) -> list[str]:
+        """What would stop the lock job, checked without changing anything, on any day."""
+        problems = []
+        branch = self.git("rev-parse", "--abbrev-ref", "HEAD").out.strip()
+        if branch != "depth":
+            problems.append(f"the checkout {self.root} is on {branch or 'nothing'}, not depth")
+        status = self.git("status", "--porcelain=v1", "-z", "--untracked-files=all")
+        other = [p for p in porcelain(status.out) if not allowed(p, mac_jobs.mac_job_files())]
+        if other:
+            problems.append("local changes the lock job would refuse: " + ", ".join(other[:8]))
+        for tool in ("uv", "npx", "node", "gh", "make", "pandoc", "java", "gitleaks"):
+            if shutil.which(tool) is None:
+                problems.append(f"{tool} is not on PATH; make check or the deploy needs it")
+        for folder in (
+            "apps/web/node_modules",
+            "worker/node_modules",
+            "tools/diagrams/node_modules",
+        ):
+            if not (self.root / folder).is_dir():
+                problems.append(f"{folder} is missing; run npm ci there")
+        if not self.out.run(["npx", "wrangler", "whoami"], cwd=self.root / "worker").ok:
+            problems.append("wrangler is not logged in (npx wrangler login in worker/)")
+        if not self.out.run(["gh", "auth", "status"], cwd=self.root).ok:
+            problems.append("gh is not logged in (gh auth login)")
+        if not self.read_qa_key():
+            problems.append("no QA_KEY in the environment or this checkout's .env")
+        rows = dr.load(self.root / HOSTING)
+        live_w, live_p = dr.live_worker(self.out, self.root), dr.live_pages(self.out, self.root)
+        # Rows not yet marked good still count: the job marks them after its read-only check.
+        as_if_good = [replace(r, checked=True) for r in rows]
+        problems += dr.good_for_live(as_if_good, live_w, live_p)[2]
+        return problems
+
+    # -- the whole thing ---------------------------------------------------
+
+    def run(self) -> int:
+        now = self.clock()
+        if now < DATA_LOCK_UTC:
+            self.log(
+                f"refused: it is {stamp(now)}, before the data lock at {stamp(DATA_LOCK_UTC)}; "
+                "nothing was done"
+            )
+            return 3
+        try:
+            done_before = self.already_done()
+            if done_before:
+                self.log(f"nothing to do: {done_before}")
+                return 0
+            self.freshen()
+            done_before = self.already_done()
+            if done_before:
+                self.log(f"nothing to do after the fast-forward: {done_before}")
+                return 0
+            self.preflight()
+            self.backup()
+            self.export()
+            self.analysis()
+            self.readme()
+            self.check()
+            head = self.commit(
+                "Data lock: the one pre-registered analysis, and the README's human row\n\n"
+                f"Run by {SCRIPT} after the lock at {stamp(DATA_LOCK_UTC)}, from the backup "
+                f"{self.backup_file.name if self.backup_file else ''}. main moves here by "
+                "fast-forward."
+            )
+            self.log(f"main will move to {head[:7]} by fast-forward")
+            self.push(dry=True)
+            self.deploy()
+            self.judge_mode()
+            self.mark_good()
+            self.commit(
+                "Record the deploy after the data lock as good\n\nThe phone tests passed.",
+                only=[HOSTING],
+            )
+            self.push(dry=False)
+        except Failed as failure:
+            self.undo(failure)
+            return 1
+        except Exception as e:  # any surprise must still undo and report
+            self.undo(Failed("unexpected", f"{type(e).__name__}: {e}"))
+            return 1
+        line = self.status_line()
+        self.log(line)
+        posted = self.out.comment(line)
+        if not posted.ok:
+            self.log(
+                f"the lock is done, but the status issue could not be written: {posted.tail()}"
+            )
+        counts = panel_status.read_counts(self.out, SITE)
+        if counts is not None:
+            self.log(
+                panel_status.update_issue(
+                    self.out, counts, when=self.clock().strftime("%Y-%m-%d %H:%M UTC"), force=True,
+                    state=self.backups / "state" / "panel_counts.json",
+                )
+            )  # fmt: skip
+        return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--ready",
+        action="store_true",
+        help="only say whether this Mac and checkout are ready for the lock; change nothing",
+    )
+    args = parser.parse_args(argv)
+    lock = Lock(root=ROOT, out=Outward(), local=Local(), qa_key=lambda: qa_key_from(ROOT))
+    if args.ready:
+        problems = lock.readiness()
+        for p in problems:
+            print(f"lock-ready: {p}")
+        print("lock-ready: ready" if not problems else f"lock-ready: {len(problems)} problem(s)")
+        return 1 if problems else 0
+    return lock.run()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
