@@ -92,3 +92,10 @@ def test_the_judge_mode_risk_row_says_what_happens_after_the_lock() -> None:
     assert "docs/THREAT_MODEL.md" in row
     weak = section(readme, "Known weaknesses")
     assert "The answer key can be rebuilt after the lock" in weak
+
+
+def test_the_first_mention_of_an_arm_says_what_an_arm_is() -> None:
+    # R04: half the people get the photos before the lesson, and "arm" was never explained.
+    lines = text(README).splitlines()
+    first = next(ln for ln in lines if re.search(r"\barms?\b", ln, re.I))
+    assert "called arms" in first or first.startswith("- **Arm:**"), first

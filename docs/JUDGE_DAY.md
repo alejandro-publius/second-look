@@ -8,7 +8,10 @@ Oct 1 to Oct 15, with what they should see at each step. Judge mode opens on Sep
 
 1. Open https://second-look-79t.pages.dev. You see "Which creek is healthier?" above two creek
    photos: the first screen of the two-minute test a volunteer takes. Your guess is kept on the
-   phone and becomes your first answer only if you agree to take part.
+   phone and becomes your first answer only if you agree to take part. If you go on and take the
+   test, the server puts you at random in one of two groups: one sees the lesson before the 16
+   photos, the other sees the photos first and is offered the lesson after its score. If the
+   photos come first, that is your group, not a missing step.
 2. Open https://second-look-79t.pages.dev/judges (the README's "Judges start here" link, or For
    judges on the About page). You see every door, each with how long it takes.
 3. Open "How we know it works" (/how-we-know). You see which features each of four Claude models

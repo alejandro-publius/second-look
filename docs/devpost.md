@@ -85,7 +85,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-1103 characters
+1384 characters
 
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->
@@ -94,7 +94,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 Take the test: https://second-look-79t.pages.dev (no camera needed).
 Judges start here: https://second-look-79t.pages.dev/judges
 
-/t: consent, warm-up, lesson, 16 photos, a score per feature.
+/t: consent, warm-up, then the lesson and 16 photos, in an order the server picks at random (half the people see the photos first and get the lesson after their score), and a score per feature.
 /demo: judge mode with feedback after each answer.
 /check: the guided creek check, one question per screen, with follow-ups chosen by code.
 /walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. The clips show natural creeks, so a measure appears when the walk reports damage, for example Artificial for the bank. /city?creek=strawberry-creek stays empty until the first real check.

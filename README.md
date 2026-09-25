@@ -37,7 +37,24 @@ The tidy park on the left hides a concrete channel. The messy bend on the right 
 
 The two-minute test from consent to the score screen: <!--v:results/screens.json#/gif/frames-->32<!--/v--> frames over <!--v:results/screens.json#/gif/seconds-->32.8<!--/v--> seconds. It was made from a local build with the mock API, so it added no session anywhere, and no frame shows a chosen answer on a test photo.
 
-How this answers the organizers' five headers: *The problem* and *Innovation and practical value* are under Why trust a volunteer, and the AI?; *How the solution aligns with OneAquaHealth* under How OneAquaHealth is used; *Effective use of data, technology, AI, APIs and standards* under Architecture and Evals; *A clear demonstration of what was built* under For judges. The Devpost text keeps the five headers as they are.
+The test is a small randomized study, so there are two orders. The server puts each person at random in one of two groups, called arms: one sees the lesson before the 16 photos, as in the GIF; the other sees the 16 photos first and is offered the lesson after its score. If you take the test and the photos come first, that is your group, not a missing step.
+
+How this answers the organizers' five headers: *The problem* and *Innovation and practical value* are under Why trust a volunteer, and the AI?; *How the solution aligns with OneAquaHealth* under How OneAquaHealth is used; *Effective use of data, technology, AI, APIs and standards* under Architecture and Evals; *A clear demonstration of what was built* under For judges. The Devpost text keeps the five headers as they are. The words this page uses are explained just below.
+
+## Words used here
+
+- **Feature:** one of the four kinds of creek damage the test covers: a built bank, a dug-out channel, a plant that does not belong, and a pipe running into the creek.
+- **Arm:** one of the test's two groups, picked at random by the server: lesson first, or the 16 photos first with the lesson offered after the score.
+- **The checker:** a vision model that looks at a creek photo after the person has answered. It is off on the live site.
+- **Pass table:** which features each model passed on the same 16-photo test people take, all four photos of a feature right in at least two of three runs. It is a committed file, and the only thing that lets a model speak.
+- **Candidate flag and flag:** a candidate flag is a model saying a feature is there. The gate keeps it as a flag only for a feature that model passed, and a flag can only make one follow-up question eligible.
+- **The gate:** the code that turns a model's answer into a flag or drops it, [`core/gate.py`](core/gate.py).
+- **The lock:** 2026-09-28T01:00:00Z, which is Sep 27 at 18:00 in California. The study's data is fixed then, and the one planned analysis runs once.
+- **Judge mode:** `/demo`, the 16 test photos with right or wrong after each answer. It is shut until the lock, because it gives away the answer key.
+- **Walk:** `/walk`, a short clip of a real creek somewhere else and the same creek check done while you watch. It makes a demo record that is never counted.
+- **prereg-v1:** the git tag on the analysis plan, made before anyone took the test.
+- **Golden vectors:** fixed inputs and outputs written by the Python code, which the TypeScript Worker must give back exactly.
+- **The Mac:** one team member's laptop, Alex's, which runs the daily jobs (Known weaknesses says what that means).
 
 ## Numbers at a glance
 
@@ -500,7 +517,7 @@ Every number is graded by code and written to [`results/`](results/); [`scripts/
 - The 16-photo test, taken by four vision models, three runs each: [`evals/model_sweep.py`](evals/model_sweep.py) writes the pass table; [`evals/benchmark.py`](evals/benchmark.py) adds per-feature accuracy with Wilson intervals.
 - The same models on open creek footage: [`evals/footage.py`](evals/footage.py) reports agreement between models, what the gate stopped, and the adversarial frames; [`evals/footage_pool.py`](evals/footage_pool.py) writes the numbers no model touches.
 - The ablation (rules only, context only, vision only, all three): [`evals/ablation.py`](evals/ablation.py).
-- The pre-registered analysis of the two-minute test, written and tested on synthetic data before the tag: [`evals/usability_analysis.py`](evals/usability_analysis.py). It runs once, after the lock: with at least 20 finished sessions per arm it makes its one confirmatory test, and with fewer it reports a description with counts.
+- The pre-registered analysis of the two-minute test, written and tested on synthetic data before the tag: [`evals/usability_analysis.py`](evals/usability_analysis.py). It runs once, after the lock: with at least 20 finished sessions per arm (each of the two groups, lesson first or photos first) it makes its one confirmatory test, and with fewer it reports a description with counts.
 - Cost is logged per call in [`results/cost_log.jsonl`](results/cost_log.jsonl).
 - `make reproduce` grades the AI numbers again from the committed raw replies in [`evals/fixtures/raw/`](evals/fixtures/raw/) and the seeds, with no network and no key, and fails if one differs. `make judge-check` and CI run it. The pass table, each sweep's answers and the footage runs are graded again from their replies. Some numbers can only be checked as recorded, and it prints a note under each file that holds them: the right-answer counts of the benchmark runs, which kept counts and no replies, so each model's right answers in the table above, of all 16 photos and without the plant photos; those runs' share of can't tell answers; and their count of malformed replies. For those it checks that each accuracy and interval follows from the recorded counts. The footage runs kept only each model's majority answer on the adversarial frames, so those answers are as recorded too, and three old synthetic files, the ablation among them, are not graded again.
 
@@ -585,7 +602,7 @@ make demo-offline
 
 ## For judges
 
-A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full creek check), what the city sees, from the end of that walk ("See this creek as a city would"; [`/city?creek=strawberry-creek`](https://second-look-79t.pages.dev/city?creek=strawberry-creek) stays empty until the first real check), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two), and [how we know](https://second-look-79t.pages.dev/how-we-know): which features each model passed and what the gate did on real creek footage. The main doors are on [/judges](https://second-look-79t.pages.dev/judges).
+A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson; the server puts you at random in one of two groups, and one group sees the 16 photos first and is offered the lesson after its score), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full creek check), what the city sees, from the end of that walk ("See this creek as a city would"; [`/city?creek=strawberry-creek`](https://second-look-79t.pages.dev/city?creek=strawberry-creek) stays empty until the first real check), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two), and [how we know](https://second-look-79t.pages.dev/how-we-know): which features each model passed and what the gate did on real creek footage. The main doors are on [/judges](https://second-look-79t.pages.dev/judges). From Sep 28, [judge mode](https://second-look-79t.pages.dev/demo) shows the same 16 photos with right or wrong after each answer and stores nothing; [`docs/JUDGE_DAY.md`](docs/JUDGE_DAY.md) is a ten minute path that starts there, with what you should see at each step.
 
 See *Quickstart* above for `make judge-check`, the one command that needs no key and no network.
 
@@ -604,7 +621,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 <details>
 <summary>Each route and what it shows</summary>
 
-- `/t`: consent, the warm-up pair, the lesson, 16 items with Yes, No and Can't tell, the score per feature, the share card.
+- `/t`: consent, the warm-up pair, then, by the arm the server picks at random, the lesson and the 16 items, or the 16 items first and the lesson offered after the score; each item with Yes, No and Can't tell, the score per feature, the share card.
 - `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` shows the photos in one fixed order, for the screen recording.
 - `/check`: the guided creek check, one question per screen, with follow-ups chosen by [`core/followups.py`](core/followups.py); once the site has been opened on a phone, it keeps working offline and sends when the phone is back online.
 - `/walk`: a creek from your desk, a clip of a creek in Russia, the United Kingdom or the United States, the same check, a demo record made on the phone with a link that opens it anywhere.
