@@ -149,6 +149,7 @@
   "check.slider.fear": "Fear",
   "check.photos_title": "Photos",
   "check.photos_intro": "Optional. Photos are made smaller on your phone before they are sent. Location data is removed on the server.",
+  "check.photos_send_note": "Send stores this spot and your check on the live site. Any follow-up questions come after that.",
   "check.add_photo": "Add a photo",
   "check.photo_working": "Preparing the photo",
   "check.photo_count": "{n} photo(s) ready",

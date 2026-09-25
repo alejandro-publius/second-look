@@ -225,6 +225,9 @@ export function CheckFlow() {
           <FocusHeading>{t("check.photos_title")}</FocusHeading>
           <p>{t("check.photos_intro")}</p>
           <PhotoPicker photos={photos} onChange={setPhotos} />
+          {/* Send is what writes: the draft makes the spot and the visit before the API picks any
+              follow-up, so the screen says so before the button (judge walk W01). */}
+          <p data-testid="send-note">{t("check.photos_send_note")}</p>
           <div className="btn-row">
             <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "items", index: Math.max(0, items.length - 1) })}>
               {t("check.back")}

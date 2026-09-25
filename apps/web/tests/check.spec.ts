@@ -85,6 +85,12 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await expect(page.getByText("Question 1 of")).toBeVisible();
   await expect(page.getByText("Draft wording")).toBeVisible();
   await answerForm(page);
+  // Judge walk W01: Send is what writes, and the follow-ups come after it. The Photos screen says
+  // so before the button, and nothing has been sent yet.
+  await expect(page.getByTestId("send-note")).toHaveText(
+    "Send stores this spot and your check on the live site. Any follow-up questions come after that.",
+  );
+  expect(calls.filter((c) => c.path.startsWith("/api/check"))).toEqual([]);
   await page.getByRole("button", { name: "Send" }).click();
 
   const draft = calls.find((c) => c.path === "/api/check/draft")!;
