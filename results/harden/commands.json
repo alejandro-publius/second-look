@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-24T13:09:22Z",
- "commit": "3c14b51",
+ "checked_utc": "2026-09-25T23:31:39Z",
+ "commit": "20858c7",
  "branch": "HEAD",
  "setup": {
   "uv sync --frozen": 0,
@@ -8,40 +8,31 @@
   "npm ci (worker)": 0,
   "npm ci (tools/diagrams)": 0
  },
+ "docs_missing": [],
  "commands": [
   {
    "doc": "README.md",
-   "line": 59,
-   "command": "make mutation",
-   "ran": true,
-   "result": "pass",
-   "exit": 0,
-   "seconds": 143.9,
-   "detail": "uv run python scripts/mutation.py\ncore/gate.py: 226 of 229 changes caught, 3 survived, 0 timed out, 98.7 percent\ncore/followups.py: 319 of 324 changes caught, 5 survived, 0 timed out, 98.5 percent\ncore/scoring.py: 53 of 53 changes caught, 0 survived, 0 timed out, 100.0 percent\ncore/fhir_emit.py: 1477 of 1543 changes caught, 66 survived, 0 timed out, 95.7 percent\nmutation: every module at 85 percent or more; wrote results/mutation.json\n"
-  },
-  {
-   "doc": "README.md",
-   "line": 76,
+   "line": 93,
    "command": "make screens",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 159.4,
-   "detail": "0m16 |\u001b[0m \u001b[36mfunction\u001b[0m readResult(path: string): unknown {\n\u001b[33m\u001b[1m>\u001b[0m \u001b[90m17 |\u001b[0m   \u001b[36mconst\u001b[0m full = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m18 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m19 |\u001b[0m }\n  \u001b[90m20 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\n"
+   "seconds": 183.3,
+   "detail": "ve, 9 local mock), largest 203082 bytes; GIF 2976766 bytes, 32 frames; social preview 342150 bytes\nuv run pytest -q scripts/tests/test_gallery.py\n...................................................                      [100%]\nTurbopack build encountered 1 warning:\n./apps/web/lib/how-data.ts:18:16\nWarning: Dynamic filesystem access causes tracing of the whole project\n  \u001b[90m16 |\u001b[0m\n  \u001b[90m17 |\u001b[0m \u001b[36mfunction\u001b[0m readResult(path: string): unknown {\n\u001b[33m\u001b[1m>\u001b[0m \u001b[90m18 |\u001b[0m   \u001b[36mconst\u001b[0m full = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m19 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m20 |\u001b[0m }\n  \u001b[90m21 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\n"
   },
   {
    "doc": "README.md",
-   "line": 122,
+   "line": 147,
    "command": "uv run python scripts/verify_audit.py",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 0.7,
+   "seconds": 0.6,
    "detail": "audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\n"
   },
   {
    "doc": "README.md",
-   "line": 122,
+   "line": 147,
    "command": "uv run python scripts/ots_status.py",
    "ran": true,
    "result": "pass",
@@ -51,47 +42,47 @@
   },
   {
    "doc": "README.md",
-   "line": 123,
+   "line": 148,
    "command": "uv sync",
    "ran": true,
    "result": "pass",
    "exit": 0,
    "seconds": 0.0,
-   "detail": "Resolved 117 packages in 4ms\nChecked 111 packages in 2ms\n"
+   "detail": "Resolved 117 packages in 5ms\nChecked 111 packages in 2ms\n"
   },
   {
    "doc": "README.md",
-   "line": 165,
+   "line": 190,
    "command": "make diagrams",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 3.4,
-   "detail": "uv run python scripts/check_diagrams.py\ndiagrams: 8 Mermaid block(s) parse, by the structural check; 4 source(s) in docs/diagrams have labelled edges and an SVG drawn from them as they are now\ncd tools/diagrams && node --test render.test.mjs && node render.mjs --check\n\u2714 positions and sizes are set aside (1.002542ms)\n\u2714 a label that changed is not set aside (0.086166ms)\n\u2714 a digit in a label is kept (0.058541ms)\n\u2714 a class or an element that changed is not set aside (0.067334ms)\n\u2714 the stamp names the source, the config, the renderer and the drawing (0.391458ms)\n\u2714 the drawing's sha256 in the stamp gives away a hand edit (0.146667ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 476.56075\ndiagrams: ai-gate.svg: the same bytes as a fresh render\ndiagrams: fhir-graph.svg: the same bytes as a fresh render\ndiagrams: loop.svg: the same bytes as a fresh render\ndiagrams: system-map.svg: the same bytes as a fresh render\ndiagrams: 4 diagram(s) match a fresh render, @mermaid-js/mermaid-cli 11.17.0, mermaid 11.17.2\n"
+   "seconds": 3.1,
+   "detail": "uv run python scripts/check_diagrams.py\ndiagrams: 8 Mermaid block(s) parse, by the structural check; 4 source(s) in docs/diagrams have labelled edges and an SVG drawn from them as they are now\ncd tools/diagrams && node --test render.test.mjs && node render.mjs --check\n\u2714 positions and sizes are set aside (1.048583ms)\n\u2714 a label that changed is not set aside (0.105542ms)\n\u2714 a digit in a label is kept (0.06275ms)\n\u2714 a class or an element that changed is not set aside (0.070667ms)\n\u2714 the stamp names the source, the config, the renderer and the drawing (0.414375ms)\n\u2714 the drawing's sha256 in the stamp gives away a hand edit (0.156042ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 396.235625\ndiagrams: ai-gate.svg: the same bytes as a fresh render\ndiagrams: fhir-graph.svg: the same bytes as a fresh render\ndiagrams: loop.svg: the same bytes as a fresh render\ndiagrams: system-map.svg: the same bytes as a fresh render\ndiagrams: 4 diagram(s) match a fresh render, @mermaid-js/mermaid-cli 11.17.0, mermaid 11.17.2\n"
   },
   {
    "doc": "README.md",
-   "line": 372,
+   "line": 411,
    "command": "make check",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 303.7,
-   "detail": " = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m18 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m19 |\u001b[0m }\n  \u001b[90m20 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mUnknown SCM platform. Use --platform to include links in findings.\u001b[0m \u001b[36mhost=\u001b[0m\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1m372 commits scanned.\u001b[0m\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mscanned ~18103705 bytes (18.10 MB) in 3.47s\u001b[0m\n\u001b[90m5:57AM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mno leaks found\u001b[0m\n"
+   "seconds": 352.2,
+   "detail": "amic filesystem access causes tracing of the whole project\n  \u001b[90m16 |\u001b[0m\n  \u001b[90m17 |\u001b[0m \u001b[36mfunction\u001b[0m readResult(path: string): unknown {\n\u001b[33m\u001b[1m>\u001b[0m \u001b[90m18 |\u001b[0m   \u001b[36mconst\u001b[0m full = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m19 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m20 |\u001b[0m }\n  \u001b[90m21 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\n\u001b[90m4:11PM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mUnknown SCM platform. Use --platform to include links in findings.\u001b[0m \u001b[36mhost=\u001b[0m\n\u001b[90m4:11PM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1m599 commits scanned.\u001b[0m\n\u001b[90m4:11PM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mscanned ~20482710 bytes (20.48 MB) in 3.36s\u001b[0m\n\u001b[90m4:11PM\u001b[0m \u001b[32mINF\u001b[0m \u001b[1mno leaks found\u001b[0m\n"
   },
   {
    "doc": "README.md",
-   "line": 417,
+   "line": 472,
    "command": "make new-city NAME=Aarhus COUNTRY=Denmark LAT=56.1629 LON=10.2039",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 0.3,
+   "seconds": 0.4,
    "detail": "uv run python scripts/new_city.py --name \"Aarhus\" --country \"Denmark\" --lat 56.1629 --lon 10.2039\nnew-city: wrote content/regions/aarhus.yaml\nnew-city: wrote fhir/fsh/city-aarhus.fsh\nnew-city: wrote docs/cities/aarhus/poster.html\nnew-city: wrote docs/cities/aarhus/CHECKLIST.md\nnew-city: wrote docs/cities/TIMES.md\nnew-city: no claim was made; the checklist says what the city fills in by hand\n (clone restored: exit 0)"
   },
   {
    "doc": "README.md",
-   "line": 434,
+   "line": 499,
    "command": "make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>",
    "ran": false,
    "result": "not run",
@@ -99,97 +90,107 @@
   },
   {
    "doc": "README.md",
-   "line": 453,
+   "line": 520,
    "command": "make reproduce",
    "ran": true,
    "result": "pass",
    "exit": 0,
    "seconds": 22.1,
-   "detail": "60922T054932Z.json: 82 values regraded from seed 20260920 and the fake profiles in evals/fixtures/seeds.json\nok   results/footage_20260922T184011Z.json: 3443 values regraded from seed 20260920 and the fake profiles in evals/fixtures/seeds.json\nok   results/usability_synthetic.json: 323 values regraded from plan seed 20260920\nok   results/examples.json: 10 values regraded from the regraded usability analysis and results/model_sweep_20260921T001651Z.json\nok   results/power.json: 26 values regraded from plan seed 20260920\nok   results/consensus_coarseness.json: 851 values regraded from its seed, by make consensus-check\nskip results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has\nskip results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file\nskip results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has\nreproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches\n"
+   "detail": "mark_20260921T001415Z.json: 82 values regraded from seed 20260920 and the fake profiles in evals/fixtures/seeds.json\nok   results/benchmark_20260922T054932Z.json: 82 values regraded from seed 20260920 and the fake profiles in evals/fixtures/seeds.json\nok   results/footage_20260922T184011Z.json: 3443 values regraded from seed 20260920 and the fake profiles in evals/fixtures/seeds.json\nok   results/usability_synthetic.json: 323 values regraded from plan seed 20260920\nok   results/examples.json: 10 values regraded from the regraded usability analysis and results/model_sweep_20260921T001651Z.json\nok   results/power.json: 26 values regraded from plan seed 20260920\nok   results/consensus_coarseness.json: 851 values regraded from its seed, by make consensus-check\nskip results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has\nskip results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file\nskip results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has\nreproduce: 28603 values in 23 files regraded from raw replies and seeds, with no network and no key; every one matches; 3 files not regraded and 5 notes, each named above\n"
   },
   {
    "doc": "README.md",
-   "line": 453,
+   "line": 523,
    "command": "make judge-check",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 201.1,
-   "detail": "files regraded from raw replies and seeds, with no network and no key; every one matches\n  ok   fhir: last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4\n  ok   web: next build ok\n  ok   web: design-check: clean. 84 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.4s).\n  ok   audit log: audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\n  ok   secrets: working tree: nothing shaped like a live key\n  ok   secrets: gitleaks: history clean\n\nPASS  tests      159.7s  python: 2004 passed, 1 skipped, 9 xfailed in 157.36s (0:02:37)\nPASS  reproduce   22.8s  reproduce: 28603 values in 26 files regraded from raw replies and seeds, with no network and no key; every one matches\nPASS  fhir         0.5s  last validator run: 14 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4\nPASS  web         10.6s  next build ok\nPASS  audit log    0.2s  audit-log: 3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\nPASS  secrets      7.1s  working tree: nothing shaped like a live key\njudge-check: 6 of 6 steps passed, offline, with no key\n"
+   "seconds": 252.2,
+   "detail": "versarial frames, so those answers are as recorded; the cost of their 144 calls is regraded\n                         note on results/footage_20260924T060539Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 192 calls is regraded\n                         note on results/cost_log.jsonl: 41.11 USD paid in all, every line accounted for\n                         note on results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has\n                         note on results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file\n                         note on results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has\nPASS  fhir         0.5s  last validator run: 15 file(s) against hl7-eu/oah at b907cf0, 0 errors, validator 6.10.4\nPASS  web         10.7s  next build ok\nPASS  audit log    0.2s  3 entries, chain intact, 1 stamped line(s) still in place, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3\nPASS  secrets      6.7s  working tree: nothing shaped like a live key\njudge-check: 6 of 6 steps passed, offline, with no key\n"
   },
   {
    "doc": "README.md",
-   "line": 459,
+   "line": 529,
    "command": "uv run pytest",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 152.6,
-   "detail": ".......................................... [ 46%]\n........................................................................ [ 50%]\n........................................................................ [ 53%]\n........................................................................ [ 57%]\n........................................................................ [ 60%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 78%]\n........................................................................ [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 89%]\n........................................................................ [ 92%]\n....................................................................s... [ 96%]\n......................................................................   [100%]\n2004 passed, 1 skipped, 9 xfailed in 150.54s (0:02:30)\n"
+   "seconds": 208.4,
+   "detail": "45%]\n........................................................................ [ 48%]\n........................................................................ [ 51%]\n........................................................................ [ 54%]\n........................................................................ [ 58%]\n........................................................................ [ 61%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 70%]\n........................................................................ [ 73%]\n........................................................................ [ 76%]\n........................................................................ [ 79%]\n..........................s............................................. [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 88%]\n........................................................................ [ 91%]\n........................................s............................... [ 94%]\n........................................................................ [ 97%]\n.....................................................                    [100%]\n2346 passed, 2 skipped, 9 xfailed in 206.25s (0:03:26)\n"
   },
   {
    "doc": "README.md",
-   "line": 460,
+   "line": 530,
    "command": "make worker-check",
    "ran": true,
    "result": "pass",
    "exit": 0,
    "seconds": 1.8,
-   "detail": "he same pick for the same seed (1.038708ms)\n\u2714 act: findings, needs, pipes worth testing, and both pin guards (2.960834ms)\n\u2714 act: the downstream note, only where flows_into is set (0.729125ms)\n\u2714 regions: placement on a creek and a reach, and the reaches below (0.353292ms)\n\u2714 fhir_emit: the same Bundle as Python, and it passes the structural check (5.651792ms)\n\u2714 fhir_referral: the ServiceRequest and the example result, the same as Python (2.711958ms)\n\u2714 walks: the same demo Bundle as Python, tagged on every resource, and structurally sound (1.50375ms)\n\u2714 old Bundles: only ts- JSON files are deleted, and only the ones in that folder (1.723583ms)\n\u2714 old Bundles: every ts- Bundle the validator will read was written by this run (0.113709ms)\n\u2714 uploads: a JPEG keeps its picture and loses its metadata, wherever the metadata sits (0.519042ms)\n\u2714 uploads: a JPEG that breaks the shape is refused, not copied with its metadata (0.306ms)\n\u2714 uploads: a stored photo is put in KV to expire after 30 days (38.678375ms)\n\u2139 tests 15\n\u2139 suites 0\n\u2139 pass 15\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 161.744917\n"
+   "detail": " the selector, over the repository's own table and form (0.89725ms)\n\u2714 labels: k of 4, the date, the expired sentence (0.876666ms)\n\u2714 healthcard: approved sentences only, the same pick for the same seed (1.062667ms)\n\u2714 act: findings, needs, pipes worth testing, and both pin guards (2.8145ms)\n\u2714 act: the downstream note, only where flows_into is set (0.887417ms)\n\u2714 regions: placement on a creek and a reach, and the reaches below (0.403667ms)\n\u2714 fhir_emit: the same Bundle as Python, and it passes the structural check (5.4435ms)\n\u2714 fhir_referral: the ServiceRequest and the example result, the same as Python (2.925333ms)\n\u2714 walks: the same demo Bundle as Python, tagged on every resource, and structurally sound (3.251583ms)\n\u2714 walks: the stored row of a finished walk, or the same reason to refuse it, as Python (1.965167ms)\n\u2714 walks: the follow-ups a walk asks and the checks kept with it, or the same reason to refuse them, as Python (1.001292ms)\n\u2714 old Bundles: only ts- JSON files are deleted, and only the ones in that folder (1.357959ms)\n\u2714 old Bundles: every ts- Bundle the validator will read was written by this run (0.099ms)\n\u2714 uploads: a JPEG keeps its picture and loses its metadata, wherever the metadata sits (0.490583ms)\n\u2714 uploads: a JPEG that breaks the shape is refused, not copied with its metadata (0.303375ms)\n\u2714 uploads: a stored photo is put in KV to expire after 30 days (36.932375ms)\n\u2139 tests 17\n\u2139 suites 0\n\u2139 pass 17\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 155.013583\n"
   },
   {
    "doc": "README.md",
-   "line": 461,
+   "line": 531,
    "command": "make e2e",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 55.4,
-   "detail": "./apps/web/lib/how-data.ts:17:16\n[WebServer] Warning: Dynamic filesystem access causes tracing of the whole project\n[WebServer]   15 |\n[WebServer]   16 | function readResult(path: string): unknown {\n[WebServer] > 17 |   const full = join(REPO, path);\n[WebServer]      |                ^^^^^^^^^^^^^^^^\n[WebServer]   18 |   return existsSync(full) ? JSON.parse(readFileSync(full, \"utf8\")) : null;\n[WebServer]   19 | }\n[WebServer]   20 |\n[WebServer] \n[WebServer] Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.\n[WebServer] This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\n[WebServer] This can slow down deployments or lead to failures when size limits are exceeded.\n[WebServer] To resolve this, you can\n[WebServer] - make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n[WebServer] - only use them in development, or\n[WebServer] - opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n[WebServer] - remove them.\n[WebServer] \n[WebServer] Import trace:\n[WebServer]   Server Component:\n[WebServer]     ./apps/web/lib/how-data.ts\n[WebServer]     ./apps/web/app/how-we-know/page.tsx\n[WebServer] \n[WebServer] \n[WebServer] \u26a0 \"next start\" does not work with \"output: standalone\" configuration. Use \"node .next/standalone/server.js\" instead.\n"
+   "seconds": 101.2,
+   "detail": "./apps/web/lib/how-data.ts:18:16\n[WebServer] Warning: Dynamic filesystem access causes tracing of the whole project\n[WebServer]   16 |\n[WebServer]   17 | function readResult(path: string): unknown {\n[WebServer] > 18 |   const full = join(REPO, path);\n[WebServer]      |                ^^^^^^^^^^^^^^^^\n[WebServer]   19 |   return existsSync(full) ? JSON.parse(readFileSync(full, \"utf8\")) : null;\n[WebServer]   20 | }\n[WebServer]   21 |\n[WebServer] \n[WebServer] Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.\n[WebServer] This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\n[WebServer] This can slow down deployments or lead to failures when size limits are exceeded.\n[WebServer] To resolve this, you can\n[WebServer] - make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n[WebServer] - only use them in development, or\n[WebServer] - opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n[WebServer] - remove them.\n[WebServer] \n[WebServer] Import trace:\n[WebServer]   Server Component:\n[WebServer]     ./apps/web/lib/how-data.ts\n[WebServer]     ./apps/web/app/how-we-know/page.tsx\n[WebServer] \n[WebServer] \n[WebServer] \u26a0 \"next start\" does not work with \"output: standalone\" configuration. Use \"node .next/standalone/server.js\" instead.\n"
   },
   {
    "doc": "README.md",
-   "line": 462,
+   "line": 532,
    "command": "make worker-e2e",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 15.1,
-   "detail": "lete 200 OK (4ms)\n[wrangler:info] POST /api/test/session 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (4ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/complete 200 OK (2ms)\n[wrangler:info] GET /api/test/counts 200 OK (2ms)\n[wrangler:info] GET /api/test/export 404 Not Found (0ms)\n[wrangler:info] GET /api/test/export 404 Not Found (0ms)\n[wrangler:info] GET /api/test/export 404 Not Found (1ms)\n[wrangler:info] GET /api/test/export 200 OK (3ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/finalize 404 Not Found (3ms)\n[wrangler:info] POST /api/check/draft 404 Not Found (2ms)\n\n"
+   "seconds": 24.8,
+   "detail": "lete 200 OK (3ms)\n[wrangler:info] POST /api/test/session 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (4ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/response 200 OK (5ms)\n[wrangler:info] POST /api/test/response 200 OK (4ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (2ms)\n[wrangler:info] POST /api/test/response 200 OK (3ms)\n[wrangler:info] POST /api/test/complete 200 OK (4ms)\n[wrangler:info] GET /api/test/counts 200 OK (3ms)\n[wrangler:info] GET /api/test/export 404 Not Found (1ms)\n[wrangler:info] GET /api/test/export 404 Not Found (2ms)\n[wrangler:info] GET /api/test/export 404 Not Found (1ms)\n[wrangler:info] GET /api/test/export 200 OK (4ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/draft 422 Unprocessable Entity (1ms)\n[wrangler:info] POST /api/check/finalize 404 Not Found (3ms)\n[wrangler:info] POST /api/check/draft 404 Not Found (2ms)\n\n"
   },
   {
    "doc": "README.md",
-   "line": 463,
+   "line": 533,
    "command": "make fhir-validate",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 42.5,
-   "detail": "fhir/build/instances/ts-sl-referral-bundle-spot-1.json\n 00:00.039\n  Validate fhir/build/instances/ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json\n 00:00.066\n  Validate fhir/build/instances/ts-sl-visit-visit-0001.json\n 00:00.054\n  Validate fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json\n 00:00.040\n  Validate fhir/build/instances/ts-sl-visit-walk-4116f9ddf7b8b451.json\n 00:00.058\n  Validate fhir/build/instances/ts-sl-visit-walk-d2ef0549e6f251c4.json\n 00:00.078\nDone. Times: Loading: 00:11.218, validation: 00:02.067 (#14). Memory = 1Gb\n\nDone. Times: Loading: 00:11.218, validation: 00:02.067 (#14). Max Memory = 3Gb\nfhir-validate: 14 file(s), 0 error(s), 58 warning(s), terminology checks ran; details in results/fhir_validation.json\n"
+   "seconds": 43.7,
+   "detail": "                                                                 |\n===================================================================\n| Fin-tastic job!                        0 Errors      0 Warnings |\n===================================================================\n\nbuilt 511 resources into fhir/build/ig/fsh-generated/resources\n  Validate fhir/golden/referral-strawberry-creek-1.json\n 00:00.049\n  Validate fhir/golden/visit-strawberry-creek-1.json\n 00:00.077\n  Validate fhir/golden/visit-strawberry-creek-1.transaction.json\n 00:00.150\n  Validate fhir/build/instances/ts-sl-example-result-spot-1.json\n 00:00.074\n  Validate fhir/build/instances/ts-sl-referral-bundle-spot-1.json\n 00:00.048\n  Validate fhir/build/instances/ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json\n 00:00.074\n  Validate fhir/build/instances/ts-sl-visit-visit-0001.json\n 00:00.056\n  Validate fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json\n 00:00.041\n  Validate fhir/build/instances/ts-sl-visit-walk-4116f9ddf7b8b451.json\n 00:00.061\n  Validate fhir/build/instances/ts-sl-visit-walk-757a5b9a10482fc9.json\n 00:00.059\n  Validate fhir/build/instances/ts-sl-visit-walk-d2ef0549e6f251c4.json\n 00:00.068\nDone. Times: Loading: 00:11.128, validation: 00:02.096 (#15). Memory = 627Mb\n\nDone. Times: Loading: 00:11.128, validation: 00:02.096 (#15). Max Memory = 3Gb\nfhir-validate: 15 file(s), 0 error(s), 61 warning(s), terminology checks ran; details in results/fhir_validation.json\n"
   },
   {
    "doc": "README.md",
-   "line": 496,
+   "line": 534,
+   "command": "make mutation",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 166.0,
+   "detail": "uv run python scripts/mutation.py\ncore/gate.py: 226 of 229 changes caught, 3 survived, 0 timed out, 98.7 percent\ncore/followups.py: 336 of 341 changes caught, 5 survived, 0 timed out, 98.5 percent\ncore/scoring.py: 53 of 53 changes caught, 0 survived, 0 timed out, 100.0 percent\ncore/fhir_emit.py: 1480 of 1546 changes caught, 66 survived, 0 timed out, 95.7 percent\nmutation: every module at 85 percent or more; wrote results/mutation.json\n"
+  },
+  {
+   "doc": "README.md",
+   "line": 572,
    "command": "uv sync && (cd apps/web && npm ci && npx playwright install chromium) && (cd worker && npm ci) && (cd tools/diagrams && npm ci)",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 15.5,
-   "detail": "\nadded 382 packages, and audited 383 packages in 5s\n\n146 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 43 packages, and audited 44 packages in 2s\n\n7 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 261 packages, and audited 262 packages in 7s\n\n21 packages are looking for funding\n  run `npm fund` for details\n\n4 high severity vulnerabilities\n\nTo address all issues (including breaking changes), run:\n  npm audit fix --force\n\nRun `npm audit` for details.\nResolved 117 packages in 4ms\nChecked 111 packages in 14ms\nnpm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.\n"
+   "seconds": 14.9,
+   "detail": "\nadded 382 packages, and audited 383 packages in 6s\n\n146 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 43 packages, and audited 44 packages in 2s\n\n7 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n\nadded 191 packages, and audited 192 packages in 5s\n\n22 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nResolved 117 packages in 4ms\nChecked 111 packages in 13ms\nnpm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.\n"
   },
   {
    "doc": "README.md",
-   "line": 509,
+   "line": 595,
    "command": "make demo-offline",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 8.2,
+   "seconds": 8.4,
    "detail": "API answered: True; web answered: True. ports 8000 or 3100 are taken by another process on this machine, so the same two servers ran on 8962 and 8963"
   },
   {
    "doc": "README.md",
-   "line": 514,
+   "line": 609,
    "command": "make dev",
    "ran": true,
    "result": "pass",
@@ -199,7 +200,7 @@
   },
   {
    "doc": "README.md",
-   "line": 514,
+   "line": 609,
    "command": "uv tool install pre-commit && pre-commit install",
    "ran": true,
    "result": "pass",
@@ -209,7 +210,37 @@
   },
   {
    "doc": "README.md",
-   "line": 552,
+   "line": 611,
+   "command": "WEB_PORT=3200 make demo-offline",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 4.9,
+   "detail": "API answered: True; web answered: True."
+  },
+  {
+   "doc": "README.md",
+   "line": 611,
+   "command": "make rollback",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 4.7,
+   "detail": "uv run python scripts/rollback.py \nrollback: would worker: back to 36aa2ae4-2714-4f2a-8194-0aa2e14478bd from commit 8d04135: in worker, run npx wrangler rollback 36aa2ae4-2714-4f2a-8194-0aa2e14478bd --name second-look-api --message rollback to 8d04135 --yes\nrollback: would web: back to b60e7e02 from commit 8d04135: in ~/second-look-backups/deploys/web-20260925T221046Z-8d04135, run npx wrangler pages deploy out --project-name second-look --branch main --commit-hash 8d04135 --commit-message rollback to 8d04135 --commit-dirty=true\nrollback: dry run, nothing changed. Run make rollback ROLLBACK=yes to do it.\n"
+  },
+  {
+   "doc": "README.md",
+   "line": 630,
+   "command": "make video-final",
+   "ran": true,
+   "result": "pass",
+   "exit": 0,
+   "seconds": 108.1,
+   "detail": "uv run python scripts/video_final.py \nvideo-final: <temp folder> 3:45 (225.5 s), 1920x1080, 77.1 MB, 45 captions, no voice\n"
+  },
+  {
+   "doc": "README.md",
+   "line": 665,
    "command": "curl -H \"Accept: application/fhir+json\" https://sandbox.hl7europe.eu/oneaquahealth/fhir/Library/466",
    "ran": false,
    "result": "not run",
@@ -217,37 +248,53 @@
   },
   {
    "doc": "README.md",
-   "line": 576,
+   "line": 699,
+   "command": "make go-public GO=yes",
+   "ran": false,
+   "result": "not run",
+   "detail": "not on the safe list: contains 'go-public'"
+  },
+  {
+   "doc": "README.md",
+   "line": 699,
+   "command": "make go-public GO=dry",
+   "ran": false,
+   "result": "not run",
+   "detail": "not on the safe list: contains 'go-public'"
+  },
+  {
+   "doc": "README.md",
+   "line": 704,
    "command": "make report-pdf",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 1.4,
-   "detail": "uv run python scripts/build_report.py\nreport-pdf: docs/REPORT.pdf, 8 pages, stamp in results/report_pdf.json\n"
+   "seconds": 1.6,
+   "detail": "uv run python scripts/build_report.py\nreport-pdf: docs/REPORT.pdf, 9 pages, stamp in results/report_pdf.json\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 23,
+   "line": 28,
    "command": "make test",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 153.0,
-   "detail": ".......................................... [ 46%]\n........................................................................ [ 50%]\n........................................................................ [ 53%]\n........................................................................ [ 57%]\n........................................................................ [ 60%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 78%]\n........................................................................ [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 89%]\n........................................................................ [ 92%]\n....................................................................s... [ 96%]\n......................................................................   [100%]\n2004 passed, 1 skipped, 9 xfailed in 150.95s (0:02:30)\n"
+   "seconds": 205.1,
+   "detail": "45%]\n........................................................................ [ 48%]\n........................................................................ [ 51%]\n........................................................................ [ 54%]\n........................................................................ [ 58%]\n........................................................................ [ 61%]\n........................................................................ [ 64%]\n........................................................................ [ 67%]\n........................................................................ [ 70%]\n........................................................................ [ 73%]\n........................................................................ [ 76%]\n........................................................................ [ 79%]\n..........................s............................................. [ 82%]\n........................................................................ [ 85%]\n........................................................................ [ 88%]\n........................................................................ [ 91%]\n........................................s............................... [ 94%]\n........................................................................ [ 97%]\n.....................................................                    [100%]\n2346 passed, 2 skipped, 9 xfailed in 202.67s (0:03:22)\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 26,
+   "line": 31,
    "command": "make verify-claims",
    "ran": true,
    "result": "pass",
    "exit": 0,
    "seconds": 0.9,
-   "detail": "(the kept output was only uv's warning about the shell's own VIRTUAL_ENV)"
+   "detail": " scripts/verify_claims.py --synthetic\nverify-claims: 107 claim(s), 40 alt text(s) checked, all match results/\nuv run python scripts/verify_claims.py --file docs/devpost.md\nverify-claims: 11 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file docs/submission/JUDGE_QA.md\nverify-claims: 2 claim(s) checked, all match results/\nuv run python scripts/api_inventory.py --check\napi-inventory: results/api_inventory.json matches the code\nuv run python scripts/verify_claims.py --file docs/API.md\nverify-claims: 10 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file docs/MCP.md\nverify-claims: 1 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file WRITEUP.md\nverify-claims: 16 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file SECURITY.md\nverify-claims: 0 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file DEPLOY.md\nverify-claims: 0 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file docs/DATA_CARD.md\nverify-claims: 54 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file docs/MODEL_CARD.md\nverify-claims: 161 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file docs/THREAT_MODEL.md\nverify-claims: 0 claim(s) checked, all match results/\nuv run python scripts/verify_claims.py --file docs/ACCEPTANCE.md\nverify-claims: 1 claim(s) checked, all match results/\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 27,
+   "line": 32,
    "command": "make audit-verify",
    "ran": true,
    "result": "pass",
@@ -257,27 +304,27 @@
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 28,
+   "line": 33,
    "command": "make manifest-check",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 0.4,
-   "detail": "uv run python scripts/check_manifest.py\nmanifest-check: 84 image(s) and 12 smaller copies, all with matching rows\n"
+   "seconds": 0.9,
+   "detail": "uv run python scripts/check_manifest.py\nmanifest-check: 84 image(s) and 50 smaller copies, all with matching rows\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 29,
+   "line": 34,
    "command": "make readability",
    "ran": true,
    "result": "pass",
    "exit": 0,
    "seconds": 0.1,
-   "detail": "uv run python scripts/check_readability.py\nreadability: 150 strings, average grade 5.18 (cap 7.0), hardest 11.0 (cap 11.0), 3 exception(s)\n"
+   "detail": "uv run python scripts/check_readability.py\nreadability: 188 strings, average grade 5.24 (cap 7.0), hardest 10.4 (cap 11.0), 3 exception(s)\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 30,
+   "line": 35,
    "command": "make dash-check",
    "ran": true,
    "result": "pass",
@@ -287,47 +334,55 @@
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 32,
+   "line": 37,
    "command": "make design-check",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 5.0,
-   "detail": "cd apps/web && node scripts/design-check.mjs\ndesign-check: clean. 84 source files and 24 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.1s).\n"
+   "seconds": 5.4,
+   "detail": "cd apps/web && WEB_PORT=3100 node scripts/design-check.mjs\ndesign-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 33,
+   "line": 38,
    "command": "make web-build",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 5.9,
-   "detail": "SSG)     prerendered as static HTML (uses generateStaticParams)\n\nweb build ok\ncheck-bundle: 24 shipped files scanned, no gold key in any\ncheck-preloads: 2 page(s), each preloads the copies it shows and matches public/_headers\nTurbopack build encountered 1 warning:\n./apps/web/lib/how-data.ts:17:16\nWarning: Dynamic filesystem access causes tracing of the whole project\n  \u001b[90m15 |\u001b[0m\n  \u001b[90m16 |\u001b[0m \u001b[36mfunction\u001b[0m readResult(path: string): unknown {\n\u001b[33m\u001b[1m>\u001b[0m \u001b[90m17 |\u001b[0m   \u001b[36mconst\u001b[0m full = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m18 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m19 |\u001b[0m }\n  \u001b[90m20 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\n"
+   "seconds": 7.3,
+   "detail": "les (pages 42162, static 815685, photos 1441542), budget 3000000\nweb build ok\ncheck-bundle: 26 shipped files scanned, no gold key in any\ncheck-preloads: 2 page(s), each preloads the copies it shows and matches public/_headers\nTurbopack build encountered 1 warning:\n./apps/web/lib/how-data.ts:18:16\nWarning: Dynamic filesystem access causes tracing of the whole project\n  \u001b[90m16 |\u001b[0m\n  \u001b[90m17 |\u001b[0m \u001b[36mfunction\u001b[0m readResult(path: string): unknown {\n\u001b[33m\u001b[1m>\u001b[0m \u001b[90m18 |\u001b[0m   \u001b[36mconst\u001b[0m full = join(\u001b[33mREPO\u001b[0m, path);\n  \u001b[90m   |\u001b[0m                \u001b[33m\u001b[1m^^^^^^^^^^^^^^^^\u001b[0m\n  \u001b[90m19 |\u001b[0m   \u001b[36mreturn\u001b[0m existsSync(full) ? \u001b[33mJSON\u001b[0m.parse(readFileSync(full, \u001b[32m\"utf8\"\u001b[0m)) : \u001b[36mnull\u001b[0m;\n  \u001b[90m20 |\u001b[0m }\n  \u001b[90m21 |\u001b[0m\n\nStatic analysis determined that this filesystem access causes the whole project to be traced and included in the output.\nThis is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.\nThis can slow down deployments or lead to failures when size limits are exceeded.\nTo resolve this, you can\n- make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or\n- only use them in development, or\n- opt out by adding an ignore comment to the highlighted call: path.join(/*turbopackIgnore: true*/ ...), or\n- remove them.\n\nImport trace:\n  Server Component:\n    ./apps/web/lib/how-data.ts\n    ./apps/web/app/how-we-know/page.tsx\n\n\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 35,
+   "line": 40,
    "command": "make preflight-launch",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 38.9,
-   "detail": "second_labels: no second label for test photo ph-bank-01\n  NOTE   second_labels: no second label for test photo ph-bank-02\n  NOTE   second_labels: no second label for test photo ph-bank-03\n  NOTE   second_labels: no second label for test photo ph-bank-04\n  NOTE   second_labels: no second label for test photo ph-channel-01\n  NOTE   second_labels: no second label for test photo ph-channel-02\n  NOTE   second_labels: no second label for test photo ph-channel-03\n  NOTE   second_labels: no second label for test photo ph-channel-04\n  NOTE   second_labels: no second label for test photo ph-plant-01\n  NOTE   second_labels: no second label for test photo ph-plant-02\n  NOTE   second_labels: no second label for test photo ph-plant-03\n  NOTE   second_labels: no second label for test photo ph-plant-04\n  NOTE   second_labels: no second label for test photo ph-pipe-01\n  NOTE   second_labels: no second label for test photo ph-pipe-02\n  NOTE   second_labels: no second label for test photo ph-pipe-03\n  NOTE   second_labels: no second label for test photo ph-pipe-04\n  NOTE   key_agreement: one labeller set the whole key, so no agreement figure is reported: named in docs/analysis_plan.md and under Known weaknesses\n\nchecks: 17 run, 15 passed, 0 failed, 17 notes\npreflight: 0 failed, of which 0 need a human\n"
+   "seconds": 38.0,
+   "detail": "_field, human_inputs, key_frozen, key_matches, lock_tests, marks_approved, plan_matches_tag, plan_wording, prereg_tag, verify_claims\n\nCLEARED BY: a second labeller, optional  (17 lines)\n  NOTE   second_labels: no second label for test photo ph-bank-01\n  NOTE   second_labels: no second label for test photo ph-bank-02\n  NOTE   second_labels: no second label for test photo ph-bank-03\n  NOTE   second_labels: no second label for test photo ph-bank-04\n  NOTE   second_labels: no second label for test photo ph-channel-01\n  NOTE   second_labels: no second label for test photo ph-channel-02\n  NOTE   second_labels: no second label for test photo ph-channel-03\n  NOTE   second_labels: no second label for test photo ph-channel-04\n  NOTE   second_labels: no second label for test photo ph-plant-01\n  NOTE   second_labels: no second label for test photo ph-plant-02\n  NOTE   second_labels: no second label for test photo ph-plant-03\n  NOTE   second_labels: no second label for test photo ph-plant-04\n  NOTE   second_labels: no second label for test photo ph-pipe-01\n  NOTE   second_labels: no second label for test photo ph-pipe-02\n  NOTE   second_labels: no second label for test photo ph-pipe-03\n  NOTE   second_labels: no second label for test photo ph-pipe-04\n  NOTE   key_agreement: one labeller set the whole key, so no agreement figure is reported: named in docs/analysis_plan.md and under Known weaknesses\n\nchecks: 17 run, 15 passed, 0 failed, 17 notes\npreflight: 0 failed, of which 0 need a human\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 36,
+   "line": 40,
+   "command": "make backup",
+   "ran": false,
+   "result": "not run",
+   "detail": "not on the safe list: contains 'backup'"
+  },
+  {
+   "doc": "docs/ACCEPTANCE.md",
+   "line": 41,
    "command": "make submit-check",
    "ran": true,
-   "result": "fail",
+   "result": "pass",
    "exit": 2,
-   "seconds": 4.6,
-   "detail": "uv run python scripts/submit_check.py\nPASS  track_statement\nPASS  five_headers\nFAIL  video_link\n      README.md has no line with the word video and a link\n      docs/devpost.md has no line with the word video and a link\nPASS  video_duration  (no --video file given, so the 3 to 5 minute check was skipped)\nPASS  license\nPASS  demo_url  (NEXT_PUBLIC_SITE_URL unset and no demo link in docs/devpost.md; skipped)\nPASS  secrets_scan  (gitleaks: history clean)\nPASS  verify_claims\nPASS  audit_log  (3 entries, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3)\nFAIL  repo_public\n      cannot tell if the repo is public (gh said: none of the git remotes configured for this repository point to a known GitHub host. To tell gh about a new GitHub host, please use `gh auth login`)\nsubmit-check: 2 failed: video_link, repo_public\nmake: *** [submit-check] Error 1\n"
+   "seconds": 5.5,
+   "detail": "uv run python scripts/submit_check.py\nPASS  track_statement\nPASS  five_headers\nPASS  devpost_track_statement\nPASS  devpost_fields\nPASS  devpost_numbers\nPASS  devpost_report\nPASS  devpost_team\nFAIL  video_link\n      README.md has no line with the word video and a link\n      docs/devpost.md has no line with the word video and a link\n      docs/devpost.md still holds the video's slot [VIDEO LINK]\n      the 'Video link' field in docs/devpost.md holds no link\nPASS  video_duration  (no --video file given, so the 3 to 5 minute check was skipped)\nPASS  license\nPASS  demo_url  (https://second-look-79t.pages.dev answered 200)\nPASS  secrets_scan  (gitleaks: history clean)\nPASS  verify_claims\nPASS  audit_log  (3 entries, last hash 3d3cbb4da01ac26e9e9579dac9681d67e5b034006cfc1ddd4215ea28d0fb3cc3)\nFAIL  repo_public\n      GitHub repo is PRIVATE; it goes public on Sep 30\nsubmit-check: 2 failed: video_link, repo_public\nmake: *** [submit-check] Error 1\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 44,
+   "line": 49,
    "command": "cd apps/web && npx playwright test",
    "ran": false,
    "result": "not run",
@@ -335,7 +390,7 @@
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 46,
+   "line": 51,
    "command": "DEPLOYED_URL=... DEPLOYED_API=... npx playwright test tests/deployed-smoke.spec.ts",
    "ran": false,
    "result": "not run",
@@ -343,7 +398,7 @@
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 47,
+   "line": 52,
    "command": "SITE_URL=... node apps/web/scripts/live-check.mjs",
    "ran": false,
    "result": "not run",
@@ -351,17 +406,17 @@
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 79,
-   "command": "uv run pytest -q scripts/tests/test_no_video_files.py",
+   "line": 84,
+   "command": "uv run pytest scripts/tests/test_no_video_files.py",
    "ran": true,
    "result": "pass",
    "exit": 0,
-   "seconds": 0.5,
-   "detail": "....                                                                     [100%]\n"
+   "seconds": 0.6,
+   "detail": "....                                                                     [100%]\n4 passed in 0.30s\n"
   },
   {
    "doc": "docs/ACCEPTANCE.md",
-   "line": 80,
+   "line": 85,
    "command": "SITE_URL=https://second-look-79t.pages.dev node apps/web/scripts/live-readonly.mjs",
    "ran": false,
    "result": "not run",
