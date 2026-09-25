@@ -46,6 +46,31 @@ export function derivedSources(manifestRows, derivedRows) {
   return out;
 }
 
+// Where the build puts the phone-size offline copies, apart from the photos pages name, so a copy
+// never takes the address of a photo a page shows.
+export const OFFLINE_URL_DIR = "/photos/offline";
+
+/**
+ * The phone-size copy of each photo that has one, from photos/offline/manifest.csv, which
+ * scripts/derive_photos.py writes (UPDATE_30 section 1 item 1). No page names these: the service
+ * worker precaches them and answers with one only when its photo cannot be fetched. Throws, like
+ * derivedSources, when a copy was made from another version of its photo, or a photo has two.
+ */
+export function offlineCopies(manifestRows, offlineRows) {
+  const byId = new Map(manifestRows.filter((r) => r.id).map((r) => [r.id, r]));
+  const out = {};
+  for (const row of offlineRows) {
+    const source = byId.get(row.source_id);
+    if (!source) throw new Error(`offline copy ${row.file} names ${row.source_id}, which has no manifest row`);
+    if (source.sha256 !== row.source_sha256) throw new Error(`offline copy ${row.file} was made from another version of ${row.source_id}`);
+    if (row.format !== "avif") throw new Error(`offline copy ${row.file} is ${row.format}, not avif`);
+    if (out[row.source_id]) throw new Error(`${row.source_id} has two offline copies`);
+    const name = row.file.split("/").pop();
+    out[row.source_id] = { file: row.file, url: `${OFFLINE_URL_DIR}/${name}`, bytes: Number(row.bytes) };
+  }
+  return out;
+}
+
 /** The first URL in a srcset: the smallest copy, the cheapest one to fetch by mistake. */
 export function firstUrl(srcset) {
   return srcset.split(",")[0].trim().split(/\s+/)[0];

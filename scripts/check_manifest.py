@@ -16,6 +16,9 @@ ROOT = Path(__file__).resolve().parents[1]
 IMAGE_SUFFIXES = content_loader.IMAGE_SUFFIXES
 DERIVED_DIR = content_loader.DERIVED_DIR
 DERIVED_FORMATS = {".avif": ("avif", "AVIF"), ".webp": ("webp", "WEBP")}
+OFFLINE_DIR = content_loader.OFFLINE_DIR
+# One small AVIF per photo: the smallest format, and every browser that runs the site shows it.
+OFFLINE_FORMATS = {".avif": ("avif", "AVIF")}
 # What a smaller copy may not carry. The AVIF colour box (colr, nclx) is not on the list: it says
 # how to decode the colours, and it names nothing and no one.
 METADATA_KEYS = ("exif", "xmp", "XML:com.adobe.xmp", "icc_profile", "comment")
@@ -85,20 +88,40 @@ def picture_difference(copy: Image.Image, source: Image.Image) -> float:
     return float(ImageStat.Stat(ImageChops.difference(a, b)).mean[0])
 
 
+# The folders of copies: the smaller copies the landing page shows (Update 22) and the phone-size
+# copies the test uses offline (UPDATE_30).
+COPY_FOLDERS = (DERIVED_DIR, OFFLINE_DIR)
+
+
+def copy_rules(folder: str) -> tuple[set[str], int, dict[str, tuple[str, str]]]:
+    """A folder's roles, byte cap and formats, read when asked so a test can change them."""
+    if folder == DERIVED_DIR:
+        return content_loader.DERIVED_ROLES, content_loader.DERIVED_MAX_BYTES, DERIVED_FORMATS
+    return content_loader.OFFLINE_ROLES, content_loader.OFFLINE_MAX_BYTES, OFFLINE_FORMATS
+
+
 def check_derived(root: Path, by_id: dict[str, dict[str, str]], images: list[Path]) -> list[str]:
     """Every smaller copy traces to a manifest row and its sha256, and is what its row says."""
+    return check_copies(root, by_id, images, DERIVED_DIR)
+
+
+def check_copies(
+    root: Path, by_id: dict[str, dict[str, str]], images: list[Path], folder: str
+) -> list[str]:
+    """The copies in photos/<folder>/ against that folder's manifest, its roles and its cap."""
+    roles, max_bytes, formats = copy_rules(folder)
     problems: list[str] = []
-    rows = content_loader.derived_rows(root)
+    rows = content_loader.copy_rows(root, folder)
     if rows:
         missing_cols = [c for c in content_loader.DERIVED_COLUMNS if c not in rows[0]]
         if missing_cols:
-            return [f"photos/{DERIVED_DIR}/manifest.csv missing columns: {missing_cols}"]
+            return [f"photos/{folder}/manifest.csv missing columns: {missing_cols}"]
     by_file = {row["file"]: row for row in rows}
     for img in images:
         rel = img.relative_to(root / "photos").as_posix()
         row = by_file.get(rel)
         if row is None:
-            problems.append(f"no derived manifest row: photos/{rel}")
+            problems.append(f"no {folder} manifest row: photos/{rel}")
             continue
         source = by_id.get(row["source_id"])
         if source is None:
@@ -106,19 +129,17 @@ def check_derived(root: Path, by_id: dict[str, dict[str, str]], images: list[Pat
             continue
         if row["source_sha256"] != source["sha256"]:
             problems.append(f"copy of another version of {source['file']}: photos/{rel}")
-        if source["role"] not in content_loader.DERIVED_ROLES:
+        if source["role"] not in roles:
             problems.append(f"copy of a {source['role']} photo: photos/{rel}")
         if row["sha256"] != sha256_of(img):
             problems.append(f"sha256 mismatch: photos/{rel}")
         size = img.stat().st_size
         if row["bytes"] != str(size):
             problems.append(f"byte count mismatch: photos/{rel}")
-        if size > content_loader.DERIVED_MAX_BYTES:
-            problems.append(
-                f"copy over {content_loader.DERIVED_MAX_BYTES} bytes: photos/{rel} ({size})"
-            )
-        fmt, pil_format = DERIVED_FORMATS.get(img.suffix.lower(), ("", ""))
-        if rel != f"{DERIVED_DIR}/{row['source_id']}-{row['width']}.{fmt}":
+        if size > max_bytes:
+            problems.append(f"copy over {max_bytes} bytes: photos/{rel} ({size})")
+        fmt, pil_format = formats.get(img.suffix.lower(), ("", ""))
+        if rel != f"{folder}/{row['source_id']}-{row['width']}.{fmt}":
             problems.append(f"copy not named <source id>-<width>.<format>: photos/{rel}")
         source_path = root / "photos" / source["file"]
         if not source_path.exists():
@@ -142,7 +163,7 @@ def check_derived(root: Path, by_id: dict[str, dict[str, str]], images: list[Pat
                 )
     for rel in by_file:
         if not (root / "photos" / rel).exists():
-            problems.append(f"derived manifest row without file: photos/{rel}")
+            problems.append(f"{folder} manifest row without file: photos/{rel}")
     return problems
 
 
@@ -162,9 +183,12 @@ def main(root: Path = ROOT) -> int:
     by_file = {row["file"]: row for row in rows if row.get("file")}
     images = [p for p in (root / "photos").rglob("*") if p.suffix.lower() in IMAGE_SUFFIXES]
     # Smaller copies answer to their own manifest, which names the source row.
-    derived = [p for p in images if p.relative_to(root / "photos").parts[0] == DERIVED_DIR]
     by_id = {row["id"]: row for row in rows if row.get("id")}
-    problems.extend(check_derived(root, by_id, derived))
+    derived: list[Path] = []
+    for folder in COPY_FOLDERS:
+        copies = [p for p in images if p.relative_to(root / "photos").parts[0] == folder]
+        problems.extend(check_copies(root, by_id, copies, folder))
+        derived.extend(copies)
     for img in images:
         if img in derived:
             continue

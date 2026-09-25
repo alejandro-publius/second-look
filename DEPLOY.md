@@ -219,6 +219,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `WALK_ID` | empty | `apps/web/scripts/live-readonly.mjs` | one walk to check by id |
 | `REQUIRE_THEIRS` | not set | `apps/web/scripts/live-readonly.mjs` | `1` fails the read only check when their record is missing |
 | `DEPLOYED_URL`, `DEPLOYED_API` | empty, so the spec skips | `apps/web/tests/deployed-smoke.spec.ts` | point the deployed smoke spec at a site |
+| `PRECACHE_BUDGET_OUT` | not set, so nothing is written | `apps/web/tests/offline-budget.spec.ts` | where the first visit's background download is written; `make precache-budget` sets it to `results/precache_budget.json` |
 | `BUDGET_URL` | `http://127.0.0.1:3100`, or the `WEB_PORT` | `apps/web/scripts/budget.mjs` | the built site the landing budgets measure |
 | `LIGHTHOUSE_URL` | `http://127.0.0.1:3100/`, or the `WEB_PORT` | `apps/web/scripts/lighthouse.mjs` | the page Lighthouse measures |
 | `SCREENS_URL` | `http://127.0.0.1:3100`, or the `WEB_PORT` | `apps/web/scripts/screens.mjs` and the other screen scripts | the site the screenshots and clips are taken from |

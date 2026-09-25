@@ -9,7 +9,8 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
 import { load as yamlLoad } from "js-yaml";
-import { derivedSources } from "../photo-sources.mjs";
+import { BACKGROUND_BUDGET_BYTES, OFFLINE_PAGES } from "../offline-budget.mjs";
+import { derivedSources, OFFLINE_URL_DIR, offlineCopies } from "../photo-sources.mjs";
 import { inatChecks } from "./inat-checks.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -219,6 +220,16 @@ function main() {
   } catch (e) {
     fail(e.message);
   }
+  // Phone-size AVIF copies of the photos of the test, also written by scripts/derive_photos.py.
+  // No page names them: they go into public/photos/offline/ and the service worker's precache, and
+  // it hands one to a page only when that page's photo cannot be fetched (UPDATE_30 1.1).
+  const offlinePath = join(photosDir, "offline", "manifest.csv");
+  let offline = {};
+  try {
+    offline = offlineCopies(manifestRows, existsSync(offlinePath) ? parseCsv(readFileSync(offlinePath, "utf8")) : []);
+  } catch (e) {
+    fail(e.message);
+  }
   // Video walks (Update 14 3.7). Written by scripts/build_walks.py. A walk's poster is one of its
   // clip's own benchmark frames, so it is shown, copied and credited like any other photograph.
   const walksPath = join(contentDir, "walks.yaml");
@@ -301,6 +312,23 @@ function main() {
       }
     }
     if (lesson.practice && !photos[lesson.practice.photo_id]) fail(`lesson ${fid} practice photo missing`);
+  }
+
+  // Every photo the two-minute test shows: the warm-up, each lesson's pairs and practice photo, and
+  // the 16 test photos. Each must have its phone-size copy, or the test would break offline.
+  const flowIds = [
+    ...new Set([
+      ...warmup.map((w) => w.photo_id),
+      ...Object.values(lessons).flatMap((l) => [...(l.contrast_pairs ?? []).flatMap((p) => [p.assume_photo_id, p.actual_photo_id]), l.practice?.photo_id]),
+      ...strippedItems.map((i) => i.photo_id),
+    ]),
+  ].filter(Boolean);
+  const noCopy = flowIds.filter((id) => !offline[id]);
+  if (noCopy.length) fail(`these photos of the test have no phone-size copy for offline use: ${noCopy.join(", ")}; run uv run python scripts/derive_photos.py --set offline`);
+  for (const id of flowIds) {
+    const src = join(photosDir, offline[id].file);
+    if (!existsSync(src)) fail(`the offline copy ${offline[id].file} is in its manifest but not on disk`);
+    copyList.push({ src, file: `${OFFLINE_URL_DIR.slice("/photos/".length)}/${basename(src)}`, offline: true });
   }
 
   for (const w of walksRaw) if (!photos[w.poster_photo_id]) fail(`walk ${w.id} has no poster row ${w.poster_photo_id}`);
@@ -387,18 +415,30 @@ function main() {
   writeFileSync(join(outDir, "content.json"), text + "\n");
 
   rmSync(publicPhotos, { recursive: true, force: true });
-  mkdirSync(publicPhotos, { recursive: true });
+  mkdirSync(join(webRoot, "public", OFFLINE_URL_DIR), { recursive: true });
   for (const { src, file } of copyList) copyFileSync(src, join(publicPhotos, file));
 
   mkdirSync(publicIcons, { recursive: true });
   writeFileSync(join(publicIcons, "icon-192.png"), iconPng(192));
   writeFileSync(join(publicIcons, "icon-512.png"), iconPng(512));
 
+  // What the service worker keeps at install (UPDATE_30 section 1 item 1): the offline pages and,
+  // of the photos, only the phone-size copy of each photo of the test. Every other photo, page and
+  // clip is fetched when it is opened. fallbacks names, for every address a page may ask for a
+  // photo of the test by (its JPEG, and on the landing page its AVIF and WebP copies), the copy the
+  // worker answers with when that address cannot be fetched. precache-static.mjs adds the
+  // /_next/static files after the build and fails it if the whole list is over the budget.
+  const fallbacks = {};
+  for (const id of flowIds) {
+    const addresses = [photos[id].url, ...(photos[id].sources ?? []).flatMap((s) => s.srcset.split(",").map((part) => part.trim().split(/\s+/)[0]))];
+    for (const address of addresses) fallbacks[address] = offline[id].url;
+  }
   const precache = {
     version: content_hash,
-    pages: ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/offline", "/manifest.webmanifest"],
-    // The copies too: offline, the landing page asks for the copy it picks, not the JPEG.
-    photos: [...Object.values(photos).map((p) => p.url), ...copyList.filter((c) => c.copy).map((c) => `/photos/${c.file}`)],
+    budget_bytes: BACKGROUND_BUDGET_BYTES,
+    pages: OFFLINE_PAGES,
+    photos: flowIds.map((id) => offline[id].url),
+    fallbacks,
   };
   writeFileSync(join(webRoot, "public", "precache.json"), JSON.stringify(precache, null, 2) + "\n");
 
@@ -410,7 +450,10 @@ function main() {
 
   const size = statSync(join(outDir, "content.json")).size;
   const copyCount = copyList.filter((c) => c.copy).length;
-  console.log(`build-content: content_hash ${content_hash}, consent ${consent_version}, ${copyList.length - copyCount} photos and ${copyCount} smaller copies copied, content.json ${size} bytes`);
+  const offlineCount = copyList.filter((c) => c.offline).length;
+  console.log(
+    `build-content: content_hash ${content_hash}, consent ${consent_version}, ${copyList.length - copyCount - offlineCount} photos, ${copyCount} smaller copies and ${offlineCount} offline copies copied, content.json ${size} bytes`,
+  );
 }
 
 main();
