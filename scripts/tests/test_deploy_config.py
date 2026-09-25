@@ -11,7 +11,7 @@ import ast
 import re
 from pathlib import Path
 
-from scripts import config_inventory
+from scripts import config_inventory, mac_jobs
 
 ROOT = Path(__file__).resolve().parents[2]
 DEPLOY = ROOT / "DEPLOY.md"
@@ -97,13 +97,26 @@ def test_every_d1_table_has_a_row() -> None:
 
 
 def test_every_launchd_job_has_a_row() -> None:
-    labels = set()
+    labels = {job.label for job in mac_jobs.JOBS}
     for path in (ROOT / "scripts").glob("install_*_job.sh"):
         m = re.search(r'^LABEL="([\w.]+)"', path.read_text(encoding="utf-8"), re.M)
         assert m, path
-        labels.add(m.group(1))
+        assert m.group(1) in labels, f"{path.name} installs a job scripts/mac_jobs.py does not list"
     documented = set(re.findall(r"^\| `(com\.[\w.]+)` \|", section("Jobs on the Mac"), re.M))
     assert labels and labels == documented
+
+
+def test_every_daily_job_row_names_the_time_the_table_sets() -> None:
+    rows = {
+        m.group(1): m.group(2)
+        for m in re.finditer(r"^\| `(com\.[\w.]+)` \| ([^|]+) \|", section("Jobs on the Mac"), re.M)
+    }
+    for job in mac_jobs.JOBS:
+        if job.calendar and "Month" not in job.calendar:
+            when = f"{job.calendar['Hour']:02d}:{job.calendar['Minute']:02d}"
+            assert when in rows[job.label], f"{job.label}: {when} is not in its row"
+    assert "every 10 minutes" in rows["com.secondlook.uptime"]
+    assert "2026-09-28T01:10:00Z" in rows["com.secondlook.lock"]
 
 
 def test_every_launchd_job_row_names_the_time_its_installer_sets() -> None:
