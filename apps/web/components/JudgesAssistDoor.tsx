@@ -7,5 +7,14 @@ import { t } from "@/lib/t";
  * assisted arm meets them, with feedback and nothing stored, so a judge feels the question.
  */
 export function JudgesAssistDoor() {
-  return <Row label={<Link href="/t2/demo">{t("judges.assist")}</Link>} value={t("judges.assist_note")} />;
+  return (
+    <Row
+      label={
+        <Link className="row-link" href="/t2/demo">
+          {t("judges.assist")}
+        </Link>
+      }
+      value={t("judges.assist_note")}
+    />
+  );
 }
