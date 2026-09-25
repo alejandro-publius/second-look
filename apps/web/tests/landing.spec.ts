@@ -58,7 +58,7 @@ test("no CSP violations are reported on the main screens", async ({ page }) => {
 
 test("every screen shows real strings, none missing from the locale", async ({ page }) => {
   await mockApi(page);
-  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/quick?spot=example", "/poster", "/offline", "/share/13", "/judges", "/credits"]) {
+  for (const path of ["/", "/t", "/demo", "/check", "/about", "/privacy", "/how-we-know", "/two", "/spot?id=example", "/quick?spot=example", "/quick", "/poster", "/offline", "/share/13", "/judges", "/credits"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("body")).not.toContainText("[missing:");

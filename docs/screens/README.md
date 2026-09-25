@@ -28,7 +28,7 @@ The phone screens of Second Look, in one drawn frame, captured by `make screens`
 <td align="center"><img src="check-question.webp" width="200" alt="The first question of the creek check, with the answers as big buttons."><br>First question<br><code>/check</code></td>
 </tr>
 <tr>
-<td align="center"><img src="quick.webp" width="200" alt="The quick check: water colour, smell and the pipe, in three taps."><br>Quick check<br><code>/quick</code></td>
+<td align="center"><img src="quick.webp" width="200" alt="The quick check: water colour, smell and the pipe, in three taps."><br>Quick check<br><code>/quick?spot=example</code> (mock)</td>
 <td align="center"><img src="spot-record.webp" width="200" alt="A sample creek record: what the volunteer saw, and the observer score that goes with it."><br>A sample record<br><code>/spot?id=example</code> (mock)</td>
 <td align="center"><img src="spot-fhir.webp" width="200" alt="The same record opened with View as FHIR: the Observation the record is stored as."><br>View as FHIR<br><code>/spot?id=example</code> (mock)</td>
 <td align="center"><img src="city.webp" width="200" alt="The city view of Strawberry Creek before anyone has checked it: no visits yet, and no OneAquaHealth measure shown yet."><br>City view<br><code>/city?creek=strawberry-creek</code></td>

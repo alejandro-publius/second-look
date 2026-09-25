@@ -109,6 +109,24 @@ test("/quick/example posts the fixed enums", async ({ page }) => {
   await expect(page.getByRole("link", { name: "See the record" })).toHaveAttribute("href", "/spot?id=example");
 });
 
+// CRITIC_09 R04: /quick with no spot showed the whole form, and Send could only end on "try
+// again", since the API has no route for an empty spot. With no spot it now says where the quick
+// check opens from and links the full check, and there is nothing to send.
+test("/quick with no spot says to open it from a record, links the check, and has no form", async ({ page }) => {
+  const calls = await mockApi(page);
+  await page.goto("/quick");
+  await expect(page.getByRole("heading", { name: "Quick check", level: 1 })).toBeVisible();
+  await expect(page.getByText("Open the quick check from a creek record.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Water colour" })).toHaveCount(0);
+  await expect(page.getByText("Step 1 of 4")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Send" })).toHaveCount(0);
+  const link = page.getByRole("main").getByRole("link", { name: "Start a creek check", exact: true });
+  await expect(link).toHaveAttribute("href", "/check");
+  await link.click();
+  await expect(page.getByRole("heading", { name: "Creek check" })).toBeVisible();
+  expect(calls.filter((c: { path: string }) => c.path.startsWith("/api/quick"))).toEqual([]);
+});
+
 test("share card route returns an SVG built from the score and rejects bad scores", async ({ request }) => {
   const ok = await request.get("/api/share/13");
   expect(ok.status()).toBe(200);

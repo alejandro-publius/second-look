@@ -192,6 +192,12 @@ async function localRun(browser) {
     await shoot(page),
     "The end of the sample record: the What you can do card, with one thing to do for you, one for your pet and one for the city, and the source of each.",
   );
+  // The quick check opens from a record, with the record's spot in the link. With no spot it says
+  // so and shows no form (CRITIC_09 R04), and the live site has no stored spot, so the picture of
+  // the form comes from the mock, from the link the sample record gives.
+  await page.goto(`${LOCAL}/quick?spot=example`);
+  await page.getByRole("group", { name: content.locale["quick.colour"] }).waitFor();
+  gallery("quick", "/quick?spot=example", "local mock", await shoot(page), "The quick check: water colour, smell and the pipe, in three taps.");
   await context.close();
 }
 
@@ -253,7 +259,6 @@ async function liveRun(browser) {
   await page.getByLabel("Name for this spot").fill("Footbridge");
   await page.getByRole("button", { name: /^Next/ }).first().click();
   gallery("check-question", "/check", "live", await shoot(page), "The first question of the creek check, with the answers as big buttons.");
-  gallery("quick", "/quick", "live", await visit("/quick"), "The quick check: water colour, smell and the pipe, in three taps.");
   // The alt text says what the screen shows. Until somebody checks Strawberry Creek, the live
   // page has no visits and no measure on it, so the alt text says that instead.
   const cityShot = await visit("/city?creek=strawberry-creek");

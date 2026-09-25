@@ -537,6 +537,20 @@ def test_the_walk_city_shot_follows_a_walk_that_reported_only_a_built_bank() -> 
     assert f'<img src="walk-city.webp" width="200" alt="{WALK_CITY_ALT}">' in screens
 
 
+def test_the_quick_check_shot_shows_the_form_from_a_record_link_on_the_mock() -> None:
+    # CRITIC_09 R04: /quick with no spot has no form, since it could never be sent, and the live
+    # site has no stored spot. The picture of the form comes from the local mock, from the link the
+    # sample record gives, and the gallery names that route.
+    source = (ROOT / "apps" / "web" / "scripts" / "gallery.mjs").read_text(encoding="utf-8")
+    local = source[source.index("async function localRun") : source.index("async function liveRun")]
+    live = source[source.index("async function liveRun") :]
+    assert "await page.goto(`${LOCAL}/quick?spot=example`);" in local
+    assert 'gallery("quick", "/quick?spot=example", "local mock", await shoot(page),' in local
+    assert 'gallery("quick"' not in live
+    screens = (ROOT / "docs" / "screens" / "README.md").read_text(encoding="utf-8")
+    assert "<br>Quick check<br><code>/quick?spot=example</code> (mock)</td>" in screens
+
+
 def test_the_walk_city_shot_is_taken_from_the_needs_region() -> None:
     # CRITIC_07 J04: the city view's shot cut the first measure off before its source. The step is
     # tested in apps/web/tests/walk.spec.ts; this checks the gallery takes it before the shot.
