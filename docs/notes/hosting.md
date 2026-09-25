@@ -129,6 +129,12 @@ merge, both halves go in one session, in this order, and not the other way round
    `/api/test/counts` answer through the Pages origin, `/api/share/13` is still an SVG, and the
    policy reads `connect-src 'self'`.
 
+`make lock-analysis` (`scripts/lock_analysis.py`), which a launchd job runs at
+2026-09-28T01:10:00Z, deploys in this order after the lock's commit, with the read-only phone
+check after the site, then confirms judge mode opened, and only then pushes `depth` and `main` in
+one atomic push. The push comes last so that a failed step can roll production back to the
+deploy record's rows below without rewriting history.
+
 ## The sandbox mirror after launch (Update 10C answer 3)
 
 Real creek visits are mirrored once, as one tagged batch after data lock, not as they arrive:

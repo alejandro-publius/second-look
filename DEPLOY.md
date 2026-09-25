@@ -65,7 +65,8 @@ the test.
    `CREATE INDEX IF NOT EXISTS`, so applying it again adds what is new and touches nothing else:
    `cd worker && npx wrangler d1 execute second-look --remote --file schema.sql`.
 2. **The Worker.** `cd worker && npx wrangler deploy`. Steps 1 and 2 together are
-   `bash scripts/deploy.sh worker`.
+   `bash scripts/deploy.sh worker`, which also writes the new version into the deploy record in
+   `docs/notes/hosting.md`, as step 4 does for the site; `make rollback` reads that record.
 3. **The contract and the phone tests against production.**
    `uv run pytest -q apps/api/tests/test_study.py`, then
    `SITE_URL=https://second-look-79t.pages.dev QA_KEY=... node apps/web/scripts/live-check.mjs`.
