@@ -80,6 +80,9 @@ class World:
         git(tmp, "init", "-q", "--bare", "-b", "depth", str(self.origin))
         git(tmp, "clone", "-q", str(self.origin), str(self.root))
         git(self.root, "checkout", "-q", "-b", "depth")
+        # The job commits with git's own settings; a CI runner has no name set.
+        git(self.root, "config", "user.name", "lock job test")
+        git(self.root, "config", "user.email", "lock-job@test.invalid")
         self.good_web = self.archives / "web-good"
         (self.good_web / "out").mkdir(parents=True)
         web_row = dr.Row("2026-09-26T10:00", "web", "c1c1c1c", "c1c1c1c1", str(self.good_web), True)
