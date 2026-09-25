@@ -26,9 +26,15 @@ export function howWeKnowNumbers(featureOrder: string[]) {
 /** Where the split of the kept flags comes from (CRITIC_09 J03). */
 export const MODEL_CARD_FILE = "results/model_card.json";
 
-/** How the gate's kept flags split: on a dug-out channel, and on the kept case shown below. */
-export function howKeptSplit(gate: { kept: number } | null, shownFeature: string | null | undefined) {
-  return keptSplit(readResult(MODEL_CARD_FILE), gate, shownFeature);
+/**
+ * How the gate's kept flags split: on a dug-out channel, and the kept model's answers on the frame
+ * shown below, with that model and its runs named (CRITIC_11 V02).
+ */
+export function howKeptSplit(
+  gate: { kept: number } | null,
+  shownCase: { feature: string; model: string; own: string[] } | null | undefined,
+) {
+  return keptSplit(readResult(MODEL_CARD_FILE), gate, shownCase);
 }
 
 /** The footage example, written by evals/footage_example.py (CRITIC_03 D04). */

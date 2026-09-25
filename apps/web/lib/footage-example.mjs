@@ -74,6 +74,23 @@ function othersThatPassed(c) {
 }
 
 /**
+ * The kept model's own answers on the kept frame and feature, one per run in run order, read from
+ * the run's answers in results/ rather than from the example file (CRITIC_11 V02). Empty when the
+ * run does not list them, or lists one that is not an answer.
+ * @param {any} c
+ * @param {any} run
+ * @returns {string[]}
+ */
+function ownAnswers(c, run) {
+  const rows = Array.isArray(run?.answers) ? run.answers : [];
+  const mine = rows
+    .filter((a) => a?.frame === c.frame && a?.feature === c.feature && a?.model === c.model)
+    .sort((a, b) => Number(a?.run) - Number(b?.run));
+  if (!mine.every((a) => ANSWERS.has(a?.answer) && isCount(a?.run))) return [];
+  return mine.map((a) => a.answer);
+}
+
+/**
  * @param {any} example the parsed examples/footage-flag/example.json, or null
  * @param {any} run the parsed results file the example names in run.results, or null
  * @returns {{
@@ -81,7 +98,7 @@ function othersThatPassed(c) {
  *   files: string[],
  *   kept: null | { frame: string, model: string, feature: string, credit: { author: string, license: string, source_url: string },
  *     photos: number, right: number, runs: number, unlabelled: boolean, question: string, note: string,
- *     others: { model: string, answers: string[] }[] },
+ *     others: { model: string, answers: string[] }[], own: string[] },
  *   dropped: null | { frame: string, model: string, feature: string, credit: { author: string, license: string, source_url: string },
  *     photos: number, right: number, runs: number, unlabelled: boolean, not_passed: boolean, reasons: string[] },
  * } | null}
@@ -102,7 +119,7 @@ export function footageCases(example, run) {
     isText(screen?.question) &&
     isText(screen?.note)
   ) {
-    kept = { ...base, question: screen.question, note: screen.note, others: othersThatPassed(k) };
+    kept = { ...base, question: screen.question, note: screen.note, others: othersThatPassed(k), own: ownAnswers(k, run) };
   }
 
   let dropped = null;

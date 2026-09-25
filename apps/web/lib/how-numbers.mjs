@@ -73,18 +73,26 @@ export const NOT_ASKED = "dug_out_channel";
  * nothing of a split, unless the model card is real, gives the same kept count as the gate, and the
  * two parts add up to all of it, so "the other" on the page is always the rest.
  *
+ * The page names whose the rest are: the shown case's model, which said yes on the shown frame in
+ * every one of its runs (CRITIC_11 V02). So the split is also null unless that model's own answers
+ * on the frame, read from the run in results/, are all yes and are as many as the rest. A model
+ * that passed the feature has every yes kept, so then the rest are exactly those answers.
+ *
  * @param {any} modelCard the parsed results/model_card.json, or null
  * @param {{ kept: number } | null} gate the gate numbers howNumbers gave
- * @param {string | null | undefined} shownFeature the feature of the kept case shown below
- * @returns {{ nothing: number, shown: number } | null}
+ * @param {{ feature: string, model: string, own: string[] } | null | undefined} shownCase the kept case shown below
+ * @returns {{ nothing: number, shown: number, model: string, runs: number } | null}
  */
-export function keptSplit(modelCard, gate, shownFeature) {
+export function keptSplit(modelCard, gate, shownCase) {
   const kept = modelCard?.footage_kept;
   const by = kept?.by_feature;
+  const shownFeature = shownCase?.feature;
   if (!isReal(modelCard) || !gate || !by || typeof by !== "object" || !shownFeature || shownFeature === NOT_ASKED) return null;
   const nothing = by[NOT_ASKED];
   const shown = by[shownFeature];
   if (![nothing, shown, kept.kept, gate.kept].every(isCount)) return null;
   if (kept.kept !== gate.kept || nothing + shown !== gate.kept) return null;
-  return { nothing, shown };
+  const own = Array.isArray(shownCase.own) ? shownCase.own : [];
+  if (typeof shownCase.model !== "string" || own.length === 0 || own.length !== shown || !own.every((a) => a === "yes")) return null;
+  return { nothing, shown, model: shownCase.model, runs: own.length };
 }

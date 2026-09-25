@@ -593,7 +593,7 @@
   "city.walk_example_title": "An example, not from your answers",
   "city.walk_example_intro": "If one check had reported a built bank, this creek would need:",
   "city.walk_more": "Try another door",
-  "how.gate_split": "{nothing} of the {kept} kept flags are on a dug-out channel, which the check does not ask about, so they ask nothing. The other {shown} are the kept case shown below.",
+  "how.gate_split": "{nothing} of the {kept} kept flags are on a dug-out channel, which the check does not ask about, so they ask nothing. The other {shown} are {model}'s answers on the frame shown below: it said yes in each of its {runs} runs.",
   "quick.no_spot": "Open the quick check from a creek record. It adds to a spot that someone has already checked.",
   "quick.no_spot_link": "Start a creek check",
   "judges.verify_note_unstamped": "Shows every line of our audit log and its timestamps. Your browser checks the chain again as the page opens. Under a minute.",
