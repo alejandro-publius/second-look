@@ -19,7 +19,7 @@ record of why the hosting looks like this is `docs/notes/hosting.md`; the decisi
 
 | Command | What runs | Network | Data |
 |---|---|---|---|
-| `make dev` | the Python API on port 8000 with reload, and the site in dev mode on http://localhost:3100 | the creek check asks Open-Meteo about rain, and `/two` asks their sandbox; both fail closed when offline | `data/local.db` and `data/fhir_store`, empty at first |
+| `make dev` | the Python API on port 8000 with reload, and the site in dev mode on http://localhost:3100 (`WEB_PORT` moves it) | the creek check asks Open-Meteo about rain, and `/two` asks their sandbox; both fail closed when offline | `data/local.db` and `data/fhir_store`, empty at first |
 | `make demo-offline` | the same two servers on the same ports, after `scripts/seed_demo.py` fills `data/demo` | none: the seed refuses every socket to another machine and fails if one was tried; the servers get a proxy that goes nowhere | three made up creek checks on Strawberry Creek, two of them by people who passed the test and one with no score; one pipe worth testing; two test sittings that never count |
 | `docker compose up` | Postgres, the API and the web server, as in `docker-compose.yml` | as `make dev` | a Postgres volume |
 
@@ -202,7 +202,8 @@ a row names something the code no longer reads, or when a default below differs 
 | `NEXT_EXPORT` | not set | `apps/web/next.config.ts` | `1` builds the static export for Pages; `npm run export` sets it |
 | `NODE_ENV` | set by Next | `apps/web/next.config.ts`, `apps/web/components/SwRegister.tsx` | development relaxes the policy and skips the service worker |
 | `CI` | set by GitHub Actions | `apps/web/playwright.config.ts` | one retry for a Playwright test in CI, and a test that passes only on its retry still fails the run |
-| `PW_REUSE` | not set | `apps/web/playwright.config.ts`, `apps/web/scripts/design-check.mjs` | `1` lets Playwright use the server already on 3100; only the design check sets it, for the build it has just started there |
+| `WEB_PORT` | `3100` | `apps/web/scripts/web-port.mjs` (read by `apps/web/playwright.config.ts`, `apps/web/tests/helpers.ts`, the design check and the screen scripts), `apps/web/package.json` (`dev` and `start`), `Makefile`, `scripts/judge_check.py` | the port the web app serves on locally; `make judge-check` serves on it when it is free and on a free port it picks when not, and says which |
+| `PW_REUSE` | not set | `apps/web/playwright.config.ts`, `apps/web/scripts/design-check.mjs` | `1` lets Playwright use the server already on `WEB_PORT`; only the design check sets it, for the build it has just started there |
 | `SITE_URL` | none, must be set (the live site for `make panel-status`) | `apps/web/scripts/live-check.mjs`, `apps/web/scripts/live-readonly.mjs`, `scripts/panel_status.py` | the deployed site the phone checks drive, and the one whose counts `make panel-status` reads |
 | `GALLERY_LIVE_URL` | `https://second-look-79t.pages.dev` | `apps/web/scripts/gallery.mjs` | the live site `make screens` photographs, reading only |
 | `GALLERY_LOCAL_URL` | `http://127.0.0.1:3217` | `apps/web/scripts/gallery.mjs` | the local build with the mock API for the test flow's screens |
@@ -211,9 +212,9 @@ a row names something the code no longer reads, or when a default below differs 
 | `WALK_ID` | empty | `apps/web/scripts/live-readonly.mjs` | one walk to check by id |
 | `REQUIRE_THEIRS` | not set | `apps/web/scripts/live-readonly.mjs` | `1` fails the read only check when their record is missing |
 | `DEPLOYED_URL`, `DEPLOYED_API` | empty, so the spec skips | `apps/web/tests/deployed-smoke.spec.ts` | point the deployed smoke spec at a site |
-| `BUDGET_URL` | `http://127.0.0.1:3100` | `apps/web/scripts/budget.mjs` | the built site the landing budgets measure |
-| `LIGHTHOUSE_URL` | `http://127.0.0.1:3100/` | `apps/web/scripts/lighthouse.mjs` | the page Lighthouse measures |
-| `SCREENS_URL` | `http://127.0.0.1:3100` | `apps/web/scripts/screens.mjs` and the other screen scripts | the site the screenshots and clips are taken from |
+| `BUDGET_URL` | `http://127.0.0.1:3100`, or the `WEB_PORT` | `apps/web/scripts/budget.mjs` | the built site the landing budgets measure |
+| `LIGHTHOUSE_URL` | `http://127.0.0.1:3100/`, or the `WEB_PORT` | `apps/web/scripts/lighthouse.mjs` | the page Lighthouse measures |
+| `SCREENS_URL` | `http://127.0.0.1:3100`, or the `WEB_PORT` | `apps/web/scripts/screens.mjs` and the other screen scripts | the site the screenshots and clips are taken from |
 | `SKIP_TAP` | not set | `apps/web/scripts/design-check.mjs` | `1` skips the tap target measurement |
 | `POSTER_PORT` | `3102` | `apps/web/scripts/poster.mjs` | the port the poster is printed from |
 | `CLIPS_RAW` | a folder under `docs/video/clips` | `apps/web/scripts/record-clips.mjs` | where the raw screen recordings go |

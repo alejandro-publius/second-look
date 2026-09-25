@@ -4,10 +4,11 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { WEB_ORIGIN } from "./web-port.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, "..");
-const url = process.env.LIGHTHOUSE_URL || "http://127.0.0.1:3100/";
+const url = process.env.LIGHTHOUSE_URL || `${WEB_ORIGIN}/`;
 
 const which = spawnSync(process.platform === "win32" ? "where" : "which", ["lighthouse"], { encoding: "utf8" });
 if (which.status !== 0) {

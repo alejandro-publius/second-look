@@ -3,18 +3,21 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 PY := uv run python
 WEB := apps/web
+# The web server's port for make dev, make demo-offline, make e2e and the design check. WEB_PORT
+# moves it (apps/web/scripts/web-port.mjs reads the same name); make judge-check picks its own.
+WEB_PORT ?= 3100
 
 .PHONY: report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
 
-# npm run dev serves the site on 3100, so the API is told that origin, or the browser's calls fail
+# npm run dev serves the site on WEB_PORT, so the API is told that origin, or the browser's calls fail
 # CORS. The audit log line each stored check writes goes under data/, never to the tracked
 # audit/log.jsonl. make demo-offline below is the same with seeded data and no network.
 dev:
-	@echo "API on :8000, web on http://localhost:3100. Stop with Ctrl-C."
-	@bash -c 'trap "kill 0" EXIT; PUBLIC_WEB_ORIGIN=http://localhost:3100 AUDIT_LOG_PATH=$(CURDIR)/data/dev_audit.jsonl $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && npm run dev) & wait'
+	@echo "API on :8000, web on http://localhost:$(WEB_PORT). Stop with Ctrl-C."
+	@bash -c 'trap "kill 0" EXIT; PUBLIC_WEB_ORIGIN=http://localhost:$(WEB_PORT) AUDIT_LOG_PATH=$(CURDIR)/data/dev_audit.jsonl $(PY) -m uvicorn apps.api.main:app --reload --port 8000 & (cd $(WEB) && WEB_PORT=$(WEB_PORT) npm run dev) & wait'
 
 # The site and the API on this machine with no network and no key, on seeded demo data (UPDATE_27
 # block 24). scripts/seed_demo.py fills data/demo through the API's own routes with every socket
@@ -24,7 +27,7 @@ dev:
 # and one `npm ci` in apps/web beforehand, which are the only steps that use the network.
 DEMO_DIR := $(CURDIR)/data/demo
 DEMO_API_PORT ?= 8000
-DEMO_WEB_PORT ?= 3100
+DEMO_WEB_PORT ?= $(WEB_PORT)
 DEMO_ENV := ANTHROPIC_API_KEY= DATABASE_URL=sqlite:///$(DEMO_DIR)/demo.db FHIR_STORE_DIR=$(DEMO_DIR)/fhir_store UPLOAD_DIR=$(DEMO_DIR)/uploads AUDIT_LOG_PATH=$(DEMO_DIR)/audit.jsonl SANDBOX_CACHE_DIR=$(DEMO_DIR)/sandbox_cache QA_KEY= EXPORT_TOKEN= PUBLIC_WEB_ORIGIN=http://localhost:$(DEMO_WEB_PORT) HTTP_PROXY=http://127.0.0.1:9 HTTPS_PROXY=http://127.0.0.1:9 NO_PROXY=localhost,127.0.0.1 NEXT_TELEMETRY_DISABLED=1
 demo-offline:
 	env -u ANTHROPIC_API_KEY uv run --offline python scripts/seed_demo.py --out $(DEMO_DIR)
@@ -95,7 +98,7 @@ dash-check:
 # The look and feel gate from docs/internal/updates/UPDATE_06.md section 6. Runs after web-build because
 # the tap target measurement drives the built app on the phone viewport.
 design-check:
-	cd $(WEB) && node scripts/design-check.mjs
+	cd $(WEB) && WEB_PORT=$(WEB_PORT) node scripts/design-check.mjs
 
 verify-claims:
 	$(PY) scripts/verify_claims.py --synthetic
@@ -176,7 +179,7 @@ new-city:
 	$(PY) scripts/new_city.py --name "$(NAME)" --country "$(COUNTRY)" --lat $(LAT) --lon $(LON)
 
 e2e:
-	cd $(WEB) && npm run build --silent && npx playwright test
+	cd $(WEB) && npm run build --silent && WEB_PORT=$(WEB_PORT) npx playwright test
 
 smoke:
 	$(PY) scripts/smoke.py
@@ -226,7 +229,7 @@ ai-run:
 	$(PY) scripts/build_walks.py --no-clips
 	$(PY) evals/footage_pool.py
 
-# Update 14 section 7. Screen recordings (needs the built app on 3100), then the rough cut with a
+# Update 14 section 7. Screen recordings (needs the built app on WEB_PORT), then the rough cut with a
 # scratch voice. Nothing either writes is committed: they are video files.
 video-clips:
 	@mkdir -p docs/video/clips
@@ -262,9 +265,9 @@ reproduce:
 	env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN uv run --offline python evals/reproduce.py
 
 # The landing budgets from UPDATE_06 section 5 as Update 07 moved them. Needs the built app
-# running on 3100, so it is not inside make check.
+# running on WEB_PORT, so it is not inside make check.
 budget:
-	cd $(WEB) && node scripts/budget.mjs
+	cd $(WEB) && WEB_PORT=$(WEB_PORT) node scripts/budget.mjs
 
 backup:
 	bash scripts/backup_d1.sh

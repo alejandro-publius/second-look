@@ -1,6 +1,8 @@
 import { expect, type Page } from "@playwright/test";
+import { WEB_ORIGIN } from "../scripts/web-port.mjs";
 
-export const BASE = "http://127.0.0.1:3100";
+// The site under test: 3100 unless WEB_PORT moves it, the same origin as playwright.config.ts.
+export const BASE = WEB_ORIGIN;
 
 /** Consent: tick both boxes and start. Returns after the warm-up appears. */
 export async function passConsent(page: Page) {
