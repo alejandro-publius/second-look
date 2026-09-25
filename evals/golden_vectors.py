@@ -24,7 +24,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-from core import act, followups, healthcard, labels, regions, walks
+from core import act, assist, followups, healthcard, labels, regions, walks
 from core.content_loader import load_content
 from core.fhir_emit import check_bundle, emit_visit, fhir_id
 from core.fhir_referral import example_lab_result, referral_bundle
@@ -1104,6 +1104,77 @@ def helper_vectors() -> dict[str, Any]:
     }
 
 
+def assist_vectors() -> dict[str, Any]:
+    """Part 2: when the question appears, the stored row, and reading the flags file."""
+    flags = {
+        "items": [
+            {"item_id": "a01", "flag": {"points_to": "present"}},
+            {"item_id": "a02", "flag": {"points_to": "absent"}},
+            {"item_id": "a03", "flag": None},
+            {"item_id": "a04", "flag": {"points_to": "maybe"}},
+            {"item_id": "a05", "flag": "present"},
+            "junk",
+        ]
+    }
+    side_cases = [
+        case(f"{name} {item}", {"flags": doc, "item_id": item}, assist.flag_side(doc, item))
+        for name, doc in (("file", flags), ("not a mapping", ["a01"]), ("no items", {"x": 1}))
+        for item in ("a01", "a02", "a03", "a04", "a05", "a09")
+    ]
+    ask_cases = [
+        case(
+            f"{arm} {side} {first}",
+            {"arm": arm, "side": side, "first": first},
+            assist.question_needed(arm, side, first),
+        )
+        for arm in ("assisted", "unassisted", "other")
+        for side in ("present", "absent", None, "maybe")
+        for first in ("yes", "no", "cant_tell", "perhaps")
+    ]
+    settle_cases = []
+    for first in ("yes", "no", "cant_tell", "perhaps"):
+        for asked in (False, True):
+            for choice, changed_to in (
+                (None, None),
+                ("keep", None),
+                ("keep", first),
+                ("keep", "no"),
+                ("change", "yes"),
+                ("change", "cant_tell"),
+                ("change", None),
+                ("maybe", "yes"),
+            ):
+                try:
+                    got = assist.settle(first, asked=asked, choice=choice, changed_to=changed_to)
+                    expected: Any = {
+                        "first_answer": got.first_answer,
+                        "final_answer": got.final_answer,
+                        "question_shown": got.question_shown,
+                        "choice": got.choice,
+                    }
+                except assist.AssistError as e:
+                    expected = {"error": str(e)}
+                settle_cases.append(
+                    case(
+                        f"{first} asked={asked} {choice} {changed_to}",
+                        {
+                            "first": first,
+                            "asked": asked,
+                            "choice": choice,
+                            "changed_to": changed_to,
+                        },
+                        expected,
+                    )
+                )
+    return {
+        "function": "assist",
+        "flag_side": side_cases,
+        "question_needed": ask_cases,
+        "settle": settle_cases,
+        "question": assist.QUESTION,
+    }
+
+
 def build() -> dict[str, dict[str, Any]]:
     content = load_content(ROOT, strict=True)
     form_items = list(content.form.get("items", []))
@@ -1147,6 +1218,7 @@ def build() -> dict[str, dict[str, Any]]:
         "fhir_emit": fhir_vectors(),
         "walks": walk_vectors(),
         "helpers": helper_vectors(),
+        "assist": assist_vectors(),
     }
 
 

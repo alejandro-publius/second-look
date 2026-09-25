@@ -1,0 +1,1607 @@
+{
+  "flag_side": [
+    {
+      "expected": "present",
+      "input": {
+        "flags": {
+          "items": [
+            {
+              "flag": {
+                "points_to": "present"
+              },
+              "item_id": "a01"
+            },
+            {
+              "flag": {
+                "points_to": "absent"
+              },
+              "item_id": "a02"
+            },
+            {
+              "flag": null,
+              "item_id": "a03"
+            },
+            {
+              "flag": {
+                "points_to": "maybe"
+              },
+              "item_id": "a04"
+            },
+            {
+              "flag": "present",
+              "item_id": "a05"
+            },
+            "junk"
+          ]
+        },
+        "item_id": "a01"
+      },
+      "name": "file a01"
+    },
+    {
+      "expected": "absent",
+      "input": {
+        "flags": {
+          "items": [
+            {
+              "flag": {
+                "points_to": "present"
+              },
+              "item_id": "a01"
+            },
+            {
+              "flag": {
+                "points_to": "absent"
+              },
+              "item_id": "a02"
+            },
+            {
+              "flag": null,
+              "item_id": "a03"
+            },
+            {
+              "flag": {
+                "points_to": "maybe"
+              },
+              "item_id": "a04"
+            },
+            {
+              "flag": "present",
+              "item_id": "a05"
+            },
+            "junk"
+          ]
+        },
+        "item_id": "a02"
+      },
+      "name": "file a02"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "items": [
+            {
+              "flag": {
+                "points_to": "present"
+              },
+              "item_id": "a01"
+            },
+            {
+              "flag": {
+                "points_to": "absent"
+              },
+              "item_id": "a02"
+            },
+            {
+              "flag": null,
+              "item_id": "a03"
+            },
+            {
+              "flag": {
+                "points_to": "maybe"
+              },
+              "item_id": "a04"
+            },
+            {
+              "flag": "present",
+              "item_id": "a05"
+            },
+            "junk"
+          ]
+        },
+        "item_id": "a03"
+      },
+      "name": "file a03"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "items": [
+            {
+              "flag": {
+                "points_to": "present"
+              },
+              "item_id": "a01"
+            },
+            {
+              "flag": {
+                "points_to": "absent"
+              },
+              "item_id": "a02"
+            },
+            {
+              "flag": null,
+              "item_id": "a03"
+            },
+            {
+              "flag": {
+                "points_to": "maybe"
+              },
+              "item_id": "a04"
+            },
+            {
+              "flag": "present",
+              "item_id": "a05"
+            },
+            "junk"
+          ]
+        },
+        "item_id": "a04"
+      },
+      "name": "file a04"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "items": [
+            {
+              "flag": {
+                "points_to": "present"
+              },
+              "item_id": "a01"
+            },
+            {
+              "flag": {
+                "points_to": "absent"
+              },
+              "item_id": "a02"
+            },
+            {
+              "flag": null,
+              "item_id": "a03"
+            },
+            {
+              "flag": {
+                "points_to": "maybe"
+              },
+              "item_id": "a04"
+            },
+            {
+              "flag": "present",
+              "item_id": "a05"
+            },
+            "junk"
+          ]
+        },
+        "item_id": "a05"
+      },
+      "name": "file a05"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "items": [
+            {
+              "flag": {
+                "points_to": "present"
+              },
+              "item_id": "a01"
+            },
+            {
+              "flag": {
+                "points_to": "absent"
+              },
+              "item_id": "a02"
+            },
+            {
+              "flag": null,
+              "item_id": "a03"
+            },
+            {
+              "flag": {
+                "points_to": "maybe"
+              },
+              "item_id": "a04"
+            },
+            {
+              "flag": "present",
+              "item_id": "a05"
+            },
+            "junk"
+          ]
+        },
+        "item_id": "a09"
+      },
+      "name": "file a09"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": [
+          "a01"
+        ],
+        "item_id": "a01"
+      },
+      "name": "not a mapping a01"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": [
+          "a01"
+        ],
+        "item_id": "a02"
+      },
+      "name": "not a mapping a02"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": [
+          "a01"
+        ],
+        "item_id": "a03"
+      },
+      "name": "not a mapping a03"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": [
+          "a01"
+        ],
+        "item_id": "a04"
+      },
+      "name": "not a mapping a04"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": [
+          "a01"
+        ],
+        "item_id": "a05"
+      },
+      "name": "not a mapping a05"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": [
+          "a01"
+        ],
+        "item_id": "a09"
+      },
+      "name": "not a mapping a09"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "x": 1
+        },
+        "item_id": "a01"
+      },
+      "name": "no items a01"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "x": 1
+        },
+        "item_id": "a02"
+      },
+      "name": "no items a02"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "x": 1
+        },
+        "item_id": "a03"
+      },
+      "name": "no items a03"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "x": 1
+        },
+        "item_id": "a04"
+      },
+      "name": "no items a04"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "x": 1
+        },
+        "item_id": "a05"
+      },
+      "name": "no items a05"
+    },
+    {
+      "expected": null,
+      "input": {
+        "flags": {
+          "x": 1
+        },
+        "item_id": "a09"
+      },
+      "name": "no items a09"
+    }
+  ],
+  "function": "assist",
+  "generated_by": "evals/golden_vectors.py",
+  "question": "The checker noticed something here. Look again?",
+  "question_needed": [
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "yes",
+        "side": "present"
+      },
+      "name": "assisted present yes"
+    },
+    {
+      "expected": true,
+      "input": {
+        "arm": "assisted",
+        "first": "no",
+        "side": "present"
+      },
+      "name": "assisted present no"
+    },
+    {
+      "expected": true,
+      "input": {
+        "arm": "assisted",
+        "first": "cant_tell",
+        "side": "present"
+      },
+      "name": "assisted present cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "perhaps",
+        "side": "present"
+      },
+      "name": "assisted present perhaps"
+    },
+    {
+      "expected": true,
+      "input": {
+        "arm": "assisted",
+        "first": "yes",
+        "side": "absent"
+      },
+      "name": "assisted absent yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "no",
+        "side": "absent"
+      },
+      "name": "assisted absent no"
+    },
+    {
+      "expected": true,
+      "input": {
+        "arm": "assisted",
+        "first": "cant_tell",
+        "side": "absent"
+      },
+      "name": "assisted absent cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "perhaps",
+        "side": "absent"
+      },
+      "name": "assisted absent perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "yes",
+        "side": null
+      },
+      "name": "assisted None yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "no",
+        "side": null
+      },
+      "name": "assisted None no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "cant_tell",
+        "side": null
+      },
+      "name": "assisted None cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "perhaps",
+        "side": null
+      },
+      "name": "assisted None perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "yes",
+        "side": "maybe"
+      },
+      "name": "assisted maybe yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "no",
+        "side": "maybe"
+      },
+      "name": "assisted maybe no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "cant_tell",
+        "side": "maybe"
+      },
+      "name": "assisted maybe cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "assisted",
+        "first": "perhaps",
+        "side": "maybe"
+      },
+      "name": "assisted maybe perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "yes",
+        "side": "present"
+      },
+      "name": "unassisted present yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "no",
+        "side": "present"
+      },
+      "name": "unassisted present no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "cant_tell",
+        "side": "present"
+      },
+      "name": "unassisted present cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "perhaps",
+        "side": "present"
+      },
+      "name": "unassisted present perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "yes",
+        "side": "absent"
+      },
+      "name": "unassisted absent yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "no",
+        "side": "absent"
+      },
+      "name": "unassisted absent no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "cant_tell",
+        "side": "absent"
+      },
+      "name": "unassisted absent cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "perhaps",
+        "side": "absent"
+      },
+      "name": "unassisted absent perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "yes",
+        "side": null
+      },
+      "name": "unassisted None yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "no",
+        "side": null
+      },
+      "name": "unassisted None no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "cant_tell",
+        "side": null
+      },
+      "name": "unassisted None cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "perhaps",
+        "side": null
+      },
+      "name": "unassisted None perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "yes",
+        "side": "maybe"
+      },
+      "name": "unassisted maybe yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "no",
+        "side": "maybe"
+      },
+      "name": "unassisted maybe no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "cant_tell",
+        "side": "maybe"
+      },
+      "name": "unassisted maybe cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "unassisted",
+        "first": "perhaps",
+        "side": "maybe"
+      },
+      "name": "unassisted maybe perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "yes",
+        "side": "present"
+      },
+      "name": "other present yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "no",
+        "side": "present"
+      },
+      "name": "other present no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "cant_tell",
+        "side": "present"
+      },
+      "name": "other present cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "perhaps",
+        "side": "present"
+      },
+      "name": "other present perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "yes",
+        "side": "absent"
+      },
+      "name": "other absent yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "no",
+        "side": "absent"
+      },
+      "name": "other absent no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "cant_tell",
+        "side": "absent"
+      },
+      "name": "other absent cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "perhaps",
+        "side": "absent"
+      },
+      "name": "other absent perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "yes",
+        "side": null
+      },
+      "name": "other None yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "no",
+        "side": null
+      },
+      "name": "other None no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "cant_tell",
+        "side": null
+      },
+      "name": "other None cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "perhaps",
+        "side": null
+      },
+      "name": "other None perhaps"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "yes",
+        "side": "maybe"
+      },
+      "name": "other maybe yes"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "no",
+        "side": "maybe"
+      },
+      "name": "other maybe no"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "cant_tell",
+        "side": "maybe"
+      },
+      "name": "other maybe cant_tell"
+    },
+    {
+      "expected": false,
+      "input": {
+        "arm": "other",
+        "first": "perhaps",
+        "side": "maybe"
+      },
+      "name": "other maybe perhaps"
+    }
+  ],
+  "settle": [
+    {
+      "expected": {
+        "choice": "",
+        "final_answer": "yes",
+        "first_answer": "yes",
+        "question_shown": false
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": null,
+        "first": "yes"
+      },
+      "name": "yes asked=False None None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "yes"
+      },
+      "name": "yes asked=False keep None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "keep",
+        "first": "yes"
+      },
+      "name": "yes asked=False keep yes"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "yes"
+      },
+      "name": "yes asked=False keep no"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "yes"
+      },
+      "name": "yes asked=False change yes"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "yes"
+      },
+      "name": "yes asked=False change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "change",
+        "first": "yes"
+      },
+      "name": "yes asked=False change None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "yes"
+      },
+      "name": "yes asked=False maybe yes"
+    },
+    {
+      "expected": {
+        "error": "Choose Keep or Change."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": null,
+        "first": "yes"
+      },
+      "name": "yes asked=True None None"
+    },
+    {
+      "expected": {
+        "choice": "keep",
+        "final_answer": "yes",
+        "first_answer": "yes",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "yes"
+      },
+      "name": "yes asked=True keep None"
+    },
+    {
+      "expected": {
+        "choice": "keep",
+        "final_answer": "yes",
+        "first_answer": "yes",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "keep",
+        "first": "yes"
+      },
+      "name": "yes asked=True keep yes"
+    },
+    {
+      "expected": {
+        "error": "Keep keeps the first answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "yes"
+      },
+      "name": "yes asked=True keep no"
+    },
+    {
+      "expected": {
+        "choice": "change",
+        "final_answer": "yes",
+        "first_answer": "yes",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "yes"
+      },
+      "name": "yes asked=True change yes"
+    },
+    {
+      "expected": {
+        "choice": "change",
+        "final_answer": "cant_tell",
+        "first_answer": "yes",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "yes"
+      },
+      "name": "yes asked=True change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "change",
+        "first": "yes"
+      },
+      "name": "yes asked=True change None"
+    },
+    {
+      "expected": {
+        "error": "Choose Keep or Change."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "yes"
+      },
+      "name": "yes asked=True maybe yes"
+    },
+    {
+      "expected": {
+        "choice": "",
+        "final_answer": "no",
+        "first_answer": "no",
+        "question_shown": false
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": null,
+        "first": "no"
+      },
+      "name": "no asked=False None None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "no"
+      },
+      "name": "no asked=False keep None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "no"
+      },
+      "name": "no asked=False keep no"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "no"
+      },
+      "name": "no asked=False keep no"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "no"
+      },
+      "name": "no asked=False change yes"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "no"
+      },
+      "name": "no asked=False change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "change",
+        "first": "no"
+      },
+      "name": "no asked=False change None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "no"
+      },
+      "name": "no asked=False maybe yes"
+    },
+    {
+      "expected": {
+        "error": "Choose Keep or Change."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": null,
+        "first": "no"
+      },
+      "name": "no asked=True None None"
+    },
+    {
+      "expected": {
+        "choice": "keep",
+        "final_answer": "no",
+        "first_answer": "no",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "no"
+      },
+      "name": "no asked=True keep None"
+    },
+    {
+      "expected": {
+        "choice": "keep",
+        "final_answer": "no",
+        "first_answer": "no",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "no"
+      },
+      "name": "no asked=True keep no"
+    },
+    {
+      "expected": {
+        "choice": "keep",
+        "final_answer": "no",
+        "first_answer": "no",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "no"
+      },
+      "name": "no asked=True keep no"
+    },
+    {
+      "expected": {
+        "choice": "change",
+        "final_answer": "yes",
+        "first_answer": "no",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "no"
+      },
+      "name": "no asked=True change yes"
+    },
+    {
+      "expected": {
+        "choice": "change",
+        "final_answer": "cant_tell",
+        "first_answer": "no",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "no"
+      },
+      "name": "no asked=True change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "change",
+        "first": "no"
+      },
+      "name": "no asked=True change None"
+    },
+    {
+      "expected": {
+        "error": "Choose Keep or Change."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "no"
+      },
+      "name": "no asked=True maybe yes"
+    },
+    {
+      "expected": {
+        "choice": "",
+        "final_answer": "cant_tell",
+        "first_answer": "cant_tell",
+        "question_shown": false
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": null,
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False None None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False keep None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "cant_tell",
+        "choice": "keep",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False keep cant_tell"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False keep no"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False change yes"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "change",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False change None"
+    },
+    {
+      "expected": {
+        "error": "No question was asked for this photo, so there is nothing to choose."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=False maybe yes"
+    },
+    {
+      "expected": {
+        "error": "Choose Keep or Change."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": null,
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True None None"
+    },
+    {
+      "expected": {
+        "choice": "keep",
+        "final_answer": "cant_tell",
+        "first_answer": "cant_tell",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True keep None"
+    },
+    {
+      "expected": {
+        "choice": "keep",
+        "final_answer": "cant_tell",
+        "first_answer": "cant_tell",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "cant_tell",
+        "choice": "keep",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True keep cant_tell"
+    },
+    {
+      "expected": {
+        "error": "Keep keeps the first answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True keep no"
+    },
+    {
+      "expected": {
+        "choice": "change",
+        "final_answer": "yes",
+        "first_answer": "cant_tell",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True change yes"
+    },
+    {
+      "expected": {
+        "choice": "change",
+        "final_answer": "cant_tell",
+        "first_answer": "cant_tell",
+        "question_shown": true
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "change",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True change None"
+    },
+    {
+      "expected": {
+        "error": "Choose Keep or Change."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "cant_tell"
+      },
+      "name": "cant_tell asked=True maybe yes"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": null,
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False None None"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False keep None"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "perhaps",
+        "choice": "keep",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False keep perhaps"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False keep no"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False change yes"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": null,
+        "choice": "change",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False change None"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": false,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=False maybe yes"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": null,
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True None None"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "keep",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True keep None"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "perhaps",
+        "choice": "keep",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True keep perhaps"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "no",
+        "choice": "keep",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True keep no"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "change",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True change yes"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "cant_tell",
+        "choice": "change",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True change cant_tell"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": null,
+        "choice": "change",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True change None"
+    },
+    {
+      "expected": {
+        "error": "We do not know that answer."
+      },
+      "input": {
+        "asked": true,
+        "changed_to": "yes",
+        "choice": "maybe",
+        "first": "perhaps"
+      },
+      "name": "perhaps asked=True maybe yes"
+    }
+  ]
+}

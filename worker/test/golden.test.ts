@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 
 import CONTENT from "../src/content.json";
 import { downstreamNote, findingsFromVisits, looksLikeATestName, metresBetween, nearestSpot, needsFromFindings, notesBelow, pipesWorthTesting } from "../src/core/act";
+import { AssistError, QUESTION, flagSide, questionNeeded, settle } from "../src/core/assist";
 import { checkBundle, emitVisit, fhirId } from "../src/core/fhir_emit";
 import { exampleLabResult, isExample, referralBundle } from "../src/core/fhir_referral";
 import { selectFollowups } from "../src/core/followups";
@@ -71,6 +72,23 @@ test("helpers: sha256, Python rounding, fhir_id", () => {
   for (const c of doc.sha256) same(sha256Hex(c.input.text), c.expected, `sha256 ${c.name}`);
   for (const c of doc.round) same(pyRound(c.input.value, c.input.digits), c.expected, `round ${c.name}`);
   for (const c of doc.fhir_id) same(fhirId(...c.input.parts), c.expected, `fhir_id ${c.name}`);
+});
+
+test("assist: part 2's question and the stored row, the flag never an answer", () => {
+  const doc = golden("assist");
+  same(QUESTION, doc.question, "the question's words");
+  for (const c of doc.flag_side) same(flagSide(c.input.flags, c.input.item_id), c.expected, `flag_side ${c.name}`);
+  for (const c of doc.question_needed) same(questionNeeded(c.input.arm, c.input.side, c.input.first), c.expected, `ask ${c.name}`);
+  for (const c of doc.settle) {
+    let got: unknown;
+    try {
+      got = settle(c.input.first, c.input.asked, c.input.choice, c.input.changed_to);
+    } catch (e) {
+      if (!(e instanceof AssistError)) throw e;
+      got = { error: e.message };
+    }
+    same(got, c.expected, `settle ${c.name}`);
+  }
 });
 
 test("followups: the selector, over the repository's own table and form", () => {
