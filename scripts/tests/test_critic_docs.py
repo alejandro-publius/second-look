@@ -84,6 +84,23 @@ def test_no_page_says_the_repush_job_runs_on_set_days() -> None:
     assert said == [], said
 
 
+def test_known_weaknesses_says_the_test_photos_have_smaller_copies_when_they_do() -> None:
+    # E02: it said only the landing page and the poster got smaller copies, while a phone keeps a
+    # 640 pixel copy of every test photo for a sitting that loses the network.
+    import csv
+
+    items = yaml.safe_load(text(ROOT / "content" / "test_items.yaml"))["items"]
+    with (ROOT / "photos" / "offline" / "manifest.csv").open(encoding="utf-8") as f:
+        copied = {row["source_id"] for row in csv.DictReader(f)}
+    assert {i["photo_id"] for i in items} <= copied, "a test photo has no offline copy"
+    weak = heading_body(text(README), "Known weaknesses")
+    about = [s for s in sentences(weak) if "smaller cop" in s]
+    assert about, "Known weaknesses no longer says where the smaller copies are"
+    wrong = [s for s in about if re.search(r"\bonly the landing page and the poster got\b", s)]
+    assert wrong == [], wrong
+    assert any(re.search(r"\bkeeps a smaller copy of each test\b", s) for s in about), about
+
+
 def test_a_readme_section_in_the_report_names_only_sections_the_report_has() -> None:
     # A05: the report took "What the AI cannot do" from the README, and it sent the reader to
     # "The gate, the heart of it", a README heading the report does not have (its 2.2 is "The
