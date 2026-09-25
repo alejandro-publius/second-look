@@ -8,8 +8,8 @@ origin. The **Python API** (`apps/api/`, FastAPI) is the reference: the tests, t
 
 `scripts/api_inventory.py` reads both route lists out of the code, and
 `scripts/tests/test_api_docs.py` fails when a route has no row below, or a row has no route.
-The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->27<!--/v--> routes
-and the Python API <!--v:results/api_inventory.json#/python/count-->28<!--/v-->
+The counts: the Worker answers <!--v:results/api_inventory.json#/worker/count-->28<!--/v--> routes
+and the Python API <!--v:results/api_inventory.json#/python/count-->29<!--/v-->
 (`results/api_inventory.json`).
 
 Every answer is JSON unless the row says otherwise. An error is `{"detail": "..."}` in plain
