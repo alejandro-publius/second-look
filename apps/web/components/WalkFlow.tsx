@@ -32,11 +32,16 @@ function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
   return content.form.items.filter((item) => !item.depends_on || answers[item.depends_on.item] === item.depends_on.value);
 }
 
+/**
+ * The clip, with its poster until the person presses play. preload="none" asks for no byte of the
+ * video before then: the host answers a range request with the whole file, so even "metadata"
+ * pulled megabytes on page open and slowed a phone on a slow line (judge walk W05).
+ */
 function Clip({ walk }: { walk: Walk }) {
   const poster = content.photos[walk.poster_photo_id];
   return (
     <figure className="stack walk-figure">
-      <video className="walk-clip" controls muted playsInline preload="metadata" poster={poster?.url} aria-label={t("walk.clip_label", { creek: walk.creek_name })}>
+      <video className="walk-clip" controls muted playsInline preload="none" poster={poster?.url} aria-label={t("walk.clip_label", { creek: walk.creek_name })}>
         <source src={`/${walk.clip.file}`} type="video/mp4" />
         <Photo id={walk.poster_photo_id} />
       </video>

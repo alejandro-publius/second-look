@@ -51,6 +51,26 @@ test("the walks are said to be somewhere else, not from another country", async 
   }
 });
 
+// Judge walk W05: the host answers a range request with the whole clip, so even preload
+// "metadata" pulled megabytes on page open, before anyone pressed play. Now the clip asks for no
+// byte until play, and its poster shows in its place.
+test("a walk's clip loads nothing before play and shows its poster", async ({ page }) => {
+  await mockApi(page, {});
+  const clips: string[] = [];
+  page.on("request", (r) => {
+    if (/\/walks\/[^/?]+\.mp4/.test(r.url())) clips.push(r.url());
+  });
+  for (const w of content.walks as { id: string; poster_photo_id: string }[]) {
+    await page.goto(`${BASE}/walk/${w.id}`);
+    const video = page.locator("video.walk-clip");
+    await expect(video).toHaveAttribute("preload", "none");
+    await expect(video).toHaveAttribute("poster", content.photos[w.poster_photo_id].url);
+    await page.waitForLoadState("networkidle");
+    expect(await video.evaluate((v: HTMLVideoElement) => v.readyState), w.id).toBe(0);
+  }
+  expect(clips, "clip bytes asked for before play").toEqual([]);
+});
+
 // UPDATE_30 section 1 item 3: the finished walk now goes to the walk store, once, as a demo
 // record, and to nothing else: no creek check, no upload, no quick check.
 test("a walk shows its credit, builds a demo record on the phone, and sends it to the walk store only", async ({ page }) => {
