@@ -51,6 +51,10 @@ the first paid model run on Sep 23. The dates here are Pacific time.
 
 {{section:README.md#What the AI cannot do}}
 
+### 2.4 Three properties that follow
+
+{{section:README.md#Three properties that follow}}
+
 ## 3. Evidence
 
 All numbers below come from files in `results/`, written by the scripts in `evals/` and checked
@@ -84,13 +88,13 @@ One creek visit becomes these resources (`docs/fhir_mapping.md`):
 
 {{section:docs/fhir_mapping.md#Codes: theirs where they exist, ours where they do not}}
 
+### One Digital Health and FAIR
+
+{{section:README.md#One Digital Health and FAIR}}
+
 ## 5. Limitations
 
 {{section:README.md#Known weaknesses}}
-
-The labels have a limit of their own. The test key came from the photo picks, with one labeller,
-and no blind second label exists yet (`docs/DATA_CARD.md`). Until one does, read every accuracy
-figure here as agreement with this key.
 
 ## 6. Contributions
 

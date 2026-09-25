@@ -136,7 +136,7 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 
 ## What the AI cannot do
 
-It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate's steps below say how, and Three properties that follow names the test for each. Two more limits:
+It cannot write the record. It cannot speak on a feature it did not pass, or on a made-up pass table. It cannot ask more than one question, or ask before the person answers. The gate, the heart of it, says how, and Three properties that follow names the test for each. Two more limits:
 
 | It cannot | Enforced by | Test |
 |---|---|---|
@@ -448,7 +448,7 @@ OneAquaHealth says citizen data should stand beside lab data under the same prof
 | The HL7 validator with their guide, terminology on | Sample records from both emitters in CI; golden vectors hold the live emitter to them | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`fhir/ig.lock`](fhir/ig.lock) |
 | Their sandbox | Conditional creates with our tag and a ledger, and a Library entry for the data set | [`scripts/repush_sandbox.py`](scripts/repush_sandbox.py), [`fhir/sandbox_ledger.jsonl`](fhir/sandbox_ledger.jsonl) |
 | Their decision tool's measures | What a creek needs, in their words, from the Policy Brief, page 9 | [`content/approved_sentences.yaml`](content/approved_sentences.yaml), `/city` |
-| The five One Digital Health dimensions and FAIR | Stated in words below | this section |
+| The five One Digital Health dimensions and FAIR | Stated in words under One Digital Health and FAIR | this section |
 | The follower city recipe | `make new-city NAME=Aarhus COUNTRY=Denmark LAT=56.1629 LON=10.2039` scaffolds a new city in seconds; Heraklion was made that way, as a dry example | [`scripts/new_city.py`](scripts/new_city.py), [`docs/cities/`](docs/cities/) |
 | Their SpecimenOah profile | The shape of a laboratory result coming back to a volunteer's pipe, marked EXAMPLE | [`core/fhir_referral.py`](core/fhir_referral.py) |
 | Not theirs: iNaturalist's public API, under its [terms](https://www.inaturalist.org/pages/terms); each observation keeps its observer's licence | One context line per creek, research grade sightings of the region's listed invasive plants near its spots, shown once a finished check on that creek has answered the plant question, never in the check and never counted; the Bay Area list waits on a check, so it reports none yet. | [`docs/adr/0011-inaturalist-context.md`](docs/adr/0011-inaturalist-context.md) |
