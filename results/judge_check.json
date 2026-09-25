@@ -1,18 +1,18 @@
 {
-  "commit": "aaf4987",
-  "ran_at_utc": "2026-09-25T19:33:15Z",
+  "commit": "c28bb88",
+  "ran_at_utc": "2026-09-25T20:17:48Z",
   "steps": [
     {
       "name": "tests",
       "ok": true,
-      "text": "python: 2198 passed, 3 skipped, 9 xfailed in 229.00s (0:03:49); worker: pass 16",
-      "seconds": 245
+      "text": "python: 2319 passed, 2 skipped, 9 xfailed in 228.59s (0:03:48); worker: pass 17",
+      "seconds": 231
     },
     {
       "name": "reproduce",
       "ok": true,
       "text": "reproduce: 28603 values in 23 files regraded from raw replies and seeds, with no network and no key; every one matches; 3 files not regraded and 5 notes, each named above; note on results/benchmark_20260924T031225Z.json and results/benchmark_20260924T054939Z.json: the right-answer counts per feature, the share of cant_tell answers and the count of malformed replies are as recorded: the run kept counts, not answers, so no reply is left to grade them from; the accuracies, intervals and cost are regraded; note on results/footage_20260924T032230Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 144 calls is regraded; note on results/footage_20260924T060539Z.json: the run kept only each model's majority answer on the adversarial frames, so those answers are as recorded; the cost of their 192 calls is regraded; note on results/cost_log.jsonl: 41.11 USD paid in all, every line accounted for; note on results/ablation_20260921T001415Z.json: not regraded: its rule stub is keyed to the bytes of gray placeholder images the repository no longer has; note on results/consensus_synthetic.json: not regraded: made by an earlier rule of evals/consensus.py that was dropped as biased (docs/DECISIONS.md, 2026-09-23); today's script makes a different file; note on results/agreement_20260921T001415Z.json: not regraded: no model and no seed: it counts the two label columns of the photo manifest as it stood on Sep 20, with 18 gray placeholders the repository no longer has",
-      "seconds": 28
+      "seconds": 23
     },
     {
       "name": "fhir",
@@ -23,8 +23,8 @@
     {
       "name": "web",
       "ok": true,
-      "text": "next build ok; design-check: clean. 89 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.0s).; served on port 4817, which is free again",
-      "seconds": 15
+      "text": "next build ok; design-check: clean. 91 source files and 23 content files scanned, contrast computed from tokens.css, tap targets 3 passed (3.3s).; served on port 3100, which is free again",
+      "seconds": 11
     },
     {
       "name": "audit log",
@@ -36,9 +36,9 @@
       "name": "secrets",
       "ok": true,
       "text": "working tree: nothing shaped like a live key; gitleaks: history clean",
-      "seconds": 5
+      "seconds": 7
     }
   ],
-  "seconds": 294,
+  "seconds": 274,
   "last": "judge-check: 6 of 6 steps passed, offline, with no key"
 }
