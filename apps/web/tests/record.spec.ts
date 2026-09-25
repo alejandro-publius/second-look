@@ -237,6 +237,22 @@ test("/city with no creek says so rather than showing an empty page", async ({ p
   await expect(page.getByText("Nobody has checked this creek yet.")).toBeVisible();
 });
 
+// CRITIC_09 R05: /city?creek=<unknown> said "Something did not send", though nothing was sent and
+// the API had answered in its own words. A 404 now shows that sentence; a server error says the
+// server could not take it, and only a failed connection speaks of the connection.
+test("/city with a creek the API does not know shows the API's own sentence", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/city?creek=no-such-creek");
+  await expect(page.getByRole("status")).toHaveText("We have no record for that creek yet.");
+  await expect(page.getByText("Something did not send")).toHaveCount(0);
+  await page.route("**/api/city/**", (route) => route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ detail: "boom" }) }));
+  await page.goto("/city?creek=no-such-creek");
+  await expect(page.getByRole("status")).toHaveText("The server could not take that. Try again in a moment.");
+  await page.route("**/api/city/**", (route) => route.abort());
+  await page.goto("/city?creek=no-such-creek");
+  await expect(page.getByRole("status")).toHaveText("Something did not send. Check your connection and try again.");
+});
+
 // /two shows a volunteer record beside a laboratory reading from another place, so the door must
 // not promise the same creek (REVIEW_03 R34).
 test("the judges' door names /two for what it shows", async ({ page }) => {

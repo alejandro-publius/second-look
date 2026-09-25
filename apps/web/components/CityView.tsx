@@ -6,7 +6,7 @@ import { InatContext } from "./InatContext";
 import { Icon } from "./ui/Icon";
 import { Row } from "./ui/Row";
 import { Skeleton } from "./ui/Skeleton";
-import { api, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
+import { api, ApiError, isNetworkError, type CityOut, type CityPipe, type FhirResource } from "@/lib/api";
 import { t } from "@/lib/t";
 import { reasonsThenSource } from "@/lib/text";
 
@@ -140,7 +140,13 @@ export function CityView({ creekId }: { creekId: string }) {
     api
       .city(creekId)
       .then((v) => live && setView(v))
-      .catch(() => live && setError(t("error.network")));
+      .catch((err) => {
+        if (!live) return;
+        // A 404 says in the API's own words that it has no record of the creek. Nothing was sent,
+        // so "Something did not send" would be untrue (CRITIC_09 R05).
+        if (err instanceof ApiError && err.status === 404 && err.detail) setError(err.detail);
+        else setError(isNetworkError(err) ? t("error.network") : t("error.server"));
+      });
     return () => {
       live = false;
     };
