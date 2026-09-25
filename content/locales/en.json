@@ -399,7 +399,7 @@
   "verify.anchor_unchecked": "Named in Bitcoin block {height}, not checked yet.",
   "verify.ots_title": "Timestamps anyone can check",
   "verify.ots_what": "OpenTimestamps is a public timestamp service. It is not ours, and it is not our own chain. It takes the hash of a file, gathers it with many others, and writes one summary of them into Bitcoin. Once that is in a block, anyone can show the file existed by that block's time. Only the hash is sent, never the file.",
-  "verify.ots_why": "We stamped the analysis plan and its tag before the study data was locked. We stamp the last receipt of the audit log once a day, which covers every line before it too.",
+  "verify.ots_why": "We stamped the analysis plan and its tag before the study data was locked. Once a day we stamp the audit log's last receipt, if it has changed since the last stamp. A stamp on the last receipt covers every line before it too.",
   "verify.proof.prereg_tag": "The tag prereg-v1, which fixes the analysis plan in git",
   "verify.proof.analysis_plan": "The analysis plan",
   "verify.proof.audit_head": "The audit log up to line {seq}",

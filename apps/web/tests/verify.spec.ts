@@ -45,6 +45,10 @@ test("verify: says what OpenTimestamps is, and shows each proof's status from re
   const text = await page.locator("main").innerText();
   expect(text.match(/blockchain/gi) ?? []).toHaveLength(1);
   expect(text).toContain("This is an audit log, not a blockchain.");
+  // CRITIC_10 S02: a day with no new line gets no new stamp (scripts/anchor_audit_head.py), so the
+  // page does not say the log is stamped every day.
+  expect(text).toContain("Once a day we stamp the audit log's last receipt, if it has changed since the last stamp.");
+  expect(text).not.toContain("once a day, which");
   for (const what of ["prereg_tag", "analysis_plan"]) {
     const p = ots.proofs.find((x) => x.what === what);
     expect(p, `results/ots.json has no ${what} proof`).toBeTruthy();
