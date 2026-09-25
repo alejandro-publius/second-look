@@ -56,3 +56,15 @@ def test_the_evals_section_names_the_numbers_checked_only_as_recorded() -> None:
     named = line[line.index("checked as recorded") :]
     for words in ("right-answer counts", "can't tell", "malformed"):
         assert words in named, words
+
+
+def test_the_judge_mode_risk_row_says_what_happens_after_the_lock() -> None:
+    # R03: the row said only what stops the leak before the lock; the key can be rebuilt after it.
+    readme = text(README)
+    row = next(
+        ln for ln in readme.splitlines() if ln.startswith("| Judge mode leaks the answer key")
+    )
+    assert "Before the lock" in row and "After the lock" in row, row
+    assert "docs/THREAT_MODEL.md" in row
+    weak = section(readme, "Known weaknesses")
+    assert "The answer key can be rebuilt after the lock" in weak
