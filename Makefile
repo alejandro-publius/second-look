@@ -296,6 +296,12 @@ screens:
 deploy:
 	bash scripts/deploy.sh
 
+# UPDATE_30 section 7.2: the last known good Worker version and Pages build, from the deploy
+# record in docs/notes/hosting.md. A dry run that prints what it would do, unless ROLLBACK=yes.
+.PHONY: rollback
+rollback:
+	$(PY) scripts/rollback.py $(if $(filter yes,$(ROLLBACK)),--yes,)
+
 # The depth branch's own preview on Cloudflare Pages (Update 10 rule B and answer A1). The export
 # is built with an empty API origin, so the browser talks to one origin and the API is reached
 # through /api/* by the Pages Function and the service binding in apps/web/wrangler.jsonc. This
