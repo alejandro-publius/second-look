@@ -19,7 +19,7 @@ The phone screens of Second Look, in one drawn frame, captured by `make screens`
 <td align="center"><img src="walks.webp" width="200" alt="Check a creek from your desk: one short clip of a creek for each country."><br>Walks<br><code>/walk</code></td>
 <td align="center"><img src="walk.webp" width="200" alt="A walk: the clip of a creek, with its credit, and a button to start the check."><br>A walk<br><code>/walk/v02</code></td>
 <td align="center"><img src="walk-in-progress.webp" width="200" alt="A walk in progress: a question about the creek in the clip, with a progress count."><br>A walk in progress<br><code>/walk/v02</code></td>
-<td align="center"><img src="walk-record.webp" width="200" alt="The record from the walk, made on the phone and never sent, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
+<td align="center"><img src="walk-record.webp" width="200" alt="The record from the walk, tagged as a demo and never counted, with a line saying every link inside it checks out."><br>The walk record<br><code>/walk/v02</code></td>
 </tr>
 <tr>
 <td align="center"><img src="walk-city.webp" width="200" alt="The walk seen as a city would see it, after answering Artificial for the bank: what this demo creek needs, in OneAquaHealth's own measures, each with its source."><br>The walk as a city sees it, after answering Artificial for the bank<br><code>/city?walk=v02</code></td>
