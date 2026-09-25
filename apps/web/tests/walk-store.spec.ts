@@ -38,21 +38,30 @@ async function question(page: Page) {
 /** Waits until IndexedDB holds this walk with `count` answers, as lib/offline.ts keeps it. A
  * person takes longer than the write does; a test that reloads at once must wait for it. */
 async function kept(page: Page, walkId: string, count: number) {
-  await page.waitForFunction(
-    ([id, n]) =>
-      new Promise<boolean>((resolve) => {
-        const open = indexedDB.open("second-look");
-        open.onerror = () => resolve(false);
-        open.onsuccess = () => {
-          const db = open.result;
-          if (!db.objectStoreNames.contains("walks")) return resolve(false);
-          const get = db.transaction("walks").objectStore("walks").get(id as string);
-          get.onsuccess = () => resolve(Object.keys(get.result?.answers ?? {}).length === n);
-          get.onerror = () => resolve(false);
-        };
-      }),
-    [walkId, count] as const,
-  );
+  // page.evaluate waits for the promise; waitForFunction would take the promise itself as a yes.
+  const answers = () =>
+    page.evaluate(
+      (id) =>
+        new Promise<number>((resolve) => {
+          const open = indexedDB.open("second-look");
+          open.onerror = () => resolve(-1);
+          open.onsuccess = () => {
+            const db = open.result;
+            if (!db.objectStoreNames.contains("walks")) {
+              db.close();
+              return resolve(-1);
+            }
+            const get = db.transaction("walks").objectStore("walks").get(id);
+            get.onsuccess = () => {
+              db.close();
+              resolve(Object.keys(get.result?.answers ?? {}).length);
+            };
+            get.onerror = () => resolve(-1);
+          };
+        }),
+      walkId,
+    );
+  await expect.poll(answers, { timeout: 10_000 }).toBe(count);
 }
 
 test("four answers survive Back and a reload, and the walk opens on the next question", async ({ page }) => {
@@ -104,6 +113,44 @@ test("four answers survive Back and a reload, and the walk opens on the next que
   await mockApi(tab, {});
   await tab.goto(`${BASE}/walk/${walk.id}`);
   await expect(tab.locator("h1#question")).toHaveText(q5.text);
+});
+
+test("a phone with the old offline queue keeps its queued check when the walks store is added", async ({ page }) => {
+  await mockApi(page, {});
+  // The database as the app left it before UPDATE_30: version 1, the queue store only, one check
+  // the server refused, so no page tries to send it again.
+  await page.goto(`${BASE}/about`);
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open("second-look", 1);
+        open.onupgradeneeded = () => open.result.createObjectStore("queue", { keyPath: "id", autoIncrement: true });
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const t = open.result.transaction("queue", "readwrite");
+          t.objectStore("queue").add({ kind: "quick", created_at: "2026-09-24T10:00:00Z", photos: [], status: "failed", error: "kept for the test" });
+          t.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+        };
+      }),
+  );
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await page.getByRole("button", { name: items[0].options![1].label, exact: true }).click();
+  await kept(page, walk.id, 1);
+  const db = await page.evaluate(
+    () =>
+      new Promise<{ version: number; queued: string[] }>((resolve) => {
+        const open = indexedDB.open("second-look");
+        open.onsuccess = () => {
+          const all = open.result.transaction("queue").objectStore("queue").getAll();
+          all.onsuccess = () => resolve({ version: open.result.version, queued: all.result.map((q: { error?: string }) => q.error ?? "") });
+        };
+      }),
+  );
+  expect(db).toEqual({ version: 2, queued: ["kept for the test"] });
 });
 
 test("a finished walk's record link opens in a fresh browser, on /spot and on /city under the demo creek", async ({ page, browser }) => {
