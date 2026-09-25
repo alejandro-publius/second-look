@@ -134,10 +134,12 @@ def test_the_paragraph_check_sees_a_comment_that_breaks_a_paragraph() -> None:
     assert broken_paragraph_lines(f"From\n{v} to {v}\n") == [2]
     # a number with a word before it holds the paragraph together
     assert broken_paragraph_lines(f"The gate\nsaw {v} flags.\n") == []
-    # a claim comment alone between blank lines, or after a full stop, is fine
+    # a claim comment alone between blank lines, or at a paragraph's end, is fine
     claim = "<!-- claim: results/r.json#/n = 3 -->"
     assert broken_paragraph_lines(f"Text.\n\n{claim}\n{claim}\n\nMore.\n") == []
-    assert broken_paragraph_lines(f"It is real.\n{claim}\nProof: a file.\n") == []
+    assert broken_paragraph_lines(f"It is real.\nProof: a file. {claim}\n") == []
+    # but with text on both sides it splits the paragraph, even after a full stop (round 10 L01)
+    assert broken_paragraph_lines(f"It is real.\n{claim}\nProof: a file.\n") == [2]
     # but not in the middle of a sentence
     assert broken_paragraph_lines(f"The gate kept\n{claim}\n35 flags.\n") == [2]
     # a comment in a code fence, a table cell or an HTML block is not a paragraph line

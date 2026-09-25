@@ -24,9 +24,8 @@ Proof: `content/drafts/regions/california-bay-area.yaml` (the draft); `content/r
 
 **5. Does it really validate against the OneAquaHealth guide?**
 Yes. The guide is pinned at hl7-eu/oah b907cf0 and built from source with SUSHI 3.20.1, and CI runs the HL7 validator over sample records from both emitters, the Python API and the live Worker; golden vectors hold the Worker's emitter to the Python one.
-<!-- claim: results/fhir_validation.json#/errors = 0 -->
 The latest run has zero errors.
-Proof: `fhir/ig.lock`; `results/fhir_validation.json`; `make fhir-validate`.
+Proof: `fhir/ig.lock`; `results/fhir_validation.json`; `make fhir-validate`. <!-- claim: results/fhir_validation.json#/errors = 0 -->
 
 **6. Why is a volunteer a Practitioner?**
 Because `Observation.performer` has no better fit in R4 and the guide has no profile for a citizen observer. We know it is a stretch, and we asked the guide's authors which resource they want.
@@ -48,8 +47,7 @@ Proof: `core/tests/test_gate.py::test_fuzz_model_output_never_reaches_answers_or
 
 **10. When may a model speak at all?**
 Only on a feature it passed: all four items right in at least two of three runs, on the same 16 photos people take. Then a flag can make one follow-up question eligible, and the person has already answered. The real run of Sep 23, Pacific time (Sep 24 UTC), four models: all four passed built banks; Claude Haiku 4.5, Claude Sonnet 5 and Claude Opus 5.5 passed dug-out channels; Claude Opus 5.5 and Claude Fable 5.1 passed pipes; no model passed invasive plants. A table that is not real licenses nothing.
-<!-- claim: results/model_pass_table.json#/real = True -->
-Proof: `core/gate.py`; `results/model_pass_table.json` (`"real": true`); `core/tests/test_gate.py::test_synthetic_table_licenses_nothing`.
+Proof: `core/gate.py`; `results/model_pass_table.json` (`"real": true`); `core/tests/test_gate.py::test_synthetic_table_licenses_nothing`. <!-- claim: results/model_pass_table.json#/real = True -->
 
 **11. What does the MCP server expose, and can an agent write?**
 Read only, over our own records. Tools include listing creeks, a creek record, findings, an observer's score and "explain this number", and every answer carries the resource ids behind it.

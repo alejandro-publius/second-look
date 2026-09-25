@@ -99,6 +99,7 @@ Judges start here: https://second-look-79t.pages.dev/judges
 /check: the guided creek check, one question per screen, with follow-ups chosen by code.
 /walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. The clips show natural creeks, so a measure appears when the walk reports damage, for example Artificial for the bank. /city?creek=strawberry-creek stays empty until the first real check.
 /two: a volunteer Observation of ours in the viewer built for a lab result; their sandbox's lab record joins it when their name resolves again.
+/how-we-know: which features each vision model passed on the 16-photo test, and what the gate kept and dropped on real creek footage, with the frames.
 /walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a record made on your phone that is never stored.
 
 Video: [VIDEO LINK] (released under CC BY-SA 4.0; creek footage from Wikimedia Commons, credited in the video)
@@ -169,7 +170,7 @@ The video is released under CC BY-SA 4.0, because several of the creek clips in 
 
 1. `docs/screens/landing.webp`: the question every visitor meets.
 2. `docs/screens/score.webp`: the score per feature.
-3. `docs/screens/walk.webp`: a video walk, a creek in another country.
+3. `docs/screens/walk.webp`: a video walk, a creek somewhere else, with a button to start the check.
 4. `docs/screens/spot-health.webp`: the health card, one action for the person, one for the pet and one for the city, each with its source (a sample record, from a local build).
 5. `docs/screens/walk-city.webp`: the creek a walk just checked, seen as a city would after answering Artificial for the bank, with what it needs in OneAquaHealth's own measures and their source. The clips show natural creeks, so a measure appears when the walk reports damage, as it does here.
 

@@ -166,8 +166,8 @@ that measured our config and the three-model run before Opus 5.5 and Fable 5.1 j
   sweep <!--v:results/model_sweep_20260924T054756Z.json#/counts/cost_usd-->2.2<!--/v--> USD, the
   benchmark <!--v:results/benchmark_20260924T054939Z.json#/cost_usd-->2.2<!--/v--> USD and the
   footage <!--v:results/footage_latest.json#/cost/usd-->23.6<!--/v--> USD.
-- Per 100 footage frames, four models, direct calls at the full
-  price: <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD. The batch interface costs
+- Per 100 footage frames, four models, direct calls at the full price, with the run's adversarial
+  frames counted in: <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD. The batch interface costs
   half as much, but a batch once waited three hours in the queue.
 - The live site calls no model, so a volunteer's check costs nothing in model calls.
 

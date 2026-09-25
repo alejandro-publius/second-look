@@ -35,7 +35,6 @@ HTML_BLOCK_TAGS = (
 )
 HTML_BLOCK_RE = re.compile(rf"^ {{0,3}}</?(?:{HTML_BLOCK_TAGS})(?:\s|/?>|$)", re.I)
 LONE_TAG_RE = re.compile(r"^ {0,3}(?:<[A-Za-z][\w-]*(?:\s[^<>]*)?/?>|</[A-Za-z][\w-]*\s*>)\s*$")
-SENTENCE_ENDS = (".", "!", "?", '."', ".)")
 
 
 def line_kinds(lines: list[str]) -> list[str]:
@@ -88,8 +87,9 @@ def broken_paragraph_lines(text: str) -> list[int]:
     In CommonMark, and so on GitHub, a line that starts with "<!--" opens an HTML block: it cuts
     off the paragraph above it, and the rest of that line is raw HTML, so its Markdown shows as
     typed (critic round 09 L01). So a rendered number keeps a word before it on its line. A line
-    that holds only a comment is fine, unless it cuts a sentence in two: paragraph text runs on
-    both sides of it and the line above does not end a sentence.
+    that holds only a comment is fine only between blank lines or at a paragraph's edge: with
+    paragraph text on both sides it splits one answer into two paragraphs, even after a full stop
+    (critic round 10 L01).
     """
     lines = text.splitlines()
     kinds = line_kinds(lines)
@@ -98,9 +98,7 @@ def broken_paragraph_lines(text: str) -> list[int]:
         before = kinds[n - 1] if n else "blank"
         after = kinds[n + 1] if n + 1 < len(kinds) else "blank"
         cuts = before in ("text", "item") and after == "text"
-        if kind == "comment-led" or (
-            kind == "comment" and cuts and not lines[n - 1].rstrip().endswith(SENTENCE_ENDS)
-        ):
+        if kind == "comment-led" or (kind == "comment" and cuts):
             broken.append(n + 1)
     return broken
 

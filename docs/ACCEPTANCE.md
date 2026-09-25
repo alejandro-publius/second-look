@@ -13,9 +13,10 @@ as well, offline, with no API key, and prints a six line summary.
 uv sync
 (cd apps/web && npm ci && npx playwright install chromium) && (cd worker && npm ci) && (cd tools/diagrams && npm ci)
 export JAVA17_HOME=/opt/homebrew/opt/openjdk@17   # the FHIR validator needs Java 17
+brew install gitleaks                              # make check scans the history for secrets
 ```
 
-Nothing below needs an API key. Nothing below needs a network except the two rows that say so.
+Nothing below needs an API key. Three rows in the first table need a network: the first run of rows 3 and 12 fetches their guide, SUSHI and the HL7 validator, and asks tx.fhir.org for terminology; row 14 opens the live site and asks GitHub whether the repository is public. The gates further down say which need a network or a browser.
 
 ## The gates
 

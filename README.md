@@ -55,7 +55,7 @@ How this answers the organizers' five headers: *The problem* and *Innovation and
 | Agreement between models | not asked | Haiku 4.5 and Fable 5.1, the pair that agreed least, gave the same answer on <!--v:results/footage_latest.json#/agreement/artificial_bank/pairs/claude-haiku-4-5-20251001 vs claude-fable-5-1/agree-->41<!--/v--> of <!--v:results/footage_latest.json#/agreement/artificial_bank/frames-->46<!--/v--> frames for built banks, <!--v:results/footage_latest.json#/agreement/dug_out_channel/pairs/claude-haiku-4-5-20251001 vs claude-fable-5-1/agree-->15<!--/v--> for a dug-out channel, <!--v:results/footage_latest.json#/agreement/invasive_plant/pairs/claude-haiku-4-5-20251001 vs claude-fable-5-1/agree-->38<!--/v--> for invasive plants and <!--v:results/footage_latest.json#/agreement/pipe_running/pairs/claude-haiku-4-5-20251001 vs claude-fable-5-1/agree-->30<!--/v--> for pipes |
 | Flags the gate stopped | not asked: an answer on the test is scored, never flagged | <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags dropped, <!--v:results/footage_latest.json#/gate/kept-->35<!--/v--> kept, because a model may flag only a feature it passed |
 | One checker question about one frame, in cents | not asked | Claude Haiku 4.5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-haiku-4-5-20251001-->0.2<!--/v-->, Claude Sonnet 5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-sonnet-5-->0.4<!--/v-->, Claude Opus 5.5 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-opus-5-5-->1.0<!--/v-->, Claude Fable 5.1 <!--v:results/model_card.json#/cost/footage_cents_per_call/claude-fable-5-1-->2.3<!--/v--> |
-| Cost per 100 frames, each asked the four questions three times by all four models | not asked | <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD, with direct calls at the full price |
+| Cost per 100 frames, each asked the four questions three times by all four models, with the run's adversarial frames counted in | not asked | <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD, with direct calls at the full price |
 
 Which features each model passed on the 16-photo test: all four photos of a feature right in at least two of three runs ([`results/model_pass_table.json`](results/model_pass_table.json)).
 
@@ -126,7 +126,7 @@ Measure each volunteer, per feature, and store the measure with the data. The an
 | Duplicate and test pins fill the map | A precise pin within 30 metres of an existing spot is offered as that spot; names that read like a test are kept out of the counts and listed apart for a person to check; a coarse pin is never compared | [`core/act.py`](core/act.py), [`core/tests/test_act.py`](core/tests/test_act.py) |
 | A record a city's systems cannot read | Sample records from both emitters, the Python API and the TypeScript Worker (<!--v:results/fhir_validation.json#/files_validated-->14<!--/v--> files, walk records among them), are validated against their guide in CI, and golden vectors hold the live emitter to the same output | [`scripts/fhir_validate.py`](scripts/fhir_validate.py), [`worker/test/golden.test.ts`](worker/test/golden.test.ts) |
 | Someone edits history | A hash-chained audit log, checked by a script | [`audit/`](audit/), [`scripts/verify_audit.py`](scripts/verify_audit.py) |
-| Someone rewrites the audit log, last line included | Its last hash is stamped with OpenTimestamps once a day. A rewrite with fresh hashes still holds together, so the stamped line is compared with the log's own line; `/verify` does that too, and checks the whole chain again in your browser | `uv run python scripts/verify_audit.py`, then `uv run python scripts/ots_status.py`, which fails when the log no longer has a stamped line; `.venv/bin/ots verify proofs/audit-head-2026-09-24.ots` checks the stamp itself |
+| Someone rewrites the audit log, last line included | Once a day its last hash is stamped with OpenTimestamps, if it has changed since the last stamp. A rewrite with fresh hashes still holds together, so the stamped line is compared with the log's own line; `/verify` does that too, and checks the whole chain again in your browser | `uv run python scripts/verify_audit.py`, then `uv run python scripts/ots_status.py`, which fails when the log no longer has a stamped line; `.venv/bin/ots verify proofs/audit-head-2026-09-24.ots` checks the stamp itself |
 | The plan was written after the data came in | The `prereg-v1` tag object and [`docs/analysis_plan.md`](docs/analysis_plan.md) are stamped with OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin; it is not our own chain. `/verify` shows each proof and its Bitcoin block once confirmed | `.venv/bin/ots verify proofs/prereg-v1.tag.ots`, `.venv/bin/ots verify -f docs/analysis_plan.md proofs/analysis_plan.md.ots` (`uv sync` puts `ots` in `.venv/bin`; it needs a Bitcoin node to finish), or `uv run python scripts/ots_status.py`, which checks the block against a public explorer; [`proofs/README.md`](proofs/README.md) |
 | We fool ourselves with the statistics | The analysis plan is tagged before any data; every README number is checked against [`results/`](results/) in CI; a synthetic result is cited only where the sentence says it is a simulation | [`docs/analysis_plan.md`](docs/analysis_plan.md) at `prereg-v1`, [`scripts/verify_claims.py`](scripts/verify_claims.py) |
 | Judge mode leaks the answer key | Judge mode is shut until Sep 28 by a lock constant, and its answer route refuses before then on the Worker and in the Python API | [`core/lock.py`](core/lock.py), [`apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`](apps/api/tests/test_study.py), [`worker/test/e2e.mjs`](worker/test/e2e.mjs) |
@@ -382,7 +382,7 @@ The same four as images, for places that do not draw Mermaid: [`docs/diagrams/lo
 
 | Part | Built with |
 |---|---|
-| Web app | Next.js 16 and React 19, a static export on Cloudflare Pages, a service worker for offline checks, self-hosted fonts, no third party script |
+| Web app | Next.js 16 and React 19, a static export on Cloudflare Pages, a service worker that keeps the creek check working offline once the site has been opened, self-hosted fonts, no third party script |
 | API, live | a TypeScript Worker on Cloudflare Workers, with D1 for records and Workers KV for photos |
 | API, reference | Python 3.12, FastAPI, SQLModel and Alembic, SQLite locally and Postgres in docker compose |
 | Pure logic | [`core/`](core/): the gate, the follow-ups, scoring, labels, the FHIR emitter; ported to TypeScript and proved equal by golden vectors |
@@ -463,14 +463,15 @@ Sent to OneAquaHealth's implementation guide on 2026-09-24, in the open:
 - [hl7-eu/oah issue 6](https://github.com/hl7-eu/oah/issues/6): their temporary code system spells one code `morophology`. We kept their spelling so our records validate.
 - [hl7-eu/oah issue 7](https://github.com/hl7-eu/oah/issues/7): `SpecimenOah.collection.collector` allows only a PractitionerRole, which leaves out a laboratory and a volunteer who takes a sample.
 - [hl7-eu/oah issue 8](https://github.com/hl7-eu/oah/issues/8): their sandbox's name stopped resolving on 2026-09-23, with the evidence from their own nameserver.
-- A read only MCP server over our own records, so any software agent can ask for a creek's records with the resource ids behind every answer. [`examples/mcp/README.md`](examples/mcp/README.md).
+
+And for anyone, not sent to them: a read only MCP server over our own records, so any software agent can ask for a creek's records with the resource ids behind every answer ([`examples/mcp/README.md`](examples/mcp/README.md)).
 
 ### Feasibility: set up for Berkeley the way a follower city would
 
 OneAquaHealth calls a city that adopts the method a follower city. Berkeley has not adopted it. We set up the five steps for Berkeley's creeks the way a follower city would, and this is how far each one got:
 
 1. Name the streams: done, as nested Locations.
-2. Adopt the form: done; it mirrors their app.
+2. Adopt the form: done; it follows their app's items and order, and the wording is not yet checked against the app.
 3. Train and test the volunteers, in about four minutes: the lesson and the test are live, and no volunteer has been trained or tested yet.
 4. Collect and validate every visit against their profiles: the check is live and CI validates the records the code makes, and no real visit exists yet.
 5. Publish to the sandbox with a Library entry, and repeat with the three-question return check: publishing ran with the hand-made example visit, and the return check opens from a creek record (`/quick?spot=<id>`).
@@ -578,7 +579,7 @@ make demo-offline
 
 ## For judges
 
-A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full creek check), what the city sees, from the end of that walk ("See this creek as a city would"; [`/city?creek=strawberry-creek`](https://second-look-79t.pages.dev/city?creek=strawberry-creek) stays empty until the first real check), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two). The main doors are on [/judges](https://second-look-79t.pages.dev/judges).
+A path of about ten minutes: [the test](https://second-look-79t.pages.dev/t?src=other) (about four minutes with its lesson), [a creek from your desk](https://second-look-79t.pages.dev/walk), [a record made on your phone](https://second-look-79t.pages.dev/walk/v02) (a 40 second clip, then the full creek check), what the city sees, from the end of that walk ("See this creek as a city would"; [`/city?creek=strawberry-creek`](https://second-look-79t.pages.dev/city?creek=strawberry-creek) stays empty until the first real check), [a volunteer record in the viewer built for lab results](https://second-look-79t.pages.dev/two), and [how we know](https://second-look-79t.pages.dev/how-we-know): which features each model passed and what the gate did on real creek footage. The main doors are on [/judges](https://second-look-79t.pages.dev/judges).
 
 See *Quickstart* above for `make judge-check`, the one command that needs no key and no network.
 
@@ -588,6 +589,7 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 | A sample record | [`fhir/golden/visit-strawberry-creek-1.json`](fhir/golden/visit-strawberry-creek-1.json) |
 | Eval results | [`results/`](results/) |
 | Architecture, the deep version | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| The technical report, about fifteen minutes to read | [`docs/REPORT.pdf`](docs/REPORT.pdf) |
 | Our own scorecard, weaknesses included | [`docs/JUDGE_SCORECARD.md`](docs/JUDGE_SCORECARD.md) |
 | The demo script | [`docs/video/SHOTLIST.md`](docs/video/SHOTLIST.md), read aloud from [`docs/video/VOICE_SCRIPT.md`](docs/video/VOICE_SCRIPT.md) |
 
@@ -597,13 +599,15 @@ See *Quickstart* above for `make judge-check`, the one command that needs no key
 <summary>Each route and what it shows</summary>
 
 - `/t`: consent, the warm-up pair, the lesson, 16 items with Yes, No and Can't tell, the score per feature, the share card.
-- `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` replays one fixed path.
-- `/check`: the guided creek check, one question per screen, with follow-ups chosen by [`core/followups.py`](core/followups.py), working offline.
-- `/walk`: a creek from your desk, a clip from another country, the same check, a demo record made on the phone.
+- `/demo`: judge mode with feedback after each answer, opening Sep 28. `/demo?script=1` shows the photos in one fixed order, for the screen recording.
+- `/check`: the guided creek check, one question per screen, with follow-ups chosen by [`core/followups.py`](core/followups.py); once the site has been opened on a phone, it keeps working offline and sends when the phone is back online.
+- `/walk`: a creek from your desk, a clip of a creek in Russia, the United Kingdom or the United States, the same check, a demo record made on the phone.
 - `/spot?id=`: the record, each answer beside the observer's score, View as FHIR with the validation badge, the health card. It needs a stored record, so on the live site today it is empty; [`docs/screens/`](docs/screens/README.md) shows it on a local build.
 - `/city?creek=strawberry-creek`: what the creek needs, pipes worth testing with a FHIR referral, the downstream note by reach. It is empty until the first real check; `make demo-offline` shows it full.
 - `/two`: a lab Observation from their sandbox beside one of ours, from a copy the Mac fetches once a day. While their sandbox's name does not resolve, ours stands alone and the page says so.
 - `/quick?spot=<id>`: the three-question return check. It opens from a creek record, so like `/spot?id=` it needs a stored record.
+- `/how-we-know`: which features each vision model passed on the 16-photo test and what the gate did on real creek footage, read from [`results/`](results/), with one kept and one dropped flag and their frames.
+- `/verify`: the audit log checked again in your browser, with its Bitcoin stamps.
 - `/poster`, `/judges`, `/credits`.
 - A read only MCP server over our own records: [`examples/mcp/README.md`](examples/mcp/README.md).
 
@@ -627,7 +631,7 @@ One worked visit to Strawberry Creek in Berkeley, from the golden record in this
 
 </details>
 
-You can run the same loop from your desk on a creek in another country: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
+You can run the same loop from your desk on a creek somewhere else: **`/walk`**, "Check a creek from your desk". Each walk plays a short clip from an openly licensed video with its credit on screen, you do the same guided check while watching, and the record is built on your phone, tagged as a demo, and never stored or counted.
 
 The AI's part, step by step: [`examples/footage-flag/`](examples/footage-flag/README.md) shows one frame of real creek footage where the gate kept a model's flag, with the question that flag makes eligible and the model's note labelled "the checker noticed", and one frame where the gate dropped the flag, because that model had not passed that feature. Each step quotes the model's answer as committed in [`evals/fixtures/raw/`](evals/fixtures/raw/), and [`evals/footage_example.py`](evals/footage_example.py) writes the page from committed files, so `make check` fails if it drifts. The checker is off on the live site, so this is the paid footage run's record, not something a volunteer saw.
 
