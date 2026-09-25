@@ -46,8 +46,14 @@ def test_every_doc_with_a_rendered_number_is_rendered_and_checked() -> None:
     tracked = subprocess.run(
         ["git", "ls-files", "*.md"], cwd=root, capture_output=True, text=True, check=True
     ).stdout.split()
+    # A whole rendered value, outside code spans: a review that quotes "`<!--v:`" is not one.
+    value = re.compile(r"<!--v:[^\s>]+-->[^<]*<!--/v-->")
     marked = {
-        p for p in tracked if "<!--v:" in (root / p).read_text(encoding="utf-8", errors="ignore")
+        p
+        for p in tracked
+        if value.search(
+            re.sub(r"`[^`]*`", "", (root / p).read_text(encoding="utf-8", errors="ignore"))
+        )
     }
     make = (root / "Makefile").read_text(encoding="utf-8")
     found = re.search(r"^RENDERED_DOCS := (.+)$", make, re.M)
