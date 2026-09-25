@@ -30,12 +30,12 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 
 ## The problem
 
-700 characters
+793 characters
 
 ```text
 People judge a creek the way they judge a park: tidy and green reads as healthy. OneAquaHealth's project lead said it in the first workshop. Volunteers catch smell, foam and colour, and walk past concrete banks, a channel that was dug out, and pretty plants that do not belong. So the best-looking creek can get the best rating and deserve the worst.
 
-Professional surveyors fixed this long ago. In the UK's River Habitat Survey, only surveys from accredited surveyors are entered on the database, and accreditation means a course and a test. Volunteers have never had that. Their observations arrive with no mark of how far to trust them, so a city cannot tell a careful observer from a hopeful one.
+Professional surveyors fixed this long ago. In the UK's River Habitat Survey, only surveys from accredited surveyors are entered on the database, and accreditation means a course and a test. Some volunteer programs certify people for a method, such as water chemistry. None we know of measures how well each volunteer sees each feature, or keeps that score with every observation, so a city cannot tell a careful observer from a hopeful one.
 ```
 
 ## How the solution aligns with OneAquaHealth

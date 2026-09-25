@@ -40,7 +40,7 @@ every warning word for word, is in docs/notes/p2_validator_run.md.
 
 ## The problem in one line
 
-Professional surveyors pass a test before their data counts. Citizen observers never have. The guide has a profile for an indicator Observation and a profile for a Location, but no place to say how good the person who made the observation is at seeing that indicator.
+Professional surveyors pass a test before their data counts. Some volunteer programs certify people for a method, such as water chemistry, but none we know of measures how well each observer sees each feature, or keeps that score with every observation. The guide has a profile for an indicator Observation and a profile for a Location, but no place to say how good the person who made the observation is at seeing that indicator.
 
 ## What we did
 
