@@ -329,6 +329,50 @@ def test_a_whole_voice_plays_unbroken_and_the_beats_follow_it() -> None:
     assert f"adelay=delays={int(lead * 1000)}" in graph
 
 
+# ---- docs/video/UPLOAD.md ----------------------------------------------------------------------
+
+UPLOAD = SHOTLIST.parent / "UPLOAD.md"
+
+
+def paste_field(heading: str) -> str:
+    """The code block under a heading of UPLOAD.md: what gets pasted into YouTube."""
+    text = UPLOAD.read_text(encoding="utf-8")
+    m = re.search(rf"^## {heading}\n.*?```text\n(.*?)```", text, re.M | re.S)
+    assert m, heading
+    return m.group(1).strip()
+
+
+def test_the_upload_description_credits_everything_the_cut_shows() -> None:
+    description = paste_field("Description")
+    for row in footage_rows():
+        stem = re.sub(r"\.[A-Za-z]{3,4}$", "", row["title"])
+        line = f'"{stem}" by {row["author"]}, {row["licence"]}: {row["source_page"]}'
+        assert line in description.splitlines(), line
+    screens = dict(credit_sections(FETCHED_DATA, footage_used(CUT)))["Inside the app screens"]
+    for line in screens:
+        m = re.fullmatch(r'"(.+)" by (.+), (.+), (Wikimedia Commons|YouTube)', line)
+        if m:
+            assert f'"{m[1]}" by {m[2]}, {m[3]}, {m[4]}: ' in description, line
+        else:
+            assert "second-look-79t.pages.dev/credits" in line
+            assert "lesson and the test are credited one by one at https://" in description
+    assert f"This video is released under {VIDEO_LICENCE}" in description
+    assert "https://creativecommons.org/licenses/by-sa/4.0/" in description
+    assert LIVE_LINK in description
+
+
+def test_the_upload_fields_fit_youtube() -> None:
+    title, description, tags = (paste_field(h) for h in ("Title", "Description", "Tags"))
+    assert 0 < len(title) <= 100
+    assert len(description) <= 5000
+    assert len(tags) <= 500
+    for field in (title, description, tags):
+        assert "<" not in field and ">" not in field, "YouTube refuses angle brackets"
+    steps = UPLOAD.read_text(encoding="utf-8")
+    assert "**Unlisted**" in steps
+    assert "Standard YouTube License" in steps
+
+
 # ---- the thumbnail -----------------------------------------------------------------------------
 
 
