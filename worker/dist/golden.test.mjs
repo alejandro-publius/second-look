@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "dd63f5f1302b1668",
+  content_hash: "5adc561b26315c2b",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -818,14 +818,14 @@ var content_default = {
     "test.yes": "Yes"
   },
   part2_flags: {
-    a01: null,
-    a02: null,
-    a03: null,
-    a04: null,
+    a01: "present",
+    a02: "absent",
+    a03: "present",
+    a04: "absent",
     a05: null,
     a06: null,
-    a07: null,
-    a08: null
+    a07: "present",
+    a08: "absent"
   },
   part2_items: [
     {
