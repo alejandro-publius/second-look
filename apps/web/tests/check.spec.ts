@@ -43,7 +43,9 @@ async function answerForm(page: import("@playwright/test").Page, { moveJoy = tru
   await page.getByRole("button", { name: "Shrubs" }).click(); // type right
   await page.getByRole("button", { name: "Yes", exact: true }).click(); // invasive species -> which ones
   await expect(page.getByRole("heading", { name: "Which ones?" })).toBeVisible();
-  await expect(page.getByText("No plant list for this region yet.")).toBeVisible();
+  // The Bay Area list was approved on 2026-09-25 (UPDATE_30 section 3), so its plants are offered.
+  await expect(page.getByLabel("Himalayan blackberry (Rubus armeniacus)")).toBeVisible();
+  await expect(page.getByText("No plant list for this region yet.")).toHaveCount(0);
   await page.getByLabel("Can't tell").check();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "No", exact: true }).click(); // cuts
