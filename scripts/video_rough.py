@@ -104,6 +104,7 @@ class Part:
     seconds: float | None  # None means the rest of the beat
     before_words: bool
     shows: str
+    mark: str = ""  # a screen part whose From is a word starts at that mark of its recording
 
     @property
     def is_footage(self) -> bool:
@@ -112,6 +113,7 @@ class Part:
 
 PART_ROW = re.compile(r"^\|\s*(\d+)\.(\d+)\s*\|\s*(\d+:\d\d)\s*\|")
 SECONDS = re.compile(rf"^(\d+(?:\.\d+)?|rest)(?: ({BEFORE}))?$")
+MARK = re.compile(r"[a-z][a-z_]*")
 
 
 def footage_parts(text: str) -> dict[str, list[Part]]:
@@ -129,15 +131,19 @@ def footage_parts(text: str) -> dict[str, list[Part]]:
         when = SECONDS.match(seconds)
         if not when:
             raise ValueError(f"seconds must be a number or rest, then maybe '{BEFORE}': {line}")
+        # A footage part starts at a second of its clip. A screen part may name a mark instead,
+        # a moment scripts/video_final.py finds in the recording's marks file.
+        mark = start if clip in (SCREEN, PHONE) and MARK.fullmatch(start) else ""
         out.setdefault(beat, []).append(
             Part(
                 beat=beat,
                 order=int(match.group(2)),
                 clip=clip,
-                start=float(start) if start else 0.0,
+                start=float(start) if start and not mark else 0.0,
                 seconds=None if when.group(1) == "rest" else float(when.group(1)),
                 before_words=bool(when.group(2)),
                 shows=shows,
+                mark=mark,
             )
         )
     for parts in out.values():
@@ -151,6 +157,7 @@ class Piece:
     start: float
     seconds: float
     shows: str
+    mark: str = ""
 
 
 def plan(
@@ -191,7 +198,7 @@ def plan(
         start = p.start if p.is_footage else screen_at
         if not p.is_footage:
             screen_at += s
-        pieces.append(Piece(p.clip, start, s, p.shows))
+        pieces.append(Piece(p.clip, start, s, p.shows, p.mark))
     return length, lead, pieces
 
 
@@ -261,11 +268,15 @@ def end_card(path: Path) -> None:
     Image.alpha_composite(panel, text).save(path)
 
 
-def phone_frame(path: Path, screen_w: int, screen_h: int) -> None:
-    """A plain phone outline, transparent where the screen shows through. No hands, no person."""
+def phone_frame(path: Path, screen_w: int, screen_h: int, screen_top: int | None = None) -> None:
+    """A plain phone outline, transparent where the screen shows through. No hands, no person.
+
+    The screen is centred, or its top edge is at screen_top.
+    """
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    x0, y0 = (W - screen_w) // 2, (H - screen_h) // 2
+    x0 = (W - screen_w) // 2
+    y0 = (H - screen_h) // 2 if screen_top is None else screen_top
     side, top = 20, 48
     draw.rounded_rectangle(
         [x0 - side, y0 - top, x0 + screen_w + side, y0 + screen_h + top],
