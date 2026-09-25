@@ -103,6 +103,7 @@ test("a first visit to / downloads no more than 3 MB in the background", async (
       profile: "Playwright iPhone 13 in Chromium, service workers allowed",
       waited_seconds: 30,
       budget_bytes: BACKGROUND_BUDGET_BYTES,
+      budget_megabytes: BACKGROUND_BUDGET_BYTES / 1_000_000,
       bytes,
       megabytes: Math.round(bytes / 10_000) / 100,
       files: sized.length,
