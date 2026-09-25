@@ -319,6 +319,14 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     path = args.file if args.file.is_absolute() else Path.cwd() / args.file
+    if args.file == DONE_FILE and not DONE_FILE.is_file():
+        # make go-public removes the working notes from the tip, the checklist with them, and
+        # the loop that worked from it is over. That is not an error; say so and stop.
+        print(
+            "done-check: the working notes are gone from this tree (make go-public removed them), "
+            "so there is no checklist to run"
+        )
+        return 0
     try:
         items = parse(path.read_text(encoding="utf-8"))
         now = parse_date(args.now) if args.now else datetime.now(UTC).replace(microsecond=0)

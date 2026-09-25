@@ -31,7 +31,7 @@ from urllib.parse import unquote, urlparse
 
 import httpx
 
-from scripts.go_public import INTERNAL
+from scripts.go_public import INTERNAL, notes_gone
 
 ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN = ("api.enora-oah.eu", "resilience")  # hard rule 9: never called, only listed
@@ -296,6 +296,17 @@ async def check_urls(urls: list[str]) -> dict[str, Result]:
     return results
 
 
+def write_page(md: Path, text: str) -> bool:
+    """The review page goes in the working notes. Once make go-public has removed them it is not
+    written, so the folder does not come back; results/harden/links.json still is."""
+    if notes_gone(md, ROOT):
+        print(f"the working notes are gone, so {md.name} was not written; the JSON was")
+        return False
+    md.parent.mkdir(parents=True, exist_ok=True)
+    md.write_text(text, encoding="utf-8")
+    return True
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument(
@@ -390,8 +401,7 @@ def main() -> int:
         "",
         *table("skipped", None),
     ]
-    args.md.parent.mkdir(parents=True, exist_ok=True)
-    args.md.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    write_page(args.md, "\n".join(lines).rstrip() + "\n")
     print(
         f"{len(files)} files, {len(rows)} references: "
         + ", ".join(f"{s} {sum(count[k][s] for k in kinds)}" for s in statuses)

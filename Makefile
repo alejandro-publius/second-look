@@ -236,11 +236,14 @@ video-clips:
 video-rough:
 	$(PY) scripts/video_rough.py
 
-# Update 14 section 8 item 2. Says what it would do; with GO=yes, on main on Sep 30, removes the
-# working notes, runs submit-check, and only then makes the repository public.
+# UPDATE_30 section 8. Says what it would do. GO=dry runs every step before the flip in a
+# throwaway worktree and stops (main is never touched); GO=yes, on main on Sep 30, runs them all:
+# the secrets scan, the working notes out in one commit, the tests, submit-check, the README's
+# images and links, the changelog, then the push, the flip, a logged out pass, and the v1.0 tag
+# and release. docs/SUBMISSION_DAY.md has the order of the day.
 go-public:
-	$(PY) scripts/go_public.py $(if $(filter yes,$(GO)),--yes,)
-# bash scripts/go_public.sh --run does the same thing; Alex was told that command first.
+	$(PY) scripts/go_public.py $(if $(filter yes,$(GO)),--yes,)$(if $(filter dry,$(GO)),--no-flip,)
+# bash scripts/go_public.sh --run (or --dry) does the same thing; Alex was told that command first.
 
 # The one command for a judge: no key, no network, six lines out. Tests, every AI number graded
 # again from the raw replies, FHIR validation, the web build and the design gate, the audit chain,
