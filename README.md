@@ -429,6 +429,7 @@ The live site's API is a TypeScript Worker on Cloudflare with <!--v:results/api_
 | `GET /api/spot/{spot_id}`, `/api/city/{creek}` | a record, and the analyst's view of a creek, every number with the visit ids behind it |
 | `GET /api/fhir/Bundle/{visit_id}`, `/api/fhir/referral/{spot_id}` | the FHIR behind every record, and a ServiceRequest for a pipe worth testing |
 | `GET /api/two` | one of our Observations beside a laboratory one from their sandbox |
+| `POST /api/walk`, `GET /api/walk/{record_id}` | a finished video walk's demo record, kept 30 days and never counted, and reading it back |
 | `POST /api/demo/answer` | judge mode: right or wrong only, shut until the data lock |
 
 </details>

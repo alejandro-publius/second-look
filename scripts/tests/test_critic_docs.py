@@ -136,6 +136,19 @@ def test_deploy_says_the_anchor_job_stamps_only_a_changed_hash() -> None:
     assert re.search(r"\bonly on a day that hash has changed since the last stamp\b", row), row
 
 
+def test_the_readme_route_table_names_the_walk_routes_the_worker_serves() -> None:
+    # Round 15: a finished walk is stored by POST /api/walk and read back by GET /api/walk/{id},
+    # and the README's table of routes named neither.
+    import json
+
+    inventory = json.loads(text(ROOT / "results" / "api_inventory.json"))
+    served = {(r["method"], r["path"]) for r in inventory["worker"]["routes"]}
+    assert {("POST", "/api/walk"), ("GET", "/api/walk/{}")} <= served
+    table = heading_body(text(README), "Architecture").split("### API", 1)[1]
+    row = next(ln for ln in table.splitlines() if ln.startswith("| `POST /api/walk`"))
+    assert "`GET /api/walk/{record_id}`" in row and "30 days" in row, row
+
+
 def test_a_readme_section_in_the_report_names_only_sections_the_report_has() -> None:
     # A05: the report took "What the AI cannot do" from the README, and it sent the reader to
     # "The gate, the heart of it", a README heading the report does not have (its 2.2 is "The
