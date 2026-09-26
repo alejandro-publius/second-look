@@ -46,10 +46,10 @@ SCRIPT = "evals/assist_analysis.py"
 REPO_ROOT = ROOT
 PLAN_RELATIVE = "docs/analysis_plan_v2.md"
 PLAN_TAG = "prereg-v2"
-# Pinned when the plan is tagged, as docs/notes/plan_hash.md records them. Until then the
-# script refuses real data: an unpinned plan is not a registered plan.
-PLAN_COMMIT: str | None = None
-PLAN_SHA256: str | None = None
+# The commit the tag points at and the SHA-256 of the tagged plan, as docs/notes/plan_hash.md
+# records them (tagged 2026-09-26).
+PLAN_COMMIT: str | None = "d2ada333ea3c710589504e1bac7b9c6bb55b91a8"
+PLAN_SHA256: str | None = "723f7980a2e05eba3b74f43826e0afbf2211a7c35da6dcc18581dba3df73a8c3"
 SYNTHETIC_MARKER = ua.SYNTHETIC_MARKER
 SYNTHETIC_DIR = ROOT / "data" / "synthetic_part2"
 SEED = 20260926

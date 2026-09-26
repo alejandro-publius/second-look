@@ -50,10 +50,15 @@ OUT = ROOT / "results" / "ots.json"
 EXPLORER = "https://blockstream.info/api"
 USER_AGENT = "second-look ots_status (github.com/alejandro-publius/second-look)"
 # A proof whose stamped file does not sit beside it, minus .ots, names its file here.
-TARGETS = {"analysis_plan.md.ots": "docs/analysis_plan.md"}
+TARGETS = {
+    "analysis_plan.md.ots": "docs/analysis_plan.md",
+    "analysis_plan_v2.md.ots": "docs/analysis_plan_v2.md",
+}
 WHAT = {
     "prereg-v1.tag.ots": "prereg_tag",
     "analysis_plan.md.ots": "analysis_plan",
+    "prereg-v2.tag.ots": "prereg_tag",
+    "analysis_plan_v2.md.ots": "analysis_plan",
 }
 
 # Returns the 80 byte header of the block at a height, and the id the explorer gave it.

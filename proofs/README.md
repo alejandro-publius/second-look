@@ -9,6 +9,8 @@ later than that block. Only the hash leaves this machine, never the file.
 |---|---|---|
 | `prereg-v1.tag.ots` | `prereg-v1.tag`, the raw bytes of the `prereg-v1` tag object | `uv run ots verify proofs/prereg-v1.tag.ots` |
 | `analysis_plan.md.ots` | `docs/analysis_plan.md`, unchanged since the tag | `uv run ots verify -f docs/analysis_plan.md proofs/analysis_plan.md.ots` |
+| `prereg-v2.tag.ots` | `prereg-v2.tag`, the raw bytes of the `prereg-v2` tag object, part 2's plan | `uv run ots verify proofs/prereg-v2.tag.ots` |
+| `analysis_plan_v2.md.ots` | `docs/analysis_plan_v2.md`, unchanged since the tag | `uv run ots verify -f docs/analysis_plan_v2.md proofs/analysis_plan_v2.md.ots` |
 | `audit-head-<date>.ots` | `audit-head-<date>`, the text `audit/log.jsonl` hashes for its last entry on that date, so the file's SHA-256 is that entry's hash | `uv run ots verify proofs/audit-head-<date>.ots` |
 
 `prereg-v1.tag` is exactly what `git cat-file tag prereg-v1` prints. Git names a tag object by the

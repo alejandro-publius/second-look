@@ -25,3 +25,26 @@ analysis cannot quietly follow a plan written after the data.
 
 Alex posts the SHA-256 publicly when he posts the link. The point is that anyone can see the
 plan was fixed before the answers arrived.
+
+## Part 2, the assisted second look: `prereg-v2`
+
+`docs/analysis_plan_v2.md` became binding when it was tagged `prereg-v2` on 2026-09-26, before
+any part 2 session existed (part 2 was not deployed yet). It changes nothing in the first plan.
+Anything that changes after the tag is written in `docs/deviations.md` with its date.
+
+| Thing | Value |
+|---|---|
+| Tag | `prereg-v2` |
+| Commit | `d2ada333ea3c710589504e1bac7b9c6bb55b91a8` |
+| SHA-256 of `docs/analysis_plan_v2.md` | `723f7980a2e05eba3b74f43826e0afbf2211a7c35da6dcc18581dba3df73a8c3` |
+| Audit entry | kind `plan_tagged`, hash `bf68d0a8214227254cfdd23d5c90a7bf063cf02322388b5aaedc47ff635aec13` |
+| OpenTimestamps | `proofs/prereg-v2.tag.ots` and `proofs/analysis_plan_v2.md.ots` |
+
+```
+shasum -a 256 docs/analysis_plan_v2.md
+git show prereg-v2:docs/analysis_plan_v2.md | shasum -a 256
+make audit-verify
+```
+
+`evals/assist_analysis.py` refuses to run if the tag is missing, if the working copy of the plan
+differs from the tagged one, or if the tag does not point at the commit above.
