@@ -103,7 +103,10 @@ def compose(names: list[str], title: str, sources: dict[str, str]) -> Image.Imag
     top, bottom = 170, SIZE[1] - 30
     height = bottom - top
     phones = [Image.open(SCREENS / f"{n}.webp").convert("RGBA") for n in names]
-    scaled = [p.resize((round(p.width * height / p.height), height), Image.Resampling.LANCZOS) for p in phones]
+    scaled = [
+        p.resize((round(p.width * height / p.height), height), Image.Resampling.LANCZOS)
+        for p in phones
+    ]
     gap = 60
     total = sum(p.width for p in scaled) + gap * (len(scaled) - 1)
     x = (SIZE[0] - total) // 2
