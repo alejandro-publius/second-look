@@ -99,10 +99,11 @@ test.describe("with service workers allowed", () => {
     expect((await precache()).paths).toContain("/photos/ph-bank-01.jpg");
     await page.reload();
     await ready();
-    const after = await precache();
+    // ready() can answer for the old registration before the new worker has finished cleaning up,
+    // which made CI fail once on depth at e14b29c; poll for the end state instead of reading once.
     const version = fresh.names.find((n) => n.endsWith("-precache"))!.replace(/-precache$/, "");
-    expect(after.names.filter((n) => !n.startsWith(`${version}-`))).toEqual([]);
-    expect(after.paths.sort()).toEqual(fresh.paths.sort());
+    await expect.poll(async () => (await precache()).names.filter((n) => !n.startsWith(`${version}-`)), { timeout: 30_000 }).toEqual([]);
+    await expect.poll(async () => (await precache()).paths.sort(), { timeout: 30_000 }).toEqual(fresh.paths.sort());
   });
 
   // CRITIC_11 W01: the worker cached the pages at install but not the JavaScript, CSS and fonts
