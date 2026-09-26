@@ -16,10 +16,10 @@ const loadFunction = (relative: string) =>
 // honest without a network: the routes file sends /api/* and /health to the Function and keeps
 // the static share cards out of it, and the Function hands the request to the bound Worker as is.
 
-test("_routes.json sends the API to the Function and keeps the share cards static", async () => {
+test("_routes.json sends the API and the walk clips to Functions and keeps the share cards static", async () => {
   const routes = JSON.parse(readFileSync(join(web, "public", "_routes.json"), "utf8"));
   expect(routes.version).toBe(1);
-  expect(routes.include).toEqual(["/api/*", "/health"]);
+  expect(routes.include).toEqual(["/api/*", "/health", "/walks/*"]);
   expect(routes.exclude).toEqual(["/api/share/*"]);
 });
 
