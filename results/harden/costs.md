@@ -1,11 +1,15 @@
 # Cost per assessment
 
-Computed 2026-09-25T21:16:34Z by `uv run python scripts/harden_costs.py` from `results/cost_log.jsonl`. One line in the log is one model call, and one call judges one photo or one frame, so an assessment is one call. Only lines marked real count.
+Computed 2026-09-26T01:27:15Z by `uv run python scripts/harden_costs.py` from `results/cost_log.jsonl`. One line in the log is one model call, and one call judges one photo or one frame, so an assessment is one call. Only lines marked real count.
 
-The log has 5065 lines and 5017 of them are real.
+The log has 5161 lines and 5113 of them are real.
 
 | Purpose | Model | Calls | Cost (USD) | Per assessment (USD) | Per 100 (USD) |
 |---|---|---|---|---|---|
+| assist_answers | claude-fable-5-1 | 24 | 0.2949 | 0.012287 | 1.2288 |
+| assist_answers | claude-haiku-4-5-20251001 | 24 | 0.028811 | 0.0012 | 0.12 |
+| assist_answers | claude-opus-5-5 | 24 | 0.12277 | 0.005115 | 0.5115 |
+| assist_answers | claude-sonnet-5 | 24 | 0.057154 | 0.002381 | 0.2381 |
 | benchmark | claude-fable-5-1 | 48 | 1.36791 | 0.028498 | 2.8498 |
 | benchmark | claude-haiku-4-5-20251001 | 96 | 0.230745 | 0.002404 | 0.2404 |
 | benchmark | claude-opus-5 | 48 | 0.636525 | 0.013261 | 1.3261 |

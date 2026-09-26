@@ -1,12 +1,56 @@
 {
- "checked_utc": "2026-09-25T21:16:34Z",
+ "checked_utc": "2026-09-26T01:27:15Z",
  "log": "results/cost_log.jsonl",
- "lines": 5065,
- "real_lines": 5017,
+ "lines": 5161,
+ "real_lines": 5113,
  "not_real_lines_by_purpose": {
   "benchmark": 48
  },
  "groups": [
+  {
+   "purpose": "assist_answers",
+   "model": "claude-fable-5-1",
+   "calls": 24,
+   "cost_usd": 0.2949,
+   "per_assessment_usd": 0.012287,
+   "per_100_usd": 1.2288,
+   "frames": false,
+   "input_tokens": 41445,
+   "output_tokens": 3507
+  },
+  {
+   "purpose": "assist_answers",
+   "model": "claude-haiku-4-5-20251001",
+   "calls": 24,
+   "cost_usd": 0.028811,
+   "per_assessment_usd": 0.0012,
+   "per_100_usd": 0.12,
+   "frames": false,
+   "input_tokens": 44577,
+   "output_tokens": 2609
+  },
+  {
+   "purpose": "assist_answers",
+   "model": "claude-opus-5-5",
+   "calls": 24,
+   "cost_usd": 0.12277,
+   "per_assessment_usd": 0.005115,
+   "per_100_usd": 0.5115,
+   "frames": false,
+   "input_tokens": 41445,
+   "output_tokens": 3988
+  },
+  {
+   "purpose": "assist_answers",
+   "model": "claude-sonnet-5",
+   "calls": 24,
+   "cost_usd": 0.057154,
+   "per_assessment_usd": 0.002381,
+   "per_100_usd": 0.2381,
+   "frames": false,
+   "input_tokens": 43029,
+   "output_tokens": 2825
+  },
   {
    "purpose": "benchmark",
    "model": "claude-fable-5-1",

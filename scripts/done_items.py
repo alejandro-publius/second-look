@@ -1403,7 +1403,8 @@ def check_panel_prep(root: Path) -> list[str]:
     needs = {
         "the study title": r"Study title",
         "a description for participants": r"Description for participants",
-        "the time, 5 minutes": r"\b5 minutes\b",
+        # UPDATE_31 section 2 item 6: about 8 minutes with the optional second look.
+        "the time, about 8 minutes": r"\babout 8 minutes\b",
         "the payment and the panel's minimum hourly rate": r"minimum hourly rate",
         "the screening, adults": r"18 or older",
         "the screening, English": r"English",

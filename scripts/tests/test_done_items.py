@@ -1208,7 +1208,7 @@ MIT.
 PANEL_STUDY = """# Panel study
 
 Study title: Second Look. Description for participants: a creek test.
-It takes 5 minutes, paid at the panel's minimum hourly rate.
+It takes about 8 minutes, paid at the panel's minimum hourly rate.
 Screening: 18 or older, fluent in English. Device: a phone or a laptop.
 Target: 80 completed sessions. Link: https://second-look-79t.pages.dev/t?src=panel
 Watch with make panel-status, which reads /api/test/counts. Completion code: C1A2B3.
