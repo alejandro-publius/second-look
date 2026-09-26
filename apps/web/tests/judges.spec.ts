@@ -163,3 +163,12 @@ test("the judges' test door says the server puts you in one of two groups at ran
   const door = nav.locator(".row").filter({ has: page.getByRole("link", { name: "Take the test, about four minutes with its lesson" }) });
   await expect(door).toContainText("The server puts you at random in one of two groups: one sees the lesson first, the other sees the sixteen photos first and is offered the lesson after its score.");
 });
+
+test("the assisted second look door opens part 2's judge mode", async ({ page }) => {
+  await page.goto("/judges");
+  const door = page.getByRole("link", { name: "Assisted second look, try it" });
+  await expect(door).toHaveAttribute("href", "/t2/demo");
+  await door.click();
+  // Before the lock the page is shut and says why; after it, judge mode starts.
+  await expect(page.getByRole("heading", { name: /Judge mode opens on Sep 28|Assisted second look, judge mode/ })).toBeVisible();
+});

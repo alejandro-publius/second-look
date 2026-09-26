@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FocusHeading } from "@/components/FocusHeading";
+import { JudgesAssistDoor } from "@/components/JudgesAssistDoor";
 import { Row } from "@/components/ui/Row";
 import { content } from "@/lib/content";
 import { t } from "@/lib/t";
@@ -82,6 +83,8 @@ export default function JudgesPage() {
             value={t(d.note, d.params)}
           />
         ))}
+        {/* Part 2's judge mode (UPDATE_31 section 2 item 9): feel the checker's question. */}
+        <JudgesAssistDoor />
       </nav>
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Consent } from "./Consent";
 import { FocusHeading } from "./FocusHeading";
 import { Lesson } from "./Lesson";
+import { Part2Offer } from "./Part2Offer";
 import { ScoreScreen } from "./ScoreScreen";
 import { TestItems } from "./TestItems";
 import { Warmup } from "./Warmup";
@@ -274,6 +275,8 @@ export function TestFlow() {
                 </Button>
               </div>
             )}
+            {/* The one change to part 1 (UPDATE_31, docs/deviations.md): the offer of part 2. */}
+            <Part2Offer sessionId={stage.session.session_id} onDecline={() => setStage({ name: "done" })} />
           </ScoreScreen>
         </div>
       );

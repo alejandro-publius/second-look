@@ -62,6 +62,9 @@ SITE = "https://second-look-79t.pages.dev"
 SCRIPT = "scripts/lock_analysis.py"
 RECORD = "results/lock_analysis.json"
 HOSTING = "docs/notes/hosting.md"
+PART2_START = "<!-- human-row-2 -->"
+PART2_END = "<!-- /human-row-2 -->"
+PART2_FILES = ("part2_sessions.csv", "part2_responses.csv")
 HUMAN_START = "<!-- human-row -->"
 HUMAN_END = "<!-- /human-row -->"
 # The README paragraph that holds the place of the human row until the lock.
@@ -195,6 +198,41 @@ def status_line(primary: dict[str, Any], claim: Callable[[str], str]) -> str:
     return "An arm kept nobody, so there is no difference to work out; this is a description."
 
 
+def part2_row(result: dict[str, Any] | None, rel: str) -> str:
+    """The README's second human row (UPDATE_31): claim tokens only, or why there is none."""
+    if result is None:
+        return (
+            f"{PART2_START}\nDoes the checker's question help? Nobody took part 2 before the data "
+            f"lock, so there is nothing to report.\n{PART2_END}"
+        )
+    md = rel.removesuffix(".json") + ".md"
+
+    def claim(pointer: str) -> str:
+        return "{{claim:" + rel + "#" + pointer + "}}"
+
+    n = f"assisted {claim('/primary/n_assisted')}, unassisted {claim('/primary/n_unassisted')}"
+    primary = result.get("primary") or {}
+    if primary.get("status") == "confirmatory":
+        body = (
+            f"Does the checker's question help? {n}, difference {claim('/primary/difference')} "
+            f"points, interval {claim('/primary/ci_low')} to {claim('/primary/ci_high')}, in the "
+            f"one run tagged `prereg-v2` ([`{md}`]({md}))."
+        )
+    else:
+        body = (
+            f"Does the checker's question help? Too few people finished part 2 for the plan's "
+            f"test: {n}, and the plan needs 20 in each ([`{md}`]({md}))."
+        )
+    return f"{PART2_START}\n{body}\n{PART2_END}"
+
+
+def place_part2_row(readme: str, row: str) -> str:
+    a, b = readme.find(PART2_START), readme.find(PART2_END)
+    if a < 0 or b < a:
+        raise Failed("readme", "the README has no place for part 2's row")
+    return readme[:a] + row + readme[b + len(PART2_END) :]
+
+
 def place_human_row(readme: str, row: str, finished: bool) -> str:
     """The README with the human row in its place, and the numbers' summary sentence updated."""
     a, b = readme.find(HUMAN_START), readme.find(HUMAN_END)
@@ -300,6 +338,8 @@ class Lock:
         self.backup_file: Path | None = None
         self.result: dict[str, Any] = {}
         self.result_rel = ""
+        self.result2: dict[str, Any] | None = None
+        self.result2_rel = ""
         self.targets: tuple[dr.Row | None, dr.Row | None] = (None, None)
         self.deploy_started = False
         self.pushed = False
@@ -448,7 +488,9 @@ class Lock:
         keep = self.backups / f"lock-{self.clock().strftime('%Y%m%dT%H%M%SZ')}"
         keep.mkdir(parents=True, exist_ok=True)
         os.chmod(keep, 0o700)
-        for name in ("sessions.csv", "responses.csv"):
+        for name in ("sessions.csv", "responses.csv", *PART2_FILES):
+            if not (out_dir / name).exists():
+                continue  # part 2's files only exist once its tables do
             shutil.copy2(out_dir / name, keep / name)
             os.chmod(keep / name, 0o600)
         self.log(
@@ -485,8 +527,34 @@ class Lock:
             },
             "checkout_at_start": self.start.head if self.start else None,
         }
+        self.part2_analysis(export)
+        record["part2_analysis"] = self.result2_rel or None
+        record["part2_status"] = ((self.result2 or {}).get("primary") or {}).get("status")
         (self.root / RECORD).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
         self.log(f"ran the pre-registered analysis once: {self.result_rel}, {record['status']}")
+
+    def part2_analysis(self, export: Path) -> None:
+        """Part 2 (UPDATE_31), right after part 1: the one run tagged prereg-v2, or none at all
+        when the export has no part 2 files, because part 2 never had a table to fill."""
+        step = "part 2 analysis"
+        if not all((export / n).exists() for n in PART2_FILES):
+            self.log("part 2 has no files in the export, so its row says nobody took it")
+            return
+        done = self.local.run(
+            ["uv", "run", "python", "evals/assist_analysis.py"], cwd=self.root, timeout=1800
+        )
+        self.must(step, done, "evals/assist_analysis.py")
+        m = re.search(r"^wrote json: (.+)$", done.out, re.M)
+        if not m:
+            raise Failed(step, "the part 2 analysis did not say where it wrote its result")
+        path = Path(m.group(1).strip())
+        path = path if path.is_absolute() else self.root / path
+        self.result2 = json.loads(path.read_text(encoding="utf-8"))
+        if self.result2.get("synthetic") is not False:
+            raise Failed(step, f"{path.name} is not a real result")
+        self.result2_rel = path.relative_to(self.root).as_posix()
+        status = (self.result2.get("primary") or {}).get("status")
+        self.log(f"ran the part 2 analysis once: {self.result2_rel}, {status}")
 
     def readme(self) -> None:
         step = "readme"
@@ -494,7 +562,10 @@ class Lock:
         path = self.root / "README.md"
         text = path.read_text(encoding="utf-8")
         path.write_text(
-            place_human_row(text, human_row(self.result, self.result_rel), finished),
+            place_part2_row(
+                place_human_row(text, human_row(self.result, self.result_rel), finished),
+                part2_row(self.result2, self.result2_rel),
+            ),
             encoding="utf-8",
         )
 
@@ -621,9 +692,18 @@ class Lock:
             f"Data lock done ({stamp(self.clock())}): the pre-registered analysis ran once "
             f"({self.result_rel}, {status}); completed and kept, trained "
             f"{counts.get('completed_trained', 0)} and untrained "
-            f"{counts.get('completed_untrained', 0)}. "
+            f"{counts.get('completed_untrained', 0)}. {self.part2_status()} "
             f"Commit {self.head()[:7]} is on depth and main, deployed, the phone tests pass, "
             "and judge mode is open."
+        )
+
+    def part2_status(self) -> str:
+        if self.result2 is None:
+            return "Part 2: nobody took it before the lock."
+        p = self.result2.get("primary") or {}
+        return (
+            f"Part 2 ({self.result2_rel}, {p.get('status')}): assisted {p.get('n_assisted')}, "
+            f"unassisted {p.get('n_unassisted')}."
         )
 
     # -- undo --------------------------------------------------------------

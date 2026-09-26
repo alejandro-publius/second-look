@@ -27,6 +27,7 @@ from typing import Any
 
 import pytest
 
+import evals.assist_analysis as aa
 import evals.common as common
 import evals.usability_analysis as ua
 from core.lock import DATA_LOCK_UTC
@@ -50,6 +51,10 @@ README = f"""# Second Look
 The full loop, from a desk.
 
 {la.HUMAN_LEAD}: it is the volunteer's own calibration step. No session has arrived yet.
+
+{la.PART2_START}
+Does the checker's question help? Part 2 is analysed once, after the data lock.
+{la.PART2_END}
 
 ## Gallery
 """
@@ -264,6 +269,8 @@ class FakeLocal(la.Local):
             return self.world.real_git(args, cwd, env)
         if args[-1] == "evals/usability_analysis.py":
             return self.analysis(cwd)
+        if args[-1] == "evals/assist_analysis.py":
+            return self.part2(cwd)
         if args[:2] == ["make", "render-readme"]:
             path = cwd / "README.md"
             text, missing = render_readme.render(path.read_text(), cwd)
@@ -286,6 +293,27 @@ class FakeLocal(la.Local):
             mp.setattr(ua, "now_utc", lambda: NOW)
             mp.setattr(common, "now_utc", lambda: NOW)
             code = ua.main(
+                [
+                    "--input",
+                    str(cwd / "data" / "export"),
+                    "--out-dir",
+                    str(cwd / "results"),
+                    "--resamples",
+                    "200",
+                    "--permutations",
+                    "200",
+                ]
+            )
+        return Done(code, buf.getvalue())
+
+    def part2(self, cwd: Path) -> Done:
+        """evals/assist_analysis.py with no option, on the checkout's export, after the lock. Its
+        tag and plan checks are tested in evals/tests/test_assist_analysis.py and stubbed here."""
+        buf = io.StringIO()
+        with pytest.MonkeyPatch.context() as mp, contextlib.redirect_stdout(buf):
+            mp.setattr(aa, "now_utc", lambda: NOW)
+            mp.setattr(aa, "refusal_reason", lambda now, repo: None)
+            code = aa.main(
                 [
                     "--input",
                     str(cwd / "data" / "export"),
@@ -655,3 +683,36 @@ def test_ready_names_each_problem(world: World, monkeypatch: pytest.MonkeyPatch)
     for words in ("README.md", "pandoc", "worker/node_modules", "gh is not logged in", "QA_KEY"):
         assert words in text
     assert "commit 9999999" in text
+
+
+def test_part2_row_says_too_few_with_claim_tokens_or_gives_the_test() -> None:
+    rel = "results/assist_20260928.json"
+    few = la.part2_row({"primary": {"status": "descriptive"}}, rel)
+    assert few.startswith(la.PART2_START) and few.endswith(la.PART2_END)
+    assert (
+        "Too few people finished part 2" in few
+        and "{{claim:" + rel + "#/primary/n_assisted}}" in few
+    )
+    test = la.part2_row({"primary": {"status": "confirmatory"}}, rel)
+    assert "difference {{claim:" in test and "#/primary/ci_high}}" in test
+    assert "Nobody took part 2" in la.part2_row(None, "")
+    with pytest.raises(la.Failed):
+        la.place_part2_row("no place here", few)
+
+
+def test_part2_the_lock_runs_part2_once_after_part1_and_fills_the_second_row(world: World) -> None:
+    assert world.lock().run() == 0
+    calls = [c[-1] for c in world.local.calls]
+    assert calls.index("evals/assist_analysis.py") == calls.index("evals/usability_analysis.py") + 1
+    assert calls.count("evals/assist_analysis.py") == 1
+    readme = git(world.root, "show", "origin/main:README.md")
+    row = readme[readme.index(la.PART2_START) : readme.index(la.PART2_END)]
+    assert "Too few people finished part 2" in row and "{{claim:" not in row
+    record = json.loads(git(world.root, "show", "origin/main:results/lock_analysis.json"))
+    assert record["part2_analysis"].startswith("results/assist_")
+
+
+def test_part2_a_refused_part2_run_undoes_the_whole_lock(world: World) -> None:
+    world.local.fail[("uv", "run", "python", "evals/assist_analysis.py")] = Done(3, "", "refused")
+    assert world.lock().run() == 1
+    assert world.out.comments and "part 2 analysis" in world.out.comments[-1]

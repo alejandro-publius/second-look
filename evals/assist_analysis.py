@@ -612,6 +612,7 @@ def main(argv: list[str] | None = None) -> int:
             n_perm=args.permutations,
         )
         print(result["readme_row"])
+        print(f"wrote json: {args.out_dir / ('assist_' + result['stamp'] + '.json')}")
         return 0
     names = SCENARIOS if args.scenario in (None, "all") else (args.scenario,)
     for name in names:
