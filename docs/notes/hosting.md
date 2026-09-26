@@ -165,6 +165,8 @@ job checks before it deploys anything.
 <!-- deploys:start -->
 | When (UTC) | Part | Commit | Id | Archive | Checked |
 |---|---|---|---|---|---|
+| 2026-09-26T02:16:49Z | web | `c21412a` | `5f5811e9` | `~/second-look-backups/deploys/web-20260926T021649Z-c21412a` | yes |
+| 2026-09-26T02:16:10Z | worker | `c21412a` | `67d4ed55-fe2f-4bd2-9b6d-5eac12311688` |  | yes |
 | 2026-09-26T01:43:37Z | web | `6f582c0` | `4a30cefe` | `~/second-look-backups/deploys/web-20260926T014337Z-6f582c0` | yes |
 | 2026-09-26T01:42:29Z | worker | `6f582c0` | `ab917e11-043c-4ca6-94e6-697bd7f3db61` |  | yes |
 | 2026-09-25T22:57:39Z | web | `5acd34a` | `ce38185d` | `~/second-look-backups/deploys/web-20260925T225739Z-5acd34a` | yes |
