@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "e364ee13d05abbd9",
+  content_hash: "ff1b6224b07fc5a5",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -155,6 +155,7 @@ var content_default = {
       "fallen-branches": "Fallen branches",
       "fallen-trees": "Fallen trees",
       fast: "Fast flow",
+      "first-rating": "First overall rating",
       flat: "Flat channel",
       good: "Good overall rating",
       "invasive-plant": "Invasive plant",
@@ -163,6 +164,7 @@ var content_default = {
       "lab-hf183": "Human faecal marker HF183",
       "leaf-deposits": "Deposits of fallen leaves",
       moderate: "Moderate overall rating",
+      "overall-rating": "Overall rating",
       "pipe-running": "Pipe running",
       poor: "Poor overall rating",
       riffles: "Riffles, rapids or falls",
@@ -1308,6 +1310,7 @@ var core_content_default = {
       "fallen-branches": "Fallen branches",
       "fallen-trees": "Fallen trees",
       fast: "Fast flow",
+      "first-rating": "First overall rating",
       flat: "Flat channel",
       good: "Good overall rating",
       "invasive-plant": "Invasive plant",
@@ -1316,6 +1319,7 @@ var core_content_default = {
       "lab-hf183": "Human faecal marker HF183",
       "leaf-deposits": "Deposits of fallen leaves",
       moderate: "Moderate overall rating",
+      "overall-rating": "Overall rating",
       "pipe-running": "Pipe running",
       poor: "Poor overall rating",
       riffles: "Riffles, rapids or falls",
@@ -2905,6 +2909,34 @@ function observation(visit, item, value, pid, spotLocationId, visitQrId, score) 
   };
   return out;
 }
+var RATING_ITEM = "overall_rating";
+function ratingChange(visit, items) {
+  const item = items.find((i) => i.id === RATING_ITEM);
+  const given = visit.answers[RATING_ITEM];
+  if (item === void 0 || typeof given !== "string") return null;
+  const first = visit.first_rating || given;
+  const kept = visit.final_rating || given;
+  return first !== kept ? { first, kept, item } : null;
+}
+function ratingObservation(visit, item, first, kept, pid, spotLocationId, visitQrId) {
+  if (item.fhir) throw new FhirEmitError(`item ${item.id}: a changed rating needs the item mapped to none`);
+  const words = `${item.text ?? item.id} at ${visit.spot.spot_name}: ${kept.replace(/_/g, " ")}. The first rating was ${first.replace(/_/g, " ")}. On the rating check the volunteer changed it to ${kept.replace(/_/g, " ")}.`;
+  return {
+    resourceType: "Observation",
+    id: fhirId("sl-obs", visit.visit_id, item.id),
+    meta: { profile: [OAH_OBSERVATION_PROFILE] },
+    text: narrative(words),
+    identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
+    status: "final",
+    code: concept(slCoding("overall-rating"), item.text),
+    subject: ref("Location", spotLocationId),
+    effectiveDateTime: instant(visit.answered_at),
+    performer: [ref("Practitioner", pid)],
+    valueCodeableConcept: valueConcept(kept),
+    component: [{ code: concept(slCoding("first-rating")), valueCodeableConcept: valueConcept(first) }],
+    derivedFrom: [ref("QuestionnaireResponse", visitQrId)]
+  };
+}
 function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
   const entities = [{ role: "source", what: ref("QuestionnaireResponse", visitQrId) }];
   let sources = "The source is the visit.";
@@ -2928,6 +2960,8 @@ function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
   };
 }
 function emitVisit(visit, testSitting, emittedAt, items = FORM_ITEMS) {
+  const change = ratingChange(visit, items);
+  if (change !== null) visit = { ...visit, answers: { ...visit.answers, [RATING_ITEM]: change.kept } };
   const [creek, reach, spot] = locations(visit);
   const tested = testedOn(visit, testSitting);
   const person = practitioner(visit, tested);
@@ -2942,6 +2976,7 @@ function emitVisit(visit, testSitting, emittedAt, items = FORM_ITEMS) {
     const obs = observation(visit, item, visit.answers[item.id], pid, String(spot.id), String(visitQr.id), scores.get(String(item.feature ?? "")) ?? null);
     if (obs !== null) observations.push(obs);
   }
+  if (change !== null) observations.push(ratingObservation(visit, change.item, change.first, change.kept, pid, String(spot.id), String(visitQr.id)));
   const prov = provenance(visit, observations, pid, String(visitQr.id), testQr ? String(testQr.id) : null, emittedAt);
   const resources2 = [organization(), device(visit.software_version), creek, reach, spot, person];
   if (testQr) resources2.push(testQr);
@@ -3214,7 +3249,7 @@ var RATING_ISSUE_ITEMS = core_content_default.rules.rating_issue_items;
 var PRESENT = "present";
 var ABSENT = "absent";
 var BEST_RATING = "good";
-var RATING_ITEM = "overall_rating";
+var RATING_ITEM2 = "overall_rating";
 function itemById(formItems, id) {
   for (const item of formItems) if (item.id === id) return item;
   return null;
@@ -3250,7 +3285,7 @@ function dryPipe(rule, answers, site) {
   };
 }
 function ratingCheck(rule, answers, formItems) {
-  if (answers[RATING_ITEM] !== BEST_RATING) return null;
+  if (answers[RATING_ITEM2] !== BEST_RATING) return null;
   const issues = [];
   for (const itemId of RATING_ISSUE_ITEMS) {
     const value = answers[itemId];
@@ -3387,7 +3422,7 @@ var DEMO_TAG_SYSTEM = `${REPO_URL}/tags`;
 var DEMO_TAG_CODE = "demo-walk";
 var DEMO_TAG_DISPLAY = "Demo visit from a video walk. Never counted and never sent to the sandbox.";
 var WALK_PREFIX = "walk-";
-var RATING_ITEM2 = "overall_rating";
+var RATING_ITEM3 = "overall_rating";
 var WALK_KEEP_DAYS = 30;
 var WALK_PAST_DAYS = 7;
 var WALK_FUTURE_SECONDS = 300;
@@ -3440,9 +3475,9 @@ function ratingChangedNote(first, final) {
   return `The first overall rating was ${first}. On the rating check the volunteer changed it to ${final}.`;
 }
 function walkBundle(walk, answers, answeredAt, finalRating = null) {
-  const first = answers[RATING_ITEM2];
+  const first = answers[RATING_ITEM3];
   const changed = typeof first === "string" && finalRating !== null && finalRating !== first;
-  const rated = changed ? { ...answers, [RATING_ITEM2]: finalRating } : answers;
+  const rated = changed ? { ...answers, [RATING_ITEM3]: finalRating } : answers;
   const bundle = emitVisit(walkVisit(walk, rated, answeredAt), null, instant(answeredAt));
   if (changed) {
     for (const entry3 of bundle.entry) {
@@ -3497,7 +3532,7 @@ function walkChecks(answers, followups, questionTexts, given, finalRating) {
   for (const ruleId of Object.keys(given)) {
     if (!asked.has(ruleId)) throw new WalkRecordError(`No follow-up called '${ruleId}' was asked in this walk.`);
   }
-  const first = answers[RATING_ITEM2];
+  const first = answers[RATING_ITEM3];
   const firstRating = typeof first === "string" ? first : null;
   let final = firstRating;
   const checks = followups.map((f, i) => {
@@ -3779,6 +3814,34 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance");
   prov.resource.target.push({ reference: "Observation/nowhere" });
   assert.ok(checkBundle(broken).some((p) => p.includes("does not resolve")));
+});
+test("fhir_emit: a rating changed at the rating check is the value, and the first is a component", () => {
+  const base = golden("fhir_emit").cases.find((c) => c.name.startsWith("a coarse pin")).input.visit;
+  assert.equal(base.answers.overall_rating, "good", "the app stores the first rating as the answer");
+  const rated = (first, final) => {
+    const bundle = emitVisit({ ...base, first_rating: first, final_rating: final }, null, "2026-09-26T09:16:00Z");
+    const byType = (t) => bundle.entry.map((e) => e.resource).filter((r) => r.resourceType === t);
+    const qr = byType("QuestionnaireResponse").at(-1);
+    const answered = qr.item.find((i) => i.linkId === "overall_rating").answer[0].valueCoding.code;
+    const ratings = byType("Observation").filter((o) => o.id.endsWith("-overall-rating"));
+    return { bundle, answered, ratings, provenance: byType("Provenance")[0] };
+  };
+  const changed = rated("good", "poor");
+  assert.deepEqual(checkBundle(changed.bundle), []);
+  assert.equal(changed.answered, "poor", "the response answers the kept rating");
+  assert.equal(changed.ratings.length, 1);
+  const [obs] = changed.ratings;
+  assert.equal(obs.valueCodeableConcept.coding[0].code, "poor", "the value is the kept rating");
+  assert.equal(obs.component.length, 1);
+  assert.equal(obs.component[0].code.coding[0].code, "first-rating");
+  assert.equal(obs.component[0].valueCodeableConcept.coding[0].code, "good", "the component is the first rating");
+  assert.ok(changed.provenance.target.some((t) => t.reference === `Observation/${obs.id}`));
+  assert.equal(base.answers.overall_rating, "good", "the stored answers stay as given");
+  for (const [first, final] of [["good", "good"], ["good", null], [null, null], [null, "good"]]) {
+    const same2 = rated(first, final);
+    assert.equal(same2.ratings.length, 0, `${first} then ${final}`);
+    assert.equal(same2.answered, "good");
+  }
 });
 test("fhir_referral: the ServiceRequest and the example result, the same as Python", () => {
   const doc = golden("fhir_emit");

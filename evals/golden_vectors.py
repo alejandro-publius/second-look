@@ -857,6 +857,14 @@ def fhir_vectors() -> dict[str, Any]:
             "overall_rating": "good",
         },
     )
+    # The creek check as the app stores it: the answer is the first rating, and the rating check
+    # either kept it or changed it. The record answers the kept one and keeps the first.
+    changed = second.model_copy(
+        update={"visit_id": "visit-rating-changed", "first_rating": "good", "final_rating": "poor"}
+    )
+    kept = second.model_copy(
+        update={"visit_id": "visit-rating-kept", "first_rating": "good", "final_rating": "good"}
+    )
     long_id = VisitRecord(
         visit_id="visit-" + "x" * 70,
         spot=Spot(
@@ -936,6 +944,18 @@ def fhir_vectors() -> dict[str, Any]:
             run(
                 "a coarse pin, lists, a number, no sitting",
                 second,
+                None,
+                datetime(2026, 9, 26, 9, 16, tzinfo=UTC),
+            ),
+            run(
+                "a rating changed at the rating check: the kept one answers, the first stays",
+                changed,
+                None,
+                datetime(2026, 9, 26, 9, 16, tzinfo=UTC),
+            ),
+            run(
+                "a rating kept at the rating check: no rating Observation",
+                kept,
                 None,
                 datetime(2026, 9, 26, 9, 16, tzinfo=UTC),
             ),

@@ -849,6 +849,94 @@
       }
     },
     {
+      "fullUrl": "urn:uuid:91cd7153-5457-5185-9943-8d2deb058dbf",
+      "request": {
+        "ifNoneExist": "Observation?identifier=https://github.com/alejandro-publius/second-look/fhir/observation|visit-0001-overall_rating",
+        "method": "POST",
+        "url": "Observation"
+      },
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "overall-rating",
+              "display": "Overall rating",
+              "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ],
+          "text": "Overall, how would you rate this stream?"
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "code": "first-rating",
+                  "display": "First overall rating",
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              ]
+            },
+            "valueCodeableConcept": {
+              "coding": [
+                {
+                  "code": "good",
+                  "display": "Good overall rating",
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              ]
+            }
+          }
+        ],
+        "derivedFrom": [
+          {
+            "reference": "urn:uuid:b66b8f50-b0d4-51b2-b333-31fb1e62010e"
+          }
+        ],
+        "effectiveDateTime": "2026-09-24T16:40:00Z",
+        "identifier": [
+          {
+            "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+            "value": "visit-0001-overall_rating"
+          }
+        ],
+        "meta": {
+          "profile": [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ],
+          "tag": [
+            {
+              "code": "second-look",
+              "system": "https://github.com/alejandro-publius/second-look"
+            }
+          ]
+        },
+        "performer": [
+          {
+            "reference": "urn:uuid:c5f27240-a5bf-533f-a10c-a83c277e3182"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "urn:uuid:4bfe1555-8888-555f-9145-9a397426e2c6"
+        },
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Overall, how would you rate this stream? at Strawberry Creek, campus reach, spot 1: moderate. The first rating was good. On the rating check the volunteer changed it to moderate.</p></div>",
+          "status": "generated"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "code": "moderate",
+              "display": "Moderate overall rating",
+              "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ]
+        }
+      }
+    },
+    {
       "fullUrl": "urn:uuid:3f3ea79d-aec9-5ca1-a8c0-d416a7503d12",
       "request": {
         "ifNoneExist": "Provenance?target:Observation.identifier=https://github.com/alejandro-publius/second-look/fhir/observation|visit-0001-channel_form",
@@ -923,10 +1011,13 @@
           },
           {
             "reference": "urn:uuid:4a9ef7af-67c5-501a-9337-82c2a5d19dd7"
+          },
+          {
+            "reference": "urn:uuid:91cd7153-5457-5185-9943-8d2deb058dbf"
           }
         ],
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>5 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>6 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
           "status": "generated"
         }
       }

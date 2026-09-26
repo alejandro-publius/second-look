@@ -205,6 +205,7 @@ def test_entry_order_and_counts(golden_bundle: dict) -> None:
         "Observation",
         "Observation",
         "Observation",
+        "Observation",
         "Provenance",
     ]
     assert check_bundle(golden_bundle) == []
@@ -303,6 +304,7 @@ def test_one_observation_per_mapped_answer(golden_bundle: dict) -> None:
         (SL_SYSTEM, "pipe-running"),
         (OAH_SYSTEM, "hydrology"),
         (SL_SYSTEM, "invasive-plant"),
+        (SL_SYSTEM, "overall-rating"),
     ]
     _, visit_qr = resources(golden_bundle, "QuestionnaireResponse")
     (practitioner,) = resources(golden_bundle, "Practitioner")
@@ -314,10 +316,13 @@ def test_one_observation_per_mapped_answer(golden_bundle: dict) -> None:
         assert obs["performer"] == [{"reference": f"Practitioner/{practitioner['id']}"}]
         assert obs["effectiveDateTime"] == "2026-09-24T16:40:00Z"
         assert obs["derivedFrom"] == [{"reference": f"QuestionnaireResponse/{visit_qr['id']}"}]
-        assert obs["category"][0]["coding"][0]["system"] == OAH_SYSTEM
         assert obs["text"]["status"] == "generated"
-    # no Observation for the overall rating: fhir is null in the form
-    assert not any("overall" in o["id"] for o in observations)
+    *mapped, rating = observations
+    assert all(o["category"][0]["coding"][0]["system"] == OAH_SYSTEM for o in mapped)
+    # The form maps the overall rating to no Observation (fhir is null). This one is there only
+    # because the rating check changed the rating: first good, kept moderate.
+    assert not any("overall" in o["id"] for o in mapped)
+    assert rating["id"] == "sl-obs-visit-0001-overall-rating"
 
 
 def test_observation_values_use_the_code_systems_own_displays(golden_bundle: dict) -> None:
@@ -640,3 +645,71 @@ def test_check_bundle_reports_a_fullurl_used_twice(golden_bundle: dict) -> None:
     broken = json.loads(json.dumps(golden_bundle))
     broken["entry"].append(json.loads(json.dumps(broken["entry"][2])))
     assert any("appears twice" in p for p in check_bundle(broken))
+
+
+def _rating_observations(bundle: dict) -> list[dict]:
+    return [o for o in resources(bundle, "Observation") if o["id"].endswith("-overall-rating")]
+
+
+def _answered_rating(bundle: dict) -> str:
+    visit_qr = resources(bundle, "QuestionnaireResponse")[-1]
+    item = next(i for i in visit_qr["item"] if i["linkId"] == "overall_rating")
+    return str(item["answer"][0]["valueCoding"]["code"])
+
+
+def test_a_rating_changed_at_the_rating_check_is_the_value_and_the_first_is_a_component() -> None:
+    """The app stores the first rating as the answer; the rating check leaves the final one. The
+    record answers the kept rating, in the QuestionnaireResponse and in the value of the rating
+    Observation, and keeps the first rating in that Observation as a first-rating component."""
+    visit = second_visit().model_copy(update={"first_rating": "good", "final_rating": "poor"})
+    assert visit.answers["overall_rating"] == "good"
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
+    assert check_bundle(bundle) == []
+    assert _answered_rating(bundle) == "poor"
+    (rating,) = _rating_observations(bundle)
+    assert rating["code"]["coding"] == [
+        {"system": SL_SYSTEM, "code": "overall-rating", "display": "Overall rating"}
+    ]
+    assert rating["valueCodeableConcept"]["coding"] == [
+        {"system": SL_SYSTEM, "code": "poor", "display": "Poor overall rating"}
+    ]
+    assert rating["component"] == [
+        {
+            "code": {
+                "coding": [
+                    {"system": SL_SYSTEM, "code": "first-rating", "display": "First overall rating"}
+                ]
+            },
+            "valueCodeableConcept": {
+                "coding": [{"system": SL_SYSTEM, "code": "good", "display": "Good overall rating"}]
+            },
+        }
+    ]
+    assert "The first rating was good" in rating["text"]["div"]
+    (provenance,) = resources(bundle, "Provenance")
+    assert {"reference": f"Observation/{rating['id']}"} in provenance["target"]
+    # The stored answers stay as given.
+    assert visit.answers["overall_rating"] == "good"
+
+
+@pytest.mark.parametrize(
+    ("first", "final"), [("good", "good"), ("good", None), (None, None), (None, "good")]
+)
+def test_a_rating_the_check_did_not_change_adds_no_rating_observation(
+    first: str | None, final: str | None
+) -> None:
+    visit = second_visit().model_copy(update={"first_rating": first, "final_rating": final})
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
+    assert _rating_observations(bundle) == []
+    assert _answered_rating(bundle) == "good"
+    assert bundle == emit_visit(second_visit(), test_sitting=None, emitted_at=EMITTED_AT)
+
+
+def test_a_final_rating_with_no_rating_answered_adds_no_rating() -> None:
+    answers = {k: v for k, v in second_visit().answers.items() if k != "overall_rating"}
+    visit = second_visit().model_copy(
+        update={"answers": answers, "first_rating": None, "final_rating": "poor"}
+    )
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
+    assert _rating_observations(bundle) == []
+    assert "poor" not in json.dumps(bundle)
