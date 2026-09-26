@@ -697,7 +697,8 @@ try {
   assert.equal(exported.status, 200);
   assert.equal(exported.headers.get("content-type"), "application/zip");
   const files = readStoredZip(new Uint8Array(await exported.arrayBuffer()));
-  assert.deepEqual(Object.keys(files).sort(), ["responses.csv", "sessions.csv"]);
+  // Part 2 (UPDATE_31) adds its two files; worker/test/part2_e2e.mjs checks their columns.
+  assert.deepEqual(Object.keys(files).sort(), ["part2_responses.csv", "part2_sessions.csv", "responses.csv", "sessions.csv"]);
   const sessionLines = files["sessions.csv"].trimEnd().split("\r\n");
   const responseLines = files["responses.csv"].trimEnd().split("\r\n");
   assert.deepEqual(sessionLines[0].split(","), pythonColumns("SESSIONS_COLUMNS"));
