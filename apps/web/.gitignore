@@ -45,6 +45,7 @@ next-env.d.ts
 /public/photos/
 /public/icons/
 /public/precache.json
+/public/proofs/
 
 # outputs of tests and tools
 /out/

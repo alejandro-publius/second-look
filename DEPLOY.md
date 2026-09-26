@@ -213,6 +213,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `RAIN_URL` | not set, which means Open-Meteo | `worker/src/index.ts` | where the Worker asks about rain; the e2e points it at a stub |
 | `E2E_NOW` | not set, which means the real clock | `worker/src/index.ts` | a fixed time for judge mode's lock, set only by `worker/test/e2e.mjs` on its local Workers so both sides of the lock are tested; never set on a deployed Worker (`scripts/tests/test_worker_lock.py`) |
 | `API` | the Worker `second-look-api` | `apps/web/functions/api/[[path]].js`, `apps/web/functions/health.js` | the Pages Functions' service binding (`apps/web/wrangler.jsonc`) |
+| `ASSETS` | the site's own static files, given to every Pages Function by Cloudflare | `apps/web/functions/walks/[[path]].js` | reads a walk clip, so the function can answer a range request with 206 and only the bytes asked for (UPDATE_32 section 4) |
 | `NEXT_PUBLIC_API_ORIGIN` | `http://localhost:8000` | `apps/web/lib/api.ts`, `apps/web/next.config.ts`, `apps/web/scripts/build-headers.mjs` | where the site calls the API; empty means the same origin. Baked in at build time |
 | `NEXT_PUBLIC_SITE_URL` | `https://second-look.example` | `apps/web/lib/session.ts`, `scripts/submit_check.py` | the site's own address, for share links |
 | `NEXT_PUBLIC_BUILD_HASH` | `dev` | `apps/web/lib/session.ts` | the commit, sent with each sitting |

@@ -172,11 +172,13 @@ The video is released under CC BY-SA 4.0, because several of the creek clips in 
 
 ## Gallery images, in this order
 
-1. `docs/screens/landing.webp`: the question every visitor meets.
-2. `docs/screens/score.webp`: the score per feature.
-3. `docs/screens/walk.webp`: a video walk, a creek somewhere else, with a button to start the check.
-4. `docs/screens/spot-health.webp`: the health card, one action for the person, one for the pet and one for the city, each with its source (a sample record, from a local build).
-5. `docs/screens/walk-city.webp`: the creek a walk just checked, seen as a city would after answering Artificial for the bank, with what it needs in OneAquaHealth's own measures and their source. The clips show natural creeks, so a measure appears when the walk reports damage, as it does here.
+Upload these five, 1500 by 1000 each, from `docs/submission/gallery/` (made by `uv run python scripts/make_devpost_gallery.py` from the screenshots `make screens` takes). Paste each caption under its image. Images 1 and 5 are screenshots of the live site; 2 to 4 are of this commit's production build with a fake API, so taking them added no sitting or visit to the study.
+
+1. `1-which-creek.png`: The first screen: two real creeks and one question. The tidy park hides a concrete channel.
+2. `2-lesson-card.png`: A lesson card: numbered marks on a real photo show what to look for before the test.
+3. `3-score.png`: The score screen: one gauge for each of the four features, so a volunteer sees what to practise.
+4. `4-record-and-fhir.png`: A creek record shows each answer beside the observer's score, and View as FHIR shows the same record in OneAquaHealth's profiles.
+5. `5-city.png`: The city view: what the creek needs, in OneAquaHealth's own restoration measures, each with its source.
 
 ## Team
 

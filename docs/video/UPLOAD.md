@@ -70,7 +70,7 @@ creek, stream, river, citizen science, volunteer monitoring, river habitat surve
 
 ## Thumbnail
 
-`~/second-look-media/final/thumbnail.png`: 1280 by 720 and under 2 MB, as YouTube asks. `make video-final` makes it from the two creek photos on the landing page, [`photos/warmup/ph-warmup-03.jpg`](../../photos/warmup/ph-warmup-03.jpg) (Norman Creek, by Gregwadley, CC BY-SA 4.0) on the left and [`photos/warmup/ph-warmup-04.jpg`](../../photos/warmup/ph-warmup-04.jpg) (Nurton Brook, by Roger Kidd, CC BY-SA 2.0) on the right, with the question "Which creek is healthier?" across the top and both credits along the bottom. It does not give the answer away.
+[`docs/video/thumbnail.png`](thumbnail.png), a committed copy of `~/second-look-media/final/thumbnail.png`: 1280 by 720 and under 2 MB (642 KB), as YouTube asks. `make video-final` makes it from the two creek photos on the landing page, [`photos/warmup/ph-warmup-03.jpg`](../../photos/warmup/ph-warmup-03.jpg) (Norman Creek, by Gregwadley, CC BY-SA 4.0) on the left and [`photos/warmup/ph-warmup-04.jpg`](../../photos/warmup/ph-warmup-04.jpg) (Nurton Brook, by Roger Kidd, CC BY-SA 2.0) on the right, with the question "Which creek is healthier?" across the top and both credits along the bottom. It does not give the answer away.
 
 YouTube only takes your own thumbnail from an account that is verified with a phone number (https://www.youtube.com/verify, one text message). If the account is not verified, pick the frame YouTube offers that shows the two creek photos on the phone.
 
@@ -78,7 +78,7 @@ YouTube only takes your own thumbnail from an account that is verified with a ph
 
 1. Open https://studio.youtube.com, signed in to the channel the video should live on.
 2. Top right: **Create**, then **Upload videos**, then **Select files**. In the file window press Cmd+Shift+G, paste `~/second-look-media/final/second-look-final.mp4`, and press Return twice.
-3. **Details**: paste the title and the description above. Under **Thumbnail**, **Upload file**, then Cmd+Shift+G and `~/second-look-media/final/thumbnail.png`. Under **Audience**, choose **No, it's not made for kids**.
+3. **Details**: paste the title and the description above. Under **Thumbnail**, **Upload file**, then Cmd+Shift+G and `~/second-look-media/final/thumbnail.png` (the same picture as `docs/video/thumbnail.png` in the repository). Under **Audience**, choose **No, it's not made for kids**.
 4. Still on Details, **Show more**:
    - **Altered content**: **No**. Nothing in it is made or changed by AI to look real.
    - **Tags**: paste the tags above.

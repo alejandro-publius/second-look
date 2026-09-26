@@ -134,13 +134,14 @@ export function FollowupCard({
                   aria-pressed={finalRating === o.value}
                   onClick={() => onRatingTap({ rating: o.value })}
                 >
-                  {o.label}
                   {o.description ? (
-                    <span className="small muted option-description">
-                      {" "}
-                      {o.description}
-                    </span>
-                  ) : null}
+                    <>
+                      {o.label}
+                      <span className="small muted option-description"> {o.description}</span>
+                    </>
+                  ) : (
+                    o.label
+                  )}
                 </button>
               ))}
             </div>

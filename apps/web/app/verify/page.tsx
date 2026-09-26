@@ -41,14 +41,43 @@ export default async function VerifyPage() {
             <h3>{proofName(p)}</h3>
             <p>{proofStatus(p)}</p>
             <p className="small muted hash">{p.proof}</p>
+            <p className="small">
+              <a
+                href={`/proofs/${p.proof.split("/").pop()}`}
+                download
+                data-testid="proof-download"
+              >
+                {t("verify.download_proof")}
+              </a>
+              {p.file ? (
+                <>
+                  {" · "}
+                  <a href={`/proofs/${p.file.split("/").pop()}`} download>
+                    {t("verify.download_file")}
+                  </a>
+                </>
+              ) : null}
+            </p>
           </li>
         ))}
       </ul>
-      {ots.checked_utc ? <p className="small muted">{t("verify.ots_checked", { time: ots.checked_utc })}</p> : null}
+      <p className="small">{t("verify.download_how")}</p>
+      {ots.checked_utc ? (
+        <p className="small muted">
+          {t("verify.ots_checked", { time: ots.checked_utc })}
+        </p>
+      ) : null}
 
       <h2>{t("verify.check_title")}</h2>
       <p>{t("verify.check_body")}</p>
-      <pre className="code">{[t("verify.cmd_audit"), t("verify.cmd_tag"), t("verify.cmd_plan"), t("verify.cmd_head")].join("\n")}</pre>
+      <pre className="code">
+        {[
+          t("verify.cmd_audit"),
+          t("verify.cmd_tag"),
+          t("verify.cmd_plan"),
+          t("verify.cmd_head"),
+        ].join("\n")}
+      </pre>
       <p className="small muted">{t("verify.cmd_note")}</p>
     </article>
   );

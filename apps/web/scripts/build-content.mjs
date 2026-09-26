@@ -446,6 +446,20 @@ function main() {
   mkdirSync(join(webRoot, "public", OFFLINE_URL_DIR), { recursive: true });
   for (const { src, file } of copyList) copyFileSync(src, join(publicPhotos, file));
 
+  // Every OpenTimestamps proof and the file it stamps, to download from /verify, since the
+  // repository is private until Sep 30 (judge simulation 02, judge 6, thin item 3).
+  const publicProofs = join(webRoot, "public", "proofs");
+  rmSync(publicProofs, { recursive: true, force: true });
+  mkdirSync(publicProofs, { recursive: true });
+  const otsDoc = JSON.parse(readFileSync(join(repoRoot, "results", "ots.json"), "utf8"));
+  for (const p of otsDoc.proofs ?? []) {
+    for (const rel of [p.proof, p.file]) {
+      const src = join(repoRoot, rel);
+      if (!existsSync(src)) fail(`results/ots.json names ${rel}, which is not in the repository`);
+      copyFileSync(src, join(publicProofs, rel.split("/").pop()));
+    }
+  }
+
   mkdirSync(publicIcons, { recursive: true });
   writeFileSync(join(publicIcons, "icon-192.png"), iconPng(192));
   writeFileSync(join(publicIcons, "icon-512.png"), iconPng(512));

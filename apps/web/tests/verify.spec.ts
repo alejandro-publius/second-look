@@ -209,3 +209,19 @@ test("the judges' door and /verify say a stamp covers the lines from its own day
   await page.goto("/verify");
   await expect(page.getByTestId("stamp-day")).toHaveText(en["verify.stamp_day"]);
 });
+
+// Judge simulation 02, judge 6, thin item 3: /verify offered no proof to download while the
+// repository is private. Each proof and the file it stamps now download from the site itself.
+test("/verify lets anyone download every proof and the file it stamps", async ({ page, request }) => {
+  await page.goto("/verify");
+  const links = page.locator(".verify-proofs a[download]");
+  const n = await links.count();
+  expect(n).toBeGreaterThanOrEqual(4);
+  for (let i = 0; i < n; i++) {
+    const href = (await links.nth(i).getAttribute("href")) ?? "";
+    expect(href).toMatch(/^\/proofs\/[\w.-]+$/);
+    const r = await request.get(href);
+    expect(r.status(), href).toBe(200);
+    expect((await r.body()).length, href).toBeGreaterThan(0);
+  }
+});

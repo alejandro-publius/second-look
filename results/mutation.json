@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-26T20:09:50+00:00",
+  "generated_at_utc": "2026-09-26T20:30:49+00:00",
   "script": "scripts/mutation.py",
   "synthetic": false,
   "tool": "mutmut",
@@ -12,7 +12,7 @@
     "core/gate.py": "ac9c68bd55cd3bde510b69d8b1d6e5372fae93d93f3a566bb25fe9d68f884507",
     "core/followups.py": "bfa4b040982d1b3e8594669efdea9d6612ec090ae246740ed2e64eb6ec0d392a",
     "core/scoring.py": "88598f458a5dc42b0a275c2b479ef7e2ed81f32d612182192bfa4f199a9a53ab",
-    "core/fhir_emit.py": "22b205e4572cc9c7030227f73abf9c83696be65753f11ef76ff67bbed5af8228"
+    "core/fhir_emit.py": "ec5fd695d81fc87c21ea30391f286969a43cb7623b7da1212b84b8e3b97abfa2"
   },
   "modules": {
     "core/gate.py": {
@@ -30,16 +30,15 @@
     },
     "core/followups.py": {
       "mutants": 341,
-      "killed": 335,
-      "survived": 6,
+      "killed": 336,
+      "survived": 5,
       "timeout": 0,
       "other": {},
-      "score_percent": 98.2,
+      "score_percent": 98.5,
       "survivors": [
         "core.followups.x__low_score__mutmut_12",
         "core.followups.x__low_score__mutmut_31",
         "core.followups.x__rules_in_priority__mutmut_20",
-        "core.followups.x_select_followups__mutmut_1",
         "core.followups.x_select_followups__mutmut_10",
         "core.followups.x_select_followups__mutmut_14"
       ]
@@ -54,8 +53,8 @@
       "survivors": []
     },
     "core/fhir_emit.py": {
-      "mutants": 1727,
-      "killed": 1647,
+      "mutants": 1731,
+      "killed": 1651,
       "survived": 80,
       "timeout": 0,
       "other": {},
@@ -154,10 +153,10 @@
     },
     "followups": {
       "mutants": 341,
-      "killed": 335,
-      "survived": 6,
+      "killed": 336,
+      "survived": 5,
       "timeout": 0,
-      "score_percent": 98.2
+      "score_percent": 98.5
     },
     "scoring": {
       "mutants": 53,
@@ -167,18 +166,18 @@
       "score_percent": 100.0
     },
     "fhir_emit": {
-      "mutants": 1727,
-      "killed": 1647,
+      "mutants": 1731,
+      "killed": 1651,
       "survived": 80,
       "timeout": 0,
       "score_percent": 95.4
     }
   },
   "total": {
-    "mutants": 2350,
-    "killed": 2261,
-    "survived": 89,
+    "mutants": 2354,
+    "killed": 2266,
+    "survived": 88,
     "timeout": 0,
-    "score_percent": 96.2
+    "score_percent": 96.3
   }
 }
