@@ -257,9 +257,8 @@ def test_a_walk_record_states_the_language_its_questions_were_shown_in() -> None
 
     def qr(row: Mapping[str, object]) -> dict[str, object]:
         entries = row["bundle"]["entry"]  # type: ignore[index]
-        return next(
-            e["resource"] for e in entries if e["resource"]["resourceType"] == "QuestionnaireResponse"
-        )
+        kind = "QuestionnaireResponse"
+        return next(e["resource"] for e in entries if e["resource"]["resourceType"] == kind)
 
     assert qr(nl)["language"] == "nl"
     assert qr(en)["language"] == "en"
