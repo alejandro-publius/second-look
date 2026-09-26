@@ -184,6 +184,38 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
   assert.ok(checkBundle(broken as never).some((p) => p.includes("does not resolve")));
 });
 
+test("fhir_emit: a rating changed at the rating check is the value, and the first is a component", () => {
+  type Obs = { id: string; valueCodeableConcept: { coding: { code: string }[] }; component: { code: { coding: { code: string }[] }; valueCodeableConcept: { coding: { code: string }[] } }[] };
+  type Entry = { resource: { resourceType: string; id: string; item?: { linkId: string; answer: { valueCoding: { code: string } }[] }[]; target?: { reference: string }[] } };
+  const base = golden("fhir_emit").cases.find((c: { name: string }) => c.name.startsWith("a coarse pin")).input.visit;
+  assert.equal(base.answers.overall_rating, "good", "the app stores the first rating as the answer");
+  const rated = (first: string | null, final: string | null) => {
+    const bundle = emitVisit({ ...base, first_rating: first, final_rating: final }, null, "2026-09-26T09:16:00Z") as { entry: Entry[] };
+    const byType = (t: string) => bundle.entry.map((e) => e.resource).filter((r) => r.resourceType === t);
+    const qr = byType("QuestionnaireResponse").at(-1)!;
+    const answered = qr.item!.find((i) => i.linkId === "overall_rating")!.answer[0].valueCoding.code;
+    const ratings = byType("Observation").filter((o) => o.id.endsWith("-overall-rating")) as unknown as Obs[];
+    return { bundle, answered, ratings, provenance: byType("Provenance")[0] };
+  };
+  const changed = rated("good", "poor");
+  assert.deepEqual(checkBundle(changed.bundle as never), []);
+  assert.equal(changed.answered, "poor", "the response answers the kept rating");
+  assert.equal(changed.ratings.length, 1);
+  const [obs] = changed.ratings;
+  assert.equal(obs.valueCodeableConcept.coding[0].code, "poor", "the value is the kept rating");
+  assert.equal(obs.component.length, 1);
+  assert.equal(obs.component[0].code.coding[0].code, "first-rating");
+  assert.equal(obs.component[0].valueCodeableConcept.coding[0].code, "good", "the component is the first rating");
+  assert.ok(changed.provenance.target!.some((t) => t.reference === `Observation/${obs.id}`));
+  assert.equal(base.answers.overall_rating, "good", "the stored answers stay as given");
+  // A rating the check did not change adds no rating Observation and answers the rating given.
+  for (const [first, final] of [["good", "good"], ["good", null], [null, null], [null, "good"]] as const) {
+    const same = rated(first, final);
+    assert.equal(same.ratings.length, 0, `${first} then ${final}`);
+    assert.equal(same.answered, "good");
+  }
+});
+
 test("fhir_referral: the ServiceRequest and the example result, the same as Python", () => {
   const doc = golden("fhir_emit");
   const [referral, example] = doc.referral;

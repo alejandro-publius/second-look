@@ -353,6 +353,46 @@ function observation(
   return out;
 }
 
+// The form item the rating check asks about (core/followups.py).
+const RATING_ITEM = "overall_rating";
+
+/** core/fhir_emit.py _rating_change: the first and the kept overall rating, and the form item,
+ *  when the two differ. Nothing when the rating was not answered. */
+function ratingChange(visit: VisitRecord, items: FormItem[]): { first: string; kept: string; item: FormItem } | null {
+  const item = items.find((i) => i.id === RATING_ITEM);
+  const given = visit.answers[RATING_ITEM];
+  if (item === undefined || typeof given !== "string") return null;
+  const first = visit.first_rating || given;
+  const kept = visit.final_rating || given;
+  return first !== kept ? { first, kept, item } : null;
+}
+
+/** core/fhir_emit.py _rating_observation: the Observation of an overall rating the rating check
+ *  changed. Its value is the rating kept; one component, coded first-rating, holds the rating
+ *  given first. A rating that did not change adds no Observation and no component. */
+function ratingObservation(visit: VisitRecord, item: FormItem, first: string, kept: string, pid: string, spotLocationId: string, visitQrId: string): Resource {
+  if (item.fhir) throw new FhirEmitError(`item ${item.id}: a changed rating needs the item mapped to none`);
+  const words =
+    `${item.text ?? item.id} at ${visit.spot.spot_name}: ${kept.replace(/_/g, " ")}.` +
+    ` The first rating was ${first.replace(/_/g, " ")}.` +
+    ` On the rating check the volunteer changed it to ${kept.replace(/_/g, " ")}.`;
+  return {
+    resourceType: "Observation",
+    id: fhirId("sl-obs", visit.visit_id, item.id),
+    meta: { profile: [OAH_OBSERVATION_PROFILE] },
+    text: narrative(words),
+    identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
+    status: "final",
+    code: concept(slCoding("overall-rating"), item.text),
+    subject: ref("Location", spotLocationId),
+    effectiveDateTime: instant(visit.answered_at),
+    performer: [ref("Practitioner", pid)],
+    valueCodeableConcept: valueConcept(kept),
+    component: [{ code: concept(slCoding("first-rating")), valueCodeableConcept: valueConcept(first) }],
+    derivedFrom: [ref("QuestionnaireResponse", visitQrId)],
+  };
+}
+
 function provenance(visit: VisitRecord, observations: Resource[], pid: string, visitQrId: string, testQrId: string | null, emittedAt: string): Resource {
   const entities: Resource[] = [{ role: "source", what: ref("QuestionnaireResponse", visitQrId) }];
   // The last sentence names only the sources in entity (round 09 Q02).
@@ -379,6 +419,10 @@ function provenance(visit: VisitRecord, observations: Resource[], pid: string, v
 
 /** One collection Bundle for one visit. Deterministic in its inputs. */
 export function emitVisit(visit: VisitRecord, testSitting: TestSitting | null, emittedAt: string, items: FormItem[] = FORM_ITEMS): Resource {
+  // A rating the rating check changed: the record answers the kept one and keeps the first in
+  // its own Observation (ratingObservation). The stored answers stay as given.
+  const change = ratingChange(visit, items);
+  if (change !== null) visit = { ...visit, answers: { ...visit.answers, [RATING_ITEM]: change.kept } };
   const [creek, reach, spot] = locations(visit);
   const tested = testedOn(visit, testSitting);
   const person = practitioner(visit, tested);
@@ -393,6 +437,7 @@ export function emitVisit(visit: VisitRecord, testSitting: TestSitting | null, e
     const obs = observation(visit, item, visit.answers[item.id], pid, String(spot.id), String(visitQr.id), scores.get(String(item.feature ?? "")) ?? null);
     if (obs !== null) observations.push(obs);
   }
+  if (change !== null) observations.push(ratingObservation(visit, change.item, change.first, change.kept, pid, String(spot.id), String(visitQr.id)));
   const prov = provenance(visit, observations, pid, String(visitQr.id), testQr ? String(testQr.id) : null, emittedAt);
   const resources: Resource[] = [organization(), device(visit.software_version), creek, reach, spot, person];
   if (testQr) resources.push(testQr);

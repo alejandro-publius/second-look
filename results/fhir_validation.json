@@ -1,5 +1,5 @@
 {
-  "ran_at_utc": "2026-09-25T22:52:58+00:00",
+  "ran_at_utc": "2026-09-26T19:56:45+00:00",
   "validator_version": "6.10.4",
   "ig_commit": "b907cf0",
   "fhir_version": "4.0.1",
@@ -17,14 +17,16 @@
     "fhir/build/instances/ts-sl-referral-bundle-spot-1.json",
     "fhir/build/instances/ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
     "fhir/build/instances/ts-sl-visit-visit-0001.json",
+    "fhir/build/instances/ts-sl-visit-visit-rating-changed.json",
+    "fhir/build/instances/ts-sl-visit-visit-rating-kept.json",
     "fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
     "fhir/build/instances/ts-sl-visit-walk-4116f9ddf7b8b451.json",
     "fhir/build/instances/ts-sl-visit-walk-757a5b9a10482fc9.json",
     "fhir/build/instances/ts-sl-visit-walk-d2ef0549e6f251c4.json"
   ],
   "errors": 0,
-  "warnings": 61,
-  "files_validated": 15,
+  "warnings": 67,
+  "files_validated": 17,
   "walk_records_validated": 3,
   "by_file": {
     "Bundle-sl-city-heraklion-bundle.json": {
@@ -55,12 +57,12 @@
     "visit-strawberry-creek-1.json": {
       "error": 0,
       "warning": 3,
-      "information": 3
+      "information": 5
     },
     "visit-strawberry-creek-1.transaction.json": {
       "error": 0,
       "warning": 3,
-      "information": 17
+      "information": 20
     },
     "ts-sl-example-result-spot-1.json": {
       "error": 0,
@@ -80,7 +82,17 @@
     "ts-sl-visit-visit-0001.json": {
       "error": 0,
       "warning": 3,
-      "information": 3
+      "information": 5
+    },
+    "ts-sl-visit-visit-rating-changed.json": {
+      "error": 0,
+      "warning": 3,
+      "information": 7
+    },
+    "ts-sl-visit-visit-rating-kept.json": {
+      "error": 0,
+      "warning": 3,
+      "information": 5
     },
     "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json": {
       "error": 0,
@@ -396,6 +408,42 @@
       "file": "ts-sl-visit-visit-0001.json",
       "severity": "warning",
       "location": "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-rating-changed.json",
+      "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-codornices-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-rating-changed.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-codornices-lower*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-rating-changed.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-codornices-lower-2*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-rating-kept.json",
+      "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-codornices-creek*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-rating-kept.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-codornices-lower*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-visit-rating-kept.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-codornices-lower-2*/.type[0]",
       "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
     },
     {

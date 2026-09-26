@@ -712,6 +712,84 @@
             }
           },
           {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0001-overall-rating",
+            "resource": {
+              "code": {
+                "coding": [
+                  {
+                    "code": "overall-rating",
+                    "display": "Overall rating",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)"
+              },
+              "component": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "first-rating",
+                        "display": "First overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "good",
+                        "display": "Good overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-0001"
+                }
+              ],
+              "effectiveDateTime": "2026-09-24T16:40:00Z",
+              "id": "sl-obs-visit-0001-overall-rating",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-0001-overall_rating"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-20d03d930b1b"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-spot-1"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities) at Strawberry Creek, campus reach, spot 1: moderate. The first rating was good. On the rating check the volunteer changed it to moderate.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "moderate",
+                    "display": "Moderate overall rating",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              }
+            }
+          },
+          {
             "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-visit-0001",
             "resource": {
               "agent": [
@@ -774,10 +852,13 @@
                 },
                 {
                   "reference": "Observation/sl-obs-visit-0001-invasive-species"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-0001-overall-rating"
                 }
               ],
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>5 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>6 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>",
                 "status": "generated"
               }
             }
@@ -1836,6 +1917,1997 @@
         }
       },
       "name": "a coarse pin, lists, a number, no sitting"
+    },
+    {
+      "expected": {
+        "entry": [
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+            "resource": {
+              "active": true,
+              "id": "sl-org",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+                  "value": "second-look"
+                }
+              ],
+              "name": "Second Look project",
+              "resourceType": "Organization",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+            "resource": {
+              "deviceName": [
+                {
+                  "name": "Second Look web app",
+                  "type": "user-friendly-name"
+                }
+              ],
+              "id": "sl-device",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/device",
+                  "value": "second-look-web"
+                }
+              ],
+              "resourceType": "Device",
+              "status": "active",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>",
+                "status": "generated"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "software",
+                    "display": "Second Look software",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              },
+              "version": [
+                {
+                  "value": "0.1.0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-codornices-creek",
+            "resource": {
+              "id": "sl-loc-codornices-creek",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "codornices-creek"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ]
+              },
+              "mode": "instance",
+              "name": "Codornices Creek",
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Codornices Creek. A creek used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-codornices-lower",
+            "resource": {
+              "id": "sl-loc-codornices-lower",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "codornices-lower"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ]
+              },
+              "mode": "instance",
+              "name": "Codornices Creek, lower reach",
+              "partOf": {
+                "reference": "Location/sl-loc-codornices-creek"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Codornices Creek, lower reach. A reach used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-codornices-lower-2",
+            "resource": {
+              "description": "Coarse position, about 1 km.",
+              "id": "sl-loc-codornices-lower-2",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "codornices-lower-2"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ]
+              },
+              "mode": "instance",
+              "name": "Codornices Creek, lower reach, spot 2",
+              "partOf": {
+                "reference": "Location/sl-loc-codornices-lower"
+              },
+              "position": {
+                "latitude": 37.88,
+                "longitude": -122.3
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Codornices Creek, lower reach, spot 2. A spot used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-36d519346d44",
+            "resource": {
+              "active": true,
+              "id": "sl-practitioner-36d519346d44",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+                  "value": "sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Practitioner",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-visit-rating-changed",
+            "resource": {
+              "author": {
+                "reference": "Practitioner/sl-practitioner-36d519346d44"
+              },
+              "authored": "2026-09-26T09:15:30Z",
+              "id": "sl-qr-visit-visit-rating-changed",
+              "identifier": {
+                "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+                "value": "visit-rating-changed"
+              },
+              "item": [
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "sand-banks",
+                        "display": "Sand banks",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    },
+                    {
+                      "valueCoding": {
+                        "code": "riffles",
+                        "display": "Riffles, rapids or falls",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "habitats"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "slow",
+                        "display": "Slow flow",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "water_flow"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueDecimal": 0.35
+                    }
+                  ],
+                  "linkId": "water_height_m"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "impervious_right"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "trees",
+                        "display": "Trees (height >3m)",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "vegetation_type_left"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "cant-tell",
+                        "display": "Can't tell",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "invasive_species"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "cant-tell",
+                        "display": "Can't tell",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "invasive_which"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "poor",
+                        "display": "Poor overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "overall_rating"
+                }
+              ],
+              "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+              "resourceType": "QuestionnaireResponse",
+              "status": "completed",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-habitats",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "morophology",
+                      "display": "Morphology of the streams",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "morophology",
+                    "display": "Morphology of the streams",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Habitats"
+              },
+              "component": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "sand-banks",
+                        "display": "Sand banks",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "riffles",
+                        "display": "Riffles, rapids or falls",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-habitats",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-habitats"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Habitats at Codornices Creek, lower reach, spot 2: sand banks, riffles.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-water-flow",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "hydrology",
+                    "display": "Hydrology of the stream",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Water Flow"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-water-flow",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-water_flow"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Water Flow at Codornices Creek, lower reach, spot 2: slow.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "slow",
+                    "display": "Slow flow",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-water-height-m",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "hydrology",
+                    "display": "Hydrology of the stream",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Water height"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-water-height-m",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-water_height_m"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Water height at Codornices Creek, lower reach, spot 2: 0.35 metre.</p></div>",
+                "status": "generated"
+              },
+              "valueQuantity": {
+                "code": "m",
+                "system": "http://unitsofmeasure.org",
+                "unit": "metre",
+                "value": 0.35
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-impervious-right",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "LandUse",
+                      "display": "Land use in the margins",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "LandUse",
+                    "display": "Land use in the margins",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Impervious Areas (Right)"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-impervious-right",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-impervious_right"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Impervious Areas (Right) at Codornices Creek, lower reach, spot 2: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-vegetation-type-left",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "riparianVegetation",
+                      "display": "Riparian vegetation",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "riparianVegetation",
+                    "display": "Riparian vegetation",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Vegetation Type (Left)"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-vegetation-type-left",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-vegetation_type_left"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Vegetation Type (Left) at Codornices Creek, lower reach, spot 2: trees.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "trees",
+                    "display": "Trees (height >3m)",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-invasive-species",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "invasiveOrganisms",
+                      "display": "Invasive invertebrate, plants and fish",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "invasive-plant",
+                    "display": "Invasive plant",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Invasive Species"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-invasive-species",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-invasive_species"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Invasive Species at Codornices Creek, lower reach, spot 2: cant tell.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "cant-tell",
+                    "display": "Can't tell",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-invasive-which",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "invasiveOrganisms",
+                      "display": "Invasive invertebrate, plants and fish",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "invasive-plant",
+                    "display": "Invasive plant",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Which ones?"
+              },
+              "component": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "invasive-plant",
+                        "display": "Invasive plant",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "cant-tell",
+                        "display": "Can't tell",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-invasive-which",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-invasive_which"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Which ones? at Codornices Creek, lower reach, spot 2: cant tell.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-changed-overall-rating",
+            "resource": {
+              "code": {
+                "coding": [
+                  {
+                    "code": "overall-rating",
+                    "display": "Overall rating",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)"
+              },
+              "component": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "first-rating",
+                        "display": "First overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "good",
+                        "display": "Good overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-changed-overall-rating",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-changed-overall_rating"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities) at Codornices Creek, lower reach, spot 2: poor. The first rating was good. On the rating check the volunteer changed it to poor.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "poor",
+                    "display": "Poor overall rating",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-visit-rating-changed",
+            "resource": {
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "author",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Practitioner/sl-practitioner-36d519346d44"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "assembler",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Device/sl-device"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-changed"
+                  }
+                }
+              ],
+              "id": "sl-provenance-visit-rating-changed",
+              "recorded": "2026-09-26T09:16:00Z",
+              "resourceType": "Provenance",
+              "target": [
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-habitats"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-water-flow"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-water-height-m"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-impervious-right"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-vegetation-type-left"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-invasive-species"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-invasive-which"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-changed-overall-rating"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>8 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
+                "status": "generated"
+              }
+            }
+          }
+        ],
+        "id": "sl-visit-visit-rating-changed",
+        "resourceType": "Bundle",
+        "timestamp": "2026-09-26T09:16:00Z",
+        "type": "collection"
+      },
+      "input": {
+        "emitted_at": "2026-09-26T09:16:00Z",
+        "test_sitting": null,
+        "visit": {
+          "answered_at": "2026-09-26T09:15:30Z",
+          "answers": {
+            "feelings": [
+              "serenity"
+            ],
+            "habitats": [
+              "sand_banks",
+              "riffles"
+            ],
+            "impervious_right": "present",
+            "invasive_species": "cant_tell",
+            "invasive_which": [
+              "cant_tell"
+            ],
+            "natural_debris": [],
+            "overall_rating": "good",
+            "vegetation_type_left": "trees",
+            "water_flow": "slow",
+            "water_height_m": 0.35
+          },
+          "checks": [],
+          "final_rating": "poor",
+          "first_rating": "good",
+          "observer": {
+            "contributor_token": "ct_0b1c2d3e4f5a",
+            "scores": [],
+            "test_sitting_id": null
+          },
+          "photo_ids": [],
+          "software_version": "0.1.0",
+          "spot": {
+            "coarse": true,
+            "creek_id": "codornices-creek",
+            "creek_name": "Codornices Creek",
+            "latitude": 37.88123,
+            "longitude": -122.29987,
+            "reach_id": "codornices-lower",
+            "reach_name": "Codornices Creek, lower reach",
+            "spot_id": "codornices-lower-2",
+            "spot_name": "Codornices Creek, lower reach, spot 2"
+          },
+          "visit_id": "visit-rating-changed"
+        }
+      },
+      "name": "a rating changed at the rating check: the kept one answers, the first stays"
+    },
+    {
+      "expected": {
+        "entry": [
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+            "resource": {
+              "active": true,
+              "id": "sl-org",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+                  "value": "second-look"
+                }
+              ],
+              "name": "Second Look project",
+              "resourceType": "Organization",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+            "resource": {
+              "deviceName": [
+                {
+                  "name": "Second Look web app",
+                  "type": "user-friendly-name"
+                }
+              ],
+              "id": "sl-device",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/device",
+                  "value": "second-look-web"
+                }
+              ],
+              "resourceType": "Device",
+              "status": "active",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>",
+                "status": "generated"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "software",
+                    "display": "Second Look software",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              },
+              "version": [
+                {
+                  "value": "0.1.0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-codornices-creek",
+            "resource": {
+              "id": "sl-loc-codornices-creek",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "codornices-creek"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ]
+              },
+              "mode": "instance",
+              "name": "Codornices Creek",
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Codornices Creek. A creek used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-codornices-lower",
+            "resource": {
+              "id": "sl-loc-codornices-lower",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "codornices-lower"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ]
+              },
+              "mode": "instance",
+              "name": "Codornices Creek, lower reach",
+              "partOf": {
+                "reference": "Location/sl-loc-codornices-creek"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Codornices Creek, lower reach. A reach used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-codornices-lower-2",
+            "resource": {
+              "description": "Coarse position, about 1 km.",
+              "id": "sl-loc-codornices-lower-2",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "codornices-lower-2"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ]
+              },
+              "mode": "instance",
+              "name": "Codornices Creek, lower reach, spot 2",
+              "partOf": {
+                "reference": "Location/sl-loc-codornices-lower"
+              },
+              "position": {
+                "latitude": 37.88,
+                "longitude": -122.3
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Codornices Creek, lower reach, spot 2. A spot used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-36d519346d44",
+            "resource": {
+              "active": true,
+              "id": "sl-practitioner-36d519346d44",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+                  "value": "sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Practitioner",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-visit-rating-kept",
+            "resource": {
+              "author": {
+                "reference": "Practitioner/sl-practitioner-36d519346d44"
+              },
+              "authored": "2026-09-26T09:15:30Z",
+              "id": "sl-qr-visit-visit-rating-kept",
+              "identifier": {
+                "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+                "value": "visit-rating-kept"
+              },
+              "item": [
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "sand-banks",
+                        "display": "Sand banks",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    },
+                    {
+                      "valueCoding": {
+                        "code": "riffles",
+                        "display": "Riffles, rapids or falls",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "habitats"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "slow",
+                        "display": "Slow flow",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "water_flow"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueDecimal": 0.35
+                    }
+                  ],
+                  "linkId": "water_height_m"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "impervious_right"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "trees",
+                        "display": "Trees (height >3m)",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "vegetation_type_left"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "cant-tell",
+                        "display": "Can't tell",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "invasive_species"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "cant-tell",
+                        "display": "Can't tell",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "invasive_which"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "good",
+                        "display": "Good overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "overall_rating"
+                }
+              ],
+              "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+              "resourceType": "QuestionnaireResponse",
+              "status": "completed",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-kept-habitats",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "morophology",
+                      "display": "Morphology of the streams",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "morophology",
+                    "display": "Morphology of the streams",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Habitats"
+              },
+              "component": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "sand-banks",
+                        "display": "Sand banks",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "riffles",
+                        "display": "Riffles, rapids or falls",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-kept-habitats",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-kept-habitats"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Habitats at Codornices Creek, lower reach, spot 2: sand banks, riffles.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-kept-water-flow",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "hydrology",
+                    "display": "Hydrology of the stream",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Water Flow"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-kept-water-flow",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-kept-water_flow"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Water Flow at Codornices Creek, lower reach, spot 2: slow.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "slow",
+                    "display": "Slow flow",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-kept-water-height-m",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "hydrology",
+                    "display": "Hydrology of the stream",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Water height"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-kept-water-height-m",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-kept-water_height_m"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Water height at Codornices Creek, lower reach, spot 2: 0.35 metre.</p></div>",
+                "status": "generated"
+              },
+              "valueQuantity": {
+                "code": "m",
+                "system": "http://unitsofmeasure.org",
+                "unit": "metre",
+                "value": 0.35
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-kept-impervious-right",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "LandUse",
+                      "display": "Land use in the margins",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "LandUse",
+                    "display": "Land use in the margins",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Impervious Areas (Right)"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-kept-impervious-right",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-kept-impervious_right"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Impervious Areas (Right) at Codornices Creek, lower reach, spot 2: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-kept-vegetation-type-left",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "riparianVegetation",
+                      "display": "Riparian vegetation",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "riparianVegetation",
+                    "display": "Riparian vegetation",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ],
+                "text": "Vegetation Type (Left)"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-kept-vegetation-type-left",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-kept-vegetation_type_left"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Vegetation Type (Left) at Codornices Creek, lower reach, spot 2: trees.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "trees",
+                    "display": "Trees (height >3m)",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-kept-invasive-species",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "invasiveOrganisms",
+                      "display": "Invasive invertebrate, plants and fish",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "invasive-plant",
+                    "display": "Invasive plant",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Invasive Species"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-kept-invasive-species",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-kept-invasive_species"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Invasive Species at Codornices Creek, lower reach, spot 2: cant tell.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "cant-tell",
+                    "display": "Can't tell",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-rating-kept-invasive-which",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "invasiveOrganisms",
+                      "display": "Invasive invertebrate, plants and fish",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "invasive-plant",
+                    "display": "Invasive plant",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Which ones?"
+              },
+              "component": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "invasive-plant",
+                        "display": "Invasive plant",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  },
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "code": "cant-tell",
+                        "display": "Can't tell",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                }
+              ],
+              "effectiveDateTime": "2026-09-26T09:15:30Z",
+              "id": "sl-obs-visit-rating-kept-invasive-which",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "visit-rating-kept-invasive_which"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-36d519346d44"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-codornices-lower-2"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Which ones? at Codornices Creek, lower reach, spot 2: cant tell.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-visit-rating-kept",
+            "resource": {
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "author",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Practitioner/sl-practitioner-36d519346d44"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "assembler",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Device/sl-device"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-visit-rating-kept"
+                  }
+                }
+              ],
+              "id": "sl-provenance-visit-rating-kept",
+              "recorded": "2026-09-26T09:16:00Z",
+              "resourceType": "Provenance",
+              "target": [
+                {
+                  "reference": "Observation/sl-obs-visit-rating-kept-habitats"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-kept-water-flow"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-kept-water-height-m"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-kept-impervious-right"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-kept-vegetation-type-left"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-kept-invasive-species"
+                },
+                {
+                  "reference": "Observation/sl-obs-visit-rating-kept-invasive-which"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>7 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
+                "status": "generated"
+              }
+            }
+          }
+        ],
+        "id": "sl-visit-visit-rating-kept",
+        "resourceType": "Bundle",
+        "timestamp": "2026-09-26T09:16:00Z",
+        "type": "collection"
+      },
+      "input": {
+        "emitted_at": "2026-09-26T09:16:00Z",
+        "test_sitting": null,
+        "visit": {
+          "answered_at": "2026-09-26T09:15:30Z",
+          "answers": {
+            "feelings": [
+              "serenity"
+            ],
+            "habitats": [
+              "sand_banks",
+              "riffles"
+            ],
+            "impervious_right": "present",
+            "invasive_species": "cant_tell",
+            "invasive_which": [
+              "cant_tell"
+            ],
+            "natural_debris": [],
+            "overall_rating": "good",
+            "vegetation_type_left": "trees",
+            "water_flow": "slow",
+            "water_height_m": 0.35
+          },
+          "checks": [],
+          "final_rating": "good",
+          "first_rating": "good",
+          "observer": {
+            "contributor_token": "ct_0b1c2d3e4f5a",
+            "scores": [],
+            "test_sitting_id": null
+          },
+          "photo_ids": [],
+          "software_version": "0.1.0",
+          "spot": {
+            "coarse": true,
+            "creek_id": "codornices-creek",
+            "creek_name": "Codornices Creek",
+            "latitude": 37.88123,
+            "longitude": -122.29987,
+            "reach_id": "codornices-lower",
+            "reach_name": "Codornices Creek, lower reach",
+            "spot_id": "codornices-lower-2",
+            "spot_name": "Codornices Creek, lower reach, spot 2"
+          },
+          "visit_id": "visit-rating-kept"
+        }
+      },
+      "name": "a rating kept at the rating check: no rating Observation"
     },
     {
       "expected": {

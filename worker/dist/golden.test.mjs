@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
-  content_hash: "e364ee13d05abbd9",
+  content_hash: "12670e44da38ac85",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -155,6 +155,7 @@ var content_default = {
       "fallen-branches": "Fallen branches",
       "fallen-trees": "Fallen trees",
       fast: "Fast flow",
+      "first-rating": "First overall rating",
       flat: "Flat channel",
       good: "Good overall rating",
       "invasive-plant": "Invasive plant",
@@ -163,6 +164,7 @@ var content_default = {
       "lab-hf183": "Human faecal marker HF183",
       "leaf-deposits": "Deposits of fallen leaves",
       moderate: "Moderate overall rating",
+      "overall-rating": "Overall rating",
       "pipe-running": "Pipe running",
       poor: "Poor overall rating",
       riffles: "Riffles, rapids or falls",
@@ -253,6 +255,7 @@ var content_default = {
         code_system: "oah"
       },
       id: "channel_form",
+      name: "Channel Form",
       options: [
         {
           id: "flat",
@@ -261,25 +264,26 @@ var content_default = {
         },
         {
           id: "u_shape",
-          label: "U shape",
+          label: "U Shape",
           value: "u_shape"
         },
         {
           id: "v_shape",
-          label: "V shape",
+          label: "V Shape",
           value: "v_shape"
         },
         {
           id: "not_sure",
-          label: "I'm not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
-      text: "Channel form",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "The channel form is...",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -288,6 +292,7 @@ var content_default = {
         code_system: "oah"
       },
       id: "bottom_type",
+      name: "Bottom Type",
       options: [
         {
           id: "natural",
@@ -301,15 +306,16 @@ var content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
-      text: "Bottom type",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "The bottom of the wet channel is\u2026",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "artificial_bank",
@@ -319,6 +325,7 @@ var content_default = {
         code_system: "sl"
       },
       id: "bank_type",
+      name: "Bank Type",
       options: [
         {
           id: "natural",
@@ -332,21 +339,22 @@ var content_default = {
         },
         {
           id: "laid_stones",
-          label: "Laid stones with no concrete",
+          label: "Layed stones with no concrete",
           value: "absent"
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
       short_label: "artificial banks",
-      text: "Bank type",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "The banks of the channel are\u2026",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -355,6 +363,7 @@ var content_default = {
         code_system: "oah"
       },
       id: "habitats",
+      name: "Habitats",
       options: [
         {
           id: "sand_banks",
@@ -383,10 +392,11 @@ var content_default = {
         }
       ],
       section: "what_you_see",
-      text: "Habitats",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Are there any habitats present?",
       type: "multi",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -395,6 +405,7 @@ var content_default = {
         code_system: "oah"
       },
       id: "natural_debris",
+      name: "Natural Debris",
       options: [
         {
           id: "fallen_trees",
@@ -413,10 +424,11 @@ var content_default = {
         }
       ],
       section: "what_you_see",
-      text: "Natural debris",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Are there any natural debris present?",
       type: "multi",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -425,6 +437,7 @@ var content_default = {
         code_system: "oah"
       },
       id: "water_flow",
+      name: "Water Flow",
       options: [
         {
           id: "fast",
@@ -438,7 +451,7 @@ var content_default = {
         },
         {
           id: "stagnant",
-          label: "Stagnant or intermittent",
+          label: "Stagnant/intermittent",
           value: "stagnant"
         },
         {
@@ -448,15 +461,16 @@ var content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
-      text: "Water flow",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "How is the water flowing",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -465,15 +479,16 @@ var content_default = {
         code_system: "oah"
       },
       id: "water_aspect",
+      name: "Water Aspect",
       options: [
         {
           id: "clear",
-          label: "Clear or transparent",
+          label: "Clear/transparent",
           value: "absent"
         },
         {
           id: "muddy",
-          label: "Muddy or turbid",
+          label: "Muddy/turbid",
           value: "present"
         },
         {
@@ -483,20 +498,21 @@ var content_default = {
         },
         {
           id: "colour",
-          label: "Has colours or altered colour",
+          label: "Has colors/altered color",
           value: "present"
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "water",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "How is the water?",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -505,11 +521,13 @@ var content_default = {
         code_system: "oah"
       },
       id: "water_withdrawal",
+      name: "Water Withdrawal",
       section: "water",
-      text: "Is there any kind of obvious water collection, use or removal from the stream?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Is there any kind of obvious water collection, use, removal from the stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -518,11 +536,13 @@ var content_default = {
         code_system: "oah"
       },
       id: "barriers",
+      name: "Barriers",
       section: "water",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Do you see any dams or other transversal artificial barriers?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "pipe_running",
@@ -532,11 +552,13 @@ var content_default = {
         code_system: "sl"
       },
       id: "draining_pipes",
+      name: "Draining Pipes",
       section: "water",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Are there pipes draining polluted water into the stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "pipe_running",
@@ -546,12 +568,14 @@ var content_default = {
         code_system: "sl"
       },
       id: "sewage_discharge",
+      name: "Sewage discharge",
       section: "water",
       short_label: "a sewage discharge",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is there any kind of water entry or discharge of sewage?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -560,11 +584,13 @@ var content_default = {
         code_system: "oah"
       },
       id: "construction",
+      name: "Construction",
       section: "water",
-      text: "Is there any construction or works in the stream?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Is there any construction/works in stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -574,12 +600,14 @@ var content_default = {
         unit: "m"
       },
       id: "water_height_m",
+      name: "Water height",
       section: "water",
-      text: "Water height in metres",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "What is the water height?",
       type: "number",
       unit: "m",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -588,12 +616,14 @@ var content_default = {
         code_system: "oah"
       },
       id: "impervious_left",
+      name: "Impervious Areas (Left)",
       section: "margins",
       short_label: "a paved left margin",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -602,12 +632,14 @@ var content_default = {
         code_system: "oah"
       },
       id: "impervious_right",
+      name: "Impervious Areas (Right)",
       section: "margins",
       short_label: "a paved right margin",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -616,11 +648,13 @@ var content_default = {
         code_system: "oah"
       },
       id: "vegetation_left",
+      name: "Vegetation (Left)",
       section: "margins",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is the left margin covered by vegetation?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -629,11 +663,13 @@ var content_default = {
         code_system: "oah"
       },
       id: "vegetation_right",
+      name: "Vegetation (Right)",
       section: "margins",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is the right margin covered by vegetation?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -642,6 +678,7 @@ var content_default = {
         code_system: "oah"
       },
       id: "vegetation_type_left",
+      name: "Vegetation Type (Left)",
       options: [
         {
           id: "herbs",
@@ -660,15 +697,16 @@ var content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "margins",
-      text: "Left margin: what is dominant (more than half) in the first 5 m?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the left margin (first 5 meters from the channel banktop)?",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -677,6 +715,7 @@ var content_default = {
         code_system: "oah"
       },
       id: "vegetation_type_right",
+      name: "Vegetation Type (Right)",
       options: [
         {
           id: "herbs",
@@ -695,15 +734,16 @@ var content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "margins",
-      text: "Right margin: what is dominant (more than half) in the first 5 m?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the right margin (first 5 meters from the channel bank/top)?",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "invasive_plant",
@@ -713,12 +753,14 @@ var content_default = {
         code_system: "sl"
       },
       id: "invasive_species",
+      name: "Invasive Species",
       section: "margins",
       short_label: "invasive plants",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Do you see any non-native or invasive plant species?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       depends_on: {
@@ -735,10 +777,11 @@ var content_default = {
       note: "The app offers free text here. We offer the regional list plus Not sure, so no free text is stored.",
       region_list: "invasive_plants",
       section: "margins",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Which ones?",
       type: "pick_region_list",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -747,11 +790,13 @@ var content_default = {
         code_system: "oah"
       },
       id: "vegetation_cuts",
+      name: "Vegetation Cuts",
       section: "margins",
-      text: "Have there been recent cuts of vegetation (partial or total) on the banks?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Have there been recent cuts if vegetation (partial or total) on the banks (or just one of the banks) of the stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       allow_not_applicable: true,
@@ -765,10 +810,11 @@ var content_default = {
         "anger",
         "fear"
       ],
-      text: "Which feelings best describe your experience?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Which feeling(s) best describe your experience?",
       type: "sliders",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -776,27 +822,31 @@ var content_default = {
       id: "overall_rating",
       options: [
         {
+          description: "The ecosystem components are there: riparian vegetation, natural channel, good water quality, biodiversity",
           id: "good",
-          label: "Good: the ecosystem components are there, riparian vegetation, natural channel, good water quality, biodiversity",
+          label: "Good quality",
           value: "good"
         },
         {
+          description: "Some alterations, still biodiverse, with vegetation in the margins, water looks good...",
           id: "moderate",
-          label: "Moderate: some alterations, still biodiverse, with vegetation in the margins, water looks good",
+          label: "Moderate quality",
           value: "moderate"
         },
         {
+          description: "Highly modified / artificialized, loss of riparian vegetation, loss of habitats, polluted",
           id: "poor",
-          label: "Poor: highly modified or artificialized, loss of riparian vegetation, loss of habitats, polluted",
+          label: "Poor quality",
           value: "poor"
         }
       ],
       rating_check: true,
       section: "overall",
-      text: "Overall, how would you rate this stream?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     }
   ],
   locale: {
@@ -1308,6 +1358,7 @@ var core_content_default = {
       "fallen-branches": "Fallen branches",
       "fallen-trees": "Fallen trees",
       fast: "Fast flow",
+      "first-rating": "First overall rating",
       flat: "Flat channel",
       good: "Good overall rating",
       "invasive-plant": "Invasive plant",
@@ -1316,6 +1367,7 @@ var core_content_default = {
       "lab-hf183": "Human faecal marker HF183",
       "leaf-deposits": "Deposits of fallen leaves",
       moderate: "Moderate overall rating",
+      "overall-rating": "Overall rating",
       "pipe-running": "Pipe running",
       poor: "Poor overall rating",
       riffles: "Riffles, rapids or falls",
@@ -1406,6 +1458,7 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "channel_form",
+      name: "Channel Form",
       options: [
         {
           id: "flat",
@@ -1414,25 +1467,26 @@ var core_content_default = {
         },
         {
           id: "u_shape",
-          label: "U shape",
+          label: "U Shape",
           value: "u_shape"
         },
         {
           id: "v_shape",
-          label: "V shape",
+          label: "V Shape",
           value: "v_shape"
         },
         {
           id: "not_sure",
-          label: "I'm not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
-      text: "Channel form",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "The channel form is...",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1441,6 +1495,7 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "bottom_type",
+      name: "Bottom Type",
       options: [
         {
           id: "natural",
@@ -1454,15 +1509,16 @@ var core_content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
-      text: "Bottom type",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "The bottom of the wet channel is\u2026",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "artificial_bank",
@@ -1472,6 +1528,7 @@ var core_content_default = {
         code_system: "sl"
       },
       id: "bank_type",
+      name: "Bank Type",
       options: [
         {
           id: "natural",
@@ -1485,21 +1542,22 @@ var core_content_default = {
         },
         {
           id: "laid_stones",
-          label: "Laid stones with no concrete",
+          label: "Layed stones with no concrete",
           value: "absent"
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
       short_label: "artificial banks",
-      text: "Bank type",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "The banks of the channel are\u2026",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1508,6 +1566,7 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "habitats",
+      name: "Habitats",
       options: [
         {
           id: "sand_banks",
@@ -1536,10 +1595,11 @@ var core_content_default = {
         }
       ],
       section: "what_you_see",
-      text: "Habitats",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Are there any habitats present?",
       type: "multi",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1548,6 +1608,7 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "natural_debris",
+      name: "Natural Debris",
       options: [
         {
           id: "fallen_trees",
@@ -1566,10 +1627,11 @@ var core_content_default = {
         }
       ],
       section: "what_you_see",
-      text: "Natural debris",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Are there any natural debris present?",
       type: "multi",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1578,6 +1640,7 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "water_flow",
+      name: "Water Flow",
       options: [
         {
           id: "fast",
@@ -1591,7 +1654,7 @@ var core_content_default = {
         },
         {
           id: "stagnant",
-          label: "Stagnant or intermittent",
+          label: "Stagnant/intermittent",
           value: "stagnant"
         },
         {
@@ -1601,15 +1664,16 @@ var core_content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "what_you_see",
-      text: "Water flow",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "How is the water flowing",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1618,15 +1682,16 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "water_aspect",
+      name: "Water Aspect",
       options: [
         {
           id: "clear",
-          label: "Clear or transparent",
+          label: "Clear/transparent",
           value: "absent"
         },
         {
           id: "muddy",
-          label: "Muddy or turbid",
+          label: "Muddy/turbid",
           value: "present"
         },
         {
@@ -1636,20 +1701,21 @@ var core_content_default = {
         },
         {
           id: "colour",
-          label: "Has colours or altered colour",
+          label: "Has colors/altered color",
           value: "present"
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "water",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "How is the water?",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1658,11 +1724,13 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "water_withdrawal",
+      name: "Water Withdrawal",
       section: "water",
-      text: "Is there any kind of obvious water collection, use or removal from the stream?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Is there any kind of obvious water collection, use, removal from the stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1671,11 +1739,13 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "barriers",
+      name: "Barriers",
       section: "water",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Do you see any dams or other transversal artificial barriers?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "pipe_running",
@@ -1685,11 +1755,13 @@ var core_content_default = {
         code_system: "sl"
       },
       id: "draining_pipes",
+      name: "Draining Pipes",
       section: "water",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Are there pipes draining polluted water into the stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "pipe_running",
@@ -1699,12 +1771,14 @@ var core_content_default = {
         code_system: "sl"
       },
       id: "sewage_discharge",
+      name: "Sewage discharge",
       section: "water",
       short_label: "a sewage discharge",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is there any kind of water entry or discharge of sewage?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1713,11 +1787,13 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "construction",
+      name: "Construction",
       section: "water",
-      text: "Is there any construction or works in the stream?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Is there any construction/works in stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1727,12 +1803,14 @@ var core_content_default = {
         unit: "m"
       },
       id: "water_height_m",
+      name: "Water height",
       section: "water",
-      text: "Water height in metres",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "What is the water height?",
       type: "number",
       unit: "m",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1741,12 +1819,14 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "impervious_left",
+      name: "Impervious Areas (Left)",
       section: "margins",
       short_label: "a paved left margin",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1755,12 +1835,14 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "impervious_right",
+      name: "Impervious Areas (Right)",
       section: "margins",
       short_label: "a paved right margin",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1769,11 +1851,13 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "vegetation_left",
+      name: "Vegetation (Left)",
       section: "margins",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is the left margin covered by vegetation?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1782,11 +1866,13 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "vegetation_right",
+      name: "Vegetation (Right)",
       section: "margins",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Is the right margin covered by vegetation?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1795,6 +1881,7 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "vegetation_type_left",
+      name: "Vegetation Type (Left)",
       options: [
         {
           id: "herbs",
@@ -1813,15 +1900,16 @@ var core_content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "margins",
-      text: "Left margin: what is dominant (more than half) in the first 5 m?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the left margin (first 5 meters from the channel banktop)?",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1830,6 +1918,7 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "vegetation_type_right",
+      name: "Vegetation Type (Right)",
       options: [
         {
           id: "herbs",
@@ -1848,15 +1937,16 @@ var core_content_default = {
         },
         {
           id: "not_sure",
-          label: "Not sure",
+          label: "I\u2019m not sure",
           value: "cant_tell"
         }
       ],
       section: "margins",
-      text: "Right margin: what is dominant (more than half) in the first 5 m?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the right margin (first 5 meters from the channel bank/top)?",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: "invasive_plant",
@@ -1866,12 +1956,14 @@ var core_content_default = {
         code_system: "sl"
       },
       id: "invasive_species",
+      name: "Invasive Species",
       section: "margins",
       short_label: "invasive plants",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Do you see any non-native or invasive plant species?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "master_brief"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       depends_on: {
@@ -1888,10 +1980,11 @@ var core_content_default = {
       note: "The app offers free text here. We offer the regional list plus Not sure, so no free text is stored.",
       region_list: "invasive_plants",
       section: "margins",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
       text: "Which ones?",
       type: "pick_region_list",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1900,11 +1993,13 @@ var core_content_default = {
         code_system: "oah"
       },
       id: "vegetation_cuts",
+      name: "Vegetation Cuts",
       section: "margins",
-      text: "Have there been recent cuts of vegetation (partial or total) on the banks?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Have there been recent cuts if vegetation (partial or total) on the banks (or just one of the banks) of the stream?",
       type: "yesno",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       allow_not_applicable: true,
@@ -1918,10 +2013,11 @@ var core_content_default = {
         "anger",
         "fear"
       ],
-      text: "Which feelings best describe your experience?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Which feeling(s) best describe your experience?",
       type: "sliders",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     },
     {
       feature: null,
@@ -1929,27 +2025,31 @@ var core_content_default = {
       id: "overall_rating",
       options: [
         {
+          description: "The ecosystem components are there: riparian vegetation, natural channel, good water quality, biodiversity",
           id: "good",
-          label: "Good: the ecosystem components are there, riparian vegetation, natural channel, good water quality, biodiversity",
+          label: "Good quality",
           value: "good"
         },
         {
+          description: "Some alterations, still biodiverse, with vegetation in the margins, water looks good...",
           id: "moderate",
-          label: "Moderate: some alterations, still biodiverse, with vegetation in the margins, water looks good",
+          label: "Moderate quality",
           value: "moderate"
         },
         {
+          description: "Highly modified / artificialized, loss of riparian vegetation, loss of habitats, polluted",
           id: "poor",
-          label: "Poor: highly modified or artificialized, loss of riparian vegetation, loss of habitats, polluted",
+          label: "Poor quality",
           value: "poor"
         }
       ],
       rating_check: true,
       section: "overall",
-      text: "Overall, how would you rate this stream?",
+      source: "app public bundle, c5a15e8ebf91, 2026-09-26",
+      text: "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)",
       type: "choice",
-      verified_against_app: false,
-      wording_source: "app_public_text"
+      verified_against_app: true,
+      wording_source: "app_public_bundle"
     }
   ],
   rules: {
@@ -2867,7 +2967,8 @@ function components(item, values) {
 }
 function observation(visit, item, value, pid, spotLocationId, visitQrId, score) {
   const fhir = item.fhir;
-  let words = `${item.text ?? item.id} at ${visit.spot.spot_name}: `;
+  const label = item.name || (item.text ?? item.id);
+  let words = `${label} at ${visit.spot.spot_name}: `;
   let valuePart;
   if (typeof value === "boolean") {
     throw new FhirEmitError(`item ${item.id}: boolean answers are not allowed, use present/absent`);
@@ -2896,7 +2997,7 @@ function observation(visit, item, value, pid, spotLocationId, visitQrId, score) 
     identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
     status: "final",
     category: [concept(itemCategory(item))],
-    code: concept(itemCode(item), item.text),
+    code: concept(itemCode(item), label),
     subject: ref("Location", spotLocationId),
     effectiveDateTime: instant(visit.answered_at),
     performer: [ref("Practitioner", pid)],
@@ -2904,6 +3005,34 @@ function observation(visit, item, value, pid, spotLocationId, visitQrId, score) 
     derivedFrom: [ref("QuestionnaireResponse", visitQrId)]
   };
   return out;
+}
+var RATING_ITEM = "overall_rating";
+function ratingChange(visit, items) {
+  const item = items.find((i) => i.id === RATING_ITEM);
+  const given = visit.answers[RATING_ITEM];
+  if (item === void 0 || typeof given !== "string") return null;
+  const first = visit.first_rating || given;
+  const kept = visit.final_rating || given;
+  return first !== kept ? { first, kept, item } : null;
+}
+function ratingObservation(visit, item, first, kept, pid, spotLocationId, visitQrId) {
+  if (item.fhir) throw new FhirEmitError(`item ${item.id}: a changed rating needs the item mapped to none`);
+  const words = `${item.text ?? item.id} at ${visit.spot.spot_name}: ${kept.replace(/_/g, " ")}. The first rating was ${first.replace(/_/g, " ")}. On the rating check the volunteer changed it to ${kept.replace(/_/g, " ")}.`;
+  return {
+    resourceType: "Observation",
+    id: fhirId("sl-obs", visit.visit_id, item.id),
+    meta: { profile: [OAH_OBSERVATION_PROFILE] },
+    text: narrative(words),
+    identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
+    status: "final",
+    code: concept(slCoding("overall-rating"), item.text),
+    subject: ref("Location", spotLocationId),
+    effectiveDateTime: instant(visit.answered_at),
+    performer: [ref("Practitioner", pid)],
+    valueCodeableConcept: valueConcept(kept),
+    component: [{ code: concept(slCoding("first-rating")), valueCodeableConcept: valueConcept(first) }],
+    derivedFrom: [ref("QuestionnaireResponse", visitQrId)]
+  };
 }
 function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
   const entities = [{ role: "source", what: ref("QuestionnaireResponse", visitQrId) }];
@@ -2928,6 +3057,8 @@ function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
   };
 }
 function emitVisit(visit, testSitting, emittedAt, items = FORM_ITEMS) {
+  const change = ratingChange(visit, items);
+  if (change !== null) visit = { ...visit, answers: { ...visit.answers, [RATING_ITEM]: change.kept } };
   const [creek, reach, spot] = locations(visit);
   const tested = testedOn(visit, testSitting);
   const person = practitioner(visit, tested);
@@ -2942,6 +3073,7 @@ function emitVisit(visit, testSitting, emittedAt, items = FORM_ITEMS) {
     const obs = observation(visit, item, visit.answers[item.id], pid, String(spot.id), String(visitQr.id), scores.get(String(item.feature ?? "")) ?? null);
     if (obs !== null) observations.push(obs);
   }
+  if (change !== null) observations.push(ratingObservation(visit, change.item, change.first, change.kept, pid, String(spot.id), String(visitQr.id)));
   const prov = provenance(visit, observations, pid, String(visitQr.id), testQr ? String(testQr.id) : null, emittedAt);
   const resources2 = [organization(), device(visit.software_version), creek, reach, spot, person];
   if (testQr) resources2.push(testQr);
@@ -3214,7 +3346,7 @@ var RATING_ISSUE_ITEMS = core_content_default.rules.rating_issue_items;
 var PRESENT = "present";
 var ABSENT = "absent";
 var BEST_RATING = "good";
-var RATING_ITEM = "overall_rating";
+var RATING_ITEM2 = "overall_rating";
 function itemById(formItems, id) {
   for (const item of formItems) if (item.id === id) return item;
   return null;
@@ -3250,7 +3382,7 @@ function dryPipe(rule, answers, site) {
   };
 }
 function ratingCheck(rule, answers, formItems) {
-  if (answers[RATING_ITEM] !== BEST_RATING) return null;
+  if (answers[RATING_ITEM2] !== BEST_RATING) return null;
   const issues = [];
   for (const itemId of RATING_ISSUE_ITEMS) {
     const value = answers[itemId];
@@ -3387,7 +3519,7 @@ var DEMO_TAG_SYSTEM = `${REPO_URL}/tags`;
 var DEMO_TAG_CODE = "demo-walk";
 var DEMO_TAG_DISPLAY = "Demo visit from a video walk. Never counted and never sent to the sandbox.";
 var WALK_PREFIX = "walk-";
-var RATING_ITEM2 = "overall_rating";
+var RATING_ITEM3 = "overall_rating";
 var WALK_KEEP_DAYS = 30;
 var WALK_PAST_DAYS = 7;
 var WALK_FUTURE_SECONDS = 300;
@@ -3440,9 +3572,9 @@ function ratingChangedNote(first, final) {
   return `The first overall rating was ${first}. On the rating check the volunteer changed it to ${final}.`;
 }
 function walkBundle(walk, answers, answeredAt, finalRating = null) {
-  const first = answers[RATING_ITEM2];
+  const first = answers[RATING_ITEM3];
   const changed = typeof first === "string" && finalRating !== null && finalRating !== first;
-  const rated = changed ? { ...answers, [RATING_ITEM2]: finalRating } : answers;
+  const rated = changed ? { ...answers, [RATING_ITEM3]: finalRating } : answers;
   const bundle = emitVisit(walkVisit(walk, rated, answeredAt), null, instant(answeredAt));
   if (changed) {
     for (const entry3 of bundle.entry) {
@@ -3497,7 +3629,7 @@ function walkChecks(answers, followups, questionTexts, given, finalRating) {
   for (const ruleId of Object.keys(given)) {
     if (!asked.has(ruleId)) throw new WalkRecordError(`No follow-up called '${ruleId}' was asked in this walk.`);
   }
-  const first = answers[RATING_ITEM2];
+  const first = answers[RATING_ITEM3];
   const firstRating = typeof first === "string" ? first : null;
   let final = firstRating;
   const checks = followups.map((f, i) => {
@@ -3779,6 +3911,34 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance");
   prov.resource.target.push({ reference: "Observation/nowhere" });
   assert.ok(checkBundle(broken).some((p) => p.includes("does not resolve")));
+});
+test("fhir_emit: a rating changed at the rating check is the value, and the first is a component", () => {
+  const base = golden("fhir_emit").cases.find((c) => c.name.startsWith("a coarse pin")).input.visit;
+  assert.equal(base.answers.overall_rating, "good", "the app stores the first rating as the answer");
+  const rated = (first, final) => {
+    const bundle = emitVisit({ ...base, first_rating: first, final_rating: final }, null, "2026-09-26T09:16:00Z");
+    const byType = (t) => bundle.entry.map((e) => e.resource).filter((r) => r.resourceType === t);
+    const qr = byType("QuestionnaireResponse").at(-1);
+    const answered = qr.item.find((i) => i.linkId === "overall_rating").answer[0].valueCoding.code;
+    const ratings = byType("Observation").filter((o) => o.id.endsWith("-overall-rating"));
+    return { bundle, answered, ratings, provenance: byType("Provenance")[0] };
+  };
+  const changed = rated("good", "poor");
+  assert.deepEqual(checkBundle(changed.bundle), []);
+  assert.equal(changed.answered, "poor", "the response answers the kept rating");
+  assert.equal(changed.ratings.length, 1);
+  const [obs] = changed.ratings;
+  assert.equal(obs.valueCodeableConcept.coding[0].code, "poor", "the value is the kept rating");
+  assert.equal(obs.component.length, 1);
+  assert.equal(obs.component[0].code.coding[0].code, "first-rating");
+  assert.equal(obs.component[0].valueCodeableConcept.coding[0].code, "good", "the component is the first rating");
+  assert.ok(changed.provenance.target.some((t) => t.reference === `Observation/${obs.id}`));
+  assert.equal(base.answers.overall_rating, "good", "the stored answers stay as given");
+  for (const [first, final] of [["good", "good"], ["good", null], [null, null], [null, "good"]]) {
+    const same2 = rated(first, final);
+    assert.equal(same2.ratings.length, 0, `${first} then ${final}`);
+    assert.equal(same2.answered, "good");
+  }
 });
 test("fhir_referral: the ServiceRequest and the example result, the same as Python", () => {
   const doc = golden("fhir_emit");

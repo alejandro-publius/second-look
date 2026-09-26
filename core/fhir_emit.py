@@ -77,6 +77,9 @@ SL_DISPLAYS: dict[str, str] = {
     "good": "Good overall rating",
     "moderate": "Moderate overall rating",
     "poor": "Poor overall rating",
+    # A rating the rating check changed (emit_visit): the Observation and its first rating.
+    "overall-rating": "Overall rating",
+    "first-rating": "First overall rating",
     # The referral and the way back (core/fhir_referral.py).
     "test-pipe-outflow": "Test the water coming out of this pipe",
     "example": "Example, not a real result",
@@ -109,6 +112,9 @@ UCUM_DISPLAYS: dict[str, str] = {
     "%": "percent",
     "[CFU]/dL": "colony forming units per 100 mL",
 }
+
+# The form item the rating check asks about (core/followups.py).
+RATING_ITEM = "overall_rating"
 
 _ID_BAD = re.compile(r"[^A-Za-z0-9.\-]")
 _FORM_PATH = Path(__file__).resolve().parents[1] / "content" / "form.yaml"
@@ -506,6 +512,72 @@ def _observation(
     return out
 
 
+def _rating_change(
+    visit: VisitRecord, form: Sequence[Mapping[str, Any]]
+) -> tuple[str, str, Mapping[str, Any]] | None:
+    """The first and the kept overall rating, and the form item, when the two differ.
+
+    The first is the rating the check stored as first (VisitRecord.first_rating), or the answer
+    given. The kept one is the rating the rating check left (final_rating), or the answer given.
+    Nothing when the rating was not answered: the record never adds a rating nobody gave.
+    """
+    item = next((i for i in form if i["id"] == RATING_ITEM), None)
+    given = visit.answers.get(RATING_ITEM)
+    if item is None or not isinstance(given, str):
+        return None
+    first = visit.first_rating or given
+    kept = visit.final_rating or given
+    return (first, kept, item) if first != kept else None
+
+
+def _rating_observation(
+    visit: VisitRecord,
+    item: Mapping[str, Any],
+    first: str,
+    kept: str,
+    *,
+    practitioner_id: str,
+    spot_location_id: str,
+    visit_qr_id: str,
+) -> dict[str, Any]:
+    """The Observation of an overall rating the rating check changed.
+
+    The form maps the overall rating to no Observation: the QuestionnaireResponse carries it.
+    When the rating check changed it, the record adds this one. Its value is the rating the
+    person kept, and one component, coded first-rating, holds the rating they gave first, so the
+    change stays in the record. A rating that did not change adds no Observation and no
+    component: the answer in the QuestionnaireResponse is then both the first and the kept one.
+    Worker port: worker/src/core/fhir_emit.ts ratingObservation.
+    """
+    if item.get("fhir"):
+        raise FhirEmitError(f"item {item['id']}: a changed rating needs the item mapped to none")
+    words = (
+        f"{item.get('text', item['id'])} at {visit.spot.spot_name}: {kept.replace('_', ' ')}."
+        f" The first rating was {first.replace('_', ' ')}."
+        f" On the rating check the volunteer changed it to {kept.replace('_', ' ')}."
+    )
+    return {
+        "resourceType": "Observation",
+        "id": fhir_id("sl-obs", visit.visit_id, item["id"]),
+        "meta": {"profile": [OAH_OBSERVATION_PROFILE]},
+        "text": _narrative(words),
+        "identifier": [_identifier(ID_SYSTEM_OBSERVATION, f"{visit.visit_id}-{item['id']}")],
+        "status": "final",
+        "code": _concept(sl_coding("overall-rating"), item.get("text")),
+        "subject": _ref("Location", spot_location_id),
+        "effectiveDateTime": _instant(visit.answered_at),
+        "performer": [_ref("Practitioner", practitioner_id)],
+        "valueCodeableConcept": _value_concept(kept),
+        "component": [
+            {
+                "code": _concept(sl_coding("first-rating")),
+                "valueCodeableConcept": _value_concept(first),
+            }
+        ],
+        "derivedFrom": [_ref("QuestionnaireResponse", visit_qr_id)],
+    }
+
+
 def _provenance(
     visit: VisitRecord,
     *,
@@ -559,6 +631,11 @@ def emit_visit(
     `items` defaults to content/form.yaml; tests may pass their own.
     """
     form = tuple(items) if items is not None else form_items()
+    # A rating the rating check changed: the record answers the kept one and keeps the first in
+    # its own Observation (_rating_observation). The stored answers stay as given.
+    change = _rating_change(visit, form)
+    if change is not None:
+        visit = visit.model_copy(update={"answers": {**visit.answers, RATING_ITEM: change[1]}})
     creek, reach, spot = _locations(visit)
     tested_on = _tested_on(visit, test_sitting)
     practitioner = _practitioner(visit, tested_on)
@@ -583,6 +660,19 @@ def emit_visit(
         )
         if obs is not None:
             observations.append(obs)
+    if change is not None:
+        first, kept, rating_item = change
+        observations.append(
+            _rating_observation(
+                visit,
+                rating_item,
+                first,
+                kept,
+                practitioner_id=practitioner_id,
+                spot_location_id=spot["id"],
+                visit_qr_id=visit_qr["id"],
+            )
+        )
     provenance = _provenance(
         visit,
         observations=observations,

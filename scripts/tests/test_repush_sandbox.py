@@ -52,11 +52,11 @@ def test_dry_run_prints_the_plan_and_makes_no_network_call(store: Path) -> None:
     lines: list[str] = []
     assert rs.main(["--dry-run", "--store", str(store)]) == 0
     assert rs.dry_run(store, lines.append) == 0
-    assert lines[0].startswith("visit-0001.json: 14 conditional creates")
-    assert sum(1 for line in lines if line.startswith("  POST ")) == 14
+    assert lines[0].startswith("visit-0001.json: 15 conditional creates")
+    assert sum(1 for line in lines if line.startswith("  POST ")) == 15
     assert any("POST Practitioner if none exist Practitioner?identifier=" in line for line in lines)
     assert lines[-1] == (
-        "dry run: 1 bundle(s), 14 resource(s), "
+        "dry run: 1 bundle(s), 15 resource(s), "
         "tag https://github.com/alejandro-publius/second-look|second-look, no network"
     )
     assert respx.calls.call_count == 0
@@ -114,13 +114,13 @@ def test_push_posts_a_tagged_transaction_and_records_created_ids(
             "code": "second-look",
         } in entry["resource"]["meta"]["tag"]
     rows = [json.loads(line) for line in ledger.read_text().splitlines()]
-    assert len(rows) == 2 + 14
+    assert len(rows) == 2 + 15
     new_rows = rows[2:]
     assert all(r["action"] == "create" for r in new_rows)
     assert {r["resourceType"] for r in new_rows} >= {"Location", "Observation", "Provenance"}
     assert new_rows[0]["id"] == "100"
     assert waits == [], "one bundle, no wait needed"
-    assert lines[-1] == "pushed 1 bundle(s): 14 created, 0 already there"
+    assert lines[-1] == "pushed 1 bundle(s): 15 created, 0 already there"
 
 
 @respx.mock
@@ -135,7 +135,7 @@ def test_push_waits_one_second_between_bundles_and_records_matches(
     assert rs.push(store, BASE, sleep=waits.append, out=lambda _: None) == 0
     assert waits == [1.0]
     rows = [json.loads(line) for line in ledger.read_text().splitlines()][2:]
-    assert len(rows) == 28 and all(r["action"] == "exists" for r in rows)
+    assert len(rows) == 30 and all(r["action"] == "exists" for r in rows)
 
 
 @respx.mock
@@ -368,7 +368,7 @@ def test_main_mirrors_one_bundle_then_registers_the_library(
     assert code == 0
     assert (
         len(calls) == 2
-        and len(calls[0]["entry"]) == 14
+        and len(calls[0]["entry"]) == 15
         and calls[1]["entry"][0]["request"]["url"] == "Library"
     )
     # The Library lists the Provenance the first transaction just created.
