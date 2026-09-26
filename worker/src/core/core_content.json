@@ -211,6 +211,7 @@
         "code_system": "oah"
       },
       "id": "channel_form",
+      "name": "Channel Form",
       "options": [
         {
           "id": "flat",
@@ -219,25 +220,26 @@
         },
         {
           "id": "u_shape",
-          "label": "U shape",
+          "label": "U Shape",
           "value": "u_shape"
         },
         {
           "id": "v_shape",
-          "label": "V shape",
+          "label": "V Shape",
           "value": "v_shape"
         },
         {
           "id": "not_sure",
-          "label": "I'm not sure",
+          "label": "I\u2019m not sure",
           "value": "cant_tell"
         }
       ],
       "section": "what_you_see",
-      "text": "Channel form",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "The channel form is...",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -246,6 +248,7 @@
         "code_system": "oah"
       },
       "id": "bottom_type",
+      "name": "Bottom Type",
       "options": [
         {
           "id": "natural",
@@ -259,15 +262,16 @@
         },
         {
           "id": "not_sure",
-          "label": "Not sure",
+          "label": "I\u2019m not sure",
           "value": "cant_tell"
         }
       ],
       "section": "what_you_see",
-      "text": "Bottom type",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "The bottom of the wet channel is\u2026",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": "artificial_bank",
@@ -277,6 +281,7 @@
         "code_system": "sl"
       },
       "id": "bank_type",
+      "name": "Bank Type",
       "options": [
         {
           "id": "natural",
@@ -290,21 +295,22 @@
         },
         {
           "id": "laid_stones",
-          "label": "Laid stones with no concrete",
+          "label": "Layed stones with no concrete",
           "value": "absent"
         },
         {
           "id": "not_sure",
-          "label": "Not sure",
+          "label": "I\u2019m not sure",
           "value": "cant_tell"
         }
       ],
       "section": "what_you_see",
       "short_label": "artificial banks",
-      "text": "Bank type",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "The banks of the channel are\u2026",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "master_brief"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -313,6 +319,7 @@
         "code_system": "oah"
       },
       "id": "habitats",
+      "name": "Habitats",
       "options": [
         {
           "id": "sand_banks",
@@ -341,10 +348,11 @@
         }
       ],
       "section": "what_you_see",
-      "text": "Habitats",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Are there any habitats present?",
       "type": "multi",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -353,6 +361,7 @@
         "code_system": "oah"
       },
       "id": "natural_debris",
+      "name": "Natural Debris",
       "options": [
         {
           "id": "fallen_trees",
@@ -371,10 +380,11 @@
         }
       ],
       "section": "what_you_see",
-      "text": "Natural debris",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Are there any natural debris present?",
       "type": "multi",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -383,6 +393,7 @@
         "code_system": "oah"
       },
       "id": "water_flow",
+      "name": "Water Flow",
       "options": [
         {
           "id": "fast",
@@ -396,7 +407,7 @@
         },
         {
           "id": "stagnant",
-          "label": "Stagnant or intermittent",
+          "label": "Stagnant/intermittent",
           "value": "stagnant"
         },
         {
@@ -406,15 +417,16 @@
         },
         {
           "id": "not_sure",
-          "label": "Not sure",
+          "label": "I\u2019m not sure",
           "value": "cant_tell"
         }
       ],
       "section": "what_you_see",
-      "text": "Water flow",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "How is the water flowing",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -423,15 +435,16 @@
         "code_system": "oah"
       },
       "id": "water_aspect",
+      "name": "Water Aspect",
       "options": [
         {
           "id": "clear",
-          "label": "Clear or transparent",
+          "label": "Clear/transparent",
           "value": "absent"
         },
         {
           "id": "muddy",
-          "label": "Muddy or turbid",
+          "label": "Muddy/turbid",
           "value": "present"
         },
         {
@@ -441,20 +454,21 @@
         },
         {
           "id": "colour",
-          "label": "Has colours or altered colour",
+          "label": "Has colors/altered color",
           "value": "present"
         },
         {
           "id": "not_sure",
-          "label": "Not sure",
+          "label": "I\u2019m not sure",
           "value": "cant_tell"
         }
       ],
       "section": "water",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "How is the water?",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -463,11 +477,13 @@
         "code_system": "oah"
       },
       "id": "water_withdrawal",
+      "name": "Water Withdrawal",
       "section": "water",
-      "text": "Is there any kind of obvious water collection, use or removal from the stream?",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Is there any kind of obvious water collection, use, removal from the stream?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -476,11 +492,13 @@
         "code_system": "oah"
       },
       "id": "barriers",
+      "name": "Barriers",
       "section": "water",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Do you see any dams or other transversal artificial barriers?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": "pipe_running",
@@ -490,11 +508,13 @@
         "code_system": "sl"
       },
       "id": "draining_pipes",
+      "name": "Draining Pipes",
       "section": "water",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Are there pipes draining polluted water into the stream?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "master_brief"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": "pipe_running",
@@ -504,12 +524,14 @@
         "code_system": "sl"
       },
       "id": "sewage_discharge",
+      "name": "Sewage discharge",
       "section": "water",
       "short_label": "a sewage discharge",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Is there any kind of water entry or discharge of sewage?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "master_brief"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -518,11 +540,13 @@
         "code_system": "oah"
       },
       "id": "construction",
+      "name": "Construction",
       "section": "water",
-      "text": "Is there any construction or works in the stream?",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Is there any construction/works in stream?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -532,12 +556,14 @@
         "unit": "m"
       },
       "id": "water_height_m",
+      "name": "Water height",
       "section": "water",
-      "text": "Water height in metres",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "What is the water height?",
       "type": "number",
       "unit": "m",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -546,12 +572,14 @@
         "code_system": "oah"
       },
       "id": "impervious_left",
+      "name": "Impervious Areas (Left)",
       "section": "margins",
       "short_label": "a paved left margin",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "master_brief"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -560,12 +588,14 @@
         "code_system": "oah"
       },
       "id": "impervious_right",
+      "name": "Impervious Areas (Right)",
       "section": "margins",
       "short_label": "a paved right margin",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "master_brief"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -574,11 +604,13 @@
         "code_system": "oah"
       },
       "id": "vegetation_left",
+      "name": "Vegetation (Left)",
       "section": "margins",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Is the left margin covered by vegetation?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -587,11 +619,13 @@
         "code_system": "oah"
       },
       "id": "vegetation_right",
+      "name": "Vegetation (Right)",
       "section": "margins",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Is the right margin covered by vegetation?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -600,6 +634,7 @@
         "code_system": "oah"
       },
       "id": "vegetation_type_left",
+      "name": "Vegetation Type (Left)",
       "options": [
         {
           "id": "herbs",
@@ -618,15 +653,16 @@
         },
         {
           "id": "not_sure",
-          "label": "Not sure",
+          "label": "I\u2019m not sure",
           "value": "cant_tell"
         }
       ],
       "section": "margins",
-      "text": "Left margin: what is dominant (more than half) in the first 5 m?",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the left margin (first 5 meters from the channel banktop)?",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -635,6 +671,7 @@
         "code_system": "oah"
       },
       "id": "vegetation_type_right",
+      "name": "Vegetation Type (Right)",
       "options": [
         {
           "id": "herbs",
@@ -653,15 +690,16 @@
         },
         {
           "id": "not_sure",
-          "label": "Not sure",
+          "label": "I\u2019m not sure",
           "value": "cant_tell"
         }
       ],
       "section": "margins",
-      "text": "Right margin: what is dominant (more than half) in the first 5 m?",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the right margin (first 5 meters from the channel bank/top)?",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": "invasive_plant",
@@ -671,12 +709,14 @@
         "code_system": "sl"
       },
       "id": "invasive_species",
+      "name": "Invasive Species",
       "section": "margins",
       "short_label": "invasive plants",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Do you see any non-native or invasive plant species?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "master_brief"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "depends_on": {
@@ -693,10 +733,11 @@
       "note": "The app offers free text here. We offer the regional list plus Not sure, so no free text is stored.",
       "region_list": "invasive_plants",
       "section": "margins",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
       "text": "Which ones?",
       "type": "pick_region_list",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -705,11 +746,13 @@
         "code_system": "oah"
       },
       "id": "vegetation_cuts",
+      "name": "Vegetation Cuts",
       "section": "margins",
-      "text": "Have there been recent cuts of vegetation (partial or total) on the banks?",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Have there been recent cuts if vegetation (partial or total) on the banks (or just one of the banks) of the stream?",
       "type": "yesno",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "allow_not_applicable": true,
@@ -723,10 +766,11 @@
         "anger",
         "fear"
       ],
-      "text": "Which feelings best describe your experience?",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Which feeling(s) best describe your experience?",
       "type": "sliders",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     },
     {
       "feature": null,
@@ -734,27 +778,31 @@
       "id": "overall_rating",
       "options": [
         {
+          "description": "The ecosystem components are there: riparian vegetation, natural channel, good water quality, biodiversity",
           "id": "good",
-          "label": "Good: the ecosystem components are there, riparian vegetation, natural channel, good water quality, biodiversity",
+          "label": "Good quality",
           "value": "good"
         },
         {
+          "description": "Some alterations, still biodiverse, with vegetation in the margins, water looks good...",
           "id": "moderate",
-          "label": "Moderate: some alterations, still biodiverse, with vegetation in the margins, water looks good",
+          "label": "Moderate quality",
           "value": "moderate"
         },
         {
+          "description": "Highly modified / artificialized, loss of riparian vegetation, loss of habitats, polluted",
           "id": "poor",
-          "label": "Poor: highly modified or artificialized, loss of riparian vegetation, loss of habitats, polluted",
+          "label": "Poor quality",
           "value": "poor"
         }
       ],
       "rating_check": true,
       "section": "overall",
-      "text": "Overall, how would you rate this stream?",
+      "source": "app public bundle, c5a15e8ebf91, 2026-09-26",
+      "text": "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)",
       "type": "choice",
-      "verified_against_app": false,
-      "wording_source": "app_public_text"
+      "verified_against_app": true,
+      "wording_source": "app_public_bundle"
     }
   ],
   "rules": {

@@ -207,7 +207,7 @@ Part 2 measures whether the checker's one question makes a person more accurate.
 
 | ID | Item | Kind | Date | Outside cause | Cause test | Command |
 |---|---|---|---|---|---|---|
-| D120 | UPDATE_31 is saved as the newest update | CHECK | | | | `test -f docs/internal/updates/UPDATE_31.md && ls docs/internal/updates/ \| sort -V \| tail -1 \| grep -q UPDATE_31` |
+| D120 | UPDATE_31 is saved | CHECK | | | | `test -f docs/internal/updates/UPDATE_31.md` |
 | D121 | Plan v2 in the plan's usual items: the eight items and their gold labels frozen, the question wording part 1's, the flag rule, the exclusions, the lock, and a planning note that quotes `results/power_v2.json` (UPDATE_31 2.1, 1) | CHECK | | | | `grep -q "a01 artificial_bank ph-p2-01 present" docs/analysis_plan_v2.md && grep -q "2026-09-28T01:00:00Z" docs/analysis_plan_v2.md && uv run pytest -q evals/tests/test_power_v2.py` |
 | D122 | `prereg-v2` tagged before any part 2 session, its SHA-256 in docs/notes/plan_hash.md, an audit entry and an OpenTimestamps proof (UPDATE_31 2.1) | CHECK | | | | `git rev-parse -q --verify refs/tags/prereg-v2 >/dev/null && grep -q "prereg-v2" docs/notes/plan_hash.md && grep -q "$(shasum -a 256 docs/analysis_plan_v2.md \| cut -d' ' -f1)" docs/notes/plan_hash.md && test -f proofs/prereg-v2.tag.ots && uv run python scripts/verify_audit.py` |
 | D123 | Eight part 2 photos, two per feature, one present and one absent, never shown in a lesson, a practice card or the test, each with a manifest row and a gold label (UPDATE_31 1) | CHECK | | | | `uv run pytest -q evals/tests/test_assist_flags.py -k part2_items && uv run python scripts/check_manifest.py` |
@@ -226,3 +226,14 @@ Part 2 measures whether the checker's one question makes a person more accurate.
 | D136 | The phone test of both part 2 arms against production with the QA key, a Change and a Keep in the assisted arm, recorded (UPDATE_31 3) | CHECK | | | | `uv run python -c "import json,sys; d=json.load(open('results/part2_live_check.json')); sys.exit(0 if d['ok'] and set(d['arms'])=={'assisted','unassisted'} and {'keep','change'}<=set(d['choices']) else 1)"` |
 | D137 | Part 2's judge mode opens at the lock on production | DATED | 2026-09-28T01:30:00Z | | | `curl -s -X POST -H 'content-type: application/json' -d '{"item_id":"a01","answer":"yes"}' https://second-look-79t.pages.dev/api/t2/demo \| grep -q '"correct"'` |
 | D138 | The lock job ran the part 2 analysis once and its result is on main | DATED | 2026-09-28T02:30:00Z | | | `git fetch -q origin main && git ls-tree --name-only origin/main results/ \| grep -Eq "^results/assist_[0-9]{8}\.json$"` |
+
+## UPDATE_32: the weekend run
+
+The creek check in the official app's own words and languages, the kept rating in its record, walk clips that seek, and the Devpost pictures.
+
+| ID | Item | Kind | Date | Outside cause | Cause test | Command |
+|---|---|---|---|---|---|---|
+| D140 | UPDATE_32 is saved as the newest update | CHECK | | | | `test -f docs/internal/updates/UPDATE_32.md && ls docs/internal/updates/ \| sort -V \| tail -1 \| grep -q UPDATE_32` |
+| D141 | Every creek check item quotes the official app's public bundle, marked verified with its source, the bundle recorded by URL, date and SHA-256 and never committed (UPDATE_32 1) | CHECK | | | | `uv run pytest -q scripts/tests/test_app_strings.py && grep -q "SHA-256" docs/notes/app_strings.md` |
+| D142 | The app's bundle, fetched again today, still says every string the creek check quotes (UPDATE_32 1.4; needs the network) | CHECK | | | | `make app-strings-check` |
+

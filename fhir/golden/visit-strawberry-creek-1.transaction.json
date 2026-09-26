@@ -493,7 +493,7 @@
               "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
             }
           ],
-          "text": "Channel form"
+          "text": "Channel Form"
         },
         "derivedFrom": [
           {
@@ -529,7 +529,7 @@
           "reference": "urn:uuid:4bfe1555-8888-555f-9145-9a397426e2c6"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Channel form at Strawberry Creek, campus reach, spot 1: u shape.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Channel Form at Strawberry Creek, campus reach, spot 1: u shape.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
@@ -570,7 +570,7 @@
               "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
             }
           ],
-          "text": "Bank type"
+          "text": "Bank Type"
         },
         "derivedFrom": [
           {
@@ -606,7 +606,7 @@
           "reference": "urn:uuid:4bfe1555-8888-555f-9145-9a397426e2c6"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank type at Strawberry Creek, campus reach, spot 1: present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at Strawberry Creek, campus reach, spot 1: present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
@@ -647,7 +647,7 @@
               "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
             }
           ],
-          "text": "Are there pipes draining polluted water into the stream?"
+          "text": "Draining Pipes"
         },
         "derivedFrom": [
           {
@@ -683,7 +683,7 @@
           "reference": "urn:uuid:4bfe1555-8888-555f-9145-9a397426e2c6"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Are there pipes draining polluted water into the stream? at Strawberry Creek, campus reach, spot 1: cant tell. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Draining Pipes at Strawberry Creek, campus reach, spot 1: cant tell. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
@@ -724,7 +724,7 @@
               "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
             }
           ],
-          "text": "Water height in metres"
+          "text": "Water height"
         },
         "derivedFrom": [
           {
@@ -760,7 +760,7 @@
           "reference": "urn:uuid:4bfe1555-8888-555f-9145-9a397426e2c6"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Water height in metres at Strawberry Creek, campus reach, spot 1: 0.2 metre.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Water height at Strawberry Creek, campus reach, spot 1: 0.2 metre.</p></div>",
           "status": "generated"
         },
         "valueQuantity": {
@@ -798,7 +798,7 @@
               "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
             }
           ],
-          "text": "Do you see any non-native or invasive plant species?"
+          "text": "Invasive Species"
         },
         "derivedFrom": [
           {
@@ -834,7 +834,7 @@
           "reference": "urn:uuid:4bfe1555-8888-555f-9145-9a397426e2c6"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Do you see any non-native or invasive plant species? at Strawberry Creek, campus reach, spot 1: present. The observer scored 3 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Invasive Species at Strawberry Creek, campus reach, spot 1: present. The observer scored 3 of 4 on this feature, tested 2026-09-23.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {

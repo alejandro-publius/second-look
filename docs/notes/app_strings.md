@@ -1,22 +1,61 @@
-# The official app's own question wording
+# The official app's own words
 
-Pulled on 2026-09-20 from the Citizen Science app's public i18n bundle, `chunk_i18n.config`,
-served by https://apps.oneaquahealth.eu . No login and no API were used: this is the text the app
-ships to any browser that loads the page. Saved locally at
-`~/scratch/oah-research/chunk_i18n.config.bcYbKmN2.js`.
+The creek check quotes the OneAquaHealth Citizen Science App word for word. The app ships its
+translations to any browser in a public JavaScript chunk; nothing here needed a login, and none was
+used. The words belong to the OneAquaHealth project and are credited to the OneAquaHealth Citizen
+Science App wherever they are shown or stored.
 
-Quoted exactly, keys as the bundle names them.
+| | |
+|---|---|
+| Bundle URL | https://apps.oneaquahealth.eu/_nuxt/i18n.config.bcYbKmN2.js |
+| Fetched | 2026-09-26 |
+| SHA-256 | `c5a15e8ebf913c49e03ec6d71716361126301187407d4a12cd6bf4c8bd9eff51` |
+| Languages in the bundle | Greek, English, French, Italian, Dutch, Norwegian, Portuguese |
+| Languages with the assessment questions | English, Portuguese, Dutch, Norwegian, French, Italian |
 
-| App item | question | questiontext | answers |
-|---|---|---|---|
-| `bank_type` | Bank Type | The banks of the channel are... | Natural (A); Artificial (concrete or stones with concrete) (B); I am not sure |
-| `bottom_type` | Bottom Type | The bottom of the wet channel is... | Natural (A); Artificial (concrete or stones with concrete) (B); I am not sure |
-| `channel_form` | Channel Form | The channel form is... | Flat (A); U Shape (B); V Shape (C); I am not sure |
-| `invasive_species` | Invasive Species | Do you see any non-native or invasive plant species? | Yes; No; I am not sure. Free text: "Which ones?" |
-| `draining_pipes` | Draining Pipes | Are there pipes draining polluted water into the stream? | Yes; No; I am not sure |
-| `sewage_discharge` | Sewage discharge | Is there any kind of water entry or discharge of sewage? | Yes; No; I am not sure |
+The bundle itself is never committed. `scripts/app_strings.py write` fetches it, reads its object
+literal as data (a small parser; no code from the bundle runs), and keeps only the strings the
+creek check quotes, each with the app key it came from, in `content/app_strings.json`. `make
+app-strings-check` fetches it again and fails if any quoted string has changed; it needs the
+network, so it is its own line in the done list rather than part of `make check`.
 
-## How our four questions line up
+## What is quoted
+
+Every item of `content/form.yaml`: the question the app shows (`questiontext`, or for the two
+pick-several items the app's own yes or no line, `questiontextshow`), the app's short name for it
+(`question`, used as the FHIR Observation's code text), every answer, the three overall ratings with
+their descriptions, the four feelings, and the section titles "What do you see from where you
+stand" and "In the margins/riparian zone". The yes or no answers are the app's per item. Each item
+is marked `verified_against_app: true` with `source: app public bundle, c5a15e8ebf91, 2026-09-26`,
+and a test (`scripts/tests/test_app_strings.py`) holds the form's English to the quoted English.
+
+Three edits, the same in every language, all made by `tidy()` in the script:
+
+1. The answer letters, such as "(A)", are dropped. They point at the app's example pictures,
+   which we do not show.
+2. The barriers question drops "(see some examples in images provided)", for the same reason.
+3. A typographic dash inside a quoted string becomes a plain hyphen (one Norwegian title), since
+   the repository has none (CLAUDE.md rule 18).
+
+The app's own spelling is kept, including "Layed stones" and "recent cuts if vegetation"; both are
+in the note to the organizers.
+
+## What stays ours
+
+The words around the questions: buttons, the follow-up questions, the health card and the notes.
+They have no checked translation yet, so in another language they show in English with a small
+"English" tag. The four test questions in `content/features.yaml` belong to the frozen two-minute
+test and are unchanged; the dug-out channel question there is ours by design, as the app has no
+matching item, and the creek check has no dug-out item.
+
+## Translations
+
+The creek check and the walks offer every language above. Before any translation reached the
+screen it was read beside the English for meaning; 14 strings differ and fall back to English in
+their language. See `docs/notes/app_translations.md`.
+
+## History: the Sep 20 check of the four test questions
+
 
 | Our feature | Our question | App item | Verbatim? |
 |---|---|---|---|

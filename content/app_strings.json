@@ -1,0 +1,1633 @@
+{
+ "source": {
+  "app": "OneAquaHealth Citizen Science App",
+  "app_url": "https://apps.oneaquahealth.eu/",
+  "bundle_url": "https://apps.oneaquahealth.eu/_nuxt/i18n.config.bcYbKmN2.js",
+  "bundle_sha256": "c5a15e8ebf913c49e03ec6d71716361126301187407d4a12cd6bf4c8bd9eff51",
+  "fetched": "2026-09-26",
+  "attribution": "Question and answer wording quoted from the OneAquaHealth Citizen Science App (https://apps.oneaquahealth.eu), read from its public translation bundle, so a volunteer sees the questions they already know. The wording belongs to the OneAquaHealth project.",
+  "bundle_languages": [
+   "el",
+   "en",
+   "fr",
+   "it",
+   "nl",
+   "no",
+   "pt"
+  ],
+  "languages_without_assessment": [
+   "el"
+  ]
+ },
+ "languages": [
+  "en",
+  "pt",
+  "nl",
+  "no",
+  "fr",
+  "it"
+ ],
+ "app_keys": {
+  "items": {
+   "channel_form": {
+    "text": "questions_1_3.channel_form.questiontext",
+    "options": {
+     "flat": "questions_1_3.channel_form.labels.Flat (A)",
+     "u_shape": "questions_1_3.channel_form.labels.U Shape (B)",
+     "v_shape": "questions_1_3.channel_form.labels.V Shape (C)",
+     "not_sure": "questions_1_3.channel_form.labels.I am not sure"
+    }
+   },
+   "bottom_type": {
+    "text": "questions_1_3.bottom_type.questiontext",
+    "options": {
+     "natural": "questions_1_3.bottom_type.labels.Natural (A)",
+     "artificial": "questions_1_3.bottom_type.labels.Artificial (concrete or stones with concrete) (B)",
+     "not_sure": "questions_1_3.bottom_type.labels.I am not sure"
+    }
+   },
+   "bank_type": {
+    "text": "questions_1_3.bank_type.questiontext",
+    "options": {
+     "natural": "questions_1_3.bank_type.labels.Natural (A)",
+     "artificial": "questions_1_3.bank_type.labels.Artificial (concrete or stones with concrete) (B)",
+     "laid_stones": "questions_1_3.bank_type.labels.Layed stones with no concrete (C)",
+     "not_sure": "questions_1_3.bank_type.labels.I am not sure"
+    }
+   },
+   "habitats": {
+    "text": "questions_1_3.habitats.questiontextshow",
+    "options": {
+     "sand_banks": "questions_1_3.habitats.options.Sand banks (A)",
+     "sand_islands": "questions_1_3.habitats.options.Sand islands (B)",
+     "stone_deposits": "questions_1_3.habitats.options.Stone deposits (C)",
+     "riffles": "questions_1_3.habitats.options.Riffles, rapids, falls (D)",
+     "aquatic_vegetation": "questions_1_3.habitats.options.Aquatic vegetation (E)"
+    }
+   },
+   "natural_debris": {
+    "text": "questions_1_3.natural_debris.questiontextshow",
+    "options": {
+     "fallen_trees": "questions_1_3.natural_debris.labels.Fallen trees (A)",
+     "fallen_branches": "questions_1_3.natural_debris.labels.Fallen branches (B)",
+     "leaf_deposits": "questions_1_3.natural_debris.labels.Deposits of fallen leaves (C)"
+    }
+   },
+   "water_flow": {
+    "text": "questions_1_3.water_flow.questiontext",
+    "options": {
+     "fast": "questions_1_3.water_flow.labels.Fast (with waves or high velocity) (A)",
+     "slow": "questions_1_3.water_flow.labels.Slow (B)",
+     "stagnant": "questions_1_3.water_flow.labels.Stagnant/intermittent (C)",
+     "dry": "questions_1_3.water_flow.labels.Dry (D)",
+     "not_sure": "questions_1_3.water_flow.labels.I am not sure"
+    }
+   },
+   "water_aspect": {
+    "text": "questions_2_3.water_aspect_labels.questiontext",
+    "options": {
+     "clear": "questions_2_3.water_aspect_labels.labels.Clear/transparent (A)",
+     "muddy": "questions_2_3.water_aspect_labels.labels.Muddy/turbid (B)",
+     "foam": "questions_2_3.water_aspect_labels.labels.Has foam (C)",
+     "colour": "questions_2_3.water_aspect_labels.labels.Has colors/altered color (D)",
+     "not_sure": "questions_2_3.water_aspect_labels.labels.I am not sure"
+    }
+   },
+   "water_withdrawal": {
+    "text": "questions_2_3.water_withdrawal.questiontext",
+    "options": {
+     "present": "questions_2_3.water_withdrawal.labels.Yes",
+     "absent": "questions_2_3.water_withdrawal.labels.No",
+     "cant_tell": "questions_2_3.water_withdrawal.labels.I am not sure"
+    }
+   },
+   "barriers": {
+    "text": "questions_2_3.barriers.questiontext",
+    "options": {
+     "present": "questions_2_3.barriers.labels.Yes",
+     "absent": "questions_2_3.barriers.labels.No",
+     "cant_tell": "questions_2_3.barriers.labels.I am not sure"
+    }
+   },
+   "draining_pipes": {
+    "text": "questions_2_3.draining_pipes.questiontext",
+    "options": {
+     "present": "questions_2_3.draining_pipes.labels.Yes",
+     "absent": "questions_2_3.draining_pipes.labels.No",
+     "cant_tell": "questions_2_3.draining_pipes.labels.I am not sure"
+    }
+   },
+   "sewage_discharge": {
+    "text": "questions_2_3.sewage_discharge.questiontext",
+    "options": {
+     "present": "questions_2_3.sewage_discharge.labels.Yes",
+     "absent": "questions_2_3.sewage_discharge.labels.No",
+     "cant_tell": "questions_2_3.sewage_discharge.labels.I am not sure"
+    }
+   },
+   "construction": {
+    "text": "questions_2_3.construction.questiontext",
+    "options": {
+     "present": "questions_2_3.construction.labels.Yes",
+     "absent": "questions_2_3.construction.labels.No",
+     "cant_tell": "questions_2_3.construction.labels.I am not sure"
+    }
+   },
+   "water_height_m": {
+    "text": "questions_2_3.water_height.questiontext"
+   },
+   "impervious_left": {
+    "text": "questions_3_3.impervious_left.questiontext",
+    "options": {
+     "present": "questions_3_3.impervious_left.labels.Yes",
+     "absent": "questions_3_3.impervious_left.labels.No",
+     "cant_tell": "questions_3_3.impervious_left.labels.I am not sure"
+    }
+   },
+   "impervious_right": {
+    "text": "questions_3_3.impervious_right.questiontext",
+    "options": {
+     "present": "questions_3_3.impervious_right.labels.Yes",
+     "absent": "questions_3_3.impervious_right.labels.No",
+     "cant_tell": "questions_3_3.impervious_right.labels.I am not sure"
+    }
+   },
+   "vegetation_left": {
+    "text": "questions_3_3.vegetation_left.questiontext",
+    "options": {
+     "present": "questions_3_3.vegetation_left.labels.Yes",
+     "absent": "questions_3_3.vegetation_left.labels.No",
+     "cant_tell": "questions_3_3.vegetation_left.labels.I am not sure"
+    }
+   },
+   "vegetation_right": {
+    "text": "questions_3_3.vegetation_right.questiontext",
+    "options": {
+     "present": "questions_3_3.vegetation_right.labels.Yes",
+     "absent": "questions_3_3.vegetation_right.labels.No",
+     "cant_tell": "questions_3_3.vegetation_right.labels.I am not sure"
+    }
+   },
+   "vegetation_type_left": {
+    "text": "questions_3_3.vegetation_type_left.questiontext",
+    "options": {
+     "herbs": "questions_3_3.vegetation_type_left.labels.Herbs (A)",
+     "shrubs": "questions_3_3.vegetation_type_left.labels.Shrubs (B)",
+     "trees": "questions_3_3.vegetation_type_left.labels.Trees (C)",
+     "not_sure": "questions_3_3.vegetation_type_left.labels.I am not sure"
+    }
+   },
+   "vegetation_type_right": {
+    "text": "questions_3_3.vegetation_type_right.questiontext",
+    "options": {
+     "herbs": "questions_3_3.vegetation_type_right.labels.Herbs (A)",
+     "shrubs": "questions_3_3.vegetation_type_right.labels.Shrubs (B)",
+     "trees": "questions_3_3.vegetation_type_right.labels.Trees (C)",
+     "not_sure": "questions_3_3.vegetation_type_right.labels.I am not sure"
+    }
+   },
+   "invasive_species": {
+    "text": "questions_3_3.invasive_species.questiontext",
+    "options": {
+     "present": "questions_3_3.invasive_species.labels.Yes",
+     "absent": "questions_3_3.invasive_species.labels.No",
+     "cant_tell": "questions_3_3.invasive_species.labels.I am not sure"
+    }
+   },
+   "invasive_which": {
+    "text": "questions_3_3.invasive_species.placeholder"
+   },
+   "vegetation_cuts": {
+    "text": "questions_3_3.vegetation_cut.questiontext",
+    "options": {
+     "present": "questions_3_3.vegetation_cut.labels.Yes",
+     "absent": "questions_3_3.vegetation_cut.labels.No",
+     "cant_tell": "questions_3_3.vegetation_cut.labels.I am not sure"
+    }
+   },
+   "feelings": {
+    "text": "feelings.question",
+    "options": {
+     "joy": "feelings.Joy",
+     "serenity": "feelings.Serenity",
+     "anger": "feelings.Anger",
+     "fear": "feelings.Fear",
+     "not_applicable": "feelings.NotApplicable"
+    }
+   },
+   "overall_rating": {
+    "text": "stream_health.question",
+    "options": {
+     "good": "stream_health.good_quality",
+     "moderate": "stream_health.moderate_quality",
+     "poor": "stream_health.poor_quality"
+    },
+    "descriptions": {
+     "good": "stream_health.good_quality_description",
+     "moderate": "stream_health.moderate_quality_description",
+     "poor": "stream_health.poor_quality_description"
+    }
+   }
+  },
+  "sections": {
+   "what_you_see": "questions_1_3.title",
+   "margins": "questions_3_3.title"
+  }
+ },
+ "strings": {
+  "en": {
+   "items": {
+    "channel_form": {
+     "name": "Channel Form",
+     "text": "The channel form is...",
+     "options": {
+      "flat": "Flat",
+      "u_shape": "U Shape",
+      "v_shape": "V Shape",
+      "not_sure": "I’m not sure"
+     }
+    },
+    "bottom_type": {
+     "name": "Bottom Type",
+     "text": "The bottom of the wet channel is…",
+     "options": {
+      "natural": "Natural",
+      "artificial": "Artificial (concrete or stones with concrete)",
+      "not_sure": "I’m not sure"
+     }
+    },
+    "bank_type": {
+     "name": "Bank Type",
+     "text": "The banks of the channel are…",
+     "options": {
+      "natural": "Natural",
+      "artificial": "Artificial (concrete or stones with concrete)",
+      "laid_stones": "Layed stones with no concrete",
+      "not_sure": "I’m not sure"
+     }
+    },
+    "habitats": {
+     "name": "Habitats",
+     "text": "Are there any habitats present?",
+     "options": {
+      "sand_banks": "Sand banks",
+      "sand_islands": "Sand islands",
+      "stone_deposits": "Stone deposits",
+      "riffles": "Riffles, rapids, falls",
+      "aquatic_vegetation": "Aquatic vegetation"
+     }
+    },
+    "natural_debris": {
+     "name": "Natural Debris",
+     "text": "Are there any natural debris present?",
+     "options": {
+      "fallen_trees": "Fallen trees",
+      "fallen_branches": "Fallen branches",
+      "leaf_deposits": "Deposits of fallen leaves"
+     }
+    },
+    "water_flow": {
+     "name": "Water Flow",
+     "text": "How is the water flowing",
+     "options": {
+      "fast": "Fast (with waves or high velocity)",
+      "slow": "Slow",
+      "stagnant": "Stagnant/intermittent",
+      "dry": "Dry",
+      "not_sure": "I’m not sure"
+     }
+    },
+    "water_aspect": {
+     "name": "Water Aspect",
+     "text": "How is the water?",
+     "options": {
+      "clear": "Clear/transparent",
+      "muddy": "Muddy/turbid",
+      "foam": "Has foam",
+      "colour": "Has colors/altered color",
+      "not_sure": "I’m not sure"
+     }
+    },
+    "water_withdrawal": {
+     "name": "Water Withdrawal",
+     "text": "Is there any kind of obvious water collection, use, removal from the stream?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "barriers": {
+     "name": "Barriers",
+     "text": "Do you see any dams or other transversal artificial barriers?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "draining_pipes": {
+     "name": "Draining Pipes",
+     "text": "Are there pipes draining polluted water into the stream?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "sewage_discharge": {
+     "name": "Sewage discharge",
+     "text": "Is there any kind of water entry or discharge of sewage?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "construction": {
+     "name": "Construction",
+     "text": "Is there any construction/works in stream?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "water_height_m": {
+     "name": "Water height",
+     "text": "What is the water height?"
+    },
+    "impervious_left": {
+     "name": "Impervious Areas (Left)",
+     "text": "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "impervious_right": {
+     "name": "Impervious Areas (Right)",
+     "text": "Is more than one third of the right margin covered by impervious areas (such as roads, sidewalks or buildings)?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "vegetation_left": {
+     "name": "Vegetation (Left)",
+     "text": "Is the left margin covered by vegetation?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "vegetation_right": {
+     "name": "Vegetation (Right)",
+     "text": "Is the right margin covered by vegetation?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "vegetation_type_left": {
+     "name": "Vegetation Type (Left)",
+     "text": "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the left margin (first 5 meters from the channel banktop)?",
+     "options": {
+      "herbs": "Herbs",
+      "shrubs": "Shrubs",
+      "trees": "Trees",
+      "not_sure": "I’m not sure"
+     }
+    },
+    "vegetation_type_right": {
+     "name": "Vegetation Type (Right)",
+     "text": "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the right margin (first 5 meters from the channel bank/top)?",
+     "options": {
+      "herbs": "Herbs",
+      "shrubs": "Shrubs",
+      "trees": "Trees",
+      "not_sure": "I’m not sure"
+     }
+    },
+    "invasive_species": {
+     "name": "Invasive Species",
+     "text": "Do you see any non-native or invasive plant species?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "invasive_which": {
+     "text": "Which ones?"
+    },
+    "vegetation_cuts": {
+     "name": "Vegetation Cuts",
+     "text": "Have there been recent cuts if vegetation (partial or total) on the banks (or just one of the banks) of the stream?",
+     "options": {
+      "present": "Yes",
+      "absent": "No",
+      "cant_tell": "I’m not sure"
+     }
+    },
+    "feelings": {
+     "text": "Which feeling(s) best describe your experience?",
+     "options": {
+      "joy": "Joy",
+      "serenity": "Serenity",
+      "anger": "Anger",
+      "fear": "Fear",
+      "not_applicable": "Not Applicable"
+     }
+    },
+    "overall_rating": {
+     "text": "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)",
+     "options": {
+      "good": "Good quality",
+      "moderate": "Moderate quality",
+      "poor": "Poor quality"
+     },
+     "descriptions": {
+      "good": "The ecosystem components are there: riparian vegetation, natural channel, good water quality, biodiversity",
+      "moderate": "Some alterations, still biodiverse, with vegetation in the margins, water looks good...",
+      "poor": "Highly modified / artificialized, loss of riparian vegetation, loss of habitats, polluted"
+     }
+    }
+   },
+   "sections": {
+    "what_you_see": "What do you see from where you stand (in ca. 100m)?",
+    "margins": "In the margins/riparian zone (5-10m from the channel banktop)"
+   }
+  },
+  "pt": {
+   "items": {
+    "channel_form": {
+     "name": "Forma do Canal",
+     "text": "A forma do canal é...",
+     "options": {
+      "flat": "Plano",
+      "u_shape": "Forma de U",
+      "v_shape": "Forma de V",
+      "not_sure": "Não tenho a certeza"
+     }
+    },
+    "bottom_type": {
+     "name": "Tipo de Leito",
+     "text": "O fundo do canal molhado é...",
+     "options": {
+      "natural": "Natural",
+      "artificial": "Artificial (betão ou pedras com betão)",
+      "not_sure": "Não tenho a certeza"
+     }
+    },
+    "bank_type": {
+     "name": "Tipo de Margem",
+     "text": "As margens do canal são...",
+     "options": {
+      "natural": "Natural",
+      "artificial": "Artificial (betão ou pedras com betão)",
+      "laid_stones": "Pedras sobrepostas sem betão",
+      "not_sure": "Não tenho a certeza"
+     }
+    },
+    "habitats": {
+     "name": "Habitats",
+     "text": "Há habitats presentes?",
+     "options": {
+      "sand_banks": "Bancos de areia",
+      "sand_islands": "Ilhas de areia",
+      "stone_deposits": "Depósitos de pedras",
+      "riffles": "Correntes rápidas, quedas",
+      "aquatic_vegetation": "Vegetação aquática"
+     }
+    },
+    "natural_debris": {
+     "name": "Detritos Naturais",
+     "text": "Há detritos naturais presentes?",
+     "options": {
+      "fallen_trees": "Árvores caídas",
+      "fallen_branches": "Ramos caídos",
+      "leaf_deposits": "Depósitos de folhas caídas"
+     }
+    },
+    "water_flow": {
+     "name": "Fluxo da Água",
+     "text": "Como está a correr a água?",
+     "options": {
+      "fast": "Rápido (com ondas ou alta velocidade)",
+      "slow": "Lento",
+      "stagnant": "Estagnado/intermitente",
+      "dry": "Seco",
+      "not_sure": "Não tenho a certeza"
+     }
+    },
+    "water_aspect": {
+     "name": "Aspeto da Água",
+     "text": "Como está a água?",
+     "options": {
+      "clear": "Transparente",
+      "muddy": "Turva",
+      "foam": "Tem espuma",
+      "colour": "Tem cores / cor alterada",
+      "not_sure": "Não tenho a certeza"
+     }
+    },
+    "water_withdrawal": {
+     "name": "Captação de Água",
+     "text": "Há algum tipo de captação/remoção óbvia de água da ribeira?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "barriers": {
+     "name": "Barreiras",
+     "text": "Vê alguma barragem ou barreira artificial transversal?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "draining_pipes": {
+     "name": "Canos de Drenagem",
+     "text": "Há canos a descarregar água poluída na ribeira?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "sewage_discharge": {
+     "name": "Descarga de Esgotos",
+     "text": "Há alguma entrada ou descarga de esgotos?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "construction": {
+     "name": "Obras",
+     "text": "Há alguma obra/construção no leito da ribeira?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "water_height_m": {
+     "name": "Altura da Água",
+     "text": "Qual é a altura da água?"
+    },
+    "impervious_left": {
+     "name": "Áreas Impermeáveis (Esquerda)",
+     "text": "Mais de um terço da margem esquerda está coberta por áreas impermeáveis (como estradas, passeios ou edifícios)?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "impervious_right": {
+     "name": "Áreas Impermeáveis (Direita)",
+     "text": "Mais de um terço da margem direita está coberta por áreas impermeáveis (como estradas, passeios ou edifícios)?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "vegetation_left": {
+     "name": "Vegetação (Esquerda)",
+     "text": "A margem esquerda está coberta por vegetação?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "vegetation_right": {
+     "name": "Vegetação (Direita)",
+     "text": "A margem direita está coberta por vegetação?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "vegetation_type_left": {
+     "name": "Tipo de Vegetação (Esquerda)",
+     "text": "Que tipo de vegetação é dominante (mais de 50%) na margem esquerda (primeiros 5 metros)?",
+     "options": {
+      "herbs": "Ervas",
+      "shrubs": "Arbustos",
+      "trees": "Árvores",
+      "not_sure": "Não tenho a certeza"
+     }
+    },
+    "vegetation_type_right": {
+     "name": "Tipo de Vegetação (Direita)",
+     "text": "Que tipo de vegetação é dominante (mais de 50%) na margem direita (primeiros 5 metros)?",
+     "options": {
+      "herbs": "Ervas",
+      "shrubs": "Arbustos",
+      "trees": "Árvores",
+      "not_sure": "Não tenho a certeza"
+     }
+    },
+    "invasive_species": {
+     "name": "Espécies Invasoras",
+     "text": "Vê alguma planta exótica ou invasora?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "invasive_which": {
+     "text": "Quais?"
+    },
+    "vegetation_cuts": {
+     "name": "Corte de Vegetação",
+     "text": "Houve cortes recentes (parciais ou totais) da vegetação nas margens?",
+     "options": {
+      "present": "Sim",
+      "absent": "Não",
+      "cant_tell": "Não tenho a certeza"
+     }
+    },
+    "feelings": {
+     "text": "Que sentimento(s) melhor descrevem a sua experiência?",
+     "options": {
+      "joy": "Alegria",
+      "serenity": "Serenidade",
+      "anger": "Raiva",
+      "fear": "Medo",
+      "not_applicable": "Não se aplica"
+     }
+    },
+    "overall_rating": {
+     "text": "Forneça uma avaliação geral da saúde do ecossistema da ribeira (escolha uma das opções abaixo)",
+     "options": {
+      "good": "Boa qualidade",
+      "moderate": "Qualidade moderada",
+      "poor": "Má qualidade"
+     },
+     "descriptions": {
+      "good": "Os componentes do ecossistema estão presentes: vegetação ripária, leito natural, boa qualidade da água, biodiversidade",
+      "moderate": "Algumas alterações, ainda biodiverso, com vegetação nas margens, água parece em boas condições...",
+      "poor": "Altamente modificado/artificializado, perda de vegetação ripária, perda de habitats, poluição"
+     }
+    }
+   },
+   "sections": {
+    "what_you_see": "O que observa num raio de aproximadamente 100m?",
+    "margins": "Nas margens/zona ripária (5-10m desde o topo da margem)"
+   }
+  },
+  "nl": {
+   "items": {
+    "channel_form": {
+     "name": "Kanaalvorm",
+     "text": "De kanaalvorm is...",
+     "options": {
+      "flat": "Plat",
+      "u_shape": "U-vorm",
+      "v_shape": "V-vorm",
+      "not_sure": "Ik weet het niet zeker"
+     }
+    },
+    "bottom_type": {
+     "name": "Bodemtype",
+     "text": "De bodem van het natte kanaal is…",
+     "options": {
+      "natural": "Natuurlijk",
+      "artificial": "Kunstmatig (beton of stenen met beton)",
+      "not_sure": "Ik weet het niet zeker"
+     }
+    },
+    "bank_type": {
+     "name": "Banktype",
+     "text": "De oevers van het kanaal zijn…",
+     "options": {
+      "natural": "Natuurlijk",
+      "artificial": "Kunstmatig (beton of stenen met beton)",
+      "laid_stones": "Gelegde stenen zonder beton",
+      "not_sure": "Ik weet het niet zeker"
+     }
+    },
+    "habitats": {
+     "name": "Leefgebieden",
+     "text": "Zijn er leefgebieden aanwezig?",
+     "options": {
+      "sand_banks": "Zandbanken",
+      "sand_islands": "Zandeilanden",
+      "stone_deposits": "Steenafzettingen",
+      "riffles": "Geultjes, stroomversnellingen, watervallen",
+      "aquatic_vegetation": "Watervegetatie"
+     }
+    },
+    "natural_debris": {
+     "name": "Natuurlijk afval",
+     "text": "Zijn er natuurlijke resten aanwezig?",
+     "options": {
+      "fallen_trees": "Omgevallen bomen",
+      "fallen_branches": "Afgevallen takken",
+      "leaf_deposits": "Afzettingen van gevallen bladeren"
+     }
+    },
+    "water_flow": {
+     "name": "Waterstroom",
+     "text": "Hoe stroomt het water?",
+     "options": {
+      "fast": "Snel (met golven of hoge snelheid)",
+      "slow": "Langzaam",
+      "stagnant": "Stilstaand/intermitterend",
+      "dry": "Droog",
+      "not_sure": "Ik weet het niet zeker"
+     }
+    },
+    "water_aspect": {
+     "name": "Wateraspect",
+     "text": "Hoe is het water?",
+     "options": {
+      "clear": "Helder/transparant",
+      "muddy": "Modderig/troebel",
+      "foam": "Heeft schuim",
+      "colour": "Heeft kleuren/veranderde kleur",
+      "not_sure": "Ik weet het niet zeker"
+     }
+    },
+    "water_withdrawal": {
+     "name": "Wateronttrekking",
+     "text": "Is er sprake van een duidelijke verzameling, gebruik en verwijdering van water uit de beek?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "barriers": {
+     "name": "Barrières",
+     "text": "Ziet u dammen of andere dwarse kunstmatige barrières?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "draining_pipes": {
+     "name": "Afvoerbuizen",
+     "text": "Zijn er leidingen die vervuild water naar de beek afvoeren?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "sewage_discharge": {
+     "name": "Rioollozing",
+     "text": "Is er sprake van watertoevoer en -afvoer van rioolwater?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "construction": {
+     "name": "Bouw",
+     "text": "Worden er werkzaamheden/constructies in de vaart uitgevoerd?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "water_height_m": {
+     "name": "Waterhoogte",
+     "text": "Hoe hoog staat het water?"
+    },
+    "impervious_left": {
+     "name": "Ondoordringbare gebieden (links)",
+     "text": "Wordt meer dan een derde van de linkermarge bedekt door verharde oppervlakken (zoals wegen, trottoirs of gebouwen)?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "impervious_right": {
+     "name": "Ondoordringbare gebieden (rechts)",
+     "text": "Wordt meer dan een derde van de rechtermarge bedekt door verharde oppervlakken (zoals wegen, trottoirs of gebouwen)?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "vegetation_left": {
+     "name": "Vegetatie (links)",
+     "text": "Is de linkermarge bedekt met vegetatie?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "vegetation_right": {
+     "name": "Vegetatie (rechts)",
+     "text": "Is de rechtermarge bedekt met vegetatie?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "vegetation_type_left": {
+     "name": "Vegetatietype (links)",
+     "text": "Welke vegetatie is dominant (dat wil zeggen dat het meer dan 50% of de helft beslaat) in de linkermarge (de eerste 5 meter vanaf de oever van het kanaal)?",
+     "options": {
+      "herbs": "Kruiden",
+      "shrubs": "Heesters",
+      "trees": "Bomen",
+      "not_sure": "Ik weet het niet zeker"
+     }
+    },
+    "vegetation_type_right": {
+     "name": "Vegetatietype (rechts)",
+     "text": "Welke vegetatie is dominant (dat wil zeggen dat het meer dan 50% of de helft bedekt) in de rechtermarge (de eerste 5 meter vanaf de kanaaloever/bovenkant)?",
+     "options": {
+      "herbs": "Kruiden",
+      "shrubs": "Heesters",
+      "trees": "Bomen",
+      "not_sure": "Ik weet het niet zeker"
+     }
+    },
+    "invasive_species": {
+     "name": "Invasieve soorten",
+     "text": "Ziet u niet-inheemse of invasieve plantensoorten?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "invasive_which": {
+     "text": "Welke?"
+    },
+    "vegetation_cuts": {
+     "name": "Vegetatiesnoei",
+     "text": "Is er recentelijk de vegetatie (gedeeltelijk of volledig) aan de oevers (of slechts één van de oevers) van de beek gesnoeid?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nee",
+      "cant_tell": "Ik weet het niet zeker"
+     }
+    },
+    "feelings": {
+     "text": "Welk(e) gevoel(en) beschrijft/beschrijven uw ervaring het best?",
+     "options": {
+      "joy": "Vreugde",
+      "serenity": "Rust",
+      "anger": "Woede",
+      "fear": "Angst",
+      "not_applicable": "Niet van toepassing"
+     }
+    },
+    "overall_rating": {
+     "text": "Geef een algemene beoordeling van de gezondheid van het ecosysteem van de stroom (kies een van de onderstaande mogelijkheden)",
+     "options": {
+      "good": "Goede kwaliteit",
+      "moderate": "Matige kwaliteit",
+      "poor": "Slechte kwaliteit"
+     },
+     "descriptions": {
+      "good": "De ecosysteemcomponenten zijn aanwezig: oevervegetatie, natuurlijk kanaal, goede waterkwaliteit, biodiversiteit",
+      "moderate": "Enkele aanpassingen, nog steeds biodiversiteit, met vegetatie in de randen, het water ziet er goed uit...",
+      "poor": "Sterk gemodificeerd/kunstmatig, verlies van oevervegetatie, verlies van leefgebieden, vervuiling"
+     }
+    }
+   },
+   "sections": {
+    "what_you_see": "Wat zie je vanaf waar je staat (in ca. 100m)?",
+    "margins": "In de oevers/rivierzone (5-10m vanaf de oeverrand)"
+   }
+  },
+  "no": {
+   "items": {
+    "channel_form": {
+     "name": "Kanalform",
+     "text": "Kanalformen er...",
+     "options": {
+      "flat": "Flat",
+      "u_shape": "U-formet",
+      "v_shape": "V-formet",
+      "not_sure": "Jeg er ikke sikker"
+     }
+    },
+    "bottom_type": {
+     "name": "Bunntype",
+     "text": "Bunnlaget til den våte kanalen er...",
+     "options": {
+      "natural": "Naturlig",
+      "artificial": "Kunstig (betong eller steiner med betong)",
+      "not_sure": "Jeg er ikke sikker"
+     }
+    },
+    "bank_type": {
+     "name": "Kanttype",
+     "text": "Kantene til kanalen er...",
+     "options": {
+      "natural": "Naturlige",
+      "artificial": "Kunstige (betong eller steiner med betong)",
+      "laid_stones": "Steinbelagt uten betong",
+      "not_sure": "Jeg er ikke sikker"
+     }
+    },
+    "habitats": {
+     "name": "Habitater",
+     "text": "Er det noen habitater tilstede?",
+     "options": {
+      "sand_banks": "Sandbanker",
+      "sand_islands": "Sandøyer",
+      "stone_deposits": "Steinavsetninger",
+      "riffles": "Strømvirvler, stryk, fosser",
+      "aquatic_vegetation": "Vannvegetasjon"
+     }
+    },
+    "natural_debris": {
+     "name": "Naturlig avfall",
+     "text": "Er det noe naturlig avfall tilstede?",
+     "options": {
+      "fallen_trees": "Falne trær",
+      "fallen_branches": "Falne greiner",
+      "leaf_deposits": "Oppsamling av falne blader"
+     }
+    },
+    "water_flow": {
+     "name": "Vannstrøm",
+     "text": "Hvordan flyter vannet?",
+     "options": {
+      "fast": "Raskt (med bølger eller høy hastighet)",
+      "slow": "Langsomt",
+      "stagnant": "Stillestående/intermitterende",
+      "dry": "Tørt",
+      "not_sure": "Jeg er ikke sikker"
+     }
+    },
+    "water_aspect": {
+     "name": "Vannaspekt",
+     "text": "Hvordan er vannet?",
+     "options": {
+      "clear": "Klart/gjennomsiktig",
+      "muddy": "Gjørmete/grumsete",
+      "foam": "Har skum",
+      "colour": "Har farger/endret farge",
+      "not_sure": "Jeg er ikke sikker"
+     }
+    },
+    "water_withdrawal": {
+     "name": "Vannuttak",
+     "text": "Er det noen form for åpenbar vannoppsamling, bruk eller fjerning fra bekken?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "barriers": {
+     "name": "Barrierer",
+     "text": "Ser du noen demninger eller andre tverrgående kunstige barrierer?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "draining_pipes": {
+     "name": "Dreneringsrør",
+     "text": "Er det rør som drenerer forurenset vann inn i bekken?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "sewage_discharge": {
+     "name": "Avløpsutslipp",
+     "text": "Er det noen form for inngang eller utslipp av avløpsvann?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "construction": {
+     "name": "Konstruksjon",
+     "text": "Er det noen konstruksjon/arbeid i bekken?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "water_height_m": {
+     "name": "Vannhøyde",
+     "text": "Hva er vannhøyden?"
+    },
+    "impervious_left": {
+     "name": "Ugjennomtrengelige områder (Venstre)",
+     "text": "Er mer enn en tredjedel av venstre kant dekket av ugjennomtrengelige områder (som veier, fortau eller bygninger)?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "impervious_right": {
+     "name": "Ugjennomtrengelige områder (Høyre)",
+     "text": "Er mer enn en tredjedel av høyre kant dekket av ugjennomtrengelige områder (som veier, fortau eller bygninger)?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "vegetation_left": {
+     "name": "Vegetasjon (Venstre)",
+     "text": "Er venstre kant dekket av vegetasjon?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "vegetation_right": {
+     "name": "Vegetasjon (Høyre)",
+     "text": "Er høyre kant dekket av vegetasjon?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "vegetation_type_left": {
+     "name": "Vegetasjonstype (Venstre)",
+     "text": "Hvilken type vegetasjon er dominerende (betyr at den dekker mer enn 50%, eller halvparten) i venstre kant (de første 5 meter fra elvebredden)?",
+     "options": {
+      "herbs": "Ugress",
+      "shrubs": "Busker",
+      "trees": "Trær",
+      "not_sure": "Jeg er ikke sikker"
+     }
+    },
+    "vegetation_type_right": {
+     "name": "Vegetasjonstype (Høyre)",
+     "text": "Hvilken type vegetasjon er dominerende (betyr at den dekker mer enn 50%, eller halvparten) i høyre kant (de første 5 meter fra elvebredden)?",
+     "options": {
+      "herbs": "Ugress",
+      "shrubs": "Busker",
+      "trees": "Trær",
+      "not_sure": "Jeg er ikke sikker"
+     }
+    },
+    "invasive_species": {
+     "name": "Fremmede arter",
+     "text": "Ser du noen ikke-innfødte eller invasive plantearter?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "invasive_which": {
+     "text": "Hvilke?"
+    },
+    "vegetation_cuts": {
+     "name": "Vegetasjonskutt",
+     "text": "Har det vært nylige kutt av vegetasjonen (delvis eller helt) på breddene (eller bare på en av breddene) av bekken?",
+     "options": {
+      "present": "Ja",
+      "absent": "Nei",
+      "cant_tell": "Jeg er ikke sikker"
+     }
+    },
+    "feelings": {
+     "text": "Hvilke følelse(r) beskriver best din opplevelse?",
+     "options": {
+      "joy": "Glede",
+      "serenity": "Ro",
+      "anger": "Raseri",
+      "fear": "Frykt",
+      "not_applicable": "Ikke relevant"
+     }
+    },
+    "overall_rating": {
+     "text": "Gi en overordnet vurdering av elveøkosystemets helse (velg en av følgende muligheter)",
+     "options": {
+      "good": "God kvalitet",
+      "moderate": "Moderat kvalitet",
+      "poor": "Dårlig kvalitet"
+     },
+     "descriptions": {
+      "good": "Økosystemkomponentene er til stede: elvebreddevegetasjon, naturlig kanal, god vannkvalitet, biologisk mangfold",
+      "moderate": "Noen endringer, fortsatt biologisk mangfold, med vegetasjon i kantene, vannet ser bra ut...",
+      "poor": "Sterkt modifisert / kunstig, tap av elvebreddevegetasjon, tap av habitater, forurenset"
+     }
+    }
+   },
+   "sections": {
+    "what_you_see": "Hva ser du fra der du står (innen ca. 100 meter)?",
+    "margins": "I kantsonene/randsonene (5-10 m fra elvebreddens topp)"
+   }
+  },
+  "fr": {
+   "items": {
+    "channel_form": {
+     "name": "Forme du lit",
+     "text": "La forme du lit est ...",
+     "options": {
+      "flat": "Plate",
+      "u_shape": "En U",
+      "v_shape": "En V",
+      "not_sure": "Je ne suis pas sûr-e"
+     }
+    },
+    "bottom_type": {
+     "name": "Type du lit",
+     "text": "Le fond du lit est ...",
+     "options": {
+      "natural": "Naturel",
+      "artificial": "Artificiel (béton ou pierres avec béton)",
+      "not_sure": "Je ne suis pas sûr-e"
+     }
+    },
+    "bank_type": {
+     "name": "Type de berges",
+     "text": "Les berges sont ...",
+     "options": {
+      "natural": "Naturelles",
+      "artificial": "Artificielles (béton ou pierres avec béton)",
+      "laid_stones": "Pierres posées sans béton",
+      "not_sure": "Je ne suis pas sûr-e"
+     }
+    },
+    "habitats": {
+     "name": "Habitats",
+     "text": "Y a-t-il des habitats présents ?",
+     "options": {
+      "sand_banks": "Bancs de sable",
+      "sand_islands": "Îlots de sable",
+      "stone_deposits": "Dépôts de pierres",
+      "riffles": "Rapides, cascades, chutes d’eau",
+      "aquatic_vegetation": "Végétation aquatique"
+     }
+    },
+    "natural_debris": {
+     "name": "Débris naturels",
+     "text": "Y a-t-il des débris naturels présents ?",
+     "options": {
+      "fallen_trees": "Arbres tombés",
+      "fallen_branches": "Branches tombées",
+      "leaf_deposits": "Dépôts de feuilles"
+     }
+    },
+    "water_flow": {
+     "name": "Écoulement de l’eau",
+     "text": "Comment s’écoule l’eau ?",
+     "options": {
+      "fast": "Rapidement (avec des vagues ou une grande vitesse)",
+      "slow": "Lentement",
+      "stagnant": "Stagnant ou intermittent",
+      "dry": "Sec",
+      "not_sure": "Je ne suis pas sûr-e"
+     }
+    },
+    "water_aspect": {
+     "name": "Aspect de l’eau",
+     "text": "Comment est l’aspect de l’eau ?",
+     "options": {
+      "clear": "Claire ou transparente",
+      "muddy": "Boueuse ou turbide",
+      "foam": "Présence de mousse",
+      "colour": "Est colorée, ou a une couleur altérée",
+      "not_sure": "Je ne suis pas sûr-e"
+     }
+    },
+    "water_withdrawal": {
+     "name": "Prélèvement d’eau",
+     "text": "Y a-t-il une forme évidente de prélèvement, d’utilisation ou de retrait d’eau dans la rivière ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "barriers": {
+     "name": "Obstacle à l’écoulement",
+     "text": "Voyez-vous des barrages ou d’autres obstacles artificiels transversaux ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "draining_pipes": {
+     "name": "Rejet d’eaux pluviales",
+     "text": "Y a-t-il des canalisations qui déversent des eaux pluviales dans le cours d’eau ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "sewage_discharge": {
+     "name": "Rejet d’eaux usées",
+     "text": "Y a-t-il une entrée d’eau ou un rejet d’eaux usées dans le cours d’eau ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "construction": {
+     "name": "Zone de construction",
+     "text": "Y a-t-il des travaux de construction dans ou autour du cours d’eau ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "water_height_m": {
+     "name": "Profondeur",
+     "text": "Quelle est la profondeur d’eau ?"
+    },
+    "impervious_left": {
+     "name": "Zones imperméables (Gauche)",
+     "text": "Plus d’un tiers de la berge gauche est-elle recouverte par des surfaces imperméables (comme des routes, trottoirs ou bâtiments) ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "impervious_right": {
+     "name": "Zones imperméables (Droite)",
+     "text": "Plus d’un tiers de la berge droite est-elle recouverte par des surfaces imperméables (comme des routes, trottoirs ou bâtiments) ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "vegetation_left": {
+     "name": "Végétation (Gauche)",
+     "text": "La berge gauche est-elle recouverte de végétation ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "vegetation_right": {
+     "name": "Végétation (Droite)",
+     "text": "La berge droite est-elle recouverte de végétation ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "vegetation_type_left": {
+     "name": "Type de végétation (Gauche)",
+     "text": "Quelle végétation est dominante (c’est-à-dire couvrant plus de 50 %) sur la berge gauche (dans les 5 premiers mètres à partir du sommet de la berge) ?",
+     "options": {
+      "herbs": "Herbacées",
+      "shrubs": "Arbustes",
+      "trees": "Arbres",
+      "not_sure": "Je ne suis pas sûr-e"
+     }
+    },
+    "vegetation_type_right": {
+     "name": "Type de végétation (Droite)",
+     "text": "Quelle végétation est dominante (c’est-à-dire couvrant plus de 50 %) sur la berge droite (dans les 5 premiers mètres à partir du sommet de la berge) ?",
+     "options": {
+      "herbs": "Herbacées",
+      "shrubs": "Arbustes",
+      "trees": "Arbres",
+      "not_sure": "Je ne suis pas sûr-e"
+     }
+    },
+    "invasive_species": {
+     "name": "Espèces invasives",
+     "text": "Voyez-vous des espèces végétales non natives ou invasives ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "invasive_which": {
+     "text": "Lesquelles ?"
+    },
+    "vegetation_cuts": {
+     "name": "Coupes de végétation",
+     "text": "Y a-t-il eu récemment des coupes de végétation (partielles ou totales) sur les berges (ou sur l’une des berges) du cours d’eau ?",
+     "options": {
+      "present": "Oui",
+      "absent": "Non",
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
+    },
+    "feelings": {
+     "text": "Quel(s) sentiment(s) décrit/décrivent le mieux votre expérience ?",
+     "options": {
+      "joy": "Joie",
+      "serenity": "Sérénité / bien être",
+      "anger": "Colère",
+      "fear": "Anxiété / peur",
+      "not_applicable": "Non applicable"
+     }
+    },
+    "overall_rating": {
+     "text": "Fournissez une évaluation globale de la santé de l'écosystème du cours d'eau (choisissez l'une des possibilités ci-dessous)",
+     "options": {
+      "good": "Bonne qualité",
+      "moderate": "Qualité modérée",
+      "poor": "Qualité basse"
+     },
+     "descriptions": {
+      "good": "Les composantes de l'écosystème sont présentes : végétation riveraine, cours d'eau naturel, bonne qualité de l'eau, biodiversité.",
+      "moderate": "Certaines modifications, toujours riches en biodiversité, avec une végétation en bordure, l'eau semble en bon état...",
+      "poor": "Fortement modifié / artificiel, perte de végétation riveraine, perte d'habitats, pollué"
+     }
+    }
+   },
+   "sections": {
+    "what_you_see": "Que voyez-vous depuis votre position (dans un rayon d’environ 100 m) ?",
+    "margins": "Dans les marges / la zone riveraine (5 à 10 m depuis le sommet de la berge)"
+   }
+  },
+  "it": {
+   "items": {
+    "channel_form": {
+     "name": "Forma del canale",
+     "text": "La forma del canale è...",
+     "options": {
+      "flat": "Piatta",
+      "u_shape": "Forma a U",
+      "v_shape": "Forma a V",
+      "not_sure": "Non sono sicuro"
+     }
+    },
+    "bottom_type": {
+     "name": "Tipo di fondo",
+     "text": "Il fondo del canale umido è…",
+     "options": {
+      "natural": "Naturale",
+      "artificial": "Artificiale (cemento o pietre con cemento)",
+      "not_sure": "Non sono sicuro"
+     }
+    },
+    "bank_type": {
+     "name": "Tipo di banco",
+     "text": "I banchi del canale sono...",
+     "options": {
+      "natural": "Naturale",
+      "artificial": "Artificiale (cemento o pietre con cemento)",
+      "laid_stones": "Pietre posate senza cemento",
+      "not_sure": "Non sono sicuro"
+     }
+    },
+    "habitats": {
+     "name": "Habitat",
+     "text": "Sono presenti degli habitat?",
+     "options": {
+      "sand_banks": "Banchi di sabbia",
+      "sand_islands": "Isole di sabbia",
+      "stone_deposits": "Depositi di sassi",
+      "riffles": "Ruscellamenti, rapide, cascate",
+      "aquatic_vegetation": "Vegetazione acquatica"
+     }
+    },
+    "natural_debris": {
+     "name": "Detriti naturali",
+     "text": "Ci sono detriti naturali presenti?",
+     "options": {
+      "fallen_trees": "Alberi caduti",
+      "fallen_branches": "Rami caduti",
+      "leaf_deposits": "Depositi di foglie cadute"
+     }
+    },
+    "water_flow": {
+     "name": "Flusso d'acqua",
+     "text": "Come scorre l'acqua?",
+     "options": {
+      "fast": "Veloce (con onde o alta velocità)",
+      "slow": "Lento",
+      "stagnant": "Stagnante/intermittente",
+      "dry": "Secco",
+      "not_sure": "Non sono sicuro"
+     }
+    },
+    "water_aspect": {
+     "name": "Aspetto dell'acqua",
+     "text": "Com'è l'acqua?",
+     "options": {
+      "clear": "Chiara/trasparente",
+      "muddy": "Fangoso/torbido",
+      "foam": "Ha schiuma",
+      "colour": "Ha colori/colore alterato",
+      "not_sure": "Non sono sicuro"
+     }
+    },
+    "water_withdrawal": {
+     "name": "Prelievo di acqua",
+     "text": "Esiste qualche tipo di evidente raccolta, utilizzo o rimozione dell'acqua dal corso d'acqua?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "barriers": {
+     "name": "Barriere",
+     "text": "Vedete dighe o altre barriere artificiali trasversali?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "draining_pipes": {
+     "name": "Tubi di scarico",
+     "text": "Ci sono tubi che scaricano l'acqua piovana nel fiume?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "sewage_discharge": {
+     "name": "Scarico di liquami",
+     "text": "C'è qualche tipo di ingresso di acqua o scarico di liquami?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "construction": {
+     "name": "Costruzioni",
+     "text": "Ci sono lavori in opera nel corso d'acqua?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "water_height_m": {
+     "name": "Altezza dell'acqua",
+     "text": "Qual è l'altezza dell'acqua?"
+    },
+    "impervious_left": {
+     "name": "Aree impermeabili (sinistra)",
+     "text": "Più di un terzo del margine sinistro è coperto da aree impermeabili (come strade, marciapiedi o edifici)?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "impervious_right": {
+     "name": "Aree impermeabili (destra)",
+     "text": "Più di un terzo del margine destro è coperto da aree impermeabili (come strade, marciapiedi o edifici)?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "vegetation_left": {
+     "name": "Vegetazione (sinistra)",
+     "text": "Il margine sinistro è coperto dalla vegetazione?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "vegetation_right": {
+     "name": "Vegetazione (destra)",
+     "text": "Il margine destro è coperto dalla vegetazione?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "vegetation_type_left": {
+     "name": "Tipo di vegetazione (sinistra)",
+     "text": "Quale vegetazione è dominante (vale a dire che copre più del 50%, o metà) nel margine sinistro (i primi 5 metri dalla sommità dell'argine del canale)?",
+     "options": {
+      "herbs": "Erbe",
+      "shrubs": "Arbusti",
+      "trees": "Alberi",
+      "not_sure": "Non sono sicuro"
+     }
+    },
+    "vegetation_type_right": {
+     "name": "Tipo di vegetazione (destra)",
+     "text": "Quale vegetazione è dominante (vale a dire che copre più del 50%, o metà) nel margine destro (i primi 5 metri dalla sommità dell'argine del canale)?",
+     "options": {
+      "herbs": "Erbe",
+      "shrubs": "Arbusti",
+      "trees": "Alberi",
+      "not_sure": "Non sono sicuro"
+     }
+    },
+    "invasive_species": {
+     "name": "Specie invasive",
+     "text": "Vedi specie vegetali non autoctone o invasive?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "invasive_which": {
+     "text": "Quali?"
+    },
+    "vegetation_cuts": {
+     "name": "Tagli di vegetazione",
+     "text": "Ci sono stati recenti tagli di vegetazione (parziali o totali) sulle rive (o solo su una delle rive) del torrente?",
+     "options": {
+      "present": "Sì",
+      "absent": "No",
+      "cant_tell": "Non sono sicuro"
+     }
+    },
+    "feelings": {
+     "text": "Quale/i sentimento/i descrive/ono meglio la tua esperienza?",
+     "options": {
+      "joy": "Gioia",
+      "serenity": "Serenità",
+      "anger": "Rabbia",
+      "fear": "Paura",
+      "not_applicable": "Non applicabile"
+     }
+    },
+    "overall_rating": {
+     "text": "Fornire una valutazione complessiva dello stato di salute dell'ecosistema del corso d'acqua (scegliere una delle possibilità seguenti)",
+     "options": {
+      "good": "Buona qualità",
+      "moderate": "Moderata qualità",
+      "poor": "Povera qualità"
+     },
+     "descriptions": {
+      "good": "I componenti dell'ecosistema sono presenti: vegetazione ripariale, canale naturale, buona qualità dell'acqua, biodiversità.",
+      "moderate": "Alcune alterazioni, ancora biodiversità, con vegetazione ai margini, l'acqua sembra buona...",
+      "poor": "Altamente modificato/artificializzato, perdita di vegetazione ripariale, perdita di habitat, inquinato"
+     }
+    }
+   },
+   "sections": {
+    "what_you_see": "Cosa vedi dal punto in cui ti trovi (circa 100m)?",
+    "margins": "Nelle zone marginali/ripariali (5-10m dalla sommità dell'argine)"
+   }
+  }
+ },
+ "fallback": {
+  "fr": {
+   "draining_pipes.text": "high confidence: Asks about rainwater or stormwater pipes instead of pipes carrying polluted water, so a clean storm drain outlet counts as yes in French but not in English.",
+   "construction.text": "high confidence: Widens the scope from works in the stream to works in or around it, so building work on a nearby road or bank top counts as yes in French but not in English."
+  },
+  "it": {
+   "draining_pipes.text": "high confidence: Asks about rainwater instead of polluted water, so any rain drain outlet counts as yes in Italian while English asks only about pipes carrying polluted water.",
+   "bank_type.text": "medium confidence: \"Banchi\" is a false friend: in Italian it means shoals or bars (as in \"banchi di sabbia\", the sand banks option) or benches, not the river banks, so the volunteer may describe deposits in the channel instead of its banks.",
+   "habitats.option:riffles": "medium confidence: \"Ruscellamenti\" means surface runoff over land, not riffles in the stream (Italian \"raschi\"), so the first habitat named is a different thing."
+  },
+  "nl": {
+   "habitats.option:riffles": "medium confidence: \"Geultjes\" means small gullies or channels, not riffles (shallow fast water over gravel), so a volunteer may tick this for small side channels and may not tick it for a riffle.",
+   "sewage_discharge.text": "medium confidence: Narrows the question to sewage only and joins the two cases with \"and\" instead of \"or\"; \"afvoer\" can also read as sewage being carried away (a sewer), so a volunteer who sees only a clean inflow, or only a sewage outfall, may answer no."
+  },
+  "no": {
+   "habitats.option:riffles": "medium confidence: \"Strømvirvler\" means eddies or whirlpools, which are slow swirling water, not riffles (shallow fast broken water), so the first habitat named is a different one.",
+   "vegetation_type_left.option:herbs": "medium confidence: \"Ugress\" means weeds (unwanted plants), not herbs or herbaceous plants as a growth form, so a margin of grasses and wild herbs may not be seen as matching.",
+   "vegetation_type_right.option:herbs": "medium confidence: \"Ugress\" means weeds (unwanted plants), not herbs or herbaceous plants as a growth form, so a margin of grasses and wild herbs may not be seen as matching.",
+   "feelings.option:anger": "medium confidence: \"Raseri\" means rage or fury, much stronger than anger (Norwegian \"sinne\"), so a volunteer who feels angry or annoyed but not furious is less likely to pick it."
+  },
+  "pt": {
+   "vegetation_type_left.text": "medium confidence: Drops \"from the channel banktop\", so the 5 m strip has no stated starting point and will most likely be counted from the water edge, which on a deep channel includes the bank slope instead of the strip beyond the banktop.",
+   "vegetation_type_right.text": "medium confidence: Drops \"from the channel bank/top\", so the 5 m strip has no stated starting point and will most likely be counted from the water edge, which on a deep channel includes the bank slope instead of the strip beyond the banktop.",
+   "sewage_discharge.text": "medium confidence: Narrows the question to sewage only; the English (and the fr, it and no versions) also asks about any kind of water entry, so a clean inflow such as a side stream or drain counts as yes in English but not in Portuguese. The English sentence is itself ambiguous, so this may reflect the original intent."
+  }
+ }
+}

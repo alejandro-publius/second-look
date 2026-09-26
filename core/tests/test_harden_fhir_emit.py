@@ -23,6 +23,7 @@ from core.fhir_emit import (
     check_bundle,
     code_for_answer,
     emit_visit,
+    form_items,
     to_transaction,
 )
 from core.records import FeatureScore, Observer, Spot, VisitRecord
@@ -99,7 +100,15 @@ def broken_copy(bundle: dict[str, Any]) -> dict[str, Any]:
     return copied
 
 
-def observation_answer(bundle: dict[str, Any], text: str) -> dict[str, Any]:
+def item_text(item_id: str) -> str:
+    """The Observation code text for an item: its short name, else its question, as
+    content/form.yaml has them, so a wording change moves no test."""
+    item = next(i for i in form_items() if i["id"] == item_id)
+    return str(item.get("name") or item["text"])
+
+
+def observation_answer(bundle: dict[str, Any], item_id: str) -> dict[str, Any]:
+    text = item_text(item_id)
     return next(o for o in resources(bundle, "Observation") if o["code"].get("text") == text)
 
 
@@ -156,18 +165,21 @@ def test_a_code_is_always_one_of_ours_or_theirs_with_its_own_display(value: str)
 def test_a_choice_with_no_code_is_stored_as_text() -> None:
     bundle = emitted({"water_flow": "roaring"})
     assert check_bundle(bundle) == []
-    flow = observation_answer(bundle, "Water flow")
+    flow = observation_answer(bundle, "water_flow")
     assert flow["valueCodeableConcept"] == {"text": "roaring"}
     assert "coding" not in flow["valueCodeableConcept"]
     assert flow["code"]["coding"][0]["code"] == "hydrology"
-    assert "Water flow at Harden Creek, test reach, spot 1: roaring." in flow["text"]["div"]
+    assert (
+        f"{item_text('water_flow')} at Harden Creek, test reach, spot 1: roaring."
+        in flow["text"]["div"]
+    )
     assert visit_response_answers(bundle)["water_flow"] == [{"valueString": "roaring"}]
 
 
 def test_a_multi_select_value_with_no_code_is_named_by_the_item_code_and_text() -> None:
     bundle = emitted({"habitats": ["sand_banks", "beaver_dam"]})
     assert check_bundle(bundle) == []
-    habitats = observation_answer(bundle, "Habitats")
+    habitats = observation_answer(bundle, "habitats")
     known, unknown = habitats["component"]
     assert known["code"]["coding"] == [
         {"system": SL_SYSTEM, "code": "sand-banks", "display": "Sand banks"}
@@ -189,7 +201,7 @@ def test_a_multi_select_value_with_no_code_is_named_by_the_item_code_and_text() 
 def test_a_region_plant_with_no_code_is_a_text_value_on_the_invasive_plant_code() -> None:
     bundle = emitted({"invasive_which": ["arundo_donax"]})
     assert check_bundle(bundle) == []
-    (plant,) = observation_answer(bundle, "Which ones?")["component"]
+    (plant,) = observation_answer(bundle, "invasive_which")["component"]
     assert plant["code"]["coding"][0] == {
         "system": SL_SYSTEM,
         "code": "invasive-plant",
@@ -233,7 +245,7 @@ def test_a_partial_test_sitting_lists_only_its_features_in_the_fixed_order() -> 
         [{"valueInteger": 1}],
     ]
     assert "scored by code: artificial bank 4 of 4, pipe running 1 of 4." in test_qr["text"]["div"]
-    bank = observation_answer(bundle, "Bank type")
+    bank = observation_answer(bundle, "bank_type")
     assert "The observer scored 4 of 4 on this feature" in bank["text"]["div"]
     invasive = next(
         o
@@ -413,7 +425,7 @@ def test_an_observation_with_an_empty_component_list_is_named(good_bundle: dict[
     broken = broken_copy(good_bundle)
     i = index_of(broken, "Observation", 1)
     obs = broken["entry"][i]["resource"]
-    assert obs["code"]["text"] == "Habitats"
+    assert obs["code"]["text"] == item_text("habitats")
     obs["component"] = []
     assert check_bundle(broken) == [
         f"entry[{i}] Observation/{obs['id']}: no value and no component"

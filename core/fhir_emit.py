@@ -461,7 +461,9 @@ def _observation(
 ) -> dict[str, Any] | None:
     """One Observation for one answered item, or None when a list answer is empty."""
     fhir = item["fhir"]
-    words = f"{item.get('text', item['id'])} at {visit.spot.spot_name}: "
+    # The app's short name for the item (Water Flow), else its question (content/form.yaml).
+    label = item.get("name") or item.get("text", item["id"])
+    words = f"{label} at {visit.spot.spot_name}: "
     value_part: dict[str, Any]
     if isinstance(value, bool):
         raise FhirEmitError(
@@ -494,7 +496,7 @@ def _observation(
         "identifier": [_identifier(ID_SYSTEM_OBSERVATION, f"{visit.visit_id}-{item['id']}")],
         "status": "final",
         "category": [_concept(_item_category(item))],
-        "code": _concept(_item_code(item), item.get("text")),
+        "code": _concept(_item_code(item), label),
         "subject": _ref("Location", spot_location_id),
         "effectiveDateTime": _instant(visit.answered_at),
         "performer": [_ref("Practitioner", practitioner_id)],

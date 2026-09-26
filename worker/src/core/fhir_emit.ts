@@ -312,7 +312,9 @@ function observation(
   score: FeatureScore | null,
 ): Resource | null {
   const fhir = item.fhir;
-  let words = `${item.text ?? item.id} at ${visit.spot.spot_name}: `;
+  // The app's short name for the item (Water Flow), else its question (content/form.yaml).
+  const label = item.name || (item.text ?? item.id);
+  let words = `${label} at ${visit.spot.spot_name}: `;
   let valuePart: Resource;
   if (typeof value === "boolean") {
     throw new FhirEmitError(`item ${item.id}: boolean answers are not allowed, use present/absent`);
@@ -341,7 +343,7 @@ function observation(
     identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
     status: "final",
     category: [concept(itemCategory(item))],
-    code: concept(itemCode(item), item.text),
+    code: concept(itemCode(item), label),
     subject: ref("Location", spotLocationId),
     effectiveDateTime: instant(visit.answered_at),
     performer: [ref("Practitioner", pid)],

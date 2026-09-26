@@ -404,7 +404,10 @@ def test_second_visit_structure() -> None:
     assert "qualification" not in practitioner, "no score, no qualification"
     observations = {o["id"].rsplit("-", 1)[-1]: o for o in resources(bundle, "Observation")}
     # habitats: one Observation, one component per selected value, coded from our CodeSystem
-    habitats = next(o for o in resources(bundle, "Observation") if o["code"]["text"] == "Habitats")
+    habitats_text = next(i.get("name") or i["text"] for i in form_items() if i["id"] == "habitats")
+    habitats = next(
+        o for o in resources(bundle, "Observation") if o["code"]["text"] == habitats_text
+    )
     assert "valueCodeableConcept" not in habitats
     assert [c["code"]["coding"][0]["code"] for c in habitats["component"]] == [
         "sand-banks",
@@ -432,7 +435,7 @@ def test_second_visit_structure() -> None:
     assert "scored" not in invasive["text"]["div"]
     # a value that is one of their codes keeps their system and display
     trees = next(
-        o for o in resources(bundle, "Observation") if o["code"]["text"].startswith("Left margin")
+        o for o in resources(bundle, "Observation") if o["code"]["text"] == "Vegetation Type (Left)"
     )
     assert trees["valueCodeableConcept"]["coding"][0] == {
         "system": OAH_SYSTEM,

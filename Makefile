@@ -7,7 +7,7 @@ WEB := apps/web
 # moves it (apps/web/scripts/web-port.mjs reads the same name); make judge-check picks its own.
 WEB_PORT ?= 3100
 
-.PHONY: precache-budget report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation video-final video-frames
+.PHONY: app-strings-check precache-budget report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation video-final video-frames
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -236,6 +236,11 @@ mac-jobs-today:
 
 done-check:
 	$(PY) scripts/done_check.py
+
+# UPDATE_32 section 1: fetch the official app's public translation bundle again and fail if a string
+# the creek check quotes has changed. Needs the network, so it is its own done line, not in check.
+app-strings-check:
+	$(PY) scripts/app_strings.py check
 
 # A done-check item: line and branch coverage of core/ by core's own tests, 90 percent or red.
 # The data file stays outside the repo. About a minute.
