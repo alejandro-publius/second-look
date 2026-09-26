@@ -39,7 +39,7 @@ def test_tidy_makes_only_the_documented_edits() -> None:
     )
     assert a.tidy("Dams (see the images)?", drop_picture_note=True) == "Dams?"
     assert a.tidy("Dams (see the images)?") == "Dams (see the images)?"
-    assert a.tidy("5–10 m") == "5-10 m"
+    assert a.tidy("5" + chr(0x2013) + "10 m") == "5-10 m"
 
 
 def test_every_quote_names_its_source_and_the_bundle_is_not_committed() -> None:
@@ -108,4 +108,4 @@ def test_the_check_notices_a_changed_quote() -> None:
 
 def test_no_quoted_string_carries_a_dash_the_repository_bans() -> None:
     text = json.dumps(DOC, ensure_ascii=False)
-    assert "–" not in text and "—" not in text
+    assert chr(0x2013) not in text and chr(0x2014) not in text

@@ -5,13 +5,27 @@ import { useEffect, useMemo, useState } from "react";
 import { FocusHeading } from "./FocusHeading";
 import { FollowupCard, tapRating, type RatingTap } from "./FollowupCard";
 import { FormQuestion } from "./FormQuestion";
+import { LanguagePicker } from "./LanguagePicker";
 import { LocationStep } from "./LocationStep";
 import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
 import { Progress } from "./Progress";
-import { api, ApiError, isNetworkError, type AnswerValue, type DraftRequest, type DraftResponse, type SpotRef } from "@/lib/api";
+import {
+  api,
+  ApiError,
+  isNetworkError,
+  type AnswerValue,
+  type DraftRequest,
+  type DraftResponse,
+  type SpotRef,
+} from "@/lib/api";
 import { content, questionCount, regionAt, type FormItem } from "@/lib/content";
+import { useCheckLang } from "@/lib/lang";
 import { enqueue, flushQueue, getQueued, onQueueChange } from "@/lib/offline";
-import { clearContributorToken, getContributorToken, rememberSpot } from "@/lib/session";
+import {
+  clearContributorToken,
+  getContributorToken,
+  rememberSpot,
+} from "@/lib/session";
 import { t } from "@/lib/t";
 
 type Stage =
@@ -23,7 +37,12 @@ type Stage =
   | { name: "followups"; draft: DraftResponse; uploadedIds: string[] }
   | { name: "finalizing" }
   | { name: "done"; visit_id: string; spot_id: string }
-  | { name: "queued"; id: number; status: "waiting" | "sending" | "sent" | "failed"; spot_id?: string }
+  | {
+      name: "queued";
+      id: number;
+      status: "waiting" | "sending" | "sent" | "failed";
+      spot_id?: string;
+    }
   | { name: "error"; message: string; retry: () => void };
 
 function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
@@ -43,17 +62,26 @@ export function CheckFlow() {
   const [spot, setSpot] = useState<SpotRef | null>(null);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
-  const [followupAnswers, setFollowupAnswers] = useState<Record<string, string>>({});
+  const [followupAnswers, setFollowupAnswers] = useState<
+    Record<string, string>
+  >({});
   const [finalRating, setFinalRating] = useState<string | null>(null);
   const [changingRating, setChangingRating] = useState(false);
-  const [followupPhotos, setFollowupPhotos] = useState<Record<string, PickedPhoto[]>>({});
+  const [followupPhotos, setFollowupPhotos] = useState<
+    Record<string, PickedPhoto[]>
+  >({});
+  const [lang] = useCheckLang();
 
   const items = useMemo(() => visibleItems(answers), [answers]);
-  const firstRating = typeof answers.overall_rating === "string" ? answers.overall_rating : null;
+  const firstRating =
+    typeof answers.overall_rating === "string" ? answers.overall_rating : null;
   const ratingItem = content.form.items.find((i) => i.id === "overall_rating");
   // The region whose plant list Which ones? offers: the one a new spot's position is in, or none.
   // A saved spot's position is not kept on this device, so it is not known (critic round 14 B03).
-  const plantRegion = spot && "new" in spot ? (regionAt(spot.new.latitude, spot.new.longitude)?.region ?? null) : undefined;
+  const plantRegion =
+    spot && "new" in spot
+      ? (regionAt(spot.new.latitude, spot.new.longitude)?.region ?? null)
+      : undefined;
 
   // Watch the queue while a saved check waits.
   const queuedId = stage.name === "queued" ? stage.id : null;
@@ -62,7 +90,13 @@ export function CheckFlow() {
     const id = queuedId;
     const refresh = async () => {
       const q = await getQueued(id);
-      if (q) setStage({ name: "queued", id, status: q.status, spot_id: q.result?.spot_id });
+      if (q)
+        setStage({
+          name: "queued",
+          id,
+          status: q.status,
+          spot_id: q.result?.spot_id,
+        });
     };
     const off = onQueueChange(() => void refresh());
     void refresh();
@@ -77,6 +111,7 @@ export function CheckFlow() {
       answers,
       first_rating: firstRating,
       photo_ids,
+      language: lang,
     };
   }
 
@@ -93,7 +128,11 @@ export function CheckFlow() {
         draft = await api.checkDraft(draftBody(ids));
       } catch (err) {
         // An unknown contributor token is a 404 with a plain sentence. Drop the token and send without it.
-        if (err instanceof ApiError && err.status === 404 && getContributorToken()) {
+        if (
+          err instanceof ApiError &&
+          err.status === 404 &&
+          getContributorToken()
+        ) {
           clearContributorToken();
           draft = await api.checkDraft(draftBody(ids));
         } else throw err;
@@ -107,42 +146,84 @@ export function CheckFlow() {
     } catch (err) {
       if (isNetworkError(err)) {
         try {
-          const id = await enqueue({ kind: "check", created_at: new Date().toISOString(), draft: draftBody([]), photos: photos.map((p) => ({ name: p.name, type: p.type, blob: p.blob })) });
+          const id = await enqueue({
+            kind: "check",
+            created_at: new Date().toISOString(),
+            draft: draftBody([]),
+            photos: photos.map((p) => ({
+              name: p.name,
+              type: p.type,
+              blob: p.blob,
+            })),
+          });
           setStage({ name: "queued", id, status: "waiting" });
         } catch {
-          setStage({ name: "error", message: t("error.network"), retry: () => void send() });
+          setStage({
+            name: "error",
+            message: t("error.network"),
+            retry: () => void send(),
+          });
         }
       } else {
-        setStage({ name: "error", message: t("error.server"), retry: () => void send() });
+        setStage({
+          name: "error",
+          message: t("error.server"),
+          retry: () => void send(),
+        });
       }
     }
   }
 
-  async function finalize(draft: DraftResponse, fAnswers: Record<string, string>, rating: string | null) {
+  async function finalize(
+    draft: DraftResponse,
+    fAnswers: Record<string, string>,
+    rating: string | null,
+  ) {
     setStage({ name: "finalizing" });
     try {
       const merged = { ...fAnswers };
       for (const f of draft.followups) {
-        if (f.kind === "photo" && (followupPhotos[f.rule_id]?.length ?? 0) > 0 && !merged[f.rule_id]) {
-          const { photo_id } = await api.upload(followupPhotos[f.rule_id][0].blob, followupPhotos[f.rule_id][0].name);
+        if (
+          f.kind === "photo" &&
+          (followupPhotos[f.rule_id]?.length ?? 0) > 0 &&
+          !merged[f.rule_id]
+        ) {
+          const { photo_id } = await api.upload(
+            followupPhotos[f.rule_id][0].blob,
+            followupPhotos[f.rule_id][0].name,
+          );
           merged[f.rule_id] = photo_id;
         }
       }
-      const res = await api.checkFinalize({ draft_id: draft.draft_id, followup_answers: merged, final_rating: rating });
-      const spotName = spot && "new" in spot ? spot.new.name : t("check.saved_spot_default");
+      const res = await api.checkFinalize({
+        draft_id: draft.draft_id,
+        followup_answers: merged,
+        final_rating: rating,
+      });
+      const spotName =
+        spot && "new" in spot ? spot.new.name : t("check.saved_spot_default");
       rememberSpot({ spot_id: res.spot_id, name: spotName });
       setStage({ name: "done", visit_id: res.visit_id, spot_id: res.spot_id });
     } catch (err) {
-      setStage({ name: "error", message: isNetworkError(err) ? t("error.network") : t("error.server"), retry: () => void finalize(draft, fAnswers, rating) });
+      setStage({
+        name: "error",
+        message: isNetworkError(err) ? t("error.network") : t("error.server"),
+        retry: () => void finalize(draft, fAnswers, rating),
+      });
     }
   }
 
   function onRatingTap(ruleId: string, tap: RatingTap) {
-    const next = tapRating({ answer: followupAnswers[ruleId], finalRating, changingRating }, tap, firstRating);
+    const next = tapRating(
+      { answer: followupAnswers[ruleId], finalRating, changingRating },
+      tap,
+      firstRating,
+    );
     const answer = next.answer;
     setFinalRating(next.finalRating);
     setChangingRating(next.changingRating);
-    if (answer !== undefined) setFollowupAnswers((a) => ({ ...a, [ruleId]: answer }));
+    if (answer !== undefined)
+      setFollowupAnswers((a) => ({ ...a, [ruleId]: answer }));
   }
 
   function answerItem(index: number, value: AnswerValue | undefined) {
@@ -164,9 +245,14 @@ export function CheckFlow() {
           <FocusHeading>{t("check.title")}</FocusHeading>
           <p>{t("check.intro")}</p>
           <p className="small muted">{t("check.unverified_note")}</p>
+          <LanguagePicker />
           {/* The same bottom block as the test screens, so Start sits in thumb reach. */}
           <div className="actions">
-            <button type="button" className="btn btn-block" onClick={() => setStage({ name: "location" })}>
+            <button
+              type="button"
+              className="btn btn-block"
+              onClick={() => setStage({ name: "location" })}
+            >
               {t("check.start")}
             </button>
           </div>
@@ -191,14 +277,23 @@ export function CheckFlow() {
       const count = questionCount(items, stage.index);
       return (
         <div className="stack" key={item.id}>
-          <Progress value={count.n} max={count.total} labelKey="check.progress" />
+          <Progress
+            value={count.n}
+            max={count.total}
+            labelKey="check.progress"
+          />
           <FormQuestion
             item={item}
             value={answers[item.id]}
             onAnswer={(v) => answerItem(stage.index, v)}
             onSkip={() => answerItem(stage.index, undefined)}
-            onBack={() => (stage.index === 0 ? setStage({ name: "location" }) : setStage({ name: "items", index: stage.index - 1 }))}
+            onBack={() =>
+              stage.index === 0
+                ? setStage({ name: "location" })
+                : setStage({ name: "items", index: stage.index - 1 })
+            }
             plantRegion={plantRegion}
+            lang={lang}
           />
         </div>
       );
@@ -213,7 +308,16 @@ export function CheckFlow() {
               follow-up, so the screen says so before the button (judge walk W01). */}
           <p data-testid="send-note">{t("check.photos_send_note")}</p>
           <div className="btn-row">
-            <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "items", index: Math.max(0, items.length - 1) })}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() =>
+                setStage({
+                  name: "items",
+                  index: Math.max(0, items.length - 1),
+                })
+              }
+            >
               {t("check.back")}
             </button>
             <button type="button" className="btn" onClick={() => void send()}>
@@ -232,23 +336,39 @@ export function CheckFlow() {
     case "followups":
       return (
         <div className="stack">
-          <FocusHeading>{t(stage.draft.followups.length === 1 ? "check.followups_title_one" : "check.followups_title")}</FocusHeading>
+          <FocusHeading>
+            {t(
+              stage.draft.followups.length === 1
+                ? "check.followups_title_one"
+                : "check.followups_title",
+            )}
+          </FocusHeading>
           <p className="small muted">{t("check.followups_intro")}</p>
           {stage.draft.followups.map((f) => (
             <FollowupCard
               key={f.rule_id}
               followup={f}
               value={followupAnswers[f.rule_id]}
-              onAnswer={(v) => setFollowupAnswers((a) => ({ ...a, [f.rule_id]: v }))}
+              onAnswer={(v) =>
+                setFollowupAnswers((a) => ({ ...a, [f.rule_id]: v }))
+              }
               photos={followupPhotos[f.rule_id] ?? []}
-              onPhotos={(p) => setFollowupPhotos((m) => ({ ...m, [f.rule_id]: p }))}
+              onPhotos={(p) =>
+                setFollowupPhotos((m) => ({ ...m, [f.rule_id]: p }))
+              }
               changingRating={changingRating}
               ratingOptions={ratingItem?.options ?? []}
               finalRating={finalRating}
               onRatingTap={(tap) => onRatingTap(f.rule_id, tap)}
             />
           ))}
-          <button type="button" className="btn btn-block" onClick={() => void finalize(stage.draft, followupAnswers, finalRating)}>
+          <button
+            type="button"
+            className="btn btn-block"
+            onClick={() =>
+              void finalize(stage.draft, followupAnswers, finalRating)
+            }
+          >
             {t("check.finish")}
           </button>
         </div>
@@ -261,7 +381,10 @@ export function CheckFlow() {
             {t("check.done_body")}
           </p>
           <p>
-            <Link className="btn btn-block" href={`/spot?id=${encodeURIComponent(stage.spot_id)}`}>
+            <Link
+              className="btn btn-block"
+              href={`/spot?id=${encodeURIComponent(stage.spot_id)}`}
+            >
               {t("check.done_view")}
             </Link>
           </p>
@@ -274,12 +397,19 @@ export function CheckFlow() {
           <FocusHeading>{t("check.saved_title")}</FocusHeading>
           {stage.status === "sent" ? (
             <>
-              <p className="notice notice-ok" role="status" data-testid="queue-sent">
+              <p
+                className="notice notice-ok"
+                role="status"
+                data-testid="queue-sent"
+              >
                 {t("check.sent")}
               </p>
               {stage.spot_id ? (
                 <p>
-                  <Link className="btn btn-block" href={`/spot?id=${encodeURIComponent(stage.spot_id)}`}>
+                  <Link
+                    className="btn btn-block"
+                    href={`/spot?id=${encodeURIComponent(stage.spot_id)}`}
+                  >
                     {t("check.done_view")}
                   </Link>
                 </p>
@@ -291,11 +421,19 @@ export function CheckFlow() {
             </p>
           ) : (
             <>
-              <p className="notice notice-warn" role="status" data-testid="queue-saved">
+              <p
+                className="notice notice-warn"
+                role="status"
+                data-testid="queue-saved"
+              >
                 {t("check.saved_offline")}
               </p>
               <div className="btn-row">
-                <button type="button" className="btn btn-secondary" onClick={() => void flushQueue()}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => void flushQueue()}
+                >
                   {t("check.send_now")}
                 </button>
               </div>

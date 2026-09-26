@@ -191,6 +191,14 @@ function main() {
   }
   const features = readYaml(join(contentDir, "features.yaml")).features ?? [];
   const form = readYaml(join(contentDir, "form.yaml"));
+  // The official app's own words for the creek check, per language (scripts/app_strings.py).
+  const appStringsDoc = JSON.parse(readFileSync(join(contentDir, "app_strings.json"), "utf8"));
+  const app_strings = {
+    source: { app: appStringsDoc.source.app, app_url: appStringsDoc.source.app_url, attribution: appStringsDoc.source.attribution },
+    languages: appStringsDoc.languages,
+    strings: appStringsDoc.strings,
+    fallback: appStringsDoc.fallback,
+  };
   const testItemsFile = readYaml(join(contentDir, "test_items.yaml"));
   const testItems = testItemsFile.items ?? [];
   const warmup = testItemsFile.warmup ?? [];
@@ -407,6 +415,7 @@ function main() {
     consent_version,
     features,
     form,
+    app_strings,
     test_items: strippedItems,
     part2_items: part2Items,
     // more_natural travels with the pair so the reveal can badge the right photo wherever it

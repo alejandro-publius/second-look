@@ -2,9 +2,39 @@
 
 import { useState } from "react";
 import { GlossaryAside } from "./Glossary";
+import { EnglishTag } from "./LanguagePicker";
 import type { AnswerValue } from "@/lib/api";
-import { content, featureById, glossaryFor, plantRegions, type FormItem } from "@/lib/content";
+import {
+  content,
+  featureById,
+  glossaryFor,
+  plantRegions,
+  type FormItem,
+} from "@/lib/content";
+import {
+  englishOptions,
+  itemText,
+  optionDescription,
+  optionText,
+  sectionTitle,
+  type Shown,
+} from "@/lib/lang";
 import { t } from "@/lib/t";
+
+/** A string in the language it is in; English inside another language carries its tag. */
+function Words({ shown }: { shown: Shown }) {
+  return (
+    <>
+      <span lang={shown.lang}>{shown.text}</span>
+      {shown.english ? (
+        <>
+          {" "}
+          <EnglishTag />
+        </>
+      ) : null}
+    </>
+  );
+}
 
 /** Glossary toggles for every technical word in an item's text, plus the feature's own term. */
 function GlossaryLinks({ item }: { item: FormItem }) {
@@ -15,8 +45,14 @@ function GlossaryLinks({ item }: { item: FormItem }) {
   }
   if (item.feature) {
     const f = featureById(item.feature);
-    if (f && !hits.some((h) => h.term.toLowerCase() === f.glossary_term.toLowerCase())) {
-      hits.push({ term: f.glossary_term, plain: glossaryFor(f.glossary_term) ?? f.plain });
+    if (
+      f &&
+      !hits.some((h) => h.term.toLowerCase() === f.glossary_term.toLowerCase())
+    ) {
+      hits.push({
+        term: f.glossary_term,
+        plain: glossaryFor(f.glossary_term) ?? f.plain,
+      });
     }
   }
   if (hits.length === 0) return null;
@@ -45,6 +81,7 @@ export function FormQuestion({
   onBack,
   onSkip,
   plantRegion,
+  lang = "en",
 }: {
   item: FormItem;
   value: AnswerValue | undefined;
@@ -52,43 +89,98 @@ export function FormQuestion({
   onBack: () => void;
   onSkip: () => void;
   plantRegion?: string | null;
+  /** The language of the questions (UPDATE_32 section 2); the app's own translations. */
+  lang?: string;
 }) {
   const [draft, setDraft] = useState<AnswerValue | undefined>(value);
   const section = content.form.sections.find((s) => s.id === item.section);
   const unverified = !item.verified_against_app;
+  const english = englishOptions(item);
+  const other = lang !== "en";
+  // Our own words (buttons, notes) have no checked translation: English, marked, in another language.
+  const ours = other ? { lang: "en" } : {};
+  const answerWords = (id: string, fallback: string) =>
+    optionText(item, id, english?.[id] ?? fallback, lang);
+  const shownText = itemText(item, lang);
 
-  function regionList(): { options: { id: string; label: string; value: string }[]; note: string; empty: boolean } {
+  function regionList(): {
+    options: { id: string; label: string; value: string }[];
+    note: string;
+    empty: boolean;
+  } {
     const listed = plantRegions();
-    const here = plantRegion === undefined ? listed : listed.filter((r) => r.region === plantRegion);
+    const here =
+      plantRegion === undefined
+        ? listed
+        : listed.filter((r) => r.region === plantRegion);
     const options: { id: string; label: string; value: string }[] = [];
     for (const region of here) {
       for (const p of region.invasive_plants ?? []) {
-        options.push({ id: p.latin_name, label: `${p.common_name} (${p.latin_name})`, value: p.latin_name });
+        options.push({
+          id: p.latin_name,
+          label: `${p.common_name} (${p.latin_name})`,
+          value: p.latin_name,
+        });
       }
     }
-    options.push({ id: "cant_tell", label: t("check.not_sure"), value: "cant_tell" });
-    const names = (regions: { name: string }[]) => regions.map((r) => r.name).join(" and ");
-    if (here.length > 0) return { options, note: t("check.region_list_for", { region: names(here) }), empty: false };
+    options.push({
+      id: "cant_tell",
+      label: t("check.not_sure"),
+      value: "cant_tell",
+    });
+    const names = (regions: { name: string }[]) =>
+      regions.map((r) => r.name).join(" and ");
+    if (here.length > 0)
+      return {
+        options,
+        note: t("check.region_list_for", { region: names(here) }),
+        empty: false,
+      };
     // A spot in a region pack with no list yet, or no list anywhere: the old line.
-    const inPack = plantRegion ? Object.values(content.regions).some((r) => r.region === plantRegion) : false;
-    if (inPack || listed.length === 0) return { options, note: t("check.region_list_empty"), empty: true };
-    return { options, note: t("check.region_list_elsewhere", { regions: names(listed) }), empty: true };
+    const inPack = plantRegion
+      ? Object.values(content.regions).some((r) => r.region === plantRegion)
+      : false;
+    if (inPack || listed.length === 0)
+      return { options, note: t("check.region_list_empty"), empty: true };
+    return {
+      options,
+      note: t("check.region_list_elsewhere", { regions: names(listed) }),
+      empty: true,
+    };
   }
 
   const head = (
     <>
-      {section ? <p className="small muted">{section.title}</p> : null}
+      {section ? (
+        <p className="small muted">
+          <Words shown={sectionTitle(section, lang)} />
+        </p>
+      ) : null}
       <h1 tabIndex={-1} id="question">
-        {item.text}
+        <span lang={shownText.lang}>{shownText.text}</span>
         {item.unit ? ` (${item.unit})` : ""}
+        {shownText.english ? (
+          <>
+            {" "}
+            <EnglishTag />
+          </>
+        ) : null}
       </h1>
-      {unverified ? <span className="badge badge-warn">{t("check.unverified")}</span> : null}
-      <GlossaryLinks item={item} />
+      {unverified ? (
+        <span className="badge badge-warn">{t("check.unverified")}</span>
+      ) : null}
+      {other ? (
+        <div lang="en">
+          <GlossaryLinks item={item} />
+        </div>
+      ) : (
+        <GlossaryLinks item={item} />
+      )}
     </>
   );
 
   const nav = (extra?: React.ReactNode) => (
-    <div className="btn-row">
+    <div className="btn-row" {...ours}>
       <button type="button" className="btn btn-secondary" onClick={onBack}>
         {t("check.back")}
       </button>
@@ -103,8 +195,22 @@ export function FormQuestion({
           {head}
           <div className="option-list" role="group" aria-labelledby="question">
             {(item.options ?? []).map((o) => (
-              <button key={o.id} type="button" className="option" aria-pressed={value === o.value} onClick={() => onAnswer(o.value)}>
-                {o.label}
+              <button
+                key={o.id}
+                type="button"
+                className="option"
+                aria-pressed={value === o.value}
+                onClick={() => onAnswer(o.value)}
+              >
+                <Words shown={optionText(item, o.id, o.label, lang)} />
+                {o.description ? (
+                  <span className="small muted option-description">
+                    {" "}
+                    <Words
+                      shown={optionDescription(item, o.id, o.description, lang)}
+                    />
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -121,8 +227,14 @@ export function FormQuestion({
               ["absent", t("check.no")],
               ["cant_tell", t("check.not_sure")],
             ].map(([v, label]) => (
-              <button key={v} type="button" className="option" aria-pressed={value === v} onClick={() => onAnswer(v)}>
-                {label}
+              <button
+                key={v}
+                type="button"
+                className="option"
+                aria-pressed={value === v}
+                onClick={() => onAnswer(v)}
+              >
+                <Words shown={answerWords(v, label)} />
               </button>
             ))}
           </div>
@@ -132,31 +244,62 @@ export function FormQuestion({
     case "multi":
     case "pick_region_list": {
       const plants = item.type === "pick_region_list" ? regionList() : null;
-      const options = plants ? plants.options : item.options ?? [];
+      const options = plants ? plants.options : (item.options ?? []);
       const chosen = Array.isArray(draft) ? (draft as string[]) : [];
-      const toggle = (v: string) => setDraft(chosen.includes(v) ? chosen.filter((x) => x !== v) : [...chosen, v]);
+      const toggle = (v: string) =>
+        setDraft(
+          chosen.includes(v) ? chosen.filter((x) => x !== v) : [...chosen, v],
+        );
       return (
         <div className="stack">
           {head}
           {plants ? (
-            <p className={plants.empty ? "notice notice-warn" : "small muted"} data-testid="region-list-note">
+            <p
+              className={plants.empty ? "notice notice-warn" : "small muted"}
+              data-testid="region-list-note"
+              {...ours}
+            >
               {plants.note}
+              {other ? (
+                <>
+                  {" "}
+                  <EnglishTag />
+                </>
+              ) : null}
             </p>
           ) : null}
           <div className="option-list" role="group" aria-labelledby="question">
             {options.map((o) => (
               <label key={o.id} className="option">
-                <input type="checkbox" checked={chosen.includes(o.value)} onChange={() => toggle(o.value)} />
-                <span>{o.label}</span>
+                <input
+                  type="checkbox"
+                  checked={chosen.includes(o.value)}
+                  onChange={() => toggle(o.value)}
+                />
+                <span>
+                  {plants ? (
+                    o.label
+                  ) : (
+                    <Words shown={optionText(item, o.id, o.label, lang)} />
+                  )}
+                </span>
               </label>
             ))}
           </div>
           {nav(
             <>
-              <button type="button" className="btn btn-secondary" onClick={onSkip}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onSkip}
+              >
                 {t("check.none_of_these")}
               </button>
-              <button type="button" className="btn" onClick={() => onAnswer(chosen)}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => onAnswer(chosen)}
+              >
                 {t("check.next")}
               </button>
             </>,
@@ -165,7 +308,12 @@ export function FormQuestion({
       );
     }
     case "number": {
-      const text = typeof draft === "number" ? String(draft) : typeof draft === "string" ? draft : "";
+      const text =
+        typeof draft === "number"
+          ? String(draft)
+          : typeof draft === "string"
+            ? draft
+            : "";
       return (
         <form
           className="stack"
@@ -178,12 +326,33 @@ export function FormQuestion({
         >
           {head}
           <label className="field">
-            <span className="field-label">{t("check.number_label", { unit: item.unit ?? "" })}</span>
-            <input className="text-input" type="number" inputMode="decimal" step="any" min={0} value={text} onChange={(e) => setDraft(e.target.value)} name={item.id} />
+            <span className="field-label" {...ours}>
+              {t("check.number_label", { unit: item.unit ?? "" })}
+              {other ? (
+                <>
+                  {" "}
+                  <EnglishTag />
+                </>
+              ) : null}
+            </span>
+            <input
+              className="text-input"
+              type="number"
+              inputMode="decimal"
+              step="any"
+              min={0}
+              value={text}
+              onChange={(e) => setDraft(e.target.value)}
+              name={item.id}
+            />
           </label>
           {nav(
             <>
-              <button type="button" className="btn btn-secondary" onClick={onSkip}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onSkip}
+              >
                 {t("check.skip")}
               </button>
               <button type="submit" className="btn">
@@ -205,7 +374,8 @@ export function FormQuestion({
           const [k, v] = String(entry).split(":");
           current[k] = v === "not_applicable" ? "na" : Number(v);
         }
-      } else if (draft && typeof draft === "object") Object.assign(current, draft);
+      } else if (draft && typeof draft === "object")
+        Object.assign(current, draft);
       const set = (k: string, v: number | string | undefined) => {
         const next = { ...current };
         if (v === undefined) delete next[k];
@@ -222,16 +392,40 @@ export function FormQuestion({
               return (
                 <div key={s} className="card">
                   <div className="range-row">
-                    <label htmlFor={`slider-${s}`}>{t(`check.slider.${s}`)}</label>
-                    <input id={`slider-${s}`} type="range" min={0} max={5} step={1} value={typeof v === "number" ? v : 0} disabled={na} onChange={(e) => set(s, Number(e.target.value))} />
+                    <label htmlFor={`slider-${s}`}>
+                      <Words shown={answerWords(s, t(`check.slider.${s}`))} />
+                    </label>
+                    <input
+                      id={`slider-${s}`}
+                      type="range"
+                      min={0}
+                      max={5}
+                      step={1}
+                      value={typeof v === "number" ? v : 0}
+                      disabled={na}
+                      onChange={(e) => set(s, Number(e.target.value))}
+                    />
                     <output htmlFor={`slider-${s}`} aria-live="off">
                       {typeof v === "number" ? v : ""}
                     </output>
                   </div>
                   {item.allow_not_applicable ? (
                     <label className="check">
-                      <input type="checkbox" checked={na} onChange={(e) => set(s, e.target.checked ? "na" : undefined)} />
-                      <span className="small">{t("check.slider_na")}</span>
+                      <input
+                        type="checkbox"
+                        checked={na}
+                        onChange={(e) =>
+                          set(s, e.target.checked ? "na" : undefined)
+                        }
+                      />
+                      <span className="small">
+                        <Words
+                          shown={answerWords(
+                            "not_applicable",
+                            t("check.slider_na"),
+                          )}
+                        />
+                      </span>
                     </label>
                   ) : null}
                 </div>
@@ -243,7 +437,12 @@ export function FormQuestion({
               type="button"
               className="btn"
               onClick={() => {
-                const out = (item.sliders ?? []).filter((s) => current[s] !== undefined).map((s) => `${s}:${current[s] === "na" ? "not_applicable" : current[s]}`);
+                const out = (item.sliders ?? [])
+                  .filter((s) => current[s] !== undefined)
+                  .map(
+                    (s) =>
+                      `${s}:${current[s] === "na" ? "not_applicable" : current[s]}`,
+                  );
                 // No slider moved: the question is left out, as Skip leaves out the others.
                 if (out.length === 0) onSkip();
                 else onAnswer(out);

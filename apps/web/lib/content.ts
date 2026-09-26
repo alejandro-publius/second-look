@@ -20,6 +20,8 @@ export interface FormOption {
   id: string;
   label: string;
   value: string;
+  /** The app's line under an answer, as for the three overall ratings. */
+  description?: string;
 }
 
 export interface FormItem {
@@ -27,6 +29,8 @@ export interface FormItem {
   section: string;
   type: "choice" | "multi" | "yesno" | "number" | "pick_region_list" | "sliders";
   text: string;
+  /** The app's short name for the item, such as Water Flow. */
+  name?: string;
   options?: FormOption[];
   unit?: string;
   sliders?: string[];
@@ -120,11 +124,28 @@ export interface Region {
   bbox?: [number, number, number, number];
 }
 
+/** The official app's own words for one item in one language (content/app_strings.json). */
+export interface QuotedItem {
+  name?: string;
+  text?: string;
+  options?: Record<string, string>;
+  descriptions?: Record<string, string>;
+}
+
+export interface AppStrings {
+  source: { app: string; app_url: string; attribution: string };
+  languages: string[];
+  strings: Record<string, { items: Record<string, QuotedItem>; sections: Record<string, string> }>;
+  /** Per language, "item.text" or "item.option:id": a string whose meaning differs, and why. */
+  fallback: Record<string, Record<string, string>>;
+}
+
 export interface Content {
   content_hash: string;
   consent_version: string;
   features: Feature[];
   form: { version: number; sections: FormSection[]; items: FormItem[] };
+  app_strings: AppStrings;
   test_items: TestItem[];
   part2_items: TestItem[];
   warmup: WarmupItem[];

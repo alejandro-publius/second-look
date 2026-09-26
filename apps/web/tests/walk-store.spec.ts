@@ -239,7 +239,7 @@ test("a walk asks the rating check, keeps the answer, and shows the checks that 
   await expect(asked.locator('[data-rule="dry_pipe"]')).toHaveCount(0);
   expect(calls.filter((c: { method: string }) => c.method === "POST")).toEqual([]);
   await asked.getByRole("button", { name: en["check.change_rating"] }).click();
-  await asked.getByRole("button", { name: /^Poor:/ }).click();
+  await asked.getByRole("button", { name: /^Poor quality/ }).click();
   await expect(asked.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_new"], { rating: en["spot.rating_word_poor"] }));
   await asked.getByRole("button", { name: en["check.finish"], exact: true }).click();
 
@@ -397,7 +397,7 @@ test("the rating card shows which answer was picked and the rating the record ke
   await expect(card.getByTestId("rating-chosen")).toHaveText("");
 
   await change.click();
-  await card.getByRole("button", { name: /^Moderate:/ }).click();
+  await card.getByRole("button", { name: /^Moderate quality/ }).click();
   await page.mouse.move(0, 0);
   await expect(change).toHaveAttribute("aria-pressed", "true");
   await expect(card.getByTestId("rating-chosen")).toHaveText(fill(en["check.rating_new"], { rating: en["spot.rating_word_moderate"] }));

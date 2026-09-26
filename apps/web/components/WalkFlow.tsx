@@ -7,12 +7,34 @@ import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
 import { FollowupCard, tapRating, type RatingTap } from "./FollowupCard";
 import { FormQuestion } from "./FormQuestion";
+import { LanguagePicker } from "./LanguagePicker";
 import { Photo } from "./Photo";
 import { Progress } from "./Progress";
 import { WalkAnswers, walkDay } from "./WalkRecord";
 import { api, type AnswerValue } from "@/lib/api";
-import { content, featureById, licenseName, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
-import { deleteWalkState, enqueue, flushQueue, getQueued, loadWalkState, onQueueChange, removeQueued, saveWalkState, sendQueued, startQueueWatcher, type WalkState } from "@/lib/offline";
+import {
+  content,
+  featureById,
+  licenseName,
+  licenseUrl,
+  questionCount,
+  type FormItem,
+  type Walk,
+} from "@/lib/content";
+import {
+  deleteWalkState,
+  enqueue,
+  flushQueue,
+  getQueued,
+  loadWalkState,
+  onQueueChange,
+  removeQueued,
+  saveWalkState,
+  sendQueued,
+  startQueueWatcher,
+  type WalkState,
+} from "@/lib/offline";
+import { useCheckLang } from "@/lib/lang";
 import { t } from "@/lib/t";
 import { buildRecord, settleFollowups, walkQuestions } from "@/lib/walks";
 
@@ -26,7 +48,17 @@ type Stage =
 
 /** A walk on this device before its first answer. */
 function freshState(walkId: string): WalkState {
-  return { walk_id: walkId, answers: {}, next: 0, answered_at: null, queue_id: null, record_id: null, delete_after: null, followup_answers: {}, final_rating: null };
+  return {
+    walk_id: walkId,
+    answers: {},
+    next: 0,
+    answered_at: null,
+    queue_id: null,
+    record_id: null,
+    delete_after: null,
+    followup_answers: {},
+    final_rating: null,
+  };
 }
 
 /** Where the finished walk's record is: being sent, waiting for a network, kept, or refused. */
@@ -37,7 +69,11 @@ type Stored =
   | { state: "failed"; detail: string };
 
 function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
-  return content.form.items.filter((item) => !item.depends_on || answers[item.depends_on.item] === item.depends_on.value);
+  return content.form.items.filter(
+    (item) =>
+      !item.depends_on ||
+      answers[item.depends_on.item] === item.depends_on.value,
+  );
 }
 
 /**
@@ -49,7 +85,15 @@ function Clip({ walk }: { walk: Walk }) {
   const poster = content.photos[walk.poster_photo_id];
   return (
     <figure className="stack walk-figure">
-      <video className="walk-clip" controls muted playsInline preload="none" poster={poster?.url} aria-label={t("walk.clip_label", { creek: walk.creek_name })}>
+      <video
+        className="walk-clip"
+        controls
+        muted
+        playsInline
+        preload="none"
+        poster={poster?.url}
+        aria-label={t("walk.clip_label", { creek: walk.creek_name })}
+      >
         <source src={`/${walk.clip.file}`} type="video/mp4" />
         <Photo id={walk.poster_photo_id} />
       </video>
@@ -79,7 +123,9 @@ function Clip({ walk }: { walk: Walk }) {
  * most of its runs (scripts/build_walks.py), so the pass rule stopped nothing and the line must
  * not say it did (CRITIC_03 E04). One stopped guess "was", more "were".
  */
-export function checkerLine(walk: Pick<Walk, "question" | "checker_run" | "checker_dropped">): string {
+export function checkerLine(
+  walk: Pick<Walk, "question" | "checker_run" | "checker_dropped">,
+): string {
   if (walk.question) return t("walk.checker_asked");
   if (walk.checker_run !== "real") return t("walk.checker_not_real");
   if (walk.checker_dropped === 0) return t("walk.checker_nothing_seen");
@@ -89,11 +135,15 @@ export function checkerLine(walk: Pick<Walk, "question" | "checker_run" | "check
 
 /** The stage a walk this device holds opens on: its record, or the next unanswered question. */
 function resumeStage(walk: Walk, saved: WalkState): Stage {
-  if (saved.answered_at) return { name: "record", answeredAt: saved.answered_at };
+  if (saved.answered_at)
+    return { name: "record", answeredAt: saved.answered_at };
   const items = visibleItems(saved.answers);
-  if (saved.next < items.length) return { name: "items", index: Math.max(0, saved.next) };
+  if (saved.next < items.length)
+    return { name: "items", index: Math.max(0, saved.next) };
   if (walkQuestions(saved.answers).length > 0) return { name: "followups" };
-  return walk.question ? { name: "question" } : { name: "items", index: Math.max(0, items.length - 1) };
+  return walk.question
+    ? { name: "question" }
+    : { name: "items", index: Math.max(0, items.length - 1) };
 }
 
 /**
@@ -115,12 +165,15 @@ function resumeStage(walk: Walk, saved: WalkState): Stage {
 export function WalkFlow({ walk }: { walk: Walk }) {
   const [stage, setStage] = useState<Stage>({ name: "loading" });
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [lang] = useCheckLang();
   const [lookedAgain, setLookedAgain] = useState<string | null>(null);
   const [resumed, setResumed] = useState(false);
   const [stored, setStored] = useState<Stored>({ state: "sending" });
   // The follow-ups the rules asked: what was answered, the rating the rating check left, and
   // whether its rating picker is open, as the creek check holds them.
-  const [followupAnswers, setFollowupAnswers] = useState<Record<string, string>>({});
+  const [followupAnswers, setFollowupAnswers] = useState<
+    Record<string, string>
+  >({});
   const [finalRating, setFinalRating] = useState<string | null>(null);
   const [changingRating, setChangingRating] = useState(false);
   // Start again asks first on a finished walk, since it clears the record from this device.
@@ -138,25 +191,36 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   // Start again begins a new attempt. A send still going for the old one must not write into the
   // new one, or a reload would open on the walk that was set aside.
   const attempt = useRef(0);
-  const keep = useCallback((patch: Partial<WalkState>) => {
-    const next = { ...kept.current, ...patch, walk_id: walk.id };
-    kept.current = next;
-    writes.current = writes.current.then(() => saveWalkState(next));
-    return writes.current;
-  }, [walk.id]);
+  const keep = useCallback(
+    (patch: Partial<WalkState>) => {
+      const next = { ...kept.current, ...patch, walk_id: walk.id };
+      kept.current = next;
+      writes.current = writes.current.then(() => saveWalkState(next));
+      return writes.current;
+    },
+    [walk.id],
+  );
 
   /** Reads the finished walk's queue item and shows what the store did with it. */
   const showQueued = useCallback(async () => {
     const mine = attempt.current;
     const id = kept.current.queue_id;
     if (kept.current.record_id && kept.current.delete_after) {
-      setStored({ state: "stored", record_id: kept.current.record_id, delete_after: kept.current.delete_after });
+      setStored({
+        state: "stored",
+        record_id: kept.current.record_id,
+        delete_after: kept.current.delete_after,
+      });
       return;
     }
     if (id === null) return;
     const item = await getQueued(id).catch(() => undefined);
     if (item === undefined || attempt.current !== mine) return;
-    if (item.status === "sent" && item.result?.record_id && item.result.delete_after) {
+    if (
+      item.status === "sent" &&
+      item.result?.record_id &&
+      item.result.delete_after
+    ) {
       const { record_id, delete_after } = item.result;
       setStored({ state: "stored", record_id, delete_after });
       // The record id now lives with the walk, so the queue item has done its work.
@@ -176,18 +240,42 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     if (!w.answered_at) return;
     setStored({ state: "sending" });
     // The follow-up answers go with the walk; the store runs the rules again and keeps the checks.
-    const { followup_answers, final_rating } = settleFollowups(w.answers, w.followup_answers ?? {}, w.final_rating ?? null);
-    const body = { walk_id: walk.id, answers: w.answers, answered_at: w.answered_at, followup_answers, final_rating };
+    const { followup_answers, final_rating } = settleFollowups(
+      w.answers,
+      w.followup_answers ?? {},
+      w.final_rating ?? null,
+    );
+    const body = {
+      walk_id: walk.id,
+      answers: w.answers,
+      answered_at: w.answered_at,
+      followup_answers,
+      final_rating,
+    };
     let id: number;
     try {
-      id = await enqueue({ kind: "walk", created_at: new Date().toISOString(), walk: body, photos: [] });
+      id = await enqueue({
+        kind: "walk",
+        created_at: new Date().toISOString(),
+        walk: body,
+        photos: [],
+      });
     } catch {
       // No IndexedDB here (a private window can refuse it), so no queue: send it once, directly.
       try {
         const r = await api.storeWalk(body);
-        if (attempt.current === mine) setStored({ state: "stored", record_id: r.record_id, delete_after: r.delete_after });
+        if (attempt.current === mine)
+          setStored({
+            state: "stored",
+            record_id: r.record_id,
+            delete_after: r.delete_after,
+          });
       } catch (err) {
-        if (attempt.current === mine) setStored({ state: "failed", detail: (err as { detail?: string }).detail ?? t("error.network") });
+        if (attempt.current === mine)
+          setStored({
+            state: "failed",
+            detail: (err as { detail?: string }).detail ?? t("error.network"),
+          });
       }
       return;
     }
@@ -243,7 +331,8 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     attempt.current += 1;
     const w = kept.current;
     // A walk not stored yet is taken out of the queue, so what was set aside is never stored.
-    if (w.queue_id !== null && !w.record_id) await removeQueued(w.queue_id).catch(() => undefined);
+    if (w.queue_id !== null && !w.record_id)
+      await removeQueued(w.queue_id).catch(() => undefined);
     kept.current = freshState(walk.id);
     writes.current = writes.current.then(() => deleteWalkState(walk.id));
     await writes.current;
@@ -268,7 +357,13 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     setFollowupAnswers(settled.followup_answers);
     setFinalRating(settled.final_rating);
     setStage({ name: "record", answeredAt });
-    await keep({ answers: final, answered_at: answeredAt, next: visibleItems(final).length, followup_answers: settled.followup_answers, final_rating: settled.final_rating });
+    await keep({
+      answers: final,
+      answered_at: answeredAt,
+      next: visibleItems(final).length,
+      followup_answers: settled.followup_answers,
+      final_rating: settled.final_rating,
+    });
     await store();
   }
 
@@ -306,11 +401,21 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   }
 
   function onRatingTap(ruleId: string, tap: RatingTap) {
-    const firstRating = typeof answers.overall_rating === "string" ? answers.overall_rating : null;
-    const next = tapRating({ answer: followupAnswers[ruleId], finalRating, changingRating }, tap, firstRating);
+    const firstRating =
+      typeof answers.overall_rating === "string"
+        ? answers.overall_rating
+        : null;
+    const next = tapRating(
+      { answer: followupAnswers[ruleId], finalRating, changingRating },
+      tap,
+      firstRating,
+    );
     setFinalRating(next.finalRating);
     setChangingRating(next.changingRating);
-    const answered = next.answer === undefined ? followupAnswers : { ...followupAnswers, [ruleId]: next.answer };
+    const answered =
+      next.answer === undefined
+        ? followupAnswers
+        : { ...followupAnswers, [ruleId]: next.answer };
     setFollowupAnswers(answered);
     void keep({ followup_answers: answered, final_rating: next.finalRating });
   }
@@ -335,10 +440,15 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           <p data-testid="walk-honest-note">{t("walk.honest_note")}</p>
           {/* The button before the demo notice, so it is on the first screen of every walk on a
               390 by 844 phone (CRITIC_11 V01). */}
-          <button type="button" className="btn btn-block" onClick={() => setStage({ name: "items", index: 0 })}>
+          <button
+            type="button"
+            className="btn btn-block"
+            onClick={() => setStage({ name: "items", index: 0 })}
+          >
             {t("walk.start")}
           </button>
           <p className="notice notice-warn">{t("walk.demo_notice")}</p>
+          <LanguagePicker />
         </>
       );
       break;
@@ -349,11 +459,19 @@ export function WalkFlow({ walk }: { walk: Walk }) {
         body = (
           <div className="stack" key={item.id}>
             {resumed ? (
-              <p className="notice notice-ok" role="status" data-testid="walk-resumed">
+              <p
+                className="notice notice-ok"
+                role="status"
+                data-testid="walk-resumed"
+              >
                 {t("walk.resumed")}
               </p>
             ) : null}
-            <Progress value={count.n} max={count.total} labelKey="check.progress" />
+            <Progress
+              value={count.n}
+              max={count.total}
+              labelKey="check.progress"
+            />
             <FormQuestion
               item={item}
               value={answers[item.id]}
@@ -365,6 +483,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
                 else setStage({ name: "items", index: stage.index - 1 });
               }}
               plantRegion={walk.region ?? null}
+              lang={lang}
             />
           </div>
         );
@@ -376,8 +495,18 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       // words, the same Finish (CheckFlow.tsx).
       const asked = walkQuestions(answers);
       body = (
-        <section className="stack" aria-labelledby="walk-followups-title" data-testid="walk-followups">
-          <h2 id="walk-followups-title">{t(asked.length === 1 ? "check.followups_title_one" : "check.followups_title")}</h2>
+        <section
+          className="stack"
+          aria-labelledby="walk-followups-title"
+          data-testid="walk-followups"
+        >
+          <h2 id="walk-followups-title">
+            {t(
+              asked.length === 1
+                ? "check.followups_title_one"
+                : "check.followups_title",
+            )}
+          </h2>
           <p className="small muted">{t("check.followups_intro")}</p>
           {asked.map(({ card }) => (
             <FollowupCard
@@ -394,7 +523,16 @@ export function WalkFlow({ walk }: { walk: Walk }) {
             />
           ))}
           <div className="btn-row">
-            <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "items", index: Math.max(0, items.length - 1) })}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() =>
+                setStage({
+                  name: "items",
+                  index: Math.max(0, items.length - 1),
+                })
+              }
+            >
               {t("check.back")}
             </button>
             <button type="button" className="btn" onClick={afterFollowups}>
@@ -409,23 +547,44 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       const q = walk.question!;
       body = (
         <>
-          <section className="card stack" aria-label={t("label.checker_noticed")}>
+          <section
+            className="card stack"
+            aria-label={t("label.checker_noticed")}
+          >
             <p>
-              <strong>{t("followup.checker_flag", { note: featureById(q.feature)?.plain ?? q.feature })}</strong>
+              <strong>
+                {t("followup.checker_flag", {
+                  note: featureById(q.feature)?.plain ?? q.feature,
+                })}
+              </strong>
             </p>
             <p className="small muted">
               {t("label.checker_noticed")}: {q.note}
             </p>
             <div className="btn-row">
-              <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "looked"} onClick={() => setLookedAgain("looked")}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                aria-pressed={lookedAgain === "looked"}
+                onClick={() => setLookedAgain("looked")}
+              >
                 {t("check.looked_again")}
               </button>
-              <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "skipped"} onClick={() => setLookedAgain("skipped")}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                aria-pressed={lookedAgain === "skipped"}
+                onClick={() => setLookedAgain("skipped")}
+              >
                 {t("check.skip")}
               </button>
             </div>
           </section>
-          <button type="button" className="btn btn-block" onClick={() => void finish(answers)}>
+          <button
+            type="button"
+            className="btn btn-block"
+            onClick={() => void finish(answers)}
+          >
             {t("check.finish")}
           </button>
         </>
@@ -434,9 +593,18 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     }
     case "record": {
       // The checks as the store keeps them: the same rules and the same answers (lib/walks.ts).
-      const { kept: checked } = settleFollowups(answers, followupAnswers, finalRating);
+      const { kept: checked } = settleFollowups(
+        answers,
+        followupAnswers,
+        finalRating,
+      );
       // The FHIR record carries the rating the rating check left, as the stored one does.
-      const { bundle, problems } = buildRecord(walk, answers, stage.answeredAt, checked.final_rating);
+      const { bundle, problems } = buildRecord(
+        walk,
+        answers,
+        stage.answeredAt,
+        checked.final_rating,
+      );
       const recordId = stored.state === "stored" ? stored.record_id : null;
       const city = `/city?walk=${encodeURIComponent(walk.id)}${recordId ? `&record=${encodeURIComponent(recordId)}` : ""}`;
       return (
@@ -445,29 +613,53 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           <p className="notice notice-ok" role="status">
             {t("walk.done_body")}
           </p>
-          <p className={problems.length === 0 ? "badge badge-ok" : "badge badge-bad"} data-testid="walk-structure">
-            {problems.length === 0 ? t("walk.structure_ok") : t("walk.structure_bad", { n: problems.length })}
+          <p
+            className={
+              problems.length === 0 ? "badge badge-ok" : "badge badge-bad"
+            }
+            data-testid="walk-structure"
+          >
+            {problems.length === 0
+              ? t("walk.structure_ok")
+              : t("walk.structure_bad", { n: problems.length })}
           </p>
-          <section className="card stack" aria-labelledby="walk-stored-title" data-testid="walk-stored">
+          <section
+            className="card stack"
+            aria-labelledby="walk-stored-title"
+            data-testid="walk-stored"
+          >
             <h2 id="walk-stored-title">{t("walk.stored_heading")}</h2>
             {stored.state === "stored" ? (
               <>
                 <p>
-                  <Link href={`/spot?id=${encodeURIComponent(stored.record_id)}`} data-testid="walk-record-link">
+                  <Link
+                    href={`/spot?id=${encodeURIComponent(stored.record_id)}`}
+                    data-testid="walk-record-link"
+                  >
                     {t("walk.stored_link")}
                   </Link>
                 </p>
-                <p className="small muted">{t("walk.stored_until", { date: walkDay(stored.delete_after) })}</p>
+                <p className="small muted">
+                  {t("walk.stored_until", {
+                    date: walkDay(stored.delete_after),
+                  })}
+                </p>
               </>
             ) : stored.state === "waiting" ? (
               <>
                 <p>{t("walk.stored_waiting")}</p>
-                <button type="button" className="btn btn-secondary" onClick={() => void flushQueue()}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => void flushQueue()}
+                >
                   {t("walk.stored_retry")}
                 </button>
               </>
             ) : stored.state === "failed" ? (
-              <p className="notice notice-warn">{t("walk.stored_failed", { detail: stored.detail })}</p>
+              <p className="notice notice-warn">
+                {t("walk.stored_failed", { detail: stored.detail })}
+              </p>
             ) : (
               <p role="status" className="muted">
                 {t("walk.stored_sending")}
@@ -477,7 +669,11 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           <WalkAnswers answers={answers} title={t("walk.answers_title")} />
           <ChecksThatRan checks={checked.checks} ratings={checked} level="h2" />
           <p className="small muted">{checkerLine(walk)}</p>
-          <FhirView load={() => Promise.resolve(bundle)} curl={recordId ? `curl -s ${api.walkFhirUrl(recordId)}` : null} walk="phone" />
+          <FhirView
+            load={() => Promise.resolve(bundle)}
+            curl={recordId ? `curl -s ${api.walkFhirUrl(recordId)}` : null}
+            walk="phone"
+          />
           <p>
             <Link className="btn btn-block" href={city}>
               {t("walk.city_link")}
@@ -486,22 +682,41 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           {/* Start again clears the walk and its record from this device, and with them the only
               place its link is shown, so it asks first and says what stays (critic round 15 Y02). */}
           {confirmStartAgain ? (
-            <section className="card stack" data-testid="walk-start-again-warn" aria-label={t("walk.start_again")}>
+            <section
+              className="card stack"
+              data-testid="walk-start-again-warn"
+              aria-label={t("walk.start_again")}
+            >
               <p>
                 {t("walk.start_again_warn")}
-                {stored.state === "stored" ? ` ${t("walk.start_again_warn_stored", { date: walkDay(stored.delete_after) })}` : ""}
+                {stored.state === "stored"
+                  ? ` ${t("walk.start_again_warn_stored", { date: walkDay(stored.delete_after) })}`
+                  : ""}
               </p>
               <div className="btn-row">
-                <button ref={keepWalk} type="button" className="btn btn-secondary" onClick={() => setConfirmStartAgain(false)}>
+                <button
+                  ref={keepWalk}
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setConfirmStartAgain(false)}
+                >
                   {t("walk.start_again_no")}
                 </button>
-                <button type="button" className="btn" onClick={() => void startAgain()}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => void startAgain()}
+                >
                   {t("walk.start_again_yes")}
                 </button>
               </div>
             </section>
           ) : (
-            <button type="button" className="btn btn-secondary btn-block" onClick={() => setConfirmStartAgain(true)}>
+            <button
+              type="button"
+              className="btn btn-secondary btn-block"
+              onClick={() => setConfirmStartAgain(true)}
+            >
               {t("walk.start_again")}
             </button>
           )}

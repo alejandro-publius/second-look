@@ -32,8 +32,13 @@ export type RatingTap = "keep" | "change" | { rating: string };
  * record can never say keep beside a changed rating. Change opens the picker, and a rating picked
  * there becomes the final one.
  */
-export function tapRating(state: RatingFollowup, tap: RatingTap, firstRating: string | null): RatingFollowup {
-  if (tap === "keep") return { answer: "keep", finalRating: firstRating, changingRating: false };
+export function tapRating(
+  state: RatingFollowup,
+  tap: RatingTap,
+  firstRating: string | null,
+): RatingFollowup {
+  if (tap === "keep")
+    return { answer: "keep", finalRating: firstRating, changingRating: false };
   if (tap === "change") return { ...state, changingRating: true };
   return { answer: "change", finalRating: tap.rating, changingRating: false };
 }
@@ -59,12 +64,21 @@ export function FollowupCard({
   photos: PickedPhoto[];
   onPhotos: (p: PickedPhoto[]) => void;
   changingRating: boolean;
-  ratingOptions: { id: string; label: string; value: string }[];
+  ratingOptions: {
+    id: string;
+    label: string;
+    value: string;
+    description?: string;
+  }[];
   finalRating: string | null;
   onRatingTap: (tap: RatingTap) => void;
 }) {
   return (
-    <section className="card stack" aria-label={ruleTitle(followup.rule_id)} data-rule={followup.rule_id}>
+    <section
+      className="card stack"
+      aria-label={ruleTitle(followup.rule_id)}
+      data-rule={followup.rule_id}
+    >
       <p>
         <strong>{followup.question_text}</strong>
       </p>
@@ -75,7 +89,13 @@ export function FollowupCard({
             ["no", t("check.no")],
             ["cant_tell", t("check.not_sure")],
           ].map(([v, label]) => (
-            <button key={v} type="button" className="option" aria-pressed={value === v} onClick={() => onAnswer(v)}>
+            <button
+              key={v}
+              type="button"
+              className="option"
+              aria-pressed={value === v}
+              onClick={() => onAnswer(v)}
+            >
               {label}
             </button>
           ))}
@@ -87,18 +107,40 @@ export function FollowupCard({
       {followup.kind === "keep_rating" ? (
         <div className="stack">
           <div className="btn-row">
-            <button type="button" className="btn btn-secondary" aria-pressed={value === "keep"} onClick={() => onRatingTap("keep")}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              aria-pressed={value === "keep"}
+              onClick={() => onRatingTap("keep")}
+            >
               {t("check.keep_rating")}
             </button>
-            <button type="button" className="btn btn-secondary" aria-pressed={value === "change" || changingRating} onClick={() => onRatingTap("change")}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              aria-pressed={value === "change" || changingRating}
+              onClick={() => onRatingTap("change")}
+            >
               {t("check.change_rating")}
             </button>
           </div>
           {changingRating ? (
             <div className="option-list">
               {ratingOptions.map((o) => (
-                <button key={o.id} type="button" className="option" aria-pressed={finalRating === o.value} onClick={() => onRatingTap({ rating: o.value })}>
+                <button
+                  key={o.id}
+                  type="button"
+                  className="option"
+                  aria-pressed={finalRating === o.value}
+                  onClick={() => onRatingTap({ rating: o.value })}
+                >
                   {o.label}
+                  {o.description ? (
+                    <span className="small muted option-description">
+                      {" "}
+                      {o.description}
+                    </span>
+                  ) : null}
                 </button>
               ))}
             </div>
@@ -114,10 +156,20 @@ export function FollowupCard({
       ) : null}
       {followup.kind === "look_again" ? (
         <div className="btn-row">
-          <button type="button" className="btn btn-secondary" aria-pressed={value === "looked"} onClick={() => onAnswer("looked")}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            aria-pressed={value === "looked"}
+            onClick={() => onAnswer("looked")}
+          >
             {t("check.looked_again")}
           </button>
-          <button type="button" className="btn btn-secondary" aria-pressed={value === "skipped"} onClick={() => onAnswer("skipped")}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            aria-pressed={value === "skipped"}
+            onClick={() => onAnswer("skipped")}
+          >
             {t("check.skip")}
           </button>
         </div>
@@ -125,7 +177,12 @@ export function FollowupCard({
       {followup.kind === "photo" ? (
         <div className="stack">
           <PhotoPicker photos={photos} onChange={onPhotos} max={1} />
-          <button type="button" className="btn btn-quiet" aria-pressed={value === "skipped"} onClick={() => onAnswer("skipped")}>
+          <button
+            type="button"
+            className="btn btn-quiet"
+            aria-pressed={value === "skipped"}
+            onClick={() => onAnswer("skipped")}
+          >
             {t("check.skip")}
           </button>
         </div>

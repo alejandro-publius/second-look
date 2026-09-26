@@ -200,7 +200,7 @@ SECTIONS: dict[str, list[str]] = {
 
 _LETTER = re.compile(r"\s*\((?:[A-E]|[Α-Ε])\)\s*$")
 _PICTURE_NOTE = re.compile(r"\s*\([^()]*\)(?=\s*[?;]?\s*$)")
-_DASHES = re.compile("[–—]")
+_DASHES = re.compile("[" + chr(0x2013) + chr(0x2014) + "]")
 
 
 def tidy(s: str, *, drop_picture_note: bool = False) -> str:

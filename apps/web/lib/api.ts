@@ -110,6 +110,8 @@ export interface DraftRequest {
   answers: Record<string, AnswerValue>;
   first_rating: string | null;
   photo_ids: string[];
+  /** The language the questions were shown in (BCP 47), stored as the record's language. */
+  language?: string;
 }
 
 export type FollowupKind = "yesno" | "photo" | "keep_rating" | "look_again";
