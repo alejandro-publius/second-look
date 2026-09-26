@@ -1,6 +1,8 @@
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
+
 # Devpost: every field, ready to paste
 
-UPDATE_14 section 8 item 1. Each field is one code block, so one tap copies it; the count is characters, spaces included. The text is the paste kit from pull request #5 (its DEVPOST_PASTE.md, not copied), brought up to date: the video walks and the creek footage are added, and every number carries a claim marker checked against `results/` by `uv run python scripts/verify_claims.py --file docs/devpost.md`. This file is the one to paste from.
+UPDATE_14 section 8 item 1. Each field is one code block, so one tap copies it; the count is characters, spaces included. The text is the paste kit from pull request #5 (its DEVPOST_PASTE.md, not copied), brought up to date: the video walks and the creek footage are added, and every number carries a claim marker checked against `results/` by `uv run python scripts/verify_claims.py --file docs/devpost.md`, except the names and fixed facts that `scripts/submit_check.py` lists with a reason each (a version, a model's name, the 72 hour rain window). The track statement is this file's first line, as it is the README's. This file is the one to paste from.
 
 The video link is a slot on purpose. The paid model run happened on Sep 23 and 24; its numbers live in the README's AI table, checked against `results/`, and this text states the pass table only in words.
 
@@ -22,10 +24,10 @@ A two-minute photo test that scores volunteer creek observers, then saves each s
 
 ## Track statement (line one of the description)
 
-350 characters
+489 characters
 
 ```text
-Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first.
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
 ```
 
 ## The problem
@@ -72,6 +74,7 @@ It costs nothing to run: Cloudflare's free plan, no card. A follower city adopts
 <!-- claim: results/footage_pool.json#/countries_kept = 3 -->
 <!-- claim: results/footage_latest.json#/gate/dropped = 29 -->
 <!-- claim: results/footage_latest.json#/gate/candidates = 64 -->
+<!-- claim: results/benchmark_20260924T054939Z.json#/pool/n_photos = 16 -->
 
 ```text
 Standards: FHIR R4 4.0.1. The OneAquaHealth guide pinned at hl7-eu/oah b907cf0, built with SUSHI 3.20.1, and sample records from both emitters validated in CI with the HL7 validator, with 0 errors in the latest run. Their codes where they exist, ours only for the four features and "can't tell". UCUM units. Nested Locations.
@@ -85,16 +88,17 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-1103 characters
+1384 characters
 
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->
+<!-- claim: results/benchmark_20260924T054939Z.json#/pool/n_photos = 16 -->
 
 ```text
 Take the test: https://second-look-79t.pages.dev (no camera needed).
 Judges start here: https://second-look-79t.pages.dev/judges
 
-/t: consent, warm-up, lesson, 16 photos, a score per feature.
+/t: consent, warm-up, then the lesson and 16 photos, in an order the server picks at random (half the people see the photos first and get the lesson after their score), and a score per feature.
 /demo: judge mode with feedback after each answer.
 /check: the guided creek check, one question per screen, with follow-ups chosen by code.
 /walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. The clips show natural creeks, so a measure appears when the walk reports damage, for example Artificial for the bank. /city?creek=strawberry-creek stays empty until the first real check.

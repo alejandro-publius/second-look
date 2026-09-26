@@ -1,6 +1,6 @@
 """The walk's checker line and the rating follow-up, run from the real components.
 
-There is no unit runner in apps/web, so Node transpiles WalkFlow.tsx and CheckFlow.tsx with the
+There is no unit runner in apps/web, so Node transpiles WalkFlow.tsx and FollowupCard.tsx with the
 app's own TypeScript and calls the helpers they export. Only lib/t.ts is loaded for real, reading
 content/locales/en.json; every other import is an empty stand in, which is enough because the
 helpers touch nothing else.
@@ -46,8 +46,9 @@ function load(file, stubs, tail = "") {
 const t = load("lib/t.ts", { "./content": { content: { locale: en } } });
 const stubs = { "@/lib/t": t, "react/jsx-runtime": jsx };
 const WalkFlow = load("components/WalkFlow.tsx", stubs);
-// FollowupCard is not exported; the test reaches it so the buttons' wiring is checked too.
-const CheckFlow = load("components/CheckFlow.tsx", stubs, "\nexports.FollowupCard = FollowupCard;");
+// The rating follow-up and its card, which the creek check and the video walks share (judge walk
+// W01). Kept under the name CheckFlow, where they lived before.
+const CheckFlow = load("components/FollowupCard.tsx", stubs);
 const Text = load("lib/text.ts", {});
 // The walk's city view with the content and the walks the test hands it: WalkCityView, the part
 // that draws, over walks.demoCreek(), which WalkCity feeds with the walk this browser finished and

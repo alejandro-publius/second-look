@@ -1,4 +1,4 @@
-"""make reproduce: every AI number in results/, graded again from raw replies and seeds.
+"""make reproduce: the AI numbers in results/, graded again from raw replies and seeds.
 
 No network and no key. Every socket to another machine is refused, and the run fails if one was
 tried. It reads only what is committed:
@@ -938,9 +938,17 @@ def report(checks: Sequence[Check], out: Callable[[str], None] = print) -> int:
     if failed:
         out(f"reproduce: {len(failed)} of {len(checks)} files differ from the raw replies or seeds")
         return 1
+    # A skipped file is not a regraded one, and a note names numbers kept as recorded, so the last
+    # line counts them apart instead of folding them into "regraded" (judge walk 01, R02).
+    regraded = sum(1 for c in checks if c.regraded)
+    skipped = len(checks) - regraded
+    notes = sum(len(c.notes) for c in checks)
+    rest = ""
+    if skipped or notes:
+        rest = f"; {skipped} files not regraded and {notes} notes, each named above"
     out(
-        f"reproduce: {total} values in {len(checks)} files regraded from raw replies and seeds, "
-        "with no network and no key; every one matches"
+        f"reproduce: {total} values in {regraded} files regraded from raw replies and seeds, "
+        f"with no network and no key; every one matches{rest}"
     )
     return 0
 

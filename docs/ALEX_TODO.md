@@ -1,10 +1,14 @@
 # Alex: what only you can do, in order
 
+Working notes: the team's own to-do list, kept public on purpose. What is true of the product is
+in the README.
+
 Everything on this page needs your voice, your eyes or your account. Everything else is done.
 Times are Pacific.
 
-Done for you on Sep 23 and 24: the two machine sittings are marked as tests (the public counts
-read 0), the model ids and prices were confirmed and the paid AI run, four models from Sep 24, is
+Done for you on Sep 23 and 24: the two machine sittings of Sep 21 and 22 are marked as tests (on
+Sep 25 our own judge walk finished one more sitting with the hidden field filled, which the plan's
+exclusions leave out; `docs/deviations.md`), the model ids and prices were confirmed and the paid AI run, four models from Sep 24, is
 in the README (its cost is logged in `results/cost_log.jsonl`), and the QA key is set on the Worker with a copy as `QA_KEY` in
 `~/second-look/.env` and `~/second-look-depth/.env`. Copy that key and your API key to your
 password manager when you can. Nobody films at a creek: the creek shots are open footage from
@@ -12,12 +16,12 @@ Wikimedia Commons, already in the rough cut and credited in `docs/video/CREDITS.
 back: hl7-eu/oah pull request 5 and issues 6, 7 and 8 are open under your account. Two daily jobs
 on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache (07:45).
 
-1. **By Fri Sep 25, 20 minutes: record your voice.** Run `make video-rough` and play
-   `docs/video/rough_cut_scratch_voice.mp4` once: its scratch voice is there for the timing
-   only. Then record your voice against it, reading `docs/video/teleprompter.html` in a browser
-   (space pauses, the arrows change speed). The words are the ones in `docs/video/VOICE_SCRIPT.md`
-   and `docs/video/SHOTLIST.md`; beat 7 is filled from the real run. This is your only step in
-   making the video.
+1. **By Fri Sep 25, or Sat Sep 26 at the latest, 20 minutes: record your voice.** Read
+   `docs/video/teleprompter.html` in a browser (space pauses, the arrows change speed) and save the
+   recording as `~/second-look-media/voice/voice.m4a` (or .wav or .mp3). Then `make video-final`
+   lays it over the finished cut, keeps the captions as subtitles and writes
+   `~/second-look-media/final/second-look-final.mp4` (`docs/video/README.md`). If no voice
+   arrives by the end of Sep 26, the captions-only cut that is already there is the video.
 
 2. **By Sat Sep 26, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft
    and invite Rachel to it. Pick the five gallery images it names, and attach `docs/REPORT.pdf`
@@ -45,19 +49,25 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    the display is off". Keep the lid open. The data lock (Sun Sep 27, 18:10 PDT), the uptime check
    every 10 minutes and the daily jobs run only while it is awake.
 
-7. **Mon Sep 28: the dry-run submission.** Fill every Devpost field except the video, save, and
-   read it back as a judge would. Judge mode opens that day; check `/demo` on your phone.
+7. **Mon Sep 28: the dry-run submission.** Fill every Devpost field except the video from
+   `docs/devpost.md`, attach `docs/REPORT.pdf`, save the draft, and read it on your phone as a
+   judge would. Then `make go-public GO=dry`, which changes nothing. The times and what to check
+   after each step are in `docs/SUBMISSION_DAY.md`. Judge mode opens that day; check `/demo` on
+   your phone.
 
-8. **By Tue Sep 29, 10 minutes: upload the video.** Upload the cut with your voice from your own
-   account, with the licence line from `docs/devpost.md` in its description (the video is
+8. **By Tue Sep 29, 10 minutes: upload the video.** Upload
+   `~/second-look-media/final/second-look-final.mp4` to YouTube as unlisted, from your own account,
+   with the title, description, tags and thumbnail in `docs/video/UPLOAD.md` (the video is
    CC BY-SA 4.0), and paste the link into `docs/devpost.md` and the README.
 
-9. **Wed Sep 30, morning: go public.** On `main`: `make go-public` to see what it will do, then
-   `make go-public GO=yes`. It removes the working notes, runs `make submit-check`, and only then
-   makes the repository public.
+9. **Wed Sep 30, morning: go public.** Follow `docs/SUBMISSION_DAY.md` in order: on `main`,
+   `make go-public GO=dry`, then `make go-public GO=yes`. It scans the whole history for secrets,
+   removes the working notes, runs the tests and `make submit-check`, checks the README's images
+   and links, and only then makes the repository public, checks it logged out, and tags v1.0. This page,
+   `docs/HANDOFF_NEXT.md` and `PLAN.md` stay, each marked as notes.
 
 10. **Wed Sep 30, by 18:00: submit.**
 
 Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23 (their own nameserver
 answers that it does not exist); we reported it as hl7-eu/oah issue 8. While it is gone, `/two`
-shows our record alone, and the sandbox re-push on Sep 28 cannot run.
+shows our record alone, and the daily sandbox re-push sends nothing until the name comes back.

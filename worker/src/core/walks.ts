@@ -2,14 +2,16 @@
 // the store as a demo record for WALK_KEEP_DAYS days, in a table of its own, and is never counted
 // and never mirrored. Proved equal to Python by worker/golden/walks.json.
 
-import { REPO_URL, emitVisit } from "./fhir_emit";
+import { REPO_URL, emitVisit, escapeXml } from "./fhir_emit";
+import { selectFollowups, type Followup, type SiteContext } from "./followups";
 import { sha256Hex } from "./sha256";
-import { instant, parseInstant, type AnswerValue, type Json, type Spot, type VisitRecord } from "./types";
+import { instant, parseInstant, type AnswerValue, type CheckResult, type FormItem, type Json, type Spot, type VisitRecord } from "./types";
 
 export const DEMO_TAG_SYSTEM = `${REPO_URL}/tags`;
 export const DEMO_TAG_CODE = "demo-walk";
 export const DEMO_TAG_DISPLAY = "Demo visit from a video walk. Never counted and never sent to the sandbox.";
 export const WALK_PREFIX = "walk-";
+const RATING_ITEM = "overall_rating";
 
 // The stored demo record of a finished walk (UPDATE_30 section 1 item 3), the same five numbers
 // as core/walks.py.
@@ -76,9 +78,29 @@ export function tagDemo(bundle: Resource): Resource {
   return out;
 }
 
-export function walkBundle(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: string): Resource {
-  const visit = walkVisit(walk, answers, answeredAt);
-  return tagDemo(emitVisit(visit, null, instant(answeredAt)) as Resource);
+function ratingChangedNote(first: string, final: string): string {
+  return `The first overall rating was ${first}. On the rating check the volunteer changed it to ${final}.`;
+}
+
+/** The FHIR record of one walk visit, tagged as a demo. finalRating is the rating the rating check
+ *  left (walkChecks): when it differs from the walk's own overall rating, the record answers the
+ *  rating question with it and the response's narrative names the first rating (critic round 15
+ *  F02). The answers stay as given. As core/walks.py walk_bundle. */
+export function walkBundle(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: string, finalRating: string | null = null): Resource {
+  const first = answers[RATING_ITEM];
+  const changed = typeof first === "string" && finalRating !== null && finalRating !== first;
+  const rated = changed ? { ...answers, [RATING_ITEM]: finalRating as string } : answers;
+  const bundle = emitVisit(walkVisit(walk, rated, answeredAt), null, instant(answeredAt)) as Resource;
+  if (changed) {
+    for (const entry of bundle.entry as Resource[]) {
+      const resource = entry.resource as Resource;
+      if (resource.resourceType !== "QuestionnaireResponse") continue;
+      const text = resource.text as Resource;
+      const note = escapeXml(ratingChangedNote(first as string, finalRating as string));
+      text.div = String(text.div).replace("</p></div>", `</p><p>${note}</p></div>`);
+    }
+  }
+  return tagDemo(bundle);
 }
 
 export function isDemo(bundle: Resource): boolean {
@@ -111,8 +133,9 @@ export interface WalkRecordRow {
 
 /** The row the store keeps for a finished walk. Its id is the walk visit's own id, so the stored
  *  record is the one the phone built, and the same walk sent twice is one record. The caller
- *  checks the answers against the form first (worker/src/check.ts validateAnswers). */
-export function walkRecord(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: unknown, now: string): WalkRecordRow {
+ *  checks the answers against the form first (worker/src/check.ts validateAnswers), and the final
+ *  rating with walkChecks, whose final rating the Bundle carries. */
+export function walkRecord(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: unknown, now: string, finalRating: string | null = null): WalkRecordRow {
   const at = walkAnsweredAt(answeredAt, now);
   const clock = parseInstant(now);
   return {
@@ -121,6 +144,64 @@ export function walkRecord(walk: WalkRef, answers: Record<string, AnswerValue>, 
     answered_at: at,
     created_at: instant(clock),
     delete_after: instant(clock + WALK_KEEP_DAYS * DAY_MS),
-    bundle: walkBundle(walk, answers, at),
+    bundle: walkBundle(walk, answers, at, finalRating),
   };
+}
+
+// The follow-up questions of a walk (judge walk W01): the creek check's own rules over the walk's
+// answers, as core/walks.py. A clip has no place and no weather, so rain is unknown and the dry
+// pipe rule fails closed; nobody took the test for the walk, so there is no score; the checker's
+// flag on a clip is the walk's own build-time question, so no flag goes in. Proved equal to
+// Python by worker/golden/walks.json.
+export const WALK_SITE: SiteContext = { rain: "unknown" };
+/** The answers each kind of follow-up takes on a walk. A walk uploads nothing. */
+export const WALK_FOLLOWUP_ANSWERS: Record<string, readonly string[]> = {
+  yesno: ["yes", "no", "cant_tell", "skipped"],
+  keep_rating: ["keep", "change", "skipped"],
+  look_again: ["looked", "skipped"],
+  photo: ["skipped"],
+};
+
+/** The follow-ups a walk asks: selectFollowups with rain unknown, no score and no flag. */
+export function walkFollowups(answers: Record<string, AnswerValue>, table: Record<string, unknown>, formItems: FormItem[]): Followup[] {
+  return selectFollowups(answers, WALK_SITE, null, [], table, formItems, false);
+}
+
+/** The checks a finished walk ran, with what the person answered, and its final rating, kept as
+ *  the creek check keeps them. Throws WalkRecordError with the same plain reasons as Python. The
+ *  caller checks finalRating is one of the form's ratings. */
+export function walkChecks(
+  answers: Record<string, AnswerValue>,
+  followups: Followup[],
+  questionTexts: string[],
+  given: Record<string, unknown>,
+  finalRating: string | null,
+): { checks: CheckResult[]; final_rating: string | null } {
+  if (questionTexts.length !== followups.length) throw new WalkRecordError("Every follow-up needs its question.");
+  const asked = new Set(followups.map((f) => f.rule_id));
+  for (const ruleId of Object.keys(given)) {
+    if (!asked.has(ruleId)) throw new WalkRecordError(`No follow-up called '${ruleId}' was asked in this walk.`);
+  }
+  const first = answers[RATING_ITEM];
+  const firstRating = typeof first === "string" ? first : null;
+  let final = firstRating;
+  const checks: CheckResult[] = followups.map((f, i) => {
+    const raw = given[f.rule_id];
+    let answer: string | null = null;
+    if (raw !== undefined && raw !== null) {
+      const allowed = WALK_FOLLOWUP_ANSWERS[f.kind] ?? [];
+      if (typeof raw !== "string" || !allowed.includes(raw)) throw new WalkRecordError(`${f.rule_id}: answer ${allowed.join(", ")}.`);
+      answer = raw;
+    }
+    if (f.kind === "keep_rating" && answer === "change") {
+      if (finalRating === null) throw new WalkRecordError("A changed rating needs the new rating.");
+      final = finalRating;
+    }
+    const detail: Record<string, string | number | null> = {};
+    for (const [k, v] of Object.entries(f.params)) detail[k] = typeof v === "string" || typeof v === "number" ? v : String(v);
+    detail.kind = f.kind;
+    return { rule_id: f.rule_id, asked: true, question_text: questionTexts[i], answer, detail };
+  });
+  if (finalRating !== null && finalRating !== final) throw new WalkRecordError("The final rating can differ from the first only when the rating check says change.");
+  return { checks, final_rating: final };
 }

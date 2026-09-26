@@ -1,5 +1,5 @@
 {
-  "ran_at_utc": "2026-09-24T03:30:19+00:00",
+  "ran_at_utc": "2026-09-25T22:52:58+00:00",
   "validator_version": "6.10.4",
   "ig_commit": "b907cf0",
   "fhir_version": "4.0.1",
@@ -19,12 +19,13 @@
     "fhir/build/instances/ts-sl-visit-visit-0001.json",
     "fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
     "fhir/build/instances/ts-sl-visit-walk-4116f9ddf7b8b451.json",
+    "fhir/build/instances/ts-sl-visit-walk-757a5b9a10482fc9.json",
     "fhir/build/instances/ts-sl-visit-walk-d2ef0549e6f251c4.json"
   ],
   "errors": 0,
-  "warnings": 58,
-  "files_validated": 14,
-  "walk_records_validated": 2,
+  "warnings": 61,
+  "files_validated": 15,
+  "walk_records_validated": 3,
   "by_file": {
     "Bundle-sl-city-heraklion-bundle.json": {
       "error": 0,
@@ -90,6 +91,11 @@
       "error": 0,
       "warning": 3,
       "information": 11
+    },
+    "ts-sl-visit-walk-757a5b9a10482fc9.json": {
+      "error": 0,
+      "warning": 3,
+      "information": 13
     },
     "ts-sl-visit-walk-d2ef0549e6f251c4.json": {
       "error": 0,
@@ -424,6 +430,24 @@
     },
     {
       "file": "ts-sl-visit-walk-4116f9ddf7b8b451.json",
+      "severity": "warning",
+      "location": "Bundle.entry[4].resource/*Location/sl-loc-walk-v03-spot*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-walk-757a5b9a10482fc9.json",
+      "severity": "warning",
+      "location": "Bundle.entry[2].resource/*Location/sl-loc-walk-v03*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-walk-757a5b9a10482fc9.json",
+      "severity": "warning",
+      "location": "Bundle.entry[3].resource/*Location/sl-loc-walk-v03-reach*/.type[0]",
+      "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      "file": "ts-sl-visit-walk-757a5b9a10482fc9.json",
       "severity": "warning",
       "location": "Bundle.entry[4].resource/*Location/sl-loc-walk-v03-spot*/.type[0]",
       "text": "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"

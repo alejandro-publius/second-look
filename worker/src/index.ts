@@ -15,7 +15,7 @@ import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, re
 import { TooLarge, photoResponse, storeUpload } from "./uploads";
 import { two } from "./two";
 import * as part2 from "./part2";
-import { Conflict, TooMany, purgeWalks, storeWalk, walkView } from "./walk_store";
+import { Conflict, TooMany, purgeWalks, storeWalk, walkFhir, walkView } from "./walk_store";
 import { inaturalistView } from "./inaturalist";
 
 export interface Env {
@@ -467,6 +467,8 @@ export default {
       // A finished video walk's demo record (UPDATE_30 section 1 item 3), in its own table, never
       // counted and never mirrored. It reads its own body, to refuse a large one before parsing.
       if (path === "/api/walk" && request.method === "POST") return json(env, await storeWalk(env.DB, request, now));
+      const walkBundle = /^\/api\/walk\/([^/]+)\/fhir$/.exec(path);
+      if (walkBundle && request.method === "GET") return json(env, await walkFhir(env.DB, decodeURIComponent(walkBundle[1]), now));
       const walk = /^\/api\/walk\/([^/]+)$/.exec(path);
       if (walk && request.method === "GET") return json(env, await walkView(env.DB, decodeURIComponent(walk[1]), now));
       const photo = /^\/api\/photo\/([^/]+)$/.exec(path);

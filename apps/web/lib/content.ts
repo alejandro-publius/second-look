@@ -116,6 +116,8 @@ export interface Region {
   approved: boolean;
   invasive_plants: { common_name: string; latin_name: string; source: string }[];
   creeks?: { slug: string; name: string }[];
+  /** Where the region's plant list applies: [south, west, north, east] in degrees, approximate. */
+  bbox?: [number, number, number, number];
 }
 
 export interface Content {
@@ -153,6 +155,8 @@ export interface Walk {
   question: { feature: FeatureId; note: string } | null;
   checker_run: "real" | "synthetic";
   checker_dropped: number;
+  /** The region pack the clip was filmed in, whose plant list its Which ones? offers, or null. */
+  region?: string | null;
 }
 
 export interface FootageCredit {
@@ -267,6 +271,22 @@ export function shownPhotos(): Photo[] {
 export function creeksByRegion(): { region: string; name: string; creeks: { slug: string; name: string }[] }[] {
   return Object.values(content.regions)
     .map((r) => ({ region: r.region, name: r.name, creeks: [...(r.creeks ?? [])].sort((a, b) => a.name.localeCompare(b.name)) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** The region pack whose extent holds a point, or null when none does (critic round 14 B03). */
+export function regionAt(latitude: number, longitude: number): Region | null {
+  for (const r of Object.values(content.regions)) {
+    const b = r.bbox;
+    if (b && b[0] <= latitude && latitude <= b[2] && b[1] <= longitude && longitude <= b[3]) return r;
+  }
+  return null;
+}
+
+/** The region packs that have a plant list, by name. */
+export function plantRegions(): Region[] {
+  return Object.values(content.regions)
+    .filter((r) => (r.invasive_plants ?? []).length > 0)
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 

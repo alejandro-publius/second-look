@@ -7,7 +7,7 @@ WEB := apps/web
 # moves it (apps/web/scripts/web-port.mjs reads the same name); make judge-check picks its own.
 WEB_PORT ?= 3100
 
-.PHONY: precache-budget report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation
+.PHONY: precache-budget report-pdf panel-status done-check coverage-core demo-open-check test-counts demo-offline consensus-coarseness consensus-check ai-run video-clips video-rough go-public judge-check diagrams diagrams-render readability worker-e2e worker-check deploy-preview new-city export-records mcp render-readme help dev check lint types test web-build manifest-check dash-check design-check budget verify-claims fhir-validate e2e smoke preflight preflight-launch preflight-judges submit-check poster deploy audit-verify reproduce mutation video-final video-frames
 
 help:
 	@echo "make dev | check | preflight | submit-check | fhir-validate | e2e | smoke | poster | deploy"
@@ -34,7 +34,7 @@ demo-offline:
 	@echo "demo-offline: API on :$(DEMO_API_PORT), site on http://localhost:$(DEMO_WEB_PORT)/city?creek=strawberry-creek. Stop with Ctrl-C."
 	@bash -c 'trap "kill 0" EXIT; env $(DEMO_ENV) uv run --offline python -m uvicorn apps.api.main:app --port $(DEMO_API_PORT) & (cd $(WEB) && node scripts/build-content.mjs && env $(DEMO_ENV) NEXT_PUBLIC_API_ORIGIN=http://localhost:$(DEMO_API_PORT) npx next dev -p $(DEMO_WEB_PORT)) & wait'
 
-check: lint types test manifest-check dash-check readability diagrams verify-claims consensus-check worker-check fhir-validate web-build design-check
+check: lint types test manifest-check dash-check readability diagrams worker-check fhir-validate verify-claims consensus-check web-build design-check
 	@echo "CHECK GREEN"
 
 # Update 10 answer A3. Python is the reference: it writes worker/src/content.json and the golden
@@ -133,8 +133,11 @@ report-pdf:
 # The test counts the README cites (UPDATE_27 block 24): Python tests, Worker golden cases,
 # Playwright tests and the Worker e2e sections, into results/test_counts.json. Not in make check,
 # because every branch that adds a test would turn it red; run it last, before render-readme.
+# It renders every doc after counting, since a count is quoted in several (CI went red twice when
+# only the README was rendered and committed).
 test-counts:
 	$(PY) scripts/count_tests.py
+	@$(MAKE) --no-print-directory render-readme
 
 # UPDATE_22 section 1 answer 1: can four photos per feature weight a group's votes? A synthetic
 # simulation, about 15 seconds. It writes results/consensus_coarseness.json and the table
@@ -243,9 +246,11 @@ coverage-core:
 demo-open-check:
 	cd $(WEB) && node scripts/demo-open-check.mjs
 
-# The paid model run, in one command, for Alex once the model gate flags are flipped and the key
-# is in .env (docs/ALEX_TODO.md step 2). Batch API throughout. The 16-photo sweep refuses above 10
-# dollars worst case and the footage run above 25 expected, inside the 40 dollar cap of Update 14.
+# The paid model run, in one command, with the key in .env; it ran on Sep 24. The 16-photo sweep
+# refuses when its worst case is above --max-usd, and the footage run when what it has spent plus
+# the next model's expected cost is above its --max-usd: 60 and 120 dollars below. Update 14 named
+# 10, 25 and a 40 dollar cap in all; the caps were raised for the four-model run (docs/DECISIONS.md,
+# Sep 24), and every paid call, over 40 dollars in all, is a line in results/cost_log.jsonl.
 # Afterwards the walks are gated again on the real answers and the pool numbers rewritten; the
 # README's AI table is filled by the next session from results/, never by hand.
 ai-run:
@@ -265,11 +270,24 @@ video-clips:
 video-rough:
 	$(PY) scripts/video_rough.py
 
-# Update 14 section 8 item 2. Says what it would do; with GO=yes, on main on Sep 30, removes the
-# working notes, runs submit-check, and only then makes the repository public.
+# UPDATE_30 section 4. The final cut, captions only, or with the voice when
+# ~/second-look-media/voice/ holds voice.m4a, voice.wav or voice.mp3. It writes the mp4, its .srt
+# and the thumbnail to ~/second-look-media/final/, never into the repository, and the summary to
+# docs/video/final_cut.json. video-frames takes one frame every 10 s of it for a review.
+video-final:
+	$(PY) scripts/video_final.py $(if $(SCREENS),--screens $(SCREENS),)
+
+video-frames:
+	$(PY) scripts/video_final.py --frames-into $(or $(FRAMES),$(HOME)/second-look-media/final/frames)
+
+# UPDATE_30 section 8. Says what it would do. GO=dry runs every step before the flip in a
+# throwaway worktree and stops (main is never touched); GO=yes, on main on Sep 30, runs them all:
+# the secrets scan, the working notes out in one commit, the tests, submit-check, the README's
+# images and links, the changelog, then the push, the flip, a logged out pass, and the v1.0 tag
+# and release. docs/SUBMISSION_DAY.md has the order of the day.
 go-public:
-	$(PY) scripts/go_public.py $(if $(filter yes,$(GO)),--yes,)
-# bash scripts/go_public.sh --run does the same thing; Alex was told that command first.
+	$(PY) scripts/go_public.py $(if $(filter yes,$(GO)),--yes,)$(if $(filter dry,$(GO)),--no-flip,)
+# bash scripts/go_public.sh --run (or --dry) does the same thing; Alex was told that command first.
 
 # The one command for a judge: no key, no network, six lines out. Tests, every AI number graded
 # again from the raw replies, FHIR validation, the web build and the design gate, the audit chain,

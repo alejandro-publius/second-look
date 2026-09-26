@@ -165,6 +165,12 @@ job checks before it deploys anything.
 <!-- deploys:start -->
 | When (UTC) | Part | Commit | Id | Archive | Checked |
 |---|---|---|---|---|---|
+| 2026-09-25T22:57:39Z | web | `5acd34a` | `ce38185d` | `~/second-look-backups/deploys/web-20260925T225739Z-5acd34a` | yes |
+| 2026-09-25T22:56:47Z | worker | `5acd34a` | `d5527e10-38dd-4934-a874-bf9f630a1620` |  | yes |
+| 2026-09-25T22:10:46Z | web | `8d04135` | `b60e7e02` | `~/second-look-backups/deploys/web-20260925T221046Z-8d04135` | yes |
+| 2026-09-25T22:09:48Z | worker | `8d04135` | `36aa2ae4-2714-4f2a-8194-0aa2e14478bd` |  | yes |
+| 2026-09-25T20:08:43Z | web | `ead37a6` | `3bed84af` | `~/second-look-backups/deploys/web-20260925T200843Z-ead37a6` | yes |
+| 2026-09-25T20:07:45Z | worker | `ead37a6` | `4677a919-d533-4e15-a999-536e3fdd1eef` |  | yes |
 | 2026-09-25T17:18:19Z | worker | `c5b608c` | `3197b45a-0bc6-4d44-b9e8-5903a9d82d36` |  | yes |
 | 2026-09-25T17:17:52Z | web | `c5b608c` | `7827652f` | `~/second-look-backups/deploys/web-20260925T171752Z-c5b608c` | yes |
 <!-- deploys:end -->

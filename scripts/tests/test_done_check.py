@@ -356,9 +356,24 @@ def test_only_picks_items_and_refuses_an_unknown_id(
 
 
 INTERNAL = ROOT.joinpath("docs", "internal")
+# Keyed on the checklist itself, not the folder: after go-public a file nobody committed can keep
+# the folder on a disk while git has removed everything in it.
+CHECKLIST_GONE = not (INTERNAL / "DONE.md").is_file()
 
 
-@pytest.mark.skipif(not INTERNAL.is_dir(), reason="the working notes were removed at go-public")
+def test_done_check_says_the_notes_are_gone_and_exits_0(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """After make go-public the checklist is gone with the working notes: not an error."""
+    gone = tmp_path / "docs" / "internal" / "DONE.md"
+    monkeypatch.setattr(dc, "DONE_FILE", gone)
+    assert dc.main(["--root", str(tmp_path)]) == 0
+    assert "make go-public removed them" in capsys.readouterr().out
+    # A checklist named on purpose that is missing is still an error.
+    assert dc.main(["--file", str(tmp_path / "nowhere.md"), "--root", str(tmp_path)]) == 2
+
+
+@pytest.mark.skipif(CHECKLIST_GONE, reason="the working notes were removed at go-public")
 def test_the_real_checklist_reads_and_every_command_names_real_parts() -> None:
     items = dc.parse(dc.DONE_FILE.read_text(encoding="utf-8"))
     kinds = {i.kind for i in items}
@@ -378,7 +393,7 @@ def test_the_real_checklist_reads_and_every_command_names_real_parts() -> None:
     assert len(humans) == done_items.human_count(ROOT) and humans
 
 
-@pytest.mark.skipif(not INTERNAL.is_dir(), reason="the working notes were removed at go-public")
+@pytest.mark.skipif(CHECKLIST_GONE, reason="the working notes were removed at go-public")
 def test_the_real_checklist_keeps_the_order_of_update_27() -> None:
     text = dc.DONE_FILE.read_text(encoding="utf-8")
     groups = [ln[3:] for ln in text.splitlines() if ln.startswith("## ")]
@@ -422,7 +437,7 @@ def run_cause_test(tmp_path: Path, name: str, lookup: str | None) -> int:
     return proc.returncode
 
 
-@pytest.mark.skipif(not INTERNAL.is_dir(), reason="the working notes were removed at go-public")
+@pytest.mark.skipif(CHECKLIST_GONE, reason="the working notes were removed at go-public")
 def test_the_d41_cause_holds_only_while_the_name_does_not_resolve(tmp_path: Path) -> None:
     # REVIEW_03 R59: the cause test began with !, which turned "python3: command not found" (127)
     # into 0, so D41 would have stayed BLOCKED with no lookup made at all.

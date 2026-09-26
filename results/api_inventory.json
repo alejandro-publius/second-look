@@ -2,7 +2,7 @@
   "script": "scripts/api_inventory.py",
   "synthetic": false,
   "worker": {
-    "count": 34,
+    "count": 35,
     "routes": [
       {
         "method": "POST",
@@ -137,13 +137,17 @@
         "path": "/api/walk/{}"
       },
       {
+        "method": "GET",
+        "path": "/api/walk/{}/fhir"
+      },
+      {
         "method": "any",
         "path": "/health"
       }
     ]
   },
   "python": {
-    "count": 28,
+    "count": 29,
     "routes": [
       {
         "method": "POST",
@@ -309,12 +313,18 @@
       },
       {
         "method": "GET",
+        "path": "/api/walk/{record_id}/fhir",
+        "limit": "read",
+        "file": "apps/api/routes_check.py"
+      },
+      {
+        "method": "GET",
         "path": "/health",
         "limit": null,
         "file": "apps/api/main.py"
       }
     ],
-    "with_a_rate_limit": 22
+    "with_a_rate_limit": 23
   },
   "rate_limits": {
     "study": {

@@ -12,6 +12,8 @@ import { BASE } from "./helpers";
 const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
 const en: Record<string, string> = content.locale;
 const walk: { id: string } = content.walks[0];
+// "Do the walk first, then come back here.", its first words a link to the walk (critic round 14 O02).
+const walkEmpty = en["city.walk_empty"].replace("{link}", en["city.walk_empty_link"]);
 
 /** Finishes the walk the way the gallery does, answering Artificial for the bank, and returns the
  * record's answer lines and its FHIR as View as FHIR shows them. */
@@ -46,21 +48,23 @@ test("Back from a walk's city view opens the walk on its record, with View as FH
   expect(back.bundle.meta.tag.some((t: { code: string }) => t.code === "demo-walk")).toBe(true);
   await expect(page.getByTestId("walk-structure")).toHaveText(en["walk.structure_ok"]);
 
-  // Start again clears the record from this tab and goes back to the watch screen.
+  // Start again asks first (critic round 15 Y02), then clears the record from this tab and goes
+  // back to the watch screen.
   await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+  await page.getByRole("button", { name: en["walk.start_again_yes"], exact: true }).click();
   await expect(page.getByRole("button", { name: en["walk.start"] })).toBeVisible();
   await expect(page.getByRole("heading", { name: en["walk.done_title"] })).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole("button", { name: en["walk.start"] })).toBeVisible();
   await expect(page.getByRole("heading", { name: en["walk.done_title"] })).toHaveCount(0);
   await page.goto(`${BASE}/city?walk=${walk.id}`);
-  await expect(page.getByText(en["city.walk_empty"])).toBeVisible();
+  await expect(page.getByTestId("walk-city-empty")).toHaveText(walkEmpty);
 });
 
 test("the walk's city view links back to the record, and has no such link before a walk", async ({ page }) => {
   await mockApi(page, {});
   await page.goto(`${BASE}/city?walk=${walk.id}`);
-  await expect(page.getByText(en["city.walk_empty"])).toBeVisible();
+  await expect(page.getByTestId("walk-city-empty")).toHaveText(walkEmpty);
   await expect(page.getByRole("link", { name: en["city.walk_back"] })).toHaveCount(0);
 
   const made = await finishWalk(page);

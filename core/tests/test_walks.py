@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 
+from core.content_loader import load_content
 from core.fhir_emit import check_bundle
+from core.followups import Followup
 from core.walks import (
     DEMO_TAG_CODE,
     WALK_FUTURE_SECONDS,
@@ -18,10 +21,14 @@ from core.walks import (
     is_demo,
     utc_stamp,
     walk_bundle,
+    walk_checks,
+    walk_followups,
     walk_record,
     walk_spot,
     walk_visit_id,
 )
+
+ROOT = Path(__file__).resolve().parents[2]
 
 WALK = {"id": "v03", "spot_name": "The stretch in the clip", "creek_name": "A creek in Chile"}
 AT = datetime(2026, 9, 24, 16, 5, 9, tzinfo=UTC)
@@ -145,3 +152,96 @@ def test_the_edges_of_the_window_are_kept() -> None:
     old = NOW - timedelta(days=WALK_PAST_DAYS)
     for moment in (ahead, old):
         assert walk_record(WALK, {}, utc_stamp(moment), NOW)["answered_at"] == utc_stamp(moment)
+
+
+# Judge walk W01: a walk runs the creek check's follow-up rules on its answers. The judge's own
+# answers: overall Good, the bank Artificial, a sewage discharge and a pipe.
+JUDGE = {
+    "overall_rating": "good",
+    "bank_type": "present",
+    "sewage_discharge": "present",
+    "draining_pipes": "present",
+}
+
+
+def _followups(answers: Mapping[str, object]) -> list[Followup]:
+    content = load_content(ROOT)
+    return walk_followups(answers, content.followups, form_items=content.form["items"])
+
+
+def test_a_walk_asks_the_rating_check_and_never_the_dry_pipe_question() -> None:
+    chosen = _followups(JUDGE)
+    # Rain is unknown for a clip, so the dry pipe rule fails closed although a pipe was reported;
+    # no score and no flag, so the low score and checker rules have nothing to read.
+    assert [f.rule_id for f in chosen] == ["rating_check"]
+    assert chosen[0].params["issues"] == "artificial banks and a sewage discharge"
+    assert _followups({**JUDGE, "overall_rating": "moderate"}) == []
+
+
+def test_a_walk_keeps_its_checks_as_the_creek_check_does() -> None:
+    chosen = _followups(JUDGE)
+    checks, final = walk_checks(JUDGE, chosen, ["Keep it?"], {"rating_check": "change"}, "poor")
+    assert final == "poor"
+    assert [c.model_dump() for c in checks] == [
+        {
+            "rule_id": "rating_check",
+            "asked": True,
+            "question_text": "Keep it?",
+            "answer": "change",
+            "detail": {
+                "issues": "artificial banks and a sewage discharge",
+                "first_rating": "good",
+                "kind": "keep_rating",
+            },
+        }
+    ]
+    assert walk_checks(JUDGE, chosen, ["Keep it?"], {}, None)[1] == "good"
+    assert walk_checks(JUDGE, chosen, ["Keep it?"], {"rating_check": "keep"}, "good")[1] == "good"
+
+
+@pytest.mark.parametrize(
+    ("given", "final", "reason"),
+    [
+        ({"dry_pipe": "yes"}, None, "No follow-up called 'dry_pipe' was asked in this walk."),
+        ({"rating_check": "yes"}, None, "rating_check: answer keep, change, skipped."),
+        ({"rating_check": "change"}, None, "A changed rating needs the new rating."),
+        ({"rating_check": "keep"}, "poor", "only when the rating check says change"),
+        ({}, "poor", "only when the rating check says change"),
+    ],
+)
+def test_a_walk_answer_that_does_not_fit_its_question_is_refused(
+    given: dict[str, object], final: str | None, reason: str
+) -> None:
+    with pytest.raises(WalkRecordError, match=reason.replace(".", r"\.")):
+        walk_checks(JUDGE, _followups(JUDGE), ["Keep it?"], given, final)
+
+
+def _rating_answer(bundle: Mapping[str, object]) -> tuple[str, str]:
+    """The overall rating the record's QuestionnaireResponse answers, and that response's text."""
+    entries = bundle["entry"]
+    assert isinstance(entries, list)
+    for entry in entries:
+        resource = entry["resource"]
+        if resource["resourceType"] == "QuestionnaireResponse":
+            rated = [i for i in resource["item"] if i["linkId"] == "overall_rating"]
+            return rated[0]["answer"][0]["valueCoding"]["code"], resource["text"]["div"]
+    raise AssertionError("no QuestionnaireResponse")
+
+
+# Critic round 15 F02: after Change my rating the record screen said the new rating, but View as
+# FHIR still answered Good. The record a city reads carries the rating the person kept.
+def test_a_rating_changed_on_the_rating_check_is_the_rating_the_record_carries() -> None:
+    changed = walk_bundle(WALK, JUDGE, AT, "poor")
+    code, text = _rating_answer(changed)
+    assert code == "poor"
+    assert "The first overall rating was good." in text
+    assert "changed it to poor" in text
+    assert check_bundle(changed) == [] and is_demo(changed)
+    # Kept, or no rating check at all: the record the walk's own answers make, word for word.
+    assert walk_bundle(WALK, JUDGE, AT, "good") == walk_bundle(WALK, JUDGE, AT)
+    assert _rating_answer(walk_bundle(WALK, JUDGE, AT))[0] == "good"
+    # The stored row carries the same record, and the answers themselves are left as given.
+    row = walk_record(WALK, JUDGE, "2026-09-25T09:59:58Z", NOW, "poor")
+    at = datetime(2026, 9, 25, 9, 59, 58, tzinfo=UTC)
+    assert row["bundle"] == walk_bundle(WALK, JUDGE, at, "poor")
+    assert JUDGE["overall_rating"] == "good"

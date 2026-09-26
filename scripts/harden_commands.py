@@ -20,9 +20,13 @@ its turn comes; if another process holds one, it is listed as not run with that 
 with a placeholder in it (SITE_URL=...) is listed, not run. --branch reads a branch other than
 harden, for example depth, whose docs/ACCEPTANCE.md exists there first.
 
-Writes results/harden/commands.md and results/harden/commands.json.
+Writes results/harden/commands.md and results/harden/commands.json. What a command printed is kept
+without this machine's paths: no home folder, no temporary folder, no uv warning about the shell's
+own VIRTUAL_ENV (critic round 15 N03). --render writes the page again from the JSON file, with
+those paths taken out, and runs nothing.
 
   uv run python scripts/harden_commands.py --work /tmp/somewhere
+  uv run python scripts/harden_commands.py --render [--name commands_depth]
 """
 
 from __future__ import annotations
@@ -95,6 +99,8 @@ SAFE_MAKE = {
     "done-check",
     "mutation",
     "report-pdf",
+    "rollback",  # a dry run unless ROLLBACK=yes, which no printed command sets
+    "video-final",  # run with its output sent to the work folder, never over the real cut
 }
 # The setup a judge types first. Each only installs into the clone, or installs the pre-commit tool.
 SETUP_PART = (
@@ -159,14 +165,53 @@ def port_free(port: int) -> bool:
         return s.connect_ex(("127.0.0.1", port)) != 0
 
 
+# make submit-check is red by design until Sep 30, on the video link and the repository being
+# public (docs/ACCEPTANCE.md row 14 prints exactly that). It passes here only when those two are
+# its only failures.
+SUBMIT_EXPECTED_RED = {"video_link", "repo_public"}
+
+
+def expected_red(cmd: str, tail: str) -> bool:
+    if cmd.strip() != "make submit-check":
+        return False
+    failed = set(re.findall(r"^FAIL\s+(\w+)", tail, re.M))
+    return bool(failed) and failed <= SUBMIT_EXPECTED_RED
+
+
+# What a command printed, as the tables keep it (critic round 15 N03). uv warns about a VIRTUAL_ENV
+# the shell had set, and output names the clone's temporary folder and the maintainer's home.
+VENV_WARNING = re.compile(r"^warning: `VIRTUAL_ENV=.*(?:\n|$)", re.M)
+# The same warning cut short where a kept tail starts.
+VENV_REST = re.compile(
+    r"[^\s()][^\n()]*will be ignored; use `--active` to target the active environment instead\n?"
+)
+# A kept tail that held nothing but that warning.
+ONLY_WARNING = "(the kept output was only uv's warning about the shell's own VIRTUAL_ENV)"
+# A path into the clone, <work>/tree/..., whole or cut short at the start of a kept tail; never
+# part of an address such as https://host/a/tree/b, since it cannot cross a colon.
+CLONE_PATH = re.compile(r"(?<![\w:/.-])(?:/|[\w.-]+/)[^\s'\"`:]*?/tree/")
+TEMP_PATH = re.compile(r"(?:/private)?/(?:tmp|var/folders)/[^\s'\"`)]+")
+HOME_PATH = re.compile(r"/(?:Users|home)/[^/\s'\"`]+")
+
+
+def scrub(text: str) -> str:
+    text = VENV_REST.sub("", VENV_WARNING.sub("", text))
+    # The clone lives at <work>/tree, so a path into it reads from the clone's root.
+    text = CLONE_PATH.sub("", text)
+    text = TEMP_PATH.sub("<temp folder>", text)
+    return HOME_PATH.sub("~", text)
+
+
 def run(cmd: str, cwd: Path, timeout: int = 900, env: dict[str, str] | None = None) -> dict:
     started = time.monotonic()
+    # The shell's own VIRTUAL_ENV is not the clone's, and uv would say so under every command.
+    base = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
     try:
         proc = subprocess.run(
             cmd,
             shell=True,
             cwd=cwd,
-            env={**os.environ, **(env or {})},
+            env={**base, **(env or {})},
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -175,7 +220,12 @@ def run(cmd: str, cwd: Path, timeout: int = 900, env: dict[str, str] | None = No
         code, out = proc.returncode, proc.stdout + proc.stderr
     except subprocess.TimeoutExpired:
         code, out = -1, f"timed out after {timeout} s"
-    return {"code": code, "seconds": round(time.monotonic() - started, 1), "tail": out[-1500:]}
+    return {
+        "code": code,
+        "seconds": round(time.monotonic() - started, 1),
+        "tail": scrub(out)[-1500:],
+        "out": out,
+    }
 
 
 SERVES_3100 = (
@@ -189,8 +239,14 @@ SERVES_3100 = (
 )
 
 
+WEB_PORT_PREFIX = re.compile(r"^WEB_PORT=(\d{4,5}) (.+)$")
+
+
 def policy(cmd: str) -> str:
     """Empty when the command may run; otherwise the reason it is not run."""
+    moved = WEB_PORT_PREFIX.match(cmd)
+    if moved:  # the README's WEB_PORT=3200 make demo-offline: a port, then a command
+        return policy(moved.group(2))
     low = cmd.lower()
     if "..." in cmd or "<" in cmd:
         return "a template with a placeholder in it, not a command to run as printed"
@@ -228,10 +284,16 @@ def policy(cmd: str) -> str:
     return "not on the safe list"
 
 
-def make_dev(tree: Path, offline: bool = False) -> dict:
-    """make dev, or make demo-offline: two servers that never exit, passed when both answer."""
-    api_port, web_port = 8000, 3100
+def make_dev(tree: Path, offline: bool = False, asked_port: int | None = None) -> dict:
+    """make dev, or make demo-offline: two servers that never exit, passed when both answer. With
+    asked_port (WEB_PORT=3200 make demo-offline), the site must answer on that port."""
+    api_port, web_port = 8000, asked_port or 3100
     moved = ""
+    if asked_port and offline:
+        if not port_free(api_port):
+            api_port = 8962
+        cmds = [(f"WEB_PORT={asked_port} make demo-offline DEMO_API_PORT={api_port}", tree)]
+        return _serve(cmds, api_port, web_port, offline, "")
     if not (port_free(api_port) and port_free(web_port)):
         api_port, web_port = (8962, 8963) if offline else (8960, 8961)
         moved = (
@@ -245,6 +307,12 @@ def make_dev(tree: Path, offline: bool = False) -> dict:
             (f"uv run python -m uvicorn apps.api.main:app --port {api_port}", tree),
             (f"npm run dev -- -p {web_port}", tree / "apps" / "web"),
         ]
+    return _serve(cmds, api_port, web_port, offline, moved)
+
+
+def _serve(
+    cmds: list[tuple[str, Path]], api_port: int, web_port: int, offline: bool, moved: str
+) -> dict:
     procs = [
         subprocess.Popen(
             c,
@@ -354,13 +422,76 @@ def mcp(cmd: str, tree: Path) -> dict:
     }
 
 
+def joined(words: list[str]) -> str:
+    return words[0] if len(words) == 1 else f"{', '.join(words[:-1])} and {words[-1]}"
+
+
+def page(doc: dict[str, Any]) -> str:
+    """commands.md, from commands.json alone."""
+    rows = doc["commands"]
+    setup = doc["setup"]
+    npm = "npm ci ("
+    folders = [k.removeprefix(npm).removesuffix(")") for k in setup if k.startswith(npm)]
+    missing = doc.get("docs_missing")
+    if missing is None:  # a file written before docs_missing was kept: no row, not read
+        missing = [d for d in DOCS if not any(r["doc"] == d for r in rows)]
+    branch = doc.get("branch", "HEAD")
+    lines = [
+        "# Commands printed in the README",
+        "",
+        f"Checked {doc['checked_utc']} at commit {doc['commit']}"
+        + (f" (branch {branch})" if branch != "HEAD" else "")
+        + " by `uv run python scripts/harden_commands.py`, in a "
+        f"fresh clone after `uv sync --frozen` and `npm ci` in {joined(folders)}, "
+        "the way a judge "
+        "would start. "
+        + (f"{', '.join(missing)} does not exist, so only the README was read. " if missing else "")
+        + "Setup: "
+        + ", ".join(f"{k} exit {v}" for k, v in setup.items())
+        + ".",
+        "",
+        "| Where | Command | Result | What happened |",
+        "|---|---|---|---|",
+    ]
+    for r in rows:
+        detail = " ".join(str(r["detail"]).split())[-300:].replace("|", "/")
+        lines.append(f"| {r['doc']}:{r['line']} | `{r['command']}` | {r['result']} | {detail} |")
+    failed = [r for r in rows if r["result"] == "fail"]
+    lines += [
+        "",
+        f"{len(rows)} commands: {sum(r['result'] == 'pass' for r in rows)} pass, {len(failed)} "
+        f"fail, {sum(not r['ran'] for r in rows)} not run.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def write(doc: dict[str, Any], out: Path, name: str) -> None:
+    """The JSON and its page, every command's output without this machine's paths."""
+    for r in doc["commands"]:
+        detail = str(r["detail"])
+        r["detail"] = scrub(detail) if scrub(detail).strip() or not detail.strip() else ONLY_WARNING
+    out.mkdir(parents=True, exist_ok=True)
+    (out / f"{name}.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+    (out / f"{name}.md").write_text(page(doc), encoding="utf-8")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    ap.add_argument("--work", type=Path, required=True, help="scratch folder outside the repo")
+    ap.add_argument("--work", type=Path, help="scratch folder outside the repo")
     ap.add_argument("--out", type=Path, default=ROOT / "results" / "harden")
     ap.add_argument("--branch", default="", help="a local branch to read instead of HEAD")
     ap.add_argument("--name", default="commands", help="output file stem")
+    ap.add_argument(
+        "--render", action="store_true", help="write the page again from the JSON; run nothing"
+    )
     args = ap.parse_args()
+    if args.render:
+        doc = json.loads((args.out / f"{args.name}.json").read_text(encoding="utf-8"))
+        write(doc, args.out, args.name)
+        return 0
+    if args.work is None:
+        raise SystemExit("--work is needed unless --render is given")
     if ROOT in args.work.resolve().parents:
         raise SystemExit("--work must be outside the repo")
     tree = args.work / "tree"
@@ -391,17 +522,26 @@ def main() -> int:
             r = make_dev(tree)
         elif cmd.strip() == "make demo-offline":
             r = make_dev(tree, offline=True)
+        elif (m := WEB_PORT_PREFIX.match(cmd.strip())) and m.group(2) == "make demo-offline":
+            r = make_dev(tree, offline=True, asked_port=int(m.group(1)))
         elif "apps.mcp.server" in cmd:
             r = mcp(cmd, tree)
         else:
             env = {"E2E_PORT": "8971"} if "worker-e2e" in cmd else {}
+            if "video-final" in cmd:
+                # It reads the footage and the screen recordings from ~/second-look-media, which
+                # are not in the repository, and writes the cut to a folder of this run only.
+                env = {
+                    "SECOND_LOOK_FINAL": str(tree.parent / "video-final-out"),
+                    "SECOND_LOOK_SCREENS": str(Path.home() / "second-look-media" / "screens"),
+                }
             r = run(cmd, tree, env=env)
             if cmd.startswith("make new-city"):
                 # It scaffolds a city into the clone: put the clone back, so every later command
                 # sees the committed tree (an extra city adds a record to validate, for one).
                 restore = run("git checkout -- . && git clean -fdq -- fhir content docs", tree)
                 r["tail"] += f" (clone restored: exit {restore['code']})"
-        result = "pass" if r["code"] == 0 else "fail"
+        result = "pass" if r["code"] == 0 or expected_red(cmd, r.get("out", r["tail"])) else "fail"
         rows.append(
             {
                 **c,
@@ -414,50 +554,15 @@ def main() -> int:
         )
         print(f"{result}: {cmd}")
     stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / f"{args.name}.json").write_text(
-        json.dumps(
-            {
-                "checked_utc": stamp,
-                "commit": commit,
-                "branch": args.branch or "HEAD",
-                "setup": {k: v["code"] for k, v in setup.items()},
-                "commands": rows,
-            },
-            indent=1,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    missing = [d for d in DOCS if not (tree / d).exists()]
-    lines = [
-        "# Commands printed in the README",
-        "",
-        f"Checked {stamp} at commit {commit}"
-        + (f" (branch {args.branch})" if args.branch else "")
-        + " by `uv run python scripts/harden_commands.py`, in a "
-        "fresh clone after `uv sync --frozen` and `npm ci` in apps/web, worker and tools/diagrams, "
-        "the way a judge "
-        "would start. "
-        + (f"{', '.join(missing)} does not exist, so only the README was read. " if missing else "")
-        + "Setup: "
-        + ", ".join(f"{k} exit {v['code']}" for k, v in setup.items())
-        + ".",
-        "",
-        "| Where | Command | Result | What happened |",
-        "|---|---|---|---|",
-    ]
-    for r in rows:
-        detail = " ".join(str(r["detail"]).split())[-300:].replace("|", "/")
-        lines.append(f"| {r['doc']}:{r['line']} | `{r['command']}` | {r['result']} | {detail} |")
-    failed = [r for r in rows if r["result"] == "fail"]
-    lines += [
-        "",
-        f"{len(rows)} commands: {sum(r['result'] == 'pass' for r in rows)} pass, {len(failed)} "
-        f"fail, {sum(not r['ran'] for r in rows)} not run.",
-        "",
-    ]
-    (args.out / f"{args.name}.md").write_text("\n".join(lines), encoding="utf-8")
+    doc = {
+        "checked_utc": stamp,
+        "commit": commit,
+        "branch": args.branch or "HEAD",
+        "setup": {k: v["code"] for k, v in setup.items()},
+        "docs_missing": [d for d in DOCS if not (tree / d).exists()],
+        "commands": rows,
+    }
+    write(doc, args.out, args.name)
     return 0
 
 

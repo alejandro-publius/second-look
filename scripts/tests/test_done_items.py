@@ -1161,6 +1161,14 @@ def test_the_invasive_list_counts_once_a_plant_with_a_taxon_id_is_approved(tmp_p
     assert di.check_invasive_list(tmp_path) == []
 
 
+@pytest.mark.skipif(
+    not Path(__file__)
+    .resolve()
+    .parents[2]
+    .joinpath("docs", "internal", "PANEL_STUDY.md")
+    .is_file(),
+    reason="the working notes were removed at go-public",
+)
 def test_the_panel_study_checks_codes_against_finished_sessions_before_paying(
     tmp_path: Path,
 ) -> None:

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnswerLine } from "./AnswerLine";
+import { ChecksThatRan } from "./ChecksThatRan";
 import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
 import { answerRows } from "@/lib/answers";
@@ -99,7 +100,10 @@ export function WalkStoredRecord({ recordId }: { recordId: string }) {
         {problems.length === 0 ? t("walk.structure_ok") : t("walk.structure_bad", { n: problems.length })}
       </p>
       <WalkAnswers answers={record.answers} title={t("walk.stored_answers")} />
-      <FhirView load={() => Promise.resolve(record.bundle)} curl={`curl -s ${api.walkRecordUrl(record.record_id)}`} walk="stored" />
+      {/* The follow-up checks the store ran and kept with the walk (judge walk W01), as /spot shows
+          a creek check's. A record stored before walks asked any has none. */}
+      <ChecksThatRan checks={record.checks ?? []} ratings={{ first_rating: record.first_rating ?? null, final_rating: record.final_rating ?? null }} level="h2" />
+      <FhirView load={() => Promise.resolve(record.bundle)} curl={`curl -s ${api.walkFhirUrl(record.record_id)}`} walk="stored" />
       <p>
         <Link className="btn btn-block" href={city}>
           {t("walk.city_link")}

@@ -210,9 +210,20 @@ async function liveRun(browser) {
     const req = route.request();
     if (liveRequestAllowed(req.method(), req.url(), LIVE)) return route.fallback();
     // A finished walk sends its record to the store (UPDATE_30 section 1 item 3). The gallery
-    // stores none on the live site: the send is dropped like a lost network, the walk keeps its
-    // record on the phone, and the run goes on. Every other write still fails the run.
-    if (req.method() === "POST" && new URL(req.url()).pathname === "/api/walk") return route.abort("internetdisconnected");
+    // stores none on the live site: the send is answered here, the way the store answers it, so the
+    // record screen shows what a judge sees after a walk (its stored record link) and nothing is
+    // written (judge simulation 02 saw a "no network" line in the shot). Every other write still
+    // fails the run.
+    if (req.method() === "POST" && new URL(req.url()).pathname === "/api/walk") {
+      const body = JSON.parse(req.postData() || "{}");
+      const answered = String(body.answered_at || "2026-09-25T12:00:00Z");
+      const after = new Date(Date.parse(answered) + 30 * 86400000).toISOString().replace(/\.\d{3}Z$/, "Z");
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ record_id: "walk-0000000000gallery", walk_id: body.walk_id, answered_at: answered, delete_after: after }),
+      });
+    }
     refused.push(`live: ${req.method()} ${req.url()}`);
     return route.abort();
   });

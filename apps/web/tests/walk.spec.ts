@@ -51,6 +51,26 @@ test("the walks are said to be somewhere else, not from another country", async 
   }
 });
 
+// Judge walk W05: the host answers a range request with the whole clip, so even preload
+// "metadata" pulled megabytes on page open, before anyone pressed play. Now the clip asks for no
+// byte until play, and its poster shows in its place.
+test("a walk's clip loads nothing before play and shows its poster", async ({ page }) => {
+  await mockApi(page, {});
+  const clips: string[] = [];
+  page.on("request", (r) => {
+    if (/\/walks\/[^/?]+\.mp4/.test(r.url())) clips.push(r.url());
+  });
+  for (const w of content.walks as { id: string; poster_photo_id: string }[]) {
+    await page.goto(`${BASE}/walk/${w.id}`);
+    const video = page.locator("video.walk-clip");
+    await expect(video).toHaveAttribute("preload", "none");
+    await expect(video).toHaveAttribute("poster", content.photos[w.poster_photo_id].url);
+    await page.waitForLoadState("networkidle");
+    expect(await video.evaluate((v: HTMLVideoElement) => v.readyState), w.id).toBe(0);
+  }
+  expect(clips, "clip bytes asked for before play").toEqual([]);
+});
+
 // UPDATE_30 section 1 item 3: the finished walk now goes to the walk store, once, as a demo
 // record, and to nothing else: no creek check, no upload, no quick check.
 test("a walk shows its credit, builds a demo record on the phone, and sends it to the walk store only", async ({ page }) => {
@@ -104,7 +124,7 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
     "Walk records made the same way passed the HL7 validator on Sep 20, 2026. This one was made on your phone and was not checked.",
   );
   await expect(page.getByText("passed the HL7 validator against guide commit")).toHaveCount(0);
-  await expect(page.locator("pre.code").first()).toHaveText(/^curl -s http:\/\/127\.0\.0\.1:8100\/api\/walk\/walk-[0-9a-f]{16}$/);
+  await expect(page.locator("pre.code").first()).toHaveText(/^curl -s http:\/\/127\.0\.0\.1:8100\/api\/walk\/walk-[0-9a-f]{16}\/fhir$/);
   const json = await page.locator("pre.code").last().innerText();
   const bundle = JSON.parse(json);
   expect(bundle.meta.tag.some((t: { code: string }) => t.code === "demo-walk")).toBe(true);
@@ -274,7 +294,10 @@ test("a feelings slider nobody moved stays out of the walk's record", async ({ p
   for (const moved of [false, true]) {
     await page.goto(`${BASE}/walk/${walks[0].id}`);
     // The second time, this tab holds the first walk, so the page opens on its record (CRITIC_10 S01).
-    if (moved) await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+    if (moved) {
+      await page.getByRole("button", { name: en["walk.start_again"], exact: true }).click();
+      await page.getByRole("button", { name: en["walk.start_again_yes"], exact: true }).click();
+    }
     await page.getByRole("button", { name: "Start the check" }).click();
     await answerWalk(page, async () => {
       const shown = page.locator("output[for^='slider-']");
@@ -442,4 +465,36 @@ test("a walk says how to see a measure, and an honest walk ends on a marked exam
   await expect(page.getByRole("main")).not.toContainText(/\bdoor\b/i);
   await back.click();
   await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
+});
+
+// Critic round 14 B03 and round 15 F04: Which ones? offered the San Francisco Bay Area's plant list
+// on creeks in Russia, the UK and Oregon, English ivy among them, which is native to Britain, and
+// named no region. A walk's creek is in no region with a list, so it offers only Can't tell and
+// None of these, and says whose list it would be. The clip's line about seeking is there too
+// (round 15 W05).
+test("a walk's Which ones? offers no region's plants and says the list is for the Bay Area", async ({ page }) => {
+  await mockApi(page, {});
+  const uk = walks.find((w: { id: string }) => w.id === "v03")!;
+  await page.goto(`${BASE}/walk/${uk.id}`);
+  await expect(page.getByTestId("walk-seek-note")).toHaveText(en["walk.seek_note"]);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  const invasive = content.form.items.find((i: { id: string }) => i.id === "invasive_species");
+  for (let i = 0; i < 40; i++) {
+    const question = (await page.locator("h1#question").innerText()).trim();
+    if (question === "Which ones?") break;
+    if (question === invasive.text) await page.getByRole("button", { name: en["check.yes"], exact: true }).click();
+    else if (await page.getByRole("button", { name: en["check.skip"], exact: true }).isVisible()) await page.getByRole("button", { name: en["check.skip"], exact: true }).click();
+    else if (await page.getByRole("button", { name: en["check.none_of_these"], exact: true }).isVisible()) await page.getByRole("button", { name: en["check.none_of_these"], exact: true }).click();
+    else if (await page.getByRole("main").getByRole("group").first().getByRole("button").first().isVisible()) await page.getByRole("main").getByRole("group").first().getByRole("button").first().click();
+    else await page.getByRole("button", { name: en["check.next"], exact: true }).click();
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.locator("h1#question")).toHaveText("Which ones?");
+  const group = page.getByRole("main").getByRole("group");
+  await expect(group.getByText(/Hedera helix/)).toHaveCount(0);
+  await expect(group.getByRole("checkbox")).toHaveCount(1);
+  await expect(group.getByLabel(en["check.not_sure"])).toBeVisible();
+  await expect(page.getByRole("button", { name: en["check.none_of_these"], exact: true })).toBeVisible();
+  const bayArea = content.regions["california-bay-area"].name;
+  await expect(page.getByTestId("region-list-note")).toHaveText(en["check.region_list_elsewhere"].replace("{regions}", bayArea));
 });

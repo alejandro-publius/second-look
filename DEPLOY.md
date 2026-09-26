@@ -120,6 +120,7 @@ deploys to https://depth.second-look-79t.pages.dev.
 | `sandbox_cache` | the laboratory record `/two` shows, as `scripts/cache_their_records.py` fetched it |
 | `inaturalist_cache` | one creek's iNaturalist context line: per listed invasive plant, a count, the latest date and a link, as `scripts/cache_inaturalist.py` fetched it |
 | `walk_record` | one finished video walk's demo record: the walk id, the coded answers, the time and the demo Bundle, deleted 30 days after it was stored by the Worker's daily cron (`worker/wrangler.jsonc`, 04:17 UTC) and by every new walk; never counted and never mirrored |
+| `walk_checks` | the follow-up checks one walk record ran, with the coded answers and the final rating, stored with it and deleted with it |
 | `part2_slot` | one slot of part 2's pre-registered arm sequences, one per part 1 arm, from `worker/part2_arms.sql` (`scripts/seed_part2_arms.py`) |
 | `part2_counter` | the next part 2 slot per part 1 arm |
 | `part2_session` | one part 2, the assisted second look, per part 1 sitting: the part 1 arm, the arm, the item order, or a decline (UPDATE_31) |
@@ -135,7 +136,7 @@ Names only. No value is in the repository: `.env.example` is tracked and `.env` 
 | `QA_KEY` | a Worker secret; the ignored `.env` in each checkout | marks a sitting as a test when sent as the `x-qa-key` header, so a live check never counts |
 | `EXPORT_TOKEN` | a Worker secret; the ignored `.env` | opens `/api/test/export`; without it the route is 404 |
 | `ANTHROPIC_API_KEY` | the ignored `.env` in `~/second-look-depth` only, never exported in a shell | lets `make ai-run` call the models; nothing else reads it |
-| `CLOUDFLARE_D1_READ_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets, not yet set | let `.github/workflows/backup.yml` export D1; the workflow runs by hand only until they exist |
+| `CLOUDFLARE_D1_READ_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions secrets, not yet set | let `.github/workflows/backup.yml` export D1; the workflow runs by hand only, and only while the repository is private, and it is unused: the daily backup is `com.secondlook.backup` below |
 | `wrangler login` (not a variable) | wrangler's own store on the Mac | deploys, the D1 backup and the daily cache job |
 
 Both servers treat a secret shorter than 16 characters as not set (`apps/api/settings.py`,
@@ -155,7 +156,7 @@ holds the table they are built from.
 | `com.secondlook.theirs` | daily at 07:30 | `scripts/cache_their_records.py`: one read only GET to their sandbox, stored in `sandbox_cache` for `/two` | `bash scripts/install_cache_job.sh` |
 | `com.secondlook.inaturalist` | daily at 07:45 | `scripts/cache_inaturalist.py`: reads the creeks' Locations from our own API, asks iNaturalist about the region's listed invasive plants near them at one request a second, stores a summary per creek in `inaturalist_cache` | `bash scripts/install_inaturalist_job.sh` |
 | `com.secondlook.repush` | daily at 08:00 | `scripts/sandbox_retry.py`: while their sandbox's name does not resolve, sends nothing; when it does, puts our worked visit and Library entry back by conditional create, refreshes `/two`'s cache and says so once on the status issue | `bash scripts/install_repush_job.sh` |
-| `com.secondlook.anchor` | daily at 06:00 | `scripts/anchor_audit_head.py`: stamps the audit log's last hash with OpenTimestamps into `proofs/`, sending only that hash to the public calendars; then `scripts/ots_status.py` upgrades every proof and writes `results/ots.json`. It commits nothing | `bash scripts/install_anchor_job.sh` |
+| `com.secondlook.anchor` | daily at 06:00 | `scripts/anchor_audit_head.py`: stamps the audit log's last hash with OpenTimestamps into `proofs/`, but only on a day that hash has changed since the last stamp, sending only that hash to the public calendars; then `scripts/ots_status.py` upgrades every proof and writes `results/ots.json`. It commits nothing | `bash scripts/install_anchor_job.sh` |
 | `com.secondlook.hl7` | daily at 09:00 | `scripts/hl7_watch.py`: reads hl7-eu/oah pull request 5 and issues 6, 7 and 8 with `gh`; a new comment from a maintainer goes to the status issue. It never replies | `make mac-jobs-install` |
 | `com.secondlook.uptime` | every 10 minutes | `scripts/uptime.py`: GETs `/`, `/judges`, `/city`, one walk, `/health` and the counts on the live site; two failures in a row write `~/second-look-backups/uptime.log`, one status issue comment and a notification | `make mac-jobs-install` |
 | `com.secondlook.lock` | once, at 18:10 on Sep 27 in California (2026-09-28T01:10:00Z) | `scripts/lock_analysis.py`: the data lock, `make lock-analysis` | `make lock-analysis-install` |
@@ -198,6 +199,10 @@ a row names something the code no longer reads, or when a default below differs 
 | `MERMAID_CLI` | not set | `scripts/check_diagrams.py` | `1` also renders every diagram, not only parses it |
 | `SECOND_LOOK_BACKUP_DIR` | `~/second-look-backups` | `scripts/preflight.py` | where preflight looks for the last backup |
 | `SECOND_LOOK_MEDIA` | `~/second-look-media` | `scripts/fetch_footage.py` | where downloaded footage goes, outside the repo |
+| `SECOND_LOOK_SCREENS` | `docs/video/clips` | `scripts/video_final.py` | the screen recordings the final cut uses (`make video-final SCREENS=...` sets it) |
+| `SECOND_LOOK_VOICE` | `~/second-look-media/voice` | `scripts/video_final.py` | where a voice file is looked for, outside the repo |
+| `SECOND_LOOK_FINAL` | `~/second-look-media/final` | `scripts/video_final.py` | where the final cut, its .srt and the thumbnail are written, outside the repo |
+| `SCREENS_API_ORIGIN` | not set | `apps/web/scripts/record-clips.mjs` | the API address a recorded build calls; the mock answers it, so nothing reaches it |
 | `SECOND_LOOK_CLIPS` | `~/second-look-media/clips` | `scripts/video_rough.py` | the cut clips the rough cut reads |
 | `SECOND_LOOK_SAY_VOICE` | `Samantha` | `scripts/video_rough.py` | the macOS voice of the scratch narration |
 | `SECOND_LOOK_CONTACT` | the project's GitHub noreply address | `scripts/find_open_photos.py`, `scripts/find_open_videos.py` | the contact in the user agent of the photo and video searches |

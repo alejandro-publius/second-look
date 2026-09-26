@@ -81,6 +81,8 @@ test("an address with no page gets the site's own page, with a way on", async ({
   const res = await page.goto("/no-such-page");
   expect(res!.status()).toBe(404);
   await expect(page.getByRole("heading", { level: 1, name: "No page here" })).toBeVisible();
+  // Its own tab title, not the landing page's (critic round 14 P02).
+  await expect(page).toHaveTitle("No page here: Second Look");
   const main = page.getByRole("main");
   await expect(main.getByRole("link", { name: "Go to the start", exact: true })).toHaveAttribute("href", "/");
   await expect(main.getByRole("link", { name: "The page for judges", exact: true })).toHaveAttribute("href", "/judges");

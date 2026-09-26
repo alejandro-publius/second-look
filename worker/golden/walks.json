@@ -1062,11 +1062,2102 @@
         }
       },
       "name": "a walk where the person saw nothing and skipped the rest"
+    },
+    {
+      "expected": {
+        "entry": [
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+            "resource": {
+              "active": true,
+              "id": "sl-org",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+                  "value": "second-look"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "name": "Second Look project",
+              "resourceType": "Organization",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+            "resource": {
+              "deviceName": [
+                {
+                  "name": "Second Look web app",
+                  "type": "user-friendly-name"
+                }
+              ],
+              "id": "sl-device",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/device",
+                  "value": "second-look-web"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Device",
+              "status": "active",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>",
+                "status": "generated"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "software",
+                    "display": "Second Look software",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              },
+              "version": [
+                {
+                  "value": "0.1.0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03",
+            "resource": {
+              "id": "sl-loc-walk-v03",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "A creek in a clip",
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>A creek in a clip. A creek used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-reach",
+            "resource": {
+              "id": "sl-loc-walk-v03-reach",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-reach"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A reach used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-spot",
+            "resource": {
+              "id": "sl-loc-walk-v03-spot",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-spot"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03-reach"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A spot used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-bbbefee08a25",
+            "resource": {
+              "active": true,
+              "id": "sl-practitioner-bbbefee08a25",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+                  "value": "sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Practitioner",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9",
+            "resource": {
+              "author": {
+                "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+              },
+              "authored": "2026-09-25T09:30:00Z",
+              "id": "sl-qr-visit-walk-757a5b9a10482fc9",
+              "identifier": {
+                "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+                "value": "walk-757a5b9a10482fc9"
+              },
+              "item": [
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "bank_type"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "sewage_discharge"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "moderate",
+                        "display": "Moderate overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "overall_rating"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+              "resourceType": "QuestionnaireResponse",
+              "status": "completed",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T09:30:00Z, 3 items answered.</p><p>The first overall rating was good. On the rating check the volunteer changed it to moderate.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-757a5b9a10482fc9-bank-type",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "morophology",
+                      "display": "Morphology of the streams",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "artificial-bank",
+                    "display": "Artificial bank",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Bank type"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9"
+                }
+              ],
+              "effectiveDateTime": "2026-09-25T09:30:00Z",
+              "id": "sl-obs-walk-757a5b9a10482fc9-bank-type",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-757a5b9a10482fc9-bank_type"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank type at The stretch in the clip: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-757a5b9a10482fc9-sewage-discharge",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "pipe-running",
+                    "display": "Pipe running",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Is there any kind of water entry or discharge of sewage?"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9"
+                }
+              ],
+              "effectiveDateTime": "2026-09-25T09:30:00Z",
+              "id": "sl-obs-walk-757a5b9a10482fc9-sewage-discharge",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-757a5b9a10482fc9-sewage_discharge"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Is there any kind of water entry or discharge of sewage? at The stretch in the clip: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-walk-757a5b9a10482fc9",
+            "resource": {
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "author",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "assembler",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Device/sl-device"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9"
+                  }
+                }
+              ],
+              "id": "sl-provenance-walk-757a5b9a10482fc9",
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "recorded": "2026-09-25T09:30:00Z",
+              "resourceType": "Provenance",
+              "target": [
+                {
+                  "reference": "Observation/sl-obs-walk-757a5b9a10482fc9-bank-type"
+                },
+                {
+                  "reference": "Observation/sl-obs-walk-757a5b9a10482fc9-sewage-discharge"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>2 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
+                "status": "generated"
+              }
+            }
+          }
+        ],
+        "id": "sl-visit-walk-757a5b9a10482fc9",
+        "meta": {
+          "tag": [
+            {
+              "code": "demo-walk",
+              "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+              "system": "https://github.com/alejandro-publius/second-look/tags"
+            }
+          ]
+        },
+        "resourceType": "Bundle",
+        "timestamp": "2026-09-25T09:30:00Z",
+        "type": "collection"
+      },
+      "input": {
+        "answered_at": "2026-09-25T09:30:00Z",
+        "answers": {
+          "bank_type": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "moderate",
+        "walk": {
+          "creek_name": "A creek in a clip",
+          "id": "v03",
+          "spot_name": "The stretch in the clip"
+        }
+      },
+      "name": "a rating changed on the rating check"
+    },
+    {
+      "expected": {
+        "entry": [
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+            "resource": {
+              "active": true,
+              "id": "sl-org",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+                  "value": "second-look"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "name": "Second Look project",
+              "resourceType": "Organization",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+            "resource": {
+              "deviceName": [
+                {
+                  "name": "Second Look web app",
+                  "type": "user-friendly-name"
+                }
+              ],
+              "id": "sl-device",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/device",
+                  "value": "second-look-web"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Device",
+              "status": "active",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>",
+                "status": "generated"
+              },
+              "type": {
+                "coding": [
+                  {
+                    "code": "software",
+                    "display": "Second Look software",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ]
+              },
+              "version": [
+                {
+                  "value": "0.1.0"
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03",
+            "resource": {
+              "id": "sl-loc-walk-v03",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "A creek in a clip",
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>A creek in a clip. A creek used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-reach",
+            "resource": {
+              "id": "sl-loc-walk-v03-reach",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-reach"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A reach used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-spot",
+            "resource": {
+              "id": "sl-loc-walk-v03-spot",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                  "value": "walk-v03-spot"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "mode": "instance",
+              "name": "The stretch in the clip",
+              "partOf": {
+                "reference": "Location/sl-loc-walk-v03-reach"
+              },
+              "resourceType": "Location",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A spot used in Second Look creek checks.</p></div>",
+                "status": "generated"
+              },
+              "type": [
+                {
+                  "coding": [
+                    {
+                      "code": "420531007",
+                      "display": "River",
+                      "system": "http://snomed.info/sct"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-bbbefee08a25",
+            "resource": {
+              "active": true,
+              "id": "sl-practitioner-bbbefee08a25",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+                  "value": "sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "resourceType": "Practitioner",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9",
+            "resource": {
+              "author": {
+                "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+              },
+              "authored": "2026-09-25T09:30:00Z",
+              "id": "sl-qr-visit-walk-757a5b9a10482fc9",
+              "identifier": {
+                "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+                "value": "walk-757a5b9a10482fc9"
+              },
+              "item": [
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "bank_type"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "present",
+                        "display": "Present",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    }
+                  ],
+                  "linkId": "sewage_discharge"
+                },
+                {
+                  "answer": [
+                    {
+                      "valueCoding": {
+                        "code": "good",
+                        "display": "Good overall rating",
+                        "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                      }
+                    }
+                  ],
+                  "linkId": "overall_rating"
+                }
+              ],
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+              "resourceType": "QuestionnaireResponse",
+              "status": "completed",
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T09:30:00Z, 3 items answered.</p></div>",
+                "status": "generated"
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-757a5b9a10482fc9-bank-type",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "morophology",
+                      "display": "Morphology of the streams",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "artificial-bank",
+                    "display": "Artificial bank",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Bank type"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9"
+                }
+              ],
+              "effectiveDateTime": "2026-09-25T09:30:00Z",
+              "id": "sl-obs-walk-757a5b9a10482fc9-bank-type",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-757a5b9a10482fc9-bank_type"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank type at The stretch in the clip: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-757a5b9a10482fc9-sewage-discharge",
+            "resource": {
+              "category": [
+                {
+                  "coding": [
+                    {
+                      "code": "hydrology",
+                      "display": "Hydrology of the stream",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              ],
+              "code": {
+                "coding": [
+                  {
+                    "code": "pipe-running",
+                    "display": "Pipe running",
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                  }
+                ],
+                "text": "Is there any kind of water entry or discharge of sewage?"
+              },
+              "derivedFrom": [
+                {
+                  "reference": "QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9"
+                }
+              ],
+              "effectiveDateTime": "2026-09-25T09:30:00Z",
+              "id": "sl-obs-walk-757a5b9a10482fc9-sewage-discharge",
+              "identifier": [
+                {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                  "value": "walk-757a5b9a10482fc9-sewage_discharge"
+                }
+              ],
+              "meta": {
+                "profile": [
+                  "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                ],
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "performer": [
+                {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                }
+              ],
+              "resourceType": "Observation",
+              "status": "final",
+              "subject": {
+                "reference": "Location/sl-loc-walk-v03-spot"
+              },
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Is there any kind of water entry or discharge of sewage? at The stretch in the clip: present.</p></div>",
+                "status": "generated"
+              },
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "code": "present",
+                    "display": "Present",
+                    "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-walk-757a5b9a10482fc9",
+            "resource": {
+              "agent": [
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "author",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                  }
+                },
+                {
+                  "type": {
+                    "coding": [
+                      {
+                        "code": "assembler",
+                        "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                      }
+                    ]
+                  },
+                  "who": {
+                    "reference": "Device/sl-device"
+                  }
+                }
+              ],
+              "entity": [
+                {
+                  "role": "source",
+                  "what": {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-walk-757a5b9a10482fc9"
+                  }
+                }
+              ],
+              "id": "sl-provenance-walk-757a5b9a10482fc9",
+              "meta": {
+                "tag": [
+                  {
+                    "code": "demo-walk",
+                    "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                    "system": "https://github.com/alejandro-publius/second-look/tags"
+                  }
+                ]
+              },
+              "recorded": "2026-09-25T09:30:00Z",
+              "resourceType": "Provenance",
+              "target": [
+                {
+                  "reference": "Observation/sl-obs-walk-757a5b9a10482fc9-bank-type"
+                },
+                {
+                  "reference": "Observation/sl-obs-walk-757a5b9a10482fc9-sewage-discharge"
+                }
+              ],
+              "text": {
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>2 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
+                "status": "generated"
+              }
+            }
+          }
+        ],
+        "id": "sl-visit-walk-757a5b9a10482fc9",
+        "meta": {
+          "tag": [
+            {
+              "code": "demo-walk",
+              "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+              "system": "https://github.com/alejandro-publius/second-look/tags"
+            }
+          ]
+        },
+        "resourceType": "Bundle",
+        "timestamp": "2026-09-25T09:30:00Z",
+        "type": "collection"
+      },
+      "input": {
+        "answered_at": "2026-09-25T09:30:00Z",
+        "answers": {
+          "bank_type": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "good",
+        "walk": {
+          "creek_name": "A creek in a clip",
+          "id": "v03",
+          "spot_name": "The stretch in the clip"
+        }
+      },
+      "name": "a rating kept on the rating check"
     }
   ],
+  "followups_cases": [
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": null,
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {},
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "the rating check fires and the dry pipe rule fails closed"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "keep",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "keep"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "kept rating"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "keep",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "good",
+        "given": {
+          "rating_check": "keep"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "kept rating, the final rating sent"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "change",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "moderate",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "moderate",
+        "given": {
+          "rating_check": "change"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "changed rating"
+    },
+    {
+      "expected": {
+        "checks": [
+          {
+            "answer": "skipped",
+            "asked": true,
+            "detail": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge",
+              "kind": "keep_rating"
+            },
+            "question_text": "question 1 for rating_check",
+            "rule_id": "rating_check"
+          }
+        ],
+        "final_rating": "good",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "skipped"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "skipped"
+    },
+    {
+      "expected": {
+        "error": "A changed rating needs the new rating.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "change"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "a changed rating with no new rating"
+    },
+    {
+      "expected": {
+        "error": "The final rating can differ from the first only when the rating check says change.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "poor",
+        "given": {
+          "rating_check": "keep"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "a kept rating sent with another"
+    },
+    {
+      "expected": {
+        "error": "rating_check: answer keep, change, skipped.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": "yes"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "an answer the question does not take"
+    },
+    {
+      "expected": {
+        "error": "rating_check: answer keep, change, skipped.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "rating_check": true
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "an answer that is not text"
+    },
+    {
+      "expected": {
+        "error": "No follow-up called 'dry_pipe' was asked in this walk.",
+        "followups": [
+          {
+            "kind": "keep_rating",
+            "params": {
+              "first_rating": "good",
+              "issues": "artificial banks and a sewage discharge"
+            },
+            "question_key": "followup.rating_check",
+            "rule_id": "rating_check"
+          }
+        ]
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {
+          "dry_pipe": "yes"
+        },
+        "question_texts": [
+          "question 1 for rating_check"
+        ]
+      },
+      "name": "a question that was not asked"
+    },
+    {
+      "expected": {
+        "checks": [],
+        "final_rating": "poor",
+        "followups": []
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present",
+          "draining_pipes": "present",
+          "overall_rating": "poor",
+          "sewage_discharge": "present"
+        },
+        "final_rating": null,
+        "given": {},
+        "question_texts": []
+      },
+      "name": "a poor rating asks nothing"
+    },
+    {
+      "expected": {
+        "error": "The final rating can differ from the first only when the rating check says change.",
+        "followups": []
+      },
+      "input": {
+        "answers": {
+          "overall_rating": "poor"
+        },
+        "final_rating": "good",
+        "given": {},
+        "question_texts": []
+      },
+      "name": "nothing asked, a new rating sent"
+    },
+    {
+      "expected": {
+        "checks": [],
+        "final_rating": null,
+        "followups": []
+      },
+      "input": {
+        "answers": {
+          "bank_type": "present"
+        },
+        "final_rating": null,
+        "given": {},
+        "question_texts": []
+      },
+      "name": "no rating at all"
+    }
+  ],
+  "followups_function": "core.walks.walk_followups, core.walks.walk_checks",
   "function": "core.walks.walk_bundle",
   "generated_by": "evals/golden_vectors.py",
   "record_cases": [
+    {
+      "expected": {
+        "answered_at": "2026-09-25T10:00:00Z",
+        "bundle": {
+          "entry": [
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+              "resource": {
+                "active": true,
+                "id": "sl-org",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/org",
+                    "value": "second-look"
+                  }
+                ],
+                "meta": {
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "name": "Second Look project",
+                "resourceType": "Organization",
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look project. Issues the observer test and keeps the record.</p></div>",
+                  "status": "generated"
+                }
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+              "resource": {
+                "deviceName": [
+                  {
+                    "name": "Second Look web app",
+                    "type": "user-friendly-name"
+                  }
+                ],
+                "id": "sl-device",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/device",
+                    "value": "second-look-web"
+                  }
+                ],
+                "meta": {
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "resourceType": "Device",
+                "status": "active",
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>",
+                  "status": "generated"
+                },
+                "type": {
+                  "coding": [
+                    {
+                      "code": "software",
+                      "display": "Second Look software",
+                      "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                    }
+                  ]
+                },
+                "version": [
+                  {
+                    "value": "0.1.0"
+                  }
+                ]
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03",
+              "resource": {
+                "id": "sl-loc-walk-v03",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                    "value": "walk-v03"
+                  }
+                ],
+                "meta": {
+                  "profile": [
+                    "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                  ],
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "mode": "instance",
+                "name": "A creek in a clip",
+                "resourceType": "Location",
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>A creek in a clip. A creek used in Second Look creek checks.</p></div>",
+                  "status": "generated"
+                },
+                "type": [
+                  {
+                    "coding": [
+                      {
+                        "code": "420531007",
+                        "display": "River",
+                        "system": "http://snomed.info/sct"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-reach",
+              "resource": {
+                "id": "sl-loc-walk-v03-reach",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                    "value": "walk-v03-reach"
+                  }
+                ],
+                "meta": {
+                  "profile": [
+                    "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                  ],
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "mode": "instance",
+                "name": "The stretch in the clip",
+                "partOf": {
+                  "reference": "Location/sl-loc-walk-v03"
+                },
+                "resourceType": "Location",
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A reach used in Second Look creek checks.</p></div>",
+                  "status": "generated"
+                },
+                "type": [
+                  {
+                    "coding": [
+                      {
+                        "code": "420531007",
+                        "display": "River",
+                        "system": "http://snomed.info/sct"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-walk-v03-spot",
+              "resource": {
+                "id": "sl-loc-walk-v03-spot",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/location-id",
+                    "value": "walk-v03-spot"
+                  }
+                ],
+                "meta": {
+                  "profile": [
+                    "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+                  ],
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "mode": "instance",
+                "name": "The stretch in the clip",
+                "partOf": {
+                  "reference": "Location/sl-loc-walk-v03-reach"
+                },
+                "resourceType": "Location",
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>The stretch in the clip. A spot used in Second Look creek checks.</p></div>",
+                  "status": "generated"
+                },
+                "type": [
+                  {
+                    "coding": [
+                      {
+                        "code": "420531007",
+                        "display": "River",
+                        "system": "http://snomed.info/sct"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-bbbefee08a25",
+              "resource": {
+                "active": true,
+                "id": "sl-practitioner-bbbefee08a25",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+                    "value": "sl-practitioner-bbbefee08a25"
+                  }
+                ],
+                "meta": {
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "resourceType": "Practitioner",
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Volunteer observer, known only by a random contributor token.</p></div>",
+                  "status": "generated"
+                }
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-walk-b98d2b015440600a",
+              "resource": {
+                "author": {
+                  "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                },
+                "authored": "2026-09-25T10:00:00Z",
+                "id": "sl-qr-visit-walk-b98d2b015440600a",
+                "identifier": {
+                  "system": "https://github.com/alejandro-publius/second-look/fhir/qr",
+                  "value": "walk-b98d2b015440600a"
+                },
+                "item": [
+                  {
+                    "answer": [
+                      {
+                        "valueCoding": {
+                          "code": "present",
+                          "display": "Present",
+                          "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                        }
+                      }
+                    ],
+                    "linkId": "bank_type"
+                  },
+                  {
+                    "answer": [
+                      {
+                        "valueCoding": {
+                          "code": "present",
+                          "display": "Present",
+                          "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                        }
+                      }
+                    ],
+                    "linkId": "sewage_discharge"
+                  },
+                  {
+                    "answer": [
+                      {
+                        "valueCoding": {
+                          "code": "poor",
+                          "display": "Poor overall rating",
+                          "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                        }
+                      }
+                    ],
+                    "linkId": "overall_rating"
+                  }
+                ],
+                "meta": {
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+                "resourceType": "QuestionnaireResponse",
+                "status": "completed",
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T10:00:00Z, 3 items answered.</p><p>The first overall rating was good. On the rating check the volunteer changed it to poor.</p></div>",
+                  "status": "generated"
+                }
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-b98d2b015440600a-bank-type",
+              "resource": {
+                "category": [
+                  {
+                    "coding": [
+                      {
+                        "code": "morophology",
+                        "display": "Morphology of the streams",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    ]
+                  }
+                ],
+                "code": {
+                  "coding": [
+                    {
+                      "code": "artificial-bank",
+                      "display": "Artificial bank",
+                      "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                    }
+                  ],
+                  "text": "Bank type"
+                },
+                "derivedFrom": [
+                  {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-walk-b98d2b015440600a"
+                  }
+                ],
+                "effectiveDateTime": "2026-09-25T10:00:00Z",
+                "id": "sl-obs-walk-b98d2b015440600a-bank-type",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                    "value": "walk-b98d2b015440600a-bank_type"
+                  }
+                ],
+                "meta": {
+                  "profile": [
+                    "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                  ],
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "performer": [
+                  {
+                    "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                  }
+                ],
+                "resourceType": "Observation",
+                "status": "final",
+                "subject": {
+                  "reference": "Location/sl-loc-walk-v03-spot"
+                },
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank type at The stretch in the clip: present.</p></div>",
+                  "status": "generated"
+                },
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "code": "present",
+                      "display": "Present",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-walk-b98d2b015440600a-sewage-discharge",
+              "resource": {
+                "category": [
+                  {
+                    "coding": [
+                      {
+                        "code": "hydrology",
+                        "display": "Hydrology of the stream",
+                        "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                      }
+                    ]
+                  }
+                ],
+                "code": {
+                  "coding": [
+                    {
+                      "code": "pipe-running",
+                      "display": "Pipe running",
+                      "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                    }
+                  ],
+                  "text": "Is there any kind of water entry or discharge of sewage?"
+                },
+                "derivedFrom": [
+                  {
+                    "reference": "QuestionnaireResponse/sl-qr-visit-walk-b98d2b015440600a"
+                  }
+                ],
+                "effectiveDateTime": "2026-09-25T10:00:00Z",
+                "id": "sl-obs-walk-b98d2b015440600a-sewage-discharge",
+                "identifier": [
+                  {
+                    "system": "https://github.com/alejandro-publius/second-look/fhir/observation",
+                    "value": "walk-b98d2b015440600a-sewage_discharge"
+                  }
+                ],
+                "meta": {
+                  "profile": [
+                    "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+                  ],
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "performer": [
+                  {
+                    "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                  }
+                ],
+                "resourceType": "Observation",
+                "status": "final",
+                "subject": {
+                  "reference": "Location/sl-loc-walk-v03-spot"
+                },
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Is there any kind of water entry or discharge of sewage? at The stretch in the clip: present.</p></div>",
+                  "status": "generated"
+                },
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "code": "present",
+                      "display": "Present",
+                      "system": "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "fullUrl": "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-walk-b98d2b015440600a",
+              "resource": {
+                "agent": [
+                  {
+                    "type": {
+                      "coding": [
+                        {
+                          "code": "author",
+                          "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                        }
+                      ]
+                    },
+                    "who": {
+                      "reference": "Practitioner/sl-practitioner-bbbefee08a25"
+                    }
+                  },
+                  {
+                    "type": {
+                      "coding": [
+                        {
+                          "code": "assembler",
+                          "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                        }
+                      ]
+                    },
+                    "who": {
+                      "reference": "Device/sl-device"
+                    }
+                  }
+                ],
+                "entity": [
+                  {
+                    "role": "source",
+                    "what": {
+                      "reference": "QuestionnaireResponse/sl-qr-visit-walk-b98d2b015440600a"
+                    }
+                  }
+                ],
+                "id": "sl-provenance-walk-b98d2b015440600a",
+                "meta": {
+                  "tag": [
+                    {
+                      "code": "demo-walk",
+                      "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                      "system": "https://github.com/alejandro-publius/second-look/tags"
+                    }
+                  ]
+                },
+                "recorded": "2026-09-25T10:00:00Z",
+                "resourceType": "Provenance",
+                "target": [
+                  {
+                    "reference": "Observation/sl-obs-walk-b98d2b015440600a-bank-type"
+                  },
+                  {
+                    "reference": "Observation/sl-obs-walk-b98d2b015440600a-sewage-discharge"
+                  }
+                ],
+                "text": {
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>2 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The source is the visit.</p></div>",
+                  "status": "generated"
+                }
+              }
+            }
+          ],
+          "id": "sl-visit-walk-b98d2b015440600a",
+          "meta": {
+            "tag": [
+              {
+                "code": "demo-walk",
+                "display": "Demo visit from a video walk. Never counted and never sent to the sandbox.",
+                "system": "https://github.com/alejandro-publius/second-look/tags"
+              }
+            ]
+          },
+          "resourceType": "Bundle",
+          "timestamp": "2026-09-25T10:00:00Z",
+          "type": "collection"
+        },
+        "created_at": "2026-09-25T10:00:01Z",
+        "delete_after": "2026-10-25T10:00:01Z",
+        "record_id": "walk-b98d2b015440600a",
+        "walk_id": "v03"
+      },
+      "input": {
+        "answered_at": "2026-09-25T10:00:00Z",
+        "answers": {
+          "bank_type": "present",
+          "overall_rating": "good",
+          "sewage_discharge": "present"
+        },
+        "final_rating": "poor",
+        "now": "2026-09-25T10:00:01Z",
+        "walk": {
+          "creek_name": "A creek in a clip",
+          "id": "v03",
+          "spot_name": "The stretch in the clip"
+        }
+      },
+      "name": "a stored walk whose rating was changed"
+    },
     {
       "expected": {
         "answered_at": "2026-09-25T10:00:00Z",

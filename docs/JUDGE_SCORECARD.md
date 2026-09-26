@@ -1,6 +1,6 @@
 # Judge scorecard
 
-The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin, as of 2026-09-24. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
+The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin, as of 2026-09-25. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
 
 The technical report, [`docs/REPORT.pdf`](REPORT.pdf), says the same at more length.
 
@@ -34,7 +34,7 @@ Thin: the AI is held to the same test, and no model passed plants that do not be
 
 ## Technical implementation (20%)
 
-Our mark: strong. The paid model run is done and every AI number is graded again from its raw replies by `make reproduce`.
+Our mark: strong. The paid model run is done, and `make reproduce` grades its numbers again from the raw replies wherever the run kept them: the pass table, the sweeps and the footage run. The benchmark run kept counts and no replies, so its right-answer counts, its share of can't tell answers and its count of malformed replies are checked only as recorded, and the command prints a note saying so; so are the footage runs' answers on the adversarial frames.
 
 
 | What to look at | Where |
@@ -42,11 +42,11 @@ Our mark: strong. The paid model run is done and every AI number is graded again
 | FHIR R4 against their guide at b907cf0, validated in CI, zero errors in the latest run | `results/fhir_validation.json`; `make fhir-validate` |
 | Their sandbox mirrored with conditional creates, a tag on everything, a ledger of ids | `fhir/sandbox_ledger.jsonl`; `docs/notes/sandbox_library.md`, the read-back |
 | A read-only MCP server over our own records | `apps/mcp/server.py`; `examples/mcp/transcript.md` |
-| One command, no key, no network | `make judge-check` |
+| One command, no key, no network; its summary prints each note on a number it could check only as recorded | `make judge-check` |
 | Frames from open creek footage, screened by Vision and by eye, every drop with its reason | `videos/frames.json`; `videos/review.json`; `evals/footage.py` |
 | Python and the TypeScript Worker proved equal by golden vectors, walks included | `evals/golden_vectors.py`; `worker/test/golden.test.ts` |
 
-Thin: the citizen observer is modelled as a Practitioner because R4 has no better fit; the question is open with the guide's authors (`docs/ig_proposal.md`). Their sandbox's name has not resolved since Sep 23 (hl7-eu/oah issue 8), so the mirror cannot be read there today; the read-back of Sep 21 stands in.
+Thin: the benchmark's intervals count its three runs of the same photos as new answers, so they are too narrow (`docs/MODEL_CARD.md`). From Sep 28 judge mode gives away the answer key, so a volunteer could carry a perfect score into their checks; see README, Known weaknesses. The citizen observer is modelled as a Practitioner because R4 has no better fit; the question is open with the guide's authors (`docs/ig_proposal.md`). Their sandbox's name has not resolved since Sep 23 (hl7-eu/oah issue 8), so the mirror cannot be read there today; the read-back of Sep 21 stands in.
 
 ## Usability and user experience (15%)
 
@@ -74,4 +74,4 @@ Our mark: strong. Free to run, a follower city scaffolds in seconds, and a city 
 | Free to run on Cloudflare, no card | `docs/notes/hosting.md` |
 | The example offered back to their guide | `docs/ig_proposal.md` |
 
-Thin: four photos per feature is coarse, and the photos come from open collections in several countries, not from the creek a Berkeley volunteer stands in.
+Thin: four photos per feature is coarse, and the photos come from open collections in several countries, not from the creek a Berkeley volunteer stands in. The daily jobs, the backups, the uptime check and the one run of the analysis after the lock run on one team member's laptop, not yet on the Worker's own schedule; see README, Known weaknesses.

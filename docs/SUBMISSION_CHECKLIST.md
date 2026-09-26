@@ -10,10 +10,15 @@ Deadline: Wednesday Sep 30, 2026, 18:00 PDT. Repo public first, then the incogni
 |---|---|---|
 | track_statement | The first line of README.md equals docs/track_statement.md word for word | pass |
 | five_headers | docs/devpost.md has the organizers' five headers in order, and README.md names each in its map line: The problem; How the solution aligns with OneAquaHealth; Innovation and practical value; Effective use of data, technology, AI, APIs and standards; A clear demonstration of what was built | pass |
-| video_link | A line with the word "video" and a link exists in README.md and docs/devpost.md | fails until the video is uploaded |
+| devpost_track_statement | docs/devpost.md's first line, and its Track statement field, equal docs/track_statement.md word for word | pass |
+| devpost_fields | Every Devpost field in docs/devpost.md is there and filled: no empty field, no TODO, no placeholder, the tagline under 200 characters (the video's slot belongs to video_link) | pass |
+| devpost_numbers | Every number in a Devpost field has a claim marker in its section, or is a name or fixed fact listed with its reason in scripts/submit_check.py; `verify_claims.py --file docs/devpost.md` passes | pass |
+| devpost_report | docs/devpost.md names docs/REPORT.pdf as an attachment, and the file is a PDF | pass |
+| devpost_team | The Team section names Alex Velazquez and Rachel Selbrede | pass |
+| video_link | A line with the word "video" and a link exists in README.md and docs/devpost.md, the Video link field holds a link, and no [VIDEO LINK] slot is left | fails until the video is uploaded |
 | video_duration | With `--video path.mp4`, ffprobe says 180 to 300 seconds; skipped with a sentence when no file is given | skipped |
 | license | LICENSE exists and says MIT | pass |
-| demo_url | The URL in NEXT_PUBLIC_SITE_URL, or the demo link in docs/devpost.md, answers 200; skipped with a sentence when unset | pass |
+| demo_url | The URL in NEXT_PUBLIC_SITE_URL, or the Live link field in docs/devpost.md, answers 200; skipped with a sentence when unset | pass |
 | secrets_scan | No key shapes (AWS, Anthropic, OpenAI, GitHub, Slack, Google, private key blocks, quoted assigned secrets) in tracked or untracked files; gitleaks over the history when installed | pass |
 | verify_claims | `scripts/verify_claims.py` without `--synthetic` passes: every README number traces to a real results file | pass |
 | audit_log | `audit/log.jsonl` chain verifies | pass |
@@ -26,8 +31,9 @@ Anything else failing is our fault and gets fixed first.
 
 - [ ] Video recorded to docs/video/SHOTLIST.md, read from docs/video/VOICE_SCRIPT.md, edited to 3 to 5 minutes (target 3:45), uploaded,
       link pasted into README.md and docs/devpost.md, and `make submit-check --video` run on the file.
-- [ ] Devpost page filled: every field in docs/notes/devpost_fields.md mapped to a README section
-      in docs/devpost.md, the track statement first, the five headers in order.
+- [ ] Devpost page filled from docs/devpost.md, the track statement first, the five headers in
+      order, docs/REPORT.pdf attached, both of us on the team; the dry run on Mon Sep 28 and the
+      order for Sep 30 are in docs/SUBMISSION_DAY.md.
 - [ ] Demo deployed and awake: the landing page paints without the API; `make smoke` passes
       against the public URL; the API does not sleep (scheduled ping or a host that stays up).
 - [ ] Repo made public on Sep 30, then `make submit-check` rerun and fully green.

@@ -151,7 +151,15 @@ def run(targets: list[dict[str, Any]], viewports: list[dict[str, Any]]) -> list[
 
 
 def render(data: dict[str, Any], md: Path) -> None:
-    """Write the review page from the JSON, so the page and the numbers cannot drift apart."""
+    """Write the review page from the JSON, so the page and the numbers cannot drift apart.
+
+    The page goes in the working notes; once make go-public has removed them it is not written,
+    so the folder does not come back. results/harden/axe.json still is."""
+    from scripts.go_public import notes_gone
+
+    if notes_gone(md, ROOT):
+        print(f"the working notes are gone, so {md.name} was not written; the JSON was")
+        return
     rows = data["screens"]
     by_impact: dict[str, int] = {}
     for r in rows:

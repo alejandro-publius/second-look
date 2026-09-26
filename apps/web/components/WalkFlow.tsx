@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChecksThatRan } from "./ChecksThatRan";
 import { FhirView } from "./FhirView";
 import { FocusHeading } from "./FocusHeading";
+import { FollowupCard, tapRating, type RatingTap } from "./FollowupCard";
 import { FormQuestion } from "./FormQuestion";
 import { Photo } from "./Photo";
 import { Progress } from "./Progress";
@@ -12,14 +14,20 @@ import { api, type AnswerValue } from "@/lib/api";
 import { content, featureById, licenseName, licenseUrl, questionCount, type FormItem, type Walk } from "@/lib/content";
 import { deleteWalkState, enqueue, flushQueue, getQueued, loadWalkState, onQueueChange, removeQueued, saveWalkState, sendQueued, startQueueWatcher, type WalkState } from "@/lib/offline";
 import { t } from "@/lib/t";
-import { buildRecord } from "@/lib/walks";
+import { buildRecord, settleFollowups, walkQuestions } from "@/lib/walks";
 
 type Stage =
   | { name: "loading" }
   | { name: "watch" }
   | { name: "items"; index: number }
+  | { name: "followups" }
   | { name: "question" }
   | { name: "record"; answeredAt: string };
+
+/** A walk on this device before its first answer. */
+function freshState(walkId: string): WalkState {
+  return { walk_id: walkId, answers: {}, next: 0, answered_at: null, queue_id: null, record_id: null, delete_after: null, followup_answers: {}, final_rating: null };
+}
 
 /** Where the finished walk's record is: being sent, waiting for a network, kept, or refused. */
 type Stored =
@@ -32,11 +40,16 @@ function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
   return content.form.items.filter((item) => !item.depends_on || answers[item.depends_on.item] === item.depends_on.value);
 }
 
+/**
+ * The clip, with its poster until the person presses play. preload="none" asks for no byte of the
+ * video before then: the host answers a range request with the whole file, so even "metadata"
+ * pulled megabytes on page open and slowed a phone on a slow line (judge walk W05).
+ */
 function Clip({ walk }: { walk: Walk }) {
   const poster = content.photos[walk.poster_photo_id];
   return (
     <figure className="stack walk-figure">
-      <video className="walk-clip" controls muted playsInline preload="metadata" poster={poster?.url} aria-label={t("walk.clip_label", { creek: walk.creek_name })}>
+      <video className="walk-clip" controls muted playsInline preload="none" poster={poster?.url} aria-label={t("walk.clip_label", { creek: walk.creek_name })}>
         <source src={`/${walk.clip.file}`} type="video/mp4" />
         <Photo id={walk.poster_photo_id} />
       </video>
@@ -79,12 +92,19 @@ function resumeStage(walk: Walk, saved: WalkState): Stage {
   if (saved.answered_at) return { name: "record", answeredAt: saved.answered_at };
   const items = visibleItems(saved.answers);
   if (saved.next < items.length) return { name: "items", index: Math.max(0, saved.next) };
+  if (walkQuestions(saved.answers).length > 0) return { name: "followups" };
   return walk.question ? { name: "question" } : { name: "items", index: Math.max(0, items.length - 1) };
 }
 
 /**
  * A guided creek check made while watching a clip (Update 14 3.7). The checker's flag, if the gate
  * let one through at build time, is asked only after the person has answered.
+ *
+ * After the last question the creek check's own follow-up rules run on the answers (judge walk
+ * W01), through the port the store runs, and the questions they pick are shown the way the creek
+ * check shows its own: a clip has no weather, so the dry pipe question is never asked, and the
+ * rating check is. The answers go to the store with the walk, which runs the rules again and keeps
+ * the checks, and the record shows "Checks that ran" as /spot does for a creek check.
  *
  * Every answer is kept in IndexedDB beside the creek check's offline queue, keyed by the walk's
  * id, so the browser's Back, a reload or a closed tab opens the walk on its next unanswered
@@ -98,10 +118,22 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   const [lookedAgain, setLookedAgain] = useState<string | null>(null);
   const [resumed, setResumed] = useState(false);
   const [stored, setStored] = useState<Stored>({ state: "sending" });
+  // The follow-ups the rules asked: what was answered, the rating the rating check left, and
+  // whether its rating picker is open, as the creek check holds them.
+  const [followupAnswers, setFollowupAnswers] = useState<Record<string, string>>({});
+  const [finalRating, setFinalRating] = useState<string | null>(null);
+  const [changingRating, setChangingRating] = useState(false);
+  // Start again asks first on a finished walk, since it clears the record from this device.
+  const [confirmStartAgain, setConfirmStartAgain] = useState(false);
+  const keepWalk = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (confirmStartAgain) keepWalk.current?.focus();
+  }, [confirmStartAgain]);
   const items = useMemo(() => visibleItems(answers), [answers]);
+  const ratingItem = content.form.items.find((i) => i.id === "overall_rating");
 
   // The walk as this device keeps it, and the writes to IndexedDB, one after another in order.
-  const kept = useRef<WalkState>({ walk_id: walk.id, answers: {}, next: 0, answered_at: null, queue_id: null, record_id: null, delete_after: null });
+  const kept = useRef<WalkState>(freshState(walk.id));
   const writes = useRef<Promise<void>>(Promise.resolve());
   // Start again begins a new attempt. A send still going for the old one must not write into the
   // new one, or a reload would open on the walk that was set aside.
@@ -143,7 +175,9 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     const w = kept.current;
     if (!w.answered_at) return;
     setStored({ state: "sending" });
-    const body = { walk_id: walk.id, answers: w.answers, answered_at: w.answered_at };
+    // The follow-up answers go with the walk; the store runs the rules again and keeps the checks.
+    const { followup_answers, final_rating } = settleFollowups(w.answers, w.followup_answers ?? {}, w.final_rating ?? null);
+    const body = { walk_id: walk.id, answers: w.answers, answered_at: w.answered_at, followup_answers, final_rating };
     let id: number;
     try {
       id = await enqueue({ kind: "walk", created_at: new Date().toISOString(), walk: body, photos: [] });
@@ -179,6 +213,8 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       }
       kept.current = saved;
       setAnswers(saved.answers);
+      setFollowupAnswers(saved.followup_answers ?? {});
+      setFinalRating(saved.final_rating ?? null);
       setStage(resumeStage(walk, saved));
       if (saved.answered_at) {
         if (saved.record_id || saved.queue_id !== null) void showQueued();
@@ -208,10 +244,14 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     const w = kept.current;
     // A walk not stored yet is taken out of the queue, so what was set aside is never stored.
     if (w.queue_id !== null && !w.record_id) await removeQueued(w.queue_id).catch(() => undefined);
-    kept.current = { walk_id: walk.id, answers: {}, next: 0, answered_at: null, queue_id: null, record_id: null, delete_after: null };
+    kept.current = freshState(walk.id);
     writes.current = writes.current.then(() => deleteWalkState(walk.id));
     await writes.current;
     setAnswers({});
+    setFollowupAnswers({});
+    setFinalRating(null);
+    setChangingRating(false);
+    setConfirmStartAgain(false);
     setLookedAgain(null);
     setResumed(false);
     setStored({ state: "sending" });
@@ -222,9 +262,13 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   // state from before it, so the saved walk lacked its last answer (CRITIC_10 S01).
   async function finish(final: Record<string, AnswerValue>) {
     const answeredAt = new Date().toISOString();
+    // Only the answers to questions these answers still ask are kept (lib/walks.ts).
+    const settled = settleFollowups(final, followupAnswers, finalRating);
     setAnswers(final);
+    setFollowupAnswers(settled.followup_answers);
+    setFinalRating(settled.final_rating);
     setStage({ name: "record", answeredAt });
-    await keep({ answers: final, answered_at: answeredAt, next: visibleItems(final).length });
+    await keep({ answers: final, answered_at: answeredAt, next: visibleItems(final).length, followup_answers: settled.followup_answers, final_rating: settled.final_rating });
     await store();
   }
 
@@ -240,10 +284,35 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     if (pos + 1 < nextItems.length) {
       void keep({ answers: next, next: pos + 1 });
       setStage({ name: "items", index: pos + 1 });
+    } else if (walkQuestions(next).length > 0) {
+      void keep({ answers: next, next: nextItems.length });
+      setStage({ name: "followups" });
     } else if (walk.question) {
       void keep({ answers: next, next: nextItems.length });
       setStage({ name: "question" });
     } else void finish(next);
+  }
+
+  /** After the follow-ups: the checker's question when the walk has one, else the record. */
+  function afterFollowups() {
+    if (walk.question) setStage({ name: "question" });
+    else void finish(answers);
+  }
+
+  function answerFollowup(ruleId: string, value: string) {
+    const next = { ...followupAnswers, [ruleId]: value };
+    setFollowupAnswers(next);
+    void keep({ followup_answers: next });
+  }
+
+  function onRatingTap(ruleId: string, tap: RatingTap) {
+    const firstRating = typeof answers.overall_rating === "string" ? answers.overall_rating : null;
+    const next = tapRating({ answer: followupAnswers[ruleId], finalRating, changingRating }, tap, firstRating);
+    setFinalRating(next.finalRating);
+    setChangingRating(next.changingRating);
+    const answered = next.answer === undefined ? followupAnswers : { ...followupAnswers, [ruleId]: next.answer };
+    setFollowupAnswers(answered);
+    void keep({ followup_answers: answered, final_rating: next.finalRating });
   }
 
   // The clip is mounted once, above whatever the stage shows, so it keeps playing while the person
@@ -270,6 +339,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
             {t("walk.start")}
           </button>
           <p className="notice notice-warn">{t("walk.demo_notice")}</p>
+          {/* The host answers a range request with the whole file, so the browser cannot seek: a
+              move of the slider starts the clip again (critic round 15 W05). Said before the walk
+              starts, below Start, so the button stays on the first screen. */}
+          <p className="small muted" data-testid="walk-seek-note">
+            {t("walk.seek_note")}
+          </p>
         </>
       );
       break;
@@ -295,10 +370,45 @@ export function WalkFlow({ walk }: { walk: Walk }) {
                 if (stage.index === 0) setStage({ name: "watch" });
                 else setStage({ name: "items", index: stage.index - 1 });
               }}
+              plantRegion={walk.region ?? null}
             />
           </div>
         );
       }
+      break;
+    }
+    case "followups": {
+      // Shown as the creek check shows the follow-ups the API picked: the same cards, the same
+      // words, the same Finish (CheckFlow.tsx).
+      const asked = walkQuestions(answers);
+      body = (
+        <section className="stack" aria-labelledby="walk-followups-title" data-testid="walk-followups">
+          <h2 id="walk-followups-title">{t(asked.length === 1 ? "check.followups_title_one" : "check.followups_title")}</h2>
+          <p className="small muted">{t("check.followups_intro")}</p>
+          {asked.map(({ card }) => (
+            <FollowupCard
+              key={card.rule_id}
+              followup={card}
+              value={followupAnswers[card.rule_id]}
+              onAnswer={(v) => answerFollowup(card.rule_id, v)}
+              photos={[]}
+              onPhotos={() => undefined}
+              changingRating={changingRating}
+              ratingOptions={ratingItem?.options ?? []}
+              finalRating={finalRating}
+              onRatingTap={(tap) => onRatingTap(card.rule_id, tap)}
+            />
+          ))}
+          <div className="btn-row">
+            <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "items", index: Math.max(0, items.length - 1) })}>
+              {t("check.back")}
+            </button>
+            <button type="button" className="btn" onClick={afterFollowups}>
+              {t("check.finish")}
+            </button>
+          </div>
+        </section>
+      );
       break;
     }
     case "question": {
@@ -313,7 +423,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               {t("label.checker_noticed")}: {q.note}
             </p>
             <div className="btn-row">
-              <button type="button" className="btn" aria-pressed={lookedAgain === "looked"} onClick={() => setLookedAgain("looked")}>
+              <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "looked"} onClick={() => setLookedAgain("looked")}>
                 {t("check.looked_again")}
               </button>
               <button type="button" className="btn btn-secondary" aria-pressed={lookedAgain === "skipped"} onClick={() => setLookedAgain("skipped")}>
@@ -329,7 +439,10 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       break;
     }
     case "record": {
-      const { bundle, problems } = buildRecord(walk, answers, stage.answeredAt);
+      // The checks as the store keeps them: the same rules and the same answers (lib/walks.ts).
+      const { kept: checked } = settleFollowups(answers, followupAnswers, finalRating);
+      // The FHIR record carries the rating the rating check left, as the stored one does.
+      const { bundle, problems } = buildRecord(walk, answers, stage.answeredAt, checked.final_rating);
       const recordId = stored.state === "stored" ? stored.record_id : null;
       const city = `/city?walk=${encodeURIComponent(walk.id)}${recordId ? `&record=${encodeURIComponent(recordId)}` : ""}`;
       return (
@@ -368,16 +481,36 @@ export function WalkFlow({ walk }: { walk: Walk }) {
             )}
           </section>
           <WalkAnswers answers={answers} title={t("walk.answers_title")} />
+          <ChecksThatRan checks={checked.checks} ratings={checked} level="h2" />
           <p className="small muted">{checkerLine(walk)}</p>
-          <FhirView load={() => Promise.resolve(bundle)} curl={recordId ? `curl -s ${api.walkRecordUrl(recordId)}` : null} walk="phone" />
+          <FhirView load={() => Promise.resolve(bundle)} curl={recordId ? `curl -s ${api.walkFhirUrl(recordId)}` : null} walk="phone" />
           <p>
             <Link className="btn btn-block" href={city}>
               {t("walk.city_link")}
             </Link>
           </p>
-          <button type="button" className="btn btn-secondary btn-block" onClick={() => void startAgain()}>
-            {t("walk.start_again")}
-          </button>
+          {/* Start again clears the walk and its record from this device, and with them the only
+              place its link is shown, so it asks first and says what stays (critic round 15 Y02). */}
+          {confirmStartAgain ? (
+            <section className="card stack" data-testid="walk-start-again-warn" aria-label={t("walk.start_again")}>
+              <p>
+                {t("walk.start_again_warn")}
+                {stored.state === "stored" ? ` ${t("walk.start_again_warn_stored", { date: walkDay(stored.delete_after) })}` : ""}
+              </p>
+              <div className="btn-row">
+                <button ref={keepWalk} type="button" className="btn btn-secondary" onClick={() => setConfirmStartAgain(false)}>
+                  {t("walk.start_again_no")}
+                </button>
+                <button type="button" className="btn" onClick={() => void startAgain()}>
+                  {t("walk.start_again_yes")}
+                </button>
+              </div>
+            </section>
+          ) : (
+            <button type="button" className="btn btn-secondary btn-block" onClick={() => setConfirmStartAgain(true)}>
+              {t("walk.start_again")}
+            </button>
+          )}
           <p>
             <Link href="/walk">{t("walk.more")}</Link>
           </p>
@@ -386,10 +519,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     }
   }
 
+  // No clip while the walk is being opened: a finished walk opens on its record, which has none,
+  // so a reload no longer paints an empty clip first (critic round 15 O02 item 4).
   return (
     <div className="stack">
       <FocusHeading>{walk.creek_name}</FocusHeading>
-      <Clip walk={walk} />
+      {stage.name === "loading" ? null : <Clip walk={walk} />}
       {body}
     </div>
   );

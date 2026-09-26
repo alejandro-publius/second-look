@@ -64,6 +64,9 @@ test("/two renders both observers with one card and says plainly when theirs is 
   await page.goto("/two");
   await expect(page.getByText("Their sandbox did not answer, so only our record is shown.")).toBeVisible();
   await expect(page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" })).toHaveCount(0);
+  // Critic round 14 O02: with their record missing, the page opens on what it shows, ours alone.
+  await expect(page.getByRole("main").locator("p").first()).toHaveText("Our volunteer record, in the viewer built for a lab result from the OneAquaHealth sandbox.");
+  await expect(page.getByText("A lab result from the OneAquaHealth sandbox and", { exact: false })).toHaveCount(0);
 });
 
 test("/two labels the hand-made golden visit as an example and names its place (REVIEW_03 R33)", async ({ page }) => {
@@ -298,10 +301,13 @@ test("/city with no creek says to pick one and links each creek", async ({ page 
 // CRITIC_09 R05: /city?creek=<unknown> said "Something did not send", though nothing was sent and
 // the API had answered in its own words. A 404 now shows that sentence; a server error says the
 // server could not take it, and only a failed connection speaks of the connection.
-test("/city with a creek the API does not know shows the API's own sentence", async ({ page }) => {
+// Critic round 14 P02: "no record for that creek yet" suggested the creek exists, and the page gave
+// no way on. It now says there is no creek by that name and lists the creeks, as bare /city does.
+test("/city with a creek the API does not know says so and lists the creeks to pick", async ({ page }) => {
   await mockApi(page);
   await page.goto("/city?creek=no-such-creek");
-  await expect(page.getByRole("status")).toHaveText("We have no record for that creek yet.");
+  await expect(page.getByRole("status")).toHaveText("We have no creek by that name. Pick one below.");
+  await expect(page.getByRole("main").getByRole("link", { name: "Strawberry Creek", exact: true })).toHaveAttribute("href", "/city?creek=strawberry-creek");
   await expect(page.getByText("Something did not send")).toHaveCount(0);
   await page.route("**/api/city/**", (route) => route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ detail: "boom" }) }));
   await page.goto("/city?creek=no-such-creek");

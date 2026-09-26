@@ -6,14 +6,16 @@
 // so its link opens on any device (item 3). It is never counted and never sent to the sandbox.
 import { checkBundle } from "../../../worker/src/core/fhir_emit";
 import { MEASURE_FOR_FEATURE, findingsFromVisits, needsFromFindings, type Finding, type Need } from "../../../worker/src/core/act";
-import { walkBundle, walkVisit, type WalkRef } from "../../../worker/src/core/walks";
-import type { AnswerValue, VisitRecord } from "../../../worker/src/core/types";
+import type { Followup as RuleFollowup } from "../../../worker/src/core/followups";
+import { walkBundle, walkChecks, walkFollowups, walkVisit, type WalkRef } from "../../../worker/src/core/walks";
+import type { AnswerValue, CheckResult, FormItem as CoreFormItem, VisitRecord } from "../../../worker/src/core/types";
 // The approved sentences as the Worker's ports read them. core_content.json carries no gold key;
 // the full worker/src/content.json does, and must never be imported here.
 import CORE_CONTENT from "../../../worker/src/core/core_content.json";
-import type { AnswerValue as FormAnswer } from "./api";
-import { content, type Walk } from "./content";
+import type { AnswerValue as FormAnswer, Followup } from "./api";
+import { content, featureById, type Walk } from "./content";
 import { loadWalkState } from "./offline";
+import { t } from "./t";
 
 /** Answers as the emitter takes them. FormQuestion sends every value in one of these shapes. */
 export type WalkAnswers = Record<string, AnswerValue>;
@@ -29,14 +31,81 @@ function ref(walk: Walk): WalkRef {
   return { id: walk.id, spot_name: walk.spot_name, creek_name: walk.creek_name };
 }
 
-export function buildRecord(walk: Walk, answers: Record<string, FormAnswer>, answeredAt: string) {
-  const bundle = walkBundle(ref(walk), answers as WalkAnswers, answeredAt);
+/** The walk's FHIR record, as the store builds it: with the rating the rating check left, which
+ *  the record answers the rating question with when it was changed (critic round 15 F02). */
+export function buildRecord(walk: Walk, answers: Record<string, FormAnswer>, answeredAt: string, finalRating: string | null = null) {
+  const bundle = walkBundle(ref(walk), answers as WalkAnswers, answeredAt, finalRating);
   return { bundle, problems: bundleProblems(bundle) };
 }
 
 /** The references inside a Bundle that do not resolve, by the emitter's own check. */
 export function bundleProblems(bundle: Record<string, unknown>): string[] {
   return checkBundle(bundle as never);
+}
+
+/**
+ * The follow-up questions a walk asks (judge walk W01): the creek check's own rules over the walk's
+ * answers, through the same port the store runs (worker/src/core/walks.ts walkFollowups), with each
+ * question worded as the store words it (worker/src/check.ts questionText): the locale string
+ * filled from the rule's params, a feature by its name. Rain is unknown for a clip, so the dry
+ * pipe question is never asked; the rating check is.
+ */
+export function walkQuestions(answers: Record<string, FormAnswer>): { rule: RuleFollowup; card: Followup }[] {
+  const chosen = walkFollowups(answers as WalkAnswers, CORE_CONTENT.followups as Record<string, unknown>, CORE_CONTENT.form_items as CoreFormItem[]);
+  return chosen.map((rule) => {
+    const params: Record<string, string | number> = { ...rule.params };
+    if ("feature" in params) {
+      const raw = String(params.feature).trim();
+      params.feature = featureById(raw.replace(/ /g, "_"))?.name ?? raw;
+    }
+    return { rule, card: { rule_id: rule.rule_id, question_text: t(rule.question_key, params), kind: rule.kind } };
+  });
+}
+
+/** What the store keeps for a walk's follow-ups, and what its record shows under "Checks that ran". */
+export interface WalkKept {
+  checks: CheckResult[];
+  first_rating: string | null;
+  final_rating: string | null;
+}
+
+/**
+ * The follow-up answers to send with a finished walk, and the checks they make, as the store will
+ * keep them (worker/src/core/walks.ts walkChecks). Answers to a question the answers no longer ask,
+ * after the person went back and changed them, are left out, and a new rating goes only with a
+ * rating check answered "change", so what is sent is always what the store takes.
+ */
+export function settleFollowups(
+  answers: Record<string, FormAnswer>,
+  given: Record<string, string>,
+  finalRating: string | null,
+): { followup_answers: Record<string, string>; final_rating: string | null; kept: WalkKept } {
+  const asked = walkQuestions(answers);
+  const followup_answers: Record<string, string> = {};
+  for (const q of asked) {
+    const answer = given[q.rule.rule_id];
+    if (answer === undefined) continue;
+    // A change with no new rating is no answer yet: the picker was opened and nothing picked.
+    if (q.rule.kind === "keep_rating" && answer === "change" && finalRating === null) continue;
+    followup_answers[q.rule.rule_id] = answer;
+  }
+  const changed = asked.some((q) => q.rule.kind === "keep_rating" && followup_answers[q.rule.rule_id] === "change");
+  const final_rating = changed ? finalRating : null;
+  const rules = asked.map((q) => q.rule);
+  const texts = asked.map((q) => q.card.question_text);
+  let out: { checks: CheckResult[]; final_rating: string | null };
+  try {
+    out = walkChecks(answers as WalkAnswers, rules, texts, followup_answers, final_rating);
+  } catch {
+    // Only an answer the buttons never give gets here; the questions are kept, unanswered.
+    out = walkChecks(answers as WalkAnswers, rules, texts, {}, null);
+    return { followup_answers: {}, final_rating: null, kept: { checks: out.checks, first_rating: firstRating(answers), final_rating: out.final_rating } };
+  }
+  return { followup_answers, final_rating, kept: { checks: out.checks, first_rating: firstRating(answers), final_rating: out.final_rating } };
+}
+
+function firstRating(answers: Record<string, FormAnswer>): string | null {
+  return typeof answers.overall_rating === "string" ? answers.overall_rating : null;
 }
 
 /** The walk this device finished for one clip, or none. Start again forgets it. */

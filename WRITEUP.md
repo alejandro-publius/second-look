@@ -64,9 +64,9 @@ the languages too: Python's `round()` rounds an exact half to the even number an
 chosen inputs and writes their outputs to `worker/golden/`: the follow-up selector, the labels, the
 health card, the pin guards, the city functions, the region placement, the FHIR emitter and the
 hash and rounding helpers. The TypeScript in `worker/src/core/` must reproduce every output
-exactly: <!--v:results/test_counts.json#/worker_golden/cases-->125<!--/v--> cases
+exactly: <!--v:results/test_counts.json#/worker_golden/cases-->149<!--/v--> cases
 in <!--v:results/test_counts.json#/worker_golden/files-->8<!--/v--> files, replayed
-by <!--v:results/test_counts.json#/worker_golden/node_tests-->15<!--/v--> tests. `worker/src/core/pyround.ts`
+by <!--v:results/test_counts.json#/worker_golden/node_tests-->17<!--/v--> tests. `worker/src/core/pyround.ts`
 rounds the way Python does. Randomization is not ported at all: `scripts/seed_arms.py` writes
 `core/allocator.py`'s own sequence into a D1 table and the Worker takes the next slot. The Bundles
 the TypeScript emitter writes go through the HL7 validator with the Python ones.
@@ -75,7 +75,7 @@ the TypeScript emitter writes go through the HL7 validator with the Python ones.
 longer match what the Python writes, then runs `worker/test/golden.test.ts`;
 `evals/tests/test_golden_vectors.py`; `results/fhir_validation.json`,
 with <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors
-over <!--v:results/fhir_validation.json#/files_validated-->14<!--/v--> records.
+over <!--v:results/fhir_validation.json#/files_validated-->15<!--/v--> records.
 
 ## 4. The answer key stays out of the web bundle
 
@@ -105,8 +105,8 @@ into `fhir/sandbox_ledger.jsonl`. A delete names one id, which must be in the le
 delete by search and no `$expunge`. The one update is on our own Library entry, matched by our own
 identifier, so it can only ever reach our resource. Only visit Bundles are sent: a demo walk, a
 referral or an example is refused by shape. The mirror refuses OneAquaHealth's closed API by name.
-A launchd job re-pushes on set days, and the conditional creates make that a no-op for what is
-still there.
+A launchd job re-pushes every day that their sandbox answers, and the conditional creates make
+that a no-op for what is still there.
 
 **Proof.** `scripts/tests/test_repush_sandbox.py::test_delete_refuses_unknown_ids_searches_and_operations`,
 `scripts/tests/test_repush_sandbox.py::test_delete_only_an_id_from_the_ledger`,

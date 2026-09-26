@@ -103,6 +103,12 @@ def walk_record(record_id: str, db: DB, now: Now) -> dict[str, Any]:
     return walk_store.walk_view(db, record_id, now=now)
 
 
+@router.get("/walk/{record_id}/fhir", dependencies=[Depends(rate_limited(READ_LIMIT))])
+def walk_fhir(record_id: str, db: DB, now: Now) -> dict[str, Any]:
+    """One stored walk record's demo Bundle alone, until its delete date."""
+    return walk_store.walk_fhir(db, record_id, now=now)
+
+
 @router.get("/photo/{photo_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])
 def photo(photo_id: str, db: DB, t: str | None = None) -> FileResponse:
     path = check.photo_path(db, photo_id, t)

@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { t } from "@/lib/t";
+
+// Its own tab title, not the landing page's (critic round 14 P02).
+export const metadata: Metadata = { title: `${t("notfound.title")}: ${t("app.name")}` };
 
 // Any address with no page (CRITIC_11 W02). The framework's own page set inline styles, which the
 // site's CSP blocks, and gave no way on but the wordmark. This one is in the site's own words and

@@ -5,7 +5,8 @@ what the row says, the promise is not kept, whatever any page claims.
 
 Run everything from the repository root. `make judge-check` runs rows 1, 2 and 5 on its own and reads
 row 3's last run, with `make reproduce` (row 16), the web build, the design gate and a secret scan
-as well, offline, with no API key, and prints a six line summary.
+as well, offline, with no API key, and prints a six line summary, with the notes of `make reproduce`
+under its line.
 
 ## Setup, once
 
@@ -16,7 +17,9 @@ export JAVA17_HOME=/opt/homebrew/opt/openjdk@17   # the FHIR validator needs Jav
 brew install gitleaks                              # make check scans the history for secrets
 ```
 
-Nothing below needs an API key. Three rows in the first table need a network: the first run of rows 3 and 12 fetches their guide, SUSHI and the HL7 validator, and asks tx.fhir.org for terminology; row 14 opens the live site and asks GitHub whether the repository is public. The gates further down say which need a network or a browser.
+The setup needs Node 20 or later with npm, and row 18 (`make worker-e2e`) needs Node 22 or later, because the Worker's wrangler refuses to start on anything older.
+
+Nothing below needs an API key. Three rows in the first table need a network: rows 3 and 12 need one on every run, because the first run fetches their guide, SUSHI and the HL7 validator, and every run asks tx.fhir.org for terminology; row 14 opens the live site and asks GitHub whether the repository is public. The gates further down say which need a network or a browser.
 
 ## The gates
 
@@ -36,15 +39,15 @@ Nothing below needs an API key. Three rows in the first table need a network: th
 | 12 | Everything above, in one run | `make check` | `CHECK GREEN` |
 | 13 | The launch gate | `make preflight-launch` | `0 failed`, on the maintainer's Mac only: its backup check reads the receipt `make backup` leaves after it exports the live D1 database with the maintainer's login, so anywhere else that check fails |
 | 14 | The submission gate | `make submit-check` | every item except the video link and the repo being public |
-| 15 | One command for a judge | `make judge-check` | six lines, all PASS: the Python tests and the Worker's golden vector tests; `make reproduce` (row 16); the last HL7 validator run read from `results/fhir_validation.json` (it does not run the validator; row 3 does) and the golden Bundles checked against the emitter; the web build and the design check; the audit log; the secrets scan |
-| 16 | Every AI number rebuilt from the raw replies | `make reproduce` | `reproduce: ... every one matches`: each number in `results/` from a paid run graded again from the replies in `evals/fixtures/raw/`, each synthetic result made again from its seed, no network and no key; what cannot be regraded is named with its reason |
+| 15 | One command for a judge | `make judge-check` | six lines, all PASS, with `make reproduce`'s notes printed under its line: the Python tests and the Worker's golden vector tests; `make reproduce` (row 16); the last HL7 validator run read from `results/fhir_validation.json` (it does not run the validator; row 3 does) and the golden Bundles checked against the emitter; the web build and the design check; the audit log; the secrets scan |
+| 16 | The AI numbers rebuilt from the raw replies, where a run kept them | `make reproduce` | `reproduce: ... every one matches`: each number in `results/` from a paid run graded again from the replies in `evals/fixtures/raw/`, each synthetic result made again from its seed, no network and no key. A note under a file names what is checked only as recorded: the benchmark runs kept counts, not replies, so their right-answer counts, their share of can't tell answers and their count of malformed replies; and the footage runs' answers on the adversarial frames. A skip line names each file not regraded, with its reason |
 
 ## The gates that need a network or a browser
 
 | # | The promise | Command | What it prints when it holds |
 |---|---|---|---|
 | 17 | A person can finish the test on a phone | `cd apps/web && npx playwright test` | every spec passing on the 390 by 844 viewport, both arms |
-| 18 | The whole API works on the edge runtime | `make worker-e2e` | <!--v:results/test_counts.json#/worker_e2e/sections-->14<!--/v--> sections green under `wrangler dev` |
+| 18 | The whole API works on the edge runtime | `make worker-e2e` | <!--v:results/test_counts.json#/worker_e2e/sections-->16<!--/v--> sections green under `wrangler dev` |
 | 19 | The deployed site is the one we think it is | `DEPLOYED_URL=... DEPLOYED_API=... npx playwright test tests/deployed-smoke.spec.ts` | a whole sitting finished, and the counts endpoint did not move |
 | 20 | The landing page paints fast enough on a slow phone | `SITE_URL=... node apps/web/scripts/live-check.mjs` | load and largest paint under the 3 second line on a throttled 4G profile |
 

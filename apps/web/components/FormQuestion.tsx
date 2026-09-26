@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { GlossaryAside } from "./Glossary";
 import type { AnswerValue } from "@/lib/api";
-import { content, featureById, glossaryFor, type FormItem } from "@/lib/content";
+import { content, featureById, glossaryFor, plantRegions, type FormItem } from "@/lib/content";
 import { t } from "@/lib/t";
 
 /** Glossary toggles for every technical word in an item's text, plus the feature's own term. */
@@ -29,21 +29,50 @@ function GlossaryLinks({ item }: { item: FormItem }) {
   );
 }
 
-/** One form item rendered by type. Choice and yes/no move on at once; the rest need Next. */
-export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: FormItem; value: AnswerValue | undefined; onAnswer: (v: AnswerValue) => void; onBack: () => void; onSkip: () => void }) {
+/**
+ * One form item rendered by type. Choice and yes/no move on at once; the rest need Next.
+ *
+ * plantRegion says which region's plant list "Which ones?" offers (critic round 14 B03, round 15
+ * F04): the region pack the spot is in, null when it is in none, such as a video walk's creek in
+ * Russia, the UK or Oregon, and undefined when this device does not know where the spot is (a
+ * saved spot), which offers every list as before. The screen always says which region a list is
+ * for, and a creek outside every region gets no list, only Can't tell and None of these.
+ */
+export function FormQuestion({
+  item,
+  value,
+  onAnswer,
+  onBack,
+  onSkip,
+  plantRegion,
+}: {
+  item: FormItem;
+  value: AnswerValue | undefined;
+  onAnswer: (v: AnswerValue) => void;
+  onBack: () => void;
+  onSkip: () => void;
+  plantRegion?: string | null;
+}) {
   const [draft, setDraft] = useState<AnswerValue | undefined>(value);
   const section = content.form.sections.find((s) => s.id === item.section);
   const unverified = !item.verified_against_app;
 
-  function regionOptions(): { id: string; label: string; value: string }[] {
-    const opts: { id: string; label: string; value: string }[] = [];
-    for (const region of Object.values(content.regions)) {
+  function regionList(): { options: { id: string; label: string; value: string }[]; note: string; empty: boolean } {
+    const listed = plantRegions();
+    const here = plantRegion === undefined ? listed : listed.filter((r) => r.region === plantRegion);
+    const options: { id: string; label: string; value: string }[] = [];
+    for (const region of here) {
       for (const p of region.invasive_plants ?? []) {
-        opts.push({ id: p.latin_name, label: `${p.common_name} (${p.latin_name})`, value: p.latin_name });
+        options.push({ id: p.latin_name, label: `${p.common_name} (${p.latin_name})`, value: p.latin_name });
       }
     }
-    opts.push({ id: "cant_tell", label: t("check.not_sure"), value: "cant_tell" });
-    return opts;
+    options.push({ id: "cant_tell", label: t("check.not_sure"), value: "cant_tell" });
+    const names = (regions: { name: string }[]) => regions.map((r) => r.name).join(" and ");
+    if (here.length > 0) return { options, note: t("check.region_list_for", { region: names(here) }), empty: false };
+    // A spot in a region pack with no list yet, or no list anywhere: the old line.
+    const inPack = plantRegion ? Object.values(content.regions).some((r) => r.region === plantRegion) : false;
+    if (inPack || listed.length === 0) return { options, note: t("check.region_list_empty"), empty: true };
+    return { options, note: t("check.region_list_elsewhere", { regions: names(listed) }), empty: true };
   }
 
   const head = (
@@ -102,13 +131,18 @@ export function FormQuestion({ item, value, onAnswer, onBack, onSkip }: { item: 
       );
     case "multi":
     case "pick_region_list": {
-      const options = item.type === "multi" ? item.options ?? [] : regionOptions();
+      const plants = item.type === "pick_region_list" ? regionList() : null;
+      const options = plants ? plants.options : item.options ?? [];
       const chosen = Array.isArray(draft) ? (draft as string[]) : [];
       const toggle = (v: string) => setDraft(chosen.includes(v) ? chosen.filter((x) => x !== v) : [...chosen, v]);
       return (
         <div className="stack">
           {head}
-          {item.type === "pick_region_list" && options.length === 1 ? <p className="notice notice-warn">{t("check.region_list_empty")}</p> : null}
+          {plants ? (
+            <p className={plants.empty ? "notice notice-warn" : "small muted"} data-testid="region-list-note">
+              {plants.note}
+            </p>
+          ) : null}
           <div className="option-list" role="group" aria-labelledby="question">
             {options.map((o) => (
               <label key={o.id} className="option">

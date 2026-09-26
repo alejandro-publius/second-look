@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -200,3 +202,41 @@ def test_clips_only_with_no_source_fails_and_leaves_no_old_clip(
     (tmp_path / "public" / "walks" / "v01.mp4").write_bytes(b"an old cut")
     assert bw.main(["--clips-only", "--cache", str(cache)]) == 1
     assert cut == [] and not (tmp_path / "public" / "walks" / "v01.mp4").exists()
+
+
+@pytest.mark.skipif(
+    shutil.which("ffmpeg") is None or shutil.which("ffprobe") is None,
+    reason="cuts a real clip: needs ffmpeg and ffprobe",
+)
+def test_a_clip_is_cut_at_540_lines_h264_and_about_1_mbps(tmp_path: Path) -> None:
+    """Judge walk W05: at 720 lines and 2.5 Mbps a clip stalled on a 1.6 Mbps phone line.
+
+    The source here is the hardest kind to squeeze, moving noise at 720 lines, so an encoder with
+    no ceiling would spend far more than 1 Mbps on it. The cut must come out 540 lines, H.264,
+    no sound, and near 1 Mbps for the whole clip.
+    """
+    src = tmp_path / "busy.mp4"
+    subprocess.run(
+        [
+            "ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi",
+            "-i", "testsrc2=size=1280x720:rate=30:duration=10", "-vf", "noise=alls=60:allf=t",
+            "-c:v", "libx264", "-preset", "ultrafast", "-qp", "12", str(src),
+        ],
+        check=True,
+    )  # fmt: skip
+    dest = tmp_path / "walks" / "clip.mp4"
+    size = bw.cut_clip(src, dest, 1, 8)
+    probe = json.loads(
+        subprocess.run(
+            [
+                "ffprobe", "-v", "error", "-show_entries",
+                "stream=codec_type,codec_name,height:format=duration", "-of", "json", str(dest),
+            ],
+            capture_output=True, text=True, check=True,
+        ).stdout
+    )  # fmt: skip
+    streams = probe["streams"]
+    assert [s["codec_type"] for s in streams] == ["video"], "a clip carries no sound"
+    assert streams[0]["codec_name"] == "h264" and streams[0]["height"] == 540
+    kbps = size * 8 / float(probe["format"]["duration"]) / 1000
+    assert 500 < kbps <= 1250, f"{kbps:.0f} kbps, not about 1 Mbps"

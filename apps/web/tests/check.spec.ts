@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { assertOnlyOurOrigins, mockApi, watchRequests } from "./mock-api.mjs";
 import { BASE } from "./helpers";
 
+const en: Record<string, string> = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8")).locale;
+
 /** Drops a pin (the denied-location path) and names the spot. */
 async function placePin(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Start the check" }).click();
@@ -46,6 +48,8 @@ async function answerForm(page: import("@playwright/test").Page, { moveJoy = tru
   // The Bay Area list was approved on 2026-09-25 (UPDATE_30 section 3), so its plants are offered.
   await expect(page.getByLabel("Himalayan blackberry (Rubus armeniacus)")).toBeVisible();
   await expect(page.getByText("No plant list for this region yet.")).toHaveCount(0);
+  // Critic round 14 B03: the list says whose it is, here the spot's own region.
+  await expect(page.getByTestId("region-list-note")).toHaveText("This list is for California, San Francisco Bay Area.");
   await page.getByLabel("Can't tell").check();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "No", exact: true }).click(); // cuts
@@ -85,6 +89,12 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await expect(page.getByText("Question 1 of")).toBeVisible();
   await expect(page.getByText("Draft wording")).toBeVisible();
   await answerForm(page);
+  // Judge walk W01: Send is what writes, and the follow-ups come after it. The Photos screen says
+  // so before the button, and nothing has been sent yet.
+  await expect(page.getByTestId("send-note")).toHaveText(
+    "Send stores this spot and your check on the live site. Any follow-up questions come after that.",
+  );
+  expect(calls.filter((c) => c.path.startsWith("/api/check"))).toEqual([]);
   await page.getByRole("button", { name: "Send" }).click();
 
   const draft = calls.find((c) => c.path === "/api/check/draft")!;
@@ -106,7 +116,9 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
 
   await expect(page.getByRole("heading", { name: "One or two follow-ups" })).toBeVisible();
   await expect(page.getByText("It has not rained here for 5 days.")).toBeVisible();
-  await page.getByRole("region", { name: "dry_pipe" }).getByRole("button", { name: "Yes", exact: true }).click();
+  // Each card is named by its check, never by its rule's code name (critic round 14 B04).
+  await expect(page.getByRole("region", { name: "dry_pipe" })).toHaveCount(0);
+  await page.getByRole("region", { name: "Pipe after dry days" }).getByRole("button", { name: "Yes", exact: true }).click();
   await page.getByRole("button", { name: "Change my rating" }).click();
   await page.getByRole("button", { name: /^Moderate:/ }).click();
   await page.getByRole("button", { name: "Finish" }).click();
@@ -202,4 +214,65 @@ test.describe("Use my location works on a check opened by a tap inside the app",
       await expect(page.getByText("Rounded position: 37.87, -122.26")).toBeVisible();
     });
   }
+});
+
+// Critic round 14 B03: in /check the plant list follows the spot's region. A pin outside every
+// region pack's box, here Heraklion, gets no list, only Can't tell and None of these, with a line
+// that says the list is for the Bay Area. Critic round 14 B04: the Photos screen counts in words
+// that fit the number.
+test("a spot outside the Bay Area is offered no plant list, and the Photos screen counts photos in plain words", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/check");
+  await page.getByRole("button", { name: "Start the check" }).click();
+  await page.getByRole("button", { name: "Drop a pin instead" }).click();
+  await page.getByLabel("Latitude").fill("35.3387");
+  await page.getByLabel("Longitude").fill("25.1442");
+  await page.getByLabel("Name for this spot").fill("Bridge");
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Question 1 of")).toBeVisible();
+  for (let i = 0; i < 40; i++) {
+    const question = (await page.locator("h1#question").innerText()).trim();
+    if (question === "Which ones?") break;
+    if (question === "Do you see any non-native or invasive plant species?") await page.getByRole("button", { name: "Yes", exact: true }).click();
+    else if (await page.getByRole("button", { name: "Skip", exact: true }).isVisible()) await page.getByRole("button", { name: "Skip", exact: true }).click();
+    else if (await page.getByRole("button", { name: "None of these", exact: true }).isVisible()) await page.getByRole("button", { name: "None of these", exact: true }).click();
+    else if (await page.getByRole("main").getByRole("group").first().getByRole("button").first().isVisible()) await page.getByRole("main").getByRole("group").first().getByRole("button").first().click();
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.locator("h1#question")).toHaveText("Which ones?");
+  await expect(page.getByText(/Hedera helix/)).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("group").getByRole("checkbox")).toHaveCount(1);
+  await expect(page.getByTestId("region-list-note")).toHaveText(
+    "We have a plant list only for California, San Francisco Bay Area, so there is none for this creek. Pick Can't tell, or None of these.",
+  );
+  await page.getByRole("button", { name: "None of these", exact: true }).click();
+  for (let i = 0; i < 10 && !(await page.getByRole("heading", { name: "Photos" }).isVisible()); i++) {
+    const question = (await page.locator("h1#question").innerText()).trim();
+    if (await page.getByRole("button", { name: "Skip", exact: true }).isVisible()) await page.getByRole("button", { name: "Skip", exact: true }).click();
+    else if (await page.getByRole("main").getByRole("group").first().getByRole("button").first().isVisible()) await page.getByRole("main").getByRole("group").first().getByRole("button").first().click();
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.waitForFunction((q) => document.querySelector("h1#question")?.textContent?.trim() !== q, question);
+  }
+  await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
+  await expect(page.getByText("0 photos ready")).toBeVisible();
+  await expect(page.getByText(/photo\(s\)/)).toHaveCount(0);
+});
+
+// Critic round 16 K01: the spot's name is public, and the screen said nothing about it; and after
+// Use my location, Drop a pin instead kept "Position found and rounded." over empty pin fields.
+test.describe("the location step says the spot's name is public, and a pin clears the found line", () => {
+  test.use({ permissions: ["geolocation"], geolocation: { latitude: 37.8719, longitude: -122.2585 } });
+  test("found, then a pin", async ({ page }) => {
+    await mockApi(page);
+    await page.goto("/check");
+    await page.getByRole("button", { name: "Start the check" }).click();
+    await page.getByRole("button", { name: "Use my location" }).click();
+    await expect(page.getByRole("status")).toHaveText("Position found and rounded.");
+    await expect(page.getByText(en["check.pin_name_public"])).toBeVisible();
+    await expect(page.getByLabel("Name for this spot")).toHaveAttribute("aria-describedby", "spot-name-public");
+    await page.getByRole("button", { name: "Drop a pin instead" }).click();
+    await expect(page.getByText("Position found and rounded.")).toHaveCount(0);
+    await expect(page.getByText(en["check.pin_name_public"])).toBeVisible();
+  });
 });

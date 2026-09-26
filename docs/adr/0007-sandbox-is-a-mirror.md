@@ -25,7 +25,8 @@ unless `SANDBOX_MIRROR_ENABLED` is `true`.
 ## Consequences
 
 - Records someone else deletes come back on the next re-push, and the conditional creates make a
-  re-push a no-op for what is still there. A launchd job re-pushes on set days (`DEPLOY.md`).
+  re-push a no-op for what is still there. A launchd job re-pushes every day that their sandbox
+  answers (`DEPLOY.md`).
 - Real visits are mirrored as one tagged batch after the data lock, not as they arrive.
 - The Library entry lists the Provenances the ledger says we created, so anyone can find our data
   set from the sandbox itself.

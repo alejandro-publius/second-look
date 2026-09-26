@@ -5,6 +5,10 @@ Tokens: `{{claim:results/file.json#/json/pointer}}` on first render, which becom
 Markers: `<!-- claim: results/file.json#/json/pointer -->` gain ` = value` so that
 scripts/verify_claims.py compares the README with the results file in CI. Booleans render
 as "passed" or "did not pass".
+
+Blocks: a list whose length a results file decides is written whole, between
+`<!--block:NAME results/file.json-->` and `<!--/block-->`, by the maker BLOCKS names.
+scripts/verify_claims.py makes it again and compares, as it does a number.
 """
 
 from __future__ import annotations
@@ -13,12 +17,61 @@ import argparse
 import json
 import re
 import sys
+from collections.abc import Callable, Mapping
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN_RE = re.compile(r"\{\{claim:([\w./-]+#[\w/. -]+)\}\}")
 RENDERED_RE = re.compile(r"<!--v:([\w./-]+#[\w/. -]+)-->(.*?)<!--/v-->", re.S)
 MARKER_RE = re.compile(r"<!--\s*claim:\s*([\w./-]+#[\w/.-]+)\s*(?:=\s*[^\s]+)?\s*-->")
+BLOCK_RE = re.compile(r"(<!--block:([\w-]+) ([\w./-]+)-->\n)(.*?)(<!--/block-->)", re.S)
+
+
+# The judge-check run the README's Quickstart shows (results/judge_check.json). It was one bullet
+# per step with the step's text as recorded, and so read as pasted tool output: the tool's own name
+# after the step's ("reproduce: reproduce: ..."), all of make reproduce's notes run into one line,
+# and those notes called "named above" while they came after it (critic round 14 A04, round 15
+# E02). Now each note is its own item under its step.
+NOTE_START = re.compile(r"; (?=note on )")
+
+
+def summary_line(name: str, line: str) -> str:
+    """A tool's line as it reads under its step: without the tool's own name, which the step
+    already gives, and with make reproduce's "each named above", true in its own output, as
+    "below", since judge-check shows the notes after it."""
+    for own in dict.fromkeys((name, name.replace(" ", "-"))):
+        line = line.removeprefix(f"{own}: ")
+    return line.replace(", each named above", ", each named below")
+
+
+def judge_check_list(doc: Mapping[str, Any]) -> str:
+    """One item per step, its notes as items under it, then judge-check's last line."""
+    out: list[str] = []
+    for step in doc["steps"]:
+        name = str(step["name"])
+        head, *notes = NOTE_START.split(str(step["text"]))
+        parts = [summary_line(name, part).removesuffix(".") for part in head.split("; ")]
+        failed = "" if step.get("ok", True) else " (failed)"
+        out.append(f"- **{name}**{failed}: {'; '.join(parts)}")
+        out += [f"  - {note.removeprefix('note on ')}" for note in notes]
+    out.append(f"- {doc['last']}")
+    return "\n".join(out) + "\n"
+
+
+BLOCKS: dict[str, Callable[[Mapping[str, Any]], str]] = {"judge-check": judge_check_list}
+
+
+def block_text(name: str, rel: str, root: Path) -> str | None:
+    """What the block NAME shows for the results file rel, or None when it cannot be made."""
+    maker = BLOCKS.get(name)
+    if maker is None:
+        return None
+    try:
+        doc = json.loads((root / rel).read_text(encoding="utf-8"))
+        return maker(doc)
+    except (FileNotFoundError, KeyError, TypeError, json.JSONDecodeError):
+        return None
 
 
 # What a line is, for broken_paragraph_lines: CommonMark's block starts, cut down to what these
@@ -155,6 +208,15 @@ def render(text: str, root: Path) -> tuple[str, list[str]]:
         v = value_for(ref)
         return m.group(0) if v is None else f"<!-- claim: {ref} = {marker_value(v)} -->"
 
+    def sub_block(m: re.Match[str]) -> str:
+        name, rel = m.group(2), m.group(3)
+        body = block_text(name, rel, root)
+        if body is None:
+            missing.append(f"{rel} (block {name})")
+            return m.group(0)
+        return f"{m.group(1)}{body}{m.group(5)}"
+
+    text = BLOCK_RE.sub(sub_block, text)
     text = RENDERED_RE.sub(sub_rendered, text)
     text = TOKEN_RE.sub(sub_token, text)
     text = MARKER_RE.sub(sub_marker, text)

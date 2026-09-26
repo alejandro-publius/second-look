@@ -9,6 +9,9 @@ check can ever collide with one.
 
 The walk itself (the clip, its credit, and the flags the checker raised on its frames at build
 time) is a row of content/walks.yaml, written by scripts/build_walks.py.
+
+A walk runs the creek check's follow-up rules on its answers, like the check itself
+(walk_followups, walk_checks), and the store keeps the checks that ran with the record.
 """
 
 from __future__ import annotations
@@ -16,17 +19,20 @@ from __future__ import annotations
 import copy
 import hashlib
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from xml.sax.saxutils import escape
 
 from core.fhir_emit import REPO_URL, emit_visit
-from core.records import Observer, Spot, VisitRecord
+from core.followups import Followup, SiteContext, select_followups
+from core.records import CheckResult, Observer, Spot, VisitRecord
 
 DEMO_TAG_SYSTEM = f"{REPO_URL}/tags"
 DEMO_TAG_CODE = "demo-walk"
 DEMO_TAG_DISPLAY = "Demo visit from a video walk. Never counted and never sent to the sandbox."
 WALK_PREFIX = "walk-"
+RATING_ITEM = "overall_rating"
 
 # The stored demo record of a finished walk (UPDATE_30 section 1 item 3). docs/DATA_HANDLING.md
 # says the same numbers in words. worker/src/core/walks.ts holds the same five.
@@ -95,12 +101,39 @@ def tag_demo(bundle: Mapping[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _rating_changed_note(first: str, final: str) -> str:
+    return (
+        f"The first overall rating was {first}. "
+        f"On the rating check the volunteer changed it to {final}."
+    )
+
+
 def walk_bundle(
-    walk: Mapping[str, Any], answers: Mapping[str, Any], answered_at: datetime
+    walk: Mapping[str, Any],
+    answers: Mapping[str, Any],
+    answered_at: datetime,
+    final_rating: str | None = None,
 ) -> dict[str, Any]:
-    """The FHIR record of one walk visit, tagged as a demo."""
-    visit = walk_visit(walk, answers, answered_at)
-    return tag_demo(emit_visit(visit, test_sitting=None, emitted_at=answered_at))
+    """The FHIR record of one walk visit, tagged as a demo.
+
+    final_rating is the rating the rating check left (walk_checks). When it differs from the
+    walk's own overall rating, the record answers the rating question with it, and the response's
+    narrative names the first rating, so the record a city reads carries the rating the person
+    kept, not the one they took back (critic round 15 F02). The answers stay as given.
+    """
+    first = answers.get(RATING_ITEM)
+    changed = isinstance(first, str) and final_rating is not None and final_rating != first
+    rated = {**answers, RATING_ITEM: final_rating} if changed else answers
+    visit = walk_visit(walk, rated, answered_at)
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=answered_at)
+    if changed:
+        for entry in bundle["entry"]:
+            resource = entry["resource"]
+            if resource["resourceType"] == "QuestionnaireResponse":
+                div = resource["text"]["div"]
+                note = escape(_rating_changed_note(str(first), str(final_rating)))
+                resource["text"]["div"] = div.replace("</p></div>", f"</p><p>{note}</p></div>")
+    return tag_demo(bundle)
 
 
 def is_demo(bundle: Mapping[str, Any]) -> bool:
@@ -134,13 +167,18 @@ def walk_answered_at(text: object, now: datetime) -> datetime:
 
 
 def walk_record(
-    walk: Mapping[str, Any], answers: Mapping[str, Any], answered_at: object, now: datetime
+    walk: Mapping[str, Any],
+    answers: Mapping[str, Any],
+    answered_at: object,
+    now: datetime,
+    final_rating: str | None = None,
 ) -> dict[str, Any]:
     """The row the store keeps for a finished walk: its id, its times and its demo Bundle.
 
     The id is the walk visit's own id, so the stored record is the record the phone built, and
     the same walk sent twice from the queue is one record. The caller checks the answers against
-    the form first (apps/api/check.py, worker/src/check.ts).
+    the form first (apps/api/check.py, worker/src/check.ts), and the final rating with
+    walk_checks, whose final rating the Bundle carries.
     """
     at = walk_answered_at(answered_at, now)
     now = now if now.tzinfo else now.replace(tzinfo=UTC)
@@ -150,5 +188,89 @@ def walk_record(
         "answered_at": utc_stamp(at),
         "created_at": utc_stamp(now),
         "delete_after": utc_stamp(now + timedelta(days=WALK_KEEP_DAYS)),
-        "bundle": walk_bundle(walk, answers, at),
+        "bundle": walk_bundle(walk, answers, at, final_rating),
     }
+
+
+# The follow-up questions of a walk (judge walk W01): the creek check's own rules, the same pure
+# function, over the walk's answers. A clip is no place anyone stood with a phone and has no
+# weather, so rain is unknown and the dry pipe rule fails closed. Nobody took the test on this
+# phone for the walk, so there is no score and the low score rule has nothing to read. The
+# checker's flag on a clip is the walk's own question, gated at build time (scripts/build_walks.py),
+# so no flag goes in here. What is left to fire today is the rating check.
+WALK_SITE = SiteContext(rain="unknown")
+# The answers each kind of follow-up takes on a walk. A walk uploads nothing, so a photo question,
+# which cannot fire without a score anyway, can only be skipped.
+WALK_FOLLOWUP_ANSWERS: dict[str, tuple[str, ...]] = {
+    "yesno": ("yes", "no", "cant_tell", "skipped"),
+    "keep_rating": ("keep", "change", "skipped"),
+    "look_again": ("looked", "skipped"),
+    "photo": ("skipped",),
+}
+
+
+def walk_followups(
+    answers: Mapping[str, Any],
+    table: Mapping[str, Any],
+    *,
+    form_items: Sequence[Mapping[str, Any]],
+) -> list[Followup]:
+    """The follow-ups a walk asks: select_followups with rain unknown, no score and no flag."""
+    return select_followups(
+        answers, WALK_SITE, None, (), table, form_items=form_items, checker_enabled=False
+    )
+
+
+def walk_checks(
+    answers: Mapping[str, Any],
+    followups: Sequence[Followup],
+    question_texts: Sequence[str],
+    given: Mapping[str, object],
+    final_rating: str | None,
+) -> tuple[list[CheckResult], str | None]:
+    """The checks a finished walk ran, with what the person answered, and its final rating.
+
+    Kept as the creek check keeps them (apps/api/check.py finalize): one CheckResult per follow-up
+    asked, its question as the person read it, the answer or None, and the rule's params with its
+    kind as the detail. The first rating is the walk's own overall rating. The final rating is the
+    first, unless the rating check was answered "change", which must bring the new rating. Raises
+    WalkRecordError, with a plain reason, for an answer to a question that was not asked, an
+    answer the question does not take, or a final rating that does not follow from the answers.
+    The caller checks final_rating is one of the form's ratings.
+    """
+    if len(question_texts) != len(followups):
+        raise WalkRecordError("Every follow-up needs its question.")
+    asked = {f.rule_id for f in followups}
+    for rule_id in given:
+        if rule_id not in asked:
+            raise WalkRecordError(f"No follow-up called '{rule_id}' was asked in this walk.")
+    first = answers.get(RATING_ITEM)
+    first_rating = first if isinstance(first, str) else None
+    final = first_rating
+    checks: list[CheckResult] = []
+    for f, text in zip(followups, question_texts, strict=True):
+        raw = given.get(f.rule_id)
+        answer: str | None = None
+        if raw is not None:
+            allowed = WALK_FOLLOWUP_ANSWERS.get(f.kind, ())
+            if not isinstance(raw, str) or raw not in allowed:
+                raise WalkRecordError(f"{f.rule_id}: answer {', '.join(allowed)}.")
+            answer = raw
+        if f.kind == "keep_rating" and answer == "change":
+            if final_rating is None:
+                raise WalkRecordError("A changed rating needs the new rating.")
+            final = final_rating
+        detail: dict[str, str | float | int | None] = {
+            k: (v if isinstance(v, str | int | float) else str(v)) for k, v in f.params.items()
+        }
+        detail["kind"] = f.kind
+        checks.append(
+            CheckResult(
+                rule_id=f.rule_id, asked=True, question_text=text, answer=answer, detail=detail
+            )
+        )
+    if final_rating is not None and final_rating != final:
+        raise WalkRecordError(
+            "The final rating can differ from the first only when the rating check says change."
+        )
+    return checks, final

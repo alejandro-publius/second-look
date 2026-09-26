@@ -347,11 +347,15 @@ export interface InatOut {
   terms: string;
 }
 
-/** POST /api/walk: a finished video walk, sent once so its record opens on any device. */
+/** POST /api/walk: a finished video walk, sent once so its record opens on any device. The store
+ *  runs the follow-up rules on the answers itself and checks these against them (judge walk W01);
+ *  a walk queued before walks asked any carries neither. */
 export interface WalkStoreRequest {
   walk_id: string;
   answers: Record<string, AnswerValue>;
   answered_at: string;
+  followup_answers?: Record<string, string>;
+  final_rating?: string | null;
 }
 
 /** What the store answers: the record's id, which is the walk visit's own id, and its delete date. */
@@ -362,10 +366,14 @@ export interface WalkStoredOut {
   delete_after: string;
 }
 
-/** GET /api/walk/{record_id}: one stored walk record, with its answers and its demo Bundle. */
+/** GET /api/walk/{record_id}: one stored walk record, with its answers and its demo Bundle, and
+ *  the checks it ran with its two ratings, as /api/spot gives them for a visit. */
 export interface WalkRecordOut extends WalkStoredOut {
   answers: Record<string, AnswerValue>;
   bundle: Record<string, unknown>;
+  checks?: CheckResultOut[];
+  first_rating?: string | null;
+  final_rating?: string | null;
 }
 
 export type QuickColour = "clear" | "muddy" | "foam" | "coloured" | "cant_tell";
@@ -589,8 +597,10 @@ export const api = {
   walkRecord(record_id: string) {
     return withDetail<WalkRecordOut>("GET", `/api/walk/${encodeURIComponent(record_id)}`);
   },
-  walkRecordUrl(record_id: string) {
-    return absoluteApiUrl(`/api/walk/${encodeURIComponent(record_id)}`);
+  /** The stored walk record's Bundle alone (GET /api/walk/{id}/fhir), for the record's curl line:
+   *  /api/walk/{id} is the record with its answers and checks, not the FHIR (critic round 14 B04). */
+  walkFhirUrl(record_id: string) {
+    return absoluteApiUrl(`/api/walk/${encodeURIComponent(record_id)}/fhir`);
   },
   /** Multipart upload. The API strips EXIF and checks the real type; we only downsize. The token
    *  serves the photo back to the uploader only; we never store it. */

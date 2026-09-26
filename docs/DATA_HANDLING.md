@@ -44,8 +44,15 @@ Video walks (`/walk`, a creek from your desk; UPDATE_30 section 1 items 2 and 3)
   form's lists, the time the walk was finished, the time it was stored, its delete date and its
   FHIR Bundle, tagged as a demo on every resource. No contributor token, no position, no photo,
   no free text and nothing about the browser. The route refuses a body over 4096 bytes, any
-  field but those three, an answer the form does not allow, and a time more than 5 minutes
-  ahead or 7 days old, and it takes at most 200 walk records a day on the whole server.
+  field but those three and the two below, an answer the form does not allow, and a time more
+  than 5 minutes ahead or 7 days old, and it takes at most 200 walk records a day on the whole
+  server.
+- `walk_checks`: the follow-up questions the creek check's rules asked on the walk's answers and
+  what the person answered, as a creek check keeps its own in `check_result`, and the final
+  rating. The phone sends the answers (`followup_answers`) and the rating (`final_rating`); the
+  store runs the rules itself and refuses an answer to a question it did not ask or an answer
+  the question does not take. A row holds the rule, the question as the locale words it, the
+  coded answer and the rating, one row per walk record, stored with it and deleted with it.
 - A walk record is never counted: it is in no study table, it is not a spot or a visit, so no
   creek's numbers, no `/city?creek=` view and no count include it. It is never sent to
   OneAquaHealth's sandbox: the mirror reads visit Bundles only and refuses anything with the
@@ -99,8 +106,9 @@ We do not control the hosting providers' own logs. Plainly:
   names the address that failed. It is Cloudflare's own setting; we never see the reports.
 - D1 holds the study tables. Workers KV holds creek check photos after downsizing and EXIF
   stripping. Both sit in the same Cloudflare account.
-- GitHub hosts the code, the daily database backup as a private artifact, and the anonymous
-  response table after publication; it logs downloads in aggregate.
+- GitHub hosts the code and, after publication, the anonymous response table; it logs downloads
+  in aggregate. It holds no copy of the database: the daily backup stays on Alex's Mac (see
+  Backups).
 
 The consent screen says: "Cloudflare, which serves this site, keeps its own short-lived
 connection records, which include internet addresses. We do not." That sentence must stay true;
@@ -125,6 +133,7 @@ if we change hosts, change both this file and the consent text.
   row past its date once a day, at 04:17 UTC (the cron in `worker/wrangler.jsonc`), and again
   whenever a new walk is stored; the Python API deletes them whenever a new walk is stored. A
   daily backup taken before that keeps a row until the backup itself is deleted (see Backups).
+- `walk_checks`: deleted with its walk record, in the same step, by both servers.
 - A walk's answers on the phone: in the browser until Start again, or until the person clears
   the site's data. They are never sent anywhere before the walk is finished.
 
@@ -151,11 +160,23 @@ edge, which never hand an address to our code, and a line in docs/deviations.md.
 
 ## Backups
 
-The raw database is backed up once a day by `.github/workflows/backup.yml`, which runs
-`wrangler d1 export` against the `second-look` database and keeps the dump as a private GitHub
-Actions artifact. The token it uses is scoped to D1 read on this one account and nothing else.
-`scripts/backup_db.sh` still covers the compose stack. Nobody computes outcomes from a backup
-before the lock. The only code that computes outcomes is
+The raw database is backed up once a day on Alex's Mac, not on GitHub. The launchd job
+`com.secondlook.backup` (`DEPLOY.md`, Jobs on the Mac) runs `scripts/backup_d1.sh` at 21:00, or
+when the Mac wakes if it slept through that time. The script runs `wrangler d1 export` against the
+`second-look` database with the wrangler login already on the Mac, so no token is written down,
+and puts the dump in `~/second-look-backups/`. That folder is outside the repo, only its owner can
+read it, and it keeps the newest 30 dumps (`BACKUP_KEEP`). No dump goes to git or to GitHub.
+`scripts/backup_db.sh` still covers the compose stack.
+
+`.github/workflows/backup.yml` can make the same export on GitHub, but it runs only when someone
+starts it by hand, and nobody has: the two secrets it needs were never added, and its only two
+runs, scheduled on Sep 21 and 22, failed. It would keep the dump as a GitHub Actions artifact. On
+a public repository anyone signed in to GitHub can download those, and this one turns public on
+Sep 30. So the dump is kept out of Actions artifacts there: the workflow's job runs only while the
+repository is private, and on a public one it is skipped. An artifact made before the flip would
+turn public with it, so none should be made; on Sep 25 there were none.
+
+Nobody computes outcomes from a backup before the lock. The only code that computes outcomes is
 `evals/usability_analysis.py`, which refuses to run before data lock (2026-09-28T01:00:00Z)
 and refuses to run without the `prereg-v1` tag. At the lock, `make lock-analysis` takes one more
 backup on this Mac and exports the two study tables from it (`scripts/study_export.py`, the same

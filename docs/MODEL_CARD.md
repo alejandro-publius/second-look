@@ -93,7 +93,17 @@ Twelve answers per feature is small. An interval such
 as <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/low_pct-->55<!--/v-->
 to <!--v:results/model_card.json#/benchmark/models/claude-fable-5-1/dug_out_channel/high_pct-->95<!--/v-->
 percent means the test cannot tell a good model from a very good one. Read the intervals, not the
-point numbers.
+point numbers, and read them as too narrow. Each interval counts the twelve answers of a
+feature, or all the answers of the whole test, as independent. They are not: the three runs repeat
+the same four photos of a feature, and a model mostly answers a photo the same way each time (the
+per-answer sweep of the same night, `results/model_sweep_20260924T054756Z.json`, shows it).
+Counted over the photos, each interval would be wider, so "each model beat the floor of always
+answering No" holds on the point numbers only.
+
+This run kept counts, not replies. `make reproduce` checks that each accuracy and interval follows
+from the recorded counts, but the counts themselves, the Can't tell share and the count of
+malformed replies are as recorded: no reply is left to grade them from, and it prints a note
+saying so.
 
 **On creek footage.** The four models also answered every feature question
 on <!--v:results/footage_latest.json#/pool/frames-->46<!--/v--> frames

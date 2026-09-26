@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FocusHeading } from "./FocusHeading";
+import { FollowupCard, tapRating, type RatingTap } from "./FollowupCard";
 import { FormQuestion } from "./FormQuestion";
 import { LocationStep } from "./LocationStep";
 import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
 import { Progress } from "./Progress";
-import { api, ApiError, isNetworkError, type AnswerValue, type DraftRequest, type DraftResponse, type Followup, type SpotRef } from "@/lib/api";
-import { content, questionCount, type FormItem } from "@/lib/content";
+import { api, ApiError, isNetworkError, type AnswerValue, type DraftRequest, type DraftResponse, type SpotRef } from "@/lib/api";
+import { content, questionCount, regionAt, type FormItem } from "@/lib/content";
 import { enqueue, flushQueue, getQueued, onQueueChange } from "@/lib/offline";
 import { clearContributorToken, getContributorToken, rememberSpot } from "@/lib/session";
 import { t } from "@/lib/t";
@@ -32,27 +33,6 @@ function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
   });
 }
 
-/** What the rating follow-up holds: its answer, the rating the record will carry, and whether the picker is open. */
-export interface RatingFollowup {
-  answer: string | undefined;
-  finalRating: string | null;
-  changingRating: boolean;
-}
-
-/** A tap on the rating follow-up: Keep, Change, or a rating picked after Change. */
-export type RatingTap = "keep" | "change" | { rating: string };
-
-/**
- * The rating follow-up after one tap. Keep puts the first rating back and closes the picker, so a
- * record can never say keep beside a changed rating. Change opens the picker, and a rating picked
- * there becomes the final one.
- */
-export function tapRating(state: RatingFollowup, tap: RatingTap, firstRating: string | null): RatingFollowup {
-  if (tap === "keep") return { answer: "keep", finalRating: firstRating, changingRating: false };
-  if (tap === "change") return { ...state, changingRating: true };
-  return { answer: "change", finalRating: tap.rating, changingRating: false };
-}
-
 /**
  * The guided creek check from content/form.yaml: one question per screen in the form's order,
  * location first, photos welcome, follow-ups from the API shown in place, offline queue when the
@@ -71,6 +51,9 @@ export function CheckFlow() {
   const items = useMemo(() => visibleItems(answers), [answers]);
   const firstRating = typeof answers.overall_rating === "string" ? answers.overall_rating : null;
   const ratingItem = content.form.items.find((i) => i.id === "overall_rating");
+  // The region whose plant list Which ones? offers: the one a new spot's position is in, or none.
+  // A saved spot's position is not kept on this device, so it is not known (critic round 14 B03).
+  const plantRegion = spot && "new" in spot ? (regionAt(spot.new.latitude, spot.new.longitude)?.region ?? null) : undefined;
 
   // Watch the queue while a saved check waits.
   const queuedId = stage.name === "queued" ? stage.id : null;
@@ -215,6 +198,7 @@ export function CheckFlow() {
             onAnswer={(v) => answerItem(stage.index, v)}
             onSkip={() => answerItem(stage.index, undefined)}
             onBack={() => (stage.index === 0 ? setStage({ name: "location" }) : setStage({ name: "items", index: stage.index - 1 }))}
+            plantRegion={plantRegion}
           />
         </div>
       );
@@ -225,6 +209,9 @@ export function CheckFlow() {
           <FocusHeading>{t("check.photos_title")}</FocusHeading>
           <p>{t("check.photos_intro")}</p>
           <PhotoPicker photos={photos} onChange={setPhotos} />
+          {/* Send is what writes: the draft makes the spot and the visit before the API picks any
+              follow-up, so the screen says so before the button (judge walk W01). */}
+          <p data-testid="send-note">{t("check.photos_send_note")}</p>
           <div className="btn-row">
             <button type="button" className="btn btn-secondary" onClick={() => setStage({ name: "items", index: Math.max(0, items.length - 1) })}>
               {t("check.back")}
@@ -245,7 +232,7 @@ export function CheckFlow() {
     case "followups":
       return (
         <div className="stack">
-          <FocusHeading>{t("check.followups_title")}</FocusHeading>
+          <FocusHeading>{t(stage.draft.followups.length === 1 ? "check.followups_title_one" : "check.followups_title")}</FocusHeading>
           <p className="small muted">{t("check.followups_intro")}</p>
           {stage.draft.followups.map((f) => (
             <FollowupCard
@@ -328,86 +315,4 @@ export function CheckFlow() {
         </div>
       );
   }
-}
-
-function FollowupCard({
-  followup,
-  value,
-  onAnswer,
-  photos,
-  onPhotos,
-  changingRating,
-  ratingOptions,
-  finalRating,
-  onRatingTap,
-}: {
-  followup: Followup;
-  value: string | undefined;
-  onAnswer: (v: string) => void;
-  photos: PickedPhoto[];
-  onPhotos: (p: PickedPhoto[]) => void;
-  changingRating: boolean;
-  ratingOptions: { id: string; label: string; value: string }[];
-  finalRating: string | null;
-  onRatingTap: (tap: RatingTap) => void;
-}) {
-  return (
-    <section className="card stack" aria-label={followup.rule_id}>
-      <p>
-        <strong>{followup.question_text}</strong>
-      </p>
-      {followup.kind === "yesno" ? (
-        <div className="option-list">
-          {[
-            ["yes", t("check.yes")],
-            ["no", t("check.no")],
-            ["cant_tell", t("check.not_sure")],
-          ].map(([v, label]) => (
-            <button key={v} type="button" className="option" aria-pressed={value === v} onClick={() => onAnswer(v)}>
-              {label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-      {followup.kind === "keep_rating" ? (
-        <div className="stack">
-          <div className="btn-row">
-            <button type="button" className="btn" aria-pressed={value === "keep"} onClick={() => onRatingTap("keep")}>
-              {t("check.keep_rating")}
-            </button>
-            <button type="button" className="btn btn-secondary" aria-pressed={value === "change"} onClick={() => onRatingTap("change")}>
-              {t("check.change_rating")}
-            </button>
-          </div>
-          {changingRating ? (
-            <div className="option-list">
-              {ratingOptions.map((o) => (
-                <button key={o.id} type="button" className="option" aria-pressed={finalRating === o.value} onClick={() => onRatingTap({ rating: o.value })}>
-                  {o.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-      {followup.kind === "look_again" ? (
-        <div className="btn-row">
-          <button type="button" className="btn" aria-pressed={value === "looked"} onClick={() => onAnswer("looked")}>
-            {t("check.looked_again")}
-          </button>
-          <button type="button" className="btn btn-secondary" aria-pressed={value === "skipped"} onClick={() => onAnswer("skipped")}>
-            {t("check.skip")}
-          </button>
-        </div>
-      ) : null}
-      {followup.kind === "photo" ? (
-        <div className="stack">
-          <PhotoPicker photos={photos} onChange={onPhotos} max={1} />
-          <button type="button" className="btn btn-quiet" aria-pressed={value === "skipped"} onClick={() => onAnswer("skipped")}>
-            {t("check.skip")}
-          </button>
-        </div>
-      ) : null}
-    </section>
-  );
 }

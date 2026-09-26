@@ -558,6 +558,7 @@ try {
   const streamed = await fetch(`${BASE}/api/walk`, { method: "POST", headers: { "content-type": "application/json" }, body: chunked, duplex: "half" });
   assert.equal(streamed.status, 413, "a body with no declared length is still measured");
   assert.equal((await api("GET", "/api/walk/walk-0000000000000000")).status, 404);
+  assert.equal((await api("GET", "/api/walk/walk-0000000000000000/fhir")).status, 404);
   assert.equal((await api("GET", "/api/walk/not-a-walk")).status, 404);
   assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: 1 }], "nothing refused was stored");
   // The daily cap, over the whole server: the day is filled to one short of it by hand.
@@ -579,6 +580,59 @@ try {
   assert.deepEqual(d1(`SELECT COUNT(*) AS n FROM walk_record WHERE record_id = '${recordId}'`), [{ n: 0 }], "the daily cron deleted it");
   assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: WALK_DAILY_CAP - 1 }], "and nothing else");
   assert.deepEqual(await unmoved(), beforeWalk, "still nothing counted");
+
+  // 8a4. A walk runs the creek check's follow-up rules on its answers (judge walk W01). Overall
+  // Good with an artificial bank, a sewage discharge and a pipe: the rating check is asked, and
+  // the dry pipe question never is, because a clip has no weather. The store decides which
+  // questions were asked, checks each answer, and keeps the checks with the record.
+  at("a video walk's follow-up checks");
+  const rated = { ...walkAnswers, overall_rating: "good", sewage_discharge: "present" };
+  const ratedAt = secondsAgo(45);
+  for (const [body, detail] of [
+    [{ followup_answers: { dry_pipe: "yes" } }, "No follow-up called 'dry_pipe' was asked in this walk."],
+    [{ followup_answers: { rating_check: "yes" } }, "rating_check: answer keep, change, skipped."],
+    [{ followup_answers: { rating_check: "change" } }, "A changed rating needs the new rating."],
+    [{ followup_answers: { rating_check: "keep" }, final_rating: "poor" }, "The final rating can differ from the first only when the rating check says change."],
+  ]) {
+    const r = await api("POST", "/api/walk", { walk_id: walkId, answers: rated, answered_at: ratedAt, ...body });
+    assert.equal(r.status, 422, JSON.stringify(r.data));
+    assert.equal(r.data.detail, detail);
+  }
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_checks"), [{ n: 0 }], "nothing refused was kept");
+  const ratedBody = { walk_id: walkId, answers: rated, answered_at: ratedAt, followup_answers: { rating_check: "change" }, final_rating: "poor" };
+  const ratedWalk = await api("POST", "/api/walk", ratedBody);
+  assert.equal(ratedWalk.status, 200, JSON.stringify(ratedWalk.data));
+  const ratedRead = (await api("GET", `/api/walk/${ratedWalk.data.record_id}`)).data;
+  assert.equal(ratedRead.first_rating, "good");
+  assert.equal(ratedRead.final_rating, "poor");
+  assert.deepEqual(ratedRead.checks, [
+    {
+      rule_id: "rating_check",
+      asked: true,
+      question_text: "You rated this stream Good, but you also reported artificial banks and a sewage discharge. Do you want to keep your rating?",
+      answer: "change",
+      detail: { issues: "artificial banks and a sewage discharge", first_rating: "good", kind: "keep_rating" },
+    },
+  ]);
+  // Critic round 15 F02: the stored FHIR record answers the rating question with the rating the
+  // person kept, and GET .../fhir gives that Bundle alone, the one the record's curl line fetches.
+  const ratedQr = ratedRead.bundle.entry.map((e) => e.resource).find((r) => r.resourceType === "QuestionnaireResponse");
+  assert.equal(ratedQr.item.find((i) => i.linkId === "overall_rating").answer[0].valueCoding.code, "poor", "the record carries the kept rating");
+  assert.match(ratedQr.text.div, /The first overall rating was good\./);
+  const ratedFhir = await api("GET", `/api/walk/${ratedWalk.data.record_id}/fhir`);
+  assert.equal(ratedFhir.status, 200);
+  assert.deepEqual(ratedFhir.data, ratedRead.bundle, "GET .../fhir is the stored Bundle");
+  assert.deepEqual((await api("POST", "/api/walk", ratedBody)).data, ratedWalk.data, "sent again, the same record");
+  assert.equal((await api("POST", "/api/walk", { ...ratedBody, followup_answers: { rating_check: "keep" }, final_rating: null })).status, 409);
+  // A walk stored without follow-ups, as before, reads back with none and its own rating.
+  const plain = (await api("GET", `/api/walk/${last.data.record_id}`)).data;
+  assert.deepEqual([plain.checks, plain.first_rating, plain.final_rating], [[], null, null]);
+  // The checks go with their record: past its date the daily cron deletes both.
+  d1(`UPDATE walk_record SET delete_after = '2026-01-01T00:00:00Z' WHERE record_id = '${ratedWalk.data.record_id}'`);
+  const cronAgain = await fetch(`${BASE}/__scheduled?cron=${encodeURIComponent("17 4 * * *")}`);
+  assert.equal(cronAgain.status, 200, await cronAgain.text());
+  assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_checks"), [{ n: 0 }], "the cron deleted the checks with their record");
+  assert.deepEqual(await unmoved(), beforeWalk, "a walk's checks are never a creek check's");
 
   // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
   // sixteen answers would be the live test's key. This Worker's clock reads one second before
