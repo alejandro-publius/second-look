@@ -3,11 +3,7 @@
 #
 # Run: uv run python scripts/check_readability.py --worst 20
 exceptions:
-  form.yaml.items[23].options[0].label: >-
-    The official OneAquaHealth Citizen Science App's own option text, word for word. Changing it
-    would break the promise that our creek check mirrors their items, and a person answering both
-    would see two different questions. Not ours to simplify.
-  form.yaml.items[23].options[1].label: >-
-    The same option list. Their words, not ours.
-  form.yaml.items[23].options[2].label: >-
-    The same option list. Their words, not ours.
+  form.yaml.items[23].text: >-
+    The official OneAquaHealth Citizen Science App's own question, word for word, from its public
+    translation bundle (docs/notes/app_strings.md). Changing it would break the promise that our
+    creek check asks their questions, and make app-strings-check would fail. Not ours to simplify.

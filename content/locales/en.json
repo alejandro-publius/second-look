@@ -427,7 +427,7 @@
   "verify.ots_checked": "Last asked at {time}.",
   "verify.download_proof": "Download the proof",
   "verify.download_file": "Download the file it stamps",
-  "verify.download_how": "With both files in one folder, anyone can check a proof on their own computer: pip install opentimestamps-client, then ots verify followed by the proof's name.",
+  "verify.download_how": "Put the proof and its file in one folder. Then anyone can check the proof on their own computer with the OpenTimestamps client: ots verify, then the name of the proof.",
   "verify.check_title": "Check it yourself",
   "verify.check_body": "In a copy of the code, these commands run the same checks on your own computer.",
   "verify.cmd_audit": "uv run python scripts/verify_audit.py",
