@@ -150,11 +150,13 @@ def test_the_readme_route_table_names_the_walk_routes_the_worker_serves() -> Non
 
 
 def test_known_weaknesses_says_a_walk_clip_restarts_while_nothing_serves_it_in_parts() -> None:
-    # Round 15 W05: the live clips answer a range request with 200 and the whole file, so a seek
-    # starts the clip again. Nothing in the Worker or the site's headers serves them in parts; the
-    # day something does, this line and the weakness go together.
+    # Round 15 W05: Pages answers a range request with 200 and the whole file, so a seek started
+    # the clip again. The Pages Function under apps/web/functions/walks/ now serves the clips in
+    # parts (UPDATE_32 section 4), so the weakness is gone; if nothing served them in parts, it
+    # would have to come back.
     places = [
         *(ROOT / "worker" / "src").rglob("*.ts"),
+        *(ROOT / "apps" / "web" / "functions").rglob("*.js"),
         ROOT / "apps" / "web" / "public" / "_headers",
     ]
     served_in_parts = [

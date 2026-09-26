@@ -65,6 +65,12 @@ and keeps `/api/share/*`, the static share cards, out of it. The export is built
 from the Worker, `/api/share/13` is still an SVG file, the CSP header reads `connect-src 'self'`.
 Production keeps its dashboard configuration until `main` deploys with this file.
 
+The walk clips go through a Function too. Pages answers a range request with 200 and the whole
+file, so Chrome could not seek in a clip. `apps/web/functions/walks/[[path]].js` reads the same
+file from `env.ASSETS` and answers `Range` with 206 and only those bytes (416 past the end, 200
+with no Range), and `_routes.json` sends `/walks/*` to it. It needs no storage and no deploy step
+of its own: `bash scripts/deploy.sh web` uploads `functions/` with the site.
+
 ## What is live
 
 | Thing | Where |

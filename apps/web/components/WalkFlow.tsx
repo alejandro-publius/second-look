@@ -42,8 +42,8 @@ function visibleItems(answers: Record<string, AnswerValue>): FormItem[] {
 
 /**
  * The clip, with its poster until the person presses play. preload="none" asks for no byte of the
- * video before then: the host answers a range request with the whole file, so even "metadata"
- * pulled megabytes on page open and slowed a phone on a slow line (judge walk W05).
+ * video before then, so opening a walk costs a slow phone line nothing (judge walk W05). The clip
+ * is served in parts by functions/walks/[[path]].js, so the slider can jump to any second.
  */
 function Clip({ walk }: { walk: Walk }) {
   const poster = content.photos[walk.poster_photo_id];
@@ -339,12 +339,6 @@ export function WalkFlow({ walk }: { walk: Walk }) {
             {t("walk.start")}
           </button>
           <p className="notice notice-warn">{t("walk.demo_notice")}</p>
-          {/* The host answers a range request with the whole file, so the browser cannot seek: a
-              move of the slider starts the clip again (critic round 15 W05). Said before the walk
-              starts, below Start, so the button stays on the first screen. */}
-          <p className="small muted" data-testid="walk-seek-note">
-            {t("walk.seek_note")}
-          </p>
         </>
       );
       break;
