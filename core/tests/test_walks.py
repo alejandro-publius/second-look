@@ -245,3 +245,22 @@ def test_a_rating_changed_on_the_rating_check_is_the_rating_the_record_carries()
     at = datetime(2026, 9, 25, 9, 59, 58, tzinfo=UTC)
     assert row["bundle"] == walk_bundle(WALK, JUDGE, at, "poor")
     assert JUDGE["overall_rating"] == "good"
+
+
+def test_a_walk_record_states_the_language_its_questions_were_shown_in() -> None:
+    """UPDATE_32 section 2: the walk's QuestionnaireResponse carries the language; English when
+    none is given, and the record id does not depend on it."""
+    now = datetime(2026, 9, 26, 12, 0, tzinfo=UTC)
+    at = "2026-09-26T11:59:00Z"
+    nl = walk_record(WALK, {"draining_pipes": "absent"}, at, now, None, "nl")
+    en = walk_record(WALK, {"draining_pipes": "absent"}, at, now)
+
+    def qr(row: Mapping[str, object]) -> dict[str, object]:
+        entries = row["bundle"]["entry"]  # type: ignore[index]
+        return next(
+            e["resource"] for e in entries if e["resource"]["resourceType"] == "QuestionnaireResponse"
+        )
+
+    assert qr(nl)["language"] == "nl"
+    assert qr(en)["language"] == "en"
+    assert nl["record_id"] == en["record_id"]

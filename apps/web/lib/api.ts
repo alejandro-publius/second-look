@@ -358,6 +358,8 @@ export interface WalkStoreRequest {
   answered_at: string;
   followup_answers?: Record<string, string>;
   final_rating?: string | null;
+  /** The language the questions were shown in (UPDATE_32 section 2). */
+  language?: string;
 }
 
 /** What the store answers: the record's id, which is the walk visit's own id, and its delete date. */

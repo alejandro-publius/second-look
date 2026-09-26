@@ -78,7 +78,10 @@ def walk_visit_id(walk_id: str, answered_at: datetime) -> str:
 
 
 def walk_visit(
-    walk: Mapping[str, Any], answers: Mapping[str, Any], answered_at: datetime
+    walk: Mapping[str, Any],
+    answers: Mapping[str, Any],
+    answered_at: datetime,
+    language: str = "en",
 ) -> VisitRecord:
     return VisitRecord(
         visit_id=walk_visit_id(str(walk["id"]), answered_at),
@@ -86,6 +89,7 @@ def walk_visit(
         observer=Observer(contributor_token=f"demo-walk-{walk['id']}"),
         answered_at=answered_at,
         answers=dict(answers),
+        language=language,
     )
 
 
@@ -113,6 +117,7 @@ def walk_bundle(
     answers: Mapping[str, Any],
     answered_at: datetime,
     final_rating: str | None = None,
+    language: str = "en",
 ) -> dict[str, Any]:
     """The FHIR record of one walk visit, tagged as a demo.
 
@@ -124,7 +129,7 @@ def walk_bundle(
     first = answers.get(RATING_ITEM)
     changed = isinstance(first, str) and final_rating is not None and final_rating != first
     rated = {**answers, RATING_ITEM: final_rating} if changed else answers
-    visit = walk_visit(walk, rated, answered_at)
+    visit = walk_visit(walk, rated, answered_at, language)
     bundle = emit_visit(visit, test_sitting=None, emitted_at=answered_at)
     if changed:
         for entry in bundle["entry"]:
@@ -172,6 +177,7 @@ def walk_record(
     answered_at: object,
     now: datetime,
     final_rating: str | None = None,
+    language: str = "en",
 ) -> dict[str, Any]:
     """The row the store keeps for a finished walk: its id, its times and its demo Bundle.
 
@@ -188,7 +194,7 @@ def walk_record(
         "answered_at": utc_stamp(at),
         "created_at": utc_stamp(now),
         "delete_after": utc_stamp(now + timedelta(days=WALK_KEEP_DAYS)),
-        "bundle": walk_bundle(walk, answers, at, final_rating),
+        "bundle": walk_bundle(walk, answers, at, final_rating, language),
     }
 
 

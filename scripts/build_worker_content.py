@@ -20,6 +20,7 @@ import yaml
 from apps.api import content
 from core.act import MEASURE_FOR_FEATURE, PIPE_OBSERVERS_NEEDED, SAME_SPOT_METRES, TEST_NAME_WORDS
 from core.assist import flag_side
+from core.content_loader import check_languages
 from core.fhir_emit import (
     OAH_DISPLAYS,
     OAH_LOCATION_PROFILE,
@@ -115,6 +116,8 @@ def build() -> dict[str, Any]:
             for f in loaded.features
         ],
         "form_items": [dict(item) for item in loaded.form.get("items", [])],
+        # The languages the creek check offers, which the check and walk stores accept (UPDATE_32).
+        "check_languages": list(check_languages(ROOT)),
         "followups": loaded.followups,
         "sentences": list(loaded.sentences),
         "locale": {k: v for k, v in loaded.locale.items() if k.startswith(LOCALE_PREFIXES)},

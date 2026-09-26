@@ -425,6 +425,8 @@ def _visit_response(
     return {
         "resourceType": "QuestionnaireResponse",
         "id": fhir_id("sl-qr-visit", visit.visit_id),
+        # The language the volunteer saw the questions in (UPDATE_32 section 2).
+        "language": visit.language,
         "text": _narrative(
             f"Creek check at {visit.spot.spot_name} on {_instant(visit.answered_at)}, "
             f"{len(qr_items)} items answered."

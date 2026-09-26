@@ -94,6 +94,9 @@ class VisitRecord(Frozen):
     checks: tuple[CheckResult, ...] = ()
     photo_ids: tuple[str, ...] = ()
     software_version: str = "0.1.0"
+    # The language the questions were shown in, a BCP 47 tag from content/app_strings.json
+    # (UPDATE_32 section 2). The visit's QuestionnaireResponse states it as its language.
+    language: str = "en"
 
 
 class TestSitting(Frozen):

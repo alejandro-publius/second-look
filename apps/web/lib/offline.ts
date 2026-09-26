@@ -56,6 +56,8 @@ export interface WalkState {
    *  (judge walk W01). A walk kept before walks asked any has neither. */
   followup_answers?: Record<string, string>;
   final_rating?: string | null;
+  /** The language the walk's questions were shown in (UPDATE_32 section 2). */
+  language?: string;
 }
 
 function openDb(): Promise<IDBDatabase> {

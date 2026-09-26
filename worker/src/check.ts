@@ -65,6 +65,7 @@ export interface VisitRow {
   answers_json: string;
   first_rating: string | null;
   final_rating: string | null;
+  language: string | null;
   photo_ids_json: string;
   followups_json: string;
   site_json: string;
@@ -182,6 +183,14 @@ export function validateAnswers(answers: Record<string, unknown>): Record<string
     }
   }
   return clean;
+}
+
+/** One of the languages the creek check offers (content/app_strings.json), or English when none
+ *  was sent (UPDATE_32 section 2). As apps/api/check.py validate_language. */
+export function validateLanguage(value: unknown): string {
+  if (value === undefined || value === null) return "en";
+  if (typeof value !== "string" || !(CONTENT.check_languages as string[]).includes(value)) throw new Invalid("The creek check is not offered in that language.");
+  return value;
 }
 
 export function validateRating(value: unknown): string | null {
@@ -326,6 +335,7 @@ export async function createDraft(env: CheckEnv, body: Record<string, unknown>, 
   const observer = await observerFromToken(env.DB, token);
   const answers = validateAnswers((body.answers ?? {}) as Record<string, unknown>);
   const firstRating = validateRating(body.first_rating);
+  const language = validateLanguage(body.language);
   const photoIds = await checkPhotoIds(env.DB, body.photo_ids);
   const ref = parseSpotRef(body.spot);
   // Look before the new spot is made, or it finds itself.
@@ -342,10 +352,10 @@ export async function createDraft(env: CheckEnv, body: Record<string, unknown>, 
   const followups = chosen.map((f) => ({ rule_id: f.rule_id, kind: f.kind, question_key: f.question_key, question_text: questionText(f), params: f.params }));
   const visitId = `visit-${randomHex(8)}`;
   await env.DB.prepare(
-    `INSERT INTO visit (visit_id, spot_id, kind, contributor_token, answered_at, answers_json, first_rating, photo_ids_json, followups_json, site_json, software_version)
-     VALUES (?, ?, 'check', ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO visit (visit_id, spot_id, kind, contributor_token, answered_at, answers_json, first_rating, language, photo_ids_json, followups_json, site_json, software_version)
+     VALUES (?, ?, 'check', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
-    .bind(visitId, spot.spot_id, token, now, JSON.stringify(answers), firstRating, JSON.stringify(photoIds), JSON.stringify(followups), JSON.stringify(rain), SOFTWARE_VERSION)
+    .bind(visitId, spot.spot_id, token, now, JSON.stringify(answers), firstRating, language, JSON.stringify(photoIds), JSON.stringify(followups), JSON.stringify(rain), SOFTWARE_VERSION)
     .run();
   return {
     draft_id: visitId,
@@ -381,6 +391,7 @@ export function buildRecord(opts: {
   checks: CheckResult[];
   photo_ids: string[];
   software_version: string;
+  language?: string | null;
 }): VisitRecord {
   const copied: Record<string, AnswerValue> = {};
   for (const [key, value] of Object.entries(opts.answers)) copied[String(key)] = Array.isArray(value) ? value.map(String) : value;
@@ -395,6 +406,7 @@ export function buildRecord(opts: {
     checks: [...opts.checks],
     photo_ids: opts.photo_ids.map(String),
     software_version: opts.software_version,
+    language: opts.language || "en",
   };
 }
 
@@ -433,6 +445,7 @@ export async function finalize(env: CheckEnv, body: Record<string, unknown>, now
     checks,
     photo_ids: photoIds,
     software_version: row.software_version || SOFTWARE_VERSION,
+    language: row.language,
   });
   const statements = checks.map((c) =>
     env.DB.prepare("INSERT INTO check_result (visit_id, rule_id, asked, question_text, answer, detail_json) VALUES (?, ?, ?, ?, ?, ?)").bind(

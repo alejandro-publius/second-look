@@ -131,6 +131,8 @@ class VisitRow(SQLModel, table=True):
     answers_json: str = Field(sa_column=Column(Text, nullable=False))
     first_rating: str | None = Field(default=None, max_length=16)
     final_rating: str | None = Field(default=None, max_length=16)
+    # The language the questions were shown in (UPDATE_32 section 2). Empty on older rows: English.
+    language: str | None = Field(default=None, max_length=8)
     photo_ids_json: str = Field(sa_column=Column(Text, nullable=False))
     followups_json: str = Field(sa_column=Column(Text, nullable=False))
     site_json: str = Field(sa_column=Column(Text, nullable=False))

@@ -230,7 +230,7 @@ export const exampleValidation = { ran_at_utc: "2026-09-20T22:58:03+00:00", vali
 // A finished walk's stored record (UPDATE_30 section 1 item 3): the id is the walk visit's own,
 // sha256 of "<walk id>|<time to the second>", as core/walks.py and worker/src/core/walks.ts make it.
 // Since judge walk W01 a walk also sends its follow-up answers and the rating the rating check left.
-const WALK_KEYS = ["walk_id", "answers", "answered_at", "followup_answers", "final_rating"];
+const WALK_KEYS = ["walk_id", "answers", "answered_at", "followup_answers", "final_rating", "language"];
 const secondsOf = (iso) => {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? null : d.toISOString().replace(/\.\d{3}Z$/, "Z");

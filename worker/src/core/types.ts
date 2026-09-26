@@ -52,6 +52,8 @@ export interface VisitRecord {
   checks: CheckResult[];
   photo_ids: string[];
   software_version: string;
+  /** The language the questions were shown in, a BCP 47 tag; the record states it (UPDATE_32). */
+  language?: string;
 }
 
 export interface TestSitting {

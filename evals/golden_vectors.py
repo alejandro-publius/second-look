@@ -856,6 +856,8 @@ def fhir_vectors() -> dict[str, Any]:
             "feelings": ["serenity"],
             "overall_rating": "good",
         },
+        # Taken in Italian (UPDATE_32 section 2): both emitters state it as the response's language.
+        language="it",
     )
     # The creek check as the app stores it: the answer is the first rating, and the rating check
     # either kept it or changed it. The record answers the kept one and keeps the first.

@@ -1,4 +1,12 @@
 {
+  "check_languages": [
+    "en",
+    "pt",
+    "nl",
+    "no",
+    "fr",
+    "it"
+  ],
   "content_hash": "12670e44da38ac85",
   "creeks": [
     {

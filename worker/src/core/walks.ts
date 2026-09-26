@@ -50,7 +50,7 @@ export function walkVisitId(walkId: string, answeredAt: string): string {
   return WALK_PREFIX + sha256Hex(`${walkId}|${instant(answeredAt)}`).slice(0, 16);
 }
 
-export function walkVisit(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: string): VisitRecord {
+export function walkVisit(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: string, language = "en"): VisitRecord {
   return {
     visit_id: walkVisitId(walk.id, answeredAt),
     spot: walkSpot(walk),
@@ -62,6 +62,7 @@ export function walkVisit(walk: WalkRef, answers: Record<string, AnswerValue>, a
     checks: [],
     photo_ids: [],
     software_version: "0.1.0",
+    language,
   };
 }
 
@@ -86,11 +87,11 @@ function ratingChangedNote(first: string, final: string): string {
  *  left (walkChecks): when it differs from the walk's own overall rating, the record answers the
  *  rating question with it and the response's narrative names the first rating (critic round 15
  *  F02). The answers stay as given. As core/walks.py walk_bundle. */
-export function walkBundle(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: string, finalRating: string | null = null): Resource {
+export function walkBundle(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: string, finalRating: string | null = null, language = "en"): Resource {
   const first = answers[RATING_ITEM];
   const changed = typeof first === "string" && finalRating !== null && finalRating !== first;
   const rated = changed ? { ...answers, [RATING_ITEM]: finalRating as string } : answers;
-  const bundle = emitVisit(walkVisit(walk, rated, answeredAt), null, instant(answeredAt)) as Resource;
+  const bundle = emitVisit(walkVisit(walk, rated, answeredAt, language), null, instant(answeredAt)) as Resource;
   if (changed) {
     for (const entry of bundle.entry as Resource[]) {
       const resource = entry.resource as Resource;
@@ -135,7 +136,7 @@ export interface WalkRecordRow {
  *  record is the one the phone built, and the same walk sent twice is one record. The caller
  *  checks the answers against the form first (worker/src/check.ts validateAnswers), and the final
  *  rating with walkChecks, whose final rating the Bundle carries. */
-export function walkRecord(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: unknown, now: string, finalRating: string | null = null): WalkRecordRow {
+export function walkRecord(walk: WalkRef, answers: Record<string, AnswerValue>, answeredAt: unknown, now: string, finalRating: string | null = null, language = "en"): WalkRecordRow {
   const at = walkAnsweredAt(answeredAt, now);
   const clock = parseInstant(now);
   return {
@@ -144,7 +145,7 @@ export function walkRecord(walk: WalkRef, answers: Record<string, AnswerValue>, 
     answered_at: at,
     created_at: instant(clock),
     delete_after: instant(clock + WALK_KEEP_DAYS * DAY_MS),
-    bundle: walkBundle(walk, answers, at, finalRating),
+    bundle: walkBundle(walk, answers, at, finalRating, language),
   };
 }
 

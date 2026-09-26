@@ -251,6 +251,8 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       answered_at: w.answered_at,
       followup_answers,
       final_rating,
+      // The language the questions were shown in; the record states it (UPDATE_32 section 2).
+      language: w.language ?? "en",
     };
     let id: number;
     try {
@@ -360,6 +362,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     await keep({
       answers: final,
       answered_at: answeredAt,
+      language: lang,
       next: visibleItems(final).length,
       followup_answers: settled.followup_answers,
       final_rating: settled.final_rating,
@@ -604,6 +607,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
         answers,
         stage.answeredAt,
         checked.final_rating,
+        lang,
       );
       const recordId = stored.state === "stored" ? stored.record_id : null;
       const city = `/city?walk=${encodeURIComponent(walk.id)}${recordId ? `&record=${encodeURIComponent(recordId)}` : ""}`;

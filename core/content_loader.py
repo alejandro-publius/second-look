@@ -402,6 +402,13 @@ def resolve_locale(locale: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def check_languages(root: Path | str = ".") -> tuple[str, ...]:
+    """The languages the creek check offers: those the official app's bundle carries its
+    questions in, as content/app_strings.json lists them (UPDATE_32 section 2)."""
+    doc = json.loads((Path(root) / "content" / "app_strings.json").read_text(encoding="utf-8"))
+    return tuple(str(lang) for lang in doc["languages"])
+
+
 def placeholder_report(content: Content) -> list[str]:
     """Human inputs still missing. Preflight prints these and fails."""
     out: list[str] = []

@@ -333,3 +333,31 @@ def test_quick_check_joins_the_timeline_and_rejects_free_text(client, monkeypatc
     pipe = next(a for a in quick["answers"] if a["item_id"] == "pipe_running")
     assert pipe["feature"] == "pipe_running" and pipe["label"] == "present"
     assert quick["checks"] == []
+
+
+def test_the_record_states_the_language_the_check_was_taken_in(client, monkeypatch):
+    """UPDATE_32 section 2: the language the questions were shown in is stored with the visit and
+    stated by its QuestionnaireResponse; none sent is English; a language not offered is refused."""
+    monkeypatch.setattr(core_calls, "rain_status", _unknown)
+    saved: list[Any] = []
+    monkeypatch.setattr(core_calls, "save_visit_bundle", lambda visit, **_kw: saved.append(visit))
+    freeze_now(NOW)
+    assert _draft(client, language="xx").status_code in (400, 422)
+    draft = _draft(client, language="it").json()
+    plain = _draft(client).json()
+    with Session(engine) as db:
+        assert must(db.get(VisitRow, draft["draft_id"])).language == "it"
+        assert must(db.get(VisitRow, plain["draft_id"])).language == "en"
+    for d in (draft, plain):
+        r = client.post("/api/check/finalize", json={"draft_id": d["draft_id"]})
+        assert r.status_code == 200, r.text
+    assert [v.language for v in saved] == ["it", "en"]
+    from core.fhir_emit import emit_visit
+
+    bundle = emit_visit(saved[0], test_sitting=None, emitted_at=NOW)
+    (qr,) = [
+        e["resource"]
+        for e in bundle["entry"]
+        if e["resource"]["resourceType"] == "QuestionnaireResponse"
+    ]
+    assert qr["language"] == "it"

@@ -278,6 +278,8 @@ function visitResponse(visit: VisitRecord, pid: string, items: FormItem[]): Reso
   return {
     resourceType: "QuestionnaireResponse",
     id: fhirId("sl-qr-visit", visit.visit_id),
+    // The language the volunteer saw the questions in (UPDATE_32 section 2).
+    language: visit.language ?? "en",
     text: narrative(`Creek check at ${visit.spot.spot_name} on ${instant(visit.answered_at)}, ${qrItems.length} items answered.`),
     identifier: identifier(ID_SYSTEM_QR, visit.visit_id),
     questionnaire: QUESTIONNAIRE_CHECK_URL,

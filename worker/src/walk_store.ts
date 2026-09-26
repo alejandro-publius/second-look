@@ -21,7 +21,7 @@
 // was sent before walks asked any, so it keeps no checks.
 
 import CONTENT from "./content.json";
-import { Invalid, NotFound, questionText, validateAnswers, validateRating } from "./check";
+import { Invalid, NotFound, questionText, validateAnswers, validateLanguage, validateRating } from "./check";
 import { FORM_ITEMS, checkBundle } from "./core/fhir_emit";
 import type { AnswerValue, CheckResult } from "./core/types";
 import { WALK_DAILY_CAP, WALK_KEEP_DAYS, WALK_MAX_BYTES, WalkRecordError, walkChecks, walkFollowups, walkRecord, type WalkRef } from "./core/walks";
@@ -33,7 +33,7 @@ export class Conflict extends Error {}
 export class TooMany extends Error {}
 
 const WALKS: Map<string, WalkRef> = new Map(CONTENT.walks.map((w) => [w.id, { id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }]));
-const BODY_KEYS = new Set(["walk_id", "answers", "answered_at", "followup_answers", "final_rating"]);
+const BODY_KEYS = new Set(["walk_id", "answers", "answered_at", "followup_answers", "final_rating", "language"]);
 const RECORD_ID_RE = /^walk-[0-9a-f]{16}$/;
 
 interface WalkRow {
@@ -125,9 +125,11 @@ export async function storeWalk(db: D1Database, request: Request, now: string) {
   // The follow-ups first: the Bundle carries the rating the rating check left (critic round 15
   // F02), so the record a city reads says the rating the person kept.
   const kept = followupsOf(body, answers);
+  if (body.language !== undefined && body.language !== null && typeof body.language !== "string") throw new Invalid("language must be a language code.");
+  const language = validateLanguage(body.language as string | null | undefined);
   let row;
   try {
-    row = walkRecord(walk, answers, body.answered_at, now, kept === null ? null : kept.final_rating);
+    row = walkRecord(walk, answers, body.answered_at, now, kept === null ? null : kept.final_rating, language);
   } catch (err) {
     if (err instanceof WalkRecordError) throw new Invalid(err.message);
     throw err;

@@ -92,7 +92,10 @@ CREATE TABLE IF NOT EXISTS visit (
   followups_json TEXT NOT NULL,
   site_json TEXT NOT NULL,
   finalized_at TEXT,
-  software_version TEXT NOT NULL DEFAULT '0.1.0'
+  software_version TEXT NOT NULL DEFAULT '0.1.0',
+  -- The language the questions were shown in (UPDATE_32 section 2). A database made before it
+  -- gains the column once from migrations/0001_visit_language.sql.
+  language TEXT
 );
 
 CREATE INDEX IF NOT EXISTS visit_spot ON visit (spot_id);

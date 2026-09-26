@@ -8,6 +8,14 @@ import { fileURLToPath } from "node:url";
 
 // src/content.json
 var content_default = {
+  check_languages: [
+    "en",
+    "pt",
+    "nl",
+    "no",
+    "fr",
+    "it"
+  ],
   content_hash: "12670e44da38ac85",
   creeks: [
     {
@@ -2943,6 +2951,8 @@ function visitResponse(visit, pid, items) {
   return {
     resourceType: "QuestionnaireResponse",
     id: fhirId("sl-qr-visit", visit.visit_id),
+    // The language the volunteer saw the questions in (UPDATE_32 section 2).
+    language: visit.language ?? "en",
     text: narrative(`Creek check at ${visit.spot.spot_name} on ${instant(visit.answered_at)}, ${qrItems.length} items answered.`),
     identifier: identifier(ID_SYSTEM_QR, visit.visit_id),
     questionnaire: QUESTIONNAIRE_CHECK_URL,
@@ -3542,7 +3552,7 @@ function walkSpot(walk) {
 function walkVisitId(walkId, answeredAt) {
   return WALK_PREFIX + sha256Hex(`${walkId}|${instant(answeredAt)}`).slice(0, 16);
 }
-function walkVisit(walk, answers, answeredAt) {
+function walkVisit(walk, answers, answeredAt, language = "en") {
   return {
     visit_id: walkVisitId(walk.id, answeredAt),
     spot: walkSpot(walk),
@@ -3553,7 +3563,8 @@ function walkVisit(walk, answers, answeredAt) {
     final_rating: null,
     checks: [],
     photo_ids: [],
-    software_version: "0.1.0"
+    software_version: "0.1.0",
+    language
   };
 }
 function tagDemo(bundle) {
@@ -3571,11 +3582,11 @@ function tagDemo(bundle) {
 function ratingChangedNote(first, final) {
   return `The first overall rating was ${first}. On the rating check the volunteer changed it to ${final}.`;
 }
-function walkBundle(walk, answers, answeredAt, finalRating = null) {
+function walkBundle(walk, answers, answeredAt, finalRating = null, language = "en") {
   const first = answers[RATING_ITEM3];
   const changed = typeof first === "string" && finalRating !== null && finalRating !== first;
   const rated = changed ? { ...answers, [RATING_ITEM3]: finalRating } : answers;
-  const bundle = emitVisit(walkVisit(walk, rated, answeredAt), null, instant(answeredAt));
+  const bundle = emitVisit(walkVisit(walk, rated, answeredAt, language), null, instant(answeredAt));
   if (changed) {
     for (const entry3 of bundle.entry) {
       const resource = entry3.resource;
@@ -3601,7 +3612,7 @@ function walkAnsweredAt(text, now) {
   if (at < clock - WALK_PAST_DAYS * DAY_MS) throw new WalkRecordError(`That walk is more than ${WALK_PAST_DAYS} days old, so it is not stored.`);
   return instant(at);
 }
-function walkRecord(walk, answers, answeredAt, now, finalRating = null) {
+function walkRecord(walk, answers, answeredAt, now, finalRating = null, language = "en") {
   const at = walkAnsweredAt(answeredAt, now);
   const clock = parseInstant(now);
   return {
@@ -3610,7 +3621,7 @@ function walkRecord(walk, answers, answeredAt, now, finalRating = null) {
     answered_at: at,
     created_at: instant(clock),
     delete_after: instant(clock + WALK_KEEP_DAYS * DAY_MS),
-    bundle: walkBundle(walk, answers, at, finalRating)
+    bundle: walkBundle(walk, answers, at, finalRating, language)
   };
 }
 var WALK_SITE = { rain: "unknown" };

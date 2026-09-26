@@ -228,6 +228,7 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
     },
   });
   expect(draft.body.first_rating).toBe("good");
+  expect(draft.body.language).toBe("en");
   expect(draft.body.answers.bank_type).toBe("present");
   expect(draft.body.answers.draining_pipes).toBe("present");
   expect(draft.body.answers.water_height_m).toBe(0.3);
@@ -294,6 +295,7 @@ test("feelings sliders nobody moved are not sent with the check", async ({
   // The answers on either side of it are still there.
   expect(draft.body.answers.vegetation_cuts).toBe("absent");
   expect(draft.body.first_rating).toBe("good");
+  expect(draft.body.language).toBe("en");
 });
 
 test("offline: the check is saved on the phone and sent when the network returns", async ({

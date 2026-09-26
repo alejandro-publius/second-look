@@ -25,6 +25,7 @@ from apps.api.models import CheckResultRow, ObserverRow, SpotRow, UploadRow, Vis
 from apps.api.security import sha256_hex
 from apps.api.settings import settings
 from core import act
+from core.content_loader import check_languages
 from core.records import CheckResult, FeatureId, FeatureScore, Observer, Spot, TestSitting
 
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024
@@ -91,6 +92,8 @@ class DraftBody(BaseModel):
     answers: dict[str, AnswerValue] = Field(default_factory=dict)
     first_rating: str | None = Field(default=None, max_length=16)
     photo_ids: list[str] = Field(default_factory=list, max_length=8)
+    # The language the questions were shown in (UPDATE_32 section 2); English when not sent.
+    language: str | None = Field(default=None, max_length=8)
 
 
 class FinalizeBody(BaseModel):
@@ -166,6 +169,15 @@ def validate_rating(value: str | None) -> str | None:
     item = content.form_item("overall_rating")
     if item is None or value not in _option_values(item):
         raise Invalid("The overall rating must be good, moderate or poor.")
+    return value
+
+
+def validate_language(value: str | None) -> str:
+    """One of the languages the creek check offers, or English when none was sent."""
+    if value is None:
+        return "en"
+    if value not in check_languages(settings.content_root):
+        raise Invalid("The creek check is not offered in that language.")
     return value
 
 
@@ -307,6 +319,7 @@ def create_draft(db: Session, body: DraftBody, *, now: datetime) -> dict[str, An
     observer = observer_from_token(db, body.contributor_token)
     answers = validate_answers(body.answers)
     first_rating = validate_rating(body.first_rating)
+    language = validate_language(body.language)
     photo_ids = _check_photo_ids(db, body.photo_ids)
     # Look before the new spot is made, or it finds itself.
     nearby = nearby_existing_spot(db, body.spot)
@@ -341,6 +354,7 @@ def create_draft(db: Session, body: DraftBody, *, now: datetime) -> dict[str, An
             answered_at=now,
             answers_json=json.dumps(answers),
             first_rating=first_rating,
+            language=language,
             photo_ids_json=json.dumps(photo_ids),
             followups_json=json.dumps(followups),
             site_json=json.dumps(rain.as_dict()),
@@ -425,7 +439,7 @@ def finalize(db: Session, body: FinalizeBody, *, now: datetime) -> dict[str, Any
         final_rating=final_rating,
         checks=checks,
         photo_ids=photo_ids,
-    )
+    ).model_copy(update={"language": row.language or "en"})
     for c in checks:
         db.add(
             CheckResultRow(

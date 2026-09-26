@@ -46,7 +46,9 @@ from core.walks import (
     walk_record,
 )
 
-BODY_KEYS = frozenset({"walk_id", "answers", "answered_at", "followup_answers", "final_rating"})
+BODY_KEYS = frozenset(
+    {"walk_id", "answers", "answered_at", "followup_answers", "final_rating", "language"}
+)
 RECORD_ID_RE = re.compile(r"walk-[0-9a-f]{16}")
 _ANSWERS = TypeAdapter(dict[str, check.AnswerValue])
 
@@ -172,9 +174,18 @@ def store_walk(db: Session, raw: bytes, *, now: datetime) -> dict[str, str]:
     # The follow-ups first: the Bundle carries the rating the rating check left (critic round 15
     # F02), so the record a city reads says the rating the person kept.
     kept = _followups_of(body, answers)
+    language = body.get("language")
+    if language is not None and not isinstance(language, str):
+        raise check.Invalid("language must be a language code.")
+    language = check.validate_language(language)
     try:
         row = walk_record(
-            walk, answers, body.get("answered_at"), now, None if kept is None else kept[1]
+            walk,
+            answers,
+            body.get("answered_at"),
+            now,
+            None if kept is None else kept[1],
+            language,
         )
     except WalkRecordError as exc:
         raise check.Invalid(str(exc)) from exc

@@ -370,6 +370,7 @@
                   "linkId": "overall_rating"
                 }
               ],
+              "language": "en",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -915,6 +916,7 @@
           "checks": [],
           "final_rating": "moderate",
           "first_rating": "good",
+          "language": "en",
           "observer": {
             "contributor_token": "ct_7f3a9c2e",
             "scores": [
@@ -1270,6 +1272,7 @@
                   "linkId": "overall_rating"
                 }
               ],
+              "language": "it",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -1895,6 +1898,7 @@
           "checks": [],
           "final_rating": null,
           "first_rating": null,
+          "language": "it",
           "observer": {
             "contributor_token": "ct_0b1c2d3e4f5a",
             "scores": [],
@@ -2225,6 +2229,7 @@
                   "linkId": "overall_rating"
                 }
               ],
+              "language": "it",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -2931,6 +2936,7 @@
           "checks": [],
           "final_rating": "poor",
           "first_rating": "good",
+          "language": "it",
           "observer": {
             "contributor_token": "ct_0b1c2d3e4f5a",
             "scores": [],
@@ -3261,6 +3267,7 @@
                   "linkId": "overall_rating"
                 }
               ],
+              "language": "it",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -3886,6 +3893,7 @@
           "checks": [],
           "final_rating": "good",
           "first_rating": "good",
+          "language": "it",
           "observer": {
             "contributor_token": "ct_0b1c2d3e4f5a",
             "scores": [],
@@ -4168,6 +4176,7 @@
                   "linkId": "water_height_m"
                 }
               ],
+              "language": "en",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -4463,6 +4472,7 @@
           ],
           "final_rating": null,
           "first_rating": null,
+          "language": "en",
           "observer": {
             "contributor_token": "longtoken2345678",
             "scores": [
@@ -4757,6 +4767,7 @@
                   "linkId": "draining_pipes"
                 }
               ],
+              "language": "en",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -4792,6 +4803,7 @@
                   "linkId": "draining_pipes"
                 }
               ],
+              "language": "en",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -5225,6 +5237,7 @@
                       "linkId": "draining_pipes"
                     }
                   ],
+                  "language": "en",
                   "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
                   "resourceType": "QuestionnaireResponse",
                   "status": "completed",
@@ -5598,6 +5611,7 @@
                       "linkId": "draining_pipes"
                     }
                   ],
+                  "language": "en",
                   "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
                   "resourceType": "QuestionnaireResponse",
                   "status": "completed",
@@ -5994,6 +6008,7 @@
                   "linkId": "draining_pipes"
                 }
               ],
+              "language": "en",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -6029,6 +6044,7 @@
                   "linkId": "draining_pipes"
                 }
               ],
+              "language": "en",
               "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
@@ -6810,6 +6826,7 @@
                     "linkId": "draining_pipes"
                   }
                 ],
+                "language": "en",
                 "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",
@@ -6845,6 +6862,7 @@
                     "linkId": "draining_pipes"
                   }
                 ],
+                "language": "en",
                 "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",

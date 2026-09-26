@@ -367,6 +367,7 @@
             "linkId": "overall_rating"
           }
         ],
+        "language": "en",
         "questionnaire": "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
         "resourceType": "QuestionnaireResponse",
         "status": "completed",
