@@ -65,6 +65,13 @@ HOSTING = "docs/notes/hosting.md"
 PART2_START = "<!-- human-row-2 -->"
 PART2_END = "<!-- /human-row-2 -->"
 PART2_FILES = ("part2_sessions.csv", "part2_responses.csv")
+# What this design can show, and only that (the planner, 2026-09-26): every committed flag points
+# the way of its gold label, so the question only ever follows a wrong or Can't tell first answer.
+PART2_SCOPE = (
+    "This measures one thing only: whether the checker's question helps a person whose first "
+    "answer was wrong or Can't tell. It does not show that the checker cannot mislead anyone, "
+    "because every flag in this set was correct (Known weaknesses)."
+)
 HUMAN_START = "<!-- human-row -->"
 HUMAN_END = "<!-- /human-row -->"
 # The README paragraph that holds the place of the human row until the lock.
@@ -223,7 +230,7 @@ def part2_row(result: dict[str, Any] | None, rel: str) -> str:
             f"Does the checker's question help? Too few people finished part 2 for the plan's "
             f"test: {n}, and the plan needs 20 in each ([`{md}`]({md}))."
         )
-    return f"{PART2_START}\n{body}\n{PART2_END}"
+    return f"{PART2_START}\n{body} {PART2_SCOPE}\n{PART2_END}"
 
 
 def place_part2_row(readme: str, row: str) -> str:

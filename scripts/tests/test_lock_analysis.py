@@ -696,6 +696,9 @@ def test_part2_row_says_too_few_with_claim_tokens_or_gives_the_test() -> None:
     test = la.part2_row({"primary": {"status": "confirmatory"}}, rel)
     assert "difference {{claim:" in test and "#/primary/ci_high}}" in test
     assert "Nobody took part 2" in la.part2_row(None, "")
+    for row in (few, test):
+        assert "helps a person whose first answer was wrong or Can't tell" in row
+        assert "does not show that the checker cannot mislead anyone" in row
     with pytest.raises(la.Failed):
         la.place_part2_row("no place here", few)
 
