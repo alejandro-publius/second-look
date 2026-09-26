@@ -75,7 +75,7 @@ the TypeScript emitter writes go through the HL7 validator with the Python ones.
 longer match what the Python writes, then runs `worker/test/golden.test.ts`;
 `evals/tests/test_golden_vectors.py`; `results/fhir_validation.json`,
 with <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors
-over <!--v:results/fhir_validation.json#/files_validated-->15<!--/v--> records.
+over <!--v:results/fhir_validation.json#/files_validated-->17<!--/v--> records.
 
 ## 4. The answer key stays out of the web bundle
 
