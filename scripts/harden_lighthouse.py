@@ -34,6 +34,8 @@ PATHS = [
     "/",
     "/t",
     "/demo",
+    "/t2",
+    "/t2/demo",
     "/judges",
     "/check",
     "/spot",

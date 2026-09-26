@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-24T12:23:17Z",
- "commit": "6f40364",
+ "checked_utc": "2026-09-26T02:45:29Z",
+ "commit": "918c2f1",
  "tags": [
   "wcag2a",
   "wcag2aa",
@@ -58,6 +58,36 @@
   {
    "target": "production",
    "base": "https://second-look-79t.pages.dev",
+   "path": "/t2",
+   "viewport": "phone",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 32,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/t2/demo",
+   "viewport": "phone",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 33,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
    "path": "/judges",
    "viewport": "phone",
    "status": 200,
@@ -109,7 +139,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 35,
+   "passes": 32,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -154,7 +184,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 35,
+   "passes": 39,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -364,6 +394,36 @@
   {
    "target": "production",
    "base": "https://second-look-79t.pages.dev",
+   "path": "/t2",
+   "viewport": "phone-dark",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 32,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/t2/demo",
+   "viewport": "phone-dark",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 33,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
    "path": "/judges",
    "viewport": "phone-dark",
    "status": 200,
@@ -415,7 +475,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 35,
+   "passes": 32,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -460,7 +520,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 35,
+   "passes": 39,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -670,6 +730,36 @@
   {
    "target": "production",
    "base": "https://second-look-79t.pages.dev",
+   "path": "/t2",
+   "viewport": "desktop",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 32,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
+   "path": "/t2/demo",
+   "viewport": "desktop",
+   "status": 200,
+   "error": "",
+   "violations": [],
+   "incomplete": [],
+   "passes": 33,
+   "blocked_writes": [],
+   "origins": [
+    "https://second-look-79t.pages.dev"
+   ]
+  },
+  {
+   "target": "production",
+   "base": "https://second-look-79t.pages.dev",
    "path": "/judges",
    "viewport": "desktop",
    "status": 200,
@@ -721,7 +811,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 35,
+   "passes": 32,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"
@@ -766,7 +856,7 @@
    "error": "",
    "violations": [],
    "incomplete": [],
-   "passes": 35,
+   "passes": 39,
    "blocked_writes": [],
    "origins": [
     "https://second-look-79t.pages.dev"

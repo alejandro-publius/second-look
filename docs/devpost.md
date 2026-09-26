@@ -1,4 +1,4 @@
-Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. The AI's help is measured, not assumed: a second, pre-registered block tests whether the checker's one question makes people more accurate. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
 
 # Devpost: every field, ready to paste
 
@@ -24,10 +24,10 @@ A two-minute photo test that scores volunteer creek observers, then saves each s
 
 ## Track statement (line one of the description)
 
-489 characters
+629 characters
 
 ```text
-Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. The AI's help is measured, not assumed: a second, pre-registered block tests whether the checker's one question makes people more accurate. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
 ```
 
 ## The problem

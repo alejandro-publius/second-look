@@ -94,7 +94,7 @@ Does the checker's question help? Part 2, the assisted second look, is analysed 
 
 ## Gallery
 
-There are <!--v:results/screens.json#/screen_count-->32<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->23<!--/v--> come from the live site; the <!--v:results/screens.json#/local_mock_count-->9<!--/v--> marked (mock) come from a local build with the mock API, so no screenshot joined the study. `make screens` makes them again, and [`results/screens.json`](results/screens.json) lists each. The photos are credited on /credits.
+There are <!--v:results/screens.json#/screen_count-->34<!--/v--> phone screens at <!--v:results/screens.json#/phone/css_width-->390<!--/v--> by <!--v:results/screens.json#/phone/css_height-->844<!--/v-->, in one drawn frame. <!--v:results/screens.json#/live_count-->25<!--/v--> come from the live site; the <!--v:results/screens.json#/local_mock_count-->9<!--/v--> marked (mock) come from a local build with the mock API, so no screenshot joined the study. `make screens` makes them again, and [`results/screens.json`](results/screens.json) lists each. The photos are credited on /credits.
 
 <table>
 <tr>

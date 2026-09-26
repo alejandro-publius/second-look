@@ -1,6 +1,6 @@
 {
- "checked_utc": "2026-09-24T13:48:38Z",
- "commit": "d870842",
+ "checked_utc": "2026-09-26T02:49:48Z",
+ "commit": "918c2f1",
  "cpus": 8,
  "pages": [
   {
@@ -10,88 +10,88 @@
    "runs": [
     {
      "scores": {
-      "performance": 95,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 853.0,
-      "LCP ms": 2750.0,
-      "TBT ms": 50,
-      "CLS": 0,
-      "SI ms": 3529.0,
-      "TTI ms": 2750.0,
-      "TTFB ms": 58,
-      "bytes": 411729
-     },
-     "requests": 27,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/",
-     "warnings": [
-      "The page loaded too slowly to finish within the time limit. Results may be incomplete."
-     ]
-    },
-    {
-     "scores": {
-      "performance": 93,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 865.0,
-      "LCP ms": 3075.0,
-      "TBT ms": 50,
-      "CLS": 0,
-      "SI ms": 3559.0,
-      "TTI ms": 3075.0,
-      "TTFB ms": 79,
-      "bytes": 411684
-     },
-     "requests": 27,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/",
-     "warnings": [
-      "The page loaded too slowly to finish within the time limit. Results may be incomplete."
-     ]
-    },
-    {
-     "scores": {
-      "performance": 93,
+      "performance": 96,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
       "FCP ms": 847.0,
-      "LCP ms": 3046.0,
-      "TBT ms": 47,
+      "LCP ms": 2468.0,
+      "TBT ms": 20.0,
       "CLS": 0,
-      "SI ms": 3574.0,
-      "TTI ms": 3046.0,
-      "TTFB ms": 40,
-      "bytes": 411630
+      "SI ms": 3560.0,
+      "TTI ms": 2499.0,
+      "TTFB ms": 56,
+      "bytes": 377716
+     },
+     "requests": 27,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/",
+     "warnings": [
+      "The page loaded too slowly to finish within the time limit. Results may be incomplete."
+     ]
+    },
+    {
+     "scores": {
+      "performance": 96,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 818.0,
+      "LCP ms": 2460.0,
+      "TBT ms": 22,
+      "CLS": 0,
+      "SI ms": 3541.0,
+      "TTI ms": 2490.0,
+      "TTFB ms": 46,
+      "bytes": 377722
+     },
+     "requests": 27,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/",
+     "warnings": [
+      "The page loaded too slowly to finish within the time limit. Results may be incomplete."
+     ]
+    },
+    {
+     "scores": {
+      "performance": 95,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 817.0,
+      "LCP ms": 2766.0,
+      "TBT ms": 19,
+      "CLS": 0,
+      "SI ms": 3512.0,
+      "TTI ms": 2766.0,
+      "TTFB ms": 36,
+      "bytes": 377902
      },
      "requests": 27,
      "form_factor": "mobile",
@@ -113,20 +113,20 @@
    ],
    "median": {
     "scores": {
-     "performance": 93,
+     "performance": 96,
      "accessibility": 100,
      "best-practices": 100,
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 865.0,
-     "LCP ms": 3075.0,
-     "TBT ms": 50,
+     "FCP ms": 847.0,
+     "LCP ms": 2468.0,
+     "TBT ms": 20.0,
      "CLS": 0,
-     "SI ms": 3559.0,
-     "TTI ms": 3075.0,
-     "TTFB ms": 79,
-     "bytes": 411684
+     "SI ms": 3560.0,
+     "TTI ms": 2499.0,
+     "TTFB ms": 56,
+     "bytes": 377716
     },
     "requests": 27,
     "form_factor": "mobile",
@@ -159,14 +159,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 821.0,
-      "LCP ms": 2011.0,
-      "TBT ms": 18.0,
+      "FCP ms": 857.0,
+      "LCP ms": 2026.0,
+      "TBT ms": 70,
       "CLS": 0,
-      "SI ms": 821.0,
-      "TTI ms": 2061.0,
-      "TTFB ms": 60,
-      "bytes": 406046
+      "SI ms": 2426.0,
+      "TTI ms": 2026.0,
+      "TTFB ms": 94,
+      "bytes": 407522
      },
      "requests": 23,
      "form_factor": "mobile",
@@ -191,14 +191,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 856.0,
-      "LCP ms": 2037.0,
-      "TBT ms": 67,
+      "FCP ms": 823.0,
+      "LCP ms": 2004.0,
+      "TBT ms": 34,
       "CLS": 0,
-      "SI ms": 2161.0,
-      "TTI ms": 2037.0,
-      "TTFB ms": 57,
-      "bytes": 405821
+      "SI ms": 2095.0,
+      "TTI ms": 2004.0,
+      "TTFB ms": 64,
+      "bytes": 407367
      },
      "requests": 23,
      "form_factor": "mobile",
@@ -217,20 +217,20 @@
     },
     {
      "scores": {
-      "performance": 99,
+      "performance": 95,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 852.0,
-      "LCP ms": 2032.0,
-      "TBT ms": 65,
+      "FCP ms": 950.0,
+      "LCP ms": 2880.0,
+      "TBT ms": 27,
       "CLS": 0,
-      "SI ms": 2146.0,
-      "TTI ms": 2032.0,
-      "TTFB ms": 82,
-      "bytes": 405862
+      "SI ms": 2156.0,
+      "TTI ms": 3210.0,
+      "TTFB ms": 63,
+      "bytes": 411502
      },
      "requests": 23,
      "form_factor": "mobile",
@@ -256,14 +256,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 821.0,
-     "LCP ms": 2011.0,
-     "TBT ms": 18.0,
+     "FCP ms": 857.0,
+     "LCP ms": 2026.0,
+     "TBT ms": 70,
      "CLS": 0,
-     "SI ms": 821.0,
-     "TTI ms": 2061.0,
-     "TTFB ms": 60,
-     "bytes": 406046
+     "SI ms": 2426.0,
+     "TTI ms": 2026.0,
+     "TTFB ms": 94,
+     "bytes": 407522
     },
     "requests": 23,
     "form_factor": "mobile",
@@ -288,20 +288,20 @@
    "runs": [
     {
      "scores": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 854.0,
-      "LCP ms": 2036.0,
-      "TBT ms": 84,
+      "FCP ms": 820.0,
+      "LCP ms": 1110.0,
+      "TBT ms": 12,
       "CLS": 0,
-      "SI ms": 2192.0,
-      "TTI ms": 2036.0,
-      "TTFB ms": 77,
-      "bytes": 411393
+      "SI ms": 820.0,
+      "TTI ms": 1648.0,
+      "TTFB ms": 64,
+      "bytes": 416345
      },
      "requests": 27,
      "form_factor": "mobile",
@@ -326,14 +326,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 847.0,
-      "LCP ms": 2035.0,
+      "FCP ms": 820.0,
+      "LCP ms": 2007.0,
       "TBT ms": 56,
       "CLS": 0,
-      "SI ms": 2129.0,
-      "TTI ms": 2035.0,
-      "TTFB ms": 65,
-      "bytes": 410982
+      "SI ms": 2126.0,
+      "TTI ms": 2007.0,
+      "TTFB ms": 73,
+      "bytes": 413004
      },
      "requests": 27,
      "form_factor": "mobile",
@@ -358,14 +358,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 846.0,
-      "LCP ms": 2030.0,
-      "TBT ms": 69,
+      "FCP ms": 821.0,
+      "LCP ms": 2006.0,
+      "TBT ms": 37,
       "CLS": 0,
-      "SI ms": 2191.0,
-      "TTI ms": 2030.0,
-      "TTFB ms": 103,
-      "bytes": 411319
+      "SI ms": 2121.0,
+      "TTI ms": 2006.0,
+      "TTFB ms": 77,
+      "bytes": 412915
      },
      "requests": 27,
      "form_factor": "mobile",
@@ -391,14 +391,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 854.0,
-     "LCP ms": 2036.0,
-     "TBT ms": 84,
+     "FCP ms": 820.0,
+     "LCP ms": 2007.0,
+     "TBT ms": 56,
      "CLS": 0,
-     "SI ms": 2192.0,
-     "TTI ms": 2036.0,
-     "TTFB ms": 77,
-     "bytes": 411393
+     "SI ms": 2126.0,
+     "TTI ms": 2007.0,
+     "TTFB ms": 73,
+     "bytes": 413004
     },
     "requests": 27,
     "form_factor": "mobile",
@@ -417,8 +417,8 @@
    }
   },
   {
-   "page": "production /judges",
-   "url": "https://second-look-79t.pages.dev/judges",
+   "page": "production /t2",
+   "url": "https://second-look-79t.pages.dev/t2",
    "status": 200,
    "runs": [
     {
@@ -429,16 +429,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 890.0,
-      "LCP ms": 1865.0,
-      "TBT ms": 44,
+      "FCP ms": 821.0,
+      "LCP ms": 2001.0,
+      "TBT ms": 23,
       "CLS": 0,
-      "SI ms": 2107.0,
-      "TTI ms": 1882.0,
-      "TTFB ms": 54,
-      "bytes": 450384
+      "SI ms": 2168.0,
+      "TTI ms": 2001.0,
+      "TTFB ms": 102,
+      "bytes": 409009
      },
-     "requests": 40,
+     "requests": 27,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -450,7 +450,7 @@
      },
      "throttling_method": "simulate",
      "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/judges",
+     "final_url": "https://second-look-79t.pages.dev/t2",
      "warnings": []
     },
     {
@@ -461,16 +461,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 846.0,
-      "LCP ms": 1822.0,
-      "TBT ms": 47,
+      "FCP ms": 820.0,
+      "LCP ms": 2009.0,
+      "TBT ms": 16,
       "CLS": 0,
-      "SI ms": 2162.0,
-      "TTI ms": 1839.0,
-      "TTFB ms": 64,
-      "bytes": 450761
+      "SI ms": 820.0,
+      "TTI ms": 2058.0,
+      "TTFB ms": 60,
+      "bytes": 424397
      },
-     "requests": 40,
+     "requests": 27,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -482,7 +482,7 @@
      },
      "throttling_method": "simulate",
      "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/judges",
+     "final_url": "https://second-look-79t.pages.dev/t2",
      "warnings": []
     },
     {
@@ -493,14 +493,284 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 842.0,
-      "LCP ms": 1816.0,
-      "TBT ms": 42,
+      "FCP ms": 823.0,
+      "LCP ms": 2003.0,
+      "TBT ms": 50,
       "CLS": 0,
-      "SI ms": 2118.0,
-      "TTI ms": 1833.0,
+      "SI ms": 2117.0,
+      "TTI ms": 2003.0,
       "TTFB ms": 61,
-      "bytes": 450770
+      "bytes": 409008
+     },
+     "requests": 27,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/t2",
+     "warnings": []
+    }
+   ],
+   "median": {
+    "scores": {
+     "performance": 99,
+     "accessibility": 100,
+     "best-practices": 100,
+     "seo": 100
+    },
+    "metrics": {
+     "FCP ms": 821.0,
+     "LCP ms": 2001.0,
+     "TBT ms": 23,
+     "CLS": 0,
+     "SI ms": 2168.0,
+     "TTI ms": 2001.0,
+     "TTFB ms": 102,
+     "bytes": 409009
+    },
+    "requests": 27,
+    "form_factor": "mobile",
+    "throttling": {
+     "rttMs": 150,
+     "throughputKbps": 1638.4,
+     "requestLatencyMs": 562.5,
+     "downloadThroughputKbps": 1474.5600000000002,
+     "uploadThroughputKbps": 675,
+     "cpuSlowdownMultiplier": 4
+    },
+    "throttling_method": "simulate",
+    "lighthouse": "13.5.0",
+    "final_url": "https://second-look-79t.pages.dev/t2",
+    "warnings": []
+   }
+  },
+  {
+   "page": "production /t2/demo",
+   "url": "https://second-look-79t.pages.dev/t2/demo",
+   "status": 200,
+   "runs": [
+    {
+     "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 819.0,
+      "LCP ms": 1257.0,
+      "TBT ms": 22.0,
+      "CLS": 0,
+      "SI ms": 819.0,
+      "TTI ms": 1971.0,
+      "TTFB ms": 57,
+      "bytes": 414641
+     },
+     "requests": 27,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/t2/demo",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 822.0,
+      "LCP ms": 1259.0,
+      "TBT ms": 18.0,
+      "CLS": 0,
+      "SI ms": 822.0,
+      "TTI ms": 1967.0,
+      "TTFB ms": 59,
+      "bytes": 414829
+     },
+     "requests": 27,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/t2/demo",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 817.0,
+      "LCP ms": 1109.0,
+      "TBT ms": 16.0,
+      "CLS": 0,
+      "SI ms": 817.0,
+      "TTI ms": 1961.0,
+      "TTFB ms": 64,
+      "bytes": 414712
+     },
+     "requests": 27,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/t2/demo",
+     "warnings": []
+    }
+   ],
+   "median": {
+    "scores": {
+     "performance": 100,
+     "accessibility": 100,
+     "best-practices": 100,
+     "seo": 100
+    },
+    "metrics": {
+     "FCP ms": 819.0,
+     "LCP ms": 1257.0,
+     "TBT ms": 22.0,
+     "CLS": 0,
+     "SI ms": 819.0,
+     "TTI ms": 1971.0,
+     "TTFB ms": 57,
+     "bytes": 414641
+    },
+    "requests": 27,
+    "form_factor": "mobile",
+    "throttling": {
+     "rttMs": 150,
+     "throughputKbps": 1638.4,
+     "requestLatencyMs": 562.5,
+     "downloadThroughputKbps": 1474.5600000000002,
+     "uploadThroughputKbps": 675,
+     "cpuSlowdownMultiplier": 4
+    },
+    "throttling_method": "simulate",
+    "lighthouse": "13.5.0",
+    "final_url": "https://second-look-79t.pages.dev/t2/demo",
+    "warnings": []
+   }
+  },
+  {
+   "page": "production /judges",
+   "url": "https://second-look-79t.pages.dev/judges",
+   "status": 200,
+   "runs": [
+    {
+     "scores": {
+      "performance": 96,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 838.0,
+      "LCP ms": 2540.0,
+      "TBT ms": 55,
+      "CLS": 0,
+      "SI ms": 3496.0,
+      "TTI ms": 2563.0,
+      "TTFB ms": 65,
+      "bytes": 402197
+     },
+     "requests": 40,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/judges",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 1414.0,
+      "LCP ms": 1802.0,
+      "TBT ms": 38,
+      "CLS": 0,
+      "SI ms": 2529.0,
+      "TTI ms": 1802.0,
+      "TTFB ms": 72,
+      "bytes": 401166
+     },
+     "requests": 40,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/judges",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 824.0,
+      "LCP ms": 1791.0,
+      "TBT ms": 37,
+      "CLS": 0,
+      "SI ms": 2076.0,
+      "TTI ms": 1807.0,
+      "TTFB ms": 60,
+      "bytes": 386255
      },
      "requests": 40,
      "form_factor": "mobile",
@@ -526,14 +796,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 890.0,
-     "LCP ms": 1865.0,
-     "TBT ms": 44,
+     "FCP ms": 1414.0,
+     "LCP ms": 1802.0,
+     "TBT ms": 38,
      "CLS": 0,
-     "SI ms": 2107.0,
-     "TTI ms": 1882.0,
-     "TTFB ms": 54,
-     "bytes": 450384
+     "SI ms": 2529.0,
+     "TTI ms": 1802.0,
+     "TTFB ms": 72,
+     "bytes": 401166
     },
     "requests": 40,
     "form_factor": "mobile",
@@ -564,46 +834,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 830.0,
-      "LCP ms": 2019.0,
-      "TBT ms": 53,
+      "FCP ms": 833.0,
+      "LCP ms": 2021.0,
+      "TBT ms": 60,
       "CLS": 0,
-      "SI ms": 2121.0,
-      "TTI ms": 2019.0,
-      "TTFB ms": 69,
-      "bytes": 405742
-     },
-     "requests": 23,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/check",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 95,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 1009.0,
-      "LCP ms": 2956.0,
-      "TBT ms": 22.0,
-      "CLS": 0,
-      "SI ms": 2191.0,
-      "TTI ms": 3286.0,
-      "TTFB ms": 72,
-      "bytes": 409431
+      "SI ms": 2097.0,
+      "TTI ms": 2021.0,
+      "TTFB ms": 66,
+      "bytes": 407823
      },
      "requests": 23,
      "form_factor": "mobile",
@@ -628,14 +866,46 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 846.0,
-      "LCP ms": 2032.0,
-      "TBT ms": 52,
+      "FCP ms": 837.0,
+      "LCP ms": 2021.0,
+      "TBT ms": 47,
       "CLS": 0,
-      "SI ms": 2121.0,
-      "TTI ms": 2032.0,
+      "SI ms": 2133.0,
+      "TTI ms": 2021.0,
+      "TTFB ms": 82,
+      "bytes": 407573
+     },
+     "requests": 23,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/check",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 821.0,
+      "LCP ms": 1109.0,
+      "TBT ms": 18.0,
+      "CLS": 0,
+      "SI ms": 821.0,
+      "TTI ms": 1964.0,
       "TTFB ms": 66,
-      "bytes": 405827
+      "bytes": 411032
      },
      "requests": 23,
      "form_factor": "mobile",
@@ -661,14 +931,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 830.0,
-     "LCP ms": 2019.0,
-     "TBT ms": 53,
+     "FCP ms": 833.0,
+     "LCP ms": 2021.0,
+     "TBT ms": 60,
      "CLS": 0,
-     "SI ms": 2121.0,
-     "TTI ms": 2019.0,
-     "TTFB ms": 69,
-     "bytes": 405742
+     "SI ms": 2097.0,
+     "TTI ms": 2021.0,
+     "TTFB ms": 66,
+     "bytes": 407823
     },
     "requests": 23,
     "form_factor": "mobile",
@@ -693,22 +963,22 @@
    "runs": [
     {
      "scores": {
-      "performance": 100,
+      "performance": 99,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 833.0,
-      "LCP ms": 1873.0,
-      "TBT ms": 20.0,
+      "FCP ms": 827.0,
+      "LCP ms": 2011.0,
+      "TBT ms": 47,
       "CLS": 0,
-      "SI ms": 833.0,
-      "TTI ms": 2007.0,
-      "TTFB ms": 73,
-      "bytes": 399428
+      "SI ms": 2131.0,
+      "TTI ms": 2011.0,
+      "TTFB ms": 82,
+      "bytes": 417141
      },
-     "requests": 23,
+     "requests": 24,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -731,16 +1001,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 847.0,
-      "LCP ms": 1881.0,
-      "TBT ms": 61,
+      "FCP ms": 848.0,
+      "LCP ms": 2037.0,
+      "TBT ms": 38,
       "CLS": 0,
-      "SI ms": 2140.0,
-      "TTI ms": 1881.0,
-      "TTFB ms": 61,
-      "bytes": 399164
+      "SI ms": 2157.0,
+      "TTI ms": 2037.0,
+      "TTFB ms": 74,
+      "bytes": 417316
      },
-     "requests": 23,
+     "requests": 24,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -763,16 +1033,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 844.0,
-      "LCP ms": 1882.0,
-      "TBT ms": 66,
+      "FCP ms": 860.0,
+      "LCP ms": 2041.0,
+      "TBT ms": 26,
       "CLS": 0,
-      "SI ms": 2120.0,
-      "TTI ms": 1882.0,
-      "TTFB ms": 66,
-      "bytes": 399110
+      "SI ms": 2114.0,
+      "TTI ms": 2041.0,
+      "TTFB ms": 79,
+      "bytes": 417149
      },
-     "requests": 23,
+     "requests": 24,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -796,16 +1066,16 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 847.0,
-     "LCP ms": 1881.0,
-     "TBT ms": 61,
+     "FCP ms": 827.0,
+     "LCP ms": 2011.0,
+     "TBT ms": 47,
      "CLS": 0,
-     "SI ms": 2140.0,
-     "TTI ms": 1881.0,
-     "TTFB ms": 61,
-     "bytes": 399164
+     "SI ms": 2131.0,
+     "TTI ms": 2011.0,
+     "TTFB ms": 82,
+     "bytes": 417141
     },
-    "requests": 23,
+    "requests": 24,
     "form_factor": "mobile",
     "throttling": {
      "rttMs": 150,
@@ -834,16 +1104,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 828.0,
-      "LCP ms": 1864.0,
-      "TBT ms": 49,
+      "FCP ms": 848.0,
+      "LCP ms": 2019.0,
+      "TBT ms": 60,
       "CLS": 0,
-      "SI ms": 2118.0,
-      "TTI ms": 1864.0,
-      "TTFB ms": 65,
-      "bytes": 400963
+      "SI ms": 2161.0,
+      "TTI ms": 2019.0,
+      "TTFB ms": 95,
+      "bytes": 407094
      },
-     "requests": 23,
+     "requests": 27,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -866,48 +1136,48 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 842.0,
-      "LCP ms": 1879.0,
-      "TBT ms": 55,
+      "FCP ms": 812.0,
+      "LCP ms": 2006.0,
+      "TBT ms": 40,
+      "CLS": 0,
+      "SI ms": 812.0,
+      "TTI ms": 2080.0,
+      "TTFB ms": 74,
+      "bytes": 422444
+     },
+     "requests": 27,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/quick",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 819.0,
+      "LCP ms": 1999.0,
+      "TBT ms": 48,
       "CLS": 0,
       "SI ms": 2123.0,
-      "TTI ms": 1879.0,
-      "TTFB ms": 67,
-      "bytes": 400873
+      "TTI ms": 1999.0,
+      "TTFB ms": 88,
+      "bytes": 407041
      },
-     "requests": 23,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/quick",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 99,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 860.0,
-      "LCP ms": 1896.0,
-      "TBT ms": 76,
-      "CLS": 0,
-      "SI ms": 2170.0,
-      "TTI ms": 1896.0,
-      "TTFB ms": 91,
-      "bytes": 400501
-     },
-     "requests": 23,
+     "requests": 27,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -931,16 +1201,16 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 828.0,
-     "LCP ms": 1864.0,
-     "TBT ms": 49,
+     "FCP ms": 848.0,
+     "LCP ms": 2019.0,
+     "TBT ms": 60,
      "CLS": 0,
-     "SI ms": 2118.0,
-     "TTI ms": 1864.0,
-     "TTFB ms": 65,
-     "bytes": 400963
+     "SI ms": 2161.0,
+     "TTI ms": 2019.0,
+     "TTFB ms": 95,
+     "bytes": 407094
     },
-    "requests": 23,
+    "requests": 27,
     "form_factor": "mobile",
     "throttling": {
      "rttMs": 150,
@@ -963,20 +1233,20 @@
    "runs": [
     {
      "scores": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 824.0,
-      "LCP ms": 1862.0,
+      "FCP ms": 833.0,
+      "LCP ms": 1423.0,
       "TBT ms": 16.0,
       "CLS": 0,
-      "SI ms": 2079.0,
-      "TTI ms": 1913.0,
-      "TTFB ms": 72,
-      "bytes": 398453
+      "SI ms": 908.0,
+      "TTI ms": 1975.0,
+      "TTFB ms": 58,
+      "bytes": 403335
      },
      "requests": 24,
      "form_factor": "mobile",
@@ -995,20 +1265,20 @@
     },
     {
      "scores": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 859.0,
-      "LCP ms": 1886.0,
-      "TBT ms": 60,
+      "FCP ms": 828.0,
+      "LCP ms": 1122.0,
+      "TBT ms": 16.0,
       "CLS": 0,
-      "SI ms": 2128.0,
-      "TTI ms": 1886.0,
-      "TTFB ms": 74,
-      "bytes": 398552
+      "SI ms": 837.0,
+      "TTI ms": 1974.0,
+      "TTFB ms": 55,
+      "bytes": 403125
      },
      "requests": 24,
      "form_factor": "mobile",
@@ -1027,20 +1297,20 @@
     },
     {
      "scores": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 849.0,
-      "LCP ms": 1884.0,
-      "TBT ms": 46,
+      "FCP ms": 828.0,
+      "LCP ms": 1119.0,
+      "TBT ms": 17,
       "CLS": 0,
-      "SI ms": 2136.0,
-      "TTI ms": 1884.0,
-      "TTFB ms": 72,
-      "bytes": 398486
+      "SI ms": 942.0,
+      "TTI ms": 1973.0,
+      "TTFB ms": 83,
+      "bytes": 403258
      },
      "requests": 24,
      "form_factor": "mobile",
@@ -1060,20 +1330,20 @@
    ],
    "median": {
     "scores": {
-     "performance": 99,
+     "performance": 100,
      "accessibility": 100,
      "best-practices": 100,
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 824.0,
-     "LCP ms": 1862.0,
+     "FCP ms": 833.0,
+     "LCP ms": 1423.0,
      "TBT ms": 16.0,
      "CLS": 0,
-     "SI ms": 2079.0,
-     "TTI ms": 1913.0,
-     "TTFB ms": 72,
-     "bytes": 398453
+     "SI ms": 908.0,
+     "TTI ms": 1975.0,
+     "TTFB ms": 58,
+     "bytes": 403335
     },
     "requests": 24,
     "form_factor": "mobile",
@@ -1104,14 +1374,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 850.0,
-      "LCP ms": 2435.0,
-      "TBT ms": 26.0,
+      "FCP ms": 838.0,
+      "LCP ms": 2416.0,
+      "TBT ms": 23,
       "CLS": 0,
-      "SI ms": 2151.0,
-      "TTI ms": 2472.0,
-      "TTFB ms": 64,
-      "bytes": 373260
+      "SI ms": 2174.0,
+      "TTI ms": 2456.0,
+      "TTFB ms": 43,
+      "bytes": 369424
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -1136,46 +1406,46 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 845.0,
-      "LCP ms": 2731.0,
-      "TBT ms": 46.0,
-      "CLS": 0,
-      "SI ms": 2175.0,
-      "TTI ms": 2737.0,
-      "TTFB ms": 49,
-      "bytes": 373280
-     },
-     "requests": 21,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/poster",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 96,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 849.0,
-      "LCP ms": 2730.0,
+      "FCP ms": 818.0,
+      "LCP ms": 2702.0,
       "TBT ms": 40,
       "CLS": 0,
-      "SI ms": 2154.0,
-      "TTI ms": 2733.0,
-      "TTFB ms": 48,
-      "bytes": 373100
+      "SI ms": 2105.0,
+      "TTI ms": 2710.0,
+      "TTFB ms": 41,
+      "bytes": 369500
+     },
+     "requests": 21,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/poster",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 98,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 821.0,
+      "LCP ms": 2391.0,
+      "TBT ms": 20.0,
+      "CLS": 0,
+      "SI ms": 2142.0,
+      "TTI ms": 2426.0,
+      "TTFB ms": 47,
+      "bytes": 369348
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -1195,20 +1465,20 @@
    ],
    "median": {
     "scores": {
-     "performance": 96,
+     "performance": 98,
      "accessibility": 100,
      "best-practices": 100,
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 845.0,
-     "LCP ms": 2731.0,
-     "TBT ms": 46.0,
+     "FCP ms": 838.0,
+     "LCP ms": 2416.0,
+     "TBT ms": 23,
      "CLS": 0,
-     "SI ms": 2175.0,
-     "TTI ms": 2737.0,
-     "TTFB ms": 49,
-     "bytes": 373280
+     "SI ms": 2174.0,
+     "TTI ms": 2456.0,
+     "TTFB ms": 43,
+     "bytes": 369424
     },
     "requests": 21,
     "form_factor": "mobile",
@@ -1233,54 +1503,22 @@
    "runs": [
     {
      "scores": {
-      "performance": 99,
+      "performance": 98,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 1305.0,
-      "LCP ms": 1972.0,
-      "TBT ms": 25,
+      "FCP ms": 1577.0,
+      "LCP ms": 1945.0,
+      "TBT ms": 45,
       "CLS": 0,
-      "SI ms": 2456.0,
-      "TTI ms": 1972.0,
-      "TTFB ms": 63,
-      "bytes": 385079
+      "SI ms": 2424.0,
+      "TTI ms": 1945.0,
+      "TTFB ms": 62,
+      "bytes": 472840
      },
-     "requests": 22,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/how-we-know",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 100,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 888.0,
-      "LCP ms": 1170.0,
-      "TBT ms": 28.0,
-      "CLS": 0,
-      "SI ms": 1549.0,
-      "TTI ms": 2046.0,
-      "TTFB ms": 406,
-      "bytes": 385244
-     },
-     "requests": 22,
+     "requests": 23,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -1303,16 +1541,48 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 1292.0,
-      "LCP ms": 1960.0,
-      "TBT ms": 26,
+      "FCP ms": 1113.0,
+      "LCP ms": 1958.0,
+      "TBT ms": 49,
       "CLS": 0,
-      "SI ms": 2383.0,
-      "TTI ms": 1960.0,
-      "TTFB ms": 83,
-      "bytes": 385069
+      "SI ms": 2338.0,
+      "TTI ms": 1963.0,
+      "TTFB ms": 72,
+      "bytes": 473013
      },
-     "requests": 22,
+     "requests": 23,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/how-we-know",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 1109.0,
+      "LCP ms": 1955.0,
+      "TBT ms": 54,
+      "CLS": 0,
+      "SI ms": 2495.0,
+      "TTI ms": 1955.0,
+      "TTFB ms": 77,
+      "bytes": 472938
+     },
+     "requests": 23,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -1336,16 +1606,16 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 1305.0,
-     "LCP ms": 1972.0,
-     "TBT ms": 25,
+     "FCP ms": 1113.0,
+     "LCP ms": 1958.0,
+     "TBT ms": 49,
      "CLS": 0,
-     "SI ms": 2456.0,
-     "TTI ms": 1972.0,
-     "TTFB ms": 63,
-     "bytes": 385079
+     "SI ms": 2338.0,
+     "TTI ms": 1963.0,
+     "TTFB ms": 72,
+     "bytes": 473013
     },
-    "requests": 22,
+    "requests": 23,
     "form_factor": "mobile",
     "throttling": {
      "rttMs": 150,
@@ -1368,22 +1638,22 @@
    "runs": [
     {
      "scores": {
-      "performance": 100,
+      "performance": 99,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 839.0,
-      "LCP ms": 1130.0,
-      "TBT ms": 12.0,
+      "FCP ms": 826.0,
+      "LCP ms": 1812.0,
+      "TBT ms": 52,
       "CLS": 0,
-      "SI ms": 839.0,
-      "TTI ms": 1669.0,
-      "TTFB ms": 63,
-      "bytes": 444043
+      "SI ms": 2239.0,
+      "TTI ms": 1827.0,
+      "TTFB ms": 129,
+      "bytes": 373899
      },
-     "requests": 42,
+     "requests": 26,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -1401,53 +1671,53 @@
     {
      "scores": {
       "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 816.0,
+      "LCP ms": 1787.0,
+      "TBT ms": 36,
+      "CLS": 0,
+      "SI ms": 2071.0,
+      "TTI ms": 1802.0,
+      "TTFB ms": 62,
+      "bytes": 374059
+     },
+     "requests": 26,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/about",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 99,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
       "FCP ms": 812.0,
-      "LCP ms": 1103.0,
-      "TBT ms": 12,
+      "LCP ms": 1797.0,
+      "TBT ms": 51,
       "CLS": 0,
-      "SI ms": 812.0,
-      "TTI ms": 1642.0,
-      "TTFB ms": 57,
-      "bytes": 443990
+      "SI ms": 2095.0,
+      "TTI ms": 1812.0,
+      "TTFB ms": 68,
+      "bytes": 374010
      },
-     "requests": 42,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/about",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 100,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 814.0,
-      "LCP ms": 1106.0,
-      "TBT ms": 11,
-      "CLS": 0,
-      "SI ms": 814.0,
-      "TTI ms": 1645.0,
-      "TTFB ms": 56,
-      "bytes": 444076
-     },
-     "requests": 42,
+     "requests": 26,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -1465,22 +1735,22 @@
    ],
    "median": {
     "scores": {
-     "performance": 100,
+     "performance": 99,
      "accessibility": 100,
      "best-practices": 100,
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 839.0,
-     "LCP ms": 1130.0,
-     "TBT ms": 12.0,
+     "FCP ms": 826.0,
+     "LCP ms": 1812.0,
+     "TBT ms": 52,
      "CLS": 0,
-     "SI ms": 839.0,
-     "TTI ms": 1669.0,
-     "TTFB ms": 63,
-     "bytes": 444043
+     "SI ms": 2239.0,
+     "TTI ms": 1827.0,
+     "TTFB ms": 129,
+     "bytes": 373899
     },
-    "requests": 42,
+    "requests": 26,
     "form_factor": "mobile",
     "throttling": {
      "rttMs": 150,
@@ -1509,14 +1779,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 825.0,
-      "LCP ms": 1115.0,
-      "TBT ms": 12.0,
+      "FCP ms": 816.0,
+      "LCP ms": 1401.0,
+      "TBT ms": 22.0,
       "CLS": 0,
-      "SI ms": 825.0,
-      "TTI ms": 1655.0,
-      "TTFB ms": 67,
-      "bytes": 372915
+      "SI ms": 816.0,
+      "TTI ms": 1964.0,
+      "TTFB ms": 66,
+      "bytes": 372472
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -1535,20 +1805,20 @@
     },
     {
      "scores": {
-      "performance": 100,
+      "performance": 99,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 824.0,
-      "LCP ms": 1116.0,
-      "TBT ms": 12.0,
+      "FCP ms": 822.0,
+      "LCP ms": 1811.0,
+      "TBT ms": 55,
       "CLS": 0,
-      "SI ms": 824.0,
-      "TTI ms": 1656.0,
-      "TTFB ms": 78,
-      "bytes": 372908
+      "SI ms": 2142.0,
+      "TTI ms": 1825.0,
+      "TTFB ms": 82,
+      "bytes": 369024
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -1567,20 +1837,20 @@
     },
     {
      "scores": {
-      "performance": 100,
+      "performance": 99,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 825.0,
-      "LCP ms": 1789.0,
-      "TBT ms": 20,
+      "FCP ms": 828.0,
+      "LCP ms": 1809.0,
+      "TBT ms": 49,
       "CLS": 0,
-      "SI ms": 2082.0,
-      "TTI ms": 1792.0,
-      "TTFB ms": 74,
-      "bytes": 372760
+      "SI ms": 2097.0,
+      "TTI ms": 1823.0,
+      "TTFB ms": 86,
+      "bytes": 368904
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -1600,20 +1870,20 @@
    ],
    "median": {
     "scores": {
-     "performance": 100,
+     "performance": 99,
      "accessibility": 100,
      "best-practices": 100,
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 825.0,
-     "LCP ms": 1115.0,
-     "TBT ms": 12.0,
+     "FCP ms": 822.0,
+     "LCP ms": 1811.0,
+     "TBT ms": 55,
      "CLS": 0,
-     "SI ms": 825.0,
-     "TTI ms": 1655.0,
-     "TTFB ms": 67,
-     "bytes": 372915
+     "SI ms": 2142.0,
+     "TTI ms": 1825.0,
+     "TTFB ms": 82,
+     "bytes": 369024
     },
     "requests": 21,
     "form_factor": "mobile",
@@ -1638,84 +1908,84 @@
    "runs": [
     {
      "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 836.0,
+      "LCP ms": 1414.0,
+      "TBT ms": 16.0,
+      "CLS": 0,
+      "SI ms": 836.0,
+      "TTI ms": 1967.0,
+      "TTFB ms": 52,
+      "bytes": 377335
+     },
+     "requests": 22,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/credits",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 835.0,
+      "LCP ms": 1104.0,
+      "TBT ms": 16.0,
+      "CLS": 0,
+      "SI ms": 835.0,
+      "TTI ms": 1956.0,
+      "TTFB ms": 64,
+      "bytes": 377370
+     },
+     "requests": 22,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/credits",
+     "warnings": []
+    },
+    {
+     "scores": {
       "performance": 99,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 841.0,
-      "LCP ms": 1799.0,
-      "TBT ms": 22,
+      "FCP ms": 834.0,
+      "LCP ms": 1797.0,
+      "TBT ms": 44,
       "CLS": 0,
-      "SI ms": 2118.0,
-      "TTI ms": 1802.0,
-      "TTFB ms": 83,
-      "bytes": 376927
-     },
-     "requests": 22,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/credits",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 100,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 844.0,
-      "LCP ms": 1123.0,
-      "TBT ms": 13,
-      "CLS": 0,
-      "SI ms": 844.0,
-      "TTI ms": 1663.0,
-      "TTFB ms": 62,
-      "bytes": 377520
-     },
-     "requests": 22,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/credits",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 100,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 941.0,
-      "LCP ms": 1691.0,
-      "TBT ms": 11,
-      "CLS": 0,
-      "SI ms": 941.0,
-      "TTI ms": 2567.0,
-      "TTFB ms": 58,
-      "bytes": 381009
+      "SI ms": 2121.0,
+      "TTI ms": 1805.0,
+      "TTFB ms": 81,
+      "bytes": 373884
      },
      "requests": 22,
      "form_factor": "mobile",
@@ -1741,14 +2011,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 844.0,
-     "LCP ms": 1123.0,
-     "TBT ms": 13,
+     "FCP ms": 836.0,
+     "LCP ms": 1414.0,
+     "TBT ms": 16.0,
      "CLS": 0,
-     "SI ms": 844.0,
-     "TTI ms": 1663.0,
-     "TTFB ms": 62,
-     "bytes": 377520
+     "SI ms": 836.0,
+     "TTI ms": 1967.0,
+     "TTFB ms": 52,
+     "bytes": 377335
     },
     "requests": 22,
     "form_factor": "mobile",
@@ -1779,46 +2049,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 835.0,
-      "LCP ms": 1797.0,
-      "TBT ms": 16.0,
+      "FCP ms": 840.0,
+      "LCP ms": 1856.0,
+      "TBT ms": 81,
       "CLS": 0,
-      "SI ms": 2109.0,
-      "TTI ms": 1802.0,
-      "TTFB ms": 77,
-      "bytes": 410976
-     },
-     "requests": 26,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/offline",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 100,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 813.0,
-      "LCP ms": 1106.0,
-      "TBT ms": 10.0,
-      "CLS": 0,
-      "SI ms": 813.0,
-      "TTI ms": 1643.0,
-      "TTFB ms": 67,
-      "bytes": 411087
+      "SI ms": 2160.0,
+      "TTI ms": 1873.0,
+      "TTFB ms": 73,
+      "bytes": 373586
      },
      "requests": 26,
      "form_factor": "mobile",
@@ -1843,14 +2081,46 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 831.0,
-      "LCP ms": 1802.0,
-      "TBT ms": 26,
+      "FCP ms": 833.0,
+      "LCP ms": 1795.0,
+      "TBT ms": 18.0,
       "CLS": 0,
-      "SI ms": 2077.0,
-      "TTI ms": 1806.0,
-      "TTFB ms": 73,
-      "bytes": 410874
+      "SI ms": 2223.0,
+      "TTI ms": 1801.0,
+      "TTFB ms": 128,
+      "bytes": 373685
+     },
+     "requests": 26,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/offline",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 836.0,
+      "LCP ms": 1839.0,
+      "TBT ms": 68,
+      "CLS": 0,
+      "SI ms": 2122.0,
+      "TTI ms": 1850.0,
+      "TTFB ms": 61,
+      "bytes": 373470
      },
      "requests": 26,
      "form_factor": "mobile",
@@ -1876,14 +2146,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 835.0,
-     "LCP ms": 1797.0,
-     "TBT ms": 16.0,
+     "FCP ms": 840.0,
+     "LCP ms": 1856.0,
+     "TBT ms": 81,
      "CLS": 0,
-     "SI ms": 2109.0,
-     "TTI ms": 1802.0,
-     "TTFB ms": 77,
-     "bytes": 410976
+     "SI ms": 2160.0,
+     "TTI ms": 1873.0,
+     "TTFB ms": 73,
+     "bytes": 373586
     },
     "requests": 26,
     "form_factor": "mobile",
@@ -1914,14 +2184,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 851.0,
-      "LCP ms": 1803.0,
-      "TBT ms": 22,
+      "FCP ms": 849.0,
+      "LCP ms": 1806.0,
+      "TBT ms": 51,
       "CLS": 0,
-      "SI ms": 2128.0,
-      "TTI ms": 1807.0,
-      "TTFB ms": 58,
-      "bytes": 413580
+      "SI ms": 2139.0,
+      "TTI ms": 1818.0,
+      "TTFB ms": 41,
+      "bytes": 376025
      },
      "requests": 29,
      "form_factor": "mobile",
@@ -1940,52 +2210,52 @@
     },
     {
      "scores": {
-      "performance": 99,
-      "accessibility": 100,
-      "best-practices": 100,
-      "seo": 100
-     },
-     "metrics": {
-      "FCP ms": 858.0,
-      "LCP ms": 1812.0,
-      "TBT ms": 31,
-      "CLS": 0,
-      "SI ms": 2116.0,
-      "TTI ms": 1820.0,
-      "TTFB ms": 43,
-      "bytes": 413709
-     },
-     "requests": 29,
-     "form_factor": "mobile",
-     "throttling": {
-      "rttMs": 150,
-      "throughputKbps": 1638.4,
-      "requestLatencyMs": 562.5,
-      "downloadThroughputKbps": 1474.5600000000002,
-      "uploadThroughputKbps": 675,
-      "cpuSlowdownMultiplier": 4
-     },
-     "throttling_method": "simulate",
-     "lighthouse": "13.5.0",
-     "final_url": "https://second-look-79t.pages.dev/share/12",
-     "warnings": []
-    },
-    {
-     "scores": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
       "FCP ms": 838.0,
-      "LCP ms": 1797.0,
-      "TBT ms": 20,
+      "LCP ms": 1792.0,
+      "TBT ms": 42,
       "CLS": 0,
-      "SI ms": 2099.0,
-      "TTI ms": 1800.0,
-      "TTFB ms": 64,
-      "bytes": 413692
+      "SI ms": 2162.0,
+      "TTI ms": 1807.0,
+      "TTFB ms": 54,
+      "bytes": 376058
+     },
+     "requests": 29,
+     "form_factor": "mobile",
+     "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+     },
+     "throttling_method": "simulate",
+     "lighthouse": "13.5.0",
+     "final_url": "https://second-look-79t.pages.dev/share/12",
+     "warnings": []
+    },
+    {
+     "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100
+     },
+     "metrics": {
+      "FCP ms": 800.0,
+      "LCP ms": 1769.0,
+      "TBT ms": 43,
+      "CLS": 0,
+      "SI ms": 2103.0,
+      "TTI ms": 1785.0,
+      "TTFB ms": 67,
+      "bytes": 376498
      },
      "requests": 29,
      "form_factor": "mobile",
@@ -2005,20 +2275,20 @@
    ],
    "median": {
     "scores": {
-     "performance": 99,
+     "performance": 100,
      "accessibility": 100,
      "best-practices": 100,
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 851.0,
-     "LCP ms": 1803.0,
-     "TBT ms": 22,
+     "FCP ms": 838.0,
+     "LCP ms": 1792.0,
+     "TBT ms": 42,
      "CLS": 0,
-     "SI ms": 2128.0,
+     "SI ms": 2162.0,
      "TTI ms": 1807.0,
-     "TTFB ms": 58,
-     "bytes": 413580
+     "TTFB ms": 54,
+     "bytes": 376058
     },
     "requests": 29,
     "form_factor": "mobile",
@@ -2043,20 +2313,20 @@
    "runs": [
     {
      "scores": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 833.0,
-      "LCP ms": 1793.0,
-      "TBT ms": 16,
+      "FCP ms": 821.0,
+      "LCP ms": 1105.0,
+      "TBT ms": 21.0,
       "CLS": 0,
-      "SI ms": 2114.0,
-      "TTI ms": 1797.0,
-      "TTFB ms": 64,
-      "bytes": 372427
+      "SI ms": 821.0,
+      "TTI ms": 1967.0,
+      "TTFB ms": 56,
+      "bytes": 371958
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -2081,14 +2351,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 811.0,
-      "LCP ms": 1103.0,
-      "TBT ms": 13.0,
+      "FCP ms": 832.0,
+      "LCP ms": 1788.0,
+      "TBT ms": 32,
       "CLS": 0,
-      "SI ms": 811.0,
-      "TTI ms": 1643.0,
-      "TTFB ms": 58,
-      "bytes": 372629
+      "SI ms": 2090.0,
+      "TTI ms": 1805.0,
+      "TTFB ms": 67,
+      "bytes": 368566
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -2107,20 +2377,20 @@
     },
     {
      "scores": {
-      "performance": 100,
+      "performance": 97,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 840.0,
-      "LCP ms": 1130.0,
-      "TBT ms": 11.0,
+      "FCP ms": 943.0,
+      "LCP ms": 2567.0,
+      "TBT ms": 26,
       "CLS": 0,
-      "SI ms": 840.0,
-      "TTI ms": 1668.0,
-      "TTFB ms": 69,
-      "bytes": 372704
+      "SI ms": 2178.0,
+      "TTI ms": 2979.0,
+      "TTFB ms": 61,
+      "bytes": 371762
      },
      "requests": 21,
      "form_factor": "mobile",
@@ -2146,14 +2416,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 811.0,
-     "LCP ms": 1103.0,
-     "TBT ms": 13.0,
+     "FCP ms": 821.0,
+     "LCP ms": 1105.0,
+     "TBT ms": 21.0,
      "CLS": 0,
-     "SI ms": 811.0,
-     "TTI ms": 1643.0,
-     "TTFB ms": 58,
-     "bytes": 372629
+     "SI ms": 821.0,
+     "TTI ms": 1967.0,
+     "TTFB ms": 56,
+     "bytes": 371958
     },
     "requests": 21,
     "form_factor": "mobile",
@@ -2178,20 +2448,20 @@
    "runs": [
     {
      "scores": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 973.0,
-      "LCP ms": 2023.0,
+      "FCP ms": 845.0,
+      "LCP ms": 1105.0,
       "TBT ms": 11,
       "CLS": 0,
-      "SI ms": 2129.0,
-      "TTI ms": 2023.0,
-      "TTFB ms": 69,
-      "bytes": 411222
+      "SI ms": 845.0,
+      "TTI ms": 1722.0,
+      "TTFB ms": 84,
+      "bytes": 416420
      },
      "requests": 24,
      "form_factor": "mobile",
@@ -2216,14 +2486,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 999.0,
-      "LCP ms": 2049.0,
-      "TBT ms": 29,
+      "FCP ms": 963.0,
+      "LCP ms": 2013.0,
+      "TBT ms": 63,
       "CLS": 0,
       "SI ms": 2170.0,
-      "TTI ms": 2049.0,
-      "TTFB ms": 71,
-      "bytes": 411138
+      "TTI ms": 2013.0,
+      "TTFB ms": 81,
+      "bytes": 412951
      },
      "requests": 24,
      "form_factor": "mobile",
@@ -2248,14 +2518,14 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 981.0,
-      "LCP ms": 2031.0,
-      "TBT ms": 25,
+      "FCP ms": 962.0,
+      "LCP ms": 2012.0,
+      "TBT ms": 50,
       "CLS": 0,
-      "SI ms": 2156.0,
-      "TTI ms": 2031.0,
-      "TTFB ms": 76,
-      "bytes": 411661
+      "SI ms": 2155.0,
+      "TTI ms": 2012.0,
+      "TTFB ms": 62,
+      "bytes": 412977
      },
      "requests": 24,
      "form_factor": "mobile",
@@ -2281,14 +2551,14 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 973.0,
-     "LCP ms": 2023.0,
-     "TBT ms": 11,
+     "FCP ms": 963.0,
+     "LCP ms": 2013.0,
+     "TBT ms": 63,
      "CLS": 0,
-     "SI ms": 2129.0,
-     "TTI ms": 2023.0,
-     "TTFB ms": 69,
-     "bytes": 411222
+     "SI ms": 2170.0,
+     "TTI ms": 2013.0,
+     "TTFB ms": 81,
+     "bytes": 412951
     },
     "requests": 24,
     "form_factor": "mobile",
@@ -2313,22 +2583,22 @@
    "runs": [
     {
      "scores": {
-      "performance": 97,
+      "performance": 99,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 817.0,
-      "LCP ms": 2607.0,
-      "TBT ms": 31,
+      "FCP ms": 831.0,
+      "LCP ms": 2013.0,
+      "TBT ms": 81,
       "CLS": 0,
-      "SI ms": 817.0,
-      "TTI ms": 2637.0,
-      "TTFB ms": 64,
-      "bytes": 413229
+      "SI ms": 2094.0,
+      "TTI ms": 2013.0,
+      "TTFB ms": 58,
+      "bytes": 419347
      },
-     "requests": 25,
+     "requests": 26,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -2351,16 +2621,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 839.0,
-      "LCP ms": 2028.0,
-      "TBT ms": 22.0,
+      "FCP ms": 846.0,
+      "LCP ms": 2016.0,
+      "TBT ms": 26,
       "CLS": 0,
-      "SI ms": 839.0,
-      "TTI ms": 2082.0,
-      "TTFB ms": 56,
-      "bytes": 413230
+      "SI ms": 2178.0,
+      "TTI ms": 2016.0,
+      "TTFB ms": 79,
+      "bytes": 419409
      },
-     "requests": 25,
+     "requests": 26,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -2383,16 +2653,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 828.0,
-      "LCP ms": 2018.0,
-      "TBT ms": 12,
+      "FCP ms": 824.0,
+      "LCP ms": 2002.0,
+      "TBT ms": 47,
       "CLS": 0,
-      "SI ms": 828.0,
-      "TTI ms": 2061.0,
-      "TTFB ms": 46,
-      "bytes": 413590
+      "SI ms": 2093.0,
+      "TTI ms": 2002.0,
+      "TTFB ms": 79,
+      "bytes": 419311
      },
-     "requests": 25,
+     "requests": 26,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -2416,16 +2686,16 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 839.0,
-     "LCP ms": 2028.0,
-     "TBT ms": 22.0,
+     "FCP ms": 831.0,
+     "LCP ms": 2013.0,
+     "TBT ms": 81,
      "CLS": 0,
-     "SI ms": 839.0,
-     "TTI ms": 2082.0,
-     "TTFB ms": 56,
-     "bytes": 413230
+     "SI ms": 2094.0,
+     "TTI ms": 2013.0,
+     "TTFB ms": 58,
+     "bytes": 419347
     },
-    "requests": 25,
+    "requests": 26,
     "form_factor": "mobile",
     "throttling": {
      "rttMs": 150,
@@ -2448,22 +2718,22 @@
    "runs": [
     {
      "scores": {
-      "performance": 99,
+      "performance": 97,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 841.0,
-      "LCP ms": 2000.0,
-      "TBT ms": 23,
+      "FCP ms": 825.0,
+      "LCP ms": 2458.0,
+      "TBT ms": 44,
       "CLS": 0,
-      "SI ms": 2173.0,
-      "TTI ms": 2018.0,
-      "TTFB ms": 99,
-      "bytes": 993076
+      "SI ms": 2226.0,
+      "TTI ms": 2458.0,
+      "TTFB ms": 73,
+      "bytes": 976561
      },
-     "requests": 36,
+     "requests": 37,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -2486,16 +2756,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 813.0,
-      "LCP ms": 2155.0,
-      "TBT ms": 12.0,
+      "FCP ms": 823.0,
+      "LCP ms": 2161.0,
+      "TBT ms": 34,
       "CLS": 0,
-      "SI ms": 813.0,
-      "TTI ms": 2943.0,
-      "TTFB ms": 60,
-      "bytes": 993232
+      "SI ms": 2188.0,
+      "TTI ms": 2161.0,
+      "TTFB ms": 66,
+      "bytes": 976613
      },
-     "requests": 36,
+     "requests": 37,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -2518,16 +2788,16 @@
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 857.0,
-      "LCP ms": 2199.0,
-      "TBT ms": 23,
+      "FCP ms": 833.0,
+      "LCP ms": 2024.0,
+      "TBT ms": 55,
       "CLS": 0,
-      "SI ms": 2300.0,
-      "TTI ms": 2199.0,
-      "TTFB ms": 88,
-      "bytes": 993173
+      "SI ms": 2216.0,
+      "TTI ms": 2039.0,
+      "TTFB ms": 82,
+      "bytes": 976557
      },
-     "requests": 36,
+     "requests": 37,
      "form_factor": "mobile",
      "throttling": {
       "rttMs": 150,
@@ -2551,16 +2821,16 @@
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 841.0,
-     "LCP ms": 2000.0,
-     "TBT ms": 23,
+     "FCP ms": 823.0,
+     "LCP ms": 2161.0,
+     "TBT ms": 34,
      "CLS": 0,
-     "SI ms": 2173.0,
-     "TTI ms": 2018.0,
-     "TTFB ms": 99,
-     "bytes": 993076
+     "SI ms": 2188.0,
+     "TTI ms": 2161.0,
+     "TTFB ms": 66,
+     "bytes": 976613
     },
-    "requests": 36,
+    "requests": 37,
     "form_factor": "mobile",
     "throttling": {
      "rttMs": 150,
@@ -2583,20 +2853,20 @@
    "runs": [
     {
      "scores": {
-      "performance": 98,
+      "performance": 92,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 833.0,
-      "LCP ms": 2441.0,
-      "TBT ms": 6.0,
+      "FCP ms": 886.0,
+      "LCP ms": 3079.0,
+      "TBT ms": 77.0,
       "CLS": 0,
-      "SI ms": 2145.0,
-      "TTI ms": 2456.0,
-      "TTFB ms": 73,
-      "bytes": 696795
+      "SI ms": 3579.0,
+      "TTI ms": 3139.0,
+      "TTFB ms": 68,
+      "bytes": 495152
      },
      "requests": 31,
      "form_factor": "mobile",
@@ -2615,20 +2885,20 @@
     },
     {
      "scores": {
-      "performance": 98,
+      "performance": 97,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 819.0,
-      "LCP ms": 2448.0,
-      "TBT ms": 10.0,
+      "FCP ms": 812.0,
+      "LCP ms": 2605.0,
+      "TBT ms": 20.0,
       "CLS": 0,
-      "SI ms": 2147.0,
-      "TTI ms": 2463.0,
-      "TTFB ms": 106,
-      "bytes": 537606
+      "SI ms": 890.0,
+      "TTI ms": 2620.0,
+      "TTFB ms": 67,
+      "bytes": 498491
      },
      "requests": 31,
      "form_factor": "mobile",
@@ -2647,20 +2917,20 @@
     },
     {
      "scores": {
-      "performance": 100,
+      "performance": 93,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
      },
      "metrics": {
-      "FCP ms": 861.0,
-      "LCP ms": 1577.0,
-      "TBT ms": 5,
+      "FCP ms": 849.0,
+      "LCP ms": 3059.0,
+      "TBT ms": 33,
       "CLS": 0,
-      "SI ms": 861.0,
-      "TTI ms": 2123.0,
+      "SI ms": 3550.0,
+      "TTI ms": 3119.0,
       "TTFB ms": 56,
-      "bytes": 550002
+      "bytes": 495091
      },
      "requests": 31,
      "form_factor": "mobile",
@@ -2680,20 +2950,20 @@
    ],
    "median": {
     "scores": {
-     "performance": 98,
+     "performance": 93,
      "accessibility": 100,
      "best-practices": 100,
      "seo": 100
     },
     "metrics": {
-     "FCP ms": 833.0,
-     "LCP ms": 2441.0,
-     "TBT ms": 6.0,
+     "FCP ms": 849.0,
+     "LCP ms": 3059.0,
+     "TBT ms": 33,
      "CLS": 0,
-     "SI ms": 2145.0,
-     "TTI ms": 2456.0,
-     "TTFB ms": 73,
-     "bytes": 696795
+     "SI ms": 3550.0,
+     "TTI ms": 3119.0,
+     "TTFB ms": 56,
+     "bytes": 495091
     },
     "requests": 31,
     "form_factor": "mobile",
