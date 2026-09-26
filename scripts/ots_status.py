@@ -57,8 +57,8 @@ TARGETS = {
 WHAT = {
     "prereg-v1.tag.ots": "prereg_tag",
     "analysis_plan.md.ots": "analysis_plan",
-    "prereg-v2.tag.ots": "prereg_tag",
-    "analysis_plan_v2.md.ots": "analysis_plan",
+    "prereg-v2.tag.ots": "prereg_tag_v2",
+    "analysis_plan_v2.md.ots": "analysis_plan_v2",
 }
 
 # Returns the 80 byte header of the block at a height, and the id the explorer gave it.

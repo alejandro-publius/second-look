@@ -49,7 +49,7 @@ test("verify: says what OpenTimestamps is, and shows each proof's status from re
   // page does not say the log is stamped every day.
   expect(text).toContain("Once a day we stamp the audit log's last receipt, if it has changed since the last stamp.");
   expect(text).not.toContain("once a day, which");
-  for (const what of ["prereg_tag", "analysis_plan"]) {
+  for (const what of ["prereg_tag", "analysis_plan", "prereg_tag_v2", "analysis_plan_v2"]) {
     const p = ots.proofs.find((x) => x.what === what);
     expect(p, `results/ots.json has no ${what} proof`).toBeTruthy();
     const card = page.getByTestId(`proof-${what}`);
@@ -190,8 +190,10 @@ test("status words: every OpenTimestamps status, including those the committed f
 test("the judges' door and /verify say a stamp covers the lines from its own day, not from when they were written", async ({ page }) => {
   const en: Record<string, string> = JSON.parse(readFileSync(join(REPO, "content", "locales", "en.json"), "utf8"));
   const last = log[log.length - 1];
-  const head = headsAgainstLog(ots.proofs, log).find((p) => p.status === "confirmed" && (p.audit_seq ?? 0) >= last.seq)!;
-  const day = new Date(head.bitcoin!.block_time_utc!).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  const head = headsAgainstLog(ots.proofs, log).find((p) => p.status === "confirmed" && (p.audit_seq ?? 0) >= last.seq);
+  // A line written after the newest confirmed stamp (the daily anchor stamps it, and a block
+  // confirms it hours later): then there is no day to name, and the door says so.
+  const day = head ? new Date(head.bitcoin!.block_time_utc!).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }) : null;
   expect(logStampDay(log, ots.proofs)).toBe(day);
   // A line after the last stamp, a stamp still waiting for its block, or no stamp: no day to name.
   const extra: AuditEntry = { ...last, seq: last.seq + 1, prev_hash: last.hash, hash: "f".repeat(64) };
@@ -202,7 +204,7 @@ test("the judges' door and /verify say a stamp covers the lines from its own day
   await mockApi(page);
   await page.goto("/judges");
   const door = page.locator(".row").filter({ has: page.getByRole("link", { name: en["judges.verify"], exact: true }) });
-  await expect(door.locator(".row-value")).toHaveText(en["judges.verify_note"].replace("{date}", day));
+  await expect(door.locator(".row-value")).toHaveText(day ? en["judges.verify_note"].replace("{date}", day) : en["judges.verify_note_unstamped"]);
   await expect(door).not.toContainText("after it was written");
   await page.goto("/verify");
   await expect(page.getByTestId("stamp-day")).toHaveText(en["verify.stamp_day"]);

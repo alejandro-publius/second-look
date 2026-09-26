@@ -1,10 +1,10 @@
 {
- "checked_utc": "2026-09-26T01:36:00Z",
+ "checked_utc": "2026-09-26T02:03:35Z",
  "service": "OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin",
  "client": "opentimestamps-client 0.7.2",
  "upgraded": true,
  "counts": {
-  "pending": 2,
+  "pending": 3,
   "confirmed": 3,
   "unchecked": 0,
   "broken": 0
@@ -34,7 +34,7 @@
   {
    "proof": "proofs/analysis_plan_v2.md.ots",
    "file": "docs/analysis_plan_v2.md",
-   "what": "analysis_plan",
+   "what": "analysis_plan_v2",
    "file_sha256": "723f7980a2e05eba3b74f43826e0afbf2211a7c35da6dcc18581dba3df73a8c3",
    "calendars": [
     "https://alice.btc.calendar.opentimestamps.org",
@@ -69,6 +69,22 @@
    "status": "confirmed"
   },
   {
+   "proof": "proofs/audit-head-2026-09-26.ots",
+   "file": "proofs/audit-head-2026-09-26",
+   "what": "audit_head",
+   "file_sha256": "bf68d0a8214227254cfdd23d5c90a7bf063cf02322388b5aaedc47ff635aec13",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "audit_seq": 4,
+   "status": "pending"
+  },
+  {
    "proof": "proofs/prereg-v1.tag.ots",
    "file": "proofs/prereg-v1.tag",
    "what": "prereg_tag",
@@ -92,7 +108,7 @@
   {
    "proof": "proofs/prereg-v2.tag.ots",
    "file": "proofs/prereg-v2.tag",
-   "what": "prereg_tag",
+   "what": "prereg_tag_v2",
    "file_sha256": "d3093910996ceecd32c3210311b58200b9a755abf002c3dce2ae59e0181b989d",
    "calendars": [
     "https://alice.btc.calendar.opentimestamps.org",

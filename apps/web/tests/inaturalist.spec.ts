@@ -98,9 +98,9 @@ test("the credits page names iNaturalist, its terms and what it said about each 
   await mockApi(page);
   await page.goto("/credits");
   await expect(page.getByRole("heading", { name: "iNaturalist" })).toBeVisible();
-  await expect(page.getByText("9 of the plant photos above come from iNaturalist")).toBeVisible();
-  await expect(page.getByText("We asked iNaturalist about each of them on Sep 24, 2026.")).toBeVisible();
-  await expect(page.getByText("Research grade, seen in California.")).toHaveCount(9);
+  await expect(page.getByText("11 of the plant photos above come from iNaturalist")).toBeVisible();
+  await expect(page.getByText("We asked iNaturalist about each of them on Sep 25, 2026.")).toBeVisible();
+  await expect(page.getByText("Research grade, seen in California.")).toHaveCount(11);
   await expect(page.getByRole("link", { name: "iNaturalist terms of use" })).toHaveAttribute("href", "https://www.inaturalist.org/pages/terms");
   await expect(page.getByText("by Pinnacles National Park")).toBeVisible();
 });
