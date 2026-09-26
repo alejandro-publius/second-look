@@ -51,7 +51,7 @@ export default async function VerifyPage() {
               </a>
               {p.file ? (
                 <>
-                  {" · "}
+                  {` ${t("verify.download_or")} `}
                   <a href={`/proofs/${p.file.split("/").pop()}`} download>
                     {t("verify.download_file")}
                   </a>

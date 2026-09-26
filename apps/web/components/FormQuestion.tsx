@@ -308,6 +308,17 @@ export function FormQuestion({
       );
     }
     case "number": {
+      const numberLabel = (
+        <span className="field-label" {...ours}>
+          {t("check.number_label", { unit: item.unit ?? "" })}
+          {other ? (
+            <>
+              {" "}
+              <EnglishTag />
+            </>
+          ) : null}
+        </span>
+      );
       const text =
         typeof draft === "number"
           ? String(draft)
@@ -326,15 +337,7 @@ export function FormQuestion({
         >
           {head}
           <label className="field">
-            <span className="field-label" {...ours}>
-              {t("check.number_label", { unit: item.unit ?? "" })}
-              {other ? (
-                <>
-                  {" "}
-                  <EnglishTag />
-                </>
-              ) : null}
-            </span>
+            {numberLabel}
             <input
               className="text-input"
               type="number"
