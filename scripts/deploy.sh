@@ -24,6 +24,13 @@ fi
 case "$WHAT" in
   worker)
     (cd worker && npx wrangler d1 execute second-look --remote --file schema.sql)
+    # UPDATE_32: CREATE TABLE IF NOT EXISTS cannot add a column to a table that is already there, so
+    # the visit table's language column is added once, only when the live table lacks it, and
+    # before the Worker that writes it goes up.
+    cols="$(cd worker && npx wrangler d1 execute second-look --remote --json --command "SELECT name FROM pragma_table_info('visit')")"
+    if ! printf '%s' "$cols" | uv run python -c 'import json,sys; sys.exit(0 if any(r.get("name") == "language" for b in json.load(sys.stdin) for r in b.get("results", [])) else 1)'; then
+      (cd worker && npx wrangler d1 execute second-look --remote --file migrations/0001_visit_language.sql)
+    fi
     printed="$(mktemp)"
     (cd worker && npx wrangler deploy) | tee "$printed"
     uv run python scripts/deploy_record.py record worker --output-file "$printed"

@@ -2,8 +2,11 @@
 
 The creek check quotes the OneAquaHealth Citizen Science App word for word. The app ships its
 translations to any browser in a public JavaScript chunk; nothing here needed a login, and none was
-used. The words belong to the OneAquaHealth project and are credited to the OneAquaHealth Citizen
-Science App wherever they are shown or stored.
+used. The words belong to the OneAquaHealth project, not to us, and are not covered by this
+repository's MIT licence. The creek check credits them to the OneAquaHealth Citizen Science App on
+its first screen, and `content/app_strings.json` and `content/form.yaml` credit them where they
+are kept. A FHIR record names each item by the app's short name, such as Water Flow, without a
+credit line of its own.
 
 | | |
 |---|---|
@@ -43,8 +46,9 @@ in the note to the organizers.
 ## What stays ours
 
 The words around the questions: buttons, the follow-up questions, the health card and the notes.
-They have no checked translation yet, so in another language they show in English with a small
-"English" tag. The four test questions in `content/features.yaml` belong to the frozen two-minute
+They have no checked translation yet, so in another language they show in English: a question,
+note or follow-up carries a small "English" tag, and the buttons carry `lang="en"` for screen
+readers. The four test questions in `content/features.yaml` belong to the frozen two-minute
 test and are unchanged; the dug-out channel question there is ours by design, as the app has no
 matching item, and the creek check has no dug-out item.
 

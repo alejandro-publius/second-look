@@ -1,5 +1,6 @@
 "use client";
 
+import { EnglishTag } from "./LanguagePicker";
 import { PhotoPicker, type PickedPhoto } from "./PhotoPicker";
 import type { Followup } from "@/lib/api";
 import { has, t } from "@/lib/t";
@@ -57,6 +58,7 @@ export function FollowupCard({
   ratingOptions,
   finalRating,
   onRatingTap,
+  lang = "en",
 }: {
   followup: Followup;
   value: string | undefined;
@@ -69,18 +71,30 @@ export function FollowupCard({
     label: string;
     value: string;
     description?: string;
+    /** The language the answer's words are in, when they are the app's own translation. */
+    lang?: string;
   }[];
   finalRating: string | null;
   onRatingTap: (tap: RatingTap) => void;
+  /** The language of the check (UPDATE_32 section 2). The follow-ups are our own words, with no
+   *  checked translation yet, so in another language they show in English and say so. */
+  lang?: string;
 }) {
   return (
     <section
       className="card stack"
       aria-label={ruleTitle(followup.rule_id)}
       data-rule={followup.rule_id}
+      {...(lang !== "en" ? { lang: "en" } : {})}
     >
       <p>
         <strong>{followup.question_text}</strong>
+        {lang !== "en" ? (
+          <>
+            {" "}
+            <EnglishTag />
+          </>
+        ) : null}
       </p>
       {followup.kind === "yesno" ? (
         <div className="option-list">
@@ -128,6 +142,7 @@ export function FollowupCard({
             <div className="option-list">
               {ratingOptions.map((o) => (
                 <button
+                  lang={o.lang}
                   key={o.id}
                   type="button"
                   className="option"
@@ -137,7 +152,10 @@ export function FollowupCard({
                   {o.description ? (
                     <>
                       {o.label}
-                      <span className="small muted option-description"> {o.description}</span>
+                      <span className="small muted option-description">
+                        {" "}
+                        {o.description}
+                      </span>
                     </>
                   ) : (
                     o.label

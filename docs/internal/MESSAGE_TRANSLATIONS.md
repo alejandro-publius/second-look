@@ -36,9 +36,9 @@ Two small English typos, in case they are useful: "Layed stones with no concrete
 
 Greek is in the file with the start pages but not the questions yet, so we do not offer it.
 
-The full list, with back-translations, is here: docs/notes/app_translations.md in our repository.
-We are not translators, so please take these as questions, not corrections. Happy to change
-anything on our side.
+We have the full list with back-translations and are glad to send it; our repository, with the
+list at docs/notes/app_translations.md, opens to the public on Sep 30. We are not translators,
+so please take these as questions, not corrections. Happy to change anything on our side.
 
 Thank you,
 Alex (Second Look)

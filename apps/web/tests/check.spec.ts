@@ -528,3 +528,40 @@ test.describe("the location step says the spot's name is public, and a pin clear
     await expect(page.getByText(en["check.pin_name_public"])).toBeVisible();
   });
 });
+
+// UPDATE_32 section 7, review finding 3: in another language the follow-ups are our own English
+// words and say so, and the rating check offers the ratings in the app's own translation.
+test("/check in Portuguese: the follow-ups say they are English, the rating check is the app's", async ({
+  page,
+}) => {
+  const content = JSON.parse(
+    readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+  );
+  const pt = content.app_strings.strings.pt.items.overall_rating;
+  await mockApi(page);
+  await page.goto("/check");
+  await page.getByLabel("Language of the questions").selectOption("pt");
+  await placePin(page);
+  for (let i = 0; i < 40; i++) {
+    if (await page.getByRole("heading", { name: "Photos" }).isVisible()) break;
+    const good = page.getByRole("button", { name: new RegExp(`^${pt.options.good}`) });
+    const none = page.getByRole("button", { name: "None of these" });
+    const skip = page.getByRole("button", { name: "Skip" });
+    if (await good.isVisible()) await good.click();
+    else if (await none.isVisible()) await none.click();
+    else if (await skip.first().isVisible()) await skip.first().click();
+    else if (await page.locator(".option").first().isVisible()) await page.locator(".option").first().click();
+    // The feelings sliders: none moved, so Next leaves the question out.
+    else await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.waitForTimeout(50);
+  }
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByRole("heading", { name: "One or two follow-ups" })).toBeVisible();
+  const card = page.locator("section.card[data-rule]").first();
+  await expect(card).toHaveAttribute("lang", "en");
+  await expect(card.getByTestId("english-tag")).toBeVisible();
+  await page.getByRole("button", { name: "Change my rating" }).click();
+  const moderate = page.getByRole("button", { name: new RegExp(`^${pt.options.moderate}`) });
+  await expect(moderate).toBeVisible();
+  await expect(moderate).toHaveAttribute("lang", "pt");
+});

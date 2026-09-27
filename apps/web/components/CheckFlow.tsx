@@ -19,7 +19,7 @@ import {
   type SpotRef,
 } from "@/lib/api";
 import { content, questionCount, regionAt, type FormItem } from "@/lib/content";
-import { useCheckLang } from "@/lib/lang";
+import { shownOptions, useCheckLang } from "@/lib/lang";
 import { enqueue, flushQueue, getQueued, onQueueChange } from "@/lib/offline";
 import {
   clearContributorToken,
@@ -357,7 +357,8 @@ export function CheckFlow() {
                 setFollowupPhotos((m) => ({ ...m, [f.rule_id]: p }))
               }
               changingRating={changingRating}
-              ratingOptions={ratingItem?.options ?? []}
+              ratingOptions={shownOptions(ratingItem, lang)}
+              lang={lang}
               finalRating={finalRating}
               onRatingTap={(tap) => onRatingTap(f.rule_id, tap)}
             />

@@ -34,7 +34,7 @@ import {
   startQueueWatcher,
   type WalkState,
 } from "@/lib/offline";
-import { useCheckLang } from "@/lib/lang";
+import { shownOptions, useCheckLang } from "@/lib/lang";
 import { t } from "@/lib/t";
 import { buildRecord, settleFollowups, walkQuestions } from "@/lib/walks";
 
@@ -166,6 +166,9 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   const [stage, setStage] = useState<Stage>({ name: "loading" });
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [lang] = useCheckLang();
+  // The language a finished walk was taken in, so its record says that one even if the picker
+  // changes later (UPDATE_32 section 7, review finding 2). Null while the walk is not finished.
+  const [walkLang, setWalkLang] = useState<string | null>(null);
   const [lookedAgain, setLookedAgain] = useState<string | null>(null);
   const [resumed, setResumed] = useState(false);
   const [stored, setStored] = useState<Stored>({ state: "sending" });
@@ -302,6 +305,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
         return;
       }
       kept.current = saved;
+      setWalkLang(saved.answered_at ? (saved.language ?? "en") : null);
       setAnswers(saved.answers);
       setFollowupAnswers(saved.followup_answers ?? {});
       setFinalRating(saved.final_rating ?? null);
@@ -336,6 +340,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     if (w.queue_id !== null && !w.record_id)
       await removeQueued(w.queue_id).catch(() => undefined);
     kept.current = freshState(walk.id);
+    setWalkLang(null);
     writes.current = writes.current.then(() => deleteWalkState(walk.id));
     await writes.current;
     setAnswers({});
@@ -358,6 +363,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     setAnswers(final);
     setFollowupAnswers(settled.followup_answers);
     setFinalRating(settled.final_rating);
+    setWalkLang(lang);
     setStage({ name: "record", answeredAt });
     await keep({
       answers: final,
@@ -520,7 +526,8 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               photos={[]}
               onPhotos={() => undefined}
               changingRating={changingRating}
-              ratingOptions={ratingItem?.options ?? []}
+              ratingOptions={shownOptions(ratingItem, lang)}
+              lang={lang}
               finalRating={finalRating}
               onRatingTap={(tap) => onRatingTap(card.rule_id, tap)}
             />
@@ -607,7 +614,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
         answers,
         stage.answeredAt,
         checked.final_rating,
-        lang,
+        walkLang ?? lang,
       );
       const recordId = stored.state === "stored" ? stored.record_id : null;
       const city = `/city?walk=${encodeURIComponent(walk.id)}${recordId ? `&record=${encodeURIComponent(recordId)}` : ""}`;

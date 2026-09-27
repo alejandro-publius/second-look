@@ -122,10 +122,10 @@ merge, both halves go in one session, in this order, and not the other way round
 1. Apply the new D1 tables. They are additive only, every one is `CREATE TABLE IF NOT EXISTS`:
    `cd worker && npx wrangler d1 execute second-look --remote --file schema.sql`.
    On 2026-09-26 (UPDATE_32) the `visit` table gained one column, `language`, which
-   `CREATE TABLE IF NOT EXISTS` cannot add to a table that already exists. It was added once on
-   production with `npx wrangler d1 execute second-look --remote --file
-   migrations/0001_visit_language.sql`, before the Worker that writes it. A database made from
-   `schema.sql` after that date has it already; run the migration only on an older one.
+   `CREATE TABLE IF NOT EXISTS` cannot add to a table that already exists. `scripts/deploy.sh
+   worker` asks the live table for its columns and runs `migrations/0001_visit_language.sql` only
+   when `language` is missing, before the Worker that writes it goes up. A database made from
+   `schema.sql` after that date has the column already.
 2. Deploy the Worker: `bash scripts/deploy.sh worker`, which runs step 1 and then
    `cd worker && npx wrangler deploy`, and writes the new version into the deploy record below.
    The study routes are unchanged in it.

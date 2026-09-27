@@ -1,8 +1,9 @@
 // The creek check and the walks in the official app's own languages (UPDATE_32 section 2).
 // Mirrored questions and answers come from the app's own translations (content/app_strings.json).
 // A translation whose meaning was found to differ from the English falls back to English, and so
-// do our own words around the questions, which have no checked translation yet. Every string that
-// shows in English inside another language says so, with lang="en" for screen readers.
+// do our own words around the questions, which have no checked translation yet. A question, answer,
+// note or follow-up shown in English inside another language carries a small English tag; the
+// buttons carry lang="en" for screen readers.
 import { useSyncExternalStore } from "react";
 import { content, type FormItem, type FormSection } from "./content";
 
@@ -132,4 +133,16 @@ export function englishOptions(item: FormItem): Record<string, string> | null {
 export function sectionTitle(section: FormSection, lang: string): Shown {
   const t = content.app_strings.strings[lang]?.sections[section.id];
   return pick(lang, `section:${section.id}`, t, section.title);
+}
+
+/** An item's answers in the chosen language, as the rating check offers them again. */
+export function shownOptions(item: FormItem | undefined, lang: string) {
+  if (!item) return [];
+  return (item.options ?? []).map((o) => {
+    const label = optionText(item, o.id, o.label, lang);
+    const description = o.description
+      ? optionDescription(item, o.id, o.description, lang).text
+      : undefined;
+    return { ...o, label: label.text, description, lang: label.lang };
+  });
 }
