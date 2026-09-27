@@ -9,7 +9,7 @@ Proof P2 passed on 2026-09-20. The HL7 validator (6.10.4, FHIR 4.0.1) checked ou
 | Location, three nested | their `LocationOah` | creek, then reach (`partOf` creek), then spot (`partOf` reach, with `position`). Each has an identifier, a name and `mode = instance`, as the profile requires. |
 | Practitioner | base R4 | the volunteer, identified only by a random contributor token. One `qualification` coded `second-look-test`, `period` from the test date to 90 days later, `issuer` our Organization. |
 | QuestionnaireResponse, test sitting | base R4 | one item per feature with the score out of 4, computed by code. Authored by the Practitioner. |
-| QuestionnaireResponse, visit | base R4 | one item per answered check item. Link ids are the stable ids from `content/form.yaml`. |
+| QuestionnaireResponse, visit | base R4 | one item per answered check item. Link ids are the stable ids from `content/form.yaml`. `language` is the language the questions were shown in, one of the official app's (UPDATE_32); the narrative is written in English and marked `lang="en"`, and says the language when it is not English, so the validator notes on those records that the two differ, which is true. |
 | Observation, one per answered item | their `ObservationIndicatorsOah` | `status final`, `subject` the spot, `performer` the Practitioner, `effectiveDateTime`, `derivedFrom` the visit response, a coded or quantity value. |
 | Provenance | base R4 | `target` every Observation of the visit, `agent` author = Practitioner and assembler = our software Device, `entity` source = the visit response and the test sitting. This is the path from any answer to the score of the person who gave it. |
 | Organization, Device | base R4 | us, and the software. |

@@ -179,10 +179,13 @@ def _identifier(system: str, value: str) -> dict[str, str]:
     return {"system": system, "value": value}
 
 
-def _narrative(text: str) -> dict[str, str]:
+def _narrative(text: str, lang: str | None = None) -> dict[str, str]:
+    """The human-readable summary. lang marks the words' own language (always English here) for a
+    resource that states a language, as the validator and W3C ask (UPDATE_32 section 2)."""
+    attrs = f' lang="{lang}" xml:lang="{lang}"' if lang else ""
     return {
         "status": "generated",
-        "div": f'<div xmlns="http://www.w3.org/1999/xhtml"><p>{escape(text)}</p></div>',
+        "div": f'<div xmlns="http://www.w3.org/1999/xhtml"{attrs}><p>{escape(text)}</p></div>',
     }
 
 
@@ -430,6 +433,12 @@ def _visit_response(
         "text": _narrative(
             f"Creek check at {visit.spot.spot_name} on {_instant(visit.answered_at)}, "
             f"{len(qr_items)} items answered."
+            + (
+                ""
+                if visit.language == "en"
+                else f" The questions were shown in language {visit.language}."
+            ),
+            lang="en",
         ),
         "identifier": _identifier(ID_SYSTEM_QR, visit.visit_id),
         "questionnaire": QUESTIONNAIRE_CHECK_URL,

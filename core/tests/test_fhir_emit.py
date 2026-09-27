@@ -387,7 +387,9 @@ def test_every_domain_resource_has_a_generated_narrative(golden_bundle: dict) ->
     for entry in golden_bundle["entry"]:
         text = entry["resource"]["text"]
         assert text["status"] == "generated"
-        assert text["div"].startswith('<div xmlns="http://www.w3.org/1999/xhtml">')
+        # A resource that states a language marks its narrative's own language too (UPDATE_32).
+        lang = ' lang="en" xml:lang="en"' if "language" in entry["resource"] else ""
+        assert text["div"].startswith(f'<div xmlns="http://www.w3.org/1999/xhtml"{lang}>')
         assert chr(0x2014) not in text["div"] and chr(0x2013) not in text["div"]
 
 

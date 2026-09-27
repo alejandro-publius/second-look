@@ -78,8 +78,11 @@ export function escapeXml(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function narrative(text: string): Resource {
-  return { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"><p>${escapeXml(text)}</p></div>` };
+/** The human-readable summary. lang marks the words' own language (always English here) for a
+ *  resource that states a language, as the validator and W3C ask (UPDATE_32 section 2). */
+function narrative(text: string, lang: string | null = null): Resource {
+  const attrs = lang ? ` lang="${lang}" xml:lang="${lang}"` : "";
+  return { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"${attrs}><p>${escapeXml(text)}</p></div>` };
 }
 
 /** How Python prints a float in an f-string: a whole number keeps its ".0". Every number the
@@ -280,7 +283,11 @@ function visitResponse(visit: VisitRecord, pid: string, items: FormItem[]): Reso
     id: fhirId("sl-qr-visit", visit.visit_id),
     // The language the volunteer saw the questions in (UPDATE_32 section 2).
     language: visit.language ?? "en",
-    text: narrative(`Creek check at ${visit.spot.spot_name} on ${instant(visit.answered_at)}, ${qrItems.length} items answered.`),
+    text: narrative(
+      `Creek check at ${visit.spot.spot_name} on ${instant(visit.answered_at)}, ${qrItems.length} items answered.` +
+        ((visit.language ?? "en") === "en" ? "" : ` The questions were shown in language ${visit.language}.`),
+      "en",
+    ),
     identifier: identifier(ID_SYSTEM_QR, visit.visit_id),
     questionnaire: QUESTIONNAIRE_CHECK_URL,
     status: "completed",

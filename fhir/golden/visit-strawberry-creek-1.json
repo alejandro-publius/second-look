@@ -372,7 +372,7 @@
         "resourceType": "QuestionnaireResponse",
         "status": "completed",
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-24T16:40:00Z, 6 items answered.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-24T16:40:00Z, 6 items answered.</p></div>",
           "status": "generated"
         }
       }

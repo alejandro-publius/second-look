@@ -297,7 +297,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-24T16:05:09Z, 3 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-24T16:05:09Z, 3 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -896,7 +896,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T08:00:00Z, 1 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-25T08:00:00Z, 1 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -1366,7 +1366,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T09:30:00Z, 3 items answered.</p><p>The first overall rating was good. On the rating check the volunteer changed it to moderate.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-25T09:30:00Z, 3 items answered.</p><p>The first overall rating was good. On the rating check the volunteer changed it to moderate.</p></div>",
                 "status": "generated"
               }
             }
@@ -1916,7 +1916,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T09:30:00Z, 3 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-25T09:30:00Z, 3 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -2908,7 +2908,7 @@
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T10:00:00Z, 3 items answered.</p><p>The first overall rating was good. On the rating check the volunteer changed it to poor.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-25T10:00:00Z, 3 items answered.</p><p>The first overall rating was good. On the rating check the volunteer changed it to poor.</p></div>",
                   "status": "generated"
                 }
               }
@@ -3450,7 +3450,7 @@
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T10:00:00Z, 2 items answered.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-25T10:00:00Z, 2 items answered.</p></div>",
                   "status": "generated"
                 }
               }
@@ -3991,7 +3991,7 @@
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-19T10:30:00Z, 2 items answered.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-19T10:30:00Z, 2 items answered.</p></div>",
                   "status": "generated"
                 }
               }
@@ -4525,7 +4525,7 @@
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at The stretch in the clip on 2026-09-25T10:04:00Z, 0 items answered.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at The stretch in the clip on 2026-09-25T10:04:00Z, 0 items answered.</p></div>",
                   "status": "generated"
                 }
               }

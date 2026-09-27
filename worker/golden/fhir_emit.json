@@ -375,7 +375,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-24T16:40:00Z, 6 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-24T16:40:00Z, 6 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -1277,7 +1277,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered. The questions were shown in language it.</p></div>",
                 "status": "generated"
               }
             }
@@ -2234,7 +2234,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered. The questions were shown in language it.</p></div>",
                 "status": "generated"
               }
             }
@@ -3272,7 +3272,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Codornices Creek, lower reach, spot 2 on 2026-09-26T09:15:30Z, 8 items answered. The questions were shown in language it.</p></div>",
                 "status": "generated"
               }
             }
@@ -4181,7 +4181,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at A &lt;bridge&gt; &amp; a \"quote\" on 2026-09-27T08:00:00Z, 3 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at A &lt;bridge&gt; &amp; a \"quote\" on 2026-09-27T08:00:00Z, 3 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -4772,7 +4772,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -4808,7 +4808,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -5242,7 +5242,7 @@
                   "resourceType": "QuestionnaireResponse",
                   "status": "completed",
                   "text": {
-                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
                     "status": "generated"
                   }
                 }
@@ -5616,7 +5616,7 @@
                   "resourceType": "QuestionnaireResponse",
                   "status": "completed",
                   "text": {
-                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
+                    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
                     "status": "generated"
                   }
                 }
@@ -6013,7 +6013,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -6049,7 +6049,7 @@
               "resourceType": "QuestionnaireResponse",
               "status": "completed",
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
                 "status": "generated"
               }
             }
@@ -6831,7 +6831,7 @@
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-22T12:00:00Z, 1 items answered.</p></div>",
                   "status": "generated"
                 }
               }
@@ -6867,7 +6867,7 @@
                 "resourceType": "QuestionnaireResponse",
                 "status": "completed",
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-23T12:00:00Z, 1 items answered.</p></div>",
                   "status": "generated"
                 }
               }

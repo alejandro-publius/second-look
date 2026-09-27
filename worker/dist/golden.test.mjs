@@ -16,7 +16,7 @@ var content_default = {
     "fr",
     "it"
   ],
-  content_hash: "ebb0572d75fba7d8",
+  content_hash: "9289a699a7e73f6b",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -2781,8 +2781,9 @@ var identifier = (system, value) => ({ system, value });
 function escapeXml(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-function narrative(text) {
-  return { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"><p>${escapeXml(text)}</p></div>` };
+function narrative(text, lang = null) {
+  const attrs = lang ? ` lang="${lang}" xml:lang="${lang}"` : "";
+  return { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"${attrs}><p>${escapeXml(text)}</p></div>` };
 }
 function pyFloat(value) {
   if (Number.isInteger(value) && Math.abs(value) < 1e16) return `${value}.0`;
@@ -2953,7 +2954,10 @@ function visitResponse(visit, pid, items) {
     id: fhirId("sl-qr-visit", visit.visit_id),
     // The language the volunteer saw the questions in (UPDATE_32 section 2).
     language: visit.language ?? "en",
-    text: narrative(`Creek check at ${visit.spot.spot_name} on ${instant(visit.answered_at)}, ${qrItems.length} items answered.`),
+    text: narrative(
+      `Creek check at ${visit.spot.spot_name} on ${instant(visit.answered_at)}, ${qrItems.length} items answered.` + ((visit.language ?? "en") === "en" ? "" : ` The questions were shown in language ${visit.language}.`),
+      "en"
+    ),
     identifier: identifier(ID_SYSTEM_QR, visit.visit_id),
     questionnaire: QUESTIONNAIRE_CHECK_URL,
     status: "completed",
