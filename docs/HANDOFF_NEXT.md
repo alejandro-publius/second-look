@@ -15,6 +15,8 @@ order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA k
 `PLAN.md`, this file, `docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest
 `docs/internal/updates/`.
 
+Where it stands (Sep 27, 06:40Z, after UPDATE_32): `main` and `depth` at b2eaa67, deployed code d107902 (Worker 03d9374e, Pages 1f90ef9f, recorded good); the creek check quotes the official app in its six languages and records the language; `make done-check` RED: 0 BLOCKED: 12 HUMAN: 9; GitHub Actions starts no job (billing, Alex's) so four CI lines are BLOCKED-IF; report `docs/internal/reports/20260927T063000Z-weekend.md`. The paragraph below is the state before it.
+
 Where it stands (Sep 26, 00:10Z, after UPDATE_30): `main` and `depth` at 7dd0ea3 plus the report commit, CI green, Worker d5527e10 and Pages ce38185d recorded good in docs/notes/hosting.md. `make done-check` is RED: 0 BLOCKED: 6 HUMAN: 9; the BLOCKED lines wait on the lock (2026-09-28T01:00:00Z) and their sandbox. Nothing is due from a session before the lock: the lock job on the Mac (Sun Sep 27, 18:10 PDT, from ~/second-look-depth) backs up, runs the tagged analysis once, fills the README's human row, deploys and pushes, and writes to the status issue; uptime, the sandbox retry, the hl7-eu/oah watch, backups, anchoring and iNaturalist run on their own (docs/internal/MAC_JOBS.md). A second session works on UPDATE_31 (the assisted study) in ~/second-look-assisted on branch assisted and integrates once this report is on origin/depth. What is left is Alex's (docs/ALEX_TODO.md) and Sep 30's go-public (docs/SUBMISSION_DAY.md).
 
 Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamps) and
