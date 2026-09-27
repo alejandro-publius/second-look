@@ -67,6 +67,8 @@ NEVER = (
     "rm -rf",
 )
 SAFE_MAKE = {
+    # UPDATE_32: reads the official app's public bundle and compares; it writes nothing.
+    "app-strings-check",
     "check",
     "judge-check",
     "test",
