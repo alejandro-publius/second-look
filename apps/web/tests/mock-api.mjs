@@ -179,10 +179,10 @@ export const exampleSpot = {
       first_rating: "good",
       final_rating: "moderate",
       answers: [
-        { item_id: "bank_type", text: "Bank type", value: "present", label: "Artificial (concrete or stones with concrete)", feature: "artificial_bank", observer_label: "4 of 4 on Built banks, tested Sep 23", observer_passed: true },
+        { item_id: "bank_type", text: "The banks of the channel are…", value: "present", label: "Artificial (concrete or stones with concrete)", feature: "artificial_bank", observer_label: "4 of 4 on Built banks, tested Sep 23", observer_passed: true },
         { item_id: "draining_pipes", text: "Are there pipes draining polluted water into the stream?", value: "present", label: "Yes", feature: "pipe_running", observer_label: "2 of 4 on Pipes and sewage signs, tested Sep 23", observer_passed: false },
         { item_id: "invasive_species", text: "Do you see any non-native or invasive plant species?", value: "cant_tell", label: "Not sure", feature: "invasive_plant", observer_label: null, observer_passed: null },
-        { item_id: "water_flow", text: "Water flow", value: "slow", label: "Slow", feature: null, observer_label: null, observer_passed: null },
+        { item_id: "water_flow", text: "How is the water flowing", value: "slow", label: "Slow", feature: null, observer_label: null, observer_passed: null },
       ],
       checks: [
         { rule_id: "dry_pipe", asked: true, question_text: "It has not rained here for 5 days. Is anything coming out of that pipe?", answer: "yes", detail: { days: 5 } },
@@ -194,7 +194,7 @@ export const exampleSpot = {
       answered_at: "2026-09-18T15:00:00Z",
       first_rating: "moderate",
       final_rating: "moderate",
-      answers: [{ item_id: "bank_type", text: "Bank type", value: "absent", label: "Natural", feature: "artificial_bank", observer_label: "Score expired. Tested Jun 1, more than 90 days ago. Retake the test.", observer_passed: null }],
+      answers: [{ item_id: "bank_type", text: "The banks of the channel are…", value: "absent", label: "Natural", feature: "artificial_bank", observer_label: "Score expired. Tested Jun 1, more than 90 days ago. Retake the test.", observer_passed: null }],
       checks: [],
     },
   ],
