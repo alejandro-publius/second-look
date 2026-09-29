@@ -524,6 +524,26 @@ def test_check_questionnaire_fsh_mirrors_the_form() -> None:
             assert f"#{coding['code']} " in block, (item["id"], value)
 
 
+def check_questionnaire_texts(fsh: str) -> dict[str, str]:
+    """linkId to item text, as the creek check Questionnaire in the FSH states them."""
+    check = fsh[fsh.index("Instance: sl-questionnaire-check") :]
+    link_ids = dict(re.findall(r'^\* item\[(\d+)\]\.linkId = "([^"]+)"', check, flags=re.MULTILINE))
+    texts = re.findall(r'^\* item\[(\d+)\]\.text = "((?:[^"\\]|\\.)*)"$', check, flags=re.MULTILINE)
+    return {link_ids[n]: re.sub(r"\\(.)", r"\1", text) for n, text in texts}
+
+
+def test_check_questionnaire_fsh_asks_the_forms_own_questions() -> None:
+    """Every item text of the creek check Questionnaire is the form's text, word for word.
+
+    Each visit's QuestionnaireResponse names this Questionnaire, so a reader who opens it must
+    find the questions the volunteer saw (content/form.yaml, quoted from the official app).
+    """
+    fsh = (ROOT / "fhir" / "fsh" / "questionnaires-second-look.fsh").read_text(encoding="utf-8")
+    expected = {item["id"]: item["text"] for item in form_items() if item["type"] != "sliders"}
+    assert len(expected) == 23
+    assert check_questionnaire_texts(fsh) == expected
+
+
 def test_sliders_are_not_carried_in_the_response() -> None:
     bundle = emit_visit(second_visit(), test_sitting=None, emitted_at=EMITTED_AT)
     (visit_qr,) = resources(bundle, "QuestionnaireResponse")

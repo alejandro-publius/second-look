@@ -37,35 +37,35 @@ Usage: #example
 Instance: sl-questionnaire-check
 InstanceOf: Questionnaire
 Title: "Second Look creek check"
-Description: "The guided check at the creek, generated from content/form.yaml: every item in the app's order except the feelings sliders, which have no FHIR shape yet. Link ids are the stable item ids from content/form.yaml. Coding displays are the code systems' own displays; the words a person sees live in content/form.yaml and mirror the official OneAquaHealth app where marked, unverified until checked against screenshots."
+Description: "The guided check at the creek, held to content/form.yaml by a test: every item in the app's order except the feelings sliders, which have no FHIR shape yet. Link ids are the stable item ids from content/form.yaml. Each item text is the question of the official OneAquaHealth Citizen Science App, quoted from the app's public bundle c5a15e8ebf91 as checked on 2026-09-26. Coding displays are the code systems' own displays, not the app's answer words; the answer words a person sees live in content/form.yaml."
 Usage: #example
 * url = "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check"
 * name = "SecondLookCreekCheck"
 * title = "Second Look creek check"
 * status = #draft
-* date = "2026-09-20"
+* date = "2026-09-29"
 * publisher = "Second Look"
 * item[0].linkId = "channel_form"
-* item[0].text = "Channel form"
+* item[0].text = "The channel form is..."
 * item[0].type = #choice
 * item[0].answerOption[0].valueCoding = SecondLookCS#flat "Flat channel"
 * item[0].answerOption[1].valueCoding = SecondLookCS#u-shape "U shaped channel"
 * item[0].answerOption[2].valueCoding = SecondLookCS#v-shape "V shaped channel"
 * item[0].answerOption[3].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[1].linkId = "bottom_type"
-* item[1].text = "Bottom type"
+* item[1].text = "The bottom of the wet channel is…"
 * item[1].type = #choice
 * item[1].answerOption[0].valueCoding = TemporaryOahSystem#absent "Absent"
 * item[1].answerOption[1].valueCoding = TemporaryOahSystem#present "Present"
 * item[1].answerOption[2].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[2].linkId = "bank_type"
-* item[2].text = "Bank type"
+* item[2].text = "The banks of the channel are…"
 * item[2].type = #choice
 * item[2].answerOption[0].valueCoding = TemporaryOahSystem#absent "Absent"
 * item[2].answerOption[1].valueCoding = TemporaryOahSystem#present "Present"
 * item[2].answerOption[2].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[3].linkId = "habitats"
-* item[3].text = "Habitats"
+* item[3].text = "Are there any habitats present?"
 * item[3].type = #choice
 * item[3].repeats = true
 * item[3].answerOption[0].valueCoding = SecondLookCS#sand-banks "Sand banks"
@@ -74,14 +74,14 @@ Usage: #example
 * item[3].answerOption[3].valueCoding = SecondLookCS#riffles "Riffles, rapids or falls"
 * item[3].answerOption[4].valueCoding = SecondLookCS#aquatic-vegetation "Aquatic vegetation"
 * item[4].linkId = "natural_debris"
-* item[4].text = "Natural debris"
+* item[4].text = "Are there any natural debris present?"
 * item[4].type = #choice
 * item[4].repeats = true
 * item[4].answerOption[0].valueCoding = SecondLookCS#fallen-trees "Fallen trees"
 * item[4].answerOption[1].valueCoding = SecondLookCS#fallen-branches "Fallen branches"
 * item[4].answerOption[2].valueCoding = SecondLookCS#leaf-deposits "Deposits of fallen leaves"
 * item[5].linkId = "water_flow"
-* item[5].text = "Water flow"
+* item[5].text = "How is the water flowing"
 * item[5].type = #choice
 * item[5].answerOption[0].valueCoding = SecondLookCS#fast "Fast flow"
 * item[5].answerOption[1].valueCoding = SecondLookCS#slow "Slow flow"
@@ -95,7 +95,7 @@ Usage: #example
 * item[6].answerOption[1].valueCoding = TemporaryOahSystem#present "Present"
 * item[6].answerOption[2].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[7].linkId = "water_withdrawal"
-* item[7].text = "Is there any kind of obvious water collection, use or removal from the stream?"
+* item[7].text = "Is there any kind of obvious water collection, use, removal from the stream?"
 * item[7].type = #choice
 * item[7].answerOption[0].valueCoding = TemporaryOahSystem#present "Present"
 * item[7].answerOption[1].valueCoding = TemporaryOahSystem#absent "Absent"
@@ -119,13 +119,13 @@ Usage: #example
 * item[10].answerOption[1].valueCoding = TemporaryOahSystem#absent "Absent"
 * item[10].answerOption[2].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[11].linkId = "construction"
-* item[11].text = "Is there any construction or works in the stream?"
+* item[11].text = "Is there any construction/works in stream?"
 * item[11].type = #choice
 * item[11].answerOption[0].valueCoding = TemporaryOahSystem#present "Present"
 * item[11].answerOption[1].valueCoding = TemporaryOahSystem#absent "Absent"
 * item[11].answerOption[2].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[12].linkId = "water_height_m"
-* item[12].text = "Water height in metres"
+* item[12].text = "What is the water height?"
 * item[12].type = #decimal
 * item[13].linkId = "impervious_left"
 * item[13].text = "Is more than one third of the left margin covered by impervious areas (such as roads, sidewalks or buildings)?"
@@ -152,14 +152,14 @@ Usage: #example
 * item[16].answerOption[1].valueCoding = TemporaryOahSystem#absent "Absent"
 * item[16].answerOption[2].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[17].linkId = "vegetation_type_left"
-* item[17].text = "Left margin: what is dominant (more than half) in the first 5 m?"
+* item[17].text = "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the left margin (first 5 meters from the channel banktop)?"
 * item[17].type = #choice
 * item[17].answerOption[0].valueCoding = TemporaryOahSystem#herbaceous "Herbaceous (height < 1.5m)"
 * item[17].answerOption[1].valueCoding = TemporaryOahSystem#bushes "Bushes (height (1.5-3m)"
 * item[17].answerOption[2].valueCoding = TemporaryOahSystem#trees "Trees (height >3m)"
 * item[17].answerOption[3].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[18].linkId = "vegetation_type_right"
-* item[18].text = "Right margin: what is dominant (more than half) in the first 5 m?"
+* item[18].text = "Which vegetation is dominant (meaning that it covers more than 50%, or half) in the right margin (first 5 meters from the channel bank/top)?"
 * item[18].type = #choice
 * item[18].answerOption[0].valueCoding = TemporaryOahSystem#herbaceous "Herbaceous (height < 1.5m)"
 * item[18].answerOption[1].valueCoding = TemporaryOahSystem#bushes "Bushes (height (1.5-3m)"
@@ -177,13 +177,13 @@ Usage: #example
 * item[20].repeats = true
 * item[20].answerOption[0].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[21].linkId = "vegetation_cuts"
-* item[21].text = "Have there been recent cuts of vegetation (partial or total) on the banks?"
+* item[21].text = "Have there been recent cuts if vegetation (partial or total) on the banks (or just one of the banks) of the stream?"
 * item[21].type = #choice
 * item[21].answerOption[0].valueCoding = TemporaryOahSystem#present "Present"
 * item[21].answerOption[1].valueCoding = TemporaryOahSystem#absent "Absent"
 * item[21].answerOption[2].valueCoding = SecondLookCS#cant-tell "Can't tell"
 * item[22].linkId = "overall_rating"
-* item[22].text = "Overall, how would you rate this stream?"
+* item[22].text = "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)"
 * item[22].type = #choice
 * item[22].answerOption[0].valueCoding = SecondLookCS#good "Good overall rating"
 * item[22].answerOption[1].valueCoding = SecondLookCS#moderate "Moderate overall rating"
