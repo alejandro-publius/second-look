@@ -58,7 +58,7 @@ How this answers the organizers' five headers: *The problem* and *Innovation and
 
 ## Numbers at a glance
 
-**The result, in short.** Every model passed built banks, and none passed plants that do not belong: the instruction says to answer can't tell when no stream is in view, and the models often named the plant right and still said can't tell ([`docs/MODEL_CARD.md`](docs/MODEL_CARD.md)). Each beat, on the point numbers, the floor a checker gets by always answering No, <!--v:results/model_card.json#/benchmark/always_no/correct-->24<!--/v--> of <!--v:results/model_card.json#/benchmark/always_no/n-->48<!--/v-->; the three runs repeat the same photos, so the intervals are too narrow to say more. On <!--v:results/footage_pool.json#/frames_kept-->46<!--/v--> frames of real creek footage the gate dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags. Nobody has taken the test yet, so nothing here measures people.
+**The result, in short.** Every model passed built banks, and none passed plants that do not belong: the instruction says to answer can't tell when no stream is in view, and the models often named the plant right and still said can't tell ([`docs/MODEL_CARD.md`](docs/MODEL_CARD.md)). Each beat, on the point numbers, the floor a checker gets by always answering No, <!--v:results/model_card.json#/benchmark/always_no/correct-->24<!--/v--> of <!--v:results/model_card.json#/benchmark/always_no/n-->48<!--/v-->; the three runs repeat the same photos, so the intervals are too narrow to say more. On <!--v:results/footage_pool.json#/frames_kept-->46<!--/v--> frames of real creek footage the gate dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags. Nobody finished the test before the lock, so nothing here measures people.
 
 ### The AI, on the same 16 photos and on real creek footage
 
@@ -88,10 +88,14 @@ The exact model ids, as sent to the API in the run of 2026-09-24: `claude-haiku-
 
 The full loop, from a desk: <!--v:results/footage_pool.json#/walks-->3<!--/v--> video walks from <!--v:results/footage_pool.json#/walk_country_count-->3<!--/v--> countries, each ending in a FHIR record made on the phone. The HL7 validator checked <!--v:results/fhir_validation.json#/files_validated-->17<!--/v--> records against OneAquaHealth's guide, <!--v:results/fhir_validation.json#/walk_records_validated-->3<!--/v--> of them walk records, with <!--v:results/fhir_validation.json#/errors-->0<!--/v--> errors.
 
-The test runs as a pre-registered study that stays open: it is the volunteer's own calibration step and the judges' first door, and a paid research panel may add sessions before the lock. No session from a person has arrived yet, so there is no human row here; sessions that arrive are reported once, after the lock, whatever they show.
+<!-- human-row -->
+
+No finished test from a person was kept before the data lock at <!--v:results/usability_20260929.json#/plan/data_lock_utc-->2026-09-28T01:00:00Z<!--/v-->: <!--v:results/usability_20260929.json#/counts/completed_trained-->0<!--/v--> with the lesson and <!--v:results/usability_20260929.json#/counts/completed_untrained-->0<!--/v--> without it, so there is no human row. The one pre-registered run, with what each of the plan's rules removed, is in [`results/usability_20260929.md`](results/usability_20260929.md).
+
+<!-- /human-row -->
 
 <!-- human-row-2 -->
-Does the checker's question help? Part 2, the assisted second look, is analysed once, after the data lock, as tagged in `prereg-v2`.
+Does the checker's question help? Too few people finished part 2 for the plan's test: assisted <!--v:results/assist_20260929.json#/primary/n_assisted-->0<!--/v-->, unassisted <!--v:results/assist_20260929.json#/primary/n_unassisted-->0<!--/v-->, and the plan needs 20 in each ([`results/assist_20260929.md`](results/assist_20260929.md)). This measures one thing only: whether the checker's question helps a person whose first answer was wrong or Can't tell. It does not show that the checker cannot mislead anyone, because every flag in this set was correct (Known weaknesses).
 <!-- /human-row-2 -->
 
 ## Gallery
