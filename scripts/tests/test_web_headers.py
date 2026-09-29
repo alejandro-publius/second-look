@@ -423,3 +423,38 @@ def test_a_proof_file_is_sent_as_plain_bytes_and_not_as_a_spreadsheet() -> None:
             assert "Content-Security-Policy" in sent
         for path in [*(f"/proofs/{name}" for name in stamped), "/proofs/", "/verify", "/a.ots"]:
             assert "Content-Type" not in sent_with(text, path), f"{where}: {path}"
+
+
+SHARE_ROUTE = WEB / "app" / "api" / "share" / "[score]" / "route.ts"
+SVG = "image/svg+xml; charset=utf-8"
+
+
+def test_only_the_share_cards_that_exist_are_sent_as_svg() -> None:
+    """privacy-security-5: GET /api/share/999 answered 404 with the HTML not found page as its
+    body and image/svg+xml as its type, because the rule was /api/share/* and Pages adds a
+    rule's headers to its not found page too. A browser showed an XML error."""
+    found = re.search(r"^const TOTAL = (\d+);$", SHARE_ROUTE.read_text(encoding="utf-8"), re.M)
+    assert found is not None
+    total = int(found.group(1))
+    assert call("m.SHARE_CARD_TOTAL") == total == 16
+    missing = [total + 1, 999, "", "abc", "01", "1/2", "7.svg", "-1"]
+    for where, text in headers_files().items():
+        for score in range(total + 1):
+            sent = sent_with(text, f"/api/share/{score}")
+            assert sent.get("Content-Type") == SVG, f"{where}: card {score}"
+        for name in missing:
+            path = f"/api/share/{name}"
+            assert "Content-Type" not in sent_with(text, path), f"{where}: {path}"
+        assert "Content-Type" not in sent_with(text, "/share/7")
+        starred = [rule for rule, _ in pages_rules(text) if "share" in rule and "*" in rule]
+        assert starred == [], f"{where}: {starred}"
+
+
+def test_a_headers_file_with_more_rules_than_pages_reads_fails_the_build() -> None:
+    always = len(pages_rules(call("m.headersFile({ apiOrigin: '' })")))
+    fits = {f"/page-{n}": [{"href": "/photos/a.jpg"}] for n in range(100 - always)}
+    text = call(f"m.headersFile({{ apiOrigin: '', preloads: {json.dumps(fits)} }})")
+    assert len(pages_rules(text)) == 100
+    over = {**fits, "/one-more": [{"href": "/photos/a.jpg"}]}
+    err = fails(f"m.headersFile({{ apiOrigin: '', preloads: {json.dumps(over)} }})")
+    assert "101 rules, over the 100" in err

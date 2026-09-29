@@ -19,5 +19,53 @@
 /proofs/*.ots
   Content-Type: application/octet-stream
 
-/api/share/*
+/api/share/0
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/1
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/2
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/3
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/4
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/5
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/6
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/7
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/8
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/9
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/10
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/11
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/12
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/13
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/14
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/15
+  Content-Type: image/svg+xml; charset=utf-8
+
+/api/share/16
   Content-Type: image/svg+xml; charset=utf-8

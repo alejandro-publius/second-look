@@ -5,6 +5,12 @@ import { firstUrl } from "./photo-sources.mjs";
 
 // Cloudflare Pages reads at most this many characters on one line of _headers.
 export const HEADERS_LINE_LIMIT = 2000;
+// And at most this many rules in the whole file.
+export const HEADERS_RULE_LIMIT = 100;
+// The share cards are /api/share/0 up to this number, one for each score a person can get. It is
+// TOTAL in app/api/share/[score]/route.ts, and scripts/tests/test_web_headers.py holds the two
+// together.
+export const SHARE_CARD_TOTAL = 16;
 
 /**
  * True when the API origin is an address on this machine or on the local network. Only a test
@@ -135,11 +141,15 @@ export function headersFile({ apiOrigin, preloads = {} }) {
     // spreadsheet app. Plain bytes make the browser save the file, which is what /verify asks for.
     "/proofs/*.ots\n  Content-Type: application/octet-stream\n",
     // The share cards are written as extensionless files by the static export, so Pages would
-    // guess application/octet-stream and no chat window would render the preview.
-    "/api/share/*\n  Content-Type: image/svg+xml; charset=utf-8\n",
+    // guess application/octet-stream and no chat window would render the preview. One rule for
+    // each card that exists, and none with a star: Pages adds a rule's headers to its not found
+    // page too, so /api/share/* sent the HTML of that page for /api/share/999 as an SVG image.
+    ...Array.from({ length: SHARE_CARD_TOTAL + 1 }, (_, score) => `/api/share/${score}\n  Content-Type: image/svg+xml; charset=utf-8\n`),
   ].join("\n");
   // Pages drops a longer line without a word, and the Early Hints with it.
   const long = text.split("\n").find((line) => line.length > HEADERS_LINE_LIMIT);
   if (long) throw new Error(`a _headers line is ${long.length} characters, over the ${HEADERS_LINE_LIMIT} Pages reads: ${long.slice(0, 80)}`);
+  const rules = text.split("\n").filter((line) => /^(\/|https:\/\/)/.test(line)).length;
+  if (rules > HEADERS_RULE_LIMIT) throw new Error(`_headers holds ${rules} rules, over the ${HEADERS_RULE_LIMIT} Pages reads`);
   return text;
 }
