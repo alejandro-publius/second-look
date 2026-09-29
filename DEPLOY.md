@@ -82,8 +82,14 @@ the test.
    Pages origin, `/api/share/13` is still an SVG file, and the policy header reads
    `connect-src 'self'`.
 
-The `depth` branch has its own preview, which never touches production: `make deploy-preview`
-deploys to https://depth.second-look-79t.pages.dev.
+The `depth` branch has its own preview: `make deploy-preview` deploys to
+https://depth.second-look-79t.pages.dev. Only the pages are its own. The command never changes
+the production pages, but the preview's `/api` is the live API and the live database:
+`apps/web/wrangler.jsonc` binds the same Worker, `second-look-api`, for a preview as for
+production. So a test or a creek check taken on the preview is written into the real data.
+Nobody takes the test there. Use it to look at pages, and start a sitting there only with the
+QA key, as on production. The preview serves the build it was last deployed from, which can be
+older than production; `/sw.js` on each names its build in `VERSION`.
 
 ### A new Cloudflare account, once
 
