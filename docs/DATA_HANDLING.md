@@ -109,8 +109,8 @@ the fields named above:
 - localStorage `sl_saved_spots`: the ids and names of up to 20 spots the person checked.
 - localStorage `sl_open_session`: the id of the last test sitting and the lesson card it was
   on, so a reload finds it and the second look knows which test it follows. It is removed only
-  when a reload finds that the server no longer knows the sitting; the next sitting writes over
-  it.
+  when a reload cannot get the sitting from the server, because the server no longer knows it
+  or cannot be reached; the next sitting writes over it.
 - localStorage `sl_open_part2`: the ids of the open second look and of the test sitting it
   follows, kept the same way. No code removes it; the next second look writes over it.
 - localStorage `sl.check_lang`: the language chosen for the questions, so the next check or walk
