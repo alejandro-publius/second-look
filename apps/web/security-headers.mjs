@@ -6,6 +6,26 @@ import { firstUrl } from "./photo-sources.mjs";
 // Cloudflare Pages reads at most this many characters on one line of _headers.
 export const HEADERS_LINE_LIMIT = 2000;
 
+/**
+ * True when the API origin is an address on this machine or on the local network. Only a test
+ * or development build has one, and Cloudflare Pages could never reach it.
+ */
+export function isLocalOrigin(origin) {
+  if (!origin) return false;
+  let host;
+  try {
+    host = new URL(origin).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (host === "localhost" || host.endsWith(".localhost")) return true;
+  if (host === "[::1]" || host === "::1" || host === "0.0.0.0") return true;
+  const part = host.split(".").map(Number);
+  if (part.length !== 4 || part.some((n) => !Number.isInteger(n))) return false;
+  const [a, b] = part;
+  return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
+}
+
 export function buildHeaders({ apiOrigin, isDev = false }) {
   // Next's App Router hydrates through inline <script> tags it writes itself, so script-src needs
   // 'unsafe-inline'; a nonce would force every page to render per request and the landing page
@@ -96,6 +116,11 @@ export function linkEntry(entry) {
 
 /** The Cloudflare Pages _headers format: a path, then one indented header line each. */
 export function headersFile({ apiOrigin, preloads = {} }) {
+  // The file is tracked and only Pages reads it. A test build once left its mock API's address
+  // in the committed policy line, so a local address is refused here, whoever asks.
+  if (isLocalOrigin(apiOrigin)) {
+    throw new Error(`public/_headers is the policy Cloudflare Pages sends, and ${apiOrigin} is a local address. A test or development build writes the file for an empty API origin.`);
+  }
   const { everywhere } = buildHeaders({ apiOrigin });
   const block = (path, list) => `${path}\n${list.map((h) => `  ${h.key}: ${h.value}`).join("\n")}\n`;
   const link = (entries) => ({ key: "Link", value: entries.map(linkEntry).join(", ") });
