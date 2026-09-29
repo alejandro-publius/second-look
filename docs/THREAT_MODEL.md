@@ -12,12 +12,12 @@ a stolen laptop. `SECURITY.md` says what we keep and how to report a problem;
 | Asset | Where it lives | Why it matters |
 |---|---|---|
 | The answer key | `content/test_items.yaml`, hashed in `results/key_hash.json`; the Worker holds it to score | Whoever has it can score 16 of 16 and carry a false score into every later observation, and the study measures nothing |
-| The study data | the Worker's D1 database: sittings, answers, times, a hash of a browser token | The pre-registered result is only as good as these rows |
+| The study data | the Worker's D1 database: the sittings and answers of the test and of part 2, times, a hash of a browser token | The pre-registered result is only as good as these rows |
 | The contributor tokens | D1, in plain form, and on the person's phone | A token carries a person's score into their creek checks |
 | The sandbox mirror | our resources in OneAquaHealth's shared FHIR sandbox, and `fhir/sandbox_ledger.jsonl` | It is how our records reach their world; a wrong delete could hit someone else's data |
 | The pass table | `results/model_pass_table.json` | It decides which features each model may flag |
 | The QA key and the export token | Worker secrets, and `.env` files that git ignores | The QA key marks a sitting as a test; the export token opens the anonymous export |
-| Uploaded photos | the Worker's KV store, for 30 days | A phone photo can carry the place it was taken in its metadata |
+| Uploaded photos | the Worker's KV store, for 30 days; each photo's row in D1 (id, token hash, type, size, time) stays | A phone photo can carry the place it was taken in its metadata |
 
 ## Who might attack
 

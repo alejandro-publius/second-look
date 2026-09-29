@@ -14,20 +14,60 @@ Usability test (the two-minute test at `/t`):
   token, a coarse device class (phone, tablet or desktop), a QA flag, the coarse source label
   from the link (poster, chat, friends, creek_group, panel or other), whether the hidden form field was
   filled, whether the session started after data lock, the optional yes or no to "Have you ever
-  assessed a stream before?", and the warm-up choice.
+  assessed a stream before?", the warm-up choice, and how many answers the phone had given that
+  the server did not hold when the test ended (`unsent_count`).
 - `response`: session id, item id, the answer (yes, no or can't tell), the reaction time in
-  milliseconds, the position in the test, and when it arrived.
+  milliseconds, the position in the test, when it arrived, the first choice made on that photo,
+  the time to that first choice in milliseconds, and how many times the choice changed before
+  Next.
 - `observer`: only when the person ticks "Keep my score for creek visits": a random 16 character
   contributor token, the four scores as "k of 4", and the test date. This row is never linked to
   the session id.
+- `arm_slot` and `counter`: the order of the groups, written before launch, and how far along it
+  the test is. Nothing about a person.
+
+Part 2, the assisted second look (`/t2`, offered on the score screen of the test; on the live
+Worker only, the Python API has no part 2):
+
+- `part2_session`: one row for each test sitting that was offered the second look and chose. It
+  holds a random id of its own, the id of the part 1 session it follows, that session's arm, the
+  part 2 arm (assisted or unassisted), the block id, the order of the eight photos, when the
+  offer was answered, whether it was declined, when part 2 started and finished, a second copy
+  of the same hash of the random browser token, a QA flag, and whether it began after data lock.
+  A row for "No thanks" has no arm, no block and no photo order.
+- `part2_response`: for each of the eight photos, the part 2 id, the item id, the position, the
+  first answer, the final answer, whether the checker's question was shown, the choice made
+  after it (keep or change, empty when no question was shown), the time to the first answer and
+  to the final answer in milliseconds, and when the first answer arrived.
+- `part2_slot` and `part2_counter`: the order of the part 2 groups, written before part 2
+  opened, and how far along it each part 1 arm is. Nothing about a person.
+- Nothing else, as `docs/analysis_plan_v2.md` item 11 says. Part 2 joins a person's two sittings
+  by the session id. It stays anonymous: neither row holds a name, an address or free text.
 
 Creek check (rung 2, `/check`):
 
-- `spot`, `visit`, `check_result`: the spot (creek, reach, spot names; coordinates only if the
-  person placed the pin, otherwise a coarse point), the answers to the form items as coded
-  values from pick lists, the first and final rating, which follow-up rules ran and the answer,
-  and the contributor token if the person chose to carry their score.
-- `upload`: the photo bytes after EXIF stripping, a per-upload token, and the upload time.
+- `spot`: a spot id, the creek, reach and spot names with their ids, the coordinates (only if the
+  person placed the pin, otherwise a coarse point), whether the point is coarse, and when the
+  spot was made.
+- `visit`: a visit id, the spot, the kind (a full check or a quick check), the time of the
+  check and the time it was finished, the answers to the form items as coded values from pick
+  lists, the language the questions were shown in (one of the six the check offers, English when
+  none was sent, empty for a quick check), the first and final rating, the ids of the photos
+  sent with it, the follow-up questions the rules chose, what the rainfall lookup said for the
+  spot (dry, wet or unknown, the dry days and the millimetres), the software version, and the
+  contributor token if the person chose to carry their score.
+- `check_result`: for each follow-up question that was asked, the rule, the question as it was
+  worded, the coded answer, and the rule's kind and the values it was asked with.
+- `fhir_bundle`: the FHIR Bundle of each finished visit, built from the rows above. It states
+  the language too, and names the person only by a hash of the contributor token.
+- `upload`: on the live site the photo itself sits in Workers KV, with its EXIF and other
+  metadata cut out. Its row holds a photo id, a hash of the one token that opens the photo, the
+  file type, the size in bytes and the upload time. The token itself is handed to the uploader
+  and is not stored. The Python API keeps the photo as a file on private disk and the same row
+  with the file's name.
+- `skeleton_ping`: empty on the live site, where no route writes it. On the Python API
+  `/api/skeleton/ping` writes a fixed note and the time, to prove the database works. Nothing
+  from a person.
 - `sandbox_cache`: copies of public Observations fetched from the OneAquaHealth sandbox, so the
   two-observer screen still works when the sandbox is down.
 - `inaturalist_cache`: per creek, a short summary of public iNaturalist observations near its
@@ -43,10 +83,12 @@ Video walks (`/walk`, a creek from your desk; UPDATE_30 section 1 items 2 and 3)
   its link opens on any device. A row holds the walk's id, the answers as coded values from the
   form's lists, the time the walk was finished, the time it was stored, its delete date and its
   FHIR Bundle, tagged as a demo on every resource. No contributor token, no position, no photo,
-  no free text and nothing about the browser. The route refuses a body over 4096 bytes, any
-  field but those three and the two below, an answer the form does not allow, and a time more
-  than 5 minutes ahead or 7 days old, and it takes at most 200 walk records a day on the whole
-  server.
+  no free text and nothing about the browser. The phone also sends the language the questions
+  were shown in (`language`, one of the six the check offers, English when none was sent). The
+  Bundle states it; the row has no column of its own for it. The route refuses a body over 4096
+  bytes, any field but those three, the two below and `language`, an answer the form does not
+  allow, and a time more than 5 minutes ahead or 7 days old, and it takes at most 200 walk
+  records a day on the whole server.
 - `walk_checks`: the follow-up questions the creek check's rules asked on the walk's answers and
   what the person answered, as a creek check keeps its own in `check_result`, and the final
   rating. The phone sends the answers (`followup_answers`) and the rating (`final_rating`); the
@@ -59,14 +101,40 @@ Video walks (`/walk`, a creek from your desk; UPDATE_30 section 1 items 2 and 3)
   demo tag. It shows only on `/spot?id=<its id>` and on `/city?walk=<walk>&record=<its id>`, the
   links the walk page gives.
 
+On the phone, in the browser's own storage for this site. None of it is sent anywhere but as
+the fields named above:
+
+- localStorage `sl_client_token`: the random browser token. Only its hash ever leaves the phone.
+- localStorage `sl_contributor_token`: the contributor token, after "Keep my score".
+- localStorage `sl_saved_spots`: the ids and names of up to 20 spots the person checked.
+- localStorage `sl_open_session`: the id of the last test sitting and the lesson card it was
+  on, so a reload finds it and the second look knows which test it follows. It is removed only
+  when a reload finds that the server no longer knows the sitting; the next sitting writes over
+  it.
+- localStorage `sl_open_part2`: the ids of the open second look and of the test sitting it
+  follows, kept the same way. No code removes it; the next second look writes over it.
+- localStorage `sl.check_lang`: the language chosen for the questions, so the next check or walk
+  opens in it. It leaves the phone only as the `language` of a check or a walk that is sent.
+  Where the browser refuses storage, the choice lasts until the page is closed.
+- sessionStorage `sl_src` and `sl_landing_guess`: the coarse source label from the link and the
+  pick on the first page, until the tab is closed. The pick is sent as the warm-up choice only
+  after consent.
+- IndexedDB `second-look`: creek checks and finished walks that wait to be sent, with their
+  downsized photos, and each walk's answers and language while it is being made.
+- The service worker's cache: copies of this site's own pages, scripts and photos, so the site
+  opens offline. It holds no answer and nothing from `/api`.
+
 Who else gets a spot's position: Open-Meteo, for the rainfall lookup behind the dry pipe
 question, at 4 decimals; and iNaturalist, from the daily job on the Mac, which asks for sightings
 near each spot of a creek whose region has an approved plant list, at the precision the spot is
 stored (5 decimals for a placed pin, 2 otherwise). Neither gets a name, a token or an answer.
 
 Export: `GET /api/test/export?token=...` gives `sessions.csv` and `responses.csv` with the
-columns listed in docs/CONTRACTS.md. Neither file has a name, an address, a token or a time
-more precise than the second.
+columns listed in docs/CONTRACTS.md. On the live site it gives two more, `part2_sessions.csv`
+and `part2_responses.csv`, with the columns in `worker/src/part2.ts`. No file has a name, an
+address or a token. Each sessions file has the hash of the random browser token, and
+`part2_sessions.csv` has the id of the part 1 session it follows. Clock times are to the second;
+reaction times are in milliseconds.
 
 ## What our code never stores
 
@@ -116,8 +184,16 @@ if we change hosts, change both this file and the consent text.
 
 ## Retention
 
-- Uploads: deleted after 30 days by `scripts/cleanup_uploads.py`. A visitor never sees another
-  visitor's upload; each is served only with the token returned to the uploader.
+- Uploads: on the live site the photo is deleted 30 days after it was stored, by the store's
+  own expiry (Workers KV, `worker/src/uploads.ts`). Its `upload` row is not deleted by any code
+  today, so the id, the token hash, the file type, the size and the time stay after the photo
+  is gone, and so does the photo's id in its visit. They open nothing then. On the Python API
+  `scripts/cleanup_uploads.py` deletes the files and their rows after 30 days, each time it is
+  run. A visitor never sees another visitor's upload; each is served only with the token
+  returned to the uploader.
+- Part 2 tables (`part2_session`, `part2_response`): no code deletes them. They are kept as
+  `session` and `response` are. `docs/analysis_plan_v2.md` item 10 says the anonymous part 2
+  response table is published; when the raw part 2 tables are dropped is not written down yet.
 - Study tables (`session`, `response`): kept until the analysis is published, then the
   anonymous response table (the export CSVs) is published with the results and the raw tables
   are dropped. Dry-run rows are wiped at launch by `scripts/wipe_for_launch.py`, which writes
@@ -136,6 +212,8 @@ if we change hosts, change both this file and the consent text.
 - `walk_checks`: deleted with its walk record, in the same step, by both servers.
 - A walk's answers on the phone: in the browser until Start again, or until the person clears
   the site's data. They are never sent anywhere before the walk is finished.
+- Everything else on the phone: until the person clears the site's data, but for the two
+  sessionStorage keys, which go when the tab is closed.
 
 ## The rate limit, and why the deployed API has none
 
