@@ -275,6 +275,40 @@ def mock_api(answer: Any) -> tuple[ApiSource, list[str]]:
     return ApiSource("http://testserver", client=client), seen
 
 
+def test_a_404_keeps_the_apis_own_sentence_plain_or_as_fhir() -> None:
+    """The routes that answer with a FHIR resource say a 404 as an OperationOutcome (audit finding
+    api-fhir-5); the others say it in detail. Either way the reader gets the API's sentence."""
+    outcome = {
+        "resourceType": "OperationOutcome",
+        "issue": [
+            {
+                "severity": "error",
+                "code": "not-found",
+                "details": {"text": "no FHIR record for this visit"},
+            }
+        ],
+    }
+    answers: list[tuple[Any, str]] = [
+        (outcome, "no FHIR record for this visit"),
+        ({"detail": "We do not know that spot."}, "We do not know that spot."),
+        ({"resourceType": "OperationOutcome", "issue": []}, "no record for visit 'visit-1'"),
+        ({"resourceType": "OperationOutcome"}, "no record for visit 'visit-1'"),
+        ({"detail": {"not": "a sentence"}}, "no record for visit 'visit-1'"),
+        (["not", "an", "object"], "no record for visit 'visit-1'"),
+        ({}, "no record for visit 'visit-1'"),
+    ]
+    for body, sentence in answers:
+        api, _ = mock_api(lambda _request, body=body: httpx.Response(404, json=body))
+        with pytest.raises(SourceError) as caught:
+            api.bundle("visit-1")
+        assert str(caught.value) == sentence, body
+    fhir_type = {"content-type": "application/fhir+json; charset=utf-8"}
+    api, _ = mock_api(
+        lambda _request: httpx.Response(200, json={"resourceType": "Bundle"}, headers=fhir_type)
+    )
+    assert api.bundle("visit-1") == {"resourceType": "Bundle"}, "FHIR's media type reads as JSON"
+
+
 async def test_an_api_id_never_leaves_its_route() -> None:
     """REVIEW_02 F100: an id is one plain path segment. Before, "../skeleton" reached the Worker's
     D1 write at /api/skeleton, "..%2Ftwo" its sandbox fetch at /api/two, and "x%3Fy" a query."""
