@@ -6,7 +6,7 @@
 // What it proves: part 2 cannot start before part 1's score screen; the offer randomizes once per
 // part 1 session, in blocks of 4 per part 1 arm; the question appears exactly when the committed
 // flag disagrees, and only in the assisted arm; Keep and Change store the person's pick; resend,
-// resume and the export work; judge mode is shut before the lock and stores nothing after it.
+// resume and the export work; judge mode is shut before the second lock and stores nothing after it.
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -22,6 +22,12 @@ const EXPORT_TOKEN = "e2e-export-token-0123456789abcdef";
 const BASE = `http://127.0.0.1:${PORT}`;
 const PERSIST = join(worker, ".wrangler", "e2e-part2");
 const PERSIST_AFTER = join(worker, ".wrangler", "e2e-part2-after");
+// Judge mode opens at the second lock (JUDGE_MODE_OPENS_UTC in core/lock.py, UPDATE_33); the
+// first lock is where createSession's post_lock mark begins. scripts/tests/test_lock_mirror.py
+// holds these to core/lock.py.
+const FIRST_LOCK = "2026-09-28T01:00:00Z";
+const LOCK = "2026-10-03T04:00:00Z";
+const JUST_BEFORE_LOCK = "2026-10-03T03:59:59Z";
 const CONTENT = JSON.parse(readFileSync(join(worker, "src", "content.json"), "utf8"));
 const FLAGS = CONTENT.part2_flags;
 const GOLD = Object.fromEntries(CONTENT.part2_items.map((i) => [i.id, i.gold]));
@@ -112,7 +118,7 @@ try {
   spawnSync("rm", ["-rf", PERSIST, PERSIST_AFTER]);
   for (const f of ["schema.sql", "arms.sql", "part2_arms.sql"]) wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--file", f]);
   wrangler(["d1", "execute", "second-look", "--local", "--persist-to", PERSIST, "--command", "INSERT OR IGNORE INTO counter (id, next_position) VALUES (1, 0)"]);
-  await startDev(PORT, PERSIST, { QA_KEY, EXPORT_TOKEN, E2E_NOW: "2026-09-28T00:59:59Z" });
+  await startDev(PORT, PERSIST, { QA_KEY, EXPORT_TOKEN, E2E_NOW: JUST_BEFORE_LOCK });
 
   at("part 2 cannot start before part 1's score screen");
   const open = await part1({ finish: false });
@@ -233,13 +239,25 @@ try {
     assert.equal(head, cols.join(","), `${file} header`);
   }
 
-  at("judge mode: shut before the lock, feedback and nothing stored after it");
-  assert.equal((await api("POST", "/api/t2/demo", { item_id: "a01", answer: "yes" })).status, 403);
-  await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: "2026-09-28T01:00:00Z" });
+  at("judge mode: shut before the second lock, feedback and nothing stored after it");
+  const shut = await api("POST", "/api/t2/demo", { item_id: "a01", answer: "yes" });
+  assert.equal(shut.status, 403);
+  assert.deepEqual(shut.data, { detail: "Judge mode opens on Oct 3." });
+  const stored = () => d1("SELECT (SELECT COUNT(*) FROM part2_session) AS sessions, (SELECT COUNT(*) FROM part2_response) AS responses")[0];
+  const storedBefore = stored();
+  await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: LOCK });
   const judge = await api("POST", "/api/t2/demo", { item_id: "a01", answer: right("a01") }, {}, `http://127.0.0.1:${AFTER_PORT}`);
   assert.equal(judge.status, 200);
   assert.equal(judge.data.correct, true);
   assert.equal(judge.data.ask, FLAGS.a01 !== null && FLAGS.a01 !== GOLD.a01);
+  assert.deepEqual(stored(), storedBefore, "judge mode stored nothing");
+
+  // The stored post_lock mark is the first lock's (UPDATE_33 did not change it): a part 1
+  // sitting made after the first lock carries it, between the two locks too.
+  at("a sitting made after the first lock is stored with post_lock 1");
+  const sittings = d1("SELECT id, started_at, post_lock FROM session");
+  assert.ok(sittings.length > 0);
+  for (const s of sittings) assert.equal(s.post_lock, Date.parse(s.started_at) >= Date.parse(FIRST_LOCK) ? 1 : 0, `${s.id} started at ${s.started_at}`);
   console.log(`part2 e2e: passed, ${flagged.length} flagged item(s) in the committed flags`);
 } finally {
   for (const p of running) p.kill("SIGTERM");
