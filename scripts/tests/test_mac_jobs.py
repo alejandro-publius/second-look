@@ -12,12 +12,13 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pytest
 
+from evals import wave2_analysis
 from scripts import lock_analysis, mac_jobs
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -50,7 +51,7 @@ def install(
 
 def test_every_job_runs_a_script_that_exists_and_has_a_distinct_label() -> None:
     labels = [j.label for j in mac_jobs.JOBS]
-    assert len(labels) == len(set(labels)) == 8
+    assert len(labels) == len(set(labels)) == 9
     for job in mac_jobs.JOBS:
         assert (ROOT / job.script()).is_file(), job.script()
         assert (job.calendar is None) != (job.interval is None)
@@ -69,6 +70,27 @@ def test_the_lock_job_fires_at_18_10_on_sep_27_in_california() -> None:
     assert mac_jobs.LOCK_JOB_UTC > lock_analysis.DATA_LOCK_UTC
 
 
+def test_the_second_run_fires_at_21_10_on_oct_2_in_california() -> None:
+    when = mac_jobs.LOCK2_JOB_UTC
+    assert when == datetime(2026, 10, 3, 4, 10, tzinfo=UTC) == wave2_analysis.LOCK_JOB_UTC
+    assert when - wave2_analysis.SECOND_LOCK_UTC == timedelta(minutes=10)
+    assert lock_analysis.SECOND.lock_utc == wave2_analysis.SECOND_LOCK_UTC
+    job = {j.name: j for j in mac_jobs.jobs(ZoneInfo("America/Los_Angeles"))}["lock2"]
+    assert job.calendar == {"Month": 10, "Day": 2, "Hour": 21, "Minute": 10}
+    assert mac_jobs.lock_calendar(ZoneInfo("UTC"), when) == {
+        "Month": 10,
+        "Day": 3,
+        "Hour": 4,
+        "Minute": 10,
+    }
+    assert job.command == ("uv", "run", "python", "scripts/lock_analysis.py", "--wave", "2")
+    assert "2026-10-03T04:10:00Z" in job.when and "Oct 2, 21:10 PDT" in job.when
+    # The first run is as it was: the same script, no option, its own time.
+    first = mac_jobs.by_name("lock")
+    assert first.command == ("uv", "run", "python", "scripts/lock_analysis.py")
+    assert first.options() == () and job.options() == ("--wave", "2")
+
+
 def test_install_writes_and_loads_every_job_from_the_checkout(tmp_path: Path) -> None:
     proc = install(tmp_path, "--root", str(ROOT))
     assert proc.returncode == 0, proc.stdout + proc.stderr
@@ -85,12 +107,17 @@ def test_install_writes_and_loads_every_job_from_the_checkout(tmp_path: Path) ->
     lock = plists["com.secondlook.lock"]
     assert lock["StartCalendarInterval"] == {"Month": 9, "Day": 27, "Hour": 18, "Minute": 10}
     assert lock["ProgramArguments"][-1] == f"{ROOT}/scripts/lock_analysis.py"
+    second = plists["com.secondlook.lock2"]
+    assert second["StartCalendarInterval"] == {"Month": 10, "Day": 2, "Hour": 21, "Minute": 10}
+    assert second["ProgramArguments"][-3:] == [f"{ROOT}/scripts/lock_analysis.py", "--wave", "2"]
+    assert second["ProgramArguments"][1:3] == ["run", "python"]
+    assert second["StandardOutPath"].endswith("/second-look-backups/logs/lock2.out")
     assert plists["com.secondlook.uptime"]["StartInterval"] == 600
     assert plists["com.secondlook.repush"]["ProgramArguments"][-1].endswith(
         "scripts/sandbox_retry.py"
     )
     calls = (tmp_path / "calls.log").read_text()
-    assert calls.count("launchctl bootstrap") == 8 and calls.count("plutil -lint") == 8
+    assert calls.count("launchctl bootstrap") == 9 and calls.count("plutil -lint") == 9
 
 
 def test_install_only_the_lock(tmp_path: Path) -> None:
@@ -100,6 +127,17 @@ def test_install_only_the_lock(tmp_path: Path) -> None:
     assert [p.name for p in plists] == ["com.secondlook.lock.plist"]
     doc = plistlib.loads(plists[0].read_bytes())
     assert doc["StartCalendarInterval"] == {"Month": 9, "Day": 28, "Hour": 1, "Minute": 10}
+
+
+def test_install_only_the_second_run(tmp_path: Path) -> None:
+    proc = install(tmp_path, "--root", str(ROOT), "--only", "lock2", tz="UTC")
+    assert proc.returncode == 0, proc.stderr
+    plists = list((tmp_path / "Library" / "LaunchAgents").glob("*.plist"))
+    assert [p.name for p in plists] == ["com.secondlook.lock2.plist"]
+    doc = plistlib.loads(plists[0].read_bytes())
+    assert doc["StartCalendarInterval"] == {"Month": 10, "Day": 3, "Hour": 4, "Minute": 10}
+    assert doc["ProgramArguments"][-2:] == ["--wave", "2"]
+    assert (tmp_path / "calls.log").read_text().count("launchctl bootstrap") == 1
 
 
 def test_install_refuses_a_checkout_that_lacks_the_new_scripts(tmp_path: Path) -> None:
@@ -174,6 +212,16 @@ def test_the_lock_job_leaves_exactly_the_files_the_other_jobs_write() -> None:
     assert lock_analysis.allowed("proofs/audit-head-2026-09-28.ots", mac_jobs.mac_job_files())
     assert not lock_analysis.allowed("README.md", mac_jobs.mac_job_files())
     assert not lock_analysis.allowed("results/ots.json.bak", mac_jobs.mac_job_files())
+    # The audit log is not set aside like those. Lines the re-push job added to it are carried.
+    assert not lock_analysis.allowed("audit/log.jsonl", mac_jobs.mac_job_files())
+
+
+def test_the_lines_the_second_run_carries_are_of_the_kind_the_re_push_job_writes() -> None:
+    assert mac_jobs.mac_job_audit_kinds() == ("sandbox_push",)
+    assert mac_jobs.by_name("repush").audit_kinds == ("sandbox_push",)
+    writer = (ROOT / "scripts" / "repush_sandbox.py").read_text(encoding="utf-8")
+    assert '"sandbox_push", payload' in writer
+    assert lock_analysis.SECOND.carries_audit_lines and not lock_analysis.FIRST.carries_audit_lines
 
 
 @pytest.mark.skipif(
@@ -193,6 +241,11 @@ def test_mac_jobs_md_lists_every_job_with_its_time_log_and_ran_today_command() -
         assert f"~/second-look-backups/{job.ran_file()}" in row
         assert f"`uv run python scripts/mac_jobs.py ran-today {job.name}`" in row
     assert "make mac-jobs-install" in text and "~/second-look-depth" in text
+    # The table is the one the script writes, row for row and word for word.
+    assert mac_jobs.doc_with_table(text) == text
+    assert mac_jobs.doc_table().count("\n") == len(mac_jobs.JOBS) + 2
+    assert "`scripts/lock_analysis.py --wave 2`" in rows["com.secondlook.lock2"]
+    assert "make lock-analysis-2-install" in text and "make lock-analysis-2-ready" in text
 
 
 @pytest.mark.skipif(shutil.which("plutil") is None, reason="plutil is macOS only")
