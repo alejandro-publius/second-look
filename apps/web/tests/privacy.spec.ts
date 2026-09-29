@@ -28,7 +28,8 @@ test("/privacy says what the second look stores, and what a No thanks leaves", a
     "whether you chose Keep or Change",
     "How long each answer took",
     "The same hash of your browser token",
-    "If you say No thanks, we keep that you said no",
+    // A row for No thanks holds more than the no (worker/src/part2.ts, offer).
+    "If you say No thanks, we keep only this: that you said no, when you said it, which test it follows, your group in that test and the same hash.",
   ]) {
     await expect(item).toContainText(words);
   }
