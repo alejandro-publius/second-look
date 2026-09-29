@@ -10,8 +10,9 @@ import { logStampDay } from "@/lib/verify-text";
 
 export const metadata: Metadata = { title: `${t("judges.title")}: ${t("app.name")}` };
 
-// The repository is private until Sep 30 (hard rule 15). These links open on that day, and each
-// door's line says so.
+// The repository is private until Sep 30 (hard rule 15) and public from that day. Each door's line
+// says "public from Sep 30", which is true before that day and after it, so the words need no
+// clock and no second deploy. Judge mode's doors say "open since Sep 28" the same way.
 const REPO = "https://github.com/alejandro-publius/second-look";
 
 // No stored record answers to a sample id on the live site, so the sample record is the one a

@@ -8,7 +8,10 @@ import { mockApi } from "./mock-api.mjs";
 // says the test takes about four.
 const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
 const REPO = "https://github.com/alejandro-publius/second-look";
-const SEP_30 = "Opens on Sep 30, when the repository goes public.";
+// Audit findings time-bombs-1 and first-two-minutes-4: the doors said "Opens on Sep 30" and "It
+// opens on Sep 28", fixed strings that turn false on those days. These words are true on any day.
+const SEP_30 = "The repository is public from Sep 30.";
+const SEP_28 = "Open since Sep 28";
 
 test("every door on /judges has one line under it with about how long it takes", async ({ page }) => {
   await mockApi(page);
@@ -28,7 +31,7 @@ test("every door on /judges has one line under it with about how long it takes",
   expect(untimed, "doors that do not say how long they take").toEqual([]);
 });
 
-test("the repository doors link the README, the report, the model card, the footage example and the code, and say they open on Sep 30", async ({ page }) => {
+test("the repository doors link the README, the report, the model card, the footage example and the code, and say the repository is public from Sep 30", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");
   for (const [name, href] of [
@@ -45,6 +48,27 @@ test("the repository doors link the README, the report, the model card, the foot
     await expect(link).toHaveAttribute("href", href);
     await expect(page.locator(".row").filter({ has: link })).toContainText(SEP_30);
   }
+});
+
+// The page is read from Sep 29 to Oct 15 and is deployed once. So no door may speak of a day to
+// come, and the page must read the same whatever the clock says.
+test("no door on /judges says that something opens or will open, on any day from now to the end of judging", async ({ page }) => {
+  await mockApi(page);
+  const seen: string[] = [];
+  for (const day of ["2026-09-29T19:00:00Z", "2026-09-30T23:00:00Z", "2026-10-15T23:00:00Z"]) {
+    await page.clock.install({ time: new Date(day) });
+    await page.goto("/judges");
+    const main = page.getByRole("main");
+    await expect(page.getByRole("heading", { name: "For judges", level: 1 })).toBeVisible();
+    await expect(main).not.toContainText(/\bopens on\b|\bwill open\b|\bgoes public\b|\bnot yet open\b/i);
+    const nav = page.getByRole("navigation", { name: "For judges" });
+    const row = (href: string) => nav.locator(".row").filter({ has: page.locator(`a[href="${href}"]`) });
+    await expect(row("/demo")).toContainText(SEP_28);
+    await expect(row("/t2/demo")).toContainText(SEP_28);
+    seen.push(await main.innerText());
+  }
+  expect(seen[1]).toBe(seen[0]);
+  expect(seen[2]).toBe(seen[0]);
 });
 
 test("the judges' doors give the test about four minutes and the walk its clip, never two minutes", async ({ page }) => {
@@ -67,22 +91,59 @@ test("the judges' doors give the test about four minutes and the walk its clip, 
   expect(withClip).toBe(1);
 });
 
-// CRITIC_03 E05 and E06: the /two door says what the page shows while the OneAquaHealth sandbox
-// is down, and the footage door starts from the committed answer, which is the answer after
-// force_answer, not the reply as the model sent it.
-test("the /two door says our record shows alone while their sandbox is down, and the footage door starts from the committed answer", async ({
+// CRITIC_03 E05 and E06: the /two door says what the page shows, and the footage door starts from
+// the committed answer, which is the answer after force_answer, not the reply as the model sent it.
+// Audit findings api-fhir-1 and docs-consistency-2: the door said "While the OneAquaHealth sandbox
+// is down", and their sandbox answers again, at times. The Worker shows a stored copy of their
+// record with the time it was fetched, or ours alone when no copy is stored (worker/src/two.ts),
+// so the door says that, and it is true whether their sandbox answers or not.
+test("the /two door is true whether their sandbox answers or not, and the footage door starts from the committed answer", async ({
   page,
 }) => {
   await mockApi(page);
   await page.goto("/judges");
   const nav = page.getByRole("navigation", { name: "For judges" });
   const door = (name: string) => nav.locator(".row").filter({ has: page.getByRole("link", { name, exact: true }) });
-  await expect(door("A volunteer record in the viewer built for laboratory results")).toContainText(
-    "While the OneAquaHealth sandbox is down, our record shows alone.",
+  const two = door("A volunteer record in the viewer built for laboratory results");
+  await expect(two).toContainText(
+    "The lab result is a copy from the OneAquaHealth sandbox, shown with the time it was fetched. If no copy is stored, our record shows alone and the page says so.",
   );
+  await expect(two).not.toContainText(/is down|is up|answers again/i);
+  // The door's two cases are the page's two cases.
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+  await mockApi(page, { theirsStatus: "cached" });
+  await page.goto("/two");
+  await expect(page.getByText("Fetched from their sandbox at", { exact: false })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Lab (OneAquaHealth sandbox)" })).toBeVisible();
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+  await mockApi(page, { theirsStatus: "down" });
+  await page.goto("/two");
+  await expect(page.getByText("Their sandbox did not answer, so only our record is shown.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Volunteer (Second Look)" })).toBeVisible();
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+  await mockApi(page);
+  await page.goto("/judges");
   const footage = door("The checker at work on real creek footage");
   await expect(footage).toContainText("from the model's committed answer to the question a person would be asked");
   await expect(nav).not.toContainText("raw reply");
+});
+
+// Audit finding first-two-minutes-4: /judges opened with "Every part of Second Look, in the order
+// that makes the point", which never said what Second Look is. Its first lines now say it.
+test("/judges says in its first lines what Second Look is, and what the AI may do", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  const intro = page.getByRole("main").locator("p").first();
+  await expect(intro).toContainText(/^Second Look tests how well each volunteer sees four kinds of creek damage, and keeps that score with every observation they make\./);
+  await expect(intro).toContainText("AI vision models take the same test. On a feature a model passed, it may ask a person to look again, and the person decides.");
+  await expect(intro).toContainText("No volunteer has used it yet.");
+  // The first paragraph comes before the first door.
+  const order = await page.getByRole("main").evaluate((main) => {
+    const p = main.querySelector("p");
+    const nav = main.querySelector("nav");
+    return p && nav ? Boolean(p.compareDocumentPosition(nav) & Node.DOCUMENT_POSITION_FOLLOWING) : false;
+  });
+  expect(order).toBe(true);
 });
 
 // CRITIC_04 F04: /judges and /about opened with the landing page's frozen line, "Two minutes
