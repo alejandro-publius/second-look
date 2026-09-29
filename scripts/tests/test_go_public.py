@@ -163,7 +163,7 @@ def test_the_summary_line_submit_check_really_prints_is_read(
         return capsys.readouterr().out
 
     readme = Check("readme")
-    public = Check("repo_public", reasons=["GitHub repo is PRIVATE; it goes public on Sep 30"])
+    public = Check("repo_public", reasons=["GitHub repo is PRIVATE; it goes public on Oct 3"])
     video = Check("video_link", reasons=["no video link yet"])
     assert gp.submit_failures(printed(readme, public)) == {"repo_public"}
     assert gp.submit_failures(printed(readme, video, public)) == {"video_link", "repo_public"}

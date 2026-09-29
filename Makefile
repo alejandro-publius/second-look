@@ -286,7 +286,7 @@ video-frames:
 	$(PY) scripts/video_final.py --frames-into $(or $(FRAMES),$(HOME)/second-look-media/final/frames)
 
 # UPDATE_30 section 8. Says what it would do. GO=dry runs every step before the flip in a
-# throwaway worktree and stops (main is never touched); GO=yes, on main on Sep 30, runs them all:
+# throwaway worktree and stops (main is never touched); GO=yes, on main on Oct 3, runs them all:
 # the secrets scan, the working notes out in one commit, the tests, submit-check, the README's
 # images and links, the changelog, then the push, the flip, a logged out pass, and the v1.0 tag
 # and release. docs/SUBMISSION_DAY.md has the order of the day.

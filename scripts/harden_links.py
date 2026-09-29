@@ -208,17 +208,17 @@ def check_relative(ref: Ref, known: set[str], anchor_cache: dict[str, set[str]])
 
 
 def repo_link(url: str) -> Result:
-    """Our repo is private until Sep 30, so GitHub answers 404 to a script: check it in git."""
+    """Our repo is private until Oct 3, so GitHub answers 404 to a script: check it in git."""
     rest = url[len(REPO) :].strip("/")
     if not rest:
-        return Result(url, "url", "private", "our repo, private until Sep 30, so 404 to the public")
+        return Result(url, "url", "private", "our repo, private until Oct 3, so 404 to the public")
     m = re.match(r"(?:blob|tree)/([^/]+)/(.+)", rest)
     if not m:
         return Result(url, "url", "skipped", "a name under our repo address, not a page")
     ref, path = m.group(1), unquote(m.group(2).split("#")[0])
     for rev in (f"origin/{ref}", ref):
         if subprocess.run(["git", "cat-file", "-e", f"{rev}:{path}"], cwd=ROOT).returncode == 0:
-            return Result(url, "url", "private", f"exists on {rev}; public from Sep 30")
+            return Result(url, "url", "private", f"exists on {rev}; public from Oct 3")
     return Result(url, "url", "dead", f"{path} is not on {ref}")
 
 
