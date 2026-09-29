@@ -11,6 +11,7 @@ export default function PrivacyPage() {
       <h2>{t("privacy.stored_title")}</h2>
       <ul>
         <li>{t("privacy.stored_test")}</li>
+        <li>{t("privacy.stored_part2")}</li>
         <li>{t("privacy.stored_check")}</li>
         <li>{t("privacy.stored_photos")}</li>
         <li>{t("privacy.stored_walk")}</li>
