@@ -31,8 +31,11 @@ const stampDay = logStampDay(auditEntries(), otsStatus().proofs);
 
 // The judges' front door. The participant's front door, /, carries the wordmark and About and
 // nothing else, so a person taking the test is never one tap from the answer key or the code.
-// Judge mode leads because it stores nothing. The real test is the study, so it comes second and
-// says so, and a judge's first tap never adds a session to the data. Every door has one line under
+// Judge mode leads because it stores nothing. The door to the AI's one question comes second: it
+// is the one place on the site where a judge meets the checker's question, it stores nothing
+// either, and it stood last of eighteen doors, five screens down (audit finding
+// first-two-minutes-1). The real test is the study, so it comes after both and says so, and a
+// judge's first taps never add a session to the data. Every door has one line under
 // it: what it shows and about how long it takes (CRITIC_02 D03 and D11). The clip's length is on
 // one door only, and the door to the city view says it is the end of a walk (CRITIC_09 Q04).
 // The clips show natural creeks, so an honest walk finds little for a city to do. The city door
@@ -58,6 +61,28 @@ const DOORS: { href: string; label: string; note: string; params?: Record<string
   { href: "/credits", label: "nav.credits", note: "judges.credits_note" },
 ];
 
+type Door = (typeof DOORS)[number];
+
+function door(d: Door) {
+  return (
+    <Row
+      key={d.label}
+      label={
+        d.href.startsWith("https://") ? (
+          <a className="row-link" href={d.href} rel="noreferrer">
+            {t(d.label, d.params)}
+          </a>
+        ) : (
+          <Link className="row-link" href={d.href}>
+            {t(d.label, d.params)}
+          </Link>
+        )
+      }
+      value={t(d.note, d.params)}
+    />
+  );
+}
+
 export default function JudgesPage() {
   return (
     <div className="stack">
@@ -67,25 +92,10 @@ export default function JudgesPage() {
           this page opens with its own line instead (CRITIC_04 F04). */}
       <p>{t("judges.intro")}</p>
       <nav className="card" aria-label={t("judges.title")}>
-        {DOORS.map((d) => (
-          <Row
-            key={d.label}
-            label={
-              d.href.startsWith("https://") ? (
-                <a className="row-link" href={d.href} rel="noreferrer">
-                  {t(d.label, d.params)}
-                </a>
-              ) : (
-                <Link className="row-link" href={d.href}>
-                  {t(d.label, d.params)}
-                </Link>
-              )
-            }
-            value={t(d.note, d.params)}
-          />
-        ))}
+        {DOORS.slice(0, 1).map(door)}
         {/* Part 2's judge mode (UPDATE_31 section 2 item 9): feel the checker's question. */}
         <JudgesAssistDoor />
+        {DOORS.slice(1).map(door)}
       </nav>
     </div>
   );

@@ -678,8 +678,8 @@
   "part2.demo_title": "Assisted second look, judge mode",
   "part2.demo_intro": "The eight photos of the second look, as the assisted group sees them, with feedback after every answer. Nothing here is stored.",
   "part2.demo_shut_body": "This judge mode tells you if each answer is right, on the same photos the study uses. So it opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.",
-  "judges.assist": "Assisted second look, try it",
-  "judges.assist_note": "Eight photos as the assisted group sees them. When the checker disagrees with you it asks you to look again, and you decide. Feedback after every answer, nothing stored. Open since Sep 28.",
+  "judges.assist": "The AI's one question, try it",
+  "judges.assist_note": "Eight photos as the assisted group of the study sees them. The checker is a vision model that answered these photos before you. It asks you to look again only when its answer differs from yours, and you decide. To see its question, answer Can't tell when asked about banks, a channel or a pipe. It never asks about plants, because the model did not pass that feature. It says whether you were right after every answer and stores nothing. No model is called while you answer. Open since Sep 28. A couple of minutes.",
   "verify.proof.prereg_tag_v2": "The tag prereg-v2, which fixes part 2's analysis plan in git",
   "verify.proof.analysis_plan_v2": "Part 2's analysis plan"
 }

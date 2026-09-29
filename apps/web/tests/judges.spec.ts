@@ -71,6 +71,37 @@ test("no door on /judges says that something opens or will open, on any day from
   expect(seen[2]).toBe(seen[0]);
 });
 
+// Every door that was on the page before the AI's door moved up is still there, once each.
+test("/judges keeps every door: eighteen, each to its own place", async ({ page }) => {
+  await mockApi(page);
+  await page.goto("/judges");
+  const walk = content.walks[0];
+  const hrefs = await page
+    .getByRole("navigation", { name: "For judges" })
+    .locator(".row a")
+    .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
+  expect(hrefs).toEqual([
+    "/demo",
+    "/t2/demo",
+    "/t?src=other",
+    "/check",
+    "/walk",
+    `/walk/${walk.id}`,
+    `/walk/${walk.id}`,
+    "/two",
+    "/how-we-know",
+    `${REPO}#for-judges`,
+    `${REPO}/blob/main/docs/JUDGE_DAY.md`,
+    `${REPO}/blob/main/docs/submission/JUDGE_QA.md`,
+    `${REPO}/blob/main/docs/REPORT.pdf`,
+    `${REPO}/blob/main/docs/MODEL_CARD.md`,
+    `${REPO}/blob/main/examples/footage-flag/README.md`,
+    REPO,
+    "/verify",
+    "/credits",
+  ]);
+});
+
 test("the judges' doors give the test about four minutes and the walk its clip, never two minutes", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");
@@ -225,10 +256,22 @@ test("the judges' test door says the server puts you in one of two groups at ran
   await expect(door).toContainText("The server puts you at random in one of two groups: one sees the lesson first, the other sees the sixteen photos first and is offered the lesson after its score.");
 });
 
-test("the assisted second look door opens part 2's judge mode", async ({ page }) => {
+// Audit finding first-two-minutes-1: this door was the last of eighteen, five screens down on a
+// phone. It is the one place a judge meets the AI's question, so it is the second door.
+test("the door to the AI's one question is the second door and opens part 2's judge mode", async ({ page }) => {
   await page.goto("/judges");
-  const door = page.getByRole("link", { name: "Assisted second look, try it" });
-  await expect(door).toHaveAttribute("href", "/t2/demo");
+  const rows = page.getByRole("navigation", { name: "For judges" }).locator(".row");
+  await expect(rows.nth(0).getByRole("link")).toHaveAttribute("href", "/demo");
+  await expect(rows.nth(1).getByRole("link")).toHaveAttribute("href", "/t2/demo");
+  await expect(rows.nth(1).getByRole("link")).toHaveText("The AI's one question, try it");
+  await expect(rows.nth(2).getByRole("link")).toHaveAttribute("href", "/t?src=other");
+  // On a phone the door was five and a half screens down. Now it starts the second screen, under
+  // the first paragraph and the first door.
+  const box = await rows.nth(1).getByRole("link").boundingBox();
+  const screen = page.viewportSize();
+  expect(box!.y + box!.height).toBeLessThan(2 * screen!.height);
+  const door = page.getByRole("link", { name: "The AI's one question, try it" });
+  await expect(door).toHaveCount(1);
   await door.click();
   // Before the lock the page is shut and says why; after it, judge mode starts.
   await expect(page.getByRole("heading", { name: /Judge mode opens on Sep 28|Assisted second look, judge mode/ })).toBeVisible();
