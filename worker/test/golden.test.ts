@@ -24,7 +24,7 @@ import { sha256Hex } from "../src/core/sha256";
 import { WalkRecordError, isDemo, walkBundle, walkChecks, walkFollowups, walkRecord } from "../src/core/walks";
 import { FHIR_JSON, PLAIN_JSON, fhirMediaType, operationOutcome } from "../src/fhir_http";
 import worker from "../src/index";
-import { storeUpload, stripJpeg } from "../src/uploads";
+import { purgeUploads, storeUpload, stripJpeg, uploadCutoff } from "../src/uploads";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
@@ -364,7 +364,28 @@ test("uploads: a stored photo is put in KV to expire after 30 days", async () =>
   assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
 });
 
-/** A store that only writes down what it was asked, for the routes below. */
+// The upload row (the id, the hash of the token, the type, the size, the time) had nothing to
+// delete it on the Worker, so it outlived the photo KV dropped (audit finding privacy-security-1).
+// The daily cron deletes it now. worker/test/e2e.mjs runs the same on a real local D1.
+test("uploads: the daily run deletes the rows older than 30 days, and only those", async () => {
+  assert.equal(uploadCutoff("2026-10-30T04:17:00Z"), "2026-09-30T04:17:00Z", "30 days back, written as created_at is");
+  assert.equal(uploadCutoff("2026-03-01T00:00:05Z"), "2026-01-30T00:00:05Z", "across a month's end");
+  const ran: { sql: string; args: unknown[] }[] = [];
+  const db = {
+    prepare: (sql: string) => ({
+      bind: (...args: unknown[]) => ({
+        run: async () => {
+          ran.push({ sql, args });
+          return { meta: { changes: 3 } };
+        },
+      }),
+    }),
+  } as unknown as Parameters<typeof purgeUploads>[0];
+  assert.equal(await purgeUploads(db, "2026-10-30T04:17:00Z"), 3, "how many rows went");
+  assert.deepEqual(ran, [{ sql: "DELETE FROM upload WHERE created_at <= ?", args: ["2026-09-30T04:17:00Z"] }]);
+});
+
+/** A store that only writes down what it was asked, for the routes and the cron below. */
 function recordingStore(changes = 0) {
   const ran: { sql: string; args: unknown[] }[] = [];
   const DB = {
@@ -386,6 +407,25 @@ function recordingStore(changes = 0) {
   };
   return { ran, env: { DB, PHOTOS: {} } as unknown as Parameters<typeof worker.fetch>[1] };
 }
+
+test("cron: one daily run deletes the walks past their date and the old upload rows", async () => {
+  const { ran, env } = recordingStore();
+  const before = uploadCutoff(new Date().toISOString());
+  await worker.scheduled({} as ScheduledController, env);
+  const after = uploadCutoff(new Date().toISOString());
+  const uploads = ran.filter((r) => r.sql === "DELETE FROM upload WHERE created_at <= ?");
+  assert.equal(uploads.length, 1, JSON.stringify(ran));
+  const cutoff = String(uploads[0].args[0]);
+  assert.ok(before <= cutoff && cutoff <= after, `${cutoff} is 30 days before now`);
+  assert.equal(ran.filter((r) => r.sql === "DELETE FROM walk_record WHERE delete_after <= ?").length, 1, "the walks still go");
+  // A store that fails on the walks still has its upload rows deleted, and the run shows as failed.
+  const broken = recordingStore();
+  (broken.env.DB as unknown as { batch: unknown }).batch = async () => {
+    throw new Error("the walk tables are gone");
+  };
+  await assert.rejects(() => worker.scheduled({} as ScheduledController, broken.env), /the walk tables are gone/);
+  assert.equal(broken.ran.filter((r) => r.sql.startsWith("DELETE FROM upload")).length, 1);
+});
 
 // Audit finding api-fhir-5: an error on a route that answers with a FHIR resource is FHIR's own
 // OperationOutcome. apps/api/tests/test_fhir_routes.py holds the same one, letter for letter.

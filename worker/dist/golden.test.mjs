@@ -5107,6 +5107,13 @@ async function storeUpload(env, request, now) {
   await env.DB.prepare("INSERT INTO upload (photo_id, token_hash, content_type, size_bytes, created_at) VALUES (?, ?, ?, ?, ?)").bind(photoId, sha256Hex(token), type, clean.length, now).run();
   return { photo_id: photoId, token };
 }
+function uploadCutoff(now) {
+  return new Date(Date.parse(now) - KEEP_SECONDS * 1e3).toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+async function purgeUploads(db, now) {
+  const gone = await db.prepare("DELETE FROM upload WHERE created_at <= ?").bind(uploadCutoff(now)).run();
+  return Number(gone.meta.changes ?? 0);
+}
 function sameDigest(a, b) {
   if (a.length !== b.length) return false;
   let diff = 0;
@@ -7037,9 +7044,13 @@ var src_default = {
     return json(env, { detail: "Not found." }, 404);
   },
   /** Once a day (the cron in worker/wrangler.jsonc): deletes every video walk record past its
-   *  delete date (UPDATE_30 section 1 item 3, docs/DATA_HANDLING.md). Nothing else runs on it. */
+   *  delete date (UPDATE_30 section 1 item 3) and every upload row older than 30 days, whose photo
+   *  KV has dropped by then (hard rule 8, docs/DATA_HANDLING.md). Each runs whatever the other
+   *  does, and a failure in either is thrown, so the run shows as failed. Nothing else runs on it. */
   async scheduled(_controller, env) {
-    await purgeWalks(env.DB, nowIso2());
+    const now = nowIso2();
+    const runs = await Promise.allSettled([purgeWalks(env.DB, now), purgeUploads(env.DB, now)]);
+    for (const run of runs) if (run.status === "rejected") throw run.reason;
   }
 };
 function reply(env, r) {
@@ -7383,6 +7394,23 @@ test("uploads: a stored photo is put in KV to expire after 30 days", async () =>
   assert.equal(puts[0].key, `photo:${stored2.photo_id}`);
   assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
 });
+test("uploads: the daily run deletes the rows older than 30 days, and only those", async () => {
+  assert.equal(uploadCutoff("2026-10-30T04:17:00Z"), "2026-09-30T04:17:00Z", "30 days back, written as created_at is");
+  assert.equal(uploadCutoff("2026-03-01T00:00:05Z"), "2026-01-30T00:00:05Z", "across a month's end");
+  const ran = [];
+  const db = {
+    prepare: (sql) => ({
+      bind: (...args) => ({
+        run: async () => {
+          ran.push({ sql, args });
+          return { meta: { changes: 3 } };
+        }
+      })
+    })
+  };
+  assert.equal(await purgeUploads(db, "2026-10-30T04:17:00Z"), 3, "how many rows went");
+  assert.deepEqual(ran, [{ sql: "DELETE FROM upload WHERE created_at <= ?", args: ["2026-09-30T04:17:00Z"] }]);
+});
 function recordingStore(changes = 0) {
   const ran = [];
   const DB = {
@@ -7403,6 +7431,23 @@ function recordingStore(changes = 0) {
   };
   return { ran, env: { DB, PHOTOS: {} } };
 }
+test("cron: one daily run deletes the walks past their date and the old upload rows", async () => {
+  const { ran, env } = recordingStore();
+  const before = uploadCutoff((/* @__PURE__ */ new Date()).toISOString());
+  await src_default.scheduled({}, env);
+  const after = uploadCutoff((/* @__PURE__ */ new Date()).toISOString());
+  const uploads = ran.filter((r) => r.sql === "DELETE FROM upload WHERE created_at <= ?");
+  assert.equal(uploads.length, 1, JSON.stringify(ran));
+  const cutoff = String(uploads[0].args[0]);
+  assert.ok(before <= cutoff && cutoff <= after, `${cutoff} is 30 days before now`);
+  assert.equal(ran.filter((r) => r.sql === "DELETE FROM walk_record WHERE delete_after <= ?").length, 1, "the walks still go");
+  const broken = recordingStore();
+  broken.env.DB.batch = async () => {
+    throw new Error("the walk tables are gone");
+  };
+  await assert.rejects(() => src_default.scheduled({}, broken.env), /the walk tables are gone/);
+  assert.equal(broken.ran.filter((r) => r.sql.startsWith("DELETE FROM upload")).length, 1);
+});
 test("fhir_http: an error as an OperationOutcome, the same as Python", () => {
   assert.deepEqual(operationOutcome(404, "no FHIR record for this visit"), {
     resourceType: "OperationOutcome",

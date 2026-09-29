@@ -418,6 +418,16 @@ try {
   const bad = new FormData();
   bad.append("file", new Blob([new TextEncoder().encode("not an image")], { type: "text/plain" }), "x.txt");
   assert.equal((await fetch(`${BASE}/api/upload`, { method: "POST", body: bad })).status, 422);
+  // The upload's row goes 30 days on (audit finding privacy-security-1). KV drops the photo by
+  // its own expiry, and the daily cron deletes the row: the one a second past 30 days goes, the
+  // one an hour short of it stays, and so does the photo sent a moment ago, still served.
+  const ago = (ms) => new Date(Date.now() - ms).toISOString().replace(/\.\d{3}Z$/, "Z");
+  const THIRTY_DAYS = 30 * 86_400_000;
+  d1(`INSERT INTO upload (photo_id, token_hash, content_type, size_bytes, created_at) VALUES ('up-e2e-old', 'none', 'image/jpeg', 1, '${ago(THIRTY_DAYS + 1000)}'), ('up-e2e-older', 'none', 'image/jpeg', 1, '2026-01-01T00:00:00Z'), ('up-e2e-young', 'none', 'image/jpeg', 1, '${ago(THIRTY_DAYS - 3_600_000)}')`);
+  const uploadCron = await fetch(`${BASE}/__scheduled?cron=${encodeURIComponent("17 4 * * *")}`);
+  assert.equal(uploadCron.status, 200, await uploadCron.text());
+  assert.deepEqual(d1("SELECT photo_id FROM upload ORDER BY photo_id").map((r) => r.photo_id), ["up-e2e-young", upload.photo_id].sort(), "the rows past 30 days are gone, the rest stay");
+  assert.equal((await fetch(`${BASE}/api/photo/${upload.photo_id}?t=${upload.token}`)).status, 200, "a new photo is still served");
 
   // 8. Two observers. The Worker never fetches their sandbox; it shows what
   // scripts/cache_their_records.py stored. Nothing stored: ours stands alone and the screen is

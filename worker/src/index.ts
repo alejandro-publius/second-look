@@ -12,7 +12,7 @@ import VALIDATION from "../../results/fhir_validation.json";
 import CONTENT from "./content.json";
 import { Invalid, NotFound, createDraft, finalize, latestBundleForSpot, loadVisitBundle, quickCheck, spotView, todayOf } from "./check";
 import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, referralView } from "./city";
-import { TooLarge, photoResponse, storeUpload } from "./uploads";
+import { TooLarge, photoResponse, purgeUploads, storeUpload } from "./uploads";
 import { fhirMediaType, operationOutcome } from "./fhir_http";
 import { two } from "./two";
 import * as part2 from "./part2";
@@ -583,9 +583,13 @@ export default {
   },
 
   /** Once a day (the cron in worker/wrangler.jsonc): deletes every video walk record past its
-   *  delete date (UPDATE_30 section 1 item 3, docs/DATA_HANDLING.md). Nothing else runs on it. */
+   *  delete date (UPDATE_30 section 1 item 3) and every upload row older than 30 days, whose photo
+   *  KV has dropped by then (hard rule 8, docs/DATA_HANDLING.md). Each runs whatever the other
+   *  does, and a failure in either is thrown, so the run shows as failed. Nothing else runs on it. */
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
-    await purgeWalks(env.DB, nowIso());
+    const now = nowIso();
+    const runs = await Promise.allSettled([purgeWalks(env.DB, now), purgeUploads(env.DB, now)]);
+    for (const run of runs) if (run.status === "rejected") throw run.reason;
   },
 };
 

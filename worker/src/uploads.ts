@@ -139,12 +139,27 @@ export async function storeUpload(env: UploadEnv, request: Request, now: string)
   const clean = stripMetadata(bytes, type);
   const photoId = `up-${randomHex(8)}`;
   const token = urlSafeToken(24);
-  // KV's own expiry is the 30 day deletion: nothing has to run to keep the promise.
+  // KV's own expiry is the 30 day deletion of the photo: nothing has to run to keep that promise.
+  // The row below is deleted by purgeUploads, on the daily cron.
   await env.PHOTOS.put(`photo:${photoId}`, clean, { expirationTtl: KEEP_SECONDS, metadata: { contentType: type } });
   await env.DB.prepare("INSERT INTO upload (photo_id, token_hash, content_type, size_bytes, created_at) VALUES (?, ?, ?, ?, ?)")
     .bind(photoId, sha256Hex(token), type, clean.length, now)
     .run();
   return { photo_id: photoId, token };
+}
+
+/** The time KEEP_DAYS before now, written the way created_at is stored, so the two compare as
+ *  text. */
+export function uploadCutoff(now: string): string {
+  return new Date(Date.parse(now) - KEEP_SECONDS * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+/** Deletes every upload row older than KEEP_DAYS and returns how many went. KV drops the photo by
+ *  its own expiry; the row (the id, the hash of the token, the type, the size and the time) had
+ *  nothing to delete it, so it outlived the photo. The daily cron runs this (worker/src/index.ts). */
+export async function purgeUploads(db: D1Database, now: string): Promise<number> {
+  const gone = await db.prepare("DELETE FROM upload WHERE created_at <= ?").bind(uploadCutoff(now)).run();
+  return Number(gone.meta.changes ?? 0);
 }
 
 /** Constant time compare of two hex digests of equal length. */
