@@ -58,8 +58,9 @@ one place where a person meets a question that came from a model.
   once, in <!--v:results/assist_answers_20260925T230654Z.json#/runs-->3<!--/v--> runs each, and the answers
   are stored in `results/assist_answers_20260925T230654Z.json`. `evals/assist_flags.py` made the
   flags from those stored answers and the pass table, through the same gate, and wrote them to
-  `results/assist_flags.json`. The Worker reads that committed file and nothing else
-  (`worker/src/part2.ts`), so every person meets the same flags.
+  `results/assist_flags.json`. The content build copies which way each flag points into
+  `worker/src/content.json`, and that is all the Worker reads (`worker/src/part2.ts`), so every
+  person meets the same flags.
 - **One model is the checker:** Claude Opus 5.5, because it passed the most features. A photo
   gets a flag when that model gave the same Yes or No in at least 2 of its 3 runs and the gate
   kept the flag, which it does only for a feature that model passed
