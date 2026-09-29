@@ -16,5 +16,8 @@
 /sw.js
   Cache-Control: no-cache
 
+/proofs/*.ots
+  Content-Type: application/octet-stream
+
 /api/share/*
   Content-Type: image/svg+xml; charset=utf-8

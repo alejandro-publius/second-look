@@ -377,3 +377,49 @@ def test_a_build_for_an_api_on_another_host_names_it_in_the_policy(tmp_path: Pat
     text, said = build_headers_in_a_copy(tmp_path, "https://api.example/")
     assert "connect-src 'self' https://api.example;" in text
     assert "api origin https://api.example," in said
+
+
+def pages_rules(text: str) -> list[tuple[str, list[tuple[str, str]]]]:
+    """The rules of a Pages _headers file: a path line, then indented header lines."""
+    rules: list[tuple[str, list[tuple[str, str]]]] = []
+    for line in text.splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        if not line.startswith(" "):
+            rules.append((line.strip(), []))
+        else:
+            name, _, value = line.strip().partition(":")
+            rules[-1][1].append((name.strip(), value.strip()))
+    return rules
+
+
+def sent_with(text: str, path: str) -> dict[str, str]:
+    """The headers Pages adds to one path. It matches a rule the way wrangler's rules engine
+    does: the whole path, a * for any run of characters, a :name for one path part."""
+    out: dict[str, str] = {}
+    for pattern, headers in pages_rules(text):
+        parts = [re.sub(r":[A-Za-z]\w*", "[^/]+", re.escape(p)) for p in pattern.split("*")]
+        if re.fullmatch("(.*)".join(parts), path):
+            for name, value in headers:
+                out[name] = f"{out[name]}, {value}" if name in out else value
+    return out
+
+
+def headers_files() -> dict[str, str]:
+    return {"a fresh build": call("m.headersFile({ apiOrigin: '' })"), **tracked_copies()}
+
+
+def test_a_proof_file_is_sent_as_plain_bytes_and_not_as_a_spreadsheet() -> None:
+    """privacy-security-5: Pages sent /proofs/prereg-v1.tag.ots as
+    application/vnd.oasis.opendocument.spreadsheet-template, the other file type that ends in
+    .ots. The files that were stamped keep the type Pages gives them."""
+    proofs = sorted(p.name for p in (ROOT / "proofs").glob("*.ots"))
+    assert len(proofs) >= 6
+    stamped = [name.removesuffix(".ots") for name in proofs]
+    for where, text in headers_files().items():
+        for name in proofs:
+            sent = sent_with(text, f"/proofs/{name}")
+            assert sent.get("Content-Type") == "application/octet-stream", f"{where}: {name}"
+            assert "Content-Security-Policy" in sent
+        for path in [*(f"/proofs/{name}" for name in stamped), "/proofs/", "/verify", "/a.ots"]:
+            assert "Content-Type" not in sent_with(text, path), f"{where}: {path}"

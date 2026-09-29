@@ -130,6 +130,10 @@ export function headersFile({ apiOrigin, preloads = {} }) {
     block("/*", everywhere),
     ...Object.entries(preloads).map(([path, urls]) => block(path, [link(urls)])),
     "/sw.js\n  Cache-Control: no-cache\n",
+    // An OpenTimestamps proof is a small binary file. Pages guesses the type from the ending, and
+    // .ots is also the ending of a spreadsheet template, so a phone offered to open a proof in a
+    // spreadsheet app. Plain bytes make the browser save the file, which is what /verify asks for.
+    "/proofs/*.ots\n  Content-Type: application/octet-stream\n",
     // The share cards are written as extensionless files by the static export, so Pages would
     // guess application/octet-stream and no chat window would render the preview.
     "/api/share/*\n  Content-Type: image/svg+xml; charset=utf-8\n",
