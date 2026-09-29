@@ -468,41 +468,41 @@ export default {
       // counted and never mirrored. It reads its own body, to refuse a large one before parsing.
       if (path === "/api/walk" && request.method === "POST") return json(env, await storeWalk(env.DB, request, now));
       const walkBundle = /^\/api\/walk\/([^/]+)\/fhir$/.exec(path);
-      if (walkBundle && request.method === "GET") return json(env, await walkFhir(env.DB, decodeURIComponent(walkBundle[1]), now));
+      if (walkBundle && request.method === "GET") return json(env, await walkFhir(env.DB, idFrom(walkBundle[1]), now));
       const walk = /^\/api\/walk\/([^/]+)$/.exec(path);
-      if (walk && request.method === "GET") return json(env, await walkView(env.DB, decodeURIComponent(walk[1]), now));
+      if (walk && request.method === "GET") return json(env, await walkView(env.DB, idFrom(walk[1]), now));
       const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
-      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, decodeURIComponent(photo[1]), url.searchParams.get("t")));
+      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, idFrom(photo[1]), url.searchParams.get("t")));
       if (path === "/api/creeks") return json(env, await creeksView(checkEnv));
       const city = /^\/api\/city\/([^/]+)$/.exec(path);
-      if (city) return json(env, await cityView(checkEnv, decodeURIComponent(city[1]), todayOf(now)));
+      if (city) return json(env, await cityView(checkEnv, idFrom(city[1]), todayOf(now)));
       const spotFhir = /^\/api\/spot\/([^/]+)\/fhir$/.exec(path);
       if (spotFhir) {
-        const bundle = await latestBundleForSpot(env.DB, decodeURIComponent(spotFhir[1]));
+        const bundle = await latestBundleForSpot(env.DB, idFrom(spotFhir[1]));
         if (bundle === null) return json(env, { detail: "no FHIR record for this spot yet" }, 404);
         return json(env, bundle);
       }
       const spot = /^\/api\/spot\/([^/]+)$/.exec(path);
       if (spot && request.method === "GET") {
-        const id = decodeURIComponent(spot[1]);
+        const id = idFrom(spot[1]);
         const view = await spotView(checkEnv, id, todayOf(now));
         return json(env, { ...view, place: await placeForSpot(checkEnv, id), downstream_notes: await notesForSpot(checkEnv, id, todayOf(now)) });
       }
       const bundle = /^\/api\/fhir\/Bundle\/([^/]+)$/.exec(path);
       if (bundle) {
-        const found = await loadVisitBundle(env.DB, decodeURIComponent(bundle[1]));
+        const found = await loadVisitBundle(env.DB, idFrom(bundle[1]));
         if (found === null) return json(env, { detail: "no FHIR record for this visit" }, 404);
         return json(env, found);
       }
       if (path === "/api/fhir/validation") return json(env, VALIDATION);
       const example = /^\/api\/fhir\/referral\/([^/]+)\/example-result$/.exec(path);
-      if (example) return json(env, await exampleResultView(checkEnv, decodeURIComponent(example[1]), now));
+      if (example) return json(env, await exampleResultView(checkEnv, idFrom(example[1]), now));
       const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
-      if (referral) return json(env, await referralView(checkEnv, decodeURIComponent(referral[1]), now));
+      if (referral) return json(env, await referralView(checkEnv, idFrom(referral[1]), now));
       if (path === "/api/two") return json(env, await two(env));
       // The iNaturalist context line for a creek, from the copy the Mac stored. Read only.
       const inat = /^\/api\/inaturalist\/([^/]+)$/.exec(path);
-      if (inat && request.method === "GET") return json(env, await inaturalistView(env, decodeURIComponent(inat[1])));
+      if (inat && request.method === "GET") return json(env, await inaturalistView(env, idFrom(inat[1])));
     } catch (err) {
       return errorResponse(env, err);
     }
@@ -520,7 +520,7 @@ export default {
       if (path === "/api/check/draft" && request.method === "POST") return json(env, await createDraft(checkEnv, body, now));
       if (path === "/api/check/finalize" && request.method === "POST") return json(env, await finalize(checkEnv, body, now));
       const quick = /^\/api\/quick\/([^/]+)$/.exec(path);
-      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, decodeURIComponent(quick[1]), body, now));
+      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, idFrom(quick[1]), body, now));
       if (path === "/api/test/session" && request.method === "POST") {
         const isTest = sameSecret(request.headers.get("x-qa-key"), env.QA_KEY);
         return await createSession(env, body, isTest);
@@ -592,14 +592,32 @@ function lockClock(env: Env): number {
   return Number.isFinite(fixed) ? fixed : Date.now();
 }
 
+/** One id from the address, decoded. A broken percent code (%E0%A4%A, %ff cut short, a lone %)
+ *  is an address nothing lives at, so it is a plain 404 like any other unknown id, not a 500. */
+function idFrom(part: string): string {
+  try {
+    return decodeURIComponent(part);
+  } catch {
+    throw new NotFound("Not found.");
+  }
+}
+
+/** The status and the plain sentence for an error. Anything the code did not raise on purpose is
+ *  a 500 with one fixed sentence: the error's own text stays on the server, since it can name a
+ *  table or quote what was sent. */
+function problemOf(err: unknown): { status: number; detail: string } {
+  if (err instanceof Invalid) return { status: 422, detail: err.message };
+  if (err instanceof NotFound) return { status: 404, detail: err.message };
+  if (err instanceof TooLarge) return { status: 413, detail: err.message };
+  if (err instanceof Conflict) return { status: 409, detail: err.message };
+  if (err instanceof TooMany) return { status: 429, detail: err.message };
+  return { status: 500, detail: "The server could not take that. Try again in a moment." };
+}
+
 /** The plain errors the check code raises become the same answers the Python API gives. */
 function errorResponse(env: Env, err: unknown): Response {
-  if (err instanceof Invalid) return json(env, { detail: err.message }, 422);
-  if (err instanceof NotFound) return json(env, { detail: err.message }, 404);
-  if (err instanceof TooLarge) return json(env, { detail: err.message }, 413);
-  if (err instanceof Conflict) return json(env, { detail: err.message }, 409);
-  if (err instanceof TooMany) return json(env, { detail: err.message }, 429);
-  return json(env, { detail: "The server could not take that. Try again in a moment.", error: String(err) }, 500);
+  const problem = problemOf(err);
+  return json(env, { detail: problem.detail }, problem.status);
 }
 
 function withCors(env: Env, response: Response): Response {

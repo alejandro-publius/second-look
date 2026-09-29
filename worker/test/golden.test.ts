@@ -22,6 +22,7 @@ import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
 import { WalkRecordError, isDemo, walkBundle, walkChecks, walkFollowups, walkRecord } from "../src/core/walks";
+import worker from "../src/index";
 import { storeUpload, stripJpeg } from "../src/uploads";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -360,4 +361,70 @@ test("uploads: a stored photo is put in KV to expire after 30 days", async () =>
   assert.equal(puts.length, 1);
   assert.equal(puts[0].key, `photo:${stored.photo_id}`);
   assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
+});
+
+const PLAIN_JSON = "application/json; charset=utf-8";
+
+/** A store that only writes down what it was asked, for the routes below. */
+function recordingStore(changes = 0) {
+  const ran: { sql: string; args: unknown[] }[] = [];
+  const DB = {
+    prepare: (sql: string) => ({
+      bind: (...args: unknown[]) => ({
+        sql,
+        args,
+        run: async () => {
+          ran.push({ sql, args });
+          return { meta: { changes } };
+        },
+      }),
+    }),
+    batch: async (statements: { sql: string; args: unknown[] }[]) =>
+      statements.map((s) => {
+        ran.push({ sql: s.sql, args: s.args });
+        return { meta: { changes } };
+      }),
+  };
+  return { ran, env: { DB, PHOTOS: {} } as unknown as Parameters<typeof worker.fetch>[1] };
+}
+
+const ask = async (env: Parameters<typeof worker.fetch>[1], address: string, headers: Record<string, string> = {}) => {
+  const res = await worker.fetch(new Request(`http://127.0.0.1${address}`, { headers }), env);
+  return { status: res.status, type: res.headers.get("content-type"), vary: res.headers.get("vary"), cache: res.headers.get("cache-control"), body: await res.json() };
+};
+
+// Audit finding privacy-security-4: GET /api/spot/%E0%A4%A was a 500 that carried "URIError: URI
+// malformed". A broken percent code is an id nobody has: a plain 404, and the store is not asked.
+test("routes: a broken percent code in the address is a plain 404", async () => {
+  const { ran, env } = recordingStore();
+  const addresses = [
+    "/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/photo/%E0%A4%A?t=x", "/api/inaturalist/%",
+    "/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%", "/api/fhir/referral/%/example-result",
+  ];
+  for (const address of addresses) {
+    const answer = await ask(env, address);
+    assert.deepEqual([answer.status, answer.body, answer.type], [404, { detail: "Not found." }, PLAIN_JSON], address);
+  }
+  const quick = await worker.fetch(new Request("http://127.0.0.1/api/quick/%E0%A4%A", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }), env);
+  assert.deepEqual([quick.status, await quick.json()], [404, { detail: "Not found." }]);
+  assert.deepEqual(ran, [], "nothing was asked of the store");
+});
+
+test("routes: a 500 says one fixed sentence and never the error's own text", async () => {
+  const env = {
+    DB: {
+      prepare: () => {
+        throw new Error("D1_ERROR: no such table: spot, asked with the-secret-word");
+      },
+    },
+    PHOTOS: {},
+  } as unknown as Parameters<typeof worker.fetch>[1];
+  const sentence = "The server could not take that. Try again in a moment.";
+  const plain = await ask(env, "/api/creeks");
+  assert.deepEqual([plain.status, plain.body], [500, { detail: sentence }], "no error field");
+  const fhir = await ask(env, "/api/fhir/Bundle/visit-0001");
+  assert.deepEqual([fhir.status, fhir.body], [500, { detail: sentence }]);
+  const study = await worker.fetch(new Request("http://127.0.0.1/api/test/counts"), env);
+  assert.deepEqual([study.status, await study.json()], [500, { detail: sentence }], "the study routes too");
+  for (const answer of [plain.body, fhir.body]) assert.ok(!JSON.stringify(answer).includes("secret") && !JSON.stringify(answer).includes("D1_ERROR"));
 });

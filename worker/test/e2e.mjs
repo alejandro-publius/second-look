@@ -7,7 +7,7 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { createServer } from "node:http";
+import { createServer, request as httpRequest } from "node:http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -181,6 +181,8 @@ async function api(method, path, body, headers = {}) {
   }
   return { status: res.status, data, res };
 }
+
+const PLAIN_JSON = "application/json; charset=utf-8";
 
 async function passingSession() {
   const created = await api("POST", "/api/test/session", {
@@ -633,6 +635,28 @@ try {
   assert.equal(cronAgain.status, 200, await cronAgain.text());
   assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_checks"), [{ n: 0 }], "the cron deleted the checks with their record");
   assert.deepEqual(await unmoved(), beforeWalk, "a walk's checks are never a creek check's");
+
+  // 8a5. A broken percent code in the address (audit finding privacy-security-4). It was a 500
+  // that carried "URIError: URI malformed"; it is an id nobody has, so a plain 404 like any other,
+  // and no answer has an error field. Sent raw, since fetch would tidy the address.
+  at("a broken percent code in the address");
+  const raw = (method, address) =>
+    new Promise((resolve, reject) => {
+      const req = httpRequest({ host: "127.0.0.1", port: PORT, method, path: address, headers: method === "POST" ? { "content-type": "application/json", "content-length": "2" } : {} }, (res) => {
+        let text = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (text += chunk));
+        res.on("end", () => resolve({ status: res.statusCode, type: res.headers["content-type"], data: JSON.parse(text) }));
+      });
+      req.on("error", reject);
+      req.end(method === "POST" ? "{}" : undefined);
+    });
+  for (const address of ["/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/inaturalist/%E0%A4%A", "/api/photo/%E0%A4%A?t=x", "/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%E0%A4%A", "/api/fhir/referral/%/example-result"]) {
+    assert.deepEqual(await raw("GET", address), { status: 404, type: PLAIN_JSON, data: { detail: "Not found." } }, address);
+  }
+  assert.deepEqual(await raw("POST", "/api/quick/%E0%A4%A"), { status: 404, type: PLAIN_JSON, data: { detail: "Not found." } });
+  // A good percent code still reads as the id it spells.
+  assert.equal((await raw("GET", `/api/spot/${first.spot_id.replace("-", "%2D")}`)).status, 200);
 
   // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
   // sixteen answers would be the live test's key. This Worker's clock reads one second before
