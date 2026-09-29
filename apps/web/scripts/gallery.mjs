@@ -237,9 +237,9 @@ async function liveRun(browser) {
   await page.getByRole("button", { name: /This creek, on the left/ }).click();
   await page.getByText("Kept on this phone.", { exact: false }).waitFor();
   gallery("landing-guess", "/", "live", await shoot(page), "The same screen after a tap on the left photo: the guess is kept on the phone until the person agrees to take part.");
-  gallery("demo", "/demo", "live", await visit("/demo"), "Judge mode today: it opens on Sep 28, when the data locks.");
+  gallery("demo", "/demo", "live", await visit("/demo"), "Judge mode: the start screen. The same sixteen photos as the test, with feedback after every answer.");
   gallery("t2", "/t2", "live", await visit("/t2"), "The second look, opened without a finished test: it says the test comes first and links to it.");
-  gallery("t2-demo", "/t2/demo", "live", await visit("/t2/demo"), "Judge mode for the second look today: it opens on Sep 28, when the data locks.");
+  gallery("t2-demo", "/t2/demo", "live", await visit("/t2/demo"), "Judge mode for the second look: the start screen. Eight photos as the assisted group sees them, with feedback after every answer.");
   gallery("judges", "/judges", "live", await visit("/judges"), "The page for judges: every part of Second Look, in order.");
   gallery("walks", "/walk", "live", await visit("/walk"), "Check a creek from your desk: one short clip of a creek for each country.");
   if (firstWalk) {
