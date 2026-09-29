@@ -888,6 +888,71 @@ def fhir_vectors() -> dict[str, Any]:
         software_version="0.2.0",
     )
 
+    # How an Observation names itself, on items the real form does not have: a finding phrase
+    # with spaces round it, one that is blank or not text, an item with no short name, no
+    # question or neither, a phrase on an item that has our own code, and a list with a value
+    # that has no code. Both emitters get these items, so the port is held to every branch.
+    def odd(item_id: str, fhir_extra: dict[str, Any], **extra: Any) -> dict[str, Any]:
+        fhir = {"code_system": "oah", "code": "hydrology", **fhir_extra}
+        return {"id": item_id, "type": "yesno", "fhir": fhir, **extra}
+
+    odd_items: list[dict[str, Any]] = [
+        odd("trimmed", {"finding": "  Dam across the stream  "}, name="Barriers"),
+        odd("blank", {"finding": "   "}, name="Barriers"),
+        odd("empty", {"finding": ""}, name="Barriers"),
+        odd("not_text", {"finding": 7}, name="Barriers"),
+        odd("nothing", {"finding": None}, name="Barriers"),
+        odd("no_phrase", {}, name="Barriers"),
+        odd("no_name", {"finding": "Dam"}, name="", text="Any dams?"),
+        odd("question_only", {"finding": "Dam"}, text="Any dams?"),
+        odd("no_question", {"finding": "Dam"}, name=None, text=None),
+        odd("empty_question", {}, text=""),
+        odd("id_only", {"finding": "Dam"}),
+        {
+            "id": "own_code",
+            "type": "yesno",
+            "name": "Bank Type",
+            "fhir": {
+                "code_system": "sl",
+                "code": "artificial-bank",
+                "category": "morophology",
+                "finding": "Other words",
+            },
+        },
+        {
+            "id": "a_list",
+            "type": "multi",
+            "name": "Habitats",
+            "fhir": {"code_system": "oah", "code": "morophology"},
+        },
+    ]
+    odd_answers: dict[str, Any] = {
+        item["id"]: value
+        for item, value in zip(odd_items, ["present", "absent", "cant_tell"] * 4, strict=False)
+        if item["id"] != "a_list"
+    }
+    odd_answers["a_list"] = ["riffles", "beaver_dam", "sand_banks"]
+    odd_visit = VisitRecord(
+        visit_id="visit-odd-names",
+        spot=SPOT,
+        observer=Observer(contributor_token="ct_7f3a9c2e"),
+        answered_at=datetime(2026, 9, 24, 16, 40, tzinfo=UTC),
+        answers=odd_answers,
+    )
+    odd_bundle = emit_visit(odd_visit, test_sitting=None, emitted_at=EMITTED_AT, items=odd_items)
+    assert check_bundle(odd_bundle) == []
+    named_cases = [
+        case(
+            "names and value words on items the form does not have",
+            {
+                "visit": dump(odd_visit),
+                "items": odd_items,
+                "emitted_at": EMITTED_AT.isoformat().replace("+00:00", "Z"),
+            },
+            odd_bundle,
+        )
+    ]
+
     def run(name: str, v: VisitRecord, ts: TestSitting | None, at: datetime) -> dict[str, Any]:
         bundle = emit_visit(v, test_sitting=ts, emitted_at=at)
         assert check_bundle(bundle) == []
@@ -936,6 +1001,7 @@ def fhir_vectors() -> dict[str, Any]:
     return {
         "function": "core.fhir_emit.emit_visit",
         "referral": referral_cases,
+        "named": named_cases,
         "cases": [
             run(
                 "the golden strawberry creek visit with its sitting",

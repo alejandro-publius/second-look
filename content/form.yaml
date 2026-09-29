@@ -48,7 +48,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: morophology }
+    fhir: { code_system: oah, code: morophology, finding: "Artificial channel bottom" }
   # TODO-TEAM-CONFIRM: laid stone counts as a built bank. The River Habitat Survey treats it as
   # reinforcement. We keep the app's three bank types and call none of them natural, and no laid
   # stone photo goes in the test set because the app gives it a category of its own.
@@ -129,7 +129,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: foam }
+    fhir: { code_system: oah, code: foam, finding: "Muddy water, foam or a changed colour" }
   - id: water_withdrawal
     section: water
     type: yesno
@@ -139,7 +139,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: hydrology }
+    fhir: { code_system: oah, code: hydrology, finding: "Water taken from the stream" }
   - id: barriers
     section: water
     type: yesno
@@ -149,7 +149,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: morophology }
+    fhir: { code_system: oah, code: morophology, finding: "Dam or other barrier across the stream" }
   - id: draining_pipes
     section: water
     type: yesno
@@ -180,7 +180,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: morophology }
+    fhir: { code_system: oah, code: morophology, finding: "Construction or works in the stream" }
   - id: water_height_m
     section: water
     type: number
@@ -202,7 +202,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: LandUse }
+    fhir: { code_system: oah, code: LandUse, finding: "Left margin more than one third paved or built on" }
   - id: impervious_right
     section: margins
     type: yesno
@@ -213,7 +213,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: LandUse }
+    fhir: { code_system: oah, code: LandUse, finding: "Right margin more than one third paved or built on" }
   - id: vegetation_left
     section: margins
     type: yesno
@@ -223,7 +223,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: riparianVegetation }
+    fhir: { code_system: oah, code: riparianVegetation, finding: "Left margin covered by vegetation" }
   - id: vegetation_right
     section: margins
     type: yesno
@@ -233,7 +233,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: riparianVegetation }
+    fhir: { code_system: oah, code: riparianVegetation, finding: "Right margin covered by vegetation" }
   - id: vegetation_type_left
     section: margins
     type: choice
@@ -296,7 +296,7 @@ items:
     verified_against_app: true
     source: "app public bundle, c5a15e8ebf91, 2026-09-26"
     feature: null
-    fhir: { code_system: oah, code: riparianVegetation }
+    fhir: { code_system: oah, code: riparianVegetation, finding: "Recent cuts of vegetation on the banks" }
   - id: feelings
     section: feelings
     type: sliders

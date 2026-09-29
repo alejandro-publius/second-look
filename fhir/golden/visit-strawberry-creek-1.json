@@ -430,7 +430,7 @@
           "reference": "Location/sl-loc-spot-1"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Channel Form at Strawberry Creek, campus reach, spot 1: u shape.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Channel Form at Strawberry Creek, campus reach, spot 1: U shaped channel.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
@@ -466,7 +466,7 @@
               "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
             }
           ],
-          "text": "Bank Type"
+          "text": "Artificial bank (Bank Type)"
         },
         "derivedFrom": [
           {
@@ -497,7 +497,7 @@
           "reference": "Location/sl-loc-spot-1"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at Strawberry Creek, campus reach, spot 1: present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at Strawberry Creek, campus reach, spot 1: Present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
@@ -533,7 +533,7 @@
               "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
             }
           ],
-          "text": "Draining Pipes"
+          "text": "Pipe running (Draining Pipes)"
         },
         "derivedFrom": [
           {
@@ -564,7 +564,7 @@
           "reference": "Location/sl-loc-spot-1"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Draining Pipes at Strawberry Creek, campus reach, spot 1: cant tell. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Pipe running (Draining Pipes) at Strawberry Creek, campus reach, spot 1: Can't tell. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
@@ -664,7 +664,7 @@
               "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
             }
           ],
-          "text": "Invasive Species"
+          "text": "Invasive plant (Invasive Species)"
         },
         "derivedFrom": [
           {
@@ -695,7 +695,7 @@
           "reference": "Location/sl-loc-spot-1"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Invasive Species at Strawberry Creek, campus reach, spot 1: present. The observer scored 3 of 4 on this feature, tested 2026-09-23.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Invasive plant (Invasive Species) at Strawberry Creek, campus reach, spot 1: Present. The observer scored 3 of 4 on this feature, tested 2026-09-23.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
@@ -720,7 +720,7 @@
               "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
             }
           ],
-          "text": "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)"
+          "text": "Overall rating"
         },
         "component": [
           {
@@ -773,7 +773,7 @@
           "reference": "Location/sl-loc-spot-1"
         },
         "text": {
-          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities) at Strawberry Creek, campus reach, spot 1: moderate. The first rating was good. On the rating check the volunteer changed it to moderate.</p></div>",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Overall rating at Strawberry Creek, campus reach, spot 1: Moderate overall rating. The first answer was Good overall rating. On the rating check the volunteer changed it to Moderate overall rating.</p></div>",
           "status": "generated"
         },
         "valueCodeableConcept": {
