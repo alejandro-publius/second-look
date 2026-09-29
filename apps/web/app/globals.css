@@ -1176,3 +1176,46 @@ pre.code {
   font-weight: 400;
   white-space: nowrap;
 }
+
+/* The language list (finding 5). A browser may draw its own list shorter than a thumb needs, so
+   the list is drawn here at the full tap height, with a small mark that says it opens. */
+.select-wrap {
+  position: relative;
+  display: block;
+}
+
+.select-wrap > select {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: var(--tap);
+  padding-right: var(--s7);
+}
+
+.select-wrap::after {
+  content: "";
+  position: absolute;
+  right: var(--s4);
+  top: 50%;
+  width: var(--s2);
+  height: var(--s2);
+  border-right: var(--border) solid var(--ink);
+  border-bottom: var(--border) solid var(--ink);
+  transform: translateY(-75%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* On a walk the list sits alone under the title and takes no more room than it needs. The clip
+   below it has no margin of its own, so the gap to it is set here. */
+.lang-compact {
+  margin-bottom: var(--s3);
+}
+
+.lang-compact .field {
+  margin: 0;
+}
+
+/* The two lines a walk opens on sit one step closer, which makes the room the list takes, so
+   Start the check stays whole on the first screen of a phone. */
+.walk-lead {
+  margin-bottom: 0;
+}

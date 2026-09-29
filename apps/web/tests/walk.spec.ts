@@ -1070,3 +1070,54 @@ test("a walk taken in English reads back as before, with no English tag", async 
   );
   await expect(page.getByTestId("english-tag")).toHaveCount(0);
 });
+
+// Audit finding phone-ux-languages-5: on a walk the list of languages sat below Start and the
+// demo notice, off the first screen, so a person could start a walk without ever seeing that it
+// speaks their language. The list is now right under the walk's title, whole on the first
+// screen of the phone profile, at the full tap height, and its note stays below Start. The test
+// above still holds Start whole on the first screen at 390 by 844.
+test("the list of languages is whole on the first screen of every walk, and its note comes after Start", async ({
+  page,
+}) => {
+  const height = page.viewportSize()!.height;
+  expect(height).toBeLessThanOrEqual(664);
+  for (const w of walks) {
+    await page.goto(`${BASE}/walk/${w.id}`);
+    const list = page.getByLabel(en["check.lang_label"]);
+    await expect(list).toBeVisible();
+    await expect(list).toHaveValue("en");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const box = (await list.boundingBox())!;
+    expect(box.y, w.id).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height, w.id).toBeLessThanOrEqual(height);
+    // A thumb's height, drawn by the page and not left to the browser's own small list.
+    expect(box.height, w.id).toBeGreaterThanOrEqual(48);
+    expect(await list.evaluate((e) => getComputedStyle(e).appearance)).toBe(
+      "none",
+    );
+    // Under the title and above the clip.
+    const title = (await page
+      .getByRole("heading", { name: w.creek_name, level: 1 })
+      .boundingBox())!;
+    const clip = (await page.locator("video.walk-clip").boundingBox())!;
+    expect(box.y).toBeGreaterThanOrEqual(title.y + title.height);
+    expect(clip.y).toBeGreaterThanOrEqual(box.y + box.height + 8);
+    // The note about whose words these are is kept, below Start.
+    const note = (await page.getByTestId("language-note").boundingBox())!;
+    const start = (await page
+      .getByRole("button", { name: en["walk.start"] })
+      .boundingBox())!;
+    await expect(page.getByTestId("language-note")).toHaveText(
+      en["check.lang_note"],
+    );
+    expect(note.y).toBeGreaterThan(start.y + start.height);
+    await expect(page.locator("select")).toHaveCount(1);
+  }
+  // The list is for choosing before the walk starts: a question screen has none.
+  await page.getByLabel(en["check.lang_label"]).selectOption("it");
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await expect(page.locator("h1#question > span[lang=it]")).toHaveText(
+    content.app_strings.strings.it.items.channel_form.text,
+  );
+  await expect(page.locator("select")).toHaveCount(0);
+});

@@ -7,13 +7,29 @@ import { t } from "@/lib/t";
  * The language of the creek check's questions, remembered on this phone (UPDATE_32 section 2).
  * The questions and answers are the official app's own, in its own translations; our own words
  * around them stay English, each marked, until a person has checked a translation.
+ *
+ * A walk shows the two parts apart (audit finding phone-ux-languages-5): the list alone right
+ * under the walk's title, where the first screen shows it, with its label kept for screen
+ * readers, and the note further down, below Start, where it pushes nothing off the screen.
  */
-export function LanguagePicker() {
+export function LanguagePicker({
+  part = "all",
+}: {
+  part?: "all" | "list" | "note";
+}) {
   const [lang, setLang] = useCheckLang();
-  return (
-    <div className="stack" data-testid="language-picker">
-      <label className="field">
-        <span className="field-label">{t("check.lang_label")}</span>
+  const note = (
+    <p className="small muted" data-testid="language-note">
+      {t("check.lang_note")}
+    </p>
+  );
+  if (part === "note") return note;
+  const list = (
+    <label className="field">
+      <span className={part === "list" ? "visually-hidden" : "field-label"}>
+        {t("check.lang_label")}
+      </span>
+      <span className="select-wrap">
         <select
           className="text-input"
           value={lang}
@@ -26,8 +42,19 @@ export function LanguagePicker() {
             </option>
           ))}
         </select>
-      </label>
-      <p className="small muted">{t("check.lang_note")}</p>
+      </span>
+    </label>
+  );
+  if (part === "list")
+    return (
+      <div className="lang-compact" data-testid="language-picker">
+        {list}
+      </div>
+    );
+  return (
+    <div className="stack" data-testid="language-picker">
+      {list}
+      {note}
     </div>
   );
 }
