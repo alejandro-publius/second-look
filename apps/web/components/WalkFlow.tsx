@@ -677,7 +677,11 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               </p>
             )}
           </section>
-          <WalkAnswers answers={answers} title={t("walk.answers_title")} />
+          <WalkAnswers
+            answers={answers}
+            title={t("walk.answers_title")}
+            lang={walkLang ?? lang}
+          />
           <ChecksThatRan checks={checked.checks} ratings={checked} level="h2" />
           <p className="small muted">{checkerLine(walk)}</p>
           <FhirView

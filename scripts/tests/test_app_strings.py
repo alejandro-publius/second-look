@@ -109,3 +109,25 @@ def test_the_check_notices_a_changed_quote() -> None:
 def test_no_quoted_string_carries_a_dash_the_repository_bans() -> None:
     text = json.dumps(DOC, ensure_ascii=False)
     assert chr(0x2013) not in text and chr(0x2014) not in text
+
+
+def test_the_plant_list_ends_on_the_apps_own_not_sure() -> None:
+    """Which ones? is the app's invasive species placeholder, so its not sure answer is that
+    question's own, in every language."""
+    key = "questions_3_3.invasive_species.labels.I am not sure"
+    assert DOC["app_keys"]["items"]["invasive_which"]["options"]["cant_tell"] == key
+    for lang in DOC["languages"]:
+        items = DOC["strings"][lang]["items"]
+        mine = items["invasive_which"]["options"]["cant_tell"]
+        assert mine and mine == items["invasive_species"]["options"]["cant_tell"], lang
+
+
+def test_the_same_bundle_read_again_keeps_its_date_and_a_new_bundle_moves_it() -> None:
+    src = 'const e={messages:{en:{feelings:{question:"How?"}}}};'
+    first = a.build("https://example.org/one.js", src, "2026-09-26", None)
+    again = a.build("/tmp/a-saved-copy.js", src, "2026-09-29", first)
+    assert again["source"]["fetched"] == "2026-09-26"
+    assert again["source"]["bundle_url"] == "https://example.org/one.js"
+    moved = a.build("https://example.org/two.js", src + " ", "2026-09-29", first)
+    assert moved["source"]["fetched"] == "2026-09-29"
+    assert moved["source"]["bundle_url"] == "https://example.org/two.js"

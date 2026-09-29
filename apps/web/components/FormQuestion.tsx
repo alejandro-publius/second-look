@@ -123,6 +123,8 @@ export function FormQuestion({
         });
       }
     }
+    // The last answer is worded in another language as the app words it on its own invasive
+    // species question, whose placeholder "Which ones?" is (scripts/app_strings.py).
     options.push({
       id: "cant_tell",
       label: t("check.not_sure"),
@@ -277,10 +279,12 @@ export function FormQuestion({
                   onChange={() => toggle(o.value)}
                 />
                 <span>
-                  {plants ? (
-                    o.label
-                  ) : (
+                  {!plants || o.id === "cant_tell" ? (
                     <Words shown={optionText(item, o.id, o.label, lang)} />
+                  ) : (
+                    // A plant's name is from our own region list: English, and the note above
+                    // the list carries the English tag for all of them.
+                    <span {...ours}>{o.label}</span>
                   )}
                 </span>
               </label>

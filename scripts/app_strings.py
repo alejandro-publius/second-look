@@ -165,7 +165,12 @@ ITEMS: dict[str, dict[str, Any]] = {
         {"herbs": "Herbs (A)", "shrubs": "Shrubs (B)", "trees": "Trees (C)", "not_sure": NOT_SURE},
     ),
     "invasive_species": _yesno(Q3, "invasive_species"),
-    "invasive_which": {"text": [Q3, "invasive_species", "placeholder"]},
+    # "Which ones?" is the placeholder of the app's invasive species question. Our plant list
+    # ends on a not sure answer, worded as that same app question words its own.
+    "invasive_which": {
+        "text": [Q3, "invasive_species", "placeholder"],
+        "options": {"cant_tell": [Q3, "invasive_species", "labels", NOT_SURE]},
+    },
     "vegetation_cuts": _yesno(Q3, "vegetation_cut"),
     "feelings": {
         "text": ["feelings", "question"],
@@ -416,12 +421,18 @@ def build(
 ) -> dict[str, Any]:
     messages = parse_bundle(text)
     langs = extract(messages)
+    sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    # The same bundle read again keeps the day and the address it was first fetched from, so
+    # quoting one more of its strings does not move the date every form item names as its source.
+    before = (previous or {}).get("source", {})
+    if before.get("bundle_sha256") == sha:
+        url, fetched = before.get("bundle_url", url), before.get("fetched", fetched)
     doc: dict[str, Any] = {
         "source": {
             "app": APP_NAME,
             "app_url": APP_URL,
             "bundle_url": url,
-            "bundle_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "bundle_sha256": sha,
             "fetched": fetched,
             "attribution": ATTRIBUTION,
             "bundle_languages": sorted(messages),

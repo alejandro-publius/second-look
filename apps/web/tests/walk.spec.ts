@@ -799,3 +799,274 @@ test("a walk's Which ones? offers no region's plants and says the list is for th
     en["check.region_list_elsewhere"].replace("{regions}", bayArea),
   );
 });
+
+// Audit finding phone-ux-languages-2: a walk answered in Portuguese read every answer back in
+// English, with no English tag. The record now words each question and answer in the language
+// the walk was taken in, in the official app's own words, and marks as English only what fell
+// back to English. The expected words are worked out here from content.json, not from the screen.
+type ShownWords = { text: string; lang: string; english: boolean };
+type FormItemFull = {
+  id: string;
+  text: string;
+  type: string;
+  unit?: string;
+  sliders?: string[];
+  depends_on?: { item: string; value: string };
+  options?: { id: string; value: string; label: string }[];
+};
+const fullItems: FormItemFull[] = content.form.items;
+
+/** What the screen should show for one of the app's strings: the translation, or English marked. */
+function wordsFor(
+  lang: string,
+  key: string,
+  translated: string | undefined,
+  english: string,
+): ShownWords {
+  if (lang === "en") return { text: english, lang: "en", english: false };
+  const fellBack = Boolean(content.app_strings.fallback[lang]?.[key]);
+  if (translated && !fellBack)
+    return { text: translated, lang, english: false };
+  return { text: english, lang: "en", english: true };
+}
+
+/** An answer's words on the question screen and in the record, in another language. */
+function optionWords(lang: string, item: FormItemFull, id: string): ShownWords {
+  const app = (l: string) => content.app_strings.strings[l].items[item.id];
+  const own = (item.options ?? []).find((o) => o.id === id)?.label;
+  return wordsFor(
+    lang,
+    `${item.id}.option:${id}`,
+    app(lang)?.options?.[id],
+    own ?? app("en")?.options?.[id],
+  );
+}
+
+/**
+ * Takes the walk on screen in `lang`, saying something on every screen: the first choice (or
+ * `pick[item]`), Yes on a yes or no question, two habitats, the plant list's not sure answer, a
+ * water height, and two feelings moved with a third marked not applicable. Returns each row the
+ * record should hold: the question and the pieces of the answer.
+ */
+async function walkIn(
+  page: Page,
+  lang: string,
+  pick: Record<string, string[]>,
+): Promise<{ question: ShownWords; answer: ShownWords[]; text: string }[]> {
+  const rows: { question: ShownWords; answer: ShownWords[]; text: string }[] =
+    [];
+  const answers: Record<string, string> = {};
+  const button = (name: string) =>
+    page.getByRole("button", { name, exact: true });
+  const next = () => button(uiWords(lang, "next", en["check.next"]).text);
+  for (const item of fullItems) {
+    if (item.depends_on && answers[item.depends_on.item] !== item.depends_on.value)
+      continue;
+    const app = content.app_strings.strings[lang].items[item.id];
+    const question = wordsFor(lang, `${item.id}.text`, app?.text, item.text);
+    await expect(page.locator("h1#question > span").first()).toHaveText(
+      question.text,
+    );
+    await expect(page.locator("h1#question > span").first()).toHaveAttribute(
+      "lang",
+      question.lang,
+    );
+    let answer: ShownWords[] = [];
+    let text = "";
+    if (item.type === "choice") {
+      const id = pick[item.id]?.[0] ?? item.options![0].id;
+      const w = optionWords(lang, item, id);
+      answers[item.id] = item.options!.find((o) => o.id === id)!.value;
+      answer = [w];
+      text = w.text;
+      await page
+        .getByRole("group")
+        .getByRole("button")
+        .filter({ has: page.getByText(w.text, { exact: true }) })
+        .first()
+        .click();
+    } else if (item.type === "yesno") {
+      const w = optionWords(lang, item, "present");
+      answers[item.id] = "present";
+      answer = [w];
+      text = w.text;
+      await page
+        .getByRole("group")
+        .getByRole("button")
+        .filter({ has: page.getByText(w.text, { exact: true }) })
+        .first()
+        .click();
+    } else if (item.type === "multi") {
+      const ids = pick[item.id] ?? [item.options![0].id];
+      answer = ids.map((id) => optionWords(lang, item, id));
+      text = answer.map((w) => w.text).join(", ");
+      for (const w of answer)
+        await page
+          .locator("label.option")
+          .filter({ has: page.getByText(w.text, { exact: true }) })
+          .getByRole("checkbox")
+          .check();
+      await next().click();
+    } else if (item.type === "pick_region_list") {
+      const w = wordsFor(
+        lang,
+        `${item.id}.option:cant_tell`,
+        app?.options?.cant_tell,
+        en["check.not_sure"],
+      );
+      answer = [w];
+      text = w.text;
+      await page
+        .locator("label.option")
+        .filter({ has: page.getByText(w.text, { exact: true }) })
+        .getByRole("checkbox")
+        .check();
+      await next().click();
+    } else if (item.type === "number") {
+      await page.locator(`input[name=${item.id}]`).fill("0.3");
+      answer = [{ text: `0.3 ${item.unit}`, lang, english: false }];
+      text = answer[0].text;
+      await next().click();
+    } else if (item.type === "sliders") {
+      const moved = ["joy", "anger"];
+      const parts: string[] = [];
+      for (const s of item.sliders!) {
+        const name = optionWords(lang, item, s);
+        if (moved.includes(s)) {
+          await page.locator(`#slider-${s}`).fill("3");
+          answer.push(name, { text: "3", lang: name.lang, english: false });
+          parts.push(`${name.text}: 3`);
+        } else if (s === "fear") {
+          const na = optionWords(lang, item, "not_applicable");
+          await page
+            .locator(".card")
+            .filter({ has: page.locator(`#slider-${s}`) })
+            .getByRole("checkbox")
+            .check();
+          answer.push(name, na);
+          parts.push(`${name.text}: ${na.text}`);
+        }
+      }
+      text = parts.join(", ");
+      await next().click();
+    }
+    rows.push({ question, answer, text });
+  }
+  // The follow-ups the rules ask, and the checker's question, are left as they are.
+  const done = page.getByRole("heading", {
+    name: en["walk.done_title"],
+    level: 1,
+  });
+  for (let i = 0; i < 4 && !(await done.isVisible()); i++) {
+    const finish = button(en["check.finish"]);
+    if (await finish.isVisible()) await finish.click();
+    else await page.waitForTimeout(100);
+  }
+  await expect(done).toBeVisible();
+  return rows;
+}
+
+/** A button of ours that the app has its own word for (scripts/app_strings.py UI). */
+function uiWords(lang: string, key: string, english: string): ShownWords {
+  return wordsFor(
+    lang,
+    `ui:${key}`,
+    content.app_strings.strings[lang]?.ui?.[key],
+    english,
+  );
+}
+
+/** Checks the record's rows on screen against the rows the walk should have made. */
+async function expectRows(
+  page: Page,
+  rows: { question: ShownWords; answer: ShownWords[]; text: string }[],
+) {
+  const lines = page.getByTestId("walk-answers").locator(".answer-line");
+  await expect(lines).toHaveCount(rows.length);
+  let tags = 0;
+  for (const [i, row] of rows.entries()) {
+    const line = lines.nth(i);
+    const q = line.locator(".muted").first();
+    await expect(q.locator("span[lang]").first()).toHaveText(row.question.text);
+    await expect(q.locator("span[lang]").first()).toHaveAttribute(
+      "lang",
+      row.question.lang,
+    );
+    await expect(q.getByTestId("english-tag")).toHaveCount(
+      row.question.english ? 1 : 0,
+    );
+    const pieces = line.locator("strong span[lang]:not([data-testid])");
+    await expect(pieces).toHaveText(row.answer.map((w) => w.text));
+    for (const [j, w] of row.answer.entries())
+      await expect(pieces.nth(j)).toHaveAttribute("lang", w.lang);
+    const marked = row.answer.filter((w) => w.english).length;
+    await expect(line.locator("strong").getByTestId("english-tag")).toHaveCount(
+      marked,
+    );
+    tags += marked + (row.question.english ? 1 : 0);
+  }
+  await expect(
+    page.getByTestId("walk-answers").getByTestId("english-tag"),
+  ).toHaveCount(tags);
+  return tags;
+}
+
+for (const [lang, pick, fellBack] of [
+  ["pt", {}, 3],
+  ["nl", { habitats: ["sand_banks", "riffles"] }, 2],
+  ["no", { habitats: ["sand_banks", "riffles"] }, 4],
+] as const) {
+  test(`a walk taken in ${lang} reads its answers back in ${lang}, with the English tag only where a string fell back`, async ({
+    page,
+  }) => {
+    await mockApi(page, {});
+    const w = walks[0];
+    await page.goto(`${BASE}/walk/${w.id}`);
+    await page.getByLabel(en["check.lang_label"]).selectOption(lang);
+    await page.getByRole("button", { name: en["walk.start"] }).click();
+    const rows = await walkIn(page, lang, pick as Record<string, string[]>);
+    // The words are the app's own: the first row is its translation of the channel form.
+    expect(rows[0].question.text).toBe(
+      content.app_strings.strings[lang].items.channel_form.text,
+    );
+    expect(rows[0].answer[0].text).toBe(
+      content.app_strings.strings[lang].items.channel_form.options.flat,
+    );
+    expect(rows[0].question.text).not.toBe(fullItems[0].text);
+    const tags = await expectRows(page, rows);
+    // Every string this walk showed that the meaning check sent back to English, and no other.
+    expect(tags).toBe(fellBack);
+    const feelings = rows.find((r) => r.text.includes(": 3"))!;
+    await expect(
+      page
+        .getByTestId("walk-answers")
+        .locator(".answer-line")
+        .filter({ hasText: feelings.question.text })
+        .locator("strong"),
+    ).toContainText(feelings.text.split(",")[0]);
+    // The record keeps the language the walk was taken in: another pick made later, and a
+    // reload, leave its answers as they were given.
+    await page.evaluate(() => localStorage.setItem("sl.check_lang", "fr"));
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: en["walk.done_title"], level: 1 }),
+    ).toBeVisible();
+    expect(await expectRows(page, rows)).toBe(fellBack);
+  });
+}
+
+test("a walk taken in English reads back as before, with no English tag", async ({
+  page,
+}) => {
+  await mockApi(page, {});
+  await page.goto(`${BASE}/walk/${walks[0].id}`);
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  await answerWalkPlainly(page, content, { bank: "present" });
+  const lines = page.getByTestId("walk-answers").locator(".answer-line");
+  await expect(lines.first().locator("strong")).toHaveText("Flat");
+  await expect(lines.first().locator("span[lang]").first()).toHaveAttribute(
+    "lang",
+    "en",
+  );
+  await expect(page.getByTestId("english-tag")).toHaveCount(0);
+});

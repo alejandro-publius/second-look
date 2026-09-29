@@ -195,7 +195,10 @@
     }
    },
    "invasive_which": {
-    "text": "questions_3_3.invasive_species.placeholder"
+    "text": "questions_3_3.invasive_species.placeholder",
+    "options": {
+     "cant_tell": "questions_3_3.invasive_species.labels.I am not sure"
+    }
    },
    "vegetation_cuts": {
     "text": "questions_3_3.vegetation_cut.questiontext",
@@ -423,7 +426,10 @@
      }
     },
     "invasive_which": {
-     "text": "Which ones?"
+     "text": "Which ones?",
+     "options": {
+      "cant_tell": "I’m not sure"
+     }
     },
     "vegetation_cuts": {
      "name": "Vegetation Cuts",
@@ -651,7 +657,10 @@
      }
     },
     "invasive_which": {
-     "text": "Quais?"
+     "text": "Quais?",
+     "options": {
+      "cant_tell": "Não tenho a certeza"
+     }
     },
     "vegetation_cuts": {
      "name": "Corte de Vegetação",
@@ -879,7 +888,10 @@
      }
     },
     "invasive_which": {
-     "text": "Welke?"
+     "text": "Welke?",
+     "options": {
+      "cant_tell": "Ik weet het niet zeker"
+     }
     },
     "vegetation_cuts": {
      "name": "Vegetatiesnoei",
@@ -1107,7 +1119,10 @@
      }
     },
     "invasive_which": {
-     "text": "Hvilke?"
+     "text": "Hvilke?",
+     "options": {
+      "cant_tell": "Jeg er ikke sikker"
+     }
     },
     "vegetation_cuts": {
      "name": "Vegetasjonskutt",
@@ -1335,7 +1350,10 @@
      }
     },
     "invasive_which": {
-     "text": "Lesquelles ?"
+     "text": "Lesquelles ?",
+     "options": {
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
     },
     "vegetation_cuts": {
      "name": "Coupes de végétation",
@@ -1563,7 +1581,10 @@
      }
     },
     "invasive_which": {
-     "text": "Quali?"
+     "text": "Quali?",
+     "options": {
+      "cant_tell": "Non sono sicuro"
+     }
     },
     "vegetation_cuts": {
      "name": "Tagli di vegetazione",

@@ -18,6 +18,14 @@ app-strings-check` goes red, and the fallback can be lifted after a person reads
 The organizers get the list in a short message (docs/internal/MESSAGE_TRANSLATIONS.md) for Alex
 to post.
 
+Added on 2026-09-29, same bundle: the plant list under "Which ones?" ends on a not sure answer.
+It now shows the app's own words for it, the not sure answer of the app's invasive species
+question, which "Which ones?" is the placeholder of. These are the five strings already read on
+2026-09-26 for that question (pt "Não tenho a certeza", nl "Ik weet het niet zeker", no "Jeg er
+ikke sikker", fr "Je ne suis pas sûr-e", it "Non sono sicuro"). Our English for it stays "Can't
+tell". Each was read again beside "Can't tell": all five say the person is not sure, which is
+the same answer. None flagged.
+
 ## Flags
 
 

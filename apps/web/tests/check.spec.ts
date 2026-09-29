@@ -628,3 +628,50 @@ test.describe("a browser set to pt-PT with a stored choice", () => {
     await expect(page.getByLabel(PICKER)).toHaveValue("en");
   });
 });
+
+// Audit finding phone-ux-languages-2, second case: the plant list's last answer was "Can't tell"
+// in English with no tag, while every other question said it in the app's own words. It now uses
+// the words of the app's invasive species question, which "Which ones?" belongs to. The plants'
+// names are from our own list, so they stay English and say so to a screen reader.
+test("/check in Portuguese: the plant list ends on the app's own not sure answer", async ({
+  page,
+}) => {
+  const content = JSON.parse(
+    readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+  );
+  const pt = content.app_strings.strings.pt.items;
+  await mockApi(page);
+  await page.goto("/check");
+  await page.getByLabel(PICKER).selectOption("pt");
+  await placePin(page);
+  for (let i = 0; i < 30; i++) {
+    const h = (
+      (await page.locator("#question > span").first().textContent()) ?? ""
+    ).trim();
+    if (h === pt.invasive_which.text) break;
+    const none = page.getByRole("button", { name: "None of these" });
+    const skip = page.getByRole("button", { name: "Skip" });
+    if (await none.isVisible()) await none.click();
+    else if (await skip.isVisible()) await skip.click();
+    else await page.locator("button.option").first().click();
+    await page.waitForFunction(
+      (was) =>
+        document.querySelector("#question > span")?.textContent?.trim() !==
+        was,
+      h,
+    );
+  }
+  await expect(page.locator("#question > span[lang=pt]")).toHaveText(
+    pt.invasive_which.text,
+  );
+  const options = page.locator("label.option");
+  const last = options.last();
+  await expect(last.locator("span[lang=pt]")).toHaveText(
+    pt.invasive_species.options.cant_tell,
+  );
+  await expect(last.getByTestId("english-tag")).toHaveCount(0);
+  await expect(page.getByText("Can't tell", { exact: true })).toHaveCount(0);
+  // A plant of the Bay Area list, where the pin is: our own English words.
+  expect(await options.count()).toBeGreaterThan(1);
+  await expect(options.first().locator("span[lang=en]")).toBeVisible();
+});
