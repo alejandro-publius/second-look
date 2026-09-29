@@ -79,3 +79,41 @@ a day with commits has none. The numbers live in the README, checked against `re
 - On the Mac: the data lock and analysis job for Sep 27, uptime every 10 minutes, the daily
   sandbox retry, and `make rollback`.
 - The captions-only video, built by `make video-final`, and critic rounds 14 to 17.
+- Part 2, the assisted second look: more photos after the score, where half the people who
+  start it, picked at random, meet the checker's one question and keep or change their answer.
+  No model is called while they answer. Its plan was tagged `prereg-v2` before any part 2 session.
+
+### Sat Sep 26
+
+- The creek check and the video walks ask the official OneAquaHealth Citizen Science App's own
+  questions and answers, word for word, in every language the app carries them in. `make
+  app-strings-check` holds our copy to the app's public translation file.
+- Where a translation means something else than the English, the English shows in its place,
+  marked.
+- Every creek check and walk record states the language its questions were shown in.
+- A creek check's FHIR record answers the rating the rating check left, and keeps the first
+  rating beside it.
+- Walk clips are served in parts, so moving the slider no longer starts a clip again.
+- `/verify` offers each timestamp proof, and the file it stamps, as a download.
+- The weekend build deployed and checked on a phone, the screens and the Devpost pictures taken
+  again, and every README command run again in a fresh clone.
+
+### Sep 27 to 28
+
+- Nothing was committed. Judge mode opened by its lock constant at the lock time, Sep 27 at 18:00
+  PDT.
+- The Mac's data lock job failed at its own phone check; its fix is under Sep 29.
+- OneAquaHealth's sandbox answered again on Sep 28, and the re-push job put our golden visit back.
+
+### Tue Sep 29
+
+- The data lock job's two failures fixed: its phone check expects judge mode open from the lock
+  on, and its last check runs from the folder its path is written for.
+- A deploy asks the live database a question first, and stops when it cannot read the answer.
+- The Mac jobs' records of Sep 28 and 29 committed, with every OpenTimestamps proof now confirmed
+  in a Bitcoin block.
+- The model card says where people meet the checker's question, which is part 2, and the data
+  card counts part 2's photos as a set of their own.
+- The third party list and `/credits` name the official app's words as the OneAquaHealth
+  project's, under neither of our licences.
+- The decisions of Sep 26 written into `docs/DECISIONS.md`.
