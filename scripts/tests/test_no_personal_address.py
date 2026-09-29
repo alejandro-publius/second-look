@@ -7,6 +7,10 @@ university or a company is not a hit: the consent screen gives one on purpose, a
 A hit names the file and the line, never the value, so a red run does not print the address
 again. Every fake value here is built when the test runs, so this file holds nothing the scan
 could find in itself.
+
+Two things a review on Sep 29 added. The documents wrap their lines, so an id on the line after
+the words account id is a hit too. And a file with a byte that is not UTF-8 is still read, with
+that byte replaced, where it used to be skipped without a word.
 """
 
 from __future__ import annotations
@@ -40,11 +44,16 @@ ACCOUNT_ID = re.compile(rf"{WORDS}.{{0,80}}?{HEX32}|{HEX32}.{{0,80}}?{WORDS}", r
 def hits_in(text: str) -> list[tuple[int, str]]:
     """The line numbers that hold one, with what it is. Never the value."""
     found: list[tuple[int, str]] = []
-    for n, line in enumerate(text.splitlines(), 1):
+    lines = text.splitlines()
+    for n, line in enumerate(lines, 1):
         if ADDRESS.search(line):
             found.append((n, "a personal mail address"))
         if ACCOUNT_ID.search(line):
             found.append((n, "a Cloudflare account id"))
+        elif n < len(lines) and not ACCOUNT_ID.search(lines[n]):
+            # The words on one line and the id on the next, as a wrapped paragraph has them.
+            if ACCOUNT_ID.search(line + " " + lines[n]):
+                found.append((n, "a Cloudflare account id"))
     return found
 
 
@@ -57,12 +66,12 @@ def scan(root: Path, names: list[str]) -> list[str]:
         if not path.is_file():
             continue
         try:
-            with path.open("rb") as f:
-                if b"\0" in f.read(8192):
-                    continue
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
+            raw = path.read_bytes()
+        except OSError:
             continue
+        if b"\0" in raw[:8192]:
+            continue
+        text = raw.decode("utf-8", errors="replace")
         out += [f"{name}:{n}: holds {what}" for n, what in hits_in(text)]
     return out
 
@@ -89,6 +98,23 @@ def test_an_account_id_beside_its_words_is_a_hit() -> None:
         f"{fake_id()} is the account id",
     ):
         assert hits_in(line) == [(1, "a Cloudflare account id")], line.split(fake_id())[0]
+
+
+def test_an_account_id_on_the_line_after_its_words_is_a_hit() -> None:
+    wrapped = f"The Cloudflare account, whose account id\nis `{fake_id()}`, is the team's.\n"
+    assert hits_in(wrapped) == [(1, "a Cloudflare account id")]
+    other_way = f"`{fake_id()}`\nis the account id.\n"
+    assert hits_in(other_way) == [(1, "a Cloudflare account id")]
+    # One hit, on its own line, when the next line holds both the words and the id.
+    assert hits_in(f"See below.\naccount id `{fake_id()}`\n") == [(2, "a Cloudflare account id")]
+    # Two lines apart is not beside.
+    assert hits_in(f"account id\n\n{fake_id()}\n") == []
+
+
+def test_a_file_with_a_byte_that_is_not_utf8_is_still_read(tmp_path: Path) -> None:
+    line = ("caf\xe9 login " + fake_address("gmail.com") + "\n").encode("latin-1")
+    (tmp_path / "old.md").write_bytes(line)
+    assert scan(tmp_path, ["old.md"]) == ["old.md:1: holds a personal mail address"]
 
 
 def test_both_on_one_line_are_two_hits() -> None:
