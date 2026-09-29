@@ -1,11 +1,11 @@
 {
- "checked_utc": "2026-09-26T02:03:35Z",
+ "checked_utc": "2026-09-29T18:29:16Z",
  "service": "OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin",
  "client": "opentimestamps-client 0.7.2",
  "upgraded": true,
  "counts": {
-  "pending": 3,
-  "confirmed": 3,
+  "pending": 0,
+  "confirmed": 7,
   "unchecked": 0,
   "broken": 0
  },
@@ -42,9 +42,15 @@
     "https://btc.calendar.catallaxy.com",
     "https://finney.calendar.eternitywall.com"
    ],
-   "bitcoin": null,
+   "bitcoin": {
+    "block_height": 968618,
+    "merkle_root": "1340c23d5e68a46c0cd704f72621c84cfce3cce5196f7d1fbfb071a05be2be06",
+    "block_hash": "00000000000000000000e8d65bd992ee937a1481c523c39ffbdda52416fd2046",
+    "block_time_utc": "2026-09-26T01:41:13Z",
+    "header_from": "https://blockstream.info/api"
+   },
    "problem": null,
-   "status": "pending"
+   "status": "confirmed"
   },
   {
    "proof": "proofs/audit-head-2026-09-24.ots",
@@ -79,10 +85,38 @@
     "https://btc.calendar.catallaxy.com",
     "https://finney.calendar.eternitywall.com"
    ],
-   "bitcoin": null,
+   "bitcoin": {
+    "block_height": 968622,
+    "merkle_root": "5c6b43a7b6aba6de7fde2e2679fbba90c213c19930184277e6d5db204f7edcb9",
+    "block_hash": "000000000000000000015e112db819a6e823e2eaa11afa3194c69fb90ed62788",
+    "block_time_utc": "2026-09-26T02:31:59Z",
+    "header_from": "https://blockstream.info/api"
+   },
    "problem": null,
    "audit_seq": 4,
-   "status": "pending"
+   "status": "confirmed"
+  },
+  {
+   "proof": "proofs/audit-head-2026-09-29.ots",
+   "file": "proofs/audit-head-2026-09-29",
+   "what": "audit_head",
+   "file_sha256": "97981375195a8be27052d16575adffe30f0fc0cc94fe210b821083f723d7536d",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": {
+    "block_height": 969160,
+    "merkle_root": "0766acce53202b1e16c75844005ef730ea3aa722b14dd596cb4c8c6bcf51a920",
+    "block_hash": "00000000000000000001a429785d8938608c424b7fd16096bf530b67a8193ee4",
+    "block_time_utc": "2026-09-29T13:32:01Z",
+    "header_from": "https://blockstream.info/api"
+   },
+   "problem": null,
+   "audit_seq": 5,
+   "status": "confirmed"
   },
   {
    "proof": "proofs/prereg-v1.tag.ots",
@@ -116,9 +150,15 @@
     "https://btc.calendar.catallaxy.com",
     "https://finney.calendar.eternitywall.com"
    ],
-   "bitcoin": null,
+   "bitcoin": {
+    "block_height": 968618,
+    "merkle_root": "1340c23d5e68a46c0cd704f72621c84cfce3cce5196f7d1fbfb071a05be2be06",
+    "block_hash": "00000000000000000000e8d65bd992ee937a1481c523c39ffbdda52416fd2046",
+    "block_time_utc": "2026-09-26T01:41:13Z",
+    "header_from": "https://blockstream.info/api"
+   },
    "problem": null,
-   "status": "pending"
+   "status": "confirmed"
   }
  ]
 }
