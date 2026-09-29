@@ -672,9 +672,10 @@ class Lock:
 
     def judge_mode(self) -> None:
         step = "judge mode"
-        page = self.out.run(
-            ["node", "apps/web/scripts/demo-open-check.mjs"], cwd=self.root / "apps" / "web"
-        )
+        # From the checkout's root, like every other script here. It once ran from apps/web with
+        # this same path, which names no file from there, so the last step of the first full run
+        # crashed and the whole lock was undone (2026-09-29).
+        page = self.out.run(["node", "apps/web/scripts/demo-open-check.mjs"], cwd=self.root)
         self.must(step, page, "the /demo check (the shut page must be gone)")
         reply = self.out.http(
             f"{SITE}/api/demo/answer",

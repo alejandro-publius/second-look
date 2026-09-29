@@ -251,6 +251,7 @@ class FakeLocal(la.Local):
     def __init__(self, world: World) -> None:
         self.world = world
         self.calls: list[list[str]] = []
+        self.cwds: list[Path] = []
         self.fail: dict[tuple[str, ...], Done] = {}
 
     def run(
@@ -263,6 +264,7 @@ class FakeLocal(la.Local):
     ) -> Done:
         args = list(argv)
         self.calls.append(args)
+        self.cwds.append(cwd)
         for prefix, result in self.fail.items():
             if tuple(args[: len(prefix)]) == prefix:
                 return result
@@ -445,6 +447,26 @@ def test_the_whole_chain_on_a_copy_of_the_database(world: World) -> None:
     assert entry["payload_sha256"] == hashlib.sha256(canonical.encode()).hexdigest()
     assert audit_log.verify(world.root / "audit" / "log.jsonl") == 1
     assert "the audit log holds the data lock" in log
+
+
+def test_every_script_the_job_runs_is_a_file_from_the_folder_it_runs_in(world: World) -> None:
+    """The fakes answer any command, so a path that names no file passed every test and then
+    crashed the real job at its last step (2026-09-29: demo-open-check.mjs, run from apps/web
+    with a path from the root). Every script the whole chain names must exist in this repository,
+    seen from the folder the job runs it in."""
+    assert world.lock().run() == 0
+    ran = [*zip(world.out.calls, world.out.cwds, strict=True)]
+    ran += [*zip(world.local.calls, world.local.cwds, strict=True)]
+    scripts = []
+    for args, cwd in ran:
+        for arg in args[1:]:
+            if arg.endswith((".mjs", ".py", ".sh")) and not arg.startswith("-"):
+                assert cwd is not None, args
+                scripts.append((Path(cwd).relative_to(world.root) / arg).as_posix())
+    assert "apps/web/scripts/demo-open-check.mjs" in scripts
+    assert "apps/web/scripts/live-readonly.mjs" in scripts and "scripts/deploy.sh" in scripts
+    missing = sorted({s for s in scripts if not (la.ROOT / s).is_file()})
+    assert missing == []
 
 
 def assert_as_it_was(world: World, start: str, origin: tuple[str, str]) -> None:
