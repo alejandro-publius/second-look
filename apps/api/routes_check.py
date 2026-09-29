@@ -3,18 +3,29 @@ route belong to W3 (apps/api/fhir_routes.py)."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from apps.api import check, inaturalist, walk_store
 from apps.api import city as city_mod
 from apps.api.deps import DB, Now
+from apps.api.fhir_http import fhir_error, fhir_response
 from apps.api.security import READ_LIMIT, STUDY_LIMIT, UPLOAD_LIMIT, rate_limited
 from core.walks import WALK_MAX_BYTES
 
 router = APIRouter(prefix="/api")
+
+
+def _as_fhir(request: Request, make: Callable[[], dict[str, Any]]) -> JSONResponse:
+    """One route that answers with a FHIR resource: the resource under FHIR's media type, or the
+    reason there is none as an OperationOutcome, with the sentence detail would have carried."""
+    try:
+        return fhir_response(request, make())
+    except check.NotFound as exc:
+        return fhir_error(request, 404, str(exc))
 
 
 @router.post("/check/draft", dependencies=[Depends(rate_limited(STUDY_LIMIT))])
@@ -55,17 +66,17 @@ def inaturalist_context(creek_id: str, db: DB) -> dict[str, Any]:
 
 
 @router.get("/fhir/referral/{spot_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])
-def referral(spot_id: str, db: DB, now: Now) -> dict[str, Any]:
+def referral(spot_id: str, request: Request, db: DB, now: Now) -> JSONResponse:
     """A ServiceRequest for a pipe on the worth testing list. 404 with the reason otherwise."""
-    return city_mod.referral_view(db, spot_id, now=now)
+    return _as_fhir(request, lambda: city_mod.referral_view(db, spot_id, now=now))
 
 
 @router.get(
     "/fhir/referral/{spot_id}/example-result", dependencies=[Depends(rate_limited(READ_LIMIT))]
 )
-def example_result(spot_id: str, db: DB, now: Now) -> dict[str, Any]:
+def example_result(spot_id: str, request: Request, db: DB, now: Now) -> JSONResponse:
     """How a laboratory result would return to that record. An example, tagged as one."""
-    return city_mod.example_result_view(db, spot_id, now=now)
+    return _as_fhir(request, lambda: city_mod.example_result_view(db, spot_id, now=now))
 
 
 @router.post("/quick/{spot_id}", dependencies=[Depends(rate_limited(STUDY_LIMIT))])
@@ -104,9 +115,9 @@ def walk_record(record_id: str, db: DB, now: Now) -> dict[str, Any]:
 
 
 @router.get("/walk/{record_id}/fhir", dependencies=[Depends(rate_limited(READ_LIMIT))])
-def walk_fhir(record_id: str, db: DB, now: Now) -> dict[str, Any]:
+def walk_fhir(record_id: str, request: Request, db: DB, now: Now) -> JSONResponse:
     """One stored walk record's demo Bundle alone, until its delete date."""
-    return walk_store.walk_fhir(db, record_id, now=now)
+    return _as_fhir(request, lambda: walk_store.walk_fhir(db, record_id, now=now))
 
 
 @router.get("/photo/{photo_id}", dependencies=[Depends(rate_limited(READ_LIMIT))])

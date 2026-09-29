@@ -326,7 +326,10 @@ def test_a_pipe_not_on_the_list_has_no_referral(client, monkeypatch):
     made = a_visit(client, token=passing_session(client), spot=NEW_SPOT, answers=GOOD_ANSWERS)
     r = client.get(f"/api/fhir/referral/{made['spot_id']}")
     assert r.status_code == 404
-    assert "not on the list" in r.json()["detail"]
+    # The reason, as FHIR says it: an OperationOutcome (apps/api/fhir_http.py).
+    assert r.json()["resourceType"] == "OperationOutcome"
+    assert r.json()["issue"][0]["code"] == "not-found"
+    assert "not on the list" in r.json()["issue"][0]["details"]["text"]
     assert client.get(f"/api/fhir/referral/{made['spot_id']}/example-result").status_code == 404
     assert client.get("/api/fhir/referral/spot-nowhere").status_code == 404
 
