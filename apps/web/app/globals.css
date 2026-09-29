@@ -1160,3 +1160,19 @@ pre.code {
     page-break-after: always;
   }
 }
+
+/* The creek check in the official app's six languages (audit findings phone-ux-languages-4 to 6).
+   A long question of the app's is set one size down, so its last answer fits the first screen of
+   a phone. Only FormQuestion sets this class, so every other heading keeps its size. */
+.question-long {
+  font-size: var(--text-h3);
+}
+
+/* The small English tag beside words shown in English inside another language. An outline and a
+   plain weight make it read as a label, not as one more bold word of the sentence. */
+.badge-lang {
+  border-color: var(--line-strong);
+  background: var(--surface);
+  font-weight: 400;
+  white-space: nowrap;
+}

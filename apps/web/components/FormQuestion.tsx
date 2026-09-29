@@ -21,6 +21,9 @@ import {
 } from "@/lib/lang";
 import { t } from "@/lib/t";
 
+/** A question longer than this many letters is set one size down, so its answers fit. */
+const LONG_QUESTION = 90;
+
 /** A string in the language it is in; English inside another language carries its tag. */
 function Words({ shown }: { shown: Shown }) {
   return (
@@ -151,14 +154,27 @@ export function FormQuestion({
     };
   }
 
+  // The app has a title for two of our five sections. The other three titles are our own English
+  // words, and right above a translated question an English line such as "How is the water?" read
+  // as the question shown twice, so another language leaves it out (audit finding
+  // phone-ux-languages-6).
+  const sectionWords = section ? sectionTitle(section, lang) : null;
+  // The app's longest questions run six or seven lines at the heading's size and push the last
+  // answer off a phone's first screen, so a long one is set one size down (finding 4).
+  const long = shownText.text.length > LONG_QUESTION;
+
   const head = (
     <>
-      {section ? (
-        <p className="small muted">
-          <Words shown={sectionTitle(section, lang)} />
+      {sectionWords && !sectionWords.english ? (
+        <p className="small muted" data-testid="section-line">
+          <Words shown={sectionWords} />
         </p>
       ) : null}
-      <h1 tabIndex={-1} id="question">
+      <h1
+        tabIndex={-1}
+        id="question"
+        className={long ? "question-long" : undefined}
+      >
         <span lang={shownText.lang}>{shownText.text}</span>
         {item.unit ? ` (${item.unit})` : ""}
         {shownText.english ? (
@@ -261,13 +277,16 @@ export function FormQuestion({
               data-testid="region-list-note"
               {...ours}
             >
-              {plants.note}
-              {other ? (
-                <>
-                  {" "}
-                  <EnglishTag />
-                </>
-              ) : null}
+              {/* One child, so the notice's row keeps the tag on the note's last line. */}
+              <span>
+                {plants.note}
+                {other ? (
+                  <>
+                    {" "}
+                    <EnglishTag />
+                  </>
+                ) : null}
+              </span>
             </p>
           ) : null}
           <div className="option-list" role="group" aria-labelledby="question">

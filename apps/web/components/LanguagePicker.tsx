@@ -35,7 +35,7 @@ export function LanguagePicker() {
 /** Marks English words shown inside another language, for sighted readers and screen readers alike. */
 export function EnglishTag() {
   return (
-    <span className="badge" lang="en" data-testid="english-tag">
+    <span className="badge badge-lang" lang="en" data-testid="english-tag">
       {t("check.english_tag")}
     </span>
   );

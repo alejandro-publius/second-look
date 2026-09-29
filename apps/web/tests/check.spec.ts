@@ -9,15 +9,18 @@ const en: Record<string, string> = JSON.parse(
 ).locale;
 
 /** Drops a pin (the denied-location path) and names the spot. */
-async function placePin(page: import("@playwright/test").Page) {
+async function placePin(
+  page: import("@playwright/test").Page,
+  { latitude = "37.8719", longitude = "-122.2585" } = {},
+) {
   await page.getByRole("button", { name: "Start the check" }).click();
   await expect(
     page.getByRole("heading", { name: "Where are you?" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Drop a pin instead" }).click();
   await expect(page.getByText("No map tiles here")).toBeVisible();
-  await page.getByLabel("Latitude").fill("37.8719");
-  await page.getByLabel("Longitude").fill("-122.2585");
+  await page.getByLabel("Latitude").fill(latitude);
+  await page.getByLabel("Longitude").fill(longitude);
   await page.getByLabel("Name for this spot").fill("Footbridge");
   await page.getByRole("button", { name: "Next" }).click();
 }
@@ -675,3 +678,122 @@ test("/check in Portuguese: the plant list ends on the app's own not sure answer
   expect(await options.count()).toBeGreaterThan(1);
   await expect(options.first().locator("span[lang=en]")).toBeVisible();
 });
+
+// Audit findings phone-ux-languages-4 and 6, on the phone profile (390 by 664). The app's long
+// questions ran six or seven lines and pushed the last answer off the first screen in four
+// languages, and on 9 of 24 screens an English section line sat right above the translated
+// question. Now a long question is set one size down, a section line shows only in the language
+// of the questions, and the English tag is a small outlined label on one line.
+const formSections: { id: string; title: string }[] = JSON.parse(
+  readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+).form.sections;
+for (const lang of ["en", "pt", "nl", "no", "fr", "it"]) {
+  test(`every question screen in ${lang}: the answers fit the first screen and no stray English line`, async ({
+    page,
+  }) => {
+    const content = JSON.parse(
+      readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+    );
+    const app = content.app_strings.strings[lang];
+    await mockApi(page);
+    await page.goto("/check");
+    await page.getByLabel(PICKER).selectOption(lang);
+    // A pin in Lisbon, outside every plant list, so the plant question is a short one too.
+    await placePin(page, { latitude: "38.7223", longitude: "-9.1393" });
+    const seen: string[] = [];
+    const lines: Record<string, number> = {};
+    for (const item of content.form.items as {
+      id: string;
+      type: string;
+      section: string;
+      text: string;
+    }[]) {
+      const heading = page.locator("h1#question");
+      const shown =
+        lang !== "en" && content.app_strings.fallback[lang]?.[`${item.id}.text`]
+          ? item.text
+          : app.items[item.id].text;
+      await expect(heading.locator("span").first()).toHaveText(shown);
+      seen.push(item.id);
+      await page.evaluate(() => window.scrollTo(0, 0));
+
+      // The section line: the app's own title in this language, or none.
+      const line = page.getByTestId("section-line");
+      const title = app.sections[item.section];
+      if (title) {
+        await expect(line.locator(`span[lang=${lang}]`)).toHaveText(title);
+        lines[item.section] = (lines[item.section] ?? 0) + 1;
+      } else if (lang === "en") {
+        await expect(line).toHaveText(
+          formSections.find((x) => x.id === item.section)!.title,
+        );
+      } else await expect(line).toHaveCount(0);
+      if (lang !== "en")
+        await expect(line.getByTestId("english-tag")).toHaveCount(0);
+
+      // Every answer of a pick-one question ends on the first screen.
+      if (item.type === "choice" || item.type === "yesno") {
+        const height = page.viewportSize()!.height;
+        const boxes = await page
+          .locator("button.option")
+          .evaluateAll((els) =>
+            els.map((e) => Math.round(e.getBoundingClientRect().bottom)),
+          );
+        expect(boxes.length).toBeGreaterThan(1);
+        for (const bottom of boxes)
+          expect(bottom, `${item.id} in ${lang}`).toBeLessThanOrEqual(height);
+      }
+
+      // A long question is one size down; the rest keep the heading's size.
+      const size = await heading.evaluate((h) => getComputedStyle(h).fontSize);
+      expect(size, item.id).toBe(shown.length > 90 ? "24px" : "30px");
+
+      // Each English tag on the screen is a label on one line, with an outline.
+      for (const tag of await page.getByTestId("english-tag").all()) {
+        const look = await tag.evaluate((e) => {
+          const c = getComputedStyle(e);
+          const line = parseFloat(c.lineHeight) || parseFloat(c.fontSize) * 1.5;
+          return {
+            oneLine: e.getBoundingClientRect().height < 2 * line,
+            weight: c.fontWeight,
+            outline: c.borderTopColor !== c.backgroundColor,
+            clear: c.borderTopColor.includes(", 0)"),
+          };
+        });
+        expect(look, item.id).toEqual({
+          oneLine: true,
+          weight: "400",
+          outline: true,
+          clear: false,
+        });
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBeLessThanOrEqual(page.viewportSize()!.width);
+
+      // The note above the plant list runs several lines, and its tag follows its last word:
+      // it is not a column of its own beside the note.
+      if (item.type === "pick_region_list" && lang !== "en") {
+        const note = page.getByTestId("region-list-note");
+        const noteBox = (await note.boundingBox())!;
+        const tagBox = (await note.getByTestId("english-tag").boundingBox())!;
+        expect(noteBox.height).toBeGreaterThan(3 * tagBox.height);
+        expect(tagBox.y).toBeGreaterThan(noteBox.y + noteBox.height / 2);
+      }
+
+      const none = page.getByRole("button", { name: "None of these" });
+      const skip = page.getByRole("button", { name: "Skip" });
+      if (item.type === "multi" || item.type === "pick_region_list")
+        await none.click();
+      else if (item.type === "number") await skip.click();
+      else if (item.type === "sliders")
+        await page.locator(".btn-row .btn:not(.btn-secondary)").last().click();
+      else await page.locator("button.option").first().click();
+    }
+    await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
+    // Yes everywhere asks every question, the plant list too.
+    expect(seen.length).toBe(content.form.items.length);
+    if (lang !== "en")
+      expect(Object.keys(lines).sort()).toEqual(["margins", "what_you_see"]);
+  });
+}
