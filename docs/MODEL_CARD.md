@@ -2,8 +2,9 @@
 
 The checker is the only place a vision model touches Second Look. It is `core/checker.py`, and
 every answer it gets goes through `core/gate.py`. This card says what the checker may do, what
-it may not, which models passed which features, how big the test behind that is, how it fails,
-what it cost, and how the gate holds it. Every number is read from a file in `results/` and
+it may not, where people meet a question that came from a model, which models passed which
+features, how big the test behind that is, how it fails, what it cost, and how the gate holds
+it. Every number is read from a file in `results/` and
 checked by `make verify-claims`.
 
 ## The models and how they are asked
@@ -37,12 +38,51 @@ Haiku 4.5 (`claude-haiku-4-5-20251001`), Claude Sonnet 5 (`claude-sonnet-5`), Cl
 - Show its note to the person, labelled "the checker noticed", cut to 160 characters.
 
 Where it runs today: on the live site the checker is off (`CHECKER_ENABLED`), so both servers
-pass no flags and no model is called. The video walks send the footage run's answers through the
+pass no flags to the creek check and no model is called. The video walks send the footage
+run's answers through the
 same gate when they are built, and
 today <!--v:results/footage_pool.json#/walks_with_a_checker_question-->0<!--/v--> of
 the <!--v:results/footage_pool.json#/walks-->3<!--/v--> walks carries a checker question: the gate kept no flag
-on the frames the walks use (`content/walks.yaml`). Everywhere else the models are only
-measured: on the 16 test photos and on frames from open creek footage.
+on the frames the walks use (`content/walks.yaml`). Part 2 of the test shows people a question
+that came from a model's stored answers, and the next section says how. Everywhere else the
+models are only measured: on the 16 test photos and on frames from open creek footage.
+
+## Part 2, where people meet the checker's question
+
+Part 2 of the test, `/t2`, is the assisted second look: after the score, a person may
+answer <!--v:results/data_card.json#/photos/part2/rows-->8<!--/v--> more photos, one question each.
+Its plan is `docs/analysis_plan_v2.md`, tagged `prereg-v2` before any part 2 session. It is the
+one place where a person meets a question that came from a model.
+
+- **No model is called while a person answers.** The four models answered the part 2 photos
+  once, in <!--v:results/assist_answers_20260925T230654Z.json#/runs-->3<!--/v--> runs each, and the answers
+  are stored in `results/assist_answers_20260925T230654Z.json`. `evals/assist_flags.py` made the
+  flags from those stored answers and the pass table, through the same gate, and wrote them to
+  `results/assist_flags.json`. The Worker reads that committed file and nothing else
+  (`worker/src/part2.ts`), so every person meets the same flags.
+- **One model is the checker:** Claude Opus 5.5, because it passed the most features. A photo
+  gets a flag when that model gave the same Yes or No in at least 2 of its 3 runs and the gate
+  kept the flag, which it does only for a feature that model passed
+  (`evals/tests/test_assist_flags.py::test_committed_flags_match_the_committed_pass_table`).
+- **What a person sees.** Half the people who start part 2, picked at random, are in the
+  assisted group. They
+  answer first. When the flag on that photo does not agree with their answer, one question
+  appears: "The checker noticed something here. Look again?" They choose Keep or Change. The
+  question has the same words every time, and the model's note is not shown. The other half
+  never meet the question.
+- **What is stored.** The first answer, whether the question appeared, the choice, and the final
+  answer, which is the person's own. A flag cannot set an answer: `settle` in `core/assist.py`
+  has no parameter for one (`core/tests/test_assist.py::test_settle_has_no_parameter_for_a_flag`,
+  `core/tests/test_assist.py::test_fuzz_flags_never_set_or_change_an_answer`).
+- **It asks about all four features.** The creek check has no question for a dug-out channel,
+  but part 2 shows photos of one, so a flag on a dug-out channel asks a person to look again here.
+- **What part 2 cannot show.** Of
+  the <!--v:results/data_card.json#/photos/part2/rows-->8<!--/v--> photos, <!--v:results/assist_flags.json#/n_flags-->6<!--/v--> carry
+  a flag. The plant photos carry none: the checker did not pass plants, and on one of them it
+  answered can't tell. Every flag in the set points the way of the gold label
+  (`evals/tests/test_model_card_part2.py::test_every_part_2_flag_points_the_way_of_the_gold_label`),
+  so the question only follows a first answer that was wrong or Can't tell. Part 2 can measure
+  whether the question helps that person. It cannot show what a wrong flag does to a person.
 
 ## What it may not do
 
@@ -168,9 +208,10 @@ runs spend nothing. All paid calls
 together: <!--v:results/model_card.json#/cost/real_calls-->5113<!--/v--> calls
 for <!--v:results/model_card.json#/cost/real_usd-->41.6<!--/v--> USD, of which
 footage <!--v:results/model_card.json#/cost/real_usd_by_purpose/footage-->34.2<!--/v--> USD, the
-sweeps <!--v:results/model_card.json#/cost/real_usd_by_purpose/model_sweep-->3.7<!--/v--> USD and the
-benchmarks <!--v:results/model_card.json#/cost/real_usd_by_purpose/benchmark-->3.2<!--/v--> USD. That includes the run
-that measured our config and the three-model run before Opus 5.5 and Fable 5.1 joined.
+sweeps <!--v:results/model_card.json#/cost/real_usd_by_purpose/model_sweep-->3.7<!--/v--> USD, the
+benchmarks <!--v:results/model_card.json#/cost/real_usd_by_purpose/benchmark-->3.2<!--/v--> USD and the
+stored answers for part 2 <!--v:results/model_card.json#/cost/real_usd_by_purpose/assist_answers-->0.5<!--/v--> USD.
+That includes the run that measured our config and the three-model run before Opus 5.5 and Fable 5.1 joined.
 
 - The four-model run: the
   sweep <!--v:results/model_sweep_20260924T054756Z.json#/counts/cost_usd-->2.2<!--/v--> USD, the
@@ -179,7 +220,8 @@ that measured our config and the three-model run before Opus 5.5 and Fable 5.1 j
 - Per 100 footage frames, four models, direct calls at the full price, with the run's adversarial
   frames counted in: <!--v:results/footage_latest.json#/cost/per_100_frames_usd-->51.3<!--/v--> USD. The batch interface costs
   half as much, but a batch once waited three hours in the queue.
-- The live site calls no model, so a volunteer's check costs nothing in model calls.
+- The live site calls no model, so a volunteer's check, and a person's part 2, cost nothing in
+  model calls.
 
 ## The gate
 
@@ -214,6 +256,8 @@ whole path works, step by step, is in the README under "The gate, the heart of i
 ## Check it yourself
 
 - `uv run pytest -q core/tests/test_gate.py core/tests/test_checker.py evals/tests/test_committed_pass_table.py evals/tests/test_model_card.py`
+- `uv run pytest -q core/tests/test_assist.py evals/tests/test_assist_flags.py evals/tests/test_model_card_part2.py`:
+  part 2's question, its flags, and what this page says about them.
 - `make verify-claims`: every number on this page against `results/`.
 - `uv run python evals/model_card.py --check`: the answer counts, the intervals and the cost
   against the sweep, the benchmark and the cost log.
