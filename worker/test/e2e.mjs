@@ -652,18 +652,18 @@ try {
   const shut = { status: 403, data: { detail: SHUT_DETAIL } };
   const a01 = CONTENT.part2_items?.[0]?.id ?? "a01";
   at("judge mode shut one second before the second lock");
-  const before = postTo(BASE);
-  assert.deepEqual(await before("/api/demo/answer", { item_id: "t01", answer: "yes" }), shut);
-  assert.deepEqual(await before("/api/t2/demo", { item_id: a01, answer: "yes" }), shut);
+  const justBefore = postTo(BASE);
+  assert.deepEqual(await justBefore("/api/demo/answer", { item_id: "t01", answer: "yes" }), shut);
+  assert.deepEqual(await justBefore("/api/t2/demo", { item_id: a01, answer: "yes" }), shut);
   // Shut whatever is asked: an item nobody knows gets the same 403, not a 404.
-  assert.deepEqual(await before("/api/demo/answer", { item_id: "t99", answer: "yes" }), shut);
+  assert.deepEqual(await justBefore("/api/demo/answer", { item_id: "t99", answer: "yes" }), shut);
 
   at("judge mode shut at the first lock, where it once opened");
   spawnSync("rm", ["-rf", PERSIST_AFTER]);
   const atFirstLock = await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: FIRST_LOCK });
-  const between = postTo(`http://127.0.0.1:${AFTER_PORT}`);
-  assert.deepEqual(await between("/api/demo/answer", { item_id: "t01", answer: "yes" }), shut);
-  assert.deepEqual(await between("/api/t2/demo", { item_id: a01, answer: "yes" }), shut);
+  const atFirst = postTo(`http://127.0.0.1:${AFTER_PORT}`);
+  assert.deepEqual(await atFirst("/api/demo/answer", { item_id: "t01", answer: "yes" }), shut);
+  assert.deepEqual(await atFirst("/api/t2/demo", { item_id: a01, answer: "yes" }), shut);
   await stopDev(atFirstLock);
 
   at("judge mode open at the second lock");
