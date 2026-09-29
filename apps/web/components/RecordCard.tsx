@@ -8,6 +8,7 @@ type Coding = { system?: string; code?: string; display?: string };
 type CodeableConcept = { coding?: Coding[]; text?: string };
 type Quantity = { value?: number; unit?: string; code?: string };
 type Ref = { reference?: string; display?: string };
+type Period = { start?: string; end?: string };
 
 // Our emitters (core/fhir_emit.py and worker/src/core/fhir_emit.ts) write the observer score into
 // the narrative, not into a note, so a real volunteer record carries it only here.
@@ -38,6 +39,27 @@ function valueOf(o: FhirObservation): string {
   return "";
 }
 
+/**
+ * The parts of a record that gives no single value, such as a lab's average, maximum and minimum
+ * for a year, or the answers to one of our questions that takes more than one. Each part is shown
+ * as the record gives it: its name, then its value. Nothing here judges a number.
+ */
+export function componentsOf(o: FhirObservation): { name: string; value: string }[] {
+  const list = Array.isArray(o.component) ? (o.component as FhirObservation[]) : [];
+  return list
+    .map((c) => ({ name: concept(c.code), value: valueOf(c) }))
+    .filter((c) => c.name !== "" || c.value !== "");
+}
+
+/** The names a record gives its performers. A display that only repeats the reference is no name. */
+function performerNames(o: FhirObservation): string {
+  const list = Array.isArray(o.performer) ? (o.performer as Ref[]) : [];
+  return list
+    .map((x) => (x.display && x.display !== x.reference ? x.display : ""))
+    .filter(Boolean)
+    .join(", ");
+}
+
 /** A FHIR date or dateTime in words, in the reader's locale. A bare date is read in UTC so it never slips a day. */
 export function readableTime(value: unknown): string {
   if (typeof value !== "string" || value === "") return "";
@@ -46,6 +68,22 @@ export function readableTime(value: unknown): string {
   if (value.includes("T")) return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return d.toLocaleDateString(undefined, { dateStyle: "medium", timeZone: "UTC" });
   return value;
+}
+
+/**
+ * When the record was made: its one moment, or the span of time it covers when it gives a period
+ * in place of a moment, as a lab's figures for a whole year do.
+ */
+export function whenOf(o: FhirObservation): string {
+  const moment = readableTime(o.effectiveDateTime);
+  if (moment) return moment;
+  const period = o.effectivePeriod as Period | undefined;
+  const start = readableTime(period?.start);
+  const end = readableTime(period?.end);
+  if (start && end) return t("two.period", { start, end });
+  if (start) return t("two.period_from", { start });
+  if (end) return t("two.period_until", { end });
+  return readableTime(o.issued);
 }
 
 export function observerScore(o: FhirObservation): string | null {
@@ -79,12 +117,16 @@ export function RecordCard({
   observation,
   heading,
   performer,
+  performerFallback,
   place,
   note,
 }: {
   observation: FhirObservation;
   heading: string;
+  /** Shown in place of whatever the record says of its performer. */
   performer?: string;
+  /** Shown only when the record gives its performer no name. */
+  performerFallback?: string;
   /** The place by name, when the API read it from the record, in place of a raw Location id. */
   place?: string | null;
   /** A line shown first in the card, such as the label on an example record. */
@@ -93,6 +135,8 @@ export function RecordCard({
   const [showJson, setShowJson] = useState(false);
   const score = observerScore(observation);
   const method = concept(observation.method);
+  const value = valueOf(observation);
+  const parts = value ? [] : componentsOf(observation);
   return (
     <section className="card stack" aria-label={heading}>
       <h2>{heading}</h2>
@@ -104,13 +148,21 @@ export function RecordCard({
         </div>
         <div>
           <dt className="small muted">{t("record.value")}</dt>
-          <dd>
-            <strong>{valueOf(observation) || t("spot.none")}</strong>
-          </dd>
+          {parts.length > 0 ? (
+            parts.map((part, i) => (
+              <dd key={`${i}-${part.name}`}>
+                {part.name} <strong>{part.value}</strong>
+              </dd>
+            ))
+          ) : (
+            <dd>
+              <strong>{value || t("spot.none")}</strong>
+            </dd>
+          )}
         </div>
         <div>
           <dt className="small muted">{t("record.when")}</dt>
-          <dd>{readableTime(observation.effectiveDateTime ?? observation.issued) || t("spot.none")}</dd>
+          <dd>{whenOf(observation) || t("spot.none")}</dd>
         </div>
         <div>
           <dt className="small muted">{t("record.subject")}</dt>
@@ -118,7 +170,7 @@ export function RecordCard({
         </div>
         <div>
           <dt className="small muted">{t("record.performer")}</dt>
-          <dd>{performer ?? (refText(observation.performer) || t("spot.none"))}</dd>
+          <dd>{performer ?? (performerNames(observation) || performerFallback || refText(observation.performer) || t("spot.none"))}</dd>
         </div>
         {method ? (
           <div>

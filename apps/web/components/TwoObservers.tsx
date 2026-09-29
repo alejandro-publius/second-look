@@ -53,7 +53,9 @@ export function TwoObservers() {
           ) : data.theirs_status === "cached" ? (
             <p className="small muted">{t("two.cached", { when: readableTime(data.fetched_at) || data.fetched_at })}</p>
           ) : null}
-          {data.theirs ? <RecordCard observation={data.theirs} heading={t("two.theirs")} performer={t("two.performer_theirs")} /> : null}
+          {/* Their record names who made it, so the card shows that name; the fixed word stands in
+              only when a record gives none. */}
+          {data.theirs ? <RecordCard observation={data.theirs} heading={t("two.theirs")} performerFallback={t("two.performer_theirs")} /> : null}
           {/* With no creek check stored, the API sends the golden visit, which was made by hand,
               and says so: it is labelled here and never passed off as a volunteer's answer. */}
           <RecordCard
