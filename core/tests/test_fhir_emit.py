@@ -425,8 +425,10 @@ def test_second_visit_structure() -> None:
         c["valueCodeableConcept"]["coding"][0]["code"] == "present" for c in habitats["component"]
     )
     # an empty multi-select is not an Observation
+    assert second_visit().answers["natural_debris"] == []
     assert not any(
-        o["code"].get("text") == "Natural debris" for o in resources(bundle, "Observation")
+        o["identifier"][0]["value"].endswith("-natural_debris")
+        for o in resources(bundle, "Observation")
     )
     # a number
     height = next(o for o in resources(bundle, "Observation") if "valueQuantity" in o)
