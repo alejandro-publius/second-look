@@ -16,6 +16,33 @@ Every answer is JSON unless the row says otherwise. An error is `{"detail": "...
 words. Nothing here takes a name, an email, an address or free text; see `docs/DATA_HANDLING.md`
 for what each table holds and `SECURITY.md` for the secrets and the lock.
 
+## FHIR answers and errors
+
+Five routes answer with a FHIR resource: `/api/spot/{spot_id}/fhir`, `/api/fhir/Bundle/{visit_id}`,
+`/api/fhir/referral/{spot_id}`, its `/example-result`, and `/api/walk/{record_id}/fhir`. Both
+servers treat them the same way (`worker/src/fhir_http.ts`, `apps/api/fhir_http.py`):
+
+- The answer's media type is `application/fhir+json; charset=utf-8`, the type FHIR R4 names
+  for JSON. Try it: `curl -s -D - -o /dev/null <site>/api/fhir/Bundle/<visit id>`.
+- A browser that opens one of these links asks for `text/html` first. It gets the same bytes as
+  `application/json`, so the record shows in the tab and is not saved as a file. The answer says
+  `Vary: Accept`.
+- An error is an OperationOutcome, not `{"detail": "..."}`. It has one issue, with `severity`
+  `error`, a `code` from FHIR's own list (`not-found` for a 404) and the plain sentence in
+  `details.text`. The pinned HL7 validator passes it.
+- `/api/fhir/validation` and `/api/two` are not FHIR resources. They stay `application/json`.
+- One difference: on the Python API the rate limit answers before the route runs, so its 429 is
+  still `{"detail": "..."}`. The Worker has no rate limit.
+- The address `/api/fhir/Bundle` with no visit id after it is not a route. It answers 404 with
+  `{"detail": "Not found."}`. `/api/creeks` lists the visit ids.
+
+An id that holds a broken percent code, such as `/api/spot/%E0%A4%A`, is an id nobody has. The
+answer is a plain 404, as for any unknown id.
+
+When the server itself fails, the answer is a 500 with one fixed sentence: "The server could not
+take that. Try again in a moment." The error's own text is never sent, because it could name a
+table or repeat what was sent.
+
 ## The Worker (production)
 
 "any" means the Worker does not check the method; the web app sends GET. The Worker has no rate
@@ -44,7 +71,7 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | POST | `/api/check/draft` | A creek check's answers: makes the spot if it is new, asks Open-Meteo about rain, and picks at most two follow-up questions by code. | a `spot` row if new (a coarse point unless the person placed the pin), a draft `visit` row (coded answers, first rating, the questions asked, the contributor token if given) | none |
 | POST | `/api/check/finalize` | The answers to the follow-ups and the final rating; builds the FHIR Bundle. | `check_result` rows, the final rating, a `fhir_bundle` row | refuses an answer to a question it never asked |
 | POST | `/api/quick/{spot_id}` | The three-question return check at a known spot: colour, smell, pipe running. | a `visit` row of kind quick | none |
-| POST | `/api/upload` | A creek photo as the form field `file`. JPEG, PNG or WebP only. Camera metadata (EXIF, GPS, XMP, ICC, comments) is cut out. Returns the photo id and the one token that can read it. | the bytes in KV with a 30 day expiry; an `upload` row with a hash of the token | 8 MB at most |
+| POST | `/api/upload` | A creek photo as the form field `file`. JPEG, PNG or WebP only. Camera metadata (EXIF, GPS, XMP, ICC, comments) is cut out. Returns the photo id and the one token that can read it. | the bytes in KV with a 30 day expiry; an `upload` row with a hash of the token, the type, the size and the time, deleted by the daily run once it is 30 days old | 8 MB at most |
 | GET | `/api/photo/{photo_id}` | One uploaded photo, served private and uncached. | nothing | `?t=` must be that photo's token, or the answer is 404 |
 | POST | `/api/walk` | A finished video walk, sent by the phone: `{walk_id, answers, answered_at, followup_answers, final_rating}`. Builds its demo record and returns its `record_id`. The store runs the creek check's follow-up rules on the answers itself (rain unknown, so the dry pipe question never; no score, no flag) and keeps the checks that ran with the phone's answers to them. A body with neither follow-up field keeps no checks. The same walk sent again returns the same id; other answers for the same walk and second get 409. Never counted and never mirrored to the sandbox. | a `walk_record` row (the walk id, the coded answers, the time, the demo Bundle) and a `walk_checks` row (the checks and the final rating), deleted together 30 days later | the body is 4096 bytes at most and holds nothing else; each answer must be a value from the form; a follow-up answer only for a question the rules asked, from the answers that question takes, and a final rating other than the first only with the rating check answered `change` (422 otherwise); the time at most 5 minutes ahead and 7 days old; 200 records a day on the whole server, then 429 |
 | GET | `/api/walk/{record_id}` | One stored walk record: its answers, its demo Bundle, and `checks`, `first_rating` and `final_rating` as `/api/spot` gives them for a visit, until its delete date. | nothing | none |
@@ -59,6 +86,13 @@ limit, on purpose: counting per visitor would mean holding something that identi
 | any | `/api/fhir/referral/{spot_id}/example-result` | How a laboratory result would come back to that pipe. Tagged and labelled EXAMPLE. | nothing | none |
 | any | `/api/two` | One of our Observations beside one laboratory Observation from their sandbox, read from the copy `scripts/cache_their_records.py` stored. Ours is from the latest stored visit; with none stored, it is the golden visit, made by hand, and `ours_example` is true so the page labels it an example. `ours_place` names the place. | nothing | none |
 | GET | `/api/inaturalist/{creek}` | The iNaturalist context line for one creek: research-grade sightings of plants on the region's invasive list near its spots, read from the copy `scripts/cache_inaturalist.py` stored, with the fetch time. The sightings are withheld until the creek's record answers the invasive plant question. Context only: nothing counts it and nothing decides from it. | nothing | none |
+
+### The daily run
+
+The Worker runs once a day, at 04:17 UTC (the cron in `worker/wrangler.jsonc`). It is not a
+route. It deletes every walk record past its delete date, with its checks, and every `upload`
+row that is 30 days old or more. KV has dropped that row's photo by then, through its own expiry.
+A failure in one of the two does not stop the other.
 
 ## The Python API (reference)
 
@@ -92,7 +126,7 @@ the table. The last column names the limit from the table above, then any lock.
 | POST | `/api/check/draft` | A creek check's answers and the follow-up questions. | `spot` if new, a draft `visit` | study |
 | POST | `/api/check/finalize` | Follow-up answers and the final rating; writes the FHIR Bundle to the store folder. | `check_result` rows, a Bundle file under `FHIR_STORE_DIR` | study |
 | POST | `/api/quick/{spot_id}` | The three-question return check. | a quick `visit` | study |
-| POST | `/api/upload` | A creek photo. Re-encoded as a new JPEG of at most 1600 pixels, so no metadata survives. | a file under `UPLOAD_DIR`, an `upload` row with a hash of the token | upload; 8 MB at most |
+| POST | `/api/upload` | A creek photo. Re-encoded as a new JPEG of at most 1600 pixels, so no metadata survives. | a file under `UPLOAD_DIR`, an `upload` row with a hash of the token; `scripts/cleanup_uploads.py` deletes both after 30 days | upload; 8 MB at most |
 | GET | `/api/photo/{photo_id}` | One uploaded photo with its token. | nothing | read; `?t=` must be the token, or 404 |
 | POST | `/api/walk` | A finished video walk's demo record and its follow-up checks, as the Worker stores them; expired rows go on each new store. | a `walk_record` row and a `walk_checks` row | study; the same body cap, follow-up rules, daily cap and time window as the Worker |
 | GET | `/api/walk/{record_id}` | One stored walk record until its delete date. | nothing | read |
