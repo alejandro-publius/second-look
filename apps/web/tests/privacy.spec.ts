@@ -59,5 +59,7 @@ test("the language picked on /check is kept on the phone, and /privacy says so",
   const phone = stored(page).filter({ hasText: /^On your phone only:/ });
   await expect(phone).toContainText("The language you chose for the questions.");
   await expect(phone).toContainText("Which test and which second look you have open");
+  // Seen in a browser on Sep 29: lib/offline.ts marks a queued check as sent and keeps it.
+  await expect(phone).toContainText("A check that waited stays here after it is sent, without its photos.");
   await expect(phone).toContainText("Until you close the tab: the kind of link you came from and your pick on the first page.");
 });

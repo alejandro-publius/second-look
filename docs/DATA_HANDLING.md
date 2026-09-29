@@ -120,7 +120,10 @@ the fields named above:
   pick on the first page, until the tab is closed. The pick is sent as the warm-up choice only
   after consent.
 - IndexedDB `second-look`: creek checks and finished walks that wait to be sent, with their
-  downsized photos, and each walk's answers and language while it is being made.
+  downsized photos, and each walk's answers and language while it is being made. A creek check
+  that waited here stays after it is sent: its photos are removed, but its spot, its answers,
+  its first rating, its language and the contributor token, if it had one, stay until the
+  person clears the site's data. No code removes it.
 - The service worker's cache: copies of this site's own pages, scripts and photos, so the site
   opens offline. It holds no answer and nothing from `/api`.
 

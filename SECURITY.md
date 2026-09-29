@@ -39,7 +39,8 @@ points to; this page follows it and adds the security side. Every route, with it
 - **On the phone,** in the browser's own storage for this site: the random browser token, the
   contributor token, saved spots, the ids of the open test sitting and of the open second look,
   the language chosen for the questions (`sl.check_lang`), checks and walks that wait to be sent,
-  and a walk's answers while it is being made. `docs/DATA_HANDLING.md` names each key.
+  a check that waited, which stays without its photos after it is sent, and a walk's answers
+  while it is being made. `docs/DATA_HANDLING.md` names each key.
 
 ## What we never keep
 
