@@ -96,6 +96,79 @@ test("judge mode is shut before the lock and open after it", async ({ page }) =>
   await expect(page.getByRole("button", { name: "Start judge mode" })).toBeVisible();
 });
 
+// Audit finding time-bombs-5: both judge mode pages were built shut, so after the lock every reader
+// saw "Judge mode opens on Sep 28" until the script had run, and for good with scripts off. The
+// page as built now holds the heading alone, and none of the shut page's words.
+for (const [path, title] of [
+  ["/demo", "demo.title"],
+  ["/t2/demo", "part2.demo_title"],
+] as const) {
+  test(`${path} as built holds its heading and no word of the shut page`, async ({ request }) => {
+    const en: Record<string, string> = GENERATED.locale;
+    const reply = await request.get(path);
+    expect(reply.status()).toBe(200);
+    const html = await reply.text();
+    // Apostrophes and the like are escaped in HTML, so the words are looked for both ways.
+    const escaped = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;").replace(/"/g, "&quot;");
+    const holds = (s: string) => html.includes(s) || html.includes(escaped(s));
+    expect(html).toMatch(new RegExp(`<h1[^>]*>${en[title]}</h1>`));
+    for (const key of ["demo.shut_title", "demo.shut_body", "part2.demo_shut_body", "demo.shut_meanwhile"]) {
+      expect(holds(en[key]), `${path} is built with ${key}`).toBe(false);
+    }
+    expect(html).not.toMatch(/opens on Sep 28|It opens when the data locks|Until then/);
+    // Unknown is not open: no photo and no start button are built into the page either.
+    expect(holds(en["demo.start"])).toBe(false);
+    expect(html).not.toMatch(/<img[^>]+photo/);
+  });
+
+  test(`${path} with scripts off shows its heading, not that it opens on Sep 28`, async ({ browser }) => {
+    const en: Record<string, string> = GENERATED.locale;
+    const context = await browser.newContext({ javaScriptEnabled: false, serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.goto(`${BASE}${path}`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(en[title]);
+    await expect(page.getByRole("main")).not.toContainText("opens on Sep 28");
+    await context.close();
+  });
+
+  test(`${path} never shows the shut heading on its way to open, after the lock`, async ({ page }) => {
+    const en: Record<string, string> = GENERATED.locale;
+    await mockApi(page);
+    await page.clock.install({ time: AFTER_LOCK });
+    // Every heading the page shows, from the first paint on.
+    await page.addInitScript(() => {
+      const seen: string[] = [];
+      (window as unknown as { seenHeadings: string[] }).seenHeadings = seen;
+      const note = () => {
+        const text = document.querySelector("h1")?.textContent ?? "";
+        if (text && seen[seen.length - 1] !== text) seen.push(text);
+      };
+      new MutationObserver(note).observe(document, { childList: true, subtree: true, characterData: true });
+      document.addEventListener("DOMContentLoaded", note);
+    });
+    await page.goto(path);
+    await expect(page.getByRole("button", { name: "Start judge mode" })).toBeVisible();
+    const seen = await page.evaluate(() => (window as unknown as { seenHeadings: string[] }).seenHeadings);
+    expect(seen).toEqual([en[title]]);
+  });
+}
+
+test("the second look's judge mode is shut before the lock and open after it", async ({ page }) => {
+  await mockApi(page);
+  await page.clock.install({ time: new Date("2026-09-24T12:00:00Z") });
+  await page.goto("/t2/demo");
+  await expect(page.getByRole("heading", { name: "Judge mode opens on Sep 28" })).toBeVisible();
+  await expect(page.getByText(GENERATED.locale["part2.demo_shut_body"])).toBeVisible();
+  // Shut means shut: no photo is fetched and no start button exists.
+  await expect(page.locator("img.photo, img.photo-large")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Start judge mode" })).toHaveCount(0);
+
+  await page.clock.install({ time: AFTER_LOCK });
+  await page.goto("/t2/demo");
+  await expect(page.getByRole("heading", { name: "Assisted second look, judge mode" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start judge mode" })).toBeVisible();
+});
+
 // CRITIC_09 R02: the judges' door said judge mode "shows the right answer" after each photo. It
 // says only right or not: the Worker sends back { correct } and never the answer. The door now says
 // what judge mode does, and this holds the door to what the screens show.
