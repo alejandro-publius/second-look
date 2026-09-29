@@ -30,14 +30,40 @@ export function checkLanguages(): string[] {
 // The choice when this browser refuses storage, so it lasts until the page closes.
 let chosen: string | null = null;
 
+/**
+ * The first of the browser's own languages that the check offers, or null. The phone lists its
+ * languages in the order its owner likes them, such as pt-PT then en. Only the part before the
+ * first hyphen counts, and the two written forms of Norwegian, nb and nn, are the app's "no".
+ */
+export function browserLang(): string | null {
+  try {
+    const offered = checkLanguages();
+    const tags =
+      navigator.languages && navigator.languages.length > 0
+        ? navigator.languages
+        : [navigator.language];
+    for (const tag of tags) {
+      const first = String(tag ?? "")
+        .toLowerCase()
+        .split("-")[0];
+      const lang = first === "nb" || first === "nn" ? "no" : first;
+      if (offered.includes(lang)) return lang;
+    }
+  } catch {
+    // No navigator here: no language to go by.
+  }
+  return null;
+}
+
+/** A stored choice wins, then a choice made on this page, then the browser's language, then English. */
 export function getCheckLang(): string {
   try {
     const v = localStorage.getItem(LANG_KEY);
     if (v && checkLanguages().includes(v)) return v;
   } catch {
-    // Storage blocked: the choice made on this page, else English.
+    // Storage blocked: the choice made on this page, else the browser's language.
   }
-  return chosen ?? "en";
+  return chosen ?? browserLang() ?? "en";
 }
 
 export function setCheckLang(lang: string): void {
@@ -60,7 +86,8 @@ function subscribe(onChange: () => void): () => void {
   };
 }
 
-/** The chosen language, remembered on this phone, and a setter. English on the server render. */
+/** The chosen language, remembered on this phone, and a setter. With no choice yet it is the
+ * browser's own language when the check offers it. English on the server render. */
 export function useCheckLang(): [string, (lang: string) => void] {
   const lang = useSyncExternalStore(subscribe, getCheckLang, () => "en");
   return [lang, setCheckLang];

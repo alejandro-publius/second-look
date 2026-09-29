@@ -565,3 +565,66 @@ test("/check in Portuguese: the follow-ups say they are English, the rating chec
   await expect(moderate).toBeVisible();
   await expect(moderate).toHaveAttribute("lang", "pt");
 });
+
+// Audit finding phone-ux-languages-1: a phone set to Portuguese opened the check in English,
+// because only a stored choice was read. With nothing stored, the first of the browser's own
+// languages that the check offers is the default. A stored choice still wins, and a browser
+// whose languages the check does not offer stays English.
+const PICKER = "Language of the questions";
+for (const [locale, want] of [
+  ["pt-PT", "pt"],
+  ["nb-NO", "no"],
+  ["nn-NO", "no"],
+  ["fr-CA", "fr"],
+  ["en-US", "en"],
+  ["de-DE", "en"],
+] as const) {
+  test.describe(`a browser set to ${locale}`, () => {
+    test.use({ locale });
+    test(`opens the check in ${want} when nothing is stored`, async ({
+      page,
+    }) => {
+      await mockApi(page);
+      await page.goto("/check");
+      await expect(page.getByLabel(PICKER)).toHaveValue(want);
+      expect(
+        await page.evaluate(() => localStorage.getItem("sl.check_lang")),
+      ).toBeNull();
+      // The page itself stays English: only the questions follow the language.
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    });
+  });
+}
+
+test.describe("a browser set to pt-PT with a stored choice", () => {
+  test.use({ locale: "pt-PT" });
+  test("the stored choice wins over the browser's language", async ({
+    page,
+  }) => {
+    await mockApi(page);
+    await page.addInitScript(() =>
+      localStorage.setItem("sl.check_lang", "fr"),
+    );
+    await page.goto("/check");
+    await expect(page.getByLabel(PICKER)).toHaveValue("fr");
+  });
+
+  test("the first question is in the browser's language, and a pick is kept", async ({
+    page,
+  }) => {
+    const content = JSON.parse(
+      readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+    );
+    await mockApi(page);
+    await page.goto("/check");
+    await expect(page.getByLabel(PICKER)).toHaveValue("pt");
+    await placePin(page);
+    await expect(page.locator("#question > span[lang=pt]")).toHaveText(
+      content.app_strings.strings.pt.items.channel_form.text,
+    );
+    await page.goto("/check");
+    await page.getByLabel(PICKER).selectOption("en");
+    await page.reload();
+    await expect(page.getByLabel(PICKER)).toHaveValue("en");
+  });
+});
