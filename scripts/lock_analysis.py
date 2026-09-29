@@ -16,7 +16,8 @@ until it has succeeded once. In order:
  5. back up D1 (scripts/backup_d1.sh) and export the study tables from that backup
     (scripts/study_export.py) into data/export, with a copy kept next to the backup;
  6. run the pre-registered analysis once, exactly as tagged: evals/usability_analysis.py with no
-    option, which itself refuses unless the plan is byte for byte the one tagged prereg-v1;
+    option, which itself refuses unless the plan is byte for byte the one tagged prereg-v1; then
+    add the audit log's data_lock line, whose payload is the record in results/lock_analysis.json;
  7. put the human row into the README (the counts per arm and per source label, or the sentence
     that nobody finished), render every number, rebuild the report and verify every claim;
  8. make check; commit on depth; main will be that same commit (a fast-forward);
@@ -52,8 +53,8 @@ from pathlib import Path
 from typing import Any
 
 from core.lock import DATA_LOCK_UTC
+from scripts import audit_log, mac_jobs, panel_status, study_export
 from scripts import deploy_record as dr
-from scripts import mac_jobs, panel_status, study_export
 from scripts import rollback as rb
 from scripts.outward import Done, Outward
 
@@ -539,6 +540,14 @@ class Lock:
         record["part2_status"] = ((self.result2 or {}).get("primary") or {}).get("status")
         (self.root / RECORD).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
         self.log(f"ran the pre-registered analysis once: {self.result_rel}, {record['status']}")
+        # The audit log's own line for the lock, which the done list asks for and nothing wrote
+        # (found on 2026-09-29): the record above, by its hash, chained to every line before it.
+        # It goes into the lock's commit, and a failed run undoes it with everything else.
+        try:
+            receipt = audit_log.append("data_lock", record, path=self.root / "audit" / "log.jsonl")
+        except audit_log.AuditError as e:
+            raise Failed(step, f"the audit log refused the data_lock line: {e}") from e
+        self.log(f"the audit log holds the data lock, receipt {receipt[:12]}")
 
     def part2_analysis(self, export: Path) -> None:
         """Part 2 (UPDATE_31), right after part 1: the one run tagged prereg-v2, or none at all

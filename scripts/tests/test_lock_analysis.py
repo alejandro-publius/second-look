@@ -13,6 +13,7 @@ show from a separate process too.
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -31,9 +32,9 @@ import evals.assist_analysis as aa
 import evals.common as common
 import evals.usability_analysis as ua
 from core.lock import DATA_LOCK_UTC
+from scripts import audit_log, render_readme
 from scripts import deploy_record as dr
 from scripts import lock_analysis as la
-from scripts import render_readme
 from scripts.outward import Done, Reply
 from scripts.tests.fake_outward import FakeOutward
 from scripts.tests.test_study_export import make_dump, sample_sessions, session_row
@@ -436,6 +437,14 @@ def test_the_whole_chain_on_a_copy_of_the_database(world: World) -> None:
     assert "panel-counts" in (world.out.issue or "")
     log = (world.backups / "lock.log").read_text()
     assert "ran the pre-registered analysis once" in log and "pushed" in log
+    # The audit log holds one data_lock line, in the lock's commit, whose payload is the record.
+    lines = git(world.root, "show", "origin/main:audit/log.jsonl").splitlines()
+    (entry,) = [json.loads(line) for line in lines]
+    assert entry["kind"] == "data_lock" and entry["seq"] == 1
+    canonical = json.dumps(record, sort_keys=True, separators=(",", ":"), default=str)
+    assert entry["payload_sha256"] == hashlib.sha256(canonical.encode()).hexdigest()
+    assert audit_log.verify(world.root / "audit" / "log.jsonl") == 1
+    assert "the audit log holds the data lock" in log
 
 
 def assert_as_it_was(world: World, start: str, origin: tuple[str, str]) -> None:
@@ -457,6 +466,8 @@ def assert_as_it_was(world: World, start: str, origin: tuple[str, str]) -> None:
     )
     assert not (world.root / la.RECORD).exists()
     assert not list((world.root / "results").glob("usability_*"))
+    # A failed lock leaves no data_lock line behind: the log is as it was, here not there at all.
+    assert not (world.root / "audit" / "log.jsonl").exists()
     mac_files_untouched(world)
 
 

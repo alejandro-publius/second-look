@@ -161,7 +161,12 @@ def test_runs_when_tagged_pinned_and_after_lock(
     assert "differs from the version tagged" in (aa.refusal_reason(AFTER, repo) or "")
 
 
-def test_a_real_run_refuses_now_and_never_reads_synthetic(tmp_path: Path) -> None:
+def test_a_real_run_refuses_before_the_lock_and_never_reads_synthetic(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The clock is handed in: on the real one this only held until the lock, and the test went
+    # red on 2026-09-28, inside the lock job's own make check.
+    monkeypatch.setattr(aa, "now_utc", lambda: BEFORE)
     folder = aa.make_synthetic("helps", tmp_path / "h")
     assert "SYNTHETIC.txt" in (aa.guard(folder, synthetic=False) or "")
     unmarked = tmp_path / "real"

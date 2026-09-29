@@ -16,6 +16,25 @@ import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const CONTENT = fileURLToPath(new URL("../generated/content.json", import.meta.url));
+const LOCK_TS = fileURLToPath(new URL("../lib/lock.ts", import.meta.url));
+const WORDS = fileURLToPath(new URL("../../../content/locales/en.json", import.meta.url));
+
+/**
+ * What /demo must show at a given moment. Judge mode is shut until the data lock and open from it
+ * on, and the page decides by the browser's own clock (apps/web/lib/lock.ts). This check once
+ * waited for the shut page at any hour, so the lock job, which runs after the lock, could never
+ * pass its own phone check (2026-09-28). The lock's instant and the two headings are read from
+ * the files the page is built from, so they cannot drift.
+ */
+export function judgeModeExpected(now = new Date(), lockPath = LOCK_TS, wordsPath = WORDS) {
+  const found = /DATA_LOCK_UTC\s*=\s*"([^"]+)"/.exec(readFileSync(lockPath, "utf8"));
+  if (!found || Number.isNaN(Date.parse(found[1]))) throw new Error(`no DATA_LOCK_UTC in ${lockPath}`);
+  const words = JSON.parse(readFileSync(wordsPath, "utf8"));
+  const open = now.getTime() >= Date.parse(found[1]);
+  return open
+    ? { open, name: "judge mode is open, as it is from the data lock on", heading: String(words["demo.title"]) }
+    : { open, name: "judge mode says when it opens", heading: String(words["demo.shut_title"]) };
+}
 
 /**
  * The public counts by arm, as one string to compare before and after, or the reason the read
@@ -100,12 +119,21 @@ async function main() {
     if (r.method() === "POST" && new URL(r.url()).pathname === "/api/walk") writes.push(r.url());
   });
 
+  // A step that fails is tried once more after a short wait, and the log says so: one slow page
+  // load must not fail the lock job, which undoes everything on any failure. Every step only
+  // reads, so a second try can do no harm. A second failure is the result.
   async function step(name, fn) {
     try {
       await fn();
       ok(name, true);
-    } catch (e) {
-      ok(name, false, String(e).split("\n")[0].slice(0, 160));
+    } catch (first) {
+      await new Promise((r) => setTimeout(r, 3000));
+      try {
+        await fn();
+        ok(name, true, `on the second try; the first failed: ${String(first).split("\n")[0].slice(0, 120)}`);
+      } catch (e) {
+        ok(name, false, String(e).split("\n")[0].slice(0, 160));
+      }
     }
   }
 
@@ -119,9 +147,10 @@ async function main() {
     await page.goto(`${site}/t`);
     await page.getByRole("heading", { name: "Before you start" }).waitFor({ timeout: 15000 });
   });
-  await step("judge mode says when it opens", async () => {
+  const judgeMode = judgeModeExpected();
+  await step(judgeMode.name, async () => {
     await page.goto(`${site}/demo`);
-    await page.getByText("Judge mode opens on Sep 28").waitFor({ timeout: 15000 });
+    await page.getByRole("heading", { level: 1, name: judgeMode.heading, exact: true }).waitFor({ timeout: 15000 });
   });
   await step("the judges' door", async () => {
     await page.goto(`${site}/judges`);

@@ -120,3 +120,41 @@ def test_the_pick_list_creeks_come_from_every_region_in_the_build(tmp_path: Path
         {"slug": "other-creek", "name": "Other Creek"},
     ]
     assert call(f"m.pickListCreeks({json.dumps(str(tmp_path / 'none.json'))})") == []
+
+
+def test_judge_mode_is_expected_shut_before_the_lock_and_open_from_it_on() -> None:
+    """The lock job runs this check after the lock, when /demo is open. The check once waited for
+    the shut page at any hour, so the job failed its own phone check on 2026-09-28."""
+    from core.lock import DATA_LOCK_UTC
+
+    words = json.loads((ROOT / "content" / "locales" / "en.json").read_text(encoding="utf-8"))
+    lock = DATA_LOCK_UTC.strftime("%Y-%m-%dT%H:%M:%SZ")
+    before = call("m.judgeModeExpected(new Date('2026-09-28T00:59:59Z'))")
+    assert before == {
+        "open": False,
+        "name": "judge mode says when it opens",
+        "heading": words["demo.shut_title"],
+    }
+    for moment in (lock, "2026-09-28T01:17:42Z", "2026-10-15T00:00:00Z"):
+        after = call(f"m.judgeModeExpected(new Date({json.dumps(moment)}))")
+        assert after["open"] is True, moment
+        assert after["heading"] == words["demo.title"], moment
+    # The two headings must differ by more than a prefix match would see.
+    assert words["demo.title"] != words["demo.shut_title"]
+
+
+def test_judge_mode_reads_the_lock_the_page_is_built_from(tmp_path: Path) -> None:
+    from core.lock import DATA_LOCK_UTC
+
+    page_lock = (ROOT / "apps" / "web" / "lib" / "lock.ts").read_text(encoding="utf-8")
+    assert DATA_LOCK_UTC.strftime("%Y-%m-%dT%H:%M:%SZ") in page_lock
+    # A lock file with no instant in it is an error, never a silent "open".
+    empty = tmp_path / "lock.ts"
+    empty.write_text("export const NOTHING = 1;\n", encoding="utf-8")
+    body = (
+        f"const m = await import({json.dumps(SCRIPT.as_uri())});\n"
+        f"m.judgeModeExpected(new Date(), {json.dumps(str(empty))});"
+    )
+    done = node("--input-type=module", "-e", body)
+    assert done.returncode != 0
+    assert "no DATA_LOCK_UTC" in done.stderr

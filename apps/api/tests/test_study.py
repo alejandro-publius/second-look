@@ -271,6 +271,9 @@ def test_complete_twice_keeps_the_first_completion_time(client):
 
 
 def test_counts_return_counts_only(client):
+    # A day before the lock, whatever today is: on the real clock these sittings count as post
+    # lock from 2026-09-28 on, and the last line failed (found when the lock job ran, Sep 28).
+    freeze_now(NOW)
     full_session(client)
     client.post("/api/test/session", json=dict(SESSION_BODY, source_label="chat"))
     client.post(
