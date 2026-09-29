@@ -1,9 +1,10 @@
 // The creek check and the walks in the official app's own languages (UPDATE_32 section 2).
-// Mirrored questions and answers come from the app's own translations (content/app_strings.json).
-// A translation whose meaning was found to differ from the English falls back to English, and so
-// do our own words around the questions, which have no checked translation yet. A question, answer,
-// note or follow-up shown in English inside another language carries a small English tag; the
-// buttons carry lang="en" for screen readers.
+// Mirrored questions and answers come from the app's own translations (content/app_strings.json),
+// and so do the few buttons and labels the app has its own word for: Back, Next, Send and the
+// three labels of a pin (uiText below). A translation whose meaning was found to differ from the
+// English falls back to English, and so do our own words around the questions, which have no
+// checked translation yet. A question, answer, note or follow-up shown in English inside another
+// language carries a small English tag; a button in English carries lang="en" for screen readers.
 import { useSyncExternalStore } from "react";
 import { content, type FormItem, type FormSection } from "./content";
 
@@ -155,6 +156,26 @@ export function optionDescription(
 /** The app's own English answers for this item (yes, no and not sure; the feelings), or null. */
 export function englishOptions(item: FormItem): Record<string, string> | null {
   return content.app_strings.strings.en?.items[item.id]?.options ?? null;
+}
+
+/** The buttons and labels the app has its own word for (UI in scripts/app_strings.py). */
+export type UiKey =
+  | "back"
+  | "next"
+  | "send"
+  | "latitude"
+  | "longitude"
+  | "spot_name";
+
+/**
+ * A button or label of ours in the app's own word for it. `english` is our own English, which
+ * English always shows: the app's English is never shown, as one of its labels has a typo.
+ */
+export function uiText(key: UiKey, english: string, lang: string): Shown {
+  const block = content.app_strings.strings[lang] as
+    | { ui?: Record<string, string> }
+    | undefined;
+  return pick(lang, `ui:${key}`, block?.ui?.[key], english);
 }
 
 export function sectionTitle(section: FormSection, lang: string): Shown {

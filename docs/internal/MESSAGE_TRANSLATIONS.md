@@ -31,8 +31,8 @@ know. We show English for these in our app until you have had a look:
    about any kind of water entry. The Dutch also joins the two with "and" rather than "or".
 8. Norwegian, "Anger": "Raseri" reads as rage or fury, stronger than anger ("sinne").
 
-Two small English typos, in case they are useful: "Layed stones with no concrete" (laid), and
-"recent cuts if vegetation" (of).
+Three small English typos, in case they are useful: "Layed stones with no concrete" (laid),
+"recent cuts if vegetation" (of), and the label "Logitude" (Longitude).
 
 Greek is in the file with the start pages but not the questions yet, so we do not offer it.
 

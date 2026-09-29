@@ -19,7 +19,7 @@ import {
   type SpotRef,
 } from "@/lib/api";
 import { content, questionCount, regionAt, type FormItem } from "@/lib/content";
-import { shownOptions, useCheckLang } from "@/lib/lang";
+import { shownOptions, uiText, useCheckLang } from "@/lib/lang";
 import { enqueue, flushQueue, getQueued, onQueueChange } from "@/lib/offline";
 import {
   clearContributorToken,
@@ -266,6 +266,7 @@ export function CheckFlow() {
             setStage({ name: "items", index: 0 });
           }}
           onBack={() => setStage({ name: "intro" })}
+          lang={lang}
         />
       );
     case "items": {
@@ -298,7 +299,10 @@ export function CheckFlow() {
         </div>
       );
     }
-    case "photos":
+    case "photos": {
+      // Back and Send in the app's own words; the rest of this screen is ours, in English.
+      const back = uiText("back", t("check.back"), lang);
+      const sendWord = uiText("send", t("check.send"), lang);
       return (
         <div className="stack">
           <FocusHeading>{t("check.photos_title")}</FocusHeading>
@@ -317,15 +321,22 @@ export function CheckFlow() {
                   index: Math.max(0, items.length - 1),
                 })
               }
+              lang={back.lang}
             >
-              {t("check.back")}
+              {back.text}
             </button>
-            <button type="button" className="btn" onClick={() => void send()}>
-              {t("check.send")}
+            <button
+              type="button"
+              className="btn"
+              onClick={() => void send()}
+              lang={sendWord.lang}
+            >
+              {sendWord.text}
             </button>
           </div>
         </div>
       );
+    }
     case "sending":
     case "finalizing":
       return (

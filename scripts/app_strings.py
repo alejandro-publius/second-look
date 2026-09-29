@@ -10,7 +10,9 @@ content/app_strings.json. The bundle itself is never committed.
   uv run python scripts/app_strings.py check   fetch again, fail if a string we quote has changed
   uv run python scripts/app_strings.py check --bundle FILE   the same against a saved copy
 
-The map below says which app key each form item, option and section title quotes. Two edits are
+The map below says which app key each form item, option, section title, button and label quotes.
+Our English buttons and labels stay our own: the app's English is kept beside the translations for
+the check, and one of its labels has a typo. Two edits are
 made to the app's text, the same way in every language, and both are listed in
 docs/notes/app_strings.md: the answer letters such as "(A)" are dropped, because they point at the
 app's example pictures, which we do not show; and the barriers question drops its note about those
@@ -201,6 +203,17 @@ ITEMS: dict[str, dict[str, Any]] = {
 SECTIONS: dict[str, list[str]] = {
     "what_you_see": [Q1, "title"],
     "margins": [Q3, "title"],
+}
+
+# Our own button or label -> the app's own word for the same thing. The English of these is
+# ours (content/locales/en.json); the app's English, typo and all, is kept only to be checked.
+UI: dict[str, list[str]] = {
+    "back": ["previous"],
+    "next": ["next"],
+    "send": ["submit"],
+    "latitude": ["latitude"],
+    "longitude": ["longitude"],
+    "spot_name": ["site_name"],
 }
 
 _LETTER = re.compile(r"\s*\((?:[A-E]|[Α-Ε])\)\s*$")
@@ -396,8 +409,9 @@ def extract(messages: dict[str, dict[str, Any]]) -> dict[str, Any]:
         sections = {
             sid: tidy(s) for sid, path in SECTIONS.items() if (s := _get(msgs, path)) is not None
         }
+        ui = {key: tidy(s) for key, path in UI.items() if (s := _get(msgs, path)) is not None}
         if items:
-            langs[lang] = {"items": items, "sections": sections}
+            langs[lang] = {"items": items, "sections": sections, "ui": ui}
     return langs
 
 
@@ -413,6 +427,7 @@ def app_keys() -> dict[str, Any]:
             for iid, spec in ITEMS.items()
         },
         "sections": {sid: ".".join(p) for sid, p in SECTIONS.items()},
+        "ui": {key: ".".join(p) for key, p in UI.items()},
     }
 
 
@@ -460,6 +475,12 @@ def compare(committed: dict[str, Any], fresh: dict[str, Any]) -> list[str]:
         for sid, s in block["sections"].items():
             if new["sections"].get(sid) != s:
                 out.append(f"{lang} section {sid}: {s!r} is now {new['sections'].get(sid)!r}")
+        for key, s in block.get("ui", {}).items():
+            if new.get("ui", {}).get(key) != s:
+                out.append(f"{lang} ui {key}: {s!r} is now {new.get('ui', {}).get(key)!r}")
+        # A button or label the map quotes and the bundle has, but the file does not hold.
+        for key in sorted(set(new.get("ui", {})) - set(block.get("ui", {}))):
+            out.append(f"{lang} ui {key}: not in the file, the bundle has {new['ui'][key]!r}")
         for iid, entry in block["items"].items():
             got = new["items"].get(iid, {})
             for field in ("name", "text"):
@@ -492,8 +513,9 @@ def main(argv: list[str] | None = None) -> int:
         doc = build(url, text, today, previous)
         OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         n = sum(len(b["items"]) for b in doc["strings"].values())
+        ui = sum(len(b["ui"]) for b in doc["strings"].values())
         print(
-            f"app-strings: {len(doc['strings'])} languages, {n} items, "
+            f"app-strings: {len(doc['strings'])} languages, {n} items, {ui} buttons and labels, "
             f"sha256 {doc['source']['bundle_sha256'][:12]} into {OUT.relative_to(ROOT)}"
         )
         return 0

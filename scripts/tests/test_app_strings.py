@@ -94,8 +94,12 @@ def test_every_fallback_says_why() -> None:
     for lang, entries in DOC["fallback"].items():
         assert lang in DOC["languages"]
         for key, why in entries.items():
-            iid = key.split(".", 1)[0]
-            assert iid in DOC["strings"]["en"]["items"], key
+            if key.startswith("ui:"):
+                # A button or label: "ui:back". A question or answer: "item.text".
+                assert key.removeprefix("ui:") in a.UI, key
+            else:
+                iid = key.split(".", 1)[0]
+                assert iid in DOC["strings"]["en"]["items"], key
             assert len(why) > 20, f"{lang} {key}: say why it falls back"
 
 
@@ -104,6 +108,78 @@ def test_the_check_notices_a_changed_quote() -> None:
     fresh["strings"]["it"]["items"]["draining_pipes"]["text"] = "Something else?"
     assert any("it draining_pipes text" in d for d in a.compare(DOC, fresh))
     assert a.compare(DOC, DOC) == []
+
+
+def test_the_check_notices_a_changed_or_missing_button_or_label() -> None:
+    fresh = json.loads(json.dumps(DOC))
+    fresh["strings"]["nl"]["ui"]["back"] = "Terug"
+    del fresh["strings"]["fr"]["ui"]["spot_name"]
+    diffs = a.compare(DOC, fresh)
+    assert any(d.startswith("nl ui back: 'Vorige' is now 'Terug'") for d in diffs), diffs
+    assert any(d.startswith("fr ui spot_name: 'Nom du site' is now None") for d in diffs), diffs
+    assert len(diffs) == 2
+    # The other way round: the file lacks a string the map quotes and the bundle has.
+    stale = json.loads(json.dumps(DOC))
+    del stale["strings"]["no"]["ui"]["next"]
+    assert a.compare(stale, DOC) == ["no ui next: not in the file, the bundle has 'Neste'"]
+
+
+def test_every_button_and_label_has_each_language_or_an_explicit_fallback() -> None:
+    assert set(DOC["app_keys"]["ui"]) == set(a.UI)
+    for key, path in a.UI.items():
+        assert DOC["app_keys"]["ui"][key] == ".".join(path)
+    for lang in DOC["languages"]:
+        ui = DOC["strings"][lang]["ui"]
+        fallback = DOC["fallback"].get(lang, {})
+        for key in a.UI:
+            assert ui.get(key) or f"ui:{key}" in fallback, (
+                f"{lang} {key} has neither a translation nor a fallback"
+            )
+
+
+def test_our_english_buttons_and_labels_stay_ours() -> None:
+    """The app's English is kept as the app has it, typo and all, so the check can notice a
+    change. What an English screen shows is our own locale, which the app's typo never reaches."""
+    assert DOC["strings"]["en"]["ui"]["longitude"] == "Logitude"
+    locale = json.loads((ROOT / "content" / "locales" / "en.json").read_text(encoding="utf-8"))
+    ours = {
+        "back": "check.back",
+        "next": "check.next",
+        "send": "check.send",
+        "latitude": "check.pin_lat",
+        "longitude": "check.pin_lon",
+        "spot_name": "check.pin_name",
+    }
+    assert set(ours) == set(a.UI)
+    assert {key: locale[name] for key, name in ours.items()} == {
+        "back": "Back",
+        "next": "Next",
+        "send": "Send",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "spot_name": "Name for this spot",
+    }
+    web = (ROOT / "apps" / "web" / "lib" / "lang.ts").read_text(encoding="utf-8")
+    assert 'if (lang === "en") return { text: english, lang: "en", english: false };' in web
+
+
+def test_the_bundle_reader_finds_the_buttons_and_labels() -> None:
+    src = (
+        'const e={messages:{en:{next:"Next",previous:"Previous",submit:"Submit",'
+        'latitude:"Latitude",longitude:"Logitude",site_name:"Site Name",'
+        'feelings:{question:"How?"}},'
+        'pt:{next:"Seguinte",previous:"Anterior",feelings:{question:"Como?"}}}};'
+    )
+    got = a.extract(a.parse_bundle(src))
+    assert got["en"]["ui"] == {
+        "back": "Previous",
+        "next": "Next",
+        "send": "Submit",
+        "latitude": "Latitude",
+        "longitude": "Logitude",
+        "spot_name": "Site Name",
+    }
+    assert got["pt"]["ui"] == {"back": "Anterior", "next": "Seguinte"}
 
 
 def test_no_quoted_string_carries_a_dash_the_repository_bans() -> None:

@@ -55,7 +55,7 @@ None. Three translated strings match the English exactly, but each is a real wor
 - pt: 107 strings checked, 3 flagged
 - nl: 107 strings checked, 2 flagged
 - no: 107 strings checked, 4 flagged
-- fr: 107 strings checked, 3 flagged
+- fr: 107 strings checked, 2 flagged
 - it: 107 strings checked, 3 flagged
 - Total: 535 strings checked, 14 flagged (3 high, 11 medium), 0 untranslated
 
@@ -70,3 +70,49 @@ None. Three translated strings match the English exactly, but each is a real wor
 - no natural_debris "naturlig avfall" (natural waste) is clear once the answer options are shown.
 - fr water_height_m "profondeur" (depth) is a reasonable reading of "water height".
 - fr bottom_type drops "wet", pt vegetation_cuts drops "(or just one of the banks)" and pt water_withdrawal drops "use". Each omission is small, and the question is unchanged.
+
+## Buttons and labels, checked on 2026-09-29
+
+The app has its own word for six of our buttons and labels, in the same bundle (sha256
+c5a15e8ebf91). Each was read beside our English by the same rule before it reached the screen:
+would a person reading this press the button, or fill the box, for a different reason than one
+reading the English? 6 strings in each of 5 languages, 30 in all. None flagged, so `fallback`
+holds no entry for them.
+
+| ours | our English | app key | app English | pt | nl | no | fr | it |
+|---|---|---|---|---|---|---|---|---|
+| back | Back | previous | Previous | Anterior | Vorige | Forrige | Précédent | Indietro |
+| next | Next | next | Next | Seguinte | Volgende | Neste | Suivant | Avanti |
+| send | Send | submit | Submit | Submeter | Indienen | Send inn | Soumettre | Invia |
+| latitude | Latitude | latitude | Latitude | Latitude | Breedtegraad | Breddegrad | Latitude | Latitudine |
+| longitude | Longitude | longitude | Logitude | Longitude | Lengtegraad | Lengdegrad | Longitude | Longitudine |
+| spot_name | Name for this spot | site_name | Site Name | Nome do Local | Locatienaam | Stedsnavn | Nom du site | Nome del sito |
+
+Back-translations, where the word is not the plain twin of the English:
+
+- back: pt, nl, no and fr say "previous"; it "Indietro" says "back". Both go one screen back.
+- next: it "Avanti" says "forward". The others say "next" or "following".
+- send: pt "Submeter" and fr "Soumettre" say "submit", nl "Indienen" says "hand in", no "Send
+  inn" says "send in", it "Invia" says "send". Our button sends the check, as the app's does.
+- latitude and longitude: nl and no use their own words, "degree of breadth" and "degree of
+  length", which are the usual names for the two.
+- spot_name: pt "name of the place", nl "location name", no "place name", fr and it "name of
+  the site".
+
+English keeps our own words. The app's English is kept in the file only so the check can see
+it change, and one label has a typo, "Logitude". It is never shown.
+
+Looked at but not flagged (low confidence):
+
+- The app's "site" is a research site picked from a list or added by hand. Our spot is a place
+  the volunteer names. Both boxes ask for the name of the place being checked.
+- no "Stedsnavn" is also the word for a name on a map, so a person may type the name of the
+  town. That is still a name for the place, and the line under the box says to name the place.
+- it "sito" can also mean a website. Under latitude and longitude it reads as a place.
+- The app's Submit is its last step. Our Send stores the check and any follow-up question comes
+  after it. The line above the button says so, in English.
+- pt and fr "Latitude" and "Longitude" match the English letter for letter. Each is the real
+  word in its own language.
+
+Skip, None of these, Finish, Start the check, Add a photo and Drop a pin instead have no app
+word. They stay English, and a button in English says so to a screen reader with `lang="en"`.

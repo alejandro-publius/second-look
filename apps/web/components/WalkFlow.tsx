@@ -34,7 +34,7 @@ import {
   startQueueWatcher,
   type WalkState,
 } from "@/lib/offline";
-import { shownOptions, useCheckLang } from "@/lib/lang";
+import { shownOptions, uiText, useCheckLang } from "@/lib/lang";
 import { t } from "@/lib/t";
 import { buildRecord, settleFollowups, walkQuestions } from "@/lib/walks";
 
@@ -545,8 +545,9 @@ export function WalkFlow({ walk }: { walk: Walk }) {
                   index: Math.max(0, items.length - 1),
                 })
               }
+              lang={uiText("back", t("check.back"), lang).lang}
             >
-              {t("check.back")}
+              {uiText("back", t("check.back"), lang).text}
             </button>
             <button type="button" className="btn" onClick={afterFollowups}>
               {t("check.finish")}

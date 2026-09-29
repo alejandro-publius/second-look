@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FocusHeading } from "./FocusHeading";
 import type { SpotRef } from "@/lib/api";
+import { uiText } from "@/lib/lang";
 import { savedSpots } from "@/lib/session";
 import { t } from "@/lib/t";
 
@@ -13,8 +14,18 @@ type Mode = "ask" | "found" | "pin";
  * coordinates pin or a saved spot. No map tiles: a tile server would be a third-party origin.
  * GPS positions are rounded to two decimals (about 1 km) and marked coarse. A pin a person places
  * is sent as typed and marked exact.
+ *
+ * lang is the language of the questions. The three labels of a pin, Back and Next are in the
+ * official app's own words in it (audit finding phone-ux-languages-3); the rest is ours, in English.
  */
-export function LocationStep({ onNext, onBack }: { onNext: (spot: SpotRef) => void; onBack?: () => void }) {
+export function LocationStep({ onNext, onBack, lang = "en" }: { onNext: (spot: SpotRef) => void; onBack?: () => void; lang?: string }) {
+  const words = {
+    latitude: uiText("latitude", t("check.pin_lat"), lang),
+    longitude: uiText("longitude", t("check.pin_lon"), lang),
+    name: uiText("spot_name", t("check.pin_name"), lang),
+    back: uiText("back", t("check.back"), lang),
+    next: uiText("next", t("check.next"), lang),
+  };
   const [mode, setMode] = useState<Mode>("ask");
   const [status, setStatus] = useState<string | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lon: number; coarse: boolean } | null>(null);
@@ -115,11 +126,15 @@ export function LocationStep({ onNext, onBack }: { onNext: (spot: SpotRef) => vo
             <>
               <p className="small muted">{t("check.map_note")}</p>
               <label className="field">
-                <span className="field-label">{t("check.pin_lat")}</span>
+                <span className="field-label" lang={words.latitude.lang}>
+                  {words.latitude.text}
+                </span>
                 <input className="text-input" type="number" inputMode="decimal" step="any" min={-90} max={90} value={lat} onChange={(e) => setLat(e.target.value)} name="latitude" />
               </label>
               <label className="field">
-                <span className="field-label">{t("check.pin_lon")}</span>
+                <span className="field-label" lang={words.longitude.lang}>
+                  {words.longitude.text}
+                </span>
                 <input className="text-input" type="number" inputMode="decimal" step="any" min={-180} max={180} value={lon} onChange={(e) => setLon(e.target.value)} name="longitude" />
               </label>
             </>
@@ -127,7 +142,9 @@ export function LocationStep({ onNext, onBack }: { onNext: (spot: SpotRef) => vo
             <p className="small muted">{t("check.location_coarse", { lat: coords.lat, lon: coords.lon })}</p>
           ) : null}
           <label className="field">
-            <span className="field-label">{t("check.pin_name")}</span>
+            <span className="field-label" lang={words.name.lang}>
+              {words.name.text}
+            </span>
             <input className="text-input" type="text" value={name} onChange={(e) => setName(e.target.value)} name="spot_name" autoComplete="off" maxLength={80} aria-describedby="spot-name-public" />
           </label>
           <p className="small muted" id="spot-name-public">
@@ -140,12 +157,12 @@ export function LocationStep({ onNext, onBack }: { onNext: (spot: SpotRef) => vo
           ) : null}
           <div className="btn-row">
             {onBack ? (
-              <button type="button" className="btn btn-secondary" onClick={onBack}>
-                {t("check.back")}
+              <button type="button" className="btn btn-secondary" onClick={onBack} lang={words.back.lang}>
+                {words.back.text}
               </button>
             ) : null}
-            <button type="submit" className="btn">
-              {t("check.next")}
+            <button type="submit" className="btn" lang={words.next.lang}>
+              {words.next.text}
             </button>
           </div>
         </form>

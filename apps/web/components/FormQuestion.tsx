@@ -17,6 +17,7 @@ import {
   optionDescription,
   optionText,
   sectionTitle,
+  uiText,
   type Shown,
 } from "@/lib/lang";
 import { t } from "@/lib/t";
@@ -197,10 +198,19 @@ export function FormQuestion({
     </>
   );
 
+  // Back and Next are in the app's own words (audit finding phone-ux-languages-3). Skip and
+  // None of these have no app word, so they stay English and say so to a screen reader.
+  const back = uiText("back", t("check.back"), lang);
+  const next = uiText("next", t("check.next"), lang);
   const nav = (extra?: React.ReactNode) => (
-    <div className="btn-row" {...ours}>
-      <button type="button" className="btn btn-secondary" onClick={onBack}>
-        {t("check.back")}
+    <div className="btn-row">
+      <button
+        type="button"
+        className="btn btn-secondary"
+        onClick={onBack}
+        lang={back.lang}
+      >
+        {back.text}
       </button>
       {extra}
     </div>
@@ -315,6 +325,7 @@ export function FormQuestion({
                 type="button"
                 className="btn btn-secondary"
                 onClick={onSkip}
+                {...ours}
               >
                 {t("check.none_of_these")}
               </button>
@@ -322,8 +333,9 @@ export function FormQuestion({
                 type="button"
                 className="btn"
                 onClick={() => onAnswer(chosen)}
+                lang={next.lang}
               >
-                {t("check.next")}
+                {next.text}
               </button>
             </>,
           )}
@@ -378,11 +390,12 @@ export function FormQuestion({
                 type="button"
                 className="btn btn-secondary"
                 onClick={onSkip}
+                {...ours}
               >
                 {t("check.skip")}
               </button>
-              <button type="submit" className="btn">
-                {t("check.next")}
+              <button type="submit" className="btn" lang={next.lang}>
+                {next.text}
               </button>
             </>,
           )}
@@ -473,8 +486,9 @@ export function FormQuestion({
                 if (out.length === 0) onSkip();
                 else onAnswer(out);
               }}
+              lang={next.lang}
             >
-              {t("check.next")}
+              {next.text}
             </button>,
           )}
         </div>
