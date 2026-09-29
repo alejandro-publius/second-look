@@ -11,6 +11,7 @@ what the manifests say (`evals/tests/test_data_card.py::test_the_committed_file_
 | Set | What it is for | Rows | Where |
 |---|---|---|---|
 | Test photos | the 16 items of the two-minute test, 4 per feature, and the 16 photos every model is tested on | <!--v:results/data_card.json#/photos/test/rows-->16<!--/v--> | `photos/manifest.csv`, role `test` |
+| Part 2 photos | the items of part 2, the assisted second look, one with the feature and one without for each feature; never shown in a lesson, a practice card or the test | <!--v:results/data_card.json#/photos/part2/rows-->8<!--/v--> | role `part2`, `content/part2_items.yaml` |
 | Lesson photos | the lesson cards, with their numbered marks | <!--v:results/data_card.json#/photos/lesson/rows-->16<!--/v--> | role `lesson` |
 | Practice photos | one worked example per feature | <!--v:results/data_card.json#/photos/practice/rows-->4<!--/v--> | role `practice` |
 | Warm-up photos | the "Which creek is healthier?" pair on the first screen | <!--v:results/data_card.json#/photos/warmup/rows-->2<!--/v--> | role `warmup` |
@@ -20,9 +21,13 @@ what the manifests say (`evals/tests/test_data_card.py::test_the_committed_file_
 
 In all, `photos/manifest.csv` has <!--v:results/data_card.json#/photos/rows-->92<!--/v--> rows, one per
 image, and `make manifest-check` fails when an image under `photos/` has no row or its hash does
-not match. The smaller AVIF and WebP copies of the two warm-up photos have their own rows in
-`photos/derived/manifest.csv`. No video file is committed: the videos stay in a cache outside the
-repository, and only the stills cut from them are committed, in `photos/benchmark/`.
+not match. The photo sets above add up to that total, and a test fails when a row belongs to no
+set or a set has no line in this table
+(`evals/tests/test_data_card.py::test_the_photo_sets_add_up_to_every_row`,
+`evals/tests/test_data_card.py::test_the_card_has_a_line_for_every_photo_set`). The smaller AVIF
+and WebP copies of the two warm-up photos have their own rows in `photos/derived/manifest.csv`. No
+video file is committed: the videos stay in a cache outside the repository, and only the stills
+cut from them are committed, in `photos/benchmark/`.
 
 ## Sources
 
@@ -31,7 +36,9 @@ Commons <!--v:results/data_card.json#/photos/by_source/Wikimedia Commons-->41<!-
 iNaturalist <!--v:results/data_card.json#/photos/by_source/iNaturalist-->11<!--/v-->, and frames from YouTube
 videos <!--v:results/data_card.json#/photos/by_source/YouTube-->40<!--/v-->. The test photos come from Wikimedia
 Commons (<!--v:results/data_card.json#/photos/test/by_source/Wikimedia Commons-->12<!--/v-->) and
-iNaturalist (<!--v:results/data_card.json#/photos/test/by_source/iNaturalist-->4<!--/v-->).
+iNaturalist (<!--v:results/data_card.json#/photos/test/by_source/iNaturalist-->4<!--/v-->), and so do
+the part 2 photos (Wikimedia Commons <!--v:results/data_card.json#/photos/part2/by_source/Wikimedia Commons-->6<!--/v-->,
+iNaturalist <!--v:results/data_card.json#/photos/part2/by_source/iNaturalist-->2<!--/v-->).
 
 - `scripts/find_open_photos.py` searched both collections, one request a second, and wrote a
   contact sheet a person reads. Plants came from research grade iNaturalist observations,
@@ -124,7 +131,9 @@ a concrete channel." A frame's evidence is the video's description, and says whe
 description supports no label.
 
 **The key.** `scripts/freeze_key.py` hashed the 16 test labels into `results/key_hash.json` and
-wrote the moment to the audit log. The key never ships to a browser: the web build fails if a
+wrote the moment to the audit log. The part 2 labels are written out in `docs/analysis_plan_v2.md`,
+which was tagged `prereg-v2` before any part 2 session (`docs/notes/plan_hash.md`), and in
+`content/part2_items.yaml`. Neither key ever ships to a browser: the web build fails if a
 served file carries a gold label (`apps/web/scripts/check-bundle.mjs`).
 
 ## What is labelled and what is not
@@ -132,6 +141,7 @@ served file carries a gold label (`apps/web/scripts/check-bundle.mjs`).
 | Set | Labelled | What the label is |
 |---|---|---|
 | Test photos | <!--v:results/data_card.json#/photos/test/labelled-->16<!--/v--> of <!--v:results/data_card.json#/photos/test/rows-->16<!--/v--> | <!--v:results/data_card.json#/photos/test/present-->8<!--/v--> present and <!--v:results/data_card.json#/photos/test/absent-->8<!--/v--> absent, 2 and 2 for each feature; the key the test and the models are scored against |
+| Part 2 photos | <!--v:results/data_card.json#/photos/part2/labelled-->8<!--/v--> of <!--v:results/data_card.json#/photos/part2/rows-->8<!--/v--> | <!--v:results/data_card.json#/photos/part2/present-->4<!--/v--> present and <!--v:results/data_card.json#/photos/part2/absent-->4<!--/v--> absent, one and one for each feature; the key part 2's answers are scored against |
 | Lesson photos | <!--v:results/data_card.json#/photos/lesson/labelled-->16<!--/v--> of <!--v:results/data_card.json#/photos/lesson/rows-->16<!--/v--> | <!--v:results/data_card.json#/photos/lesson/present-->8<!--/v--> present and <!--v:results/data_card.json#/photos/lesson/absent-->8<!--/v--> absent; used to teach, never scored |
 | Practice photos | <!--v:results/data_card.json#/photos/practice/labelled-->4<!--/v--> of <!--v:results/data_card.json#/photos/practice/rows-->4<!--/v--> | all present; never scored |
 | Warm-up photos | <!--v:results/data_card.json#/photos/warmup/labelled-->0<!--/v--> of <!--v:results/data_card.json#/photos/warmup/rows-->2<!--/v--> | no feature label; which creek is healthier is a judgement the end screen explains, and the warm-up answers are described, never scored |
@@ -144,7 +154,7 @@ served file carries a gold label (`apps/web/scripts/check-bundle.mjs`).
 - One labeller, and the record cannot yet show that the key was set blind. Until a second, blind
   label file exists, read every accuracy figure as agreement with this key.
 - Four test photos per feature is a small set. It shows a person what to practise; it cannot rank
-  people finely.
+  people finely. Part 2 has two photos per feature, which is smaller still.
 - The photos are from other countries and seasons than the creeks a Berkeley volunteer will see.
 - No footage frame has a label, so nothing measures a model's accuracy on footage.
 

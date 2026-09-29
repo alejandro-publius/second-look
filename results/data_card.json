@@ -88,9 +88,42 @@
     },
     "marked_synthetic": 0,
     "marked_with_faces": 0,
-    "other_roles": [
-      "part2"
-    ],
+    "other_roles": [],
+    "part2": {
+      "absent": 4,
+      "by_licence": {
+        "CC-BY-4.0": 1,
+        "CC-BY-SA-2.0": 4,
+        "CC-BY-SA-4.0": 1,
+        "CC0-1.0": 2
+      },
+      "by_source": {
+        "Wikimedia Commons": 6,
+        "iNaturalist": 2
+      },
+      "labelled": 8,
+      "per_feature": {
+        "artificial_bank": {
+          "absent": 1,
+          "present": 1
+        },
+        "dug_out_channel": {
+          "absent": 1,
+          "present": 1
+        },
+        "invasive_plant": {
+          "absent": 1,
+          "present": 1
+        },
+        "pipe_running": {
+          "absent": 1,
+          "present": 1
+        }
+      },
+      "present": 4,
+      "rows": 8,
+      "unlabelled": 0
+    },
     "practice": {
       "absent": 0,
       "by_licence": {
