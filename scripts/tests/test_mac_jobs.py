@@ -89,6 +89,11 @@ def test_the_second_run_fires_at_21_10_on_oct_2_in_california() -> None:
     first = mac_jobs.by_name("lock")
     assert first.command == ("uv", "run", "python", "scripts/lock_analysis.py")
     assert first.options() == () and job.options() == ("--wave", "2")
+    # DEPLOY.md lists every job; the second run's row gives the same instant and its targets.
+    deploy = (ROOT / "DEPLOY.md").read_text(encoding="utf-8")
+    (row,) = [ln for ln in deploy.splitlines() if ln.startswith("| `com.secondlook.lock2` |")]
+    assert "2026-10-03T04:10:00Z" in row and "21:10 on Oct 2" in row
+    assert "`scripts/lock_analysis.py --wave 2`" in row and "`make lock-analysis-2-install`" in row
 
 
 def test_install_writes_and_loads_every_job_from_the_checkout(tmp_path: Path) -> None:
