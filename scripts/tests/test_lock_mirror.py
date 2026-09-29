@@ -275,3 +275,81 @@ def test_nothing_else_in_the_repo_calls_is_before_lock() -> None:
         # The check itself: it names the function to look for it, and calls nothing.
         "apps/web/scripts/lock-mirror.mjs",
     ]
+
+
+# What lock.ts answers ---------------------------------------------------------------------------
+
+
+def lock_ts(expr: str) -> Any:
+    """Evaluate expr with apps/web/lib/lock.ts as m. The file is turned into JavaScript by the
+    TypeScript the web app already installs, so this runs the page's own code, in Node."""
+    if shutil.which("node") is None:
+        pytest.skip("needs node")
+    body = (
+        'import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";\n'
+        'import { tmpdir } from "node:os";\n'
+        'import { join } from "node:path";\n'
+        'import { pathToFileURL } from "node:url";\n'
+        'import ts from "typescript";\n'
+        f"const source = readFileSync({json.dumps(str(LOCK_TS))}, 'utf8');\n"
+        "const js = ts.transpileModule(source, { compilerOptions: "
+        "{ module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;\n"
+        'const out = join(mkdtempSync(join(tmpdir(), "lock-ts-")), "lock.mjs");\n'
+        "writeFileSync(out, js);\n"
+        "const m = await import(pathToFileURL(out).href);\n"
+        f"process.stdout.write(JSON.stringify(await ({expr})));"
+    )
+    done = subprocess.run(
+        ["node", "--input-type=module", "-e", body],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+        cwd=ROOT / "apps" / "web",
+    )
+    assert done.returncode == 0, done.stderr
+    return json.loads(done.stdout)
+
+
+SHUT_MOMENTS = [
+    "2026-09-24T12:00:00Z",
+    "2026-09-28T00:59:59Z",
+    "2026-09-28T01:00:00Z",  # the first lock, where judge mode once opened
+    "2026-09-29T21:00:00Z",
+    "2026-09-30T04:00:00Z",  # the second wave opens
+    "2026-10-03T03:59:59Z",
+    "2026-10-03T03:59:59.999Z",
+]
+OPEN_MOMENTS = ["2026-10-03T04:00:00Z", "2026-10-03T04:00:00.001Z", "2026-10-15T00:00:00Z"]
+
+
+def test_the_page_holds_judge_mode_shut_until_the_second_lock() -> None:
+    moments = SHUT_MOMENTS + OPEN_MOMENTS
+    got = lock_ts(f"{json.dumps(moments)}.map((t) => m.isJudgeModeShut(new Date(t)))")
+    assert got == [True] * len(SHUT_MOMENTS) + [False] * len(OPEN_MOMENTS)
+    # The same answers as core/lock.py gives, moment by moment.
+    assert got == [
+        lock.is_judge_mode_shut(datetime.fromisoformat(t.replace("Z", "+00:00"))) for t in moments
+    ]
+
+
+def test_is_before_lock_is_the_same_answer_under_its_old_name() -> None:
+    # The two judge mode pages call it. It must not read the first lock any more.
+    moments = SHUT_MOMENTS + OPEN_MOMENTS
+    got = lock_ts(f"{json.dumps(moments)}.map((t) => m.isBeforeLock(new Date(t)))")
+    assert got == [True] * len(SHUT_MOMENTS) + [False] * len(OPEN_MOMENTS)
+
+
+def test_the_page_exports_the_times_as_text() -> None:
+    got = lock_ts(
+        "[m.DATA_LOCK_UTC, m.WAVE2_OPEN_UTC, m.SECOND_LOCK_UTC, m.JUDGE_MODE_OPENS_UTC, "
+        "typeof m.isJudgeModeShut(), typeof m.isBeforeLock()]"
+    )
+    assert got == [
+        "2026-09-28T01:00:00Z",
+        "2026-09-30T04:00:00Z",
+        "2026-10-03T04:00:00Z",
+        "2026-10-03T04:00:00Z",
+        "boolean",
+        "boolean",
+    ]
