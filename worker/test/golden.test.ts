@@ -22,6 +22,7 @@ import { pyRound } from "../src/core/pyround";
 import { creekBySlug, placeSpot, reachOf, reachesBelow } from "../src/core/regions";
 import { sha256Hex } from "../src/core/sha256";
 import { WalkRecordError, isDemo, walkBundle, walkChecks, walkFollowups, walkRecord } from "../src/core/walks";
+import { FHIR_JSON, PLAIN_JSON, fhirMediaType, operationOutcome } from "../src/fhir_http";
 import worker from "../src/index";
 import { storeUpload, stripJpeg } from "../src/uploads";
 
@@ -363,8 +364,6 @@ test("uploads: a stored photo is put in KV to expire after 30 days", async () =>
   assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
 });
 
-const PLAIN_JSON = "application/json; charset=utf-8";
-
 /** A store that only writes down what it was asked, for the routes below. */
 function recordingStore(changes = 0) {
   const ran: { sql: string; args: unknown[] }[] = [];
@@ -388,6 +387,31 @@ function recordingStore(changes = 0) {
   return { ran, env: { DB, PHOTOS: {} } as unknown as Parameters<typeof worker.fetch>[1] };
 }
 
+// Audit finding api-fhir-5: an error on a route that answers with a FHIR resource is FHIR's own
+// OperationOutcome. apps/api/tests/test_fhir_routes.py holds the same one, letter for letter.
+test("fhir_http: an error as an OperationOutcome, the same as Python", () => {
+  assert.deepEqual(operationOutcome(404, "no FHIR record for this visit"), {
+    resourceType: "OperationOutcome",
+    text: { status: "generated", div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>no FHIR record for this visit</p></div>' },
+    issue: [{ severity: "error", code: "not-found", details: { text: "no FHIR record for this visit" } }],
+  });
+  assert.deepEqual(
+    [404, 409, 413, 422, 429, 500, 503].map((status) => operationOutcome(status, "x").issue[0].code),
+    ["not-found", "conflict", "too-long", "invalid", "throttled", "exception", "exception"],
+  );
+  assert.equal(operationOutcome(404, "a <b> & c").text.div, '<div xmlns="http://www.w3.org/1999/xhtml"><p>a &lt;b&gt; &amp; c</p></div>');
+});
+
+test("fhir_http: FHIR's media type, and plain JSON for a browser that opens the link", () => {
+  assert.equal(FHIR_JSON, "application/fhir+json; charset=utf-8");
+  for (const accept of [null, "", "*/*", "application/fhir+json", "application/json", "application/fhir+json, text/plain"]) {
+    assert.equal(fhirMediaType(accept), FHIR_JSON, String(accept));
+  }
+  for (const accept of ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "TEXT/HTML"]) {
+    assert.equal(fhirMediaType(accept), PLAIN_JSON, accept);
+  }
+});
+
 const ask = async (env: Parameters<typeof worker.fetch>[1], address: string, headers: Record<string, string> = {}) => {
   const res = await worker.fetch(new Request(`http://127.0.0.1${address}`, { headers }), env);
   return { status: res.status, type: res.headers.get("content-type"), vary: res.headers.get("vary"), cache: res.headers.get("cache-control"), body: await res.json() };
@@ -397,16 +421,16 @@ const ask = async (env: Parameters<typeof worker.fetch>[1], address: string, hea
 // malformed". A broken percent code is an id nobody has: a plain 404, and the store is not asked.
 test("routes: a broken percent code in the address is a plain 404", async () => {
   const { ran, env } = recordingStore();
-  const addresses = [
-    "/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/photo/%E0%A4%A?t=x", "/api/inaturalist/%",
-    "/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%", "/api/fhir/referral/%/example-result",
-  ];
-  for (const address of addresses) {
+  for (const address of ["/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/photo/%E0%A4%A?t=x", "/api/inaturalist/%"]) {
     const answer = await ask(env, address);
     assert.deepEqual([answer.status, answer.body, answer.type], [404, { detail: "Not found." }, PLAIN_JSON], address);
   }
   const quick = await worker.fetch(new Request("http://127.0.0.1/api/quick/%E0%A4%A", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }), env);
   assert.deepEqual([quick.status, await quick.json()], [404, { detail: "Not found." }]);
+  for (const address of ["/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%", "/api/fhir/referral/%/example-result"]) {
+    const answer = await ask(env, address);
+    assert.deepEqual([answer.status, answer.body, answer.type], [404, operationOutcome(404, "Not found."), FHIR_JSON], address);
+  }
   assert.deepEqual(ran, [], "nothing was asked of the store");
 });
 
@@ -423,8 +447,26 @@ test("routes: a 500 says one fixed sentence and never the error's own text", asy
   const plain = await ask(env, "/api/creeks");
   assert.deepEqual([plain.status, plain.body], [500, { detail: sentence }], "no error field");
   const fhir = await ask(env, "/api/fhir/Bundle/visit-0001");
-  assert.deepEqual([fhir.status, fhir.body], [500, { detail: sentence }]);
+  assert.deepEqual([fhir.status, fhir.body, fhir.type], [500, operationOutcome(500, sentence), FHIR_JSON]);
   const study = await worker.fetch(new Request("http://127.0.0.1/api/test/counts"), env);
   assert.deepEqual([study.status, await study.json()], [500, { detail: sentence }], "the study routes too");
   for (const answer of [plain.body, fhir.body]) assert.ok(!JSON.stringify(answer).includes("secret") && !JSON.stringify(answer).includes("D1_ERROR"));
+});
+
+test("routes: a FHIR route answers under FHIR's media type, found or not", async () => {
+  const rows: Record<string, unknown> = {};
+  const env = {
+    DB: { prepare: () => ({ bind: () => ({ first: async () => rows.next ?? null, all: async () => ({ results: [] }) }) }) },
+    PHOTOS: {},
+  } as unknown as Parameters<typeof worker.fetch>[1];
+  const missing = await ask(env, "/api/fhir/Bundle/visit-nowhere");
+  assert.deepEqual([missing.status, missing.body], [404, operationOutcome(404, "no FHIR record for this visit")]);
+  assert.deepEqual([missing.type, missing.vary, missing.cache], [FHIR_JSON, "Accept", "no-store"]);
+  const spot = await ask(env, "/api/spot/spot-nowhere/fhir");
+  assert.deepEqual([spot.status, spot.body, spot.type], [404, operationOutcome(404, "no FHIR record for this spot yet"), FHIR_JSON]);
+  const inBrowser = await ask(env, "/api/fhir/Bundle/visit-nowhere", { accept: "text/html,application/xhtml+xml,*/*;q=0.8" });
+  assert.deepEqual([inBrowser.status, inBrowser.type, inBrowser.body], [404, PLAIN_JSON, missing.body], "the same bytes, shown in the tab");
+  // The routes that are not FHIR resources keep plain JSON.
+  assert.equal((await ask(env, "/api/fhir/validation")).type, PLAIN_JSON);
+  assert.equal((await ask(env, "/api/nothing-here")).type, PLAIN_JSON);
 });

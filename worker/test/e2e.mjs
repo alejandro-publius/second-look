@@ -182,7 +182,17 @@ async function api(method, path, body, headers = {}) {
   return { status: res.status, data, res };
 }
 
+// Audit finding api-fhir-5. The routes that answer with a FHIR resource send FHIR's own media
+// type, and an error on them is an OperationOutcome with the sentence the other routes put in
+// detail. A browser that opens the link asks for text/html and gets the same bytes as plain JSON.
+const FHIR_JSON = "application/fhir+json; charset=utf-8";
 const PLAIN_JSON = "application/json; charset=utf-8";
+const outcome = (code, sentence) => ({
+  resourceType: "OperationOutcome",
+  text: { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"><p>${sentence}</p></div>` },
+  issue: [{ severity: "error", code, details: { text: sentence } }],
+});
+const typeOf = (answer) => answer.res.headers.get("content-type");
 
 async function passingSession() {
   const created = await api("POST", "/api/test/session", {
@@ -324,6 +334,20 @@ try {
   const validation = await api("GET", "/api/fhir/validation");
   assert.equal(validation.data.errors, 0);
   assert.equal(validation.data.ig_commit, "b907cf0");
+  // A record as FHIR goes out under FHIR's media type; the validator's verdict and the record
+  // for the page are not FHIR resources and stay plain JSON.
+  assert.deepEqual([typeOf(fhir), typeOf(bySpot)], [FHIR_JSON, FHIR_JSON]);
+  assert.deepEqual([typeOf(validation), typeOf(record)], [PLAIN_JSON, PLAIN_JSON]);
+  assert.deepEqual([fhir.res.headers.get("vary"), fhir.res.headers.get("cache-control"), fhir.res.headers.get("access-control-allow-origin")], ["Accept", "no-store", "*"]);
+  const asked = await api("GET", `/api/fhir/Bundle/${first.visit_id}`, undefined, { accept: "application/fhir+json" });
+  assert.equal(typeOf(asked), FHIR_JSON, "what a FHIR client asks for");
+  const opened = await api("GET", `/api/fhir/Bundle/${first.visit_id}`, undefined, { accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" });
+  assert.equal(typeOf(opened), PLAIN_JSON, "a browser that opens the link shows it in the tab");
+  assert.deepEqual(opened.data, fhir.data, "the same record either way");
+  const noVisit = await api("GET", "/api/fhir/Bundle/visit-nowhere");
+  assert.deepEqual([noVisit.status, typeOf(noVisit), noVisit.data], [404, FHIR_JSON, outcome("not-found", "no FHIR record for this visit")]);
+  const noSpot = await api("GET", "/api/spot/spot-nowhere/fhir");
+  assert.deepEqual([noSpot.status, typeOf(noSpot), noSpot.data], [404, FHIR_JSON, outcome("not-found", "no FHIR record for this spot yet")]);
 
   // 5. The city: every number with its ids, the pipe with its referral, the notes below.
   at("the city");
@@ -364,7 +388,15 @@ try {
   assert.equal(example.status, 200);
   assert.ok(example.data.meta.tag.some((t) => t.code === "example"));
   assert.ok(JSON.stringify(example.data).includes("EXAMPLE"));
-  assert.equal((await api("GET", `/api/fhir/referral/${quiet.spot_id}`)).status, 404, "a quiet spot has no referral");
+  assert.deepEqual([typeOf(referral), typeOf(example)], [FHIR_JSON, FHIR_JSON]);
+  const noReferral = await api("GET", `/api/fhir/referral/${quiet.spot_id}`);
+  assert.equal(noReferral.status, 404, "a quiet spot has no referral");
+  assert.equal(typeOf(noReferral), FHIR_JSON);
+  assert.equal(noReferral.data.resourceType, "OperationOutcome", JSON.stringify(noReferral.data));
+  assert.deepEqual(noReferral.data, outcome("not-found", noReferral.data.issue[0].details.text), "one issue, with the reason in plain words");
+  assert.ok(noReferral.data.issue[0].details.text.length > 10);
+  const noExample = await api("GET", `/api/fhir/referral/${quiet.spot_id}/example-result`);
+  assert.deepEqual([noExample.status, typeOf(noExample), noExample.data], [404, FHIR_JSON, noReferral.data]);
 
   // 7. The quick check, and a photo with its metadata cut out.
   at("quick check and upload");
@@ -560,7 +592,10 @@ try {
   const streamed = await fetch(`${BASE}/api/walk`, { method: "POST", headers: { "content-type": "application/json" }, body: chunked, duplex: "half" });
   assert.equal(streamed.status, 413, "a body with no declared length is still measured");
   assert.equal((await api("GET", "/api/walk/walk-0000000000000000")).status, 404);
-  assert.equal((await api("GET", "/api/walk/walk-0000000000000000/fhir")).status, 404);
+  const noWalk = await api("GET", "/api/walk/walk-0000000000000000/fhir");
+  assert.equal(noWalk.status, 404);
+  assert.equal(typeOf(noWalk), FHIR_JSON);
+  assert.deepEqual(noWalk.data, outcome("not-found", (await api("GET", "/api/walk/walk-0000000000000000")).data.detail), "the record route's sentence, as an OperationOutcome");
   assert.equal((await api("GET", "/api/walk/not-a-walk")).status, 404);
   assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_record"), [{ n: 1 }], "nothing refused was stored");
   // The daily cap, over the whole server: the day is filled to one short of it by hand.
@@ -624,6 +659,7 @@ try {
   const ratedFhir = await api("GET", `/api/walk/${ratedWalk.data.record_id}/fhir`);
   assert.equal(ratedFhir.status, 200);
   assert.deepEqual(ratedFhir.data, ratedRead.bundle, "GET .../fhir is the stored Bundle");
+  assert.equal(typeOf(ratedFhir), FHIR_JSON);
   assert.deepEqual((await api("POST", "/api/walk", ratedBody)).data, ratedWalk.data, "sent again, the same record");
   assert.equal((await api("POST", "/api/walk", { ...ratedBody, followup_answers: { rating_check: "keep" }, final_rating: null })).status, 409);
   // A walk stored without follow-ups, as before, reads back with none and its own rating.
@@ -651,10 +687,13 @@ try {
       req.on("error", reject);
       req.end(method === "POST" ? "{}" : undefined);
     });
-  for (const address of ["/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/inaturalist/%E0%A4%A", "/api/photo/%E0%A4%A?t=x", "/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%E0%A4%A", "/api/fhir/referral/%/example-result"]) {
+  for (const address of ["/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/inaturalist/%E0%A4%A", "/api/photo/%E0%A4%A?t=x"]) {
     assert.deepEqual(await raw("GET", address), { status: 404, type: PLAIN_JSON, data: { detail: "Not found." } }, address);
   }
   assert.deepEqual(await raw("POST", "/api/quick/%E0%A4%A"), { status: 404, type: PLAIN_JSON, data: { detail: "Not found." } });
+  for (const address of ["/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%E0%A4%A", "/api/fhir/referral/%/example-result"]) {
+    assert.deepEqual(await raw("GET", address), { status: 404, type: FHIR_JSON, data: outcome("not-found", "Not found.") }, address);
+  }
   // A good percent code still reads as the id it spells.
   assert.equal((await raw("GET", `/api/spot/${first.spot_id.replace("-", "%2D")}`)).status, 200);
 

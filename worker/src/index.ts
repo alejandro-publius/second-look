@@ -13,6 +13,7 @@ import CONTENT from "./content.json";
 import { Invalid, NotFound, createDraft, finalize, latestBundleForSpot, loadVisitBundle, quickCheck, spotView, todayOf } from "./check";
 import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, referralView } from "./city";
 import { TooLarge, photoResponse, storeUpload } from "./uploads";
+import { fhirMediaType, operationOutcome } from "./fhir_http";
 import { two } from "./two";
 import * as part2 from "./part2";
 import { Conflict, TooMany, purgeWalks, storeWalk, walkFhir, walkView } from "./walk_store";
@@ -104,6 +105,13 @@ const json = (env: Env, data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...corsHeaders(env) },
+  });
+
+/** A FHIR resource as the answer, under FHIR's own media type (worker/src/fhir_http.ts). */
+const fhirJson = (env: Env, request: Request, data: unknown, status = 200) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": fhirMediaType(request.headers.get("accept")), vary: "Accept", "cache-control": "no-store", ...corsHeaders(env) },
   });
 
 const nowIso = () => new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -468,7 +476,7 @@ export default {
       // counted and never mirrored. It reads its own body, to refuse a large one before parsing.
       if (path === "/api/walk" && request.method === "POST") return json(env, await storeWalk(env.DB, request, now));
       const walkBundle = /^\/api\/walk\/([^/]+)\/fhir$/.exec(path);
-      if (walkBundle && request.method === "GET") return json(env, await walkFhir(env.DB, idFrom(walkBundle[1]), now));
+      if (walkBundle && request.method === "GET") return await fhirRoute(env, request, () => walkFhir(env.DB, idFrom(walkBundle[1]), now));
       const walk = /^\/api\/walk\/([^/]+)$/.exec(path);
       if (walk && request.method === "GET") return json(env, await walkView(env.DB, idFrom(walk[1]), now));
       const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
@@ -478,9 +486,11 @@ export default {
       if (city) return json(env, await cityView(checkEnv, idFrom(city[1]), todayOf(now)));
       const spotFhir = /^\/api\/spot\/([^/]+)\/fhir$/.exec(path);
       if (spotFhir) {
-        const bundle = await latestBundleForSpot(env.DB, idFrom(spotFhir[1]));
-        if (bundle === null) return json(env, { detail: "no FHIR record for this spot yet" }, 404);
-        return json(env, bundle);
+        return await fhirRoute(env, request, async () => {
+          const found = await latestBundleForSpot(env.DB, idFrom(spotFhir[1]));
+          if (found === null) throw new NotFound("no FHIR record for this spot yet");
+          return found;
+        });
       }
       const spot = /^\/api\/spot\/([^/]+)$/.exec(path);
       if (spot && request.method === "GET") {
@@ -490,15 +500,17 @@ export default {
       }
       const bundle = /^\/api\/fhir\/Bundle\/([^/]+)$/.exec(path);
       if (bundle) {
-        const found = await loadVisitBundle(env.DB, idFrom(bundle[1]));
-        if (found === null) return json(env, { detail: "no FHIR record for this visit" }, 404);
-        return json(env, found);
+        return await fhirRoute(env, request, async () => {
+          const found = await loadVisitBundle(env.DB, idFrom(bundle[1]));
+          if (found === null) throw new NotFound("no FHIR record for this visit");
+          return found;
+        });
       }
       if (path === "/api/fhir/validation") return json(env, VALIDATION);
       const example = /^\/api\/fhir\/referral\/([^/]+)\/example-result$/.exec(path);
-      if (example) return json(env, await exampleResultView(checkEnv, idFrom(example[1]), now));
+      if (example) return await fhirRoute(env, request, () => exampleResultView(checkEnv, idFrom(example[1]), now));
       const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
-      if (referral) return json(env, await referralView(checkEnv, idFrom(referral[1]), now));
+      if (referral) return await fhirRoute(env, request, () => referralView(checkEnv, idFrom(referral[1]), now));
       if (path === "/api/two") return json(env, await two(env));
       // The iNaturalist context line for a creek, from the copy the Mac stored. Read only.
       const inat = /^\/api\/inaturalist\/([^/]+)$/.exec(path);
@@ -618,6 +630,17 @@ function problemOf(err: unknown): { status: number; detail: string } {
 function errorResponse(env: Env, err: unknown): Response {
   const problem = problemOf(err);
   return json(env, { detail: problem.detail }, problem.status);
+}
+
+/** One route that answers with a FHIR resource: the resource under FHIR's media type, or the
+ *  error as an OperationOutcome with the same status and sentence the other routes would give. */
+async function fhirRoute(env: Env, request: Request, make: () => Promise<unknown>): Promise<Response> {
+  try {
+    return fhirJson(env, request, await make());
+  } catch (err) {
+    const problem = problemOf(err);
+    return fhirJson(env, request, operationOutcome(problem.status, problem.detail), problem.status);
+  }
 }
 
 function withCors(env: Env, response: Response): Response {

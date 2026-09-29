@@ -3670,6 +3670,27 @@ function walkChecks(answers, followups, questionTexts, given, finalRating) {
   return { checks, final_rating: final };
 }
 
+// src/fhir_http.ts
+var FHIR_JSON = "application/fhir+json; charset=utf-8";
+var PLAIN_JSON = "application/json; charset=utf-8";
+var ISSUE_CODES = {
+  404: "not-found",
+  409: "conflict",
+  413: "too-long",
+  422: "invalid",
+  429: "throttled"
+};
+function operationOutcome(status, sentence) {
+  return {
+    resourceType: "OperationOutcome",
+    text: { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"><p>${escapeXml(sentence)}</p></div>` },
+    issue: [{ severity: "error", code: ISSUE_CODES[status] ?? "exception", details: { text: sentence } }]
+  };
+}
+function fhirMediaType(accept) {
+  return (accept ?? "").toLowerCase().includes("text/html") ? PLAIN_JSON : FHIR_JSON;
+}
+
 // ../results/fhir_validation.json
 var fhir_validation_default = {
   ran_at_utc: "2026-09-27T05:08:56+00:00",
@@ -6566,6 +6587,10 @@ var json = (env, data, status = 200) => new Response(JSON.stringify(data), {
   status,
   headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...corsHeaders(env) }
 });
+var fhirJson = (env, request, data, status = 200) => new Response(JSON.stringify(data), {
+  status,
+  headers: { "content-type": fhirMediaType(request.headers.get("accept")), vary: "Accept", "cache-control": "no-store", ...corsHeaders(env) }
+});
 var nowIso2 = () => (/* @__PURE__ */ new Date()).toISOString().replace(/\.\d{3}Z$/, "Z");
 async function createSession(env, body, isTest) {
   const raw = String(body.client_token_hash ?? "");
@@ -6915,7 +6940,7 @@ var src_default = {
       if (path === "/api/upload" && request.method === "POST") return json(env, await storeUpload(env, request, now));
       if (path === "/api/walk" && request.method === "POST") return json(env, await storeWalk(env.DB, request, now));
       const walkBundle2 = /^\/api\/walk\/([^/]+)\/fhir$/.exec(path);
-      if (walkBundle2 && request.method === "GET") return json(env, await walkFhir(env.DB, idFrom(walkBundle2[1]), now));
+      if (walkBundle2 && request.method === "GET") return await fhirRoute(env, request, () => walkFhir(env.DB, idFrom(walkBundle2[1]), now));
       const walk = /^\/api\/walk\/([^/]+)$/.exec(path);
       if (walk && request.method === "GET") return json(env, await walkView(env.DB, idFrom(walk[1]), now));
       const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
@@ -6925,9 +6950,11 @@ var src_default = {
       if (city) return json(env, await cityView(checkEnv, idFrom(city[1]), todayOf(now)));
       const spotFhir = /^\/api\/spot\/([^/]+)\/fhir$/.exec(path);
       if (spotFhir) {
-        const bundle2 = await latestBundleForSpot(env.DB, idFrom(spotFhir[1]));
-        if (bundle2 === null) return json(env, { detail: "no FHIR record for this spot yet" }, 404);
-        return json(env, bundle2);
+        return await fhirRoute(env, request, async () => {
+          const found = await latestBundleForSpot(env.DB, idFrom(spotFhir[1]));
+          if (found === null) throw new NotFound("no FHIR record for this spot yet");
+          return found;
+        });
       }
       const spot = /^\/api\/spot\/([^/]+)$/.exec(path);
       if (spot && request.method === "GET") {
@@ -6937,15 +6964,17 @@ var src_default = {
       }
       const bundle = /^\/api\/fhir\/Bundle\/([^/]+)$/.exec(path);
       if (bundle) {
-        const found = await loadVisitBundle(env.DB, idFrom(bundle[1]));
-        if (found === null) return json(env, { detail: "no FHIR record for this visit" }, 404);
-        return json(env, found);
+        return await fhirRoute(env, request, async () => {
+          const found = await loadVisitBundle(env.DB, idFrom(bundle[1]));
+          if (found === null) throw new NotFound("no FHIR record for this visit");
+          return found;
+        });
       }
       if (path === "/api/fhir/validation") return json(env, fhir_validation_default);
       const example = /^\/api\/fhir\/referral\/([^/]+)\/example-result$/.exec(path);
-      if (example) return json(env, await exampleResultView(checkEnv, idFrom(example[1]), now));
+      if (example) return await fhirRoute(env, request, () => exampleResultView(checkEnv, idFrom(example[1]), now));
       const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
-      if (referral) return json(env, await referralView(checkEnv, idFrom(referral[1]), now));
+      if (referral) return await fhirRoute(env, request, () => referralView(checkEnv, idFrom(referral[1]), now));
       if (path === "/api/two") return json(env, await two(env));
       const inat = /^\/api\/inaturalist\/([^/]+)$/.exec(path);
       if (inat && request.method === "GET") return json(env, await inaturalistView(env, idFrom(inat[1])));
@@ -7038,6 +7067,14 @@ function problemOf(err) {
 function errorResponse(env, err) {
   const problem = problemOf(err);
   return json(env, { detail: problem.detail }, problem.status);
+}
+async function fhirRoute(env, request, make) {
+  try {
+    return fhirJson(env, request, await make());
+  } catch (err) {
+    const problem = problemOf(err);
+    return fhirJson(env, request, operationOutcome(problem.status, problem.detail), problem.status);
+  }
 }
 function withCors(env, response) {
   const headers = new Headers(response.headers);
@@ -7346,7 +7383,6 @@ test("uploads: a stored photo is put in KV to expire after 30 days", async () =>
   assert.equal(puts[0].key, `photo:${stored2.photo_id}`);
   assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
 });
-var PLAIN_JSON = "application/json; charset=utf-8";
 function recordingStore(changes = 0) {
   const ran = [];
   const DB = {
@@ -7367,30 +7403,43 @@ function recordingStore(changes = 0) {
   };
   return { ran, env: { DB, PHOTOS: {} } };
 }
+test("fhir_http: an error as an OperationOutcome, the same as Python", () => {
+  assert.deepEqual(operationOutcome(404, "no FHIR record for this visit"), {
+    resourceType: "OperationOutcome",
+    text: { status: "generated", div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>no FHIR record for this visit</p></div>' },
+    issue: [{ severity: "error", code: "not-found", details: { text: "no FHIR record for this visit" } }]
+  });
+  assert.deepEqual(
+    [404, 409, 413, 422, 429, 500, 503].map((status) => operationOutcome(status, "x").issue[0].code),
+    ["not-found", "conflict", "too-long", "invalid", "throttled", "exception", "exception"]
+  );
+  assert.equal(operationOutcome(404, "a <b> & c").text.div, '<div xmlns="http://www.w3.org/1999/xhtml"><p>a &lt;b&gt; &amp; c</p></div>');
+});
+test("fhir_http: FHIR's media type, and plain JSON for a browser that opens the link", () => {
+  assert.equal(FHIR_JSON, "application/fhir+json; charset=utf-8");
+  for (const accept of [null, "", "*/*", "application/fhir+json", "application/json", "application/fhir+json, text/plain"]) {
+    assert.equal(fhirMediaType(accept), FHIR_JSON, String(accept));
+  }
+  for (const accept of ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "TEXT/HTML"]) {
+    assert.equal(fhirMediaType(accept), PLAIN_JSON, accept);
+  }
+});
 var ask = async (env, address, headers = {}) => {
   const res = await src_default.fetch(new Request(`http://127.0.0.1${address}`, { headers }), env);
   return { status: res.status, type: res.headers.get("content-type"), vary: res.headers.get("vary"), cache: res.headers.get("cache-control"), body: await res.json() };
 };
 test("routes: a broken percent code in the address is a plain 404", async () => {
   const { ran, env } = recordingStore();
-  const addresses = [
-    "/api/spot/%E0%A4%A",
-    "/api/walk/%ff",
-    "/api/city/%",
-    "/api/photo/%E0%A4%A?t=x",
-    "/api/inaturalist/%",
-    "/api/spot/%E0%A4%A/fhir",
-    "/api/walk/%ff/fhir",
-    "/api/fhir/Bundle/%",
-    "/api/fhir/referral/%",
-    "/api/fhir/referral/%/example-result"
-  ];
-  for (const address of addresses) {
+  for (const address of ["/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/photo/%E0%A4%A?t=x", "/api/inaturalist/%"]) {
     const answer2 = await ask(env, address);
     assert.deepEqual([answer2.status, answer2.body, answer2.type], [404, { detail: "Not found." }, PLAIN_JSON], address);
   }
   const quick = await src_default.fetch(new Request("http://127.0.0.1/api/quick/%E0%A4%A", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }), env);
   assert.deepEqual([quick.status, await quick.json()], [404, { detail: "Not found." }]);
+  for (const address of ["/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%", "/api/fhir/referral/%/example-result"]) {
+    const answer2 = await ask(env, address);
+    assert.deepEqual([answer2.status, answer2.body, answer2.type], [404, operationOutcome(404, "Not found."), FHIR_JSON], address);
+  }
   assert.deepEqual(ran, [], "nothing was asked of the store");
 });
 test("routes: a 500 says one fixed sentence and never the error's own text", async () => {
@@ -7406,8 +7455,24 @@ test("routes: a 500 says one fixed sentence and never the error's own text", asy
   const plain = await ask(env, "/api/creeks");
   assert.deepEqual([plain.status, plain.body], [500, { detail: sentence }], "no error field");
   const fhir = await ask(env, "/api/fhir/Bundle/visit-0001");
-  assert.deepEqual([fhir.status, fhir.body], [500, { detail: sentence }]);
+  assert.deepEqual([fhir.status, fhir.body, fhir.type], [500, operationOutcome(500, sentence), FHIR_JSON]);
   const study = await src_default.fetch(new Request("http://127.0.0.1/api/test/counts"), env);
   assert.deepEqual([study.status, await study.json()], [500, { detail: sentence }], "the study routes too");
   for (const answer2 of [plain.body, fhir.body]) assert.ok(!JSON.stringify(answer2).includes("secret") && !JSON.stringify(answer2).includes("D1_ERROR"));
+});
+test("routes: a FHIR route answers under FHIR's media type, found or not", async () => {
+  const rows = {};
+  const env = {
+    DB: { prepare: () => ({ bind: () => ({ first: async () => rows.next ?? null, all: async () => ({ results: [] }) }) }) },
+    PHOTOS: {}
+  };
+  const missing = await ask(env, "/api/fhir/Bundle/visit-nowhere");
+  assert.deepEqual([missing.status, missing.body], [404, operationOutcome(404, "no FHIR record for this visit")]);
+  assert.deepEqual([missing.type, missing.vary, missing.cache], [FHIR_JSON, "Accept", "no-store"]);
+  const spot = await ask(env, "/api/spot/spot-nowhere/fhir");
+  assert.deepEqual([spot.status, spot.body, spot.type], [404, operationOutcome(404, "no FHIR record for this spot yet"), FHIR_JSON]);
+  const inBrowser = await ask(env, "/api/fhir/Bundle/visit-nowhere", { accept: "text/html,application/xhtml+xml,*/*;q=0.8" });
+  assert.deepEqual([inBrowser.status, inBrowser.type, inBrowser.body], [404, PLAIN_JSON, missing.body], "the same bytes, shown in the tab");
+  assert.equal((await ask(env, "/api/fhir/validation")).type, PLAIN_JSON);
+  assert.equal((await ask(env, "/api/nothing-here")).type, PLAIN_JSON);
 });
