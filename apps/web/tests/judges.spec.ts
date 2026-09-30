@@ -169,6 +169,6 @@ test("the assisted second look door opens part 2's judge mode", async ({ page })
   const door = page.getByRole("link", { name: "Assisted second look, try it" });
   await expect(door).toHaveAttribute("href", "/t2/demo");
   await door.click();
-  // Before the lock the page is shut and says why; after it, judge mode starts.
-  await expect(page.getByRole("heading", { name: /Judge mode opens on Sep 28|Assisted second look, judge mode/ })).toBeVisible();
+  // Before the second lock the page is shut and says why; after it, judge mode starts.
+  await expect(page.getByRole("heading", { name: /Judge mode opens on Oct 3|Assisted second look, judge mode/ })).toBeVisible();
 });

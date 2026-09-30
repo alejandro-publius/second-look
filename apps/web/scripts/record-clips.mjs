@@ -187,7 +187,7 @@ await record(
     await page.getByRole("button").first().click();
     await beat(2500);
   },
-  { after: "2026-09-28T02:00:00Z" },
+  { after: "2026-10-03T05:00:00Z" },
 );
 // Beat 9: the start screen (the app's order, every question marked draft wording), a pin and the
 // first questions at a human pace; then the rest of the form at speed, with a pipe reported, up to

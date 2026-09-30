@@ -164,7 +164,7 @@ def test_report_line_names_the_failures(capsys: pytest.CaptureFixture[str]) -> N
 
 
 def test_real_repo_gh_reports_private() -> None:
-    """The proving command's expected failure: the repo is private until Sep 30."""
+    """The proving command's expected failure: the repo is private until Oct 3."""
     rc, out = submit_check.default_runner(REPO)(["gh", "repo", "view", "--json", "visibility"])
     if rc != 0:
         pytest.skip("gh not logged in")

@@ -530,7 +530,7 @@ def run_checks(
     if visibility is None:
         public.reasons.append(f"cannot tell if the repo is public (gh said: {_last_line(out)})")
     elif str(visibility).upper() != "PUBLIC":
-        public.reasons.append(f"GitHub repo is {visibility}; it goes public on Sep 30")
+        public.reasons.append(f"GitHub repo is {visibility}; it goes public on Oct 3")
     checks.append(public)
     return checks
 

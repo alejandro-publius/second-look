@@ -16,7 +16,7 @@ var content_default = {
     "fr",
     "it"
   ],
-  content_hash: "37545e39b44fd60d",
+  content_hash: "f90e8fbfb370b9c3",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -6540,6 +6540,7 @@ async function inaturalistView(env, creekRef) {
 
 // src/index.ts
 var DATA_LOCK_UTC = Date.parse("2026-09-28T01:00:00Z");
+var JUDGE_MODE_OPENS_UTC = Date.parse("2026-10-03T04:00:00Z");
 var SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other", "panel"];
 var UA_CLASSES = ["phone", "tablet", "desktop", "other"];
 var ANSWERS2 = ["yes", "no", "cant_tell"];
@@ -7029,11 +7030,11 @@ var src_default = {
       if (path === "/api/t2/resume") return reply(env, await resume(env, url.searchParams.get("part2_id") ?? ""));
       if (path === "/api/t2/counts") return reply(env, await counts(env));
       if (path === "/api/t2/demo" && request.method === "POST") {
-        if (lockClock(env) < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
+        if (lockClock(env) < JUDGE_MODE_OPENS_UTC) return json(env, { detail: "Judge mode opens on Oct 3." }, 403);
         return reply(env, demo(body));
       }
       if (path === "/api/demo/answer" && request.method === "POST") {
-        if (lockClock(env) < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
+        if (lockClock(env) < JUDGE_MODE_OPENS_UTC) return json(env, { detail: "Judge mode opens on Oct 3." }, 403);
         const gold = GOLD2[String(body.item_id ?? "")];
         if (!gold) return json(env, { detail: "We do not know that test item." }, 404);
         return json(env, { correct: isCorrect(String(body.answer ?? ""), gold) });
