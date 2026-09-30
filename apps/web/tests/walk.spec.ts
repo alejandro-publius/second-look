@@ -1028,7 +1028,7 @@ for (const [lang, pick, fellBack] of [
     await mockApi(page, {});
     const w = walks[0];
     await page.goto(`${BASE}/walk/${w.id}`);
-    await page.getByLabel(en["check.lang_label"]).selectOption(lang);
+    await page.getByLabel(en["check.lang_label_short"]).selectOption(lang);
     await page.getByRole("button", { name: en["walk.start"] }).click();
     const rows = await walkIn(page, lang, pick as Record<string, string[]>);
     // The words are the app's own: the first row is its translation of the channel form.
@@ -1089,7 +1089,7 @@ test("the list of languages is whole on the first screen of every walk, and its 
   expect(height).toBeLessThanOrEqual(664);
   for (const w of walks) {
     await page.goto(`${BASE}/walk/${w.id}`);
-    const list = page.getByLabel(en["check.lang_label"]);
+    const list = page.getByLabel(en["check.lang_label_short"]);
     await expect(list).toBeVisible();
     await expect(list).toHaveValue("en");
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -1120,10 +1120,18 @@ test("the list of languages is whole on the first screen of every walk, and its 
     await expect(page.locator("select")).toHaveCount(1);
   }
   // The list is for choosing before the walk starts: a question screen has none.
-  await page.getByLabel(en["check.lang_label"]).selectOption("it");
+  await page.getByLabel(en["check.lang_label_short"]).selectOption("it");
   await page.getByRole("button", { name: en["walk.start"] }).click();
   await expect(page.locator("h1#question > span[lang=it]")).toHaveText(
     content.app_strings.strings.it.items.channel_form.text,
   );
   await expect(page.locator("select")).toHaveCount(0);
 });
+    // WCAG 3.3.2: the list has a label a sighted person can read, right above it, and Start the
+    // check is still whole on this first screen with the label there.
+    const label = page.getByText(en["check.lang_label_short"], { exact: true });
+    await expect(label).toBeVisible();
+    expect(en["check.lang_label_short"]).toBe("Questions in");
+    const labelBox = (await label.boundingBox())!;
+    expect(labelBox.y + labelBox.height, w.id).toBeLessThanOrEqual(box.y);
+    expect(start.y + start.height, w.id).toBeLessThanOrEqual(height);

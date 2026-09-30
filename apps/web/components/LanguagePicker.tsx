@@ -9,8 +9,8 @@ import { t } from "@/lib/t";
  * around them stay English, each marked, until a person has checked a translation.
  *
  * A walk shows the two parts apart (audit finding phone-ux-languages-5): the list alone right
- * under the walk's title, where the first screen shows it, with its label kept for screen
- * readers, and the note further down, below Start, where it pushes nothing off the screen.
+ * under the walk's title, where the first screen shows it, under a short visible label (WCAG
+ * 3.3.2), and the note further down, below Start, where it pushes nothing off the screen.
  */
 export function LanguagePicker({
   part = "all",
@@ -26,8 +26,8 @@ export function LanguagePicker({
   if (part === "note") return note;
   const list = (
     <label className="field">
-      <span className={part === "list" ? "visually-hidden" : "field-label"}>
-        {t("check.lang_label")}
+      <span className={part === "list" ? "field-label small" : "field-label"}>
+        {t(part === "list" ? "check.lang_label_short" : "check.lang_label")}
       </span>
       <span className="select-wrap">
         <select

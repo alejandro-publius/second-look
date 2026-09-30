@@ -113,6 +113,7 @@
   "check.intro": "One question per screen, in the same order as the OneAquaHealth app. It takes {time.check}. Photos welcome.",
   "check.unverified_note": "The questions and answers are the OneAquaHealth Citizen Science App's own, word for word.",
   "check.lang_label": "Language of the questions",
+  "check.lang_label_short": "Questions in",
   "check.lang_note": "Questions and answers in the words of the OneAquaHealth Citizen Science App, in its own translations. In the other five languages, Back, Next and Send are the app's words too. Our other buttons, our notes and our follow-up questions are in English for now.",
   "check.english_tag": "English",
   "check.start": "Start the check",

@@ -485,7 +485,7 @@ test("a walk taken in Portuguese opens from its link in Portuguese, in a browser
   };
   seen.calls = await mockApi(page, { walkStore, walkBundle: bundleInItsLanguage });
   await page.goto(`${BASE}/walk/${walk.id}`);
-  await page.getByLabel(en["check.lang_label"]).selectOption("pt");
+  await page.getByLabel(en["check.lang_label_short"]).selectOption("pt");
   await page.getByRole("button", { name: en["walk.start"] }).click();
   const done = page.getByRole("heading", { name: en["walk.done_title"], level: 1 });
   for (let i = 0; i < 60 && !(await done.isVisible()); i++) {
