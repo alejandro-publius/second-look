@@ -14,6 +14,7 @@ that records a time and no commit. An older file measured a different README and
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -1778,6 +1779,298 @@ def check_rerun_after_29(root: Path) -> list[str]:
     return problems
 
 
+# ---------------------------------------------------------------------------------------------
+# UPDATE_33: the second wave (docs/analysis_plan_v3.md)
+
+WAVE2_WINDOW = "results/wave2_window.json"
+PLAN_V3 = "docs/analysis_plan_v3.md"
+PLAN_V3_TAG = "prereg-v3"
+WAVE2_SCRIPT = "evals/wave2_analysis.py"
+WAVE2_RESULT = re.compile(r"usability_w2_\d{8}\.json")
+# The first wave's two rows as the first lock job wrote them into the README, in its commit
+# 25277aa: the SHA-256 of the text from the first marker to the last. A hash and not a look into
+# git, so the check says the same in a clone that does not hold that commit.
+FIRST_LOCK_COMMIT = "25277aa"
+FIRST_ROWS_SHA256 = "a3aa7524737fe3aca7a62ca9f3fea8e9458210df5be01ac2cb82f0b7bd389304"
+FIRST_ROWS = ("<!-- human-row -->", "<!-- /human-row-2 -->")
+WAVE2_ROWS = (
+    "<!-- wave2-row -->",
+    "<!-- /wave2-row -->",
+    "<!-- wave2-row-2 -->",
+    "<!-- /wave2-row-2 -->",
+)
+PLAN_V3_SAYS = {
+    "the tag it becomes binding under": r"tagged `prereg-v3`",
+    "the two plans it points at": r"`prereg-v1`[\s\S]*`prereg-v2`",
+    "why: nobody took part before the first lock": (
+        r"No real person took part before the first lock, 2026-09-28T01:00:00Z"
+    ),
+    "the first wave's two results files": (
+        r"results/usability_20260929\.json[\s\S]*results/assist_20260929\.json"
+    ),
+    "what the first run said": r"not computed: an arm is empty",
+    "that the deadline moved": r"moved its deadline",
+    "the arms and the sequence that carries on": r"carry on from the slot where they stand",
+    "the seeds": r"20260920[\s\S]*20260926",
+    "the rule for fewer than 20 per arm": r"fewer than 20 kept sittings",
+    "that the two scripts are not edited": r"not edited",
+    "that the stored post_lock mark is ignored": r"ignores the stored mark",
+    "that an early sitting is left out as a dry run is": r"left out as a dry run is",
+    "judge mode, which shows the answers, and when it was open": (
+        r"Judge mode shows the answers[\s\S]*open from the first lock, 2026-09-28T01:00:00Z"
+    ),
+    "that the plan cannot tell who used judge mode": r"this plan cannot tell who did",
+    "that the first analysis had run and shown no outcome": (
+        r"decided after the first analysis had run[\s\S]*showed no outcome"
+    ),
+    "that pages outside the test changed": r"Pages outside the test changed",
+    "the recruitment": r"paid research panel[\s\S]*public link",
+    "that the analysis runs once": r"runs once, by the lock job at",
+    "that the first wave's result stays as reported": r"first wave's result stays as reported",
+}
+
+
+def git_out(root: Path, *args: str) -> str | None:
+    """What git prints, or None when it fails. GIT_ variables are left out, as the analysis
+    scripts leave them out, so no other repository answers for this one."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    proc = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, env=env)
+    return proc.stdout if proc.returncode == 0 else None
+
+
+def wave2_window(root: Path) -> tuple[dict[str, Any], list[str]]:
+    """The second wave's window as results/ holds it, with its instants read."""
+    doc = load_json(root / WAVE2_WINDOW)
+    if not isinstance(doc, dict):
+        return {}, [f"{WAVE2_WINDOW} does not exist or is not a JSON object"]
+    times = {k: parse_utc(doc.get(k)) for k in ("open_utc", "lock_utc", "lock_job_utc")}
+    missing = [f"{WAVE2_WINDOW} gives no {k}" for k, v in times.items() if v is None]
+    return {**doc, **{k: v for k, v in times.items() if v is not None}}, missing
+
+
+def between(text: str, start: str, end: str) -> str | None:
+    a, b = text.find(start), text.find(end)
+    return text[a : b + len(end)] if 0 <= a < b else None
+
+
+def check_plan_v3(root: Path) -> list[str]:
+    plan = read(root / PLAN_V3)
+    if not plan:
+        return [f"{PLAN_V3} does not exist"]
+    window, problems = wave2_window(root)
+    problems += [
+        f"{PLAN_V3} does not say {what}"
+        for what, pattern in PLAN_V3_SAYS.items()
+        if not re.search(pattern, plan)
+    ]
+    for key in ("open_utc", "lock_utc", "lock_job_utc"):
+        if key in window and done_check.iso(window[key]) not in plan:
+            problems.append(f"{PLAN_V3} does not give {key}, {done_check.iso(window[key])}")
+    items = re.findall(r"^(\d+)\. ", plan, re.M)
+    if items != [str(n) for n in range(1, len(items) + 1)] or len(items) < 7:
+        problems.append(f"{PLAN_V3} is not in numbered items, 1 upward")
+    return problems
+
+
+def check_plan_v3_tagged(root: Path) -> list[str]:
+    """The tag exists, was made before the wave opened, and everything is pinned to it."""
+    window, problems = wave2_window(root)
+    if problems:
+        return problems
+    ref = f"refs/tags/{PLAN_V3_TAG}"
+    commit = (git_out(root, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") or "").strip()
+    if not commit:
+        return [f"the tag {PLAN_V3_TAG} does not exist"]
+    plan = root / PLAN_V3
+    tagged = git_out(root, "show", f"{ref}:{PLAN_V3}")
+    if tagged is None or not plan.is_file() or tagged != plan.read_text(encoding="utf-8"):
+        problems.append(f"{PLAN_V3} differs from the version tagged {PLAN_V3_TAG}")
+    made = (git_out(root, "for-each-ref", "--format=%(creatordate:unix)", ref) or "").strip()
+    if not made.isdigit():
+        problems.append(f"the tag {PLAN_V3_TAG} gives no date")
+    elif datetime.fromtimestamp(int(made), UTC) >= window["open_utc"]:
+        when = done_check.iso(datetime.fromtimestamp(int(made), UTC))
+        problems.append(
+            f"the tag {PLAN_V3_TAG} was made at {when}, not before the wave opened at "
+            f"{done_check.iso(window['open_utc'])}"
+        )
+    sha = hashlib.sha256(plan.read_bytes()).hexdigest() if plan.is_file() else ""
+    notes = read(root / "docs" / "notes" / "plan_hash.md")
+    script = read(root / WAVE2_SCRIPT)
+    for what, value in (("commit", commit), ("SHA-256", sha)):
+        if not value or f"`{value}`" not in notes:
+            problems.append(f"docs/notes/plan_hash.md does not give the {what} of {PLAN_V3_TAG}")
+        if not value or f'"{value}"' not in script:
+            problems.append(f"{WAVE2_SCRIPT} is not pinned to the {what} of {PLAN_V3_TAG}")
+    for proof in (f"{PLAN_V3_TAG}.tag.ots", "analysis_plan_v3.md.ots"):
+        if not (root / "proofs" / proof).is_file():
+            problems.append(f"proofs/{proof} does not exist")
+    stamped = [
+        parse_utc(e.get("ts_utc")) for e in audit_entries(root) if e.get("kind") == "plan_tagged"
+    ]
+    if len(stamped) < 3:
+        problems.append("audit/log.jsonl has no third plan_tagged entry, the one for plan v3")
+    elif stamped[-1] is None or stamped[-1] >= window["open_utc"]:
+        problems.append("the newest plan_tagged entry is not from before the wave opened")
+    return problems
+
+
+def audit_entries(root: Path) -> list[dict[str, Any]]:
+    out = []
+    for line in read(root / "audit" / "log.jsonl").splitlines():
+        try:
+            entry = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(entry, dict):
+            out.append(entry)
+    return out
+
+
+def check_wave2_readme(root: Path) -> list[str]:
+    """The README holds the place for the second wave's rows, after the first wave's, and one
+    paragraph about the wave. Every time in the place is a rendered number from results/."""
+    readme = read(root / "README.md")
+    problems = []
+    at = [readme.find(m) for m in (FIRST_ROWS[1], *WAVE2_ROWS)]
+    if min(at) < 0 or at != sorted(at):
+        return ["the README lacks the second wave's two places, in order, after the first rows"]
+    place = between(readme, WAVE2_ROWS[0], WAVE2_ROWS[1]) or ""
+    bare = render_free(place)
+    if re.search(r"\d{4}-\d{2}-\d{2}|\b\d{1,2}:\d{2}\b", bare):
+        problems.append("the second wave's place gives a time that is not rendered from results/")
+    if not re.search(r"<!--v:results/(wave2_window|usability_w2_\d{8})\.json#", place):
+        problems.append("the second wave's place cites no number from results/")
+    paragraph = next((ln for ln in readme.splitlines() if ln.startswith("- The second wave:")), "")
+    if not paragraph:
+        problems.append("the README has no paragraph that starts with 'The second wave:'")
+    for what, needle in (
+        ("the plan", f"({PLAN_V3})"),
+        ("the tag", f"`{PLAN_V3_TAG}`"),
+        ("the script", f"({WAVE2_SCRIPT})"),
+        ("judge mode", "judge mode"),
+        ("the window, rendered from results/", f"<!--v:{WAVE2_WINDOW}#/lock_utc-->"),
+    ):
+        if paragraph and needle not in paragraph:
+            problems.append(f"the README's paragraph about the second wave does not name {what}")
+    return problems
+
+
+def render_free(text: str) -> str:
+    """The text without the numbers render_readme put in, and without its link targets."""
+    return re.sub(r"<!--v:[^>]*-->.*?<!--/v-->|\]\([^)]*\)|`[^`]*`", "", text, flags=re.S)
+
+
+def check_first_wave_rows(root: Path, sha256: str = FIRST_ROWS_SHA256) -> list[str]:
+    """The first wave's two rows are, word for word, the ones the first lock job committed."""
+    now = between(read(root / "README.md"), *FIRST_ROWS)
+    if now is None:
+        return ["the README no longer holds the first wave's rows"]
+    if hashlib.sha256(now.encode("utf-8")).hexdigest() != sha256:
+        return [
+            "the first wave's rows differ from the ones the first lock job wrote "
+            f"(commit {FIRST_LOCK_COMMIT})"
+        ]
+    return []
+
+
+def check_panel_launch(root: Path) -> list[str]:
+    study = read(root / "docs" / "internal" / "PANEL_STUDY.md")
+    if not study:
+        return ["the panel study document does not exist"]
+    window, problems = wave2_window(root)
+    needs = {
+        "the day and hour before which it must not be published": r"Tue Sep 29, 21:00 PDT",
+        "when to stop taking people, hours before the lock": r"Fri Oct 2, by 17:00 PDT",
+        "the second lock in Pacific time": r"Fri Oct 2, 21:00 PDT",
+        "the plan and its tag": r"analysis_plan_v3\.md[\s\S]{0,40}`prereg-v3`",
+        "the check that the plan is tagged before publishing": r"tag -l prereg-v3",
+        "the check that judge mode is shut before publishing": r"[Jj]udge mode is shut",
+        "how many places to ask for": r"Ask for 80 places",
+        "the plans' rule of 20 kept in each group": r"20 finished sittings kept in each",
+        "the least that reaches the rule": r"50 places is the least",
+        "the link with its source label": r"t\?src=panel[\s\S]*source label `src=panel`",
+        "what the description must not mention": r"nothing about judge mode",
+        "how to read the counts during the wave": r"not only\s+of the second wave",
+        "the ethics step": r"The ethics question, in one minute",
+        "when the one analysis runs": r"Fri Oct 2 at 21:10 PDT",
+    }
+    problems += [
+        f"the panel study document lacks {what}"
+        for what, pattern in needs.items()
+        if not re.search(pattern, study)
+    ]
+    for key in ("open_utc", "lock_utc", "lock_job_utc"):
+        if key in window and done_check.iso(window[key]) not in study:
+            problems.append(f"the panel study document does not give {key}")
+    return problems
+
+
+def check_data_lock_w2(root: Path) -> list[str]:
+    window, problems = wave2_window(root)
+    if problems:
+        return problems
+    locks = [
+        parse_utc(e.get("ts_utc")) for e in audit_entries(root) if e.get("kind") == "data_lock"
+    ]
+    if any(when is not None and when >= window["lock_utc"] for when in locks):
+        return []
+    return ["audit/log.jsonl has no data_lock entry at or after the second lock"]
+
+
+def check_analysis_once_w2(root: Path) -> list[str]:
+    window, problems = wave2_window(root)
+    if problems:
+        return problems
+    real = []
+    for p in sorted((root / "results").glob("usability_w2_*.json")):
+        doc = load_json(p)
+        if (
+            WAVE2_RESULT.fullmatch(p.name)
+            and isinstance(doc, dict)
+            and doc.get("synthetic") is False
+        ):
+            real.append((p, doc))
+    if len(real) != 1:
+        return [f"{len(real)} real results of the second wave in results/, not exactly 1"]
+    path, doc = real[0]
+    when = parse_utc(doc.get("generated_at_utc"))
+    if when is None or when < window["lock_utc"]:
+        problems.append(
+            f"{path.name} was made at {doc.get('generated_at_utc')}, before the second lock"
+        )
+    if doc.get("script") != WAVE2_SCRIPT:
+        problems.append(f"{path.name} was not written by {WAVE2_SCRIPT}")
+    held = doc.get("window") or {}
+    for key in ("open_utc", "lock_utc"):
+        if held.get(key) != done_check.iso(window[key]):
+            problems.append(f"{path.name} gives another {key} than {WAVE2_WINDOW}")
+    status = (doc.get("primary") or {}).get("status")
+    if not isinstance(status, str) or not (
+        status in ("descriptive", "confirmatory") or status.startswith("not computed:")
+    ):
+        problems.append(f"{path.name} does not say whether it is a description or a test")
+    return problems
+
+
+def check_wave2_row(root: Path, sha256: str = FIRST_ROWS_SHA256) -> list[str]:
+    """After the second lock: the second wave's rows cite its one real result, and the first
+    wave's rows are as they were."""
+    problems = check_analysis_once_w2(root)
+    if problems:
+        return problems
+    readme = read(root / "README.md")
+    row = between(readme, WAVE2_ROWS[0], WAVE2_ROWS[1]) or ""
+    if not re.search(r"<!--v:results/usability_w2_\d{8}\.json#", row):
+        problems.append("the second wave's row cites no number from its result in results/")
+    if WAVE2_WINDOW in row:
+        problems.append("the second wave's row still holds the words from before the lock")
+    part2 = between(readme, WAVE2_ROWS[2], WAVE2_ROWS[3]) or ""
+    if "reported here once" in part2:
+        problems.append("the second wave's part 2 row still holds the words from before the lock")
+    return problems + check_first_wave_rows(root, sha256)
+
+
 CHECKS: dict[str, Check] = {
     "screens": check_screens,
     "gif": check_gif,
@@ -1833,6 +2126,14 @@ CHECKS: dict[str, Check] = {
     "inaturalist": check_inaturalist,
     "rerun-after-update": check_rerun_after_29,
     "invasive-list": check_invasive_list,
+    "wave-plan": check_plan_v3,
+    "wave-plan-tagged": check_plan_v3_tagged,
+    "wave-readme": check_wave2_readme,
+    "first-wave-rows": check_first_wave_rows,
+    "panel-launch": check_panel_launch,
+    "wave-data-lock": check_data_lock_w2,
+    "wave-analysis-once": check_analysis_once_w2,
+    "wave-row": check_wave2_row,
 }
 
 

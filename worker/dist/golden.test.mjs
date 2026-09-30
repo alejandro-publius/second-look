@@ -16,7 +16,7 @@ var content_default = {
     "fr",
     "it"
   ],
-  content_hash: "bf79da87ed3e0816",
+  content_hash: "74dcb7ca36949bca",
   creeks: [
     {
       name: "Strawberry Creek",

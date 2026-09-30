@@ -1,10 +1,10 @@
 {
- "checked_utc": "2026-09-29T18:29:16Z",
+ "checked_utc": "2026-09-30T00:33:59Z",
  "service": "OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin",
  "client": "opentimestamps-client 0.7.2",
  "upgraded": true,
  "counts": {
-  "pending": 0,
+  "pending": 3,
   "confirmed": 7,
   "unchecked": 0,
   "broken": 0
@@ -51,6 +51,21 @@
    },
    "problem": null,
    "status": "confirmed"
+  },
+  {
+   "proof": "proofs/analysis_plan_v3.md.ots",
+   "file": "docs/analysis_plan_v3.md",
+   "what": "analysis_plan_v3",
+   "file_sha256": "6df27a02465c7791c479d9e2264b3a7cbf087433bae8a62c417b56b423fcbcf8",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "status": "pending"
   },
   {
    "proof": "proofs/audit-head-2026-09-24.ots",
@@ -119,6 +134,22 @@
    "status": "confirmed"
   },
   {
+   "proof": "proofs/audit-head-2026-09-30.ots",
+   "file": "proofs/audit-head-2026-09-30",
+   "what": "audit_head",
+   "file_sha256": "cd0a0a68d56b423120086d9a95b865b13c0aaa499aa23dd02bbd5ca0be1aca63",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "audit_seq": 7,
+   "status": "pending"
+  },
+  {
    "proof": "proofs/prereg-v1.tag.ots",
    "file": "proofs/prereg-v1.tag",
    "what": "prereg_tag",
@@ -159,6 +190,21 @@
    },
    "problem": null,
    "status": "confirmed"
+  },
+  {
+   "proof": "proofs/prereg-v3.tag.ots",
+   "file": "proofs/prereg-v3.tag",
+   "what": "prereg_tag_v3",
+   "file_sha256": "0b90e4e3a08d34a840682f7d858662bd9fb58573192ee19b16cd422fe17378b0",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "status": "pending"
   }
  ]
 }

@@ -1,0 +1,16 @@
+{
+  "generated_at_utc": "2026-09-29T20:31:36Z",
+  "script": "scripts/lock_analysis.py",
+  "synthetic": false,
+  "stamp": "20260929",
+  "analysis": "results/usability_20260929.json",
+  "status": "not computed: an arm is empty",
+  "backup_file": "second-look-20260929T202242Z.sql",
+  "export_sha256": {
+    "sessions.csv": "d9114082cb43b1f6606fea2397fc2aae29a40b4c9425881296a8fdb3ec818eed",
+    "responses.csv": "d564a10792131f8c8a2ad11b211bf0c00c3c99086c16c4e7887d0064ed6da80e"
+  },
+  "checkout_at_start": "fe0c80a9d7a81a3b9bbe30733ee4c33fb35b3d0b",
+  "part2_analysis": "results/assist_20260929.json",
+  "part2_status": "not computed: an arm is empty"
+}

@@ -12,7 +12,7 @@ from apps.api import content, study
 from apps.api.deps import DB, Now
 from apps.api.security import DEMO_LIMIT, READ_LIMIT, STUDY_LIMIT, rate_limited, same_secret
 from apps.api.settings import settings
-from core.lock import is_before_lock
+from core.lock import is_judge_mode_shut
 from core.records import TestAnswer
 from core.scoring import is_correct
 
@@ -85,10 +85,10 @@ def export(db: DB, token: str | None = None) -> Response:
 @router.post("/demo/answer", dependencies=[Depends(rate_limited(DEMO_LIMIT))])
 def demo_answer(body: DemoBody, now: Now) -> dict[str, Any]:
     """Judge mode. Takes no database session on purpose: there is nothing to store."""
-    # Shut until the data lock, as the page says (review finding F86): before it, sixteen of
-    # these would hand anyone the live test's answer key.
-    if is_before_lock(now):
-        raise HTTPException(status_code=403, detail="Judge mode opens on Sep 28.")
+    # Shut until the second lock, as the page says (review finding F86, UPDATE_33): before it,
+    # sixteen of these would hand anyone in the second wave the live test's answer key.
+    if is_judge_mode_shut(now):
+        raise HTTPException(status_code=403, detail="Judge mode opens on Oct 3.")
     gold = content.gold_for(body.item_id)
     if gold is None:
         raise HTTPException(status_code=404, detail="We do not know that test item.")
