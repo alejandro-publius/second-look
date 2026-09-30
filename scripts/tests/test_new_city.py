@@ -127,3 +127,18 @@ def test_bad_coordinates_and_an_empty_name_are_refused(root: Path) -> None:
     with pytest.raises(ValueError, match="within 90"):
         new_city.scaffold(root=root, name="Nowhere", country="", lat=95.0, lon=0.0)
     assert new_city.main(["--name", "...", "--lat", "1", "--lon", "1", "--root", str(root)]) == 2
+
+
+def test_the_pack_has_a_top_level_bbox_that_is_null_until_a_checker_sets_it(
+    root: Path, monkeypatch
+) -> None:
+    """apps/web/lib/content.ts regionAt reads the pack's top level bbox to decide which plant
+    list a pin is offered. The stub must carry the key, as null, and no made up box."""
+    monkeypatch.setattr(new_city, "qr_svg", lambda url: None)
+    new_city.scaffold(root=root, name="Heraklion", country="Greece", lat=35.3387, lon=25.1442)
+    path = root / "content" / "regions" / "heraklion.yaml"
+    pack = yaml.safe_load(path.read_text())
+    assert "bbox" in pack and pack["bbox"] is None
+    text = path.read_text()
+    assert "[south, west, north, east]" in text and "[0, 1, 2, 3]" not in text, "no fake box"
+    assert "offered only to a pin inside this box" in text

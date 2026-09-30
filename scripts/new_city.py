@@ -4,8 +4,8 @@
 
 Given a name and coordinates it writes four things and makes no claim about any of them:
 
-- content/regions/<slug>.yaml, a region pack stub: no plants, no creeks, every field that a local
-  checker has to fill marked as such.
+- content/regions/<slug>.yaml, a region pack stub: no plants, no creeks, bbox null, every field
+  that a local checker has to fill marked as such.
 - fhir/fsh/city-<slug>.fsh, the nested Locations in FSH under their LocationOah profile: the city,
   one creek, one reach, one spot, each partOf the one above, in a Bundle that scripts/fhir_build.sh
   builds inside their guide and the HL7 validator checks in make check.
@@ -52,6 +52,9 @@ name: "{name}, {country}"
 approved: false
 invasive_plants: []
 source: "to be filled by a local checker, from the regional invasive species inventory"
+# [south, west, north, east] in degrees from public maps; the plant list is
+# offered only to a pin inside this box.
+bbox: null
 
 # Creeks and their reaches. Each creek has a readable slug, so the analyst's link reads
 # /city?creek=<slug>. `flows_into` names the reach below; the downstream note appears only where it
@@ -66,11 +69,11 @@ source: "to be filled by a local checker, from the regional invasive species inv
 #       - slug: upper
 #         name: Upper reach
 #         flows_into: lower
-#         bbox: [{0}, {1}, {2}, {3}]
+#         bbox: [south, west, north, east]
 #       - slug: lower
 #         name: Lower reach
 #         flows_into: null
-#         bbox: [{0}, {1}, {2}, {3}]
+#         bbox: [south, west, north, east]
 creeks: []
 """
 
@@ -251,6 +254,9 @@ Each step below names the files and commands in this repository that do it.
       `scripts/merge_labels.py` prints Cohen's kappa and refuses to freeze while they disagree.
 - [ ] Fill `invasive_plants:` in `content/regions/{slug}.yaml` from the regional inventory,
       with the source named.
+- [ ] Set `bbox:` at the top of that file, [south, west, north, east] in degrees from public
+      maps. The plant list is offered only to a pin inside this box; while it is null, no pin
+      in {name} is offered the list.
 - [ ] `scripts/freeze_key.py`, then the lesson checked on strangers before launch.
 
 ## 4. Collect and validate
