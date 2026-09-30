@@ -4,9 +4,9 @@ UPDATE_30 section 4 item 4. Everything needed to put the video on YouTube as unl
 
 ## Which file
 
-`~/second-look-media/final/second-look-final.mp4`, built by `make video-final` ([`README.md`](README.md) in this folder).
+`~/second-look-media/final/second-look-final.mp4`, built by `make video-final` ([`README.md`](README.md) in this folder) on Tue Sep 30 from clips recorded the same day: 3:45 (225.5 seconds), 1920 by 1080, 77.7 MB, the captions on the picture, no voice, with `second-look-final.srt` beside it. The cut of Sep 25 is kept in the same folder as `second-look-final-20260925.mp4` and `.srt`: it says the creek check's wording is draft, which has not been true since Sep 26, so never upload that one.
 
-- **No voice by the end of Sep 26 Pacific:** the captions only cut is the video (UPDATE_30 section 10). Upload it as it is.
+- **No voice by the end of Thu Oct 1 Pacific** (`docs/ALEX_TODO.md` step 6): the captions only cut is the video (UPDATE_30 section 10). Upload it as it is, by Fri Oct 2.
 - **The voice arrived:** put it in `~/second-look-media/voice/`, run `make video-final` again, and check that `docs/video/final_cut.json` says `"voice_used": true`.
 
 Check the file before uploading:

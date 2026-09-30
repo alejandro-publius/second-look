@@ -1,7 +1,7 @@
 // Screen recordings for the video (Update 14 section 7 item 2), at a human pace, against a local
 // production build and the mocked API, so no recording adds a session or a visit anywhere.
-// Judge mode is recorded with Playwright's clock set after the lock: the lock constant is
-// overridden in this test environment only, and the app is untouched.
+// Every page is recorded as a judge sees it today, with the browser's own clock: judge mode is
+// shut until the second lock (UPDATE_33), so /demo is recorded saying when it opens.
 //
 // Needs: npm run build && npm run start (port 3100, or WEB_PORT). Writes webm to docs/video/clips/raw, then
 // scripts/video_rough.py converts them to 30 fps mp4 in docs/video/clips/ (never committed).
@@ -42,7 +42,7 @@ const browser = await chromium.launch();
 // starts. "start" is where the video's use of the clip begins, past the consent and warm-up
 // screens; scripts/video_final.py cuts the clip there, and a screen part of the shot list whose
 // From names a mark starts at that mark. The seconds count from the page's first frame.
-async function record(name, fn, { viewport = PHONE, video = PHONE_VIDEO, after, mock = {}, leave = [] } = {}) {
+async function record(name, fn, { viewport = PHONE, video = PHONE_VIDEO, mock = {}, leave = [] } = {}) {
   const phone = viewport === PHONE;
   const context = await browser.newContext({
     viewport,
@@ -56,7 +56,6 @@ async function record(name, fn, { viewport = PHONE, video = PHONE_VIDEO, after, 
   await context.route("**/*", (route) =>
     ours.some((o) => route.request().url().startsWith(o)) ? route.fallback() : route.abort("blockedbyclient"),
   );
-  if (after) await context.clock.install({ time: new Date(after) });
   const page = await context.newPage();
   const t0 = Date.now();
   const marks = { start: 0 };
@@ -177,31 +176,38 @@ await record("06-end-score", async (page, mark) => {
   mark("start");
   await beat(14000);
 });
-await record(
-  "extra-judge-mode",
-  async (page) => {
-    await page.goto(`${base}/judges`);
-    await beat(2000);
-    await page.goto(`${base}/demo?script=1`);
-    await beat(2000);
-    await page.getByRole("button").first().click();
-    await beat(2500);
-  },
-  { after: "2026-10-03T05:00:00Z" },
-);
-// Beat 9: the start screen (the app's order, every question marked draft wording), a pin and the
-// first questions at a human pace; then the rest of the form at speed, with a pipe reported, up to
-// the dry weather question about that pipe, the mark "followups", which is answered Yes.
+// A cutaway no beat names: the judges' page, then /demo as a judge sees it today. Judge mode is
+// shut until the second lock, so the page says when it opens; nothing here is clicked.
+await record("extra-judge-mode", async (page) => {
+  await page.goto(`${base}/judges`);
+  await beat(2500);
+  await page.goto(`${base}/demo`);
+  await page.getByRole("heading", { name: content.locale["demo.shut_title"], exact: true }).waitFor();
+  await beat(3500);
+});
+// Beat 9: the start screen, which says the questions and answers are the OneAquaHealth app's own,
+// word for word, and offers them in six languages (the picker is stepped through each language
+// and left on English, so all six names are seen), a pin and the first question at a human pace;
+// then the rest of the form at speed, with a pipe reported, up to the dry weather question about
+// that pipe, the mark "followups", which is answered Yes. The answer labels are the app's own
+// words from content/form.yaml; scripts/tests/test_video_beats.py checks each one is still there.
 const DRY_PIPE = {
   rule_id: "dry_pipe",
   question_text: content.locale["followup.dry_pipe"].replace("{days}", "5"),
   kind: "yesno",
 };
+const LANGUAGES = content.app_strings.languages.filter((l) => l !== "en");
 await record(
   "extra-check",
   async (page, mark) => {
     await page.goto(`${base}/check`);
-    await beat(3000);
+    await beat(1500);
+    const picker = page.getByLabel("Language of the questions");
+    for (const lang of [...LANGUAGES, "en"]) {
+      await picker.selectOption(lang);
+      await beat(450);
+    }
+    await beat(300);
     await page.getByRole("button", { name: "Start the check", exact: true }).click();
     await beat(500);
     await page.getByRole("button", { name: "Drop a pin instead" }).click();
@@ -211,7 +217,7 @@ await record(
     await beat(400);
     await page.getByRole("button", { name: "Next", exact: true }).click();
     await beat(3200);
-    await click(page, "U shape");
+    await click(page, "U Shape");
     await beat(1500);
     for (let i = 0; i < 40; i++) {
       const buttons = await page.getByRole("button").allInnerTexts();
@@ -220,7 +226,7 @@ await record(
       const pick = /pipes draining/i.test(text)
         ? "Yes"
         : buttons.find((b) => b.startsWith("Moderate")) ??
-          ["Natural", "Slow", "Clear or transparent", "No", "Skip", "Trees", "Next"].find((b) => buttons.includes(b));
+          ["Natural", "Slow", "Clear/transparent", "No", "Skip", "Trees", "Next"].find((b) => buttons.includes(b));
       if (!pick) throw new Error(`record-clips: no answer for a check screen with ${buttons.join(", ")}`);
       await page.getByRole("button", { name: pick, exact: true }).first().click();
       await beat(150);
@@ -268,7 +274,7 @@ if (walk) {
     await page.locator("video").evaluate((v) => v.play()).catch(() => undefined);
     await beat(6500);
     await click(page, "Start the check");
-    await click(page, "U shape");
+    await click(page, "U Shape");
     await beat(1500);
   });
 }

@@ -5,7 +5,7 @@
   "length_s": 225.5,
   "length": "3:45",
   "under_4_min": true,
-  "bytes": 77085623,
+  "bytes": 77718246,
   "width": 1920,
   "height": 1080,
   "fps": 30,
@@ -19,13 +19,13 @@
   "sound": "silence, no music",
   "captions": {
     "file": "~/second-look-media/final/second-look-final.srt",
-    "sha256": "5d8ceaff23a214e84393a2e35212f09cc68a2d2d8c3d234c2899fcc9c6de2a91",
+    "sha256": "bf5a927bc00f50d28f38557b8fd62313e91bb9b8880da939c169879c018ceb45",
     "cues": 45,
     "burned_in": true,
     "subtitles_track": false,
     "max_letters_a_second": 17.0
   },
-  "shotlist_sha256": "a0fa2d343135b80aeb9c66b03dec489700284b4c73ee7d50a50fc84a443c8f97",
+  "shotlist_sha256": "e12361ace74297428eafdb9b5300e9d6792296389d02c0a9387abe2c855652c7",
   "video_licence": "CC BY-SA 4.0",
   "end_card_link": "https://second-look-79t.pages.dev",
   "credits_card_s": 8.0,
@@ -59,7 +59,7 @@
   "screen_recordings": {
     "01-landing": {
       "size": "390x844",
-      "seconds": 8.87,
+      "seconds": 8.47,
       "marks": {
         "start": 0.0
       },
@@ -89,7 +89,7 @@
     },
     "05-test-items": {
       "size": "390x844",
-      "seconds": 20.0,
+      "seconds": 20.17,
       "marks": {
         "start": 0.8
       },
@@ -99,17 +99,17 @@
     },
     "06-end-score": {
       "size": "390x844",
-      "seconds": 17.93,
+      "seconds": 17.6,
       "marks": {
-        "start": 2.4
+        "start": 2.1
       },
       "plays_from_s": [
-        2.4
+        2.1
       ]
     },
     "07-readme-results": {
       "size": "1280x800",
-      "seconds": 24.37,
+      "seconds": 24.33,
       "marks": {
         "start": 0.4
       },
@@ -119,7 +119,7 @@
     },
     "08-how-we-know": {
       "size": "390x844",
-      "seconds": 25.57,
+      "seconds": 25.6,
       "marks": {
         "start": 0.0
       },
@@ -129,19 +129,19 @@
     },
     "extra-check": {
       "size": "390x844",
-      "seconds": 28.07,
+      "seconds": 29.43,
       "marks": {
         "start": 0.0,
-        "followups": 13.6
+        "followups": 14.9
       },
       "plays_from_s": [
         0.0,
-        13.6
+        14.9
       ]
     },
     "10-record": {
       "size": "390x844",
-      "seconds": 16.6,
+      "seconds": 16.63,
       "marks": {
         "start": 0.0
       },
@@ -162,7 +162,7 @@
     },
     "13-walk": {
       "size": "390x844",
-      "seconds": 12.4,
+      "seconds": 12.43,
       "marks": {
         "start": 0.0
       },
@@ -175,7 +175,7 @@
     {
       "time": "2:55",
       "screen": "11-two",
-      "why": "their sandbox does not answer: GET /api/two on the live site said theirs_status down on 2026-09-25, so the lab result the recording shows would be the mock's, and docs/video/VOICE_SCRIPT.md says to cut beat 11 then"
+      "why": "the recording would show the mock's lab result, not theirs: the clips are recorded against the mock API, whose lab result is made up, and on 2026-09-25 GET /api/two on the live site said theirs_status down as well, so docs/video/VOICE_SCRIPT.md says to cut beat 11"
     }
   ],
   "link_on_screen": [
