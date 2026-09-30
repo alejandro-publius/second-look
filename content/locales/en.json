@@ -678,5 +678,7 @@
   "judges.assist": "Assisted second look, try it",
   "judges.assist_note": "Eight photos as the assisted group sees them. When the checker disagrees with you it asks you to look again, and you decide. Feedback after every answer, nothing stored. Opens on Sep 28.",
   "verify.proof.prereg_tag_v2": "The tag prereg-v2, which fixes part 2's analysis plan in git",
-  "verify.proof.analysis_plan_v2": "Part 2's analysis plan"
+  "verify.proof.analysis_plan_v2": "Part 2's analysis plan",
+  "verify.proof.prereg_tag_v3": "The tag prereg-v3, which fixes the second wave's analysis plan in git",
+  "verify.proof.analysis_plan_v3": "The second wave's analysis plan"
 }

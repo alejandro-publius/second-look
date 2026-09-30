@@ -49,7 +49,7 @@ test("verify: says what OpenTimestamps is, and shows each proof's status from re
   // page does not say the log is stamped every day.
   expect(text).toContain("Once a day we stamp the audit log's last receipt, if it has changed since the last stamp.");
   expect(text).not.toContain("once a day, which");
-  for (const what of ["prereg_tag", "analysis_plan", "prereg_tag_v2", "analysis_plan_v2"]) {
+  for (const what of ["prereg_tag", "analysis_plan", "prereg_tag_v2", "analysis_plan_v2", "prereg_tag_v3", "analysis_plan_v3"]) {
     const p = ots.proofs.find((x) => x.what === what);
     expect(p, `results/ots.json has no ${what} proof`).toBeTruthy();
     const card = page.getByTestId(`proof-${what}`);

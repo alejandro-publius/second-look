@@ -71,10 +71,10 @@ SCRIPT = "evals/wave2_analysis.py"
 REPO_ROOT = ROOT
 PLAN_RELATIVE = "docs/analysis_plan_v3.md"
 PLAN_TAG = "prereg-v3"
-# Pinned when the plan is tagged, as docs/notes/plan_hash.md records them. Until then the
-# script refuses real data: an unpinned plan is not a registered plan.
-PLAN_COMMIT: str | None = None
-PLAN_SHA256: str | None = None
+# The commit the tag points at and the SHA-256 of the tagged plan, as docs/notes/plan_hash.md
+# records them (tagged 2026-09-30T00:33Z, before the wave opened).
+PLAN_COMMIT: str | None = "f49b8aa47c3fa34ec271919311787e0c7ce067c3"
+PLAN_SHA256: str | None = "6df27a02465c7791c479d9e2264b3a7cbf087433bae8a62c417b56b423fcbcf8"
 
 # The window, written once here. core/lock.py may hold the same two instants under the same
 # names; evals/tests/test_wave2_analysis.py fails if it does and they differ.
