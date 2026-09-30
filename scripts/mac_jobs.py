@@ -10,6 +10,9 @@ files in its checkout the other jobs may have changed, and leaves those alone.
                                                                   the one this table writes, loaded
   uv run python scripts/mac_jobs.py ran-today NAME                 exit 0 when its log moved today
   uv run python scripts/mac_jobs.py today                          all of them, one line each
+  uv run python scripts/mac_jobs.py doc [--check]                  write the table into
+                                                                  docs/internal/MAC_JOBS.md, or
+                                                                  exit 1 when it differs
 """
 
 from __future__ import annotations
@@ -31,6 +34,16 @@ BACKUPS = Path("~/second-look-backups")
 # When the lock job fires: ten minutes after the data lock (core/lock.py), so the Mac's clock
 # may be a few minutes off and the analysis still never runs before the lock.
 LOCK_JOB_UTC = datetime(2026, 9, 28, 1, 10, tzinfo=UTC)
+# The lock job's second run, for the second wave (docs/analysis_plan_v3.md): ten minutes after
+# the second lock, 2026-10-03T04:00:00Z. scripts/tests/test_mac_jobs.py holds it to the instant
+# evals/wave2_analysis.py names.
+LOCK2_JOB_UTC = datetime(2026, 10, 3, 4, 10, tzinfo=UTC)
+DOC = ROOT / "docs" / "internal" / "MAC_JOBS.md"
+DOC_HEAD = (
+    "| Job | When (the Mac's own clock) | What it runs | Where it logs | "
+    "The one command that shows it ran today |"
+)
+DOC_RULE = "|---|---|---|---|---|"
 
 
 @dataclass(frozen=True)
@@ -44,6 +57,9 @@ class Job:
     calendar: dict[str, int] | None = None
     interval: int | None = None
     writes: tuple[str, ...] = field(default=())
+    # The kinds of line the job adds to audit/log.jsonl in the checkout. It commits nothing, so
+    # the lock job's second run carries such lines into its own commit.
+    audit_kinds: tuple[str, ...] = field(default=())
     shows_it_ran: str = ""
     # A job that runs all day counts as running only if its log moved this many minutes ago.
     recent_minutes: int | None = None
@@ -57,18 +73,22 @@ class Job:
         words = " ".join(self.command).replace(";", " ").split()
         return next(p for p in words if p.startswith("scripts/"))
 
+    def options(self) -> tuple[str, ...]:
+        """What a uv job hands its script, such as --wave 2."""
+        return self.command[4:] if self.command[0] == "uv" else ()
+
     def ran_file(self) -> str:
         return self.shows_it_ran or self.log
 
 
-def lock_calendar(tz: tzinfo | None = None) -> dict[str, int]:
+def lock_calendar(tz: tzinfo | None = None, when: datetime = LOCK_JOB_UTC) -> dict[str, int]:
     """The lock job's time as the Mac's own clock reads it; launchd has no time zones."""
-    local = LOCK_JOB_UTC.astimezone(tz)
+    local = when.astimezone(tz)
     return {"Month": local.month, "Day": local.day, "Hour": local.hour, "Minute": local.minute}
 
 
-def uv_run(script: str) -> tuple[str, ...]:
-    return ("uv", "run", "python", script)
+def uv_run(script: str, *options: str) -> tuple[str, ...]:
+    return ("uv", "run", "python", script, *options)
 
 
 def jobs(tz: tzinfo | None = None) -> tuple[Job, ...]:
@@ -116,6 +136,7 @@ def jobs(tz: tzinfo | None = None) -> tuple[Job, ...]:
             "logs/repush.err",
             calendar={"Hour": 8, "Minute": 0},
             writes=("fhir/sandbox_ledger.jsonl",),
+            audit_kinds=("sandbox_push",),
         ),
         Job(
             "hl7",
@@ -159,6 +180,18 @@ def jobs(tz: tzinfo | None = None) -> tuple[Job, ...]:
             calendar=lock_calendar(tz),
             shows_it_ran="lock.log",
         ),
+        Job(
+            "lock2",
+            "once, at 2026-10-03T04:10:00Z (Oct 2, 21:10 PDT)",
+            "the second data lock, for the second wave: backup, export, the two registered "
+            "analyses once on the second window, the second wave's own README rows, make check, "
+            "commit, deploy, push, and a line on the status issue",
+            uv_run("scripts/lock_analysis.py", "--wave", "2"),
+            "logs/lock2.out",
+            "logs/lock2.err",
+            calendar=lock_calendar(tz, LOCK2_JOB_UTC),
+            shows_it_ran="lock.log",
+        ),
     )
 
 
@@ -179,6 +212,38 @@ def mac_job_files() -> tuple[str, ...]:
     return tuple(p for job in JOBS for p in job.writes)
 
 
+def mac_job_audit_kinds() -> tuple[str, ...]:
+    """The kinds of audit log line the jobs add in the checkout without committing them."""
+    return tuple(k for job in JOBS for k in job.audit_kinds)
+
+
+def doc_row(job: Job) -> str:
+    """One row of the table in docs/internal/MAC_JOBS.md."""
+    runs = " ".join((job.script(), *job.options()))
+    return (
+        f"| `{job.label}` | {job.when} | `{runs}`: {job.what} | "
+        f"`~/second-look-backups/{job.ran_file()}` | "
+        f"`uv run python scripts/mac_jobs.py ran-today {job.name}` |"
+    )
+
+
+def doc_table() -> str:
+    return "\n".join([DOC_HEAD, DOC_RULE, *(doc_row(job) for job in JOBS)]) + "\n"
+
+
+def doc_with_table(text: str) -> str:
+    """The document with its table written from JOBS. Its other words are left as they are."""
+    start = text.find(DOC_HEAD)
+    if start < 0:
+        raise SystemExit("mac-jobs: docs/internal/MAC_JOBS.md has no table to write into")
+    end = start
+    for line in text[start:].splitlines(keepends=True):
+        if not line.startswith("|"):
+            break
+        end += len(line)
+    return text[:start] + doc_table() + text[end:]
+
+
 def expand(path: Path, home: Path) -> Path:
     text = str(path)
     return home / text[2:] if text.startswith("~/") else path
@@ -187,7 +252,7 @@ def expand(path: Path, home: Path) -> Path:
 def program(job: Job, root: Path, uv: str) -> list[str]:
     """ProgramArguments: uv by its full path and every script by its full path in the checkout."""
     if job.command[0] == "uv":
-        return [uv, *job.command[1:3], str(root / job.command[3])]
+        return [uv, *job.command[1:3], str(root / job.command[3]), *job.options()]
     if job.command[:2] == ("bash", "-c"):
         return ["/bin/bash", "-c", job.command[2].replace("uv run", f"'{uv}' run")]
     return ["/bin/bash", str(root / job.command[1])]
@@ -301,6 +366,8 @@ def main(argv: list[str] | None = None) -> int:
     ran = sub.add_parser("ran-today")
     ran.add_argument("name")
     sub.add_parser("today")
+    doc = sub.add_parser("doc")
+    doc.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
     home = Path.home()
@@ -318,6 +385,20 @@ def main(argv: list[str] | None = None) -> int:
         if not problems:
             print(f"mac-jobs: all {len(JOBS)} jobs installed from {root} and loaded")
         return 1 if problems else 0
+    if args.command == "doc":
+        have = DOC.read_text(encoding="utf-8")
+        want = doc_with_table(have)
+        if args.check:
+            same = have == want
+            print(
+                "mac-jobs: the table is the one this script writes"
+                if same
+                else "mac-jobs: the table in the jobs document differs; run doc without --check"
+            )
+            return 0 if same else 1
+        DOC.write_text(want, encoding="utf-8")
+        print(f"mac-jobs: wrote the table of {len(JOBS)} jobs into {DOC.relative_to(ROOT)}")
+        return 0
     if args.command == "ran-today":
         ok, line = ran_today(by_name(args.name), home)
         print(line)

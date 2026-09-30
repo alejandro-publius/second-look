@@ -8,7 +8,7 @@ const day = (utc?: string) => utc?.slice(0, 10) ?? "";
 
 export function proofName(p: OtsProof): string {
   if (p.what === "audit_head") return t("verify.proof.audit_head", { seq: p.audit_seq ?? "" });
-  if (["prereg_tag", "analysis_plan", "prereg_tag_v2", "analysis_plan_v2"].includes(p.what ?? "")) return t(`verify.proof.${p.what}`);
+  if (["prereg_tag", "analysis_plan", "prereg_tag_v2", "analysis_plan_v2", "prereg_tag_v3", "analysis_plan_v3"].includes(p.what ?? "")) return t(`verify.proof.${p.what}`);
   return t("verify.proof.other");
 }
 

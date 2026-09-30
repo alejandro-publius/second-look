@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // Update 09 section 4.5: /demo gives feedback on the same sixteen photos the study uses, so it
-// stays shut until the data lock. These tests move the browser clock past it.
-const AFTER_LOCK = new Date("2026-09-29T00:00:00Z");
+// stays shut while the study runs. Since UPDATE_33 that is until the second lock,
+// 2026-10-03T04:00:00Z: a second wave of the study runs until then. These tests move the browser
+// clock past it. tests/judge-mode-second-lock.spec.ts holds both sides of that instant.
+const AFTER_LOCK = new Date("2026-10-04T00:00:00Z");
 import { assertOnlyOurOrigins, goldFor, mockApi, watchRequests } from "./mock-api.mjs";
 import { answerAllItems, BASE } from "./helpers";
 
@@ -78,19 +80,20 @@ test("?script=1 fixes the item order for the screen recording", async ({ page })
   expect(a).toEqual(b);
 });
 
-test("judge mode is shut before the lock and open after it", async ({ page }) => {
+test("judge mode is shut before the second lock and open after it", async ({ page }) => {
   await mockApi(page);
-  await page.clock.install({ time: new Date("2026-09-24T12:00:00Z") });
+  // A day after the first lock, when judge mode was open for a while: shut again (UPDATE_33).
+  await page.clock.install({ time: new Date("2026-09-29T00:00:00Z") });
   await page.goto("/demo");
-  await expect(page.getByRole("heading", { name: "Judge mode opens on Sep 28" })).toBeVisible();
-  // One moment, said once in both zones, so the heading's Sep 28 and the Sep 27 below it agree
+  await expect(page.getByRole("heading", { name: "Judge mode opens on Oct 3" })).toBeVisible();
+  // One moment, said once in both zones, so the heading's Oct 3 and the Oct 2 below it agree
   // (REVIEW_03 R44).
-  await expect(page.getByText("It opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.")).toBeVisible();
+  await expect(page.getByText("It opens when the data locks: Oct 3 at 04:00 UTC, which is Friday Oct 2 at 21:00 PDT.", { exact: false })).toBeVisible();
   // Shut means shut: no photo is fetched and no start button exists.
   await expect(page.locator("img.photo, img.photo-large")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start judge mode" })).toHaveCount(0);
 
-  await page.clock.install({ time: new Date("2026-09-29T00:00:00Z") });
+  await page.clock.install({ time: AFTER_LOCK });
   await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Judge mode" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start judge mode" })).toBeVisible();
@@ -98,7 +101,9 @@ test("judge mode is shut before the lock and open after it", async ({ page }) =>
 
 // Audit finding time-bombs-5: both judge mode pages were built shut, so after the lock every reader
 // saw "Judge mode opens on Sep 28" until the script had run, and for good with scripts off. The
-// page as built now holds the heading alone, and none of the shut page's words.
+// page as built now holds the heading alone, and none of the shut page's words. Since UPDATE_33
+// the shut page names the second lock, Oct 3, and the same holds for those words: the tests read
+// them from the locale, and look for any "opens on" besides.
 for (const [path, title] of [
   ["/demo", "demo.title"],
   ["/t2/demo", "part2.demo_title"],
@@ -115,19 +120,23 @@ for (const [path, title] of [
     for (const key of ["demo.shut_title", "demo.shut_body", "part2.demo_shut_body", "demo.shut_meanwhile"]) {
       expect(holds(en[key]), `${path} is built with ${key}`).toBe(false);
     }
-    expect(html).not.toMatch(/opens on Sep 28|It opens when the data locks|Until then/);
+    expect(html).not.toMatch(/opens on (Sep|Oct) \d|It opens when the data locks|Until then/);
     // Unknown is not open: no photo and no start button are built into the page either.
     expect(holds(en["demo.start"])).toBe(false);
     expect(html).not.toMatch(/<img[^>]+photo/);
   });
 
-  test(`${path} with scripts off shows its heading, not that it opens on Sep 28`, async ({ browser }) => {
+  test(`${path} with scripts off shows its heading, not the day it opens`, async ({ browser }) => {
     const en: Record<string, string> = GENERATED.locale;
     const context = await browser.newContext({ javaScriptEnabled: false, serviceWorkers: "block" });
     const page = await context.newPage();
     await page.goto(`${BASE}${path}`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(en[title]);
-    await expect(page.getByRole("main")).not.toContainText("opens on Sep 28");
+    await expect(page.getByRole("main")).not.toContainText(/opens on (Sep|Oct) \d/);
+    await expect(page.getByRole("main")).not.toContainText(en["demo.shut_title"]);
+    // Unknown is not open: with scripts off nothing can be started and no photo is shown.
+    await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
+    await expect(page.locator("img.photo, img.photo-large")).toHaveCount(0);
     await context.close();
   });
 
@@ -151,13 +160,42 @@ for (const [path, title] of [
     const seen = await page.evaluate(() => (window as unknown as { seenHeadings: string[] }).seenHeadings);
     expect(seen).toEqual([en[title]]);
   });
+
+  // The other side of the same instant. The page as built holds the open page's heading, so on
+  // its way to shut it must never hold more of the open page than that: no button and no photo,
+  // at any moment from the first paint on.
+  test(`${path} never shows a button or a photo on its way to shut, before the second lock`, async ({ page }) => {
+    const en: Record<string, string> = GENERATED.locale;
+    const calls = await mockApi(page);
+    await page.clock.install({ time: new Date("2026-10-03T03:59:59Z") });
+    await page.addInitScript(() => {
+      const seen = { headings: [] as string[], buttons: 0, photos: 0 };
+      (window as unknown as { seenOnTheWay: typeof seen }).seenOnTheWay = seen;
+      const note = () => {
+        const text = document.querySelector("h1")?.textContent ?? "";
+        if (text && seen.headings[seen.headings.length - 1] !== text) seen.headings.push(text);
+        seen.buttons = Math.max(seen.buttons, document.querySelectorAll("main button").length);
+        seen.photos = Math.max(seen.photos, document.querySelectorAll("img.photo, img.photo-large").length);
+      };
+      new MutationObserver(note).observe(document, { childList: true, subtree: true, characterData: true });
+      document.addEventListener("DOMContentLoaded", note);
+    });
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1, name: en["demo.shut_title"], exact: true })).toBeVisible();
+    const seen = await page.evaluate(() => (window as unknown as { seenOnTheWay: { headings: string[]; buttons: number; photos: number } }).seenOnTheWay);
+    expect(seen.headings).toEqual([en[title], en["demo.shut_title"]]);
+    expect(seen.buttons).toBe(0);
+    expect(seen.photos).toBe(0);
+    expect(calls.filter((c) => c.path.startsWith("/api/"))).toEqual([]);
+  });
 }
 
-test("the second look's judge mode is shut before the lock and open after it", async ({ page }) => {
+test("the second look's judge mode is shut before the second lock and open after it", async ({ page }) => {
   await mockApi(page);
-  await page.clock.install({ time: new Date("2026-09-24T12:00:00Z") });
+  // While the second wave of the study runs, two days after the first lock (UPDATE_33).
+  await page.clock.install({ time: new Date("2026-09-30T12:00:00Z") });
   await page.goto("/t2/demo");
-  await expect(page.getByRole("heading", { name: "Judge mode opens on Sep 28" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Judge mode opens on Oct 3" })).toBeVisible();
   await expect(page.getByText(GENERATED.locale["part2.demo_shut_body"])).toBeVisible();
   // Shut means shut: no photo is fetched and no start button exists.
   await expect(page.locator("img.photo, img.photo-large")).toHaveCount(0);

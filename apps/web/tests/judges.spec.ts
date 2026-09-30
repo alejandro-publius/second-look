@@ -273,6 +273,6 @@ test("the door to the AI's one question is the second door and opens part 2's ju
   const door = page.getByRole("link", { name: "The AI's one question, try it" });
   await expect(door).toHaveCount(1);
   await door.click();
-  // Before the lock the page is shut and says why; after it, judge mode starts.
-  await expect(page.getByRole("heading", { name: /Judge mode opens on Sep 28|Assisted second look, judge mode/ })).toBeVisible();
+  // Before the second lock the page is shut and says why; after it, judge mode starts.
+  await expect(page.getByRole("heading", { name: /Judge mode opens on Oct 3|Assisted second look, judge mode/ })).toBeVisible();
 });

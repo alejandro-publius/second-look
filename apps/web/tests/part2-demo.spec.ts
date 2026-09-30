@@ -7,7 +7,9 @@ import { answerItem, BASE } from "./helpers";
 // Audit finding first-two-minutes-1: /t2/demo is the one place a judge meets the AI's question,
 // and the door to it must say honestly what happens there. These tests hold the door's words to
 // what the screens do, and to the committed flags the live Worker reads.
-const AFTER_LOCK = new Date("2026-09-29T00:00:00Z");
+// Judge mode is shut until the second lock, 2026-10-03T04:00:00Z (UPDATE_33), so these tests set
+// the browser's clock past it.
+const AFTER_LOCK = new Date("2026-10-04T00:00:00Z");
 const QUESTION = "The checker noticed something here. Look again?";
 const ROOT = join(__dirname, "..", "..", "..");
 const GENERATED = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));

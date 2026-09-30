@@ -1,0 +1,17 @@
+{
+  "generated_at_utc": "2026-09-29T21:28:23Z",
+  "script": "evals/wave2_analysis.py",
+  "synthetic": false,
+  "stamp": "window",
+  "wave": 2,
+  "plan": "docs/analysis_plan_v3.md",
+  "plan_tag": "prereg-v3",
+  "first_lock_utc": "2026-09-28T01:00:00Z",
+  "open_utc": "2026-09-30T04:00:00Z",
+  "open_local": "Tuesday Sep 29, 2026 at 21:00 PDT",
+  "lock_utc": "2026-10-03T04:00:00Z",
+  "lock_local": "Friday Oct 2, 2026 at 21:00 PDT",
+  "lock_job_utc": "2026-10-03T04:10:00Z",
+  "window_hours": 72,
+  "min_per_arm": 20
+}

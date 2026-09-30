@@ -447,7 +447,7 @@ function main() {
   for (const { src, file } of copyList) copyFileSync(src, join(publicPhotos, file));
 
   // Every OpenTimestamps proof and the file it stamps, to download from /verify, since the
-  // repository is private until Sep 30 (judge simulation 02, judge 6, thin item 3).
+  // repository is private until Oct 3 (judge simulation 02, judge 6, thin item 3).
   const publicProofs = join(webRoot, "public", "proofs");
   rmSync(publicProofs, { recursive: true, force: true });
   mkdirSync(publicProofs, { recursive: true });

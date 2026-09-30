@@ -1,4 +1,6 @@
-"""Make the repository public on Sep 30, in the one safe order (UPDATE_30 section 8).
+"""Make the repository public on Oct 3, in the one safe order (UPDATE_30 section 8).
+
+The day was Sep 30 until the organizers moved the deadline to Oct 4 (UPDATE_33).
 
     make go-public            says what it would do and changes nothing
     make go-public GO=dry     runs every step before the flip in a throwaway copy, then stops
