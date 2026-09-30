@@ -1,6 +1,6 @@
 import { expect, test, type Locator } from "@playwright/test";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { footageCases } from "../lib/footage-example.mjs";
 import { howNumbers, keptSplit } from "../lib/how-numbers.mjs";
@@ -432,4 +432,23 @@ test("the footage example's reader follows the file: a changed copy changes what
   expect(footageCases(doc, { ...run, real: false })).toBeNull();
   expect(footageCases(doc, { ...run, synthetic: true })).toBeNull();
   expect(footageCases(null, run)).toBeNull();
+});
+
+// The judge's first minute while judge mode is shut (UPDATE_33): the page says what part 2 is,
+// in the words of README.md and docs/MODEL_CARD.md, as a sixth step, and names all three tagged
+// plans, each with its proof in proofs/.
+test("/how-we-know names part 2 as the sixth step and the three tagged plans", async ({ page }) => {
+  await page.goto("/how-we-know");
+  const steps = page.locator("article > ol > li");
+  await expect(steps).toHaveCount(6);
+  await expect(steps.nth(5)).toHaveText(en["how.flow_6"]);
+  expect(en["how.flow_6"]).toContain(`"${en["part2.question"]}"`);
+  expect(en["how.flow_6"]).toContain("the final answer is their own");
+  const plan = fill("how.plan", { tag: "prereg-v1" });
+  await expect(page.getByText(plan, { exact: true })).toBeVisible();
+  for (const tag of ["prereg-v1", "prereg-v2", "prereg-v3"]) {
+    expect(plan).toContain(tag);
+    expect(existsSync(join(ROOT, "proofs", `${tag}.tag.ots`)), tag).toBe(true);
+  }
+  expect(plan).toContain("Each plan was tagged before its first participant");
 });

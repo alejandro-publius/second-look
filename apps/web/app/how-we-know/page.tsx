@@ -112,6 +112,7 @@ export default function HowWeKnowPage() {
         <li>{t("how.flow_3")}</li>
         <li>{t("how.flow_4")}</li>
         <li>{t("how.flow_5")}</li>
+        <li>{t("how.flow_6")}</li>
       </ol>
       <h2>{t("how.numbers_title")}</h2>
       <p>{t("how.numbers")}</p>

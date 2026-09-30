@@ -152,7 +152,7 @@ test("every photograph a visitor can see is named on the credits page", async ({
 // (hard rules 13 and 15), so the page names it without a caveat (REVIEW_03 R30).
 test("the how we know page names the plan's tag as made", async ({ page }) => {
   await page.goto("/how-we-know");
-  await expect(page.getByText("Analysis plan tag: prereg-v1. The plan names")).toBeVisible();
+  await expect(page.getByText("Analysis plan tags: prereg-v1 for the test, prereg-v2 for part 2, prereg-v3 for the second wave.")).toBeVisible();
   await expect(page.locator("main")).not.toContainText("not yet tagged");
 });
 
