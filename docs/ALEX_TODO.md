@@ -23,7 +23,7 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
 
 1. **From Tue Sep 29, 21:00, as early as you can, 15 minutes: launch the panel.** Wait until the
    top of the status issue says the second wave is open (judge mode shut again, plan v3 tagged
-   and stamped). Then make a researcher account on Prolific, add about 300 dollars, create the
+   and stamped). Then make a researcher account on Prolific, add about 450 dollars, create the
    study from `docs/internal/PANEL_STUDY.md` (every field is written out there, the link and the
    completion code too) and publish it. The panel asks about ethics approval: its step 3 says
    what to check first. It runs by itself and must stop taking people a few hours before the
