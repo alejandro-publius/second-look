@@ -260,9 +260,9 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await expect(page.getByRole("heading", { name: "Channel form" })).toBeVisible();
   await page.getByRole("button", { name: "U shape" }).click();
   await expect(page.locator("h1#question")).toBeFocused();
-  await expect(page.locator("h1#question")).not.toHaveText("Channel form");
+  await expect(page.locator("h1#question")).not.toContainText(/channel form/i);
   await page.getByRole("button", { name: "Back" }).click();
-  await expect(page.locator("h1#question")).toHaveText("Channel form");
+  await expect(page.locator("h1#question")).toContainText(/channel form/i);
   await expect(page.locator("h1#question")).toBeFocused();
   await answerForm(page);
   // Judge walk W01: Send is what writes, and the follow-ups come after it. The Photos screen says

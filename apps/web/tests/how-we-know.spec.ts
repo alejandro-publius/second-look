@@ -89,7 +89,9 @@ test("/how-we-know shows the pass table and the gate on real footage as the file
   ).toBeVisible();
 
   // Nobody typed a number into the page's own words: every number comes in through a placeholder.
-  const typed = Object.entries(en).filter(([k, v]) => k.startsWith("how.") && /\d/.test(v.replace(/\{\w+\}/g, "")));
+  // Two names carry a digit and are not numbers: part 2 of the test, and a plan's tag, prereg-v2.
+  const NAMES = /\bpart 2\b|\bprereg-v\d\b/gi;
+  const typed = Object.entries(en).filter(([k, v]) => k.startsWith("how.") && /\d/.test(v.replace(/\{\w+\}/g, "").replace(NAMES, "")));
   expect(typed.map(([k]) => k)).toEqual([]);
 });
 
