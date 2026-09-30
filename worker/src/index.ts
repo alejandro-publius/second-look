@@ -12,7 +12,8 @@ import VALIDATION from "../../results/fhir_validation.json";
 import CONTENT from "./content.json";
 import { Invalid, NotFound, createDraft, finalize, latestBundleForSpot, loadVisitBundle, quickCheck, spotView, todayOf } from "./check";
 import { cityView, creeksView, exampleResultView, notesForSpot, placeForSpot, referralView } from "./city";
-import { TooLarge, photoResponse, storeUpload } from "./uploads";
+import { TooLarge, photoResponse, purgeUploads, storeUpload } from "./uploads";
+import { fhirMediaType, operationOutcome } from "./fhir_http";
 import { two } from "./two";
 import * as part2 from "./part2";
 import { Conflict, TooMany, purgeWalks, storeWalk, walkFhir, walkView } from "./walk_store";
@@ -108,6 +109,13 @@ const json = (env: Env, data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...corsHeaders(env) },
+  });
+
+/** A FHIR resource as the answer, under FHIR's own media type (worker/src/fhir_http.ts). */
+const fhirJson = (env: Env, request: Request, data: unknown, status = 200) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": fhirMediaType(request.headers.get("accept")), vary: "Accept", "cache-control": "no-store", ...corsHeaders(env) },
   });
 
 const nowIso = () => new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -472,41 +480,45 @@ export default {
       // counted and never mirrored. It reads its own body, to refuse a large one before parsing.
       if (path === "/api/walk" && request.method === "POST") return json(env, await storeWalk(env.DB, request, now));
       const walkBundle = /^\/api\/walk\/([^/]+)\/fhir$/.exec(path);
-      if (walkBundle && request.method === "GET") return json(env, await walkFhir(env.DB, decodeURIComponent(walkBundle[1]), now));
+      if (walkBundle && request.method === "GET") return await fhirRoute(env, request, () => walkFhir(env.DB, idFrom(walkBundle[1]), now));
       const walk = /^\/api\/walk\/([^/]+)$/.exec(path);
-      if (walk && request.method === "GET") return json(env, await walkView(env.DB, decodeURIComponent(walk[1]), now));
+      if (walk && request.method === "GET") return json(env, await walkView(env.DB, idFrom(walk[1]), now));
       const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
-      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, decodeURIComponent(photo[1]), url.searchParams.get("t")));
+      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, idFrom(photo[1]), url.searchParams.get("t")));
       if (path === "/api/creeks") return json(env, await creeksView(checkEnv));
       const city = /^\/api\/city\/([^/]+)$/.exec(path);
-      if (city) return json(env, await cityView(checkEnv, decodeURIComponent(city[1]), todayOf(now)));
+      if (city) return json(env, await cityView(checkEnv, idFrom(city[1]), todayOf(now)));
       const spotFhir = /^\/api\/spot\/([^/]+)\/fhir$/.exec(path);
       if (spotFhir) {
-        const bundle = await latestBundleForSpot(env.DB, decodeURIComponent(spotFhir[1]));
-        if (bundle === null) return json(env, { detail: "no FHIR record for this spot yet" }, 404);
-        return json(env, bundle);
+        return await fhirRoute(env, request, async () => {
+          const found = await latestBundleForSpot(env.DB, idFrom(spotFhir[1]));
+          if (found === null) throw new NotFound("no FHIR record for this spot yet");
+          return found;
+        });
       }
       const spot = /^\/api\/spot\/([^/]+)$/.exec(path);
       if (spot && request.method === "GET") {
-        const id = decodeURIComponent(spot[1]);
+        const id = idFrom(spot[1]);
         const view = await spotView(checkEnv, id, todayOf(now));
         return json(env, { ...view, place: await placeForSpot(checkEnv, id), downstream_notes: await notesForSpot(checkEnv, id, todayOf(now)) });
       }
       const bundle = /^\/api\/fhir\/Bundle\/([^/]+)$/.exec(path);
       if (bundle) {
-        const found = await loadVisitBundle(env.DB, decodeURIComponent(bundle[1]));
-        if (found === null) return json(env, { detail: "no FHIR record for this visit" }, 404);
-        return json(env, found);
+        return await fhirRoute(env, request, async () => {
+          const found = await loadVisitBundle(env.DB, idFrom(bundle[1]));
+          if (found === null) throw new NotFound("no FHIR record for this visit");
+          return found;
+        });
       }
       if (path === "/api/fhir/validation") return json(env, VALIDATION);
       const example = /^\/api\/fhir\/referral\/([^/]+)\/example-result$/.exec(path);
-      if (example) return json(env, await exampleResultView(checkEnv, decodeURIComponent(example[1]), now));
+      if (example) return await fhirRoute(env, request, () => exampleResultView(checkEnv, idFrom(example[1]), now));
       const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
-      if (referral) return json(env, await referralView(checkEnv, decodeURIComponent(referral[1]), now));
+      if (referral) return await fhirRoute(env, request, () => referralView(checkEnv, idFrom(referral[1]), now));
       if (path === "/api/two") return json(env, await two(env));
       // The iNaturalist context line for a creek, from the copy the Mac stored. Read only.
       const inat = /^\/api\/inaturalist\/([^/]+)$/.exec(path);
-      if (inat && request.method === "GET") return json(env, await inaturalistView(env, decodeURIComponent(inat[1])));
+      if (inat && request.method === "GET") return json(env, await inaturalistView(env, idFrom(inat[1])));
     } catch (err) {
       return errorResponse(env, err);
     }
@@ -524,7 +536,7 @@ export default {
       if (path === "/api/check/draft" && request.method === "POST") return json(env, await createDraft(checkEnv, body, now));
       if (path === "/api/check/finalize" && request.method === "POST") return json(env, await finalize(checkEnv, body, now));
       const quick = /^\/api\/quick\/([^/]+)$/.exec(path);
-      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, decodeURIComponent(quick[1]), body, now));
+      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, idFrom(quick[1]), body, now));
       if (path === "/api/test/session" && request.method === "POST") {
         const isTest = sameSecret(request.headers.get("x-qa-key"), env.QA_KEY);
         return await createSession(env, body, isTest);
@@ -575,9 +587,13 @@ export default {
   },
 
   /** Once a day (the cron in worker/wrangler.jsonc): deletes every video walk record past its
-   *  delete date (UPDATE_30 section 1 item 3, docs/DATA_HANDLING.md). Nothing else runs on it. */
+   *  delete date (UPDATE_30 section 1 item 3) and every upload row older than 30 days, whose photo
+   *  KV has dropped by then (hard rule 8, docs/DATA_HANDLING.md). Each runs whatever the other
+   *  does, and a failure in either is thrown, so the run shows as failed. Nothing else runs on it. */
   async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
-    await purgeWalks(env.DB, nowIso());
+    const now = nowIso();
+    const runs = await Promise.allSettled([purgeWalks(env.DB, now), purgeUploads(env.DB, now)]);
+    for (const run of runs) if (run.status === "rejected") throw run.reason;
   },
 };
 
@@ -596,14 +612,43 @@ function lockClock(env: Env): number {
   return Number.isFinite(fixed) ? fixed : Date.now();
 }
 
+/** One id from the address, decoded. A broken percent code (%E0%A4%A, %ff cut short, a lone %)
+ *  is an address nothing lives at, so it is a plain 404 like any other unknown id, not a 500. */
+function idFrom(part: string): string {
+  try {
+    return decodeURIComponent(part);
+  } catch {
+    throw new NotFound("Not found.");
+  }
+}
+
+/** The status and the plain sentence for an error. Anything the code did not raise on purpose is
+ *  a 500 with one fixed sentence: the error's own text stays on the server, since it can name a
+ *  table or quote what was sent. */
+function problemOf(err: unknown): { status: number; detail: string } {
+  if (err instanceof Invalid) return { status: 422, detail: err.message };
+  if (err instanceof NotFound) return { status: 404, detail: err.message };
+  if (err instanceof TooLarge) return { status: 413, detail: err.message };
+  if (err instanceof Conflict) return { status: 409, detail: err.message };
+  if (err instanceof TooMany) return { status: 429, detail: err.message };
+  return { status: 500, detail: "The server could not take that. Try again in a moment." };
+}
+
 /** The plain errors the check code raises become the same answers the Python API gives. */
 function errorResponse(env: Env, err: unknown): Response {
-  if (err instanceof Invalid) return json(env, { detail: err.message }, 422);
-  if (err instanceof NotFound) return json(env, { detail: err.message }, 404);
-  if (err instanceof TooLarge) return json(env, { detail: err.message }, 413);
-  if (err instanceof Conflict) return json(env, { detail: err.message }, 409);
-  if (err instanceof TooMany) return json(env, { detail: err.message }, 429);
-  return json(env, { detail: "The server could not take that. Try again in a moment.", error: String(err) }, 500);
+  const problem = problemOf(err);
+  return json(env, { detail: problem.detail }, problem.status);
+}
+
+/** One route that answers with a FHIR resource: the resource under FHIR's media type, or the
+ *  error as an OperationOutcome with the same status and sentence the other routes would give. */
+async function fhirRoute(env: Env, request: Request, make: () => Promise<unknown>): Promise<Response> {
+  try {
+    return fhirJson(env, request, await make());
+  } catch (err) {
+    const problem = problemOf(err);
+    return fhirJson(env, request, operationOutcome(problem.status, problem.detail), problem.status);
+  }
 }
 
 function withCors(env: Env, response: Response): Response {

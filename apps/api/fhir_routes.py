@@ -16,9 +16,11 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse
 
 from apps.api import fhir_store
+from apps.api.fhir_http import fhir_error, fhir_response
 from core.fhir_emit import OAH_SYSTEM, REPO_URL, SL_SYSTEM
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -192,21 +194,23 @@ def ours() -> tuple[dict[str, Any] | None, bool, str | None]:
 
 
 @router.get("/api/spot/{spot_id}/fhir")
-def spot_fhir(spot_id: str) -> dict[str, Any]:
-    """The latest visit at a spot as a FHIR collection Bundle."""
+def spot_fhir(spot_id: str, request: Request) -> JSONResponse:
+    """The latest visit at a spot as a FHIR collection Bundle, under FHIR's media type. With no
+    record, an OperationOutcome (apps/api/fhir_http.py)."""
     visit_id = fhir_store.latest_visit_id_for_spot(spot_id)
     bundle = fhir_store.load_visit_bundle(visit_id) if visit_id else None
     if bundle is None:
-        raise HTTPException(status_code=404, detail="no FHIR record for this spot yet")
-    return bundle
+        return fhir_error(request, 404, "no FHIR record for this spot yet")
+    return fhir_response(request, bundle)
 
 
 @router.get("/api/fhir/Bundle/{visit_id}")
-def visit_bundle(visit_id: str) -> dict[str, Any]:
+def visit_bundle(visit_id: str, request: Request) -> JSONResponse:
+    """One visit as a FHIR Bundle, under FHIR's media type, or an OperationOutcome."""
     bundle = fhir_store.load_visit_bundle(visit_id)
     if bundle is None:
-        raise HTTPException(status_code=404, detail="no FHIR record for this visit")
-    return bundle
+        return fhir_error(request, 404, "no FHIR record for this visit")
+    return fhir_response(request, bundle)
 
 
 @router.get("/api/fhir/validation")

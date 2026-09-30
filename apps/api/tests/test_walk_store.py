@@ -14,6 +14,7 @@ from sqlmodel import Session, select
 
 from apps.api import content, walk_store
 from apps.api.db import engine
+from apps.api.fhir_http import FHIR_JSON, operation_outcome
 from apps.api.fhir_store import store_dir, stored_bundle_paths
 from apps.api.models import SpotRow, VisitRow, WalkChecksRow, WalkRecordRow
 from apps.api.tests.conftest import freeze_now
@@ -263,10 +264,14 @@ def test_a_walk_record_is_deleted_after_its_days(client) -> None:
 
 @pytest.mark.parametrize("record_id", ["walk-0000000000000000", "spot-1", "walk-XYZ", "x" * 200])
 def test_an_unknown_record_is_a_plain_404(client, record_id) -> None:
-    for path in (f"/api/walk/{record_id}", f"/api/walk/{record_id}/fhir"):
-        r = client.get(path)
-        assert r.status_code == 404, path
-        assert "no stored walk record" in r.json()["detail"]
+    r = client.get(f"/api/walk/{record_id}")
+    assert r.status_code == 404
+    assert "no stored walk record" in r.json()["detail"]
+    # The FHIR route says the same sentence as FHIR says an error (apps/api/fhir_http.py).
+    fhir = client.get(f"/api/walk/{record_id}/fhir")
+    assert fhir.status_code == 404
+    assert fhir.headers["content-type"] == FHIR_JSON
+    assert fhir.json() == operation_outcome(404, r.json()["detail"])
 
 
 def test_the_walk_routes_carry_the_same_headers_and_cors_as_the_others(client) -> None:

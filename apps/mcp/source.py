@@ -59,6 +59,21 @@ def _path_id(value: str) -> str:
     return quote(value, safe="")
 
 
+def _reason(body: Any) -> str:
+    """The API's own sentence for a 404: `detail` on the plain routes, and the first issue of the
+    OperationOutcome on the routes that answer with a FHIR resource (apps/api/fhir_http.py)."""
+    if not isinstance(body, dict):
+        return ""
+    if body.get("resourceType") == "OperationOutcome":
+        issues = body.get("issue")
+        first = issues[0] if isinstance(issues, list) and issues else None
+        details = first.get("details") if isinstance(first, dict) else None
+        text = details.get("text") if isinstance(details, dict) else None
+        return text if isinstance(text, str) else ""
+    detail = body.get("detail", "")
+    return detail if isinstance(detail, str) else ""
+
+
 class ExportSource:
     """A folder written by scripts/export_records.py: creeks.json, city/<creek>.json,
     spot/<id>.json and fhir/<visit>.json."""
@@ -115,7 +130,7 @@ class ApiSource:
         if response.status_code == 404:
             detail = ""
             try:
-                detail = str(response.json().get("detail", ""))
+                detail = _reason(response.json())
             except ValueError:
                 pass
             raise SourceError(detail or f"no record for {what}")

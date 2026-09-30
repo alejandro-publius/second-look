@@ -2309,10 +2309,10 @@ function expiredOn(score, today) {
 function fill(template, params) {
   return template.replace(/\{(\w+)\}/g, (whole, name) => name in params ? String(params[name]) : whole);
 }
-function observerLabel(score, featureName, today, locale) {
+function observerLabel(score, featureName2, today, locale) {
   if (score === null) return { text: "", expired: false, passed: null };
   const tested = shortDate(score.tested_on);
-  const params = { correct: score.correct, total: score.total, feature: featureName, date: tested };
+  const params = { correct: score.correct, total: score.total, feature: featureName2, date: tested };
   if (expiredOn(score, today)) {
     return { text: fill(locale[KEY_EXPIRED], params), expired: true, passed: null };
   }
@@ -2501,10 +2501,10 @@ function looksLikeATestName(name) {
   if (words.some((w) => TEST_NAME_WORDS.has(w))) return true;
   return !/\p{L}/u.test(name);
 }
-function downstreamNote(finding, featureName, reachSlugs) {
+function downstreamNote(finding, featureName2, reachSlugs) {
   const n = finding.observers.length;
   const people = n === 1 ? "one person" : `${n} people`;
-  const line = `Upstream of here, ${people} reported ${featureName} on ${shortDate(finding.last_seen)}.`;
+  const line = `Upstream of here, ${people} reported ${featureName2} on ${shortDate(finding.last_seen)}.`;
   return Object.fromEntries(reachSlugs.map((slug) => [slug, line]));
 }
 function notesBelow(findings, reachOfSpot, creek, labels) {
@@ -2559,17 +2559,17 @@ function questionNeeded(arm, side, first) {
   return first !== sideAnswer(side);
 }
 var blank = (v) => v === null || v === void 0 || v === "";
-function settle(first, asked, choice = null, changedTo = null) {
+function settle(first, asked, choice2 = null, changedTo = null) {
   if (typeof first !== "string" || !ANSWERS.includes(first)) throw new AssistError("We do not know that answer.");
   if (!asked) {
-    if (!blank(choice) || !blank(changedTo)) throw new AssistError("No question was asked for this photo, so there is nothing to choose.");
+    if (!blank(choice2) || !blank(changedTo)) throw new AssistError("No question was asked for this photo, so there is nothing to choose.");
     return { first_answer: first, final_answer: first, question_shown: false, choice: "" };
   }
-  if (choice === "keep") {
+  if (choice2 === "keep") {
     if (!blank(changedTo) && changedTo !== first) throw new AssistError("Keep keeps the first answer.");
     return { first_answer: first, final_answer: first, question_shown: true, choice: "keep" };
   }
-  if (choice === "change") {
+  if (choice2 === "change") {
     if (typeof changedTo !== "string" || !ANSWERS.includes(changedTo)) throw new AssistError("We do not know that answer.");
     return { first_answer: first, final_answer: changedTo, question_shown: true, choice: "change" };
   }
@@ -3048,7 +3048,7 @@ function ratingObservation(visit, item, first, kept, pid, spotLocationId, visitQ
     derivedFrom: [ref("QuestionnaireResponse", visitQrId)]
   };
 }
-function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
+function provenance(visit, observations2, pid, visitQrId, testQrId, emittedAt) {
   const entities = [{ role: "source", what: ref("QuestionnaireResponse", visitQrId) }];
   let sources = "The source is the visit.";
   if (testQrId) {
@@ -3059,9 +3059,9 @@ function provenance(visit, observations, pid, visitQrId, testQrId, emittedAt) {
     resourceType: "Provenance",
     id: fhirId("sl-provenance", visit.visit_id),
     text: narrative(
-      `${observations.length} observations from one creek check, answered by the volunteer and assembled by the Second Look software. ${sources}`
+      `${observations2.length} observations from one creek check, answered by the volunteer and assembled by the Second Look software. ${sources}`
     ),
-    target: observations.map((o) => ref("Observation", String(o.id))),
+    target: observations2.map((o) => ref("Observation", String(o.id))),
     recorded: instant(emittedAt),
     agent: [
       { type: concept(coding(PROVENANCE_TYPE_SYSTEM, "author")), who: ref("Practitioner", pid) },
@@ -3081,17 +3081,17 @@ function emitVisit(visit, testSitting, emittedAt, items = FORM_ITEMS) {
   const visitQr = visitResponse(visit, pid, items);
   const scores = /* @__PURE__ */ new Map();
   for (const s of testSitting ? testSitting.scores : visit.observer.scores) scores.set(s.feature, s);
-  const observations = [];
+  const observations2 = [];
   for (const item of items) {
     if (!item.fhir || !(item.id in visit.answers)) continue;
     const obs = observation(visit, item, visit.answers[item.id], pid, String(spot.id), String(visitQr.id), scores.get(String(item.feature ?? "")) ?? null);
-    if (obs !== null) observations.push(obs);
+    if (obs !== null) observations2.push(obs);
   }
-  if (change !== null) observations.push(ratingObservation(visit, change.item, change.first, change.kept, pid, String(spot.id), String(visitQr.id)));
-  const prov = provenance(visit, observations, pid, String(visitQr.id), testQr ? String(testQr.id) : null, emittedAt);
+  if (change !== null) observations2.push(ratingObservation(visit, change.item, change.first, change.kept, pid, String(spot.id), String(visitQr.id)));
+  const prov = provenance(visit, observations2, pid, String(visitQr.id), testQr ? String(testQr.id) : null, emittedAt);
   const resources2 = [organization(), device(visit.software_version), creek, reach, spot, person];
   if (testQr) resources2.push(testQr);
-  resources2.push(visitQr, ...observations, prov);
+  resources2.push(visitQr, ...observations2, prov);
   return {
     resourceType: "Bundle",
     id: fhirId("sl-visit", visit.visit_id),
@@ -3130,7 +3130,7 @@ function checkBundle(bundle) {
       }
     }
   };
-  const observations = [];
+  const observations2 = [];
   const provenances = [];
   entries.forEach((e, i) => {
     const r = e.resource ?? {};
@@ -3138,7 +3138,7 @@ function checkBundle(bundle) {
     const label = `entry[${i}] ${rtype}/${r.id ?? e.fullUrl ?? "?"}`;
     walk(r, label);
     if (rtype === "Observation") {
-      observations.push(bundle.type !== "transaction" ? `Observation/${r.id}` : String(e.fullUrl ?? ""));
+      observations2.push(bundle.type !== "transaction" ? `Observation/${r.id}` : String(e.fullUrl ?? ""));
       for (const field of ["subject", "performer", "effectiveDateTime"]) if (!(field in r)) problems.push(`${label}: missing ${field}`);
       const profiles = r.meta?.profile ?? [];
       if (!profiles.includes(OAH_OBSERVATION_PROFILE)) problems.push(`${label}: missing the OneAquaHealth indicator profile`);
@@ -3152,7 +3152,7 @@ function checkBundle(bundle) {
   if (provenances.length !== 1) problems.push(`expected one Provenance, found ${provenances.length}`);
   else {
     const targets = new Set((provenances[0].target ?? []).map((t) => t.reference));
-    for (const obs of observations) if (!targets.has(obs)) problems.push(`Provenance does not target ${obs}`);
+    for (const obs of observations2) if (!targets.has(obs)) problems.push(`Provenance does not target ${obs}`);
   }
   return problems;
 }
@@ -3537,6 +3537,8 @@ var RATING_ITEM3 = "overall_rating";
 var WALK_KEEP_DAYS = 30;
 var WALK_PAST_DAYS = 7;
 var WALK_FUTURE_SECONDS = 300;
+var WALK_DAILY_CAP = 200;
+var WALK_MAX_BYTES = 4096;
 var ANSWERED_AT_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?(Z|[+-]\d{2}:\d{2})$/;
 var DAY_MS = 864e5;
 function walkSpot(walk) {
@@ -3649,31 +3651,1346 @@ function walkChecks(answers, followups, questionTexts, given, finalRating) {
   let final = firstRating;
   const checks = followups.map((f, i) => {
     const raw = given[f.rule_id];
-    let answer = null;
+    let answer2 = null;
     if (raw !== void 0 && raw !== null) {
       const allowed = WALK_FOLLOWUP_ANSWERS[f.kind] ?? [];
       if (typeof raw !== "string" || !allowed.includes(raw)) throw new WalkRecordError(`${f.rule_id}: answer ${allowed.join(", ")}.`);
-      answer = raw;
+      answer2 = raw;
     }
-    if (f.kind === "keep_rating" && answer === "change") {
+    if (f.kind === "keep_rating" && answer2 === "change") {
       if (finalRating === null) throw new WalkRecordError("A changed rating needs the new rating.");
       final = finalRating;
     }
     const detail = {};
     for (const [k, v] of Object.entries(f.params)) detail[k] = typeof v === "string" || typeof v === "number" ? v : String(v);
     detail.kind = f.kind;
-    return { rule_id: f.rule_id, asked: true, question_text: questionTexts[i], answer, detail };
+    return { rule_id: f.rule_id, asked: true, question_text: questionTexts[i], answer: answer2, detail };
   });
   if (finalRating !== null && finalRating !== final) throw new WalkRecordError("The final rating can differ from the first only when the rating check says change.");
   return { checks, final_rating: final };
 }
 
+// src/fhir_http.ts
+var FHIR_JSON = "application/fhir+json; charset=utf-8";
+var PLAIN_JSON = "application/json; charset=utf-8";
+var ISSUE_CODES = {
+  404: "not-found",
+  409: "conflict",
+  413: "too-long",
+  422: "invalid",
+  429: "throttled"
+};
+function operationOutcome(status, sentence) {
+  return {
+    resourceType: "OperationOutcome",
+    text: { status: "generated", div: `<div xmlns="http://www.w3.org/1999/xhtml"><p>${escapeXml(sentence)}</p></div>` },
+    issue: [{ severity: "error", code: ISSUE_CODES[status] ?? "exception", details: { text: sentence } }]
+  };
+}
+function fhirMediaType(accept) {
+  return (accept ?? "").toLowerCase().includes("text/html") ? PLAIN_JSON : FHIR_JSON;
+}
+
+// ../results/fhir_validation.json
+var fhir_validation_default = {
+  ran_at_utc: "2026-09-27T05:08:56+00:00",
+  validator_version: "6.10.4",
+  ig_commit: "b907cf0",
+  fhir_version: "4.0.1",
+  terminology_checks_ran: true,
+  terminology_server: "https://tx.fhir.org",
+  files: [
+    "fhir/build/ig/fsh-generated/resources/Bundle-sl-city-heraklion-bundle.json",
+    "fhir/build/ig/fsh-generated/resources/Bundle-sl-visit-1-bundle.json",
+    "fhir/golden/example-lab-result-strawberry-creek-1.json",
+    "fhir/golden/library-second-look.json",
+    "fhir/golden/referral-strawberry-creek-1.json",
+    "fhir/golden/visit-strawberry-creek-1.json",
+    "fhir/golden/visit-strawberry-creek-1.transaction.json",
+    "fhir/build/instances/ts-sl-example-result-spot-1.json",
+    "fhir/build/instances/ts-sl-referral-bundle-spot-1.json",
+    "fhir/build/instances/ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+    "fhir/build/instances/ts-sl-visit-visit-0001.json",
+    "fhir/build/instances/ts-sl-visit-visit-rating-changed.json",
+    "fhir/build/instances/ts-sl-visit-visit-rating-kept.json",
+    "fhir/build/instances/ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
+    "fhir/build/instances/ts-sl-visit-walk-4116f9ddf7b8b451.json",
+    "fhir/build/instances/ts-sl-visit-walk-757a5b9a10482fc9.json",
+    "fhir/build/instances/ts-sl-visit-walk-d2ef0549e6f251c4.json"
+  ],
+  errors: 0,
+  warnings: 70,
+  files_validated: 17,
+  walk_records_validated: 3,
+  by_file: {
+    "Bundle-sl-city-heraklion-bundle.json": {
+      error: 0,
+      warning: 8,
+      information: 0
+    },
+    "Bundle-sl-visit-1-bundle.json": {
+      error: 0,
+      warning: 17,
+      information: 4
+    },
+    "example-lab-result-strawberry-creek-1.json": {
+      error: 0,
+      warning: 3,
+      information: 5
+    },
+    "library-second-look.json": {
+      error: 0,
+      warning: 0,
+      information: 1
+    },
+    "referral-strawberry-creek-1.json": {
+      error: 0,
+      warning: 3,
+      information: 2
+    },
+    "visit-strawberry-creek-1.json": {
+      error: 0,
+      warning: 3,
+      information: 5
+    },
+    "visit-strawberry-creek-1.transaction.json": {
+      error: 0,
+      warning: 3,
+      information: 20
+    },
+    "ts-sl-example-result-spot-1.json": {
+      error: 0,
+      warning: 3,
+      information: 5
+    },
+    "ts-sl-referral-bundle-spot-1.json": {
+      error: 0,
+      warning: 3,
+      information: 2
+    },
+    "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json": {
+      error: 0,
+      warning: 4,
+      information: 5
+    },
+    "ts-sl-visit-visit-0001.json": {
+      error: 0,
+      warning: 3,
+      information: 5
+    },
+    "ts-sl-visit-visit-rating-changed.json": {
+      error: 0,
+      warning: 4,
+      information: 7
+    },
+    "ts-sl-visit-visit-rating-kept.json": {
+      error: 0,
+      warning: 4,
+      information: 5
+    },
+    "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json": {
+      error: 0,
+      warning: 3,
+      information: 2
+    },
+    "ts-sl-visit-walk-4116f9ddf7b8b451.json": {
+      error: 0,
+      warning: 3,
+      information: 11
+    },
+    "ts-sl-visit-walk-757a5b9a10482fc9.json": {
+      error: 0,
+      warning: 3,
+      information: 13
+    },
+    "ts-sl-visit-walk-d2ef0549e6f251c4.json": {
+      error: 0,
+      warning: 3,
+      information: 14
+    }
+  },
+  messages: [
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[0].resource/*Location/sl-city-heraklion*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[0].resource/*Location/sl-city-heraklion*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[1].resource/*Location/sl-city-heraklion-creek-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[1].resource/*Location/sl-city-heraklion-creek-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-city-heraklion-creek-1-reach-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-city-heraklion-creek-1-reach-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-city-heraklion-creek-1-reach-1-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "Bundle-sl-city-heraklion-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-city-heraklion-creek-1-reach-1-spot-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[0].resource/*Organization/sl-org*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[1].resource/*Device/sl-device*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[5].resource/*Practitioner/sl-practitioner-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[6].resource/*QuestionnaireResponse/sl-qr-test-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[7].resource/*QuestionnaireResponse/sl-qr-visit-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[8].resource/*Observation/sl-obs-bank-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[9].resource/*Observation/sl-obs-channel-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[10].resource/*Observation/sl-obs-invasive-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[11].resource/*Observation/sl-obs-pipe-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[12].resource/*Observation/sl-obs-water-height-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "Bundle-sl-visit-1-bundle.json",
+      severity: "warning",
+      location: "Bundle.entry[13].resource/*Provenance/sl-provenance-visit-1*/",
+      text: "Constraint failed: dom-6: 'A resource should have narrative for robust management' (defined in http://hl7.org/fhir/StructureDefinition/DomainResource) (Best Practice Recommendation)"
+    },
+    {
+      file: "example-lab-result-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "example-lab-result-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "example-lab-result-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "referral-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "referral-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "referral-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "visit-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "visit-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "visit-strawberry-creek-1.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "visit-strawberry-creek-1.transaction.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/null*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "visit-strawberry-creek-1.transaction.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/null*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "visit-strawberry-creek-1.transaction.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/null*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-example-result-spot-1.json",
+      severity: "warning",
+      location: "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-example-result-spot-1.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-example-result-spot-1.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-referral-bundle-spot-1.json",
+      severity: "warning",
+      location: "Bundle.entry[1].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-referral-bundle-spot-1.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-referral-bundle-spot-1.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-codornices-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-codornices-lower*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-codornices-lower-2*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f.json",
+      severity: "warning",
+      location: "Bundle.entry[6].resource/*QuestionnaireResponse/sl-qr-visit-7c1e2d3f-4a5b-4c6d-8e9f-0a1b2c3d4e5f*/",
+      text: "Resource has a language (it), and the XHTML has a lang (en), but they differ"
+    },
+    {
+      file: "ts-sl-visit-visit-0001.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-0001.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-0001.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-spot-1*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-changed.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-codornices-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-changed.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-codornices-lower*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-changed.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-codornices-lower-2*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-changed.json",
+      severity: "warning",
+      location: "Bundle.entry[6].resource/*QuestionnaireResponse/sl-qr-visit-visit-rating-changed*/",
+      text: "Resource has a language (it), and the XHTML has a lang (en), but they differ"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-kept.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-codornices-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-kept.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-codornices-lower*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-kept.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-codornices-lower-2*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-rating-kept.json",
+      severity: "warning",
+      location: "Bundle.entry[6].resource/*QuestionnaireResponse/sl-qr-visit-visit-rating-kept*/",
+      text: "Resource has a language (it), and the XHTML has a lang (en), but they differ"
+    },
+    {
+      file: "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-strawberry-creek*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-campus-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-visit-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-ac87f97c923d.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-spot-with-spaces---odd-chars*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-4116f9ddf7b8b451.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-walk-v03*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-4116f9ddf7b8b451.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-walk-v03-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-4116f9ddf7b8b451.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-walk-v03-spot*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-757a5b9a10482fc9.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-walk-v03*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-757a5b9a10482fc9.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-walk-v03-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-757a5b9a10482fc9.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-walk-v03-spot*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-d2ef0549e6f251c4.json",
+      severity: "warning",
+      location: "Bundle.entry[2].resource/*Location/sl-loc-walk-v03*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-d2ef0549e6f251c4.json",
+      severity: "warning",
+      location: "Bundle.entry[3].resource/*Location/sl-loc-walk-v03-reach*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    },
+    {
+      file: "ts-sl-visit-walk-d2ef0549e6f251c4.json",
+      severity: "warning",
+      location: "Bundle.entry[4].resource/*Location/sl-loc-walk-v03-spot*/.type[0]",
+      text: "None of the codings provided are in the value set 'ServiceDeliveryLocationRoleType' (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType|3.0.0), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (cod"
+    }
+  ]
+};
+
+// src/core/rainfall.ts
+var OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast";
+var SOURCE_OPEN_METEO = "open-meteo";
+var SOURCE_UNKNOWN = "unknown";
+var PAST_DAYS = 4;
+var FORECAST_DAYS = 1;
+var DEFAULT_DRY_MM = 2.5;
+var DEFAULT_WINDOW_HOURS = 72;
+var DRY_HOUR_MAX_MM = 0.1;
+var HOURS_PER_DAY = 24;
+var HOUR_MS = 36e5;
+var UNKNOWN = { status: "unknown", mm_in_window: null, dry_days: null, source: SOURCE_UNKNOWN };
+function buildUrl(latitude, longitude) {
+  const query = new URLSearchParams({
+    latitude: latitude.toFixed(4),
+    longitude: longitude.toFixed(4),
+    hourly: "precipitation",
+    past_days: String(PAST_DAYS),
+    forecast_days: String(FORECAST_DAYS),
+    timezone: "UTC"
+  });
+  return `${OPEN_METEO_URL}?${query.toString()}`;
+}
+function hours(payload) {
+  if (!payload || typeof payload !== "object") throw new Error("payload is not an object");
+  const hourly = payload.hourly;
+  if (!hourly || typeof hourly !== "object") throw new Error("hourly is not an object");
+  const times = hourly.time;
+  const values = hourly.precipitation;
+  if (!Array.isArray(times) || !Array.isArray(values) || times.length !== values.length) {
+    throw new Error("time and precipitation lists do not line up");
+  }
+  const out = [];
+  for (let i = 0; i < times.length; i++) {
+    const text = times[i];
+    const value = values[i];
+    if (typeof text !== "string") throw new Error("time is not text");
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) throw new Error("precipitation is not a finite non-negative number");
+    const ms = Date.parse(`${text}Z`);
+    if (Number.isNaN(ms)) throw new Error(`bad hour ${text}`);
+    out.push([ms, value]);
+  }
+  return out;
+}
+function window(list, start, end) {
+  const picked = list.filter(([hourEnd]) => start < hourEnd && hourEnd <= end).map(([, mm]) => mm);
+  const needed = Math.trunc((end - start) / HOUR_MS);
+  return picked.length < needed ? null : picked;
+}
+function dryDays(list, now) {
+  let days = 0;
+  for (; ; ) {
+    const end = now - HOURS_PER_DAY * days * HOUR_MS;
+    const start = end - HOURS_PER_DAY * HOUR_MS;
+    const values = window(list, start, end);
+    if (values === null || values.some((mm) => mm > DRY_HOUR_MAX_MM)) return days;
+    days += 1;
+  }
+}
+function statusFromPayload(payload, nowMs, dryMm = DEFAULT_DRY_MM, windowHours = DEFAULT_WINDOW_HOURS) {
+  const list = hours(payload);
+  const values = window(list, nowMs - windowHours * HOUR_MS, nowMs);
+  if (values === null) return UNKNOWN;
+  const total = Math.round(values.reduce((a, b) => a + b, 0) * 100) / 100;
+  return { status: total <= dryMm ? "dry" : "wet", mm_in_window: total, dry_days: dryDays(list, nowMs), source: SOURCE_OPEN_METEO };
+}
+async function dryStatus(latitude, longitude, nowMs, fetchJson, dryMm = DEFAULT_DRY_MM, windowHours = DEFAULT_WINDOW_HOURS) {
+  try {
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180 || windowHours <= 0) {
+      return UNKNOWN;
+    }
+    const payload = await fetchJson(buildUrl(latitude, longitude));
+    return statusFromPayload(payload, nowMs, dryMm, windowHours);
+  } catch {
+    return UNKNOWN;
+  }
+}
+async function fetchOpenMeteo(url) {
+  let last = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(5e3) });
+      if (!response.ok) throw new Error(`open-meteo ${response.status}`);
+      return await response.json();
+    } catch (err) {
+      last = err;
+    }
+  }
+  throw last;
+}
+
 // src/check.ts
 var Invalid = class extends Error {
 };
+var NotFound = class extends Error {
+};
+var COARSE_DECIMALS = 2;
+var FOLLOWUP_ANSWERS = /* @__PURE__ */ new Set(["yes", "no", "cant_tell", "keep", "change", "skipped"]);
+var QUICK_TEXT = {
+  colour: "What colour is the water?",
+  smell: "Does it smell?",
+  pipe_running: "Is anything coming out of the pipe?"
+};
+var SLIDER_RE = /^(joy|serenity|anger|fear):([0-5]|not_applicable)$/;
+var YESNO_LABEL_KEYS = { present: "test.yes", absent: "test.no", cant_tell: "test.cant_tell" };
 var LOCALE = content_default.locale;
 var REGION_PLANTS = /* @__PURE__ */ new Set([...content_default.region_plants, "cant_tell"]);
+var SOFTWARE_VERSION = "0.1.0";
+var NAME_RE = /^[A-Za-z0-9 .,'()/-]+$/;
 var randomHex = (bytes) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, "0")).join("");
+function spotFromRow(row) {
+  return {
+    spot_id: row.spot_id,
+    spot_name: row.spot_name,
+    reach_id: row.reach_id,
+    reach_name: row.reach_name,
+    creek_id: row.creek_id,
+    creek_name: row.creek_name,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    coarse: Boolean(row.coarse)
+  };
+}
+async function getSpot(db, spotId) {
+  return db.prepare("SELECT * FROM spot WHERE spot_id = ?").bind(spotId).first();
+}
+async function allSpots(db) {
+  return (await db.prepare("SELECT * FROM spot ORDER BY created_at").all()).results ?? [];
+}
+async function observerFromToken(db, token) {
+  if (!token) return null;
+  const row = await db.prepare("SELECT contributor_token, scores_json, tested_on FROM observer WHERE contributor_token = ?").bind(token).first();
+  if (row === null) throw new NotFound("We do not know that contributor token. Check it and try again.");
+  return observerFromRow(row);
+}
+function observerFromRow(row) {
+  const raw = JSON.parse(row.scores_json);
+  return {
+    contributor_token: row.contributor_token,
+    scores: raw.map((s) => ({ feature: s.feature, correct: Math.trunc(Number(s.correct)), total: Math.trunc(Number(s.total)), tested_on: row.tested_on.slice(0, 10) }))
+  };
+}
+async function sittingFor(db, token) {
+  if (!token) return null;
+  const row = await db.prepare("SELECT contributor_token, scores_json, tested_on FROM observer WHERE contributor_token = ?").bind(token).first();
+  if (row === null) return null;
+  const observer = observerFromRow(row);
+  if (observer.scores.length === 0) return null;
+  return {
+    sitting_id: `sitting-${sha256Hex(token).slice(0, 12)}`,
+    contributor_token: token,
+    completed_at: `${row.tested_on.slice(0, 10)}T00:00:00Z`,
+    scores: observer.scores
+  };
+}
+function formItem(itemId) {
+  for (const item of FORM_ITEMS) if (item.id === itemId) return item;
+  return null;
+}
+function optionValues(item) {
+  return new Set((item.options ?? []).map((o) => String(o.value)));
+}
+function validateAnswers(answers) {
+  const clean = {};
+  for (const [itemId, value] of Object.entries(answers)) {
+    const item = formItem(itemId);
+    if (item === null) throw new Invalid(`We do not have a question called '${itemId}'.`);
+    const kind = item.type;
+    if (kind === "choice") {
+      if (typeof value !== "string" || !optionValues(item).has(value)) throw new Invalid(`${itemId}: pick one of the listed options.`);
+      clean[itemId] = value;
+    } else if (kind === "yesno") {
+      if (value !== "present" && value !== "absent" && value !== "cant_tell") throw new Invalid(`${itemId}: answer present, absent or cant_tell.`);
+      clean[itemId] = value;
+    } else if (kind === "multi") {
+      const allowed = optionValues(item);
+      if (!Array.isArray(value) || value.some((v) => typeof v !== "string" || !allowed.has(v))) throw new Invalid(`${itemId}: choose only from the listed options.`);
+      clean[itemId] = value;
+    } else if (kind === "number") {
+      if (typeof value !== "number" || !Number.isFinite(value)) throw new Invalid(`${itemId}: send a number.`);
+      if (value < 0 || value > 100) throw new Invalid(`${itemId}: that number is out of range.`);
+      clean[itemId] = value;
+    } else if (kind === "pick_region_list") {
+      if (!Array.isArray(value) || value.some((v) => typeof v !== "string" || !REGION_PLANTS.has(v))) throw new Invalid(`${itemId}: choose plants from the regional list, or cant_tell.`);
+      clean[itemId] = value;
+    } else if (kind === "sliders") {
+      if (!Array.isArray(value) || value.some((v) => typeof v !== "string" || !SLIDER_RE.test(v))) throw new Invalid(`${itemId}: send entries like joy:3 or fear:not_applicable.`);
+      clean[itemId] = value;
+    } else {
+      throw new Invalid(`${itemId}: this question cannot be answered here.`);
+    }
+  }
+  return clean;
+}
+function validateLanguage(value) {
+  if (value === void 0 || value === null) return "en";
+  if (typeof value !== "string" || !content_default.check_languages.includes(value)) throw new Invalid("The creek check is not offered in that language.");
+  return value;
+}
+function validateRating(value) {
+  if (value === null || value === void 0) return null;
+  const item = formItem("overall_rating");
+  if (item === null || typeof value !== "string" || !optionValues(item).has(value)) throw new Invalid("The overall rating must be good, moderate or poor.");
+  return value;
+}
+function plainPlaceName(raw, what) {
+  if (raw === null || raw === void 0) return null;
+  if (typeof raw !== "string") throw new Invalid(`${what} must be text.`);
+  const v = raw.split(/\s+/).filter(Boolean).join(" ");
+  if (!v) throw new Invalid("A name is needed.");
+  if (v.length > 80) throw new Invalid(`${what} is too long.`);
+  if (!NAME_RE.test(v)) throw new Invalid("Use letters, numbers, spaces and . , ' - ( ) / only.");
+  if (/\d{5,}/.test(v)) throw new Invalid("That looks like an address or a code, not a place name.");
+  if (v.includes("@")) throw new Invalid("A place name cannot hold an email address.");
+  return v;
+}
+function parseSpotRef(raw) {
+  if (!raw || typeof raw !== "object") throw new Invalid("Say which spot this is, or describe a new one.");
+  const r = raw;
+  if (typeof r.spot_id === "string" && r.spot_id) {
+    if (r.spot_id.length > 32) throw new Invalid("That spot id is too long.");
+    return { spot_id: r.spot_id };
+  }
+  if (r.new && typeof r.new === "object") {
+    const n = r.new;
+    const name = plainPlaceName(n.name, "The spot name");
+    if (name === null) throw new Invalid("A name is needed.");
+    const num = (v, lo, hi, what) => {
+      if (v === null || v === void 0) return null;
+      if (typeof v !== "number" || !Number.isFinite(v) || v < lo || v > hi) throw new Invalid(`${what} is out of range.`);
+      return v;
+    };
+    return {
+      new: {
+        name,
+        latitude: num(n.latitude, -90, 90, "Latitude"),
+        longitude: num(n.longitude, -180, 180, "Longitude"),
+        coarse: n.coarse === void 0 ? true : Boolean(n.coarse),
+        creek_name: plainPlaceName(n.creek_name, "The creek name"),
+        reach_name: plainPlaceName(n.reach_name, "The reach name")
+      }
+    };
+  }
+  throw new Invalid("Say which spot this is, or describe a new one.");
+}
+function roundCoarse(value, coarse) {
+  if (value === null) return null;
+  return coarse ? pyRound(value, COARSE_DECIMALS) : pyRound(value, 6);
+}
+async function nearbyExistingSpot(db, ref3) {
+  if (ref3.spot_id || !ref3.new) return null;
+  if (ref3.new.latitude === null || ref3.new.longitude === null) return null;
+  if (ref3.new.coarse) return null;
+  const rows = (await db.prepare("SELECT * FROM spot WHERE coarse = 0").all()).results ?? [];
+  const near = nearestSpot(ref3.new.latitude, ref3.new.longitude, rows.map(spotFromRow));
+  if (near === null) return null;
+  return { spot_id: near.spot.spot_id, spot_name: near.spot.spot_name, metres: Math.round(near.metres) };
+}
+async function resolveSpot(db, ref3, now) {
+  if (ref3.spot_id) {
+    const row2 = await getSpot(db, ref3.spot_id);
+    if (row2 === null) throw new NotFound("We do not know that spot. Add it as a new spot.");
+    return row2;
+  }
+  const n = ref3.new;
+  const tail = randomHex(6);
+  const row = {
+    spot_id: `spot-${tail}`,
+    spot_name: n.name.trim(),
+    reach_id: `reach-${tail}`,
+    reach_name: (n.reach_name ?? n.name).trim(),
+    creek_id: `creek-${tail}`,
+    creek_name: (n.creek_name ?? n.name).trim(),
+    latitude: roundCoarse(n.latitude, n.coarse),
+    longitude: roundCoarse(n.longitude, n.coarse),
+    coarse: n.coarse ? 1 : 0,
+    created_at: now
+  };
+  await db.prepare("INSERT INTO spot (spot_id, spot_name, reach_id, reach_name, creek_id, creek_name, latitude, longitude, coarse, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(row.spot_id, row.spot_name, row.reach_id, row.reach_name, row.creek_id, row.creek_name, row.latitude, row.longitude, row.coarse, row.created_at).run();
+  return row;
+}
+function featureNameForParam(value) {
+  const raw = String(value).trim();
+  const fid = raw.replace(/ /g, "_");
+  for (const f of content_default.feature_list) if (f.id === fid || f.id === raw) return f.name;
+  return raw;
+}
+function questionText(f) {
+  const params = { ...f.params };
+  if ("feature" in params) params.feature = featureNameForParam(params.feature);
+  return fill(LOCALE[f.question_key] ?? f.question_key, params);
+}
+var apiKind = (kind) => kind === "look_again" ? "yesno" : kind;
+async function photoExists(db, photoId) {
+  return await db.prepare("SELECT photo_id FROM upload WHERE photo_id = ?").bind(photoId).first() !== null;
+}
+async function checkPhotoIds(db, ids) {
+  if (ids === void 0 || ids === null) return [];
+  if (!Array.isArray(ids) || ids.length > 8 || ids.some((p) => typeof p !== "string")) throw new Invalid("photo_ids must be a short list of photo ids.");
+  for (const pid of ids) if (!await photoExists(db, pid)) throw new Invalid(`We do not have a photo called '${pid}'. Upload it first.`);
+  return [...new Set(ids)];
+}
+async function createDraft(env, body, now) {
+  const token = typeof body.contributor_token === "string" && body.contributor_token ? body.contributor_token : null;
+  if (token !== null && (token.length < 8 || token.length > 32)) throw new Invalid("That contributor token does not look right.");
+  const observer = await observerFromToken(env.DB, token);
+  const answers = validateAnswers(body.answers ?? {});
+  const firstRating = validateRating(body.first_rating);
+  const language = validateLanguage(body.language);
+  const photoIds = await checkPhotoIds(env.DB, body.photo_ids);
+  const ref3 = parseSpotRef(body.spot);
+  const nearby = await nearbyExistingSpot(env.DB, ref3);
+  const spot = await resolveSpot(env.DB, ref3, now);
+  const rain = spot.latitude !== null && spot.longitude !== null ? await dryStatus(spot.latitude, spot.longitude, Date.parse(now), env.RAIN_FETCH ?? fetchOpenMeteo) : UNKNOWN;
+  const chosen = selectFollowups(answers, { rain: rain.status, dry_days: rain.dry_days, mm_in_window: rain.mm_in_window }, observer, [], content_default.followups, FORM_ITEMS, false).slice(
+    0,
+    Math.trunc(Number(content_default.followups.max_questions ?? 2))
+  );
+  const followups = chosen.map((f) => ({ rule_id: f.rule_id, kind: f.kind, question_key: f.question_key, question_text: questionText(f), params: f.params }));
+  const visitId = `visit-${randomHex(8)}`;
+  await env.DB.prepare(
+    `INSERT INTO visit (visit_id, spot_id, kind, contributor_token, answered_at, answers_json, first_rating, language, photo_ids_json, followups_json, site_json, software_version)
+     VALUES (?, ?, 'check', ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(visitId, spot.spot_id, token, now, JSON.stringify(answers), firstRating, language, JSON.stringify(photoIds), JSON.stringify(followups), JSON.stringify(rain), SOFTWARE_VERSION).run();
+  return {
+    draft_id: visitId,
+    // Not a merge: the app offers this spot first and the person decides.
+    nearby_spot: nearby,
+    followups: followups.map((f) => ({ rule_id: f.rule_id, question_text: f.question_text, kind: apiKind(f.kind) }))
+  };
+}
+async function cleanFollowupAnswer(db, followup, value) {
+  const text = String(typeof value === "boolean" ? value ? "yes" : "no" : value).trim().slice(0, 64);
+  if (followup.kind === "photo") {
+    if (FOLLOWUP_ANSWERS.has(text)) return text;
+    if (!await photoExists(db, text)) throw new Invalid(`${followup.rule_id}: send the photo id from the upload, or skipped.`);
+    return text;
+  }
+  if (!FOLLOWUP_ANSWERS.has(text)) throw new Invalid(`${followup.rule_id}: answer yes, no, cant_tell, keep, change or skipped.`);
+  return text;
+}
+function buildRecord(opts) {
+  const copied = {};
+  for (const [key, value] of Object.entries(opts.answers)) copied[String(key)] = Array.isArray(value) ? value.map(String) : value;
+  return {
+    visit_id: opts.visit_id,
+    spot: opts.spot,
+    observer: opts.observer,
+    answered_at: opts.answered_at,
+    answers: copied,
+    first_rating: opts.first_rating,
+    final_rating: opts.final_rating,
+    checks: [...opts.checks],
+    photo_ids: opts.photo_ids.map(String),
+    software_version: opts.software_version,
+    language: opts.language || "en"
+  };
+}
+async function finalize(env, body, now) {
+  const draftId = String(body.draft_id ?? "");
+  const row = await env.DB.prepare("SELECT * FROM visit WHERE visit_id = ?").bind(draftId).first();
+  if (row === null || row.kind !== "check") throw new NotFound("We do not know that draft. Start the check again.");
+  if (row.finalized_at !== null) return { visit_id: row.visit_id, spot_id: row.spot_id, fhir_saved: null };
+  const followups = JSON.parse(row.followups_json);
+  const byRule = new Map(followups.map((f) => [f.rule_id, f]));
+  const given = body.followup_answers ?? {};
+  for (const ruleId of Object.keys(given)) if (!byRule.has(ruleId)) throw new Invalid(`No follow-up called '${ruleId}' was asked in this check.`);
+  const finalRating = validateRating(body.final_rating);
+  const photoIds = JSON.parse(row.photo_ids_json);
+  const checks = [];
+  for (const f of followups) {
+    const raw = given[f.rule_id];
+    const answer2 = raw !== void 0 && raw !== null ? await cleanFollowupAnswer(env.DB, f, raw) : null;
+    if (f.kind === "photo" && answer2 && !FOLLOWUP_ANSWERS.has(answer2)) photoIds.push(answer2);
+    const detail = {};
+    for (const [k, v] of Object.entries(f.params)) detail[k] = typeof v === "string" || typeof v === "number" ? v : String(v);
+    detail.kind = f.kind;
+    checks.push({ rule_id: f.rule_id, asked: true, question_text: f.question_text, answer: answer2, detail });
+  }
+  const spotRow = await getSpot(env.DB, row.spot_id);
+  if (spotRow === null) throw new NotFound("The spot for this draft is gone.");
+  const observer = await observerFromToken(env.DB, row.contributor_token) ?? { contributor_token: `anon${row.visit_id.slice(-12)}`, scores: [] };
+  const record = buildRecord({
+    visit_id: row.visit_id,
+    spot: spotFromRow(spotRow),
+    observer,
+    answered_at: row.answered_at,
+    answers: JSON.parse(row.answers_json),
+    first_rating: row.first_rating,
+    final_rating: finalRating,
+    checks,
+    photo_ids: photoIds,
+    software_version: row.software_version || SOFTWARE_VERSION,
+    language: row.language
+  });
+  const statements = checks.map(
+    (c) => env.DB.prepare("INSERT INTO check_result (visit_id, rule_id, asked, question_text, answer, detail_json) VALUES (?, ?, ?, ?, ?, ?)").bind(
+      row.visit_id,
+      c.rule_id,
+      c.asked ? 1 : 0,
+      c.question_text ?? null,
+      c.answer ?? null,
+      JSON.stringify(c.detail)
+    )
+  );
+  statements.push(
+    env.DB.prepare("UPDATE visit SET final_rating = ?, photo_ids_json = ?, finalized_at = ? WHERE visit_id = ?").bind(finalRating, JSON.stringify([...new Set(photoIds)]), now, row.visit_id)
+  );
+  await env.DB.batch(statements);
+  const saved = await saveVisitBundle(env.DB, record, await sittingFor(env.DB, row.contributor_token), now);
+  return { visit_id: row.visit_id, spot_id: row.spot_id, fhir_saved: saved };
+}
+async function saveVisitBundle(db, record, sitting, now) {
+  const bundle = emitVisit(record, sitting, now);
+  if (checkBundle(bundle).length > 0) return false;
+  await db.prepare("INSERT OR REPLACE INTO fhir_bundle (visit_id, spot_id, bundle_json, created_at) VALUES (?, ?, ?, ?)").bind(record.visit_id, record.spot.spot_id, JSON.stringify(bundle), now).run();
+  return true;
+}
+async function loadVisitBundle(db, visitId) {
+  const row = await db.prepare("SELECT bundle_json FROM fhir_bundle WHERE visit_id = ?").bind(visitId).first();
+  return row === null ? null : JSON.parse(row.bundle_json);
+}
+async function latestBundleForSpot(db, spotId) {
+  const row = await db.prepare("SELECT bundle_json FROM fhir_bundle WHERE spot_id = ? ORDER BY rowid DESC LIMIT 1").bind(spotId).first();
+  return row === null ? null : JSON.parse(row.bundle_json);
+}
+async function latestBundle(db) {
+  const row = await db.prepare("SELECT bundle_json FROM fhir_bundle ORDER BY rowid DESC LIMIT 1").first();
+  return row === null ? null : JSON.parse(row.bundle_json);
+}
+var QUICK = {
+  colour: ["clear", "muddy", "foam", "coloured", "cant_tell"],
+  smell: ["none", "bad", "cant_tell"],
+  pipe_running: ["present", "absent", "cant_tell"]
+};
+async function quickCheck(env, spotId, body, now) {
+  const spot = await getSpot(env.DB, spotId);
+  if (spot === null) throw new NotFound("We do not know that spot.");
+  const token = typeof body.contributor_token === "string" && body.contributor_token ? body.contributor_token : null;
+  await observerFromToken(env.DB, token);
+  for (const [key, allowed] of Object.entries(QUICK)) {
+    if (typeof body[key] !== "string" || !allowed.includes(body[key])) throw new Invalid(`${key}: pick one of ${allowed.join(", ")}.`);
+  }
+  const photoIds = await checkPhotoIds(env.DB, typeof body.photo_id === "string" ? [body.photo_id] : []);
+  const visitId = `visit-${randomHex(8)}`;
+  await env.DB.prepare(
+    `INSERT INTO visit (visit_id, spot_id, kind, contributor_token, answered_at, answers_json, photo_ids_json, followups_json, site_json, finalized_at, software_version)
+     VALUES (?, ?, 'quick', ?, ?, ?, ?, '[]', '{}', ?, ?)`
+  ).bind(visitId, spotId, token, now, JSON.stringify({ colour: body.colour, smell: body.smell, pipe_running: body.pipe_running }), JSON.stringify(photoIds), now, SOFTWARE_VERSION).run();
+  return { visit_id: visitId, spot_id: spotId };
+}
+function valueLabel(item, value) {
+  const values = Array.isArray(value) ? value : [value];
+  return values.map((v) => {
+    if (item !== null && item.type === "yesno" && String(v) in YESNO_LABEL_KEYS) return LOCALE[YESNO_LABEL_KEYS[String(v)]] ?? String(v);
+    for (const option of item?.options ?? []) if (String(option.value) === String(v)) return String(option.label ?? v);
+    return String(v).replace(/_/g, " ");
+  }).join(", ");
+}
+function featureName(featureId) {
+  for (const f of content_default.feature_list) if (f.id === featureId) return f.name;
+  return featureId;
+}
+function answerViews(row, observer, today) {
+  const answers = JSON.parse(row.answers_json);
+  return Object.entries(answers).map(([itemId, value]) => {
+    const item = row.kind === "check" ? formItem(itemId) : null;
+    let text;
+    let feature;
+    if (row.kind === "quick") {
+      text = QUICK_TEXT[itemId] ?? itemId.replace(/_/g, " ");
+      feature = itemId === "pipe_running" ? "pipe_running" : null;
+    } else {
+      text = item ? String(item.text ?? itemId) : itemId;
+      feature = item && item.feature ? String(item.feature) : null;
+    }
+    let labelText = null;
+    let passed = null;
+    if (observer !== null && feature !== null) {
+      const score = observer.scores.find((s) => s.feature === feature) ?? null;
+      if (score !== null) {
+        const label = observerLabel(score, featureName(feature), today, LOCALE);
+        labelText = label.text;
+        passed = label.passed;
+      }
+    }
+    return { item_id: itemId, text, value, label: valueLabel(item, value), feature, observer_label: labelText, observer_passed: passed };
+  });
+}
+async function checksFor(db, visitId) {
+  const rows = (await db.prepare("SELECT * FROM check_result WHERE visit_id = ? ORDER BY id").bind(visitId).all()).results ?? [];
+  return rows.map((c) => ({ rule_id: c.rule_id, asked: Boolean(c.asked), question_text: c.question_text, answer: c.answer, detail: JSON.parse(c.detail_json) }));
+}
+async function spotView(env, spotId, today) {
+  const spot = await getSpot(env.DB, spotId);
+  if (spot === null) throw new NotFound("We do not know that spot.");
+  const visits = (await env.DB.prepare("SELECT * FROM visit WHERE spot_id = ? AND finalized_at IS NOT NULL ORDER BY answered_at DESC").bind(spotId).all()).results ?? [];
+  const observers = /* @__PURE__ */ new Map();
+  const views = [];
+  for (const v of visits) {
+    const token = v.contributor_token;
+    if (token && !observers.has(token)) {
+      const row = await env.DB.prepare("SELECT contributor_token, scores_json, tested_on FROM observer WHERE contributor_token = ?").bind(token).first();
+      observers.set(token, row ? observerFromRow(row) : null);
+    }
+    const observer = token ? observers.get(token) ?? null : null;
+    views.push({
+      visit_id: v.visit_id,
+      kind: v.kind,
+      answered_at: instant(v.answered_at),
+      answers: answerViews(v, observer, today),
+      checks: await checksFor(env.DB, v.visit_id),
+      first_rating: v.first_rating,
+      final_rating: v.final_rating,
+      photo_count: JSON.parse(v.photo_ids_json).length,
+      observer_scored: observer !== null
+    });
+  }
+  return {
+    spot: { ...spotFromRow(spot) },
+    visits: views,
+    health_card: pickActions(content_default.sentences, spotId)
+  };
+}
+var todayOf = (now) => isoDate(Date.parse(now));
+
+// src/city.ts
+var DAY_MS2 = 864e5;
+var EXAMPLE_SAMPLE_AFTER = 1 * DAY_MS2;
+var EXAMPLE_REPORT_AFTER = 4 * DAY_MS2;
+var referralPath = (spotId) => `/api/fhir/referral/${spotId}`;
+var exampleResultPath = (spotId) => `${referralPath(spotId)}/example-result`;
+var bundleLinks = (ids) => ids.map((v) => `/api/fhir/Bundle/${v}`);
+var FEATURE_NAMES = Object.fromEntries(content_default.feature_list.map((f) => [f.id, f.name]));
+for (const item of FORM_ITEMS) if (!(item.id in FEATURE_NAMES)) FEATURE_NAMES[item.id] = String(item.text ?? item.id);
+var FINDING_KEY_FOR = Object.fromEntries(FORM_ITEMS.filter((i) => i.feature).map((i) => [i.id, String(i.feature)]));
+var NOTE_LABELS = (() => {
+  const labels = {};
+  for (const item of FORM_ITEMS) labels[item.id] = item.short_label ? String(item.short_label) : String(item.id).replace(/_/g, " ");
+  for (const f of content_default.feature_list) labels[f.id] = f.name.slice(0, 1).toLowerCase() + f.name.slice(1);
+  return labels;
+})();
+async function recordsFor(env, spots) {
+  if (spots.length === 0) return [];
+  const byId = new Map(spots.map((s) => [s.spot_id, s]));
+  const placeholders = spots.map(() => "?").join(",");
+  const rows = (await env.DB.prepare(`SELECT * FROM visit WHERE spot_id IN (${placeholders}) AND finalized_at IS NOT NULL ORDER BY answered_at`).bind(...spots.map((s) => s.spot_id)).all()).results ?? [];
+  const observers = /* @__PURE__ */ new Map();
+  const out = [];
+  for (const v of rows) {
+    let observer;
+    if (!v.contributor_token) {
+      observer = { contributor_token: "anonymous000", scores: [] };
+    } else {
+      if (!observers.has(v.contributor_token)) {
+        const row = await env.DB.prepare("SELECT contributor_token, scores_json, tested_on FROM observer WHERE contributor_token = ?").bind(v.contributor_token).first();
+        observers.set(v.contributor_token, row ? observerFromRow(row) : { contributor_token: v.contributor_token, scores: [] });
+      }
+      observer = observers.get(v.contributor_token);
+    }
+    out.push({
+      visit_id: v.visit_id,
+      spot: spotFromRow(byId.get(v.spot_id)),
+      observer,
+      answered_at: v.answered_at,
+      answers: JSON.parse(v.answers_json),
+      first_rating: v.first_rating,
+      final_rating: v.final_rating,
+      checks: await checksFor(env.DB, v.visit_id),
+      photo_ids: JSON.parse(v.photo_ids_json),
+      software_version: v.software_version
+    });
+  }
+  return out;
+}
+function placementsFor(spots) {
+  const out = /* @__PURE__ */ new Map();
+  for (const row of spots) {
+    const placed = placeSpot(spotFromRow(row), CREEKS);
+    if (placed) out.set(row.spot_id, placed);
+  }
+  return out;
+}
+async function placeForSpot(env, spotId) {
+  const row = await getSpot(env.DB, spotId);
+  if (row === null) throw new NotFound("We do not know that spot.");
+  const placed = placeSpot(spotFromRow(row), CREEKS);
+  if (placed === null) return null;
+  return { creek_slug: placed.creek.slug, creek_name: placed.creek.name, reach_slug: placed.reach?.slug ?? null, reach_name: placed.reach?.name ?? null };
+}
+function findingView(f, spotNames) {
+  return {
+    spot_id: f.spot_id,
+    spot_name: spotNames.get(f.spot_id) ?? f.spot_id,
+    feature: f.feature,
+    feature_name: FEATURE_NAMES[f.feature] ?? f.feature,
+    observers: f.observers.length,
+    passed_observers: f.passed_observers.length,
+    first_seen: f.first_seen,
+    last_seen: f.last_seen,
+    visit_ids: f.visit_ids,
+    fhir: bundleLinks(f.visit_ids)
+  };
+}
+function noteView(n) {
+  return {
+    reach_slug: n.reach_slug,
+    reach_name: n.reach_name,
+    from_reach_slug: n.from_reach_slug,
+    from_reach_name: n.from_reach_name,
+    feature: n.feature,
+    feature_name: FEATURE_NAMES[n.feature] ?? n.feature,
+    line: n.line,
+    observers: n.observers,
+    visit_ids: n.visit_ids,
+    fhir: bundleLinks(n.visit_ids)
+  };
+}
+async function cityView(env, creekRef, today) {
+  let creek = creekBySlug(creekRef);
+  const all = await allSpots(env.DB);
+  const placements = placementsFor(all);
+  let spots;
+  if (creek !== null) {
+    const slug = creek.slug;
+    spots = all.filter((s) => placements.get(s.spot_id)?.creek.slug === slug);
+  } else {
+    spots = all.filter((s) => s.creek_id === creekRef);
+    if (spots.length === 0) throw new NotFound("We have no record for that creek yet.");
+    const placedOn = new Set(spots.map((s) => placements.get(s.spot_id)?.creek.slug).filter((x) => Boolean(x)));
+    creek = placedOn.size === 1 ? creekBySlug([...placedOn][0]) : null;
+  }
+  const flagged = spots.filter((s) => looksLikeATestName(s.spot_name));
+  const real = spots.filter((s) => !flagged.includes(s));
+  const spotNames = new Map(spots.map((s) => [s.spot_id, s.spot_name]));
+  const visits = await recordsFor(env, real);
+  const findings = findingsFromVisits(visits, FINDING_KEY_FOR);
+  const needs = needsFromFindings(findings, content_default.sentences);
+  const pipes = pipesWorthTesting(visits, today);
+  let notes = [];
+  const reaches = [];
+  let unplaced = 0;
+  if (creek !== null) {
+    const reachOfSpot = {};
+    for (const s of real) if (placements.has(s.spot_id)) reachOfSpot[s.spot_id] = placements.get(s.spot_id).reach;
+    notes = notesBelow(findings, reachOfSpot, creek, NOTE_LABELS);
+    const visitsAt = /* @__PURE__ */ new Map();
+    for (const v of visits) visitsAt.set(v.spot.spot_id, (visitsAt.get(v.spot.spot_id) ?? 0) + 1);
+    for (const reach of creek.reaches) {
+      const here2 = real.filter((s) => reachOfSpot[s.spot_id] === reach);
+      reaches.push({
+        slug: reach.slug,
+        name: reach.name,
+        flows_into: reach.flows_into,
+        flows_into_name: reach.flows_into ? reachOf(creek, reach.flows_into)?.name ?? null : null,
+        spots: here2.length,
+        visits: here2.reduce((n, s) => n + (visitsAt.get(s.spot_id) ?? 0), 0),
+        notes: notes.filter((n) => n.reach_slug === reach.slug).map(noteView)
+      });
+    }
+    unplaced = real.filter((s) => !reachOfSpot[s.spot_id]).length;
+  }
+  const sentences = content_default.sentences;
+  return {
+    creek_id: creekRef,
+    creek_slug: creek?.slug ?? null,
+    creek_name: creek ? creek.name : real.length ? real[0].creek_name : creekRef,
+    visits: visits.length,
+    visit_ids: visits.map((v) => v.visit_id),
+    fhir: bundleLinks(visits.map((v) => v.visit_id)),
+    spots: real.length,
+    findings: findings.map((f) => findingView(f, spotNames)),
+    needs: needs.map((n) => ({ sentence_id: n.sentence_id, text: n.text, source: n.source, because: n.because.map((b) => FEATURE_NAMES[b] ?? b), visit_ids: n.visit_ids, fhir: bundleLinks(n.visit_ids) })),
+    pipes_worth_testing: pipes.map((p) => ({
+      spot_id: p.spot_id,
+      spot_name: p.spot_name,
+      observers: p.observers.length,
+      dry_days: p.dry_days,
+      last_seen: p.last_seen,
+      visit_ids: p.visit_ids,
+      fhir: bundleLinks(p.visit_ids),
+      referral: referralPath(p.spot_id),
+      example_result: exampleResultPath(p.spot_id)
+    })),
+    flagged_spots: flagged.map((s) => ({ spot_id: s.spot_id, spot_name: s.spot_name, why: "the name reads like a test" })),
+    measures_waiting_for_approval: sentences.length === 0 || sentences.every((s) => s.approved !== true),
+    reaches,
+    downstream_notes: notes.map(noteView),
+    unplaced_spots: unplaced
+  };
+}
+async function notesForSpot(env, spotId, today) {
+  const place = await placeForSpot(env, spotId);
+  if (place === null || place.reach_slug === null) return [];
+  const view = await cityView(env, place.creek_slug, today);
+  return view.downstream_notes.filter((n) => n.reach_slug === place.reach_slug);
+}
+async function creeksView(env) {
+  const all = await allSpots(env.DB);
+  const placements = placementsFor(all);
+  const groups = /* @__PURE__ */ new Map();
+  for (const row of all) {
+    if (looksLikeATestName(row.spot_name)) continue;
+    const placed = placements.get(row.spot_id);
+    const key = placed ? placed.creek.slug : row.creek_id;
+    if (!groups.has(key)) groups.set(key, { creek: key, creek_slug: placed ? placed.creek.slug : null, name: placed ? placed.creek.name : row.creek_name, spots: [] });
+    groups.get(key).spots.push(row);
+  }
+  const out = [];
+  for (const group of groups.values()) {
+    const visits = await recordsFor(env, group.spots);
+    out.push({
+      creek: group.creek,
+      creek_slug: group.creek_slug,
+      name: group.name,
+      spots: group.spots.length,
+      visits: visits.length,
+      visit_ids: visits.map((v) => v.visit_id),
+      fhir: bundleLinks(visits.map((v) => v.visit_id)),
+      record: `/api/city/${group.creek}`
+    });
+  }
+  out.sort((a, b) => Number(a.creek_slug === null) - Number(b.creek_slug === null) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return { creeks: out };
+}
+async function realSpotsOnTheCreekOf(env, spotId) {
+  const spot = await getSpot(env.DB, spotId);
+  if (spot === null) throw new NotFound("We do not know that spot.");
+  const all = await allSpots(env.DB);
+  const placements = placementsFor(all);
+  const mine = placements.get(spotId);
+  const spots = mine ? all.filter((s) => placements.get(s.spot_id)?.creek.slug === mine.creek.slug) : all.filter((s) => s.creek_id === spot.creek_id);
+  return spots.filter((s) => !looksLikeATestName(s.spot_name));
+}
+async function pipeCaseFor(env, spotId, today) {
+  const visits = await recordsFor(env, await realSpotsOnTheCreekOf(env, spotId));
+  for (const pipe of pipesWorthTesting(visits, today)) if (pipe.spot_id === spotId) return pipe;
+  throw new NotFound("No referral: this pipe is not on the list. Two different people who both passed the pipe feature have to report it running in dry weather.");
+}
+async function referralView(env, spotId, now) {
+  const pipe = await pipeCaseFor(env, spotId, now.slice(0, 10));
+  const bundles = {};
+  for (const visitId of pipe.visit_ids) {
+    const bundle = await loadVisitBundle(env.DB, visitId);
+    if (bundle) bundles[visitId] = bundle;
+  }
+  try {
+    return referralBundle(pipe, bundles, now);
+  } catch (err) {
+    if (err instanceof ReferralError) throw new NotFound(`No referral could be built: ${err.message}`);
+    throw err;
+  }
+}
+async function exampleResultView(env, spotId, now) {
+  const referral = await referralView(env, spotId, now);
+  const at = Date.parse(now);
+  return exampleLabResult(referral, new Date(at + EXAMPLE_SAMPLE_AFTER).toISOString(), new Date(at + EXAMPLE_REPORT_AFTER).toISOString());
+}
 
 // src/uploads.ts
 var MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
@@ -3789,6 +5106,2000 @@ async function storeUpload(env, request, now) {
   await env.PHOTOS.put(`photo:${photoId}`, clean, { expirationTtl: KEEP_SECONDS, metadata: { contentType: type } });
   await env.DB.prepare("INSERT INTO upload (photo_id, token_hash, content_type, size_bytes, created_at) VALUES (?, ?, ?, ?, ?)").bind(photoId, sha256Hex(token), type, clean.length, now).run();
   return { photo_id: photoId, token };
+}
+function uploadCutoff(now) {
+  return new Date(Date.parse(now) - KEEP_SECONDS * 1e3).toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+async function purgeUploads(db, now) {
+  const gone = await db.prepare("DELETE FROM upload WHERE created_at <= ?").bind(uploadCutoff(now)).run();
+  return Number(gone.meta.changes ?? 0);
+}
+function sameDigest(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+async function photoResponse(env, photoId, token) {
+  const row = await env.DB.prepare("SELECT token_hash, content_type FROM upload WHERE photo_id = ?").bind(photoId).first();
+  if (row === null || !token || !sameDigest(sha256Hex(token), row.token_hash)) throw new NotFound("Not found.");
+  const stored2 = await env.PHOTOS.get(`photo:${photoId}`, "arrayBuffer");
+  if (stored2 === null) throw new NotFound("Not found.");
+  return new Response(stored2, {
+    status: 200,
+    headers: { "content-type": row.content_type, "cache-control": "private, no-store", "content-disposition": "inline", "x-content-type-options": "nosniff" }
+  });
+}
+
+// ../fhir/golden/visit-strawberry-creek-1.json
+var visit_strawberry_creek_1_default = {
+  entry: [
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Organization/sl-org",
+      resource: {
+        active: true,
+        id: "sl-org",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/org",
+            value: "second-look"
+          }
+        ],
+        name: "Second Look project",
+        resourceType: "Organization",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Second Look project. Issues the observer test and keeps the record.</p></div>',
+          status: "generated"
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Device/sl-device",
+      resource: {
+        deviceName: [
+          {
+            name: "Second Look web app",
+            type: "user-friendly-name"
+          }
+        ],
+        id: "sl-device",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/device",
+            value: "second-look-web"
+          }
+        ],
+        resourceType: "Device",
+        status: "active",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Second Look web app, version 0.1.0. Assembled this record.</p></div>',
+          status: "generated"
+        },
+        type: {
+          coding: [
+            {
+              code: "software",
+              display: "Second Look software",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ]
+        },
+        version: [
+          {
+            value: "0.1.0"
+          }
+        ]
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-strawberry-creek",
+      resource: {
+        id: "sl-loc-strawberry-creek",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/location-id",
+            value: "strawberry-creek"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+          ]
+        },
+        mode: "instance",
+        name: "Strawberry Creek",
+        resourceType: "Location",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Strawberry Creek. A creek used in Second Look creek checks.</p></div>',
+          status: "generated"
+        },
+        type: [
+          {
+            coding: [
+              {
+                code: "420531007",
+                display: "River",
+                system: "http://snomed.info/sct"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-campus-reach",
+      resource: {
+        id: "sl-loc-campus-reach",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/location-id",
+            value: "campus-reach"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+          ]
+        },
+        mode: "instance",
+        name: "Strawberry Creek, campus reach",
+        partOf: {
+          reference: "Location/sl-loc-strawberry-creek"
+        },
+        resourceType: "Location",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Strawberry Creek, campus reach. A reach used in Second Look creek checks.</p></div>',
+          status: "generated"
+        },
+        type: [
+          {
+            coding: [
+              {
+                code: "420531007",
+                display: "River",
+                system: "http://snomed.info/sct"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Location/sl-loc-spot-1",
+      resource: {
+        id: "sl-loc-spot-1",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/location-id",
+            value: "spot-1"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/location-oah"
+          ]
+        },
+        mode: "instance",
+        name: "Strawberry Creek, campus reach, spot 1",
+        partOf: {
+          reference: "Location/sl-loc-campus-reach"
+        },
+        position: {
+          latitude: 37.8719,
+          longitude: -122.2585
+        },
+        resourceType: "Location",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Strawberry Creek, campus reach, spot 1. A spot used in Second Look creek checks.</p></div>',
+          status: "generated"
+        },
+        type: [
+          {
+            coding: [
+              {
+                code: "420531007",
+                display: "River",
+                system: "http://snomed.info/sct"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Practitioner/sl-practitioner-20d03d930b1b",
+      resource: {
+        active: true,
+        id: "sl-practitioner-20d03d930b1b",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/contributor-token",
+            value: "sl-practitioner-20d03d930b1b"
+          }
+        ],
+        qualification: [
+          {
+            code: {
+              coding: [
+                {
+                  code: "second-look-test",
+                  display: "Second Look observer test",
+                  system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              ]
+            },
+            issuer: {
+              reference: "Organization/sl-org"
+            },
+            period: {
+              end: "2026-12-22",
+              start: "2026-09-23"
+            }
+          }
+        ],
+        resourceType: "Practitioner",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Volunteer observer, known only by a random contributor token. Took the Second Look test on 2026-09-23. The score counts until 2026-12-22.</p></div>',
+          status: "generated"
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-test-test-sitting-0001",
+      resource: {
+        author: {
+          reference: "Practitioner/sl-practitioner-20d03d930b1b"
+        },
+        authored: "2026-09-23T17:05:00Z",
+        id: "sl-qr-test-test-sitting-0001",
+        identifier: {
+          system: "https://github.com/alejandro-publius/second-look/fhir/qr",
+          value: "test-sitting-0001"
+        },
+        item: [
+          {
+            item: [
+              {
+                answer: [
+                  {
+                    valueInteger: 4
+                  }
+                ],
+                linkId: "artificial_bank.score"
+              }
+            ],
+            linkId: "artificial_bank"
+          },
+          {
+            item: [
+              {
+                answer: [
+                  {
+                    valueInteger: 2
+                  }
+                ],
+                linkId: "dug_out_channel.score"
+              }
+            ],
+            linkId: "dug_out_channel"
+          },
+          {
+            item: [
+              {
+                answer: [
+                  {
+                    valueInteger: 3
+                  }
+                ],
+                linkId: "invasive_plant.score"
+              }
+            ],
+            linkId: "invasive_plant"
+          },
+          {
+            item: [
+              {
+                answer: [
+                  {
+                    valueInteger: 4
+                  }
+                ],
+                linkId: "pipe_running.score"
+              }
+            ],
+            linkId: "pipe_running"
+          }
+        ],
+        questionnaire: "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-test",
+        resourceType: "QuestionnaireResponse",
+        status: "completed",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Observer test sitting, scored by code: artificial bank 4 of 4, dug out channel 2 of 4, invasive plant 3 of 4, pipe running 4 of 4.</p></div>',
+          status: "generated"
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/QuestionnaireResponse/sl-qr-visit-visit-0001",
+      resource: {
+        author: {
+          reference: "Practitioner/sl-practitioner-20d03d930b1b"
+        },
+        authored: "2026-09-24T16:40:00Z",
+        id: "sl-qr-visit-visit-0001",
+        identifier: {
+          system: "https://github.com/alejandro-publius/second-look/fhir/qr",
+          value: "visit-0001"
+        },
+        item: [
+          {
+            answer: [
+              {
+                valueCoding: {
+                  code: "u-shape",
+                  display: "U shaped channel",
+                  system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              }
+            ],
+            linkId: "channel_form"
+          },
+          {
+            answer: [
+              {
+                valueCoding: {
+                  code: "present",
+                  display: "Present",
+                  system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                }
+              }
+            ],
+            linkId: "bank_type"
+          },
+          {
+            answer: [
+              {
+                valueCoding: {
+                  code: "cant-tell",
+                  display: "Can't tell",
+                  system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              }
+            ],
+            linkId: "draining_pipes"
+          },
+          {
+            answer: [
+              {
+                valueDecimal: 0.2
+              }
+            ],
+            linkId: "water_height_m"
+          },
+          {
+            answer: [
+              {
+                valueCoding: {
+                  code: "present",
+                  display: "Present",
+                  system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+                }
+              }
+            ],
+            linkId: "invasive_species"
+          },
+          {
+            answer: [
+              {
+                valueCoding: {
+                  code: "moderate",
+                  display: "Moderate overall rating",
+                  system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              }
+            ],
+            linkId: "overall_rating"
+          }
+        ],
+        language: "en",
+        questionnaire: "https://github.com/alejandro-publius/second-look/fhir/Questionnaire/sl-questionnaire-check",
+        resourceType: "QuestionnaireResponse",
+        status: "completed",
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><p>Creek check at Strawberry Creek, campus reach, spot 1 on 2026-09-24T16:40:00Z, 6 items answered.</p></div>',
+          status: "generated"
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0001-channel-form",
+      resource: {
+        category: [
+          {
+            coding: [
+              {
+                code: "morophology",
+                display: "Morphology of the streams",
+                system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+              }
+            ]
+          }
+        ],
+        code: {
+          coding: [
+            {
+              code: "morophology",
+              display: "Morphology of the streams",
+              system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+            }
+          ],
+          text: "Channel Form"
+        },
+        derivedFrom: [
+          {
+            reference: "QuestionnaireResponse/sl-qr-visit-visit-0001"
+          }
+        ],
+        effectiveDateTime: "2026-09-24T16:40:00Z",
+        id: "sl-obs-visit-0001-channel-form",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/observation",
+            value: "visit-0001-channel_form"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        performer: [
+          {
+            reference: "Practitioner/sl-practitioner-20d03d930b1b"
+          }
+        ],
+        resourceType: "Observation",
+        status: "final",
+        subject: {
+          reference: "Location/sl-loc-spot-1"
+        },
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Channel Form at Strawberry Creek, campus reach, spot 1: u shape.</p></div>',
+          status: "generated"
+        },
+        valueCodeableConcept: {
+          coding: [
+            {
+              code: "u-shape",
+              display: "U shaped channel",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ]
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0001-bank-type",
+      resource: {
+        category: [
+          {
+            coding: [
+              {
+                code: "morophology",
+                display: "Morphology of the streams",
+                system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+              }
+            ]
+          }
+        ],
+        code: {
+          coding: [
+            {
+              code: "artificial-bank",
+              display: "Artificial bank",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ],
+          text: "Bank Type"
+        },
+        derivedFrom: [
+          {
+            reference: "QuestionnaireResponse/sl-qr-visit-visit-0001"
+          }
+        ],
+        effectiveDateTime: "2026-09-24T16:40:00Z",
+        id: "sl-obs-visit-0001-bank-type",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/observation",
+            value: "visit-0001-bank_type"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        performer: [
+          {
+            reference: "Practitioner/sl-practitioner-20d03d930b1b"
+          }
+        ],
+        resourceType: "Observation",
+        status: "final",
+        subject: {
+          reference: "Location/sl-loc-spot-1"
+        },
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Bank Type at Strawberry Creek, campus reach, spot 1: present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>',
+          status: "generated"
+        },
+        valueCodeableConcept: {
+          coding: [
+            {
+              code: "present",
+              display: "Present",
+              system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+            }
+          ]
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0001-draining-pipes",
+      resource: {
+        category: [
+          {
+            coding: [
+              {
+                code: "hydrology",
+                display: "Hydrology of the stream",
+                system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+              }
+            ]
+          }
+        ],
+        code: {
+          coding: [
+            {
+              code: "pipe-running",
+              display: "Pipe running",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ],
+          text: "Draining Pipes"
+        },
+        derivedFrom: [
+          {
+            reference: "QuestionnaireResponse/sl-qr-visit-visit-0001"
+          }
+        ],
+        effectiveDateTime: "2026-09-24T16:40:00Z",
+        id: "sl-obs-visit-0001-draining-pipes",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/observation",
+            value: "visit-0001-draining_pipes"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        performer: [
+          {
+            reference: "Practitioner/sl-practitioner-20d03d930b1b"
+          }
+        ],
+        resourceType: "Observation",
+        status: "final",
+        subject: {
+          reference: "Location/sl-loc-spot-1"
+        },
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Draining Pipes at Strawberry Creek, campus reach, spot 1: cant tell. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p></div>',
+          status: "generated"
+        },
+        valueCodeableConcept: {
+          coding: [
+            {
+              code: "cant-tell",
+              display: "Can't tell",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ]
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0001-water-height-m",
+      resource: {
+        category: [
+          {
+            coding: [
+              {
+                code: "hydrology",
+                display: "Hydrology of the stream",
+                system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+              }
+            ]
+          }
+        ],
+        code: {
+          coding: [
+            {
+              code: "hydrology",
+              display: "Hydrology of the stream",
+              system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+            }
+          ],
+          text: "Water height"
+        },
+        derivedFrom: [
+          {
+            reference: "QuestionnaireResponse/sl-qr-visit-visit-0001"
+          }
+        ],
+        effectiveDateTime: "2026-09-24T16:40:00Z",
+        id: "sl-obs-visit-0001-water-height-m",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/observation",
+            value: "visit-0001-water_height_m"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        performer: [
+          {
+            reference: "Practitioner/sl-practitioner-20d03d930b1b"
+          }
+        ],
+        resourceType: "Observation",
+        status: "final",
+        subject: {
+          reference: "Location/sl-loc-spot-1"
+        },
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Water height at Strawberry Creek, campus reach, spot 1: 0.2 metre.</p></div>',
+          status: "generated"
+        },
+        valueQuantity: {
+          code: "m",
+          system: "http://unitsofmeasure.org",
+          unit: "metre",
+          value: 0.2
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0001-invasive-species",
+      resource: {
+        category: [
+          {
+            coding: [
+              {
+                code: "invasiveOrganisms",
+                display: "Invasive invertebrate, plants and fish",
+                system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+              }
+            ]
+          }
+        ],
+        code: {
+          coding: [
+            {
+              code: "invasive-plant",
+              display: "Invasive plant",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ],
+          text: "Invasive Species"
+        },
+        derivedFrom: [
+          {
+            reference: "QuestionnaireResponse/sl-qr-visit-visit-0001"
+          }
+        ],
+        effectiveDateTime: "2026-09-24T16:40:00Z",
+        id: "sl-obs-visit-0001-invasive-species",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/observation",
+            value: "visit-0001-invasive_species"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        performer: [
+          {
+            reference: "Practitioner/sl-practitioner-20d03d930b1b"
+          }
+        ],
+        resourceType: "Observation",
+        status: "final",
+        subject: {
+          reference: "Location/sl-loc-spot-1"
+        },
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Invasive Species at Strawberry Creek, campus reach, spot 1: present. The observer scored 3 of 4 on this feature, tested 2026-09-23.</p></div>',
+          status: "generated"
+        },
+        valueCodeableConcept: {
+          coding: [
+            {
+              code: "present",
+              display: "Present",
+              system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu"
+            }
+          ]
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Observation/sl-obs-visit-0001-overall-rating",
+      resource: {
+        code: {
+          coding: [
+            {
+              code: "overall-rating",
+              display: "Overall rating",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ],
+          text: "Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities)"
+        },
+        component: [
+          {
+            code: {
+              coding: [
+                {
+                  code: "first-rating",
+                  display: "First overall rating",
+                  system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              ]
+            },
+            valueCodeableConcept: {
+              coding: [
+                {
+                  code: "good",
+                  display: "Good overall rating",
+                  system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+                }
+              ]
+            }
+          }
+        ],
+        derivedFrom: [
+          {
+            reference: "QuestionnaireResponse/sl-qr-visit-visit-0001"
+          }
+        ],
+        effectiveDateTime: "2026-09-24T16:40:00Z",
+        id: "sl-obs-visit-0001-overall-rating",
+        identifier: [
+          {
+            system: "https://github.com/alejandro-publius/second-look/fhir/observation",
+            value: "visit-0001-overall_rating"
+          }
+        ],
+        meta: {
+          profile: [
+            "http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-indicators-oah"
+          ]
+        },
+        performer: [
+          {
+            reference: "Practitioner/sl-practitioner-20d03d930b1b"
+          }
+        ],
+        resourceType: "Observation",
+        status: "final",
+        subject: {
+          reference: "Location/sl-loc-spot-1"
+        },
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>Provide an overall assessment of the stream ecosystem health (choose one of the below possibilities) at Strawberry Creek, campus reach, spot 1: moderate. The first rating was good. On the rating check the volunteer changed it to moderate.</p></div>',
+          status: "generated"
+        },
+        valueCodeableConcept: {
+          coding: [
+            {
+              code: "moderate",
+              display: "Moderate overall rating",
+              system: "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
+            }
+          ]
+        }
+      }
+    },
+    {
+      fullUrl: "https://github.com/alejandro-publius/second-look/fhir/Provenance/sl-provenance-visit-0001",
+      resource: {
+        agent: [
+          {
+            type: {
+              coding: [
+                {
+                  code: "author",
+                  system: "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                }
+              ]
+            },
+            who: {
+              reference: "Practitioner/sl-practitioner-20d03d930b1b"
+            }
+          },
+          {
+            type: {
+              coding: [
+                {
+                  code: "assembler",
+                  system: "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                }
+              ]
+            },
+            who: {
+              reference: "Device/sl-device"
+            }
+          }
+        ],
+        entity: [
+          {
+            role: "source",
+            what: {
+              reference: "QuestionnaireResponse/sl-qr-visit-visit-0001"
+            }
+          },
+          {
+            role: "source",
+            what: {
+              reference: "QuestionnaireResponse/sl-qr-test-test-sitting-0001"
+            }
+          }
+        ],
+        id: "sl-provenance-visit-0001",
+        recorded: "2026-09-24T16:41:00Z",
+        resourceType: "Provenance",
+        target: [
+          {
+            reference: "Observation/sl-obs-visit-0001-channel-form"
+          },
+          {
+            reference: "Observation/sl-obs-visit-0001-bank-type"
+          },
+          {
+            reference: "Observation/sl-obs-visit-0001-draining-pipes"
+          },
+          {
+            reference: "Observation/sl-obs-visit-0001-water-height-m"
+          },
+          {
+            reference: "Observation/sl-obs-visit-0001-invasive-species"
+          },
+          {
+            reference: "Observation/sl-obs-visit-0001-overall-rating"
+          }
+        ],
+        text: {
+          div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>6 observations from one creek check, answered by the volunteer and assembled by the Second Look software. The sources are the visit and the observer test sitting.</p></div>',
+          status: "generated"
+        }
+      }
+    }
+  ],
+  id: "sl-visit-visit-0001",
+  resourceType: "Bundle",
+  timestamp: "2026-09-24T16:41:00Z",
+  type: "collection"
+};
+
+// src/two.ts
+var THEIRS_LOCATION = "Location/Loc-Almyros";
+var THEIRS_CODE = "dissolved-oxygen";
+function theirsQuery(env) {
+  return { subject: THEIRS_LOCATION, code: `${OAH_SYSTEM}|${env.SANDBOX_THEIRS_CODE ?? THEIRS_CODE}`, _sort: "-date", _count: "1" };
+}
+function observations(bundle) {
+  return (bundle.entry ?? []).map((e) => e.resource).filter((r) => r && r.resourceType === "Observation");
+}
+function placeOf(bundle, obs) {
+  const reference = String((obs?.subject ?? {}).reference ?? "");
+  if (!reference.startsWith("Location/")) return null;
+  const id = reference.slice("Location/".length);
+  for (const e of bundle.entry ?? []) {
+    const r = e.resource;
+    if (r && r.resourceType === "Location" && r.id === id && typeof r.name === "string") return r.name;
+  }
+  return null;
+}
+async function ours(env) {
+  const stored2 = await latestBundle(env.DB);
+  const bundle = stored2 ?? visit_strawberry_creek_1_default;
+  const list = observations(bundle);
+  let pick = list[0] ?? null;
+  for (const obs of list) {
+    const coding2 = (obs.code?.coding ?? [])[0];
+    if (coding2 && coding2.system === SL_SYSTEM) {
+      pick = obs;
+      break;
+    }
+  }
+  return { observation: pick, example: stored2 === null, place: placeOf(bundle, pick) };
+}
+function theirsCacheKey(env) {
+  return `theirs-${sha256Hex(JSON.stringify(theirsQuery(env))).slice(0, 16)}`;
+}
+async function theirs(env) {
+  const cached = await env.DB.prepare("SELECT body, fetched_at FROM sandbox_cache WHERE cache_key = ?").bind(theirsCacheKey(env)).first();
+  if (cached === null) return { observation: null, status: "down", fetched_at: "" };
+  return { observation: JSON.parse(cached.body), status: "cached", fetched_at: cached.fetched_at };
+}
+async function two(env) {
+  const t = await theirs(env);
+  const o = await ours(env);
+  return { ours: o.observation, ours_example: o.example, ours_place: o.place, theirs: t.observation, theirs_status: t.status, fetched_at: t.fetched_at };
+}
+
+// src/part2.ts
+var ok = (body) => ({ status: 200, body });
+var no = (status, detail) => ({ status, body: { detail } });
+var ITEMS = content_default.part2_items;
+var FLAGS = content_default.part2_flags;
+var GOLD = Object.fromEntries(ITEMS.map((i) => [i.id, i.gold]));
+var PART2_ITEM_IDS = ITEMS.map((i) => i.id);
+var PART2_ARMS = ["unassisted", "assisted"];
+var STRATA = ["untrained", "trained"];
+var UNKNOWN2 = "We do not know that second look. Start it again from your score screen.";
+var nowIso = () => (/* @__PURE__ */ new Date()).toISOString().replace(/\.\d{3}Z$/, "Z");
+var isRight = (answer2, gold) => answer2 === sideAnswer(gold);
+function randomHex2(bytes) {
+  const a = new Uint8Array(bytes);
+  crypto.getRandomValues(a);
+  return Array.from(a, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function shuffled(items) {
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const r = new Uint32Array(1);
+    crypto.getRandomValues(r);
+    const j = r[0] % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+async function part2For(env, part2Id) {
+  return env.DB.prepare("SELECT id, session_id, arm, item_order, declined, completed_at FROM part2_session WHERE id = ?").bind(part2Id).first();
+}
+async function state(env, row) {
+  const rows = await env.DB.prepare(
+    "SELECT item_id, final_answer, question_shown FROM part2_response WHERE part2_id = ? ORDER BY position"
+  ).bind(row.id).all();
+  const all = rows.results ?? [];
+  const out = {
+    part2_id: row.id,
+    arm: row.arm,
+    item_order: row.item_order ? JSON.parse(row.item_order) : [],
+    answered: all.filter((r) => r.final_answer !== null).map((r) => r.item_id),
+    pending: all.find((r) => r.final_answer === null)?.item_id ?? null,
+    completed: row.completed_at !== null,
+    total: ITEMS.length
+  };
+  if (row.completed_at !== null) out.correct_total = all.filter((r) => r.final_answer !== null && isRight(r.final_answer, GOLD[r.item_id])).length;
+  return out;
+}
+async function offer(env, body, qa) {
+  const sessionId = String(body.session_id ?? "");
+  const decision = body.decision === "decline" ? "decline" : body.decision === "start" ? "start" : null;
+  if (decision === null) return no(422, "Choose to start the second look or to skip it.");
+  const part1 = await env.DB.prepare("SELECT arm, is_test, completed_at, client_token_hash FROM session WHERE id = ?").bind(sessionId).first();
+  if (part1 === null) return no(404, "We do not know that session. Start again from the first screen.");
+  if (part1.completed_at === null) return no(409, "The second look opens after the score screen of the first test.");
+  const existing = await env.DB.prepare(
+    "SELECT id, session_id, arm, item_order, declined, completed_at FROM part2_session WHERE session_id = ?"
+  ).bind(sessionId).first();
+  if (existing !== null && (existing.declined === 0 || decision === "decline")) {
+    return ok(existing.declined ? { declined: true } : await state(env, existing));
+  }
+  const at = nowIso();
+  const isTest = part1.is_test === 1 || qa ? 1 : 0;
+  const postLock = Date.now() >= Date.parse("2026-09-28T01:00:00Z") ? 1 : 0;
+  if (decision === "decline") {
+    await env.DB.prepare(
+      `INSERT OR IGNORE INTO part2_session (id, session_id, part1_arm, offered_at, declined, client_token_hash, is_test, post_lock)
+       VALUES (?, ?, ?, ?, 1, ?, ?, ?)`
+    ).bind(randomHex2(16), sessionId, part1.arm, at, part1.client_token_hash, isTest, postLock).run();
+    return ok({ declined: true });
+  }
+  const qaArm = qa && typeof body.qa_arm === "string" && PART2_ARMS.includes(body.qa_arm) ? body.qa_arm : null;
+  const picked = qaArm ? { arm: qaArm, block_id: -1 } : await takeSlot(env, part1.arm);
+  if ("detail" in picked) return no(500, picked.detail);
+  const arm = picked.arm;
+  const slot = picked;
+  const order = shuffled(PART2_ITEM_IDS);
+  const id = existing?.id ?? randomHex2(16);
+  if (existing !== null) {
+    await env.DB.prepare(
+      "UPDATE part2_session SET declined = 0, arm = ?, block_id = ?, item_order = ?, started_at = ? WHERE id = ? AND declined = 1"
+    ).bind(arm, slot.block_id, JSON.stringify(order), at, id).run();
+  } else {
+    await env.DB.prepare(
+      `INSERT INTO part2_session (id, session_id, part1_arm, arm, block_id, item_order, offered_at, declined,
+         started_at, client_token_hash, is_test, post_lock)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)`
+    ).bind(id, sessionId, part1.arm, arm, slot.block_id, JSON.stringify(order), at, at, part1.client_token_hash, isTest, postLock).run();
+  }
+  const row = await part2For(env, id);
+  return ok(row ? await state(env, row) : { part2_id: id, arm, item_order: order });
+}
+async function takeSlot(env, part1Arm) {
+  const stratum = STRATA.includes(part1Arm) ? part1Arm : "untrained";
+  const taken = await env.DB.prepare(
+    "UPDATE part2_counter SET next_position = next_position + 1 WHERE stratum = ? RETURNING next_position"
+  ).bind(stratum).first();
+  if (taken === null) return { detail: "The randomization counter for the second look is missing." };
+  const slot = await env.DB.prepare("SELECT arm, block_id FROM part2_slot WHERE stratum = ? AND position = ?").bind(stratum, Number(taken.next_position) - 1).first();
+  if (slot === null) return { detail: "The randomization sequence for the second look has run out." };
+  return slot;
+}
+async function answer(env, body) {
+  const part2Id = String(body.part2_id ?? "");
+  const itemId = String(body.item_id ?? "");
+  const first = String(body.answer ?? "");
+  if (!ANSWERS.includes(first)) return no(422, "We do not know that answer.");
+  if (!(itemId in GOLD)) return no(404, "We do not know that photo.");
+  const row = await part2For(env, part2Id);
+  if (row === null || row.declined) return no(404, UNKNOWN2);
+  const existing = await env.DB.prepare(
+    "SELECT first_answer, question_shown FROM part2_response WHERE part2_id = ? AND item_id = ?"
+  ).bind(part2Id, itemId).first();
+  if (existing !== null) {
+    if (existing.first_answer !== first) return no(409, "This photo already has an answer. The first answer stays.");
+    return ok({ ask: existing.question_shown === 1 });
+  }
+  const ask2 = questionNeeded(row.arm, FLAGS[itemId] ?? null, first);
+  const t = Number(body.t_first_ms ?? 0);
+  const settled = ask2 ? null : settle(first, false);
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO part2_response (part2_id, item_id, position, first_answer, final_answer, question_shown,
+       choice, t_first_ms, t_final_ms, received_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(part2Id, itemId, Number(body.position ?? 0), first, settled?.final_answer ?? null, ask2 ? 1 : 0, "", t, ask2 ? null : t, nowIso()).run();
+  return ok({ ask: ask2 });
+}
+async function choice(env, body) {
+  const part2Id = String(body.part2_id ?? "");
+  const itemId = String(body.item_id ?? "");
+  const row = await env.DB.prepare(
+    "SELECT first_answer, final_answer, question_shown, choice FROM part2_response WHERE part2_id = ? AND item_id = ?"
+  ).bind(part2Id, itemId).first();
+  if (row === null) return no(404, "That photo has no first answer yet.");
+  if (row.question_shown !== 1) return no(409, "No question was asked for this photo, so there is nothing to choose.");
+  let got;
+  try {
+    got = settle(row.first_answer, true, body.choice ?? null, body.changed_to ?? null);
+  } catch (e) {
+    if (e instanceof AssistError) return no(422, e.message);
+    throw e;
+  }
+  if (row.final_answer !== null) {
+    if (row.final_answer === got.final_answer && row.choice === got.choice) return ok({ ok: true });
+    return no(409, "This photo already has a final answer. The first one stays.");
+  }
+  await env.DB.prepare(
+    "UPDATE part2_response SET final_answer = ?, choice = ?, t_final_ms = ? WHERE part2_id = ? AND item_id = ? AND final_answer IS NULL"
+  ).bind(got.final_answer, got.choice, Number(body.t_final_ms ?? 0), part2Id, itemId).run();
+  return ok({ ok: true });
+}
+async function complete(env, body) {
+  const part2Id = String(body.part2_id ?? "");
+  const row = await part2For(env, part2Id);
+  if (row === null || row.declined) return no(404, UNKNOWN2);
+  const held = await env.DB.prepare("SELECT item_id, final_answer FROM part2_response WHERE part2_id = ?").bind(part2Id).all();
+  const settledIds = new Set((held.results ?? []).filter((r) => r.final_answer !== null).map((r) => r.item_id));
+  const gap = PART2_ITEM_IDS.filter((id) => !settledIds.has(id));
+  const answeredCount = Number(body.answered_count ?? 0);
+  if (gap.length > 0 && body.final !== true && row.completed_at === null && answeredCount > settledIds.size) {
+    return ok({ need_resend: gap, stored_count: settledIds.size });
+  }
+  if (row.completed_at === null) {
+    await env.DB.prepare("UPDATE part2_session SET completed_at = ? WHERE id = ? AND completed_at IS NULL").bind(nowIso(), part2Id).run();
+  }
+  const correct = (held.results ?? []).filter((r) => r.final_answer !== null && isRight(r.final_answer, GOLD[r.item_id])).length;
+  return ok({ correct_total: correct, total: ITEMS.length });
+}
+async function resume(env, part2Id) {
+  const row = await part2For(env, part2Id);
+  if (row === null || row.declined) return no(404, UNKNOWN2);
+  return ok(await state(env, row));
+}
+async function counts(env) {
+  const byArm = {};
+  for (const arm of PART2_ARMS) {
+    const r = await env.DB.prepare(
+      "SELECT COUNT(*) AS n, SUM(CASE WHEN completed_at IS NOT NULL THEN 1 ELSE 0 END) AS done FROM part2_session WHERE arm = ? AND declined = 0 AND is_test = 0"
+    ).bind(arm).first();
+    byArm[arm] = { randomized: Number(r?.n ?? 0), completed: Number(r?.done ?? 0) };
+  }
+  const d = await env.DB.prepare("SELECT COUNT(*) AS n FROM part2_session WHERE declined = 1 AND is_test = 0").first();
+  return ok({ by_arm: byArm, declined: Number(d?.n ?? 0) });
+}
+function demo(body) {
+  const itemId = String(body.item_id ?? "");
+  const given = String(body.answer ?? "");
+  if (!(itemId in GOLD)) return no(404, "We do not know that photo.");
+  if (!ANSWERS.includes(given)) return no(422, "We do not know that answer.");
+  return ok({ ask: questionNeeded("assisted", FLAGS[itemId] ?? null, given), correct: isRight(given, GOLD[itemId]) });
+}
+async function exportFiles(env, csvRow2) {
+  const sessions = await env.DB.prepare("SELECT * FROM part2_session ORDER BY offered_at").all();
+  const responses = await env.DB.prepare("SELECT * FROM part2_response ORDER BY part2_id, position").all();
+  const firstAt = {};
+  for (const r of responses.results ?? []) {
+    const id = String(r.part2_id);
+    const at = String(r.received_at);
+    if (!firstAt[id] || at < firstAt[id]) firstAt[id] = at;
+  }
+  const sLines = [csvRow2(PART2_SESSION_COLUMNS)];
+  for (const s of sessions.results ?? []) {
+    const first = firstAt[String(s.id)];
+    const seconds = s.completed_at && first ? Math.round((Date.parse(String(s.completed_at)) - Date.parse(first)) / 1e3 * 10) / 10 : "";
+    sLines.push(
+      csvRow2([
+        s.id,
+        s.session_id,
+        s.part1_arm,
+        s.arm ?? "",
+        s.block_id ?? "",
+        s.offered_at,
+        s.declined,
+        s.started_at ?? "",
+        s.completed_at ?? "",
+        seconds,
+        s.client_token_hash,
+        s.is_test,
+        s.post_lock
+      ])
+    );
+  }
+  const feature = Object.fromEntries(ITEMS.map((i) => [i.id, i.feature]));
+  const rLines = [csvRow2(PART2_RESPONSE_COLUMNS)];
+  for (const r of responses.results ?? []) {
+    const id = String(r.item_id);
+    const final = r.final_answer === null ? "" : String(r.final_answer);
+    rLines.push(
+      csvRow2([
+        r.part2_id,
+        id,
+        feature[id] ?? "",
+        GOLD[id] ?? "",
+        r.position,
+        r.first_answer,
+        final,
+        r.question_shown,
+        r.choice ?? "",
+        r.t_first_ms ?? "",
+        r.t_final_ms ?? "",
+        final && GOLD[id] && isRight(final, GOLD[id]) ? 1 : 0
+      ])
+    );
+  }
+  return [
+    { name: "part2_sessions.csv", text: sLines.join("\r\n") + "\r\n" },
+    { name: "part2_responses.csv", text: rLines.join("\r\n") + "\r\n" }
+  ];
+}
+var PART2_SESSION_COLUMNS = [
+  "part2_id",
+  "session_id",
+  "part1_arm",
+  "arm",
+  "block_id",
+  "offered_at_utc",
+  "declined",
+  "started_at_utc",
+  "completed_at_utc",
+  "test_seconds",
+  "client_token_hash",
+  "is_test",
+  "post_lock"
+];
+var PART2_RESPONSE_COLUMNS = [
+  "part2_id",
+  "item_id",
+  "feature",
+  "gold",
+  "position",
+  "first_answer",
+  "final_answer",
+  "question_shown",
+  "choice",
+  "t_first_ms",
+  "t_final_ms",
+  "correct"
+];
+
+// src/walk_store.ts
+var Conflict = class extends Error {
+};
+var TooMany = class extends Error {
+};
+var WALKS = new Map(content_default.walks.map((w) => [w.id, { id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }]));
+var BODY_KEYS = /* @__PURE__ */ new Set(["walk_id", "answers", "answered_at", "followup_answers", "final_rating", "language"]);
+var RECORD_ID_RE = /^walk-[0-9a-f]{16}$/;
+function answersText(answers) {
+  return JSON.stringify(Object.fromEntries(Object.keys(answers).sort().map((k) => [k, answers[k]])));
+}
+function stored(row) {
+  return { record_id: row.record_id, walk_id: row.walk_id, answered_at: row.answered_at, delete_after: row.delete_after };
+}
+async function purgeWalks(db, now) {
+  const [, records] = await db.batch([
+    db.prepare("DELETE FROM walk_checks WHERE record_id IN (SELECT record_id FROM walk_record WHERE delete_after <= ?)").bind(now),
+    db.prepare("DELETE FROM walk_record WHERE delete_after <= ?").bind(now)
+  ]);
+  return Number(records.meta.changes ?? 0);
+}
+function followupsOf(body, answers) {
+  if (!("followup_answers" in body) && !("final_rating" in body)) return null;
+  const given = body.followup_answers ?? {};
+  if (given === null || typeof given !== "object" || Array.isArray(given)) throw new Invalid("followup_answers must be an object of follow-up ids and answers.");
+  const finalRating = validateRating(body.final_rating);
+  const chosen = walkFollowups(answers, content_default.followups, FORM_ITEMS);
+  try {
+    return walkChecks(answers, chosen, chosen.map(questionText), given, finalRating);
+  } catch (err) {
+    if (err instanceof WalkRecordError) throw new Invalid(err.message);
+    throw err;
+  }
+}
+function keptOf(row, answers) {
+  const first = typeof answers.overall_rating === "string" ? answers.overall_rating : null;
+  if (row === null) return { checks: [], first_rating: first, final_rating: first };
+  return { checks: JSON.parse(row.checks_json), first_rating: first, final_rating: row.final_rating };
+}
+async function readBody(request) {
+  const declared = Number(request.headers.get("content-length") ?? "0");
+  if (declared > WALK_MAX_BYTES) throw new TooLarge("That walk is too large to store.");
+  const raw = new Uint8Array(await request.arrayBuffer());
+  if (raw.length > WALK_MAX_BYTES) throw new TooLarge("That walk is too large to store.");
+  let body;
+  try {
+    body = JSON.parse(new TextDecoder().decode(raw));
+  } catch {
+    throw new Invalid("That was not JSON.");
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) throw new Invalid("Send the walk as one JSON object.");
+  for (const key of Object.keys(body)) if (!BODY_KEYS.has(key)) throw new Invalid(`A walk has no field called '${key}'.`);
+  return body;
+}
+async function storeWalk(db, request, now) {
+  const body = await readBody(request);
+  const walk = typeof body.walk_id === "string" ? WALKS.get(body.walk_id) : void 0;
+  if (walk === void 0) throw new NotFound("We do not know that walk.");
+  if (!body.answers || typeof body.answers !== "object" || Array.isArray(body.answers)) throw new Invalid("answers must be an object of question ids and answers.");
+  const answers = validateAnswers(body.answers);
+  const kept = followupsOf(body, answers);
+  if (body.language !== void 0 && body.language !== null && typeof body.language !== "string") throw new Invalid("language must be a language code.");
+  const language = validateLanguage(body.language);
+  let row;
+  try {
+    row = walkRecord(walk, answers, body.answered_at, now, kept === null ? null : kept.final_rating, language);
+  } catch (err) {
+    if (err instanceof WalkRecordError) throw new Invalid(err.message);
+    throw err;
+  }
+  if (checkBundle(row.bundle).length > 0) throw new Invalid("That walk would make a record with a broken link inside it.");
+  const text = answersText(answers);
+  const keptText = kept === null ? null : JSON.stringify(kept.checks);
+  await purgeWalks(db, now);
+  const same2 = async () => {
+    const existing = await db.prepare("SELECT * FROM walk_record WHERE record_id = ?").bind(row.record_id).first();
+    if (existing === null) return null;
+    if (existing.walk_id === row.walk_id && existing.answers_json === text) {
+      const was = await db.prepare("SELECT final_rating, checks_json FROM walk_checks WHERE record_id = ?").bind(row.record_id).first();
+      if (kept === null || was === null || was.checks_json === keptText && was.final_rating === kept.final_rating) return stored(existing);
+    }
+    throw new Conflict("Another walk of this clip was stored in the same second. Start again and finish it once more.");
+  };
+  const earlier = await same2();
+  if (earlier !== null) return earlier;
+  const dayStart = `${now.slice(0, 10)}T00:00:00Z`;
+  const statements = [
+    db.prepare(
+      `INSERT OR IGNORE INTO walk_record (record_id, walk_id, answered_at, answers_json, bundle_json, created_at, delete_after)
+         SELECT ?, ?, ?, ?, ?, ?, ? WHERE (SELECT COUNT(*) FROM walk_record WHERE created_at >= ?) < ?`
+    ).bind(row.record_id, row.walk_id, row.answered_at, text, JSON.stringify(row.bundle), row.created_at, row.delete_after, dayStart, WALK_DAILY_CAP)
+  ];
+  if (kept !== null) {
+    statements.push(
+      db.prepare(
+        `INSERT OR IGNORE INTO walk_checks (record_id, final_rating, checks_json)
+           SELECT ?, ?, ? WHERE EXISTS (SELECT 1 FROM walk_record WHERE record_id = ? AND answers_json = ?)`
+      ).bind(row.record_id, kept.final_rating, keptText, row.record_id, text)
+    );
+  }
+  const [inserted] = await db.batch(statements);
+  if (!inserted.meta.changes) {
+    const raced = await same2();
+    if (raced !== null) return raced;
+    throw new TooMany("The demo store has taken all the walks it can for today. Your record is still on this page; try again tomorrow.");
+  }
+  return stored(row);
+}
+async function walkView(db, recordId, now) {
+  const gone = `We have no stored walk record called '${recordId.slice(0, 40)}'. A walk record is deleted ${WALK_KEEP_DAYS} days after it is stored.`;
+  if (!RECORD_ID_RE.test(recordId)) throw new NotFound(gone);
+  const row = await db.prepare("SELECT * FROM walk_record WHERE record_id = ? AND delete_after > ?").bind(recordId, now).first();
+  if (row === null) throw new NotFound(gone);
+  const checks = await db.prepare("SELECT final_rating, checks_json FROM walk_checks WHERE record_id = ?").bind(recordId).first();
+  const answers = JSON.parse(row.answers_json);
+  return { ...stored(row), answers, bundle: JSON.parse(row.bundle_json), ...keptOf(checks, answers) };
+}
+async function walkFhir(db, recordId, now) {
+  return (await walkView(db, recordId, now)).bundle;
+}
+
+// src/inaturalist.ts
+var INVASIVE_ITEM = "invasive_species";
+var SOURCE = "https://www.inaturalist.org";
+var TERMS = "https://www.inaturalist.org/pages/terms";
+var LINK_PREFIX = "https://www.inaturalist.org/observations";
+function asSpot(row) {
+  return {
+    spot_id: row.spot_id,
+    spot_name: row.spot_name,
+    reach_id: row.reach_id,
+    reach_name: row.reach_name,
+    creek_id: row.creek_id,
+    creek_name: row.creek_name,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    coarse: Boolean(row.coarse)
+  };
+}
+async function creekSpots(env, creekRef) {
+  const rows = (await env.DB.prepare("SELECT spot_id, spot_name, reach_id, reach_name, creek_id, creek_name, latitude, longitude, coarse FROM spot ORDER BY created_at").all()).results ?? [];
+  const placed = new Map(rows.map((r) => [r.spot_id, placeSpot(asSpot(r), CREEKS)]));
+  let creek = creekBySlug(creekRef);
+  let spots;
+  if (creek !== null) {
+    const slug = creek.slug;
+    spots = rows.filter((r) => placed.get(r.spot_id)?.creek.slug === slug);
+  } else {
+    spots = rows.filter((r) => r.creek_id === creekRef);
+    const on = new Set(spots.map((r) => placed.get(r.spot_id)?.creek.slug).filter((x) => Boolean(x)));
+    creek = on.size === 1 ? creekBySlug([...on][0]) : null;
+  }
+  return { key: creek?.slug ?? creekRef, spots: spots.filter((r) => !looksLikeATestName(r.spot_name)) };
+}
+async function invasiveAnswered(env, spotIds) {
+  if (spotIds.length === 0) return false;
+  const marks = spotIds.map(() => "?").join(",");
+  const rows = (await env.DB.prepare(`SELECT answers_json FROM visit WHERE spot_id IN (${marks}) AND finalized_at IS NOT NULL`).bind(...spotIds).all()).results ?? [];
+  for (const r of rows) {
+    const answers = JSON.parse(r.answers_json);
+    const value = answers && typeof answers === "object" ? answers[INVASIVE_ITEM] : void 0;
+    if (value !== void 0 && value !== null && value !== "") return true;
+  }
+  return false;
+}
+function cleanSpecies(raw) {
+  const out = [];
+  for (const s of Array.isArray(raw) ? raw : []) {
+    if (!s || typeof s !== "object") continue;
+    const item = s;
+    const url = String(item.url ?? "");
+    const count = item.count;
+    if (!url.startsWith(LINK_PREFIX) || typeof count !== "number" || !Number.isInteger(count) || count < 1) continue;
+    out.push({
+      taxon_id: item.taxon_id ?? null,
+      name: String(item.name ?? ""),
+      latin_name: String(item.latin_name ?? ""),
+      count,
+      last_observed: String(item.last_observed ?? ""),
+      url
+    });
+  }
+  return out;
+}
+async function inaturalistView(env, creekRef) {
+  const { key, spots } = await creekSpots(env, creekRef);
+  const shown = await invasiveAnswered(env, spots.map((s) => s.spot_id));
+  const row = await env.DB.prepare("SELECT body, fetched_at FROM inaturalist_cache WHERE creek = ?").bind(key).first();
+  let body = {};
+  if (row !== null) {
+    try {
+      const parsed = JSON.parse(row.body);
+      body = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      body = {};
+    }
+  }
+  return {
+    creek: key,
+    shown,
+    status: row !== null ? "cached" : "none",
+    fetched_at: row !== null ? row.fetched_at : null,
+    since: body.since ?? null,
+    radius_m: body.radius_m ?? null,
+    // Withheld until a finished check on this creek has answered the invasive plant question.
+    species: shown ? cleanSpecies(body.species) : [],
+    source: SOURCE,
+    terms: TERMS
+  };
+}
+
+// src/index.ts
+var DATA_LOCK_UTC = Date.parse("2026-09-28T01:00:00Z");
+var JUDGE_MODE_OPENS_UTC = Date.parse("2026-10-03T04:00:00Z");
+var SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other", "panel"];
+var UA_CLASSES = ["phone", "tablet", "desktop", "other"];
+var ANSWERS2 = ["yes", "no", "cant_tell"];
+var TOKEN_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
+var TOKEN_LENGTH = 16;
+var GOLD2 = Object.fromEntries(content_default.test_items.map((i) => [i.id, i.gold]));
+var FEATURE = Object.fromEntries(content_default.test_items.map((i) => [i.id, i.feature]));
+var ITEM_IDS = content_default.test_items.map((i) => i.id);
+function isCorrect(answer2, gold) {
+  return answer2 === "yes" && gold === "present" || answer2 === "no" && gold === "absent";
+}
+async function sha256Hex2(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function randomHex3(bytes) {
+  const a = new Uint8Array(bytes);
+  crypto.getRandomValues(a);
+  return Array.from(a, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function newContributorToken() {
+  const a = new Uint32Array(TOKEN_LENGTH);
+  crypto.getRandomValues(a);
+  return Array.from(a, (n) => TOKEN_ALPHABET[n % TOKEN_ALPHABET.length]).join("");
+}
+function shuffled2(items) {
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const r = new Uint32Array(1);
+    crypto.getRandomValues(r);
+    const j = r[0] % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+function sameSecret(given, expected) {
+  if (!expected || expected.length < 16 || !given || given.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= given.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+var coerce = (raw, allowed, fallback) => typeof raw === "string" && allowed.includes(raw) ? raw : fallback;
+function corsHeaders(env) {
+  return {
+    "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN ?? "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "content-type, x-qa-key",
+    "Access-Control-Max-Age": "86400"
+  };
+}
+var json = (env, data, status = 200) => new Response(JSON.stringify(data), {
+  status,
+  headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...corsHeaders(env) }
+});
+var fhirJson = (env, request, data, status = 200) => new Response(JSON.stringify(data), {
+  status,
+  headers: { "content-type": fhirMediaType(request.headers.get("accept")), vary: "Accept", "cache-control": "no-store", ...corsHeaders(env) }
+});
+var nowIso2 = () => (/* @__PURE__ */ new Date()).toISOString().replace(/\.\d{3}Z$/, "Z");
+async function createSession(env, body, isTest) {
+  const raw = String(body.client_token_hash ?? "");
+  if (raw.length < 8) return json(env, { detail: "client_token_hash is required." }, 422);
+  const tokenHash = (await sha256Hex2(raw)).slice(0, 32);
+  const earlier = await env.DB.prepare(
+    "SELECT arm, block_id FROM session WHERE client_token_hash = ? ORDER BY started_at LIMIT 1"
+  ).bind(tokenHash).first();
+  const taken = await env.DB.prepare(
+    "UPDATE counter SET next_position = next_position + 1 WHERE id = 1 RETURNING next_position"
+  ).first();
+  if (taken === null) return json(env, { detail: "The randomization counter is missing." }, 500);
+  const position = Number(taken.next_position) - 1;
+  const slot = await env.DB.prepare("SELECT arm, block_id FROM arm_slot WHERE position = ?").bind(position).first();
+  if (slot === null) return json(env, { detail: "The randomization sequence has run out." }, 500);
+  const arm = earlier && !isTest ? earlier.arm : slot.arm;
+  const blockId = earlier && !isTest ? earlier.block_id : slot.block_id;
+  const sessionId = randomHex3(16);
+  const order = shuffled2(ITEM_IDS);
+  const at = nowIso2();
+  const hidden = String(body.hidden_field ?? "").trim().length > 0;
+  const warmup = typeof body.warmup_choice === "string" && content_default.warmup_ids.includes(body.warmup_choice) ? body.warmup_choice : null;
+  await env.DB.prepare(
+    `INSERT INTO session (id, arm, block_id, item_order, consent_version, content_hash, build_hash,
+       consent_at, started_at, client_token_hash, ua_class, is_test, source_label,
+       hidden_field_filled, post_lock, warmup_choice)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(
+    sessionId,
+    arm,
+    blockId,
+    JSON.stringify(order),
+    String(body.consent_version ?? "").slice(0, 32),
+    String(body.content_hash ?? "").slice(0, 64),
+    String(body.build_hash ?? "").slice(0, 64),
+    at,
+    at,
+    tokenHash,
+    coerce(body.ua_class, UA_CLASSES, "other"),
+    isTest ? 1 : 0,
+    coerce(body.source_label, SOURCE_LABELS, "other"),
+    hidden ? 1 : 0,
+    Date.now() >= DATA_LOCK_UTC ? 1 : 0,
+    warmup
+  ).run();
+  return json(env, { session_id: sessionId, arm, item_order: order, lesson_first: arm === "trained" });
+}
+async function recordResponse(env, body) {
+  const sessionId = String(body.session_id ?? "");
+  const itemId = String(body.item_id ?? "");
+  const answer2 = String(body.answer ?? "");
+  if (!ANSWERS2.includes(answer2)) return json(env, { detail: "We do not know that answer." }, 422);
+  const session = await env.DB.prepare("SELECT id FROM session WHERE id = ?").bind(sessionId).first();
+  if (session === null) return json(env, { detail: "We do not know that session. Start again from the first screen." }, 404);
+  if (!(itemId in GOLD2)) return json(env, { detail: "We do not know that test item." }, 404);
+  const existing = await env.DB.prepare("SELECT answer FROM response WHERE session_id = ? AND item_id = ?").bind(sessionId, itemId).first();
+  if (existing !== null) {
+    if (existing.answer !== answer2) return json(env, { detail: "This photo already has an answer. The first answer stays." }, 409);
+    return json(env, { ok: true });
+  }
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO response (session_id, item_id, answer, rt_ms, position,
+       first_choice, t_first_ms, n_changes, received_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(
+    sessionId,
+    itemId,
+    answer2,
+    Number(body.rt_ms ?? 0),
+    Number(body.position ?? 0),
+    typeof body.first_choice === "string" ? body.first_choice : null,
+    body.t_first_ms === void 0 || body.t_first_ms === null ? null : Number(body.t_first_ms),
+    Number(body.n_changes ?? 0),
+    nowIso2()
+  ).run();
+  return json(env, { ok: true });
+}
+async function scoresFor(env, sessionId) {
+  const rows = await env.DB.prepare("SELECT item_id, answer FROM response WHERE session_id = ?").bind(sessionId).all();
+  const byFeature = {};
+  for (const f of content_default.features) byFeature[f] = { feature: f, correct: 0, total: 0 };
+  for (const item of content_default.test_items) byFeature[item.feature].total += 1;
+  for (const r of rows.results ?? []) {
+    const gold = GOLD2[r.item_id];
+    if (gold && isCorrect(r.answer, gold)) byFeature[FEATURE[r.item_id]].correct += 1;
+  }
+  const scores = content_default.features.map((f) => byFeature[f]);
+  return { scores, correct_total: scores.reduce((n, s) => n + s.correct, 0), held: (rows.results ?? []).length };
+}
+async function completeSession(env, body) {
+  const sessionId = String(body.session_id ?? "");
+  const row = await env.DB.prepare("SELECT item_order, completed_at FROM session WHERE id = ?").bind(sessionId).first();
+  if (row === null) return json(env, { detail: "We do not know that session. Start again from the first screen." }, 404);
+  const order = JSON.parse(row.item_order);
+  const held = await env.DB.prepare("SELECT item_id FROM response WHERE session_id = ?").bind(sessionId).all();
+  const have = new Set((held.results ?? []).map((r) => r.item_id));
+  const gap = order.filter((id) => !have.has(id));
+  const answeredCount = Number(body.answered_count ?? 0);
+  const isFinal = body.final === true;
+  if (gap.length > 0 && !isFinal && row.completed_at === null && answeredCount > have.size) {
+    return json(env, { need_resend: gap, stored_count: have.size });
+  }
+  const { scores, correct_total } = await scoresFor(env, sessionId);
+  const out = { scores, correct_total };
+  if (row.completed_at === null) {
+    const prior = body.prior_experience === "yes" || body.prior_experience === "no" ? body.prior_experience : null;
+    await env.DB.prepare("UPDATE session SET completed_at = ?, prior_experience = ?, unsent_count = ? WHERE id = ?").bind(nowIso2(), prior, Math.max(0, answeredCount - have.size), sessionId).run();
+  }
+  if (body.keep_score === true) {
+    const token = newContributorToken();
+    await env.DB.prepare("INSERT INTO observer (contributor_token, scores_json, tested_on) VALUES (?, ?, ?)").bind(token, JSON.stringify(scores), nowIso2().slice(0, 10)).run();
+    out.contributor_token = token;
+  }
+  return json(env, out);
+}
+async function resumeState(env, sessionId) {
+  const row = await env.DB.prepare(
+    "SELECT id, arm, item_order, lesson_seconds, completed_at FROM session WHERE id = ?"
+  ).bind(sessionId).first();
+  if (row === null) return json(env, { detail: "We do not know that session. Start again from the first screen." }, 404);
+  const answered = await env.DB.prepare("SELECT item_id FROM response WHERE session_id = ? ORDER BY position").bind(sessionId).all();
+  const state2 = {
+    session_id: row.id,
+    arm: row.arm,
+    item_order: JSON.parse(row.item_order),
+    lesson_first: row.arm === "trained",
+    lesson_done: Boolean(row.lesson_seconds),
+    answered: (answered.results ?? []).map((r) => r.item_id),
+    completed: row.completed_at !== null
+  };
+  if (row.completed_at !== null) {
+    const { scores, correct_total } = await scoresFor(env, sessionId);
+    state2.scores = scores;
+    state2.correct_total = correct_total;
+  }
+  return json(env, state2);
+}
+async function counts2(env) {
+  const byArm = {};
+  for (const arm of ["untrained", "trained"]) {
+    const r = await env.DB.prepare(
+      "SELECT COUNT(*) AS n, SUM(CASE WHEN completed_at IS NOT NULL THEN 1 ELSE 0 END) AS done FROM session WHERE arm = ? AND is_test = 0"
+    ).bind(arm).first();
+    byArm[arm] = { randomized: Number(r?.n ?? 0), completed: Number(r?.done ?? 0) };
+  }
+  const bySource = Object.fromEntries(SOURCE_LABELS.map((s) => [s, 0]));
+  const rows = await env.DB.prepare(
+    "SELECT source_label, COUNT(*) AS n FROM session WHERE is_test = 0 AND completed_at IS NOT NULL GROUP BY source_label"
+  ).all();
+  for (const r of rows.results ?? []) bySource[coerce(r.source_label, SOURCE_LABELS, "other")] += Number(r.n);
+  const post = await env.DB.prepare("SELECT COUNT(*) AS n FROM session WHERE is_test = 0 AND post_lock = 1").first();
+  return json(env, { by_arm: byArm, by_source: bySource, post_lock: Number(post?.n ?? 0) });
+}
+function crc32(bytes) {
+  let c = 4294967295;
+  for (const b of bytes) {
+    c ^= b;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
+  }
+  return (c ^ 4294967295) >>> 0;
+}
+function zipOf(files) {
+  const enc = new TextEncoder();
+  const chunks = [];
+  const central = [];
+  let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name);
+    const data = enc.encode(f.text);
+    const crc = crc32(data);
+    const local = new Uint8Array(30 + name.length);
+    const lv = new DataView(local.buffer);
+    lv.setUint32(0, 67324752, true);
+    lv.setUint16(4, 20, true);
+    lv.setUint16(8, 0, true);
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, data.length, true);
+    lv.setUint32(22, data.length, true);
+    lv.setUint16(26, name.length, true);
+    local.set(name, 30);
+    chunks.push(local, data);
+    const head = new Uint8Array(46 + name.length);
+    const hv = new DataView(head.buffer);
+    hv.setUint32(0, 33639248, true);
+    hv.setUint16(4, 20, true);
+    hv.setUint16(6, 20, true);
+    hv.setUint32(16, crc, true);
+    hv.setUint32(20, data.length, true);
+    hv.setUint32(24, data.length, true);
+    hv.setUint16(28, name.length, true);
+    hv.setUint32(42, offset, true);
+    head.set(name, 46);
+    central.push(head);
+    offset += local.length + data.length;
+  }
+  const centralSize = central.reduce((n, c) => n + c.length, 0);
+  const end = new Uint8Array(22);
+  const ev = new DataView(end.buffer);
+  ev.setUint32(0, 101010256, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, centralSize, true);
+  ev.setUint32(16, offset, true);
+  const total = offset + centralSize + 22;
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const c of [...chunks, ...central, end]) {
+    out.set(c, at);
+    at += c.length;
+  }
+  return out;
+}
+var csvCell = (v) => {
+  const s = v === null || v === void 0 ? "" : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+var csvRow = (cells) => cells.map(csvCell).join(",");
+async function exportZip(env) {
+  const sessions = await env.DB.prepare("SELECT * FROM session ORDER BY started_at").all();
+  const responses = await env.DB.prepare("SELECT * FROM response ORDER BY session_id, position").all();
+  const firstAt = {};
+  for (const r of responses.results ?? []) {
+    const sid = String(r.session_id);
+    const at = String(r.received_at);
+    if (!firstAt[sid] || at < firstAt[sid]) firstAt[sid] = at;
+  }
+  const sessionHead = [
+    "session_id",
+    "arm",
+    "block_id",
+    "source_label",
+    "ua_class",
+    "consent_version",
+    "content_hash",
+    "build_hash",
+    "started_at_utc",
+    "lesson_seconds_total",
+    "completed_at_utc",
+    "test_seconds",
+    "is_test",
+    "post_lock",
+    "hidden_field_filled",
+    "client_token_hash",
+    "prior_experience",
+    "warmup_choice",
+    "unsent_count"
+  ];
+  const sessionLines = [csvRow(sessionHead)];
+  for (const s of sessions.results ?? []) {
+    let lessonTotal = "";
+    if (s.lesson_seconds) {
+      const vals = Object.values(JSON.parse(String(s.lesson_seconds)));
+      lessonTotal = Math.round(vals.reduce((a, b) => a + b, 0) * 10) / 10;
+    }
+    let testSeconds = "";
+    const first = firstAt[String(s.id)];
+    if (s.completed_at && first) {
+      testSeconds = Math.round((Date.parse(String(s.completed_at)) - Date.parse(first)) / 1e3 * 10) / 10;
+    }
+    sessionLines.push(
+      csvRow([
+        s.id,
+        s.arm,
+        s.block_id,
+        s.source_label,
+        s.ua_class,
+        s.consent_version,
+        s.content_hash,
+        s.build_hash,
+        s.started_at,
+        lessonTotal,
+        s.completed_at ?? "",
+        testSeconds,
+        s.is_test,
+        s.post_lock,
+        s.hidden_field_filled,
+        s.client_token_hash,
+        s.prior_experience ?? "",
+        s.warmup_choice ?? "",
+        s.unsent_count
+      ])
+    );
+  }
+  const responseHead = [
+    "session_id",
+    "item_id",
+    "feature",
+    "gold",
+    "answer",
+    "correct",
+    "rt_ms",
+    "position",
+    "first_choice",
+    "final_choice",
+    "t_first_ms",
+    "t_confirm_ms",
+    "n_changes"
+  ];
+  const responseLines = [csvRow(responseHead)];
+  for (const r of responses.results ?? []) {
+    const itemId = String(r.item_id);
+    const gold = GOLD2[itemId];
+    responseLines.push(
+      csvRow([
+        r.session_id,
+        itemId,
+        FEATURE[itemId] ?? "",
+        gold ?? "",
+        r.answer,
+        gold && isCorrect(String(r.answer), gold) ? 1 : 0,
+        r.rt_ms,
+        r.position,
+        r.first_choice ?? "",
+        r.answer,
+        r.t_first_ms ?? "",
+        r.rt_ms,
+        r.n_changes
+      ])
+    );
+  }
+  const zip = zipOf([
+    { name: "sessions.csv", text: sessionLines.join("\r\n") + "\r\n" },
+    { name: "responses.csv", text: responseLines.join("\r\n") + "\r\n" },
+    // Part 2 (UPDATE_31): two more files, read by evals/assist_analysis.py.
+    ...await exportFiles(env, csvRow)
+  ]);
+  return new Response(zip, {
+    status: 200,
+    headers: {
+      "content-type": "application/zip",
+      "content-disposition": 'attachment; filename="second-look-export.zip"',
+      "cache-control": "no-store",
+      ...corsHeaders(env)
+    }
+  });
+}
+var src_default = {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(env) });
+    if (path === "/health") return json(env, { status: "ok" });
+    if (path === "/api/content/hash") return json(env, { content_hash: content_default.content_hash, build_hash: "worker" });
+    const now = nowIso2();
+    const checkEnv = { DB: env.DB, PHOTOS: env.PHOTOS, RAIN_FETCH: env.RAIN_URL ? rainFetchAt(env.RAIN_URL) : void 0 };
+    try {
+      if (path === "/api/upload" && request.method === "POST") return json(env, await storeUpload(env, request, now));
+      if (path === "/api/walk" && request.method === "POST") return json(env, await storeWalk(env.DB, request, now));
+      const walkBundle2 = /^\/api\/walk\/([^/]+)\/fhir$/.exec(path);
+      if (walkBundle2 && request.method === "GET") return await fhirRoute(env, request, () => walkFhir(env.DB, idFrom(walkBundle2[1]), now));
+      const walk = /^\/api\/walk\/([^/]+)$/.exec(path);
+      if (walk && request.method === "GET") return json(env, await walkView(env.DB, idFrom(walk[1]), now));
+      const photo = /^\/api\/photo\/([^/]+)$/.exec(path);
+      if (photo && request.method === "GET") return withCors(env, await photoResponse(env, idFrom(photo[1]), url.searchParams.get("t")));
+      if (path === "/api/creeks") return json(env, await creeksView(checkEnv));
+      const city = /^\/api\/city\/([^/]+)$/.exec(path);
+      if (city) return json(env, await cityView(checkEnv, idFrom(city[1]), todayOf(now)));
+      const spotFhir = /^\/api\/spot\/([^/]+)\/fhir$/.exec(path);
+      if (spotFhir) {
+        return await fhirRoute(env, request, async () => {
+          const found = await latestBundleForSpot(env.DB, idFrom(spotFhir[1]));
+          if (found === null) throw new NotFound("no FHIR record for this spot yet");
+          return found;
+        });
+      }
+      const spot = /^\/api\/spot\/([^/]+)$/.exec(path);
+      if (spot && request.method === "GET") {
+        const id = idFrom(spot[1]);
+        const view = await spotView(checkEnv, id, todayOf(now));
+        return json(env, { ...view, place: await placeForSpot(checkEnv, id), downstream_notes: await notesForSpot(checkEnv, id, todayOf(now)) });
+      }
+      const bundle = /^\/api\/fhir\/Bundle\/([^/]+)$/.exec(path);
+      if (bundle) {
+        return await fhirRoute(env, request, async () => {
+          const found = await loadVisitBundle(env.DB, idFrom(bundle[1]));
+          if (found === null) throw new NotFound("no FHIR record for this visit");
+          return found;
+        });
+      }
+      if (path === "/api/fhir/validation") return json(env, fhir_validation_default);
+      const example = /^\/api\/fhir\/referral\/([^/]+)\/example-result$/.exec(path);
+      if (example) return await fhirRoute(env, request, () => exampleResultView(checkEnv, idFrom(example[1]), now));
+      const referral = /^\/api\/fhir\/referral\/([^/]+)$/.exec(path);
+      if (referral) return await fhirRoute(env, request, () => referralView(checkEnv, idFrom(referral[1]), now));
+      if (path === "/api/two") return json(env, await two(env));
+      const inat = /^\/api\/inaturalist\/([^/]+)$/.exec(path);
+      if (inat && request.method === "GET") return json(env, await inaturalistView(env, idFrom(inat[1])));
+    } catch (err) {
+      return errorResponse(env, err);
+    }
+    let body = {};
+    if (request.method === "POST" && (request.headers.get("content-type") ?? "").includes("application/json")) {
+      try {
+        body = await request.json();
+      } catch {
+        return json(env, { detail: "That was not JSON." }, 400);
+      }
+    }
+    try {
+      if (path === "/api/check/draft" && request.method === "POST") return json(env, await createDraft(checkEnv, body, now));
+      if (path === "/api/check/finalize" && request.method === "POST") return json(env, await finalize(checkEnv, body, now));
+      const quick = /^\/api\/quick\/([^/]+)$/.exec(path);
+      if (quick && request.method === "POST") return json(env, await quickCheck(checkEnv, idFrom(quick[1]), body, now));
+      if (path === "/api/test/session" && request.method === "POST") {
+        const isTest = sameSecret(request.headers.get("x-qa-key"), env.QA_KEY);
+        return await createSession(env, body, isTest);
+      }
+      if (path === "/api/test/response" && request.method === "POST") return await recordResponse(env, body);
+      if (path === "/api/test/lesson-done" && request.method === "POST") {
+        const sid = String(body.session_id ?? "");
+        const seconds = body.lesson_seconds ?? {};
+        const clean = {};
+        for (const [k, v] of Object.entries(seconds)) clean[k.slice(0, 32)] = Math.round(Number(v) * 10) / 10;
+        const r = await env.DB.prepare("UPDATE session SET lesson_seconds = ? WHERE id = ?").bind(JSON.stringify(clean), sid).run();
+        if (!r.meta.changes) return json(env, { detail: "We do not know that session. Start again from the first screen." }, 404);
+        return json(env, { ok: true });
+      }
+      if (path === "/api/test/complete" && request.method === "POST") return await completeSession(env, body);
+      if (path === "/api/test/resume") return await resumeState(env, url.searchParams.get("session_id") ?? "");
+      if (path === "/api/test/counts") return await counts2(env);
+      if (path === "/api/test/export") {
+        if (!sameSecret(url.searchParams.get("token"), env.EXPORT_TOKEN)) return json(env, { detail: "Not found." }, 404);
+        return await exportZip(env);
+      }
+      if (path === "/api/t2/offer" && request.method === "POST") return reply(env, await offer(env, body, sameSecret(request.headers.get("x-qa-key"), env.QA_KEY)));
+      if (path === "/api/t2/answer" && request.method === "POST") return reply(env, await answer(env, body));
+      if (path === "/api/t2/choice" && request.method === "POST") return reply(env, await choice(env, body));
+      if (path === "/api/t2/complete" && request.method === "POST") return reply(env, await complete(env, body));
+      if (path === "/api/t2/resume") return reply(env, await resume(env, url.searchParams.get("part2_id") ?? ""));
+      if (path === "/api/t2/counts") return reply(env, await counts(env));
+      if (path === "/api/t2/demo" && request.method === "POST") {
+        if (lockClock(env) < JUDGE_MODE_OPENS_UTC) return json(env, { detail: "Judge mode opens on Oct 3." }, 403);
+        return reply(env, demo(body));
+      }
+      if (path === "/api/demo/answer" && request.method === "POST") {
+        if (lockClock(env) < JUDGE_MODE_OPENS_UTC) return json(env, { detail: "Judge mode opens on Oct 3." }, 403);
+        const gold = GOLD2[String(body.item_id ?? "")];
+        if (!gold) return json(env, { detail: "We do not know that test item." }, 404);
+        return json(env, { correct: isCorrect(String(body.answer ?? ""), gold) });
+      }
+    } catch (err) {
+      return errorResponse(env, err);
+    }
+    return json(env, { detail: "Not found." }, 404);
+  },
+  /** Once a day (the cron in worker/wrangler.jsonc): deletes every video walk record past its
+   *  delete date (UPDATE_30 section 1 item 3) and every upload row older than 30 days, whose photo
+   *  KV has dropped by then (hard rule 8, docs/DATA_HANDLING.md). Each runs whatever the other
+   *  does, and a failure in either is thrown, so the run shows as failed. Nothing else runs on it. */
+  async scheduled(_controller, env) {
+    const now = nowIso2();
+    const runs = await Promise.allSettled([purgeWalks(env.DB, now), purgeUploads(env.DB, now)]);
+    for (const run of runs) if (run.status === "rejected") throw run.reason;
+  }
+};
+function reply(env, r) {
+  return json(env, r.body, r.status);
+}
+function lockClock(env) {
+  const fixed = env.E2E_NOW === void 0 ? Number.NaN : Date.parse(env.E2E_NOW);
+  return Number.isFinite(fixed) ? fixed : Date.now();
+}
+function idFrom(part) {
+  try {
+    return decodeURIComponent(part);
+  } catch {
+    throw new NotFound("Not found.");
+  }
+}
+function problemOf(err) {
+  if (err instanceof Invalid) return { status: 422, detail: err.message };
+  if (err instanceof NotFound) return { status: 404, detail: err.message };
+  if (err instanceof TooLarge) return { status: 413, detail: err.message };
+  if (err instanceof Conflict) return { status: 409, detail: err.message };
+  if (err instanceof TooMany) return { status: 429, detail: err.message };
+  return { status: 500, detail: "The server could not take that. Try again in a moment." };
+}
+function errorResponse(env, err) {
+  const problem = problemOf(err);
+  return json(env, { detail: problem.detail }, problem.status);
+}
+async function fhirRoute(env, request, make) {
+  try {
+    return fhirJson(env, request, await make());
+  } catch (err) {
+    const problem = problemOf(err);
+    return fhirJson(env, request, operationOutcome(problem.status, problem.detail), problem.status);
+  }
+}
+function withCors(env, response) {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(corsHeaders(env))) headers.set(k, v);
+  return new Response(response.body, { status: response.status, headers });
+}
+function rainFetchAt(base) {
+  return async (url) => {
+    const query = url.split("?")[1] ?? "";
+    const response = await fetch(`${base}?${query}`, { signal: AbortSignal.timeout(5e3) });
+    if (!response.ok) throw new Error(`rain ${response.status}`);
+    return response.json();
+  };
 }
 
 // test/golden.test.ts
@@ -3983,7 +7294,7 @@ test("walks: the same demo Bundle as Python, tagged on every resource, and struc
 test("walks: the stored row of a finished walk, or the same reason to refuse it, as Python", () => {
   const doc = golden("walks");
   assert.ok(doc.record_cases.length >= 5, "cases that store and cases that refuse");
-  let stored = 0;
+  let stored2 = 0;
   for (const c of doc.record_cases) {
     let got;
     try {
@@ -3993,9 +7304,9 @@ test("walks: the stored row of a finished walk, or the same reason to refuse it,
       got = { error: err.message };
     }
     same(got, c.expected, c.name);
-    if (!("error" in c.expected)) stored += 1;
+    if (!("error" in c.expected)) stored2 += 1;
   }
-  assert.ok(stored > 0 && stored < doc.record_cases.length, "both kinds of case ran");
+  assert.ok(stored2 > 0 && stored2 < doc.record_cases.length, "both kinds of case ran");
 });
 test("walks: the follow-ups a walk asks and the checks kept with it, or the same reason to refuse them, as Python", () => {
   const doc = golden("walks");
@@ -4079,8 +7390,135 @@ test("uploads: a stored photo is put in KV to expire after 30 days", async () =>
   };
   const form = new FormData();
   form.append("file", new Blob([Uint8Array.from([...p.soi, ...p.app0, ...p.exif, ...p.dqt, ...p.sos, ...p.scan, ...p.eoi])], { type: "image/jpeg" }), "photo.jpg");
-  const stored = await storeUpload(env, new Request("http://127.0.0.1/api/upload", { method: "POST", body: form }), "2026-09-24T10:00:00Z");
+  const stored2 = await storeUpload(env, new Request("http://127.0.0.1/api/upload", { method: "POST", body: form }), "2026-09-24T10:00:00Z");
   assert.equal(puts.length, 1);
-  assert.equal(puts[0].key, `photo:${stored.photo_id}`);
+  assert.equal(puts[0].key, `photo:${stored2.photo_id}`);
   assert.equal(puts[0].options.expirationTtl, 30 * 24 * 60 * 60, "30 days, in seconds");
+});
+test("uploads: the daily run deletes the rows older than 30 days, and only those", async () => {
+  assert.equal(uploadCutoff("2026-10-30T04:17:00Z"), "2026-09-30T04:17:00Z", "30 days back, written as created_at is");
+  assert.equal(uploadCutoff("2026-03-01T00:00:05Z"), "2026-01-30T00:00:05Z", "across a month's end");
+  const ran = [];
+  const db = {
+    prepare: (sql) => ({
+      bind: (...args) => ({
+        run: async () => {
+          ran.push({ sql, args });
+          return { meta: { changes: 3 } };
+        }
+      })
+    })
+  };
+  assert.equal(await purgeUploads(db, "2026-10-30T04:17:00Z"), 3, "how many rows went");
+  assert.deepEqual(ran, [{ sql: "DELETE FROM upload WHERE created_at <= ?", args: ["2026-09-30T04:17:00Z"] }]);
+});
+function recordingStore(changes = 0) {
+  const ran = [];
+  const DB = {
+    prepare: (sql) => ({
+      bind: (...args) => ({
+        sql,
+        args,
+        run: async () => {
+          ran.push({ sql, args });
+          return { meta: { changes } };
+        }
+      })
+    }),
+    batch: async (statements) => statements.map((s) => {
+      ran.push({ sql: s.sql, args: s.args });
+      return { meta: { changes } };
+    })
+  };
+  return { ran, env: { DB, PHOTOS: {} } };
+}
+test("cron: one daily run deletes the walks past their date and the old upload rows", async () => {
+  const { ran, env } = recordingStore();
+  const before = uploadCutoff((/* @__PURE__ */ new Date()).toISOString());
+  await src_default.scheduled({}, env);
+  const after = uploadCutoff((/* @__PURE__ */ new Date()).toISOString());
+  const uploads = ran.filter((r) => r.sql === "DELETE FROM upload WHERE created_at <= ?");
+  assert.equal(uploads.length, 1, JSON.stringify(ran));
+  const cutoff = String(uploads[0].args[0]);
+  assert.ok(before <= cutoff && cutoff <= after, `${cutoff} is 30 days before now`);
+  assert.equal(ran.filter((r) => r.sql === "DELETE FROM walk_record WHERE delete_after <= ?").length, 1, "the walks still go");
+  const broken = recordingStore();
+  broken.env.DB.batch = async () => {
+    throw new Error("the walk tables are gone");
+  };
+  await assert.rejects(() => src_default.scheduled({}, broken.env), /the walk tables are gone/);
+  assert.equal(broken.ran.filter((r) => r.sql.startsWith("DELETE FROM upload")).length, 1);
+});
+test("fhir_http: an error as an OperationOutcome, the same as Python", () => {
+  assert.deepEqual(operationOutcome(404, "no FHIR record for this visit"), {
+    resourceType: "OperationOutcome",
+    text: { status: "generated", div: '<div xmlns="http://www.w3.org/1999/xhtml"><p>no FHIR record for this visit</p></div>' },
+    issue: [{ severity: "error", code: "not-found", details: { text: "no FHIR record for this visit" } }]
+  });
+  assert.deepEqual(
+    [404, 409, 413, 422, 429, 500, 503].map((status) => operationOutcome(status, "x").issue[0].code),
+    ["not-found", "conflict", "too-long", "invalid", "throttled", "exception", "exception"]
+  );
+  assert.equal(operationOutcome(404, "a <b> & c").text.div, '<div xmlns="http://www.w3.org/1999/xhtml"><p>a &lt;b&gt; &amp; c</p></div>');
+});
+test("fhir_http: FHIR's media type, and plain JSON for a browser that opens the link", () => {
+  assert.equal(FHIR_JSON, "application/fhir+json; charset=utf-8");
+  for (const accept of [null, "", "*/*", "application/fhir+json", "application/json", "application/fhir+json, text/plain"]) {
+    assert.equal(fhirMediaType(accept), FHIR_JSON, String(accept));
+  }
+  for (const accept of ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "TEXT/HTML"]) {
+    assert.equal(fhirMediaType(accept), PLAIN_JSON, accept);
+  }
+});
+var ask = async (env, address, headers = {}) => {
+  const res = await src_default.fetch(new Request(`http://127.0.0.1${address}`, { headers }), env);
+  return { status: res.status, type: res.headers.get("content-type"), vary: res.headers.get("vary"), cache: res.headers.get("cache-control"), body: await res.json() };
+};
+test("routes: a broken percent code in the address is a plain 404", async () => {
+  const { ran, env } = recordingStore();
+  for (const address of ["/api/spot/%E0%A4%A", "/api/walk/%ff", "/api/city/%", "/api/photo/%E0%A4%A?t=x", "/api/inaturalist/%"]) {
+    const answer2 = await ask(env, address);
+    assert.deepEqual([answer2.status, answer2.body, answer2.type], [404, { detail: "Not found." }, PLAIN_JSON], address);
+  }
+  const quick = await src_default.fetch(new Request("http://127.0.0.1/api/quick/%E0%A4%A", { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }), env);
+  assert.deepEqual([quick.status, await quick.json()], [404, { detail: "Not found." }]);
+  for (const address of ["/api/spot/%E0%A4%A/fhir", "/api/walk/%ff/fhir", "/api/fhir/Bundle/%", "/api/fhir/referral/%", "/api/fhir/referral/%/example-result"]) {
+    const answer2 = await ask(env, address);
+    assert.deepEqual([answer2.status, answer2.body, answer2.type], [404, operationOutcome(404, "Not found."), FHIR_JSON], address);
+  }
+  assert.deepEqual(ran, [], "nothing was asked of the store");
+});
+test("routes: a 500 says one fixed sentence and never the error's own text", async () => {
+  const env = {
+    DB: {
+      prepare: () => {
+        throw new Error("D1_ERROR: no such table: spot, asked with the-secret-word");
+      }
+    },
+    PHOTOS: {}
+  };
+  const sentence = "The server could not take that. Try again in a moment.";
+  const plain = await ask(env, "/api/creeks");
+  assert.deepEqual([plain.status, plain.body], [500, { detail: sentence }], "no error field");
+  const fhir = await ask(env, "/api/fhir/Bundle/visit-0001");
+  assert.deepEqual([fhir.status, fhir.body, fhir.type], [500, operationOutcome(500, sentence), FHIR_JSON]);
+  const study = await src_default.fetch(new Request("http://127.0.0.1/api/test/counts"), env);
+  assert.deepEqual([study.status, await study.json()], [500, { detail: sentence }], "the study routes too");
+  for (const answer2 of [plain.body, fhir.body]) assert.ok(!JSON.stringify(answer2).includes("secret") && !JSON.stringify(answer2).includes("D1_ERROR"));
+});
+test("routes: a FHIR route answers under FHIR's media type, found or not", async () => {
+  const rows = {};
+  const env = {
+    DB: { prepare: () => ({ bind: () => ({ first: async () => rows.next ?? null, all: async () => ({ results: [] }) }) }) },
+    PHOTOS: {}
+  };
+  const missing = await ask(env, "/api/fhir/Bundle/visit-nowhere");
+  assert.deepEqual([missing.status, missing.body], [404, operationOutcome(404, "no FHIR record for this visit")]);
+  assert.deepEqual([missing.type, missing.vary, missing.cache], [FHIR_JSON, "Accept", "no-store"]);
+  const spot = await ask(env, "/api/spot/spot-nowhere/fhir");
+  assert.deepEqual([spot.status, spot.body, spot.type], [404, operationOutcome(404, "no FHIR record for this spot yet"), FHIR_JSON]);
+  const inBrowser = await ask(env, "/api/fhir/Bundle/visit-nowhere", { accept: "text/html,application/xhtml+xml,*/*;q=0.8" });
+  assert.deepEqual([inBrowser.status, inBrowser.type, inBrowser.body], [404, PLAIN_JSON, missing.body], "the same bytes, shown in the tab");
+  assert.equal((await ask(env, "/api/fhir/validation")).type, PLAIN_JSON);
+  assert.equal((await ask(env, "/api/nothing-here")).type, PLAIN_JSON);
 });

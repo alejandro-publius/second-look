@@ -46,3 +46,7 @@ e219c5f0cd071736b3b13dd73f141d1bb8c268cc:worker/test/e2e.mjs:generic-api-key:18
 # 2026-09-26 (UPDATE_32 section 3). Made up for the test, as the others above.
 bb051460a4d967ededb2a3694fa2ffde10297014:worker/golden/fhir_emit.json:generic-api-key:2935
 bb051460a4d967ededb2a3694fa2ffde10297014:worker/golden/fhir_emit.json:generic-api-key:3890
+# worker/dist/golden.test.mjs line 6518: the alphabet a token is drawn from, not a token. It is the
+# line of worker/src/index.ts listed above, in the built copy of the Worker's unit tests, which
+# load the Worker itself since 2026-09-29 to test its routes.
+2fc316b84e63fa3e73a8156e2d22ea0e3d91d92d:worker/dist/golden.test.mjs:generic-api-key:6518
