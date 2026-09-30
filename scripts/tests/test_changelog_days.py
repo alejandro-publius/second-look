@@ -18,7 +18,7 @@ import pytest
 from scripts import go_public as gp
 
 ROOT = Path(__file__).resolve().parents[2]
-WRITTEN_UP_TO = date(2026, 9, 30)  # the first day the changelog does not name yet
+WRITTEN_UP_TO = date(2026, 10, 1)  # the first day the changelog does not name yet
 FLIP_DAY = date(2026, 10, 3)
 
 
