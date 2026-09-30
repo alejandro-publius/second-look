@@ -214,6 +214,7 @@ def test_a_one_shot_job_ran_if_its_log_was_written_on_its_day_or_after(tmp_path:
     log = tmp_path / "second-look-backups" / "lock.log"
     log.write_text("x\n")
     lock2 = mac_jobs.by_name("lock2")
+    assert lock2.calendar is not None
     year, month, day = datetime.now().year, lock2.calendar["Month"], lock2.calendar["Day"]
     evening = datetime(year, month, day, 21, 41).astimezone()
     os.utime(log, (evening.timestamp(), evening.timestamp()))
