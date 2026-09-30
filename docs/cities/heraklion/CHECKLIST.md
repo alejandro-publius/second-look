@@ -1,7 +1,7 @@
 # Heraklion, Greece: a follower city checklist
 
 **A dry example in English. No claims.** Nobody has run Second Look in Heraklion. Nothing in this
-folder is a finding about any creek. It was written by `scripts/new_city.py` on 2026-09-21 from a
+folder is a finding about any creek. It was written by `scripts/new_city.py` on 2026-09-30 from a
 name and one pair of coordinates (35.3387, 25.1442), to show that a new city is a checklist, not a
 rebuild. OneAquaHealth calls a city that adopts the method a follower city and gives five steps.
 Each step below names the files and commands in this repository that do it.
@@ -32,6 +32,9 @@ Each step below names the files and commands in this repository that do it.
       `scripts/merge_labels.py` prints Cohen's kappa and refuses to freeze while they disagree.
 - [ ] Fill `invasive_plants:` in `content/regions/heraklion.yaml` from the regional inventory,
       with the source named.
+- [ ] Set `bbox:` at the top of that file, [south, west, north, east] in degrees from public
+      maps. The plant list is offered only to a pin inside this box; while it is null, no pin
+      in Heraklion is offered the list.
 - [ ] `scripts/freeze_key.py`, then the lesson checked on strangers before launch.
 
 ## 4. Collect and validate
@@ -40,6 +43,8 @@ Each step below names the files and commands in this repository that do it.
       the observer's score: `core/fhir_emit.py`, nothing to change.
 - [ ] `make check` validates every emitted record in CI before it is stored or mirrored.
 - [ ] Print `docs/cities/heraklion/poster.html` on Letter or A4 once two local photos are in.
+      Its QR opens https://second-look-79t.pages.dev. Pass `SITE=` to `make new-city` to point it at
+      your own site. The poster's words are English.
 
 ## 5. Publish and repeat
 

@@ -6,6 +6,9 @@ name: "Heraklion, Greece"
 approved: false
 invasive_plants: []
 source: "to be filled by a local checker, from the regional invasive species inventory"
+# [south, west, north, east] in degrees from public maps; the plant list is
+# offered only to a pin inside this box.
+bbox: null
 
 # Creeks and their reaches. Each creek has a readable slug, so the analyst's link reads
 # /city?creek=<slug>. `flows_into` names the reach below; the downstream note appears only where it
@@ -20,9 +23,9 @@ source: "to be filled by a local checker, from the regional invasive species inv
 #       - slug: upper
 #         name: Upper reach
 #         flows_into: lower
-#         bbox: [0, 1, 2, 3]
+#         bbox: [south, west, north, east]
 #       - slug: lower
 #         name: Lower reach
 #         flows_into: null
-#         bbox: [0, 1, 2, 3]
+#         bbox: [south, west, north, east]
 creeks: []

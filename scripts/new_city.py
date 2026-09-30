@@ -1,11 +1,12 @@
 """Scaffold a follower city (Update 10 tier 2 item 3).
 
   uv run python scripts/new_city.py --name Heraklion --country Greece --lat 35.3387 --lon 25.1442
+  ... --site https://your.site    the site the poster's QR opens; ours when not given
 
 Given a name and coordinates it writes four things and makes no claim about any of them:
 
-- content/regions/<slug>.yaml, a region pack stub: no plants, no creeks, every field that a local
-  checker has to fill marked as such.
+- content/regions/<slug>.yaml, a region pack stub: no plants, no creeks, bbox null, every field
+  that a local checker has to fill marked as such.
 - fhir/fsh/city-<slug>.fsh, the nested Locations in FSH under their LocationOah profile: the city,
   one creek, one reach, one spot, each partOf the one above, in a Bundle that scripts/fhir_build.sh
   builds inside their guide and the HL7 validator checks in make check.
@@ -52,6 +53,9 @@ name: "{name}, {country}"
 approved: false
 invasive_plants: []
 source: "to be filled by a local checker, from the regional invasive species inventory"
+# [south, west, north, east] in degrees from public maps; the plant list is
+# offered only to a pin inside this box.
+bbox: null
 
 # Creeks and their reaches. Each creek has a readable slug, so the analyst's link reads
 # /city?creek=<slug>. `flows_into` names the reach below; the downstream note appears only where it
@@ -66,11 +70,11 @@ source: "to be filled by a local checker, from the regional invasive species inv
 #       - slug: upper
 #         name: Upper reach
 #         flows_into: lower
-#         bbox: [{0}, {1}, {2}, {3}]
+#         bbox: [south, west, north, east]
 #       - slug: lower
 #         name: Lower reach
 #         flows_into: null
-#         bbox: [{0}, {1}, {2}, {3}]
+#         bbox: [south, west, north, east]
 creeks: []
 """
 
@@ -215,7 +219,7 @@ def poster_html(name: str, hook: str, scan: str, url: str, svg: str | None) -> s
 """
 
 
-def checklist(slug: str, name: str, country: str, lat: float, lon: float) -> str:
+def checklist(slug: str, name: str, country: str, lat: float, lon: float, site: str) -> str:
     today = datetime.now(UTC).date().isoformat()
     return f"""# {name}, {country}: a follower city checklist
 
@@ -251,6 +255,9 @@ Each step below names the files and commands in this repository that do it.
       `scripts/merge_labels.py` prints Cohen's kappa and refuses to freeze while they disagree.
 - [ ] Fill `invasive_plants:` in `content/regions/{slug}.yaml` from the regional inventory,
       with the source named.
+- [ ] Set `bbox:` at the top of that file, [south, west, north, east] in degrees from public
+      maps. The plant list is offered only to a pin inside this box; while it is null, no pin
+      in {name} is offered the list.
 - [ ] `scripts/freeze_key.py`, then the lesson checked on strangers before launch.
 
 ## 4. Collect and validate
@@ -259,6 +266,8 @@ Each step below names the files and commands in this repository that do it.
       the observer's score: `core/fhir_emit.py`, nothing to change.
 - [ ] `make check` validates every emitted record in CI before it is stored or mirrored.
 - [ ] Print `docs/cities/{slug}/poster.html` on Letter or A4 once two local photos are in.
+      Its QR opens {site}. Pass `SITE=` to `make new-city` to point it at
+      your own site. The poster's words are English.
 
 ## 5. Publish and repeat
 
@@ -333,7 +342,7 @@ def scaffold(
         ("pack", region_pack(slug, name, country)),
         ("fsh", locations_fsh(slug, name, country, lat, lon)),
         ("poster", poster_html(name, hook, scan, url, qr_svg(url))),
-        ("checklist", checklist(slug, name, country, lat, lon)),
+        ("checklist", checklist(slug, name, country, lat, lon, site.rstrip("/"))),
     ):
         path = targets[key]
         path.parent.mkdir(parents=True, exist_ok=True)

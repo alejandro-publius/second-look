@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -10,6 +12,8 @@ import yaml
 
 from core.regions import creeks_from_regions
 from scripts import new_city
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture
@@ -127,3 +131,52 @@ def test_bad_coordinates_and_an_empty_name_are_refused(root: Path) -> None:
     with pytest.raises(ValueError, match="within 90"):
         new_city.scaffold(root=root, name="Nowhere", country="", lat=95.0, lon=0.0)
     assert new_city.main(["--name", "...", "--lat", "1", "--lon", "1", "--root", str(root)]) == 2
+
+
+def test_the_pack_has_a_top_level_bbox_that_is_null_until_a_checker_sets_it(
+    root: Path, monkeypatch
+) -> None:
+    """apps/web/lib/content.ts regionAt reads the pack's top level bbox to decide which plant
+    list a pin is offered. The stub must carry the key, as null, and no made up box."""
+    monkeypatch.setattr(new_city, "qr_svg", lambda url: None)
+    new_city.scaffold(root=root, name="Heraklion", country="Greece", lat=35.3387, lon=25.1442)
+    path = root / "content" / "regions" / "heraklion.yaml"
+    pack = yaml.safe_load(path.read_text())
+    assert "bbox" in pack and pack["bbox"] is None
+    text = path.read_text()
+    assert "[south, west, north, east]" in text and "[0, 1, 2, 3]" not in text, "no fake box"
+    assert "offered only to a pin inside this box" in text
+
+
+def test_the_checklist_names_the_poster_site_and_the_bbox_to_set(root: Path, monkeypatch) -> None:
+    monkeypatch.setattr(new_city, "qr_svg", lambda url: None)
+    new_city.scaffold(
+        root=root,
+        name="Heraklion",
+        country="Greece",
+        lat=35.3387,
+        lon=25.1442,
+        site="https://x.test/",
+    )
+    text = (root / "docs" / "cities" / "heraklion" / "CHECKLIST.md").read_text()
+    assert "QR opens https://x.test." in text and "Pass `SITE=` to `make new-city`" in text
+    assert "poster's words are English" in text
+    assert "Set `bbox:`" in text and "[south, west, north, east]" in text
+
+
+def test_make_new_city_passes_site_only_when_it_is_given() -> None:
+    """The Makefile target hands SITE= to the script as --site, and adds nothing without it."""
+    env = {k: v for k, v in os.environ.items() if k != "SITE"}
+    base = ["make", "-n", "new-city", "NAME=Testville", "COUNTRY=Nowhere", "LAT=1", "LON=2"]
+    without = subprocess.run(base, cwd=ROOT, env=env, capture_output=True, text=True, check=True)
+    assert 'scripts/new_city.py --name "Testville"' in without.stdout
+    assert "--site" not in without.stdout
+    with_site = subprocess.run(
+        [*base, "SITE=https://x.test"],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert '--site "https://x.test"' in with_site.stdout

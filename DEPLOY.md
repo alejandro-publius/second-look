@@ -3,7 +3,7 @@
 How to run it on your own machine, how to put it on Cloudflare, what the database holds, which
 secrets exist (names only), which jobs run on the Mac, and every setting the code reads. The
 record of why the hosting looks like this is `docs/notes/hosting.md`; the decisions are in
-`docs/adr/`.
+`docs/adr/`. A follower city's path on one page is `docs/ADOPT.md`.
 
 ## What you need
 
@@ -151,9 +151,9 @@ Both servers treat a secret shorter than 16 characters as not set (`apps/api/set
 
 ## Jobs on the Mac
 
-These eight launchd jobs run from one checkout as Alex. The ones that reach D1 or the sandbox use
+These nine launchd jobs run from one checkout as Alex. The ones that reach D1 or the sandbox use
 his wrangler login, and the ones that write to the status issue his gh login, so no job needs a
-secret of its own. `make mac-jobs-install` installs all eight from `scripts/mac_jobs.py`, which
+secret of its own. `make mac-jobs-install` installs all nine from `scripts/mac_jobs.py`, which
 holds the table they are built from.
 
 | Label | When | What | Install |
@@ -167,6 +167,19 @@ holds the table they are built from.
 | `com.secondlook.uptime` | every 10 minutes | `scripts/uptime.py`: GETs `/`, `/judges`, `/city`, one walk, `/health` and the counts on the live site; two failures in a row write `~/second-look-backups/uptime.log`, one status issue comment and a notification | `make mac-jobs-install` |
 | `com.secondlook.lock` | once, at 18:10 on Sep 27 in California (2026-09-28T01:10:00Z) | `scripts/lock_analysis.py`: the data lock, `make lock-analysis` | `make lock-analysis-install` |
 | `com.secondlook.lock2` | once, at 21:10 on Oct 2 in California (2026-10-03T04:10:00Z) | `scripts/lock_analysis.py --wave 2`: the second data lock, for the second wave of the study, `make lock-analysis-2` | `make lock-analysis-2-install` |
+
+Which of the nine a follower city would run at all:
+
+- Six are this study's own and stop with it: `lock`, `lock2`, `hl7`, `uptime`, `anchor`, and
+  `theirs`, which feeds the `/two` demo.
+- Three a city would run. `backup`: D1 keeps its own point in time copy by itself, 7 days on the
+  free plan (Cloudflare calls it Time Travel); the daily export is a second copy outside
+  Cloudflare. `inaturalist`: one query to iNaturalist per creek spot that has a position, every
+  listed plant in that one query, more pages only past 200 sightings, at one request a second,
+  which a second Worker cron could make.
+  `repush`: the follower city's step 5, publish to the sandbox and repeat.
+- The Worker has one cron today, `17 4 * * *` in `worker/wrangler.jsonc`, and `scheduled` in
+  `worker/src/index.ts` runs only the two purges on it. A job moved into the Worker is new code.
 
 Each one-job installer takes `--remove`. Logs go to `~/second-look-backups/`.
 `make rollback` puts the last good deploy back (`docs/notes/hosting.md`).
