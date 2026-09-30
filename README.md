@@ -533,7 +533,7 @@ OneAquaHealth calls a city that adopts the method a follower city. Berkeley has 
 4. Collect and validate every visit against their profiles: the check is live and CI validates the records the code makes, and no real visit exists yet.
 5. Publish to the sandbox with a Library entry, and repeat with the three-question return check: publishing ran with the hand-made example visit, and the return check opens from a creek record (`/quick?spot=<id>`).
 
-`make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>` scaffolds the first three steps for a new city. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card. One part does not scale yet: the daily jobs, the backups, the uptime check and the one run of the analysis after each lock run on one team member's laptop (Known weaknesses); a city would move them to the Worker's own scheduled jobs, which already delete old walk records and old upload rows each day.
+`make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon> SITE=<site>` scaffolds the first three steps for a new city and points its poster at the city's own site; [`docs/ADOPT.md`](docs/ADOPT.md) is the one page a follower city follows from `uv sync` to its own deploy. Cost through Oct 15: nothing. Cloudflare Pages and a Worker with D1 and KV, on the free plan, with no card. One part does not scale yet: the daily jobs, the backups, the uptime check and the one run of the analysis after each lock run on one team member's laptop (Known weaknesses); a city would move them to the Worker's own scheduled jobs, which already delete old walk records and old upload rows each day.
 
 ### One Digital Health and FAIR
 
