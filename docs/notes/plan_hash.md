@@ -48,3 +48,32 @@ make audit-verify
 
 `evals/assist_analysis.py` refuses to run if the tag is missing, if the working copy of the plan
 differs from the tagged one, or if the tag does not point at the commit above.
+
+## The second wave: `prereg-v3`
+
+`docs/analysis_plan_v3.md` is binding from its tag, `prereg-v3`, which is made before any sitting
+of the second wave. The wave opens at 2026-09-30T04:00:00Z. The plan changes nothing in the first
+two plans, and the first wave's result stays as reported. Anything that changes after the tag is
+written in `docs/deviations.md` with its date. It was tagged on 2026-09-30 at 00:33 UTC, which is
+Tuesday Sep 29 at 17:33 PDT, three and a half hours before the wave opened.
+
+| Thing | Value |
+|---|---|
+| Tag | `prereg-v3` |
+| Commit | `f49b8aa47c3fa34ec271919311787e0c7ce067c3` |
+| SHA-256 of `docs/analysis_plan_v3.md` | `6df27a02465c7791c479d9e2264b3a7cbf087433bae8a62c417b56b423fcbcf8` |
+| Audit entry | kind `plan_tagged`, line 7, written 2026-09-30T00:33:43Z, hash `cd0a0a68d56b423120086d9a95b865b13c0aaa499aa23dd02bbd5ca0be1aca63` |
+| OpenTimestamps | `proofs/prereg-v3.tag.ots` and `proofs/analysis_plan_v3.md.ots` |
+
+```
+shasum -a 256 docs/analysis_plan_v3.md
+git show prereg-v3:docs/analysis_plan_v3.md | shasum -a 256
+make audit-verify
+```
+
+`evals/wave2_analysis.py` refuses to run on real data before the second lock,
+2026-10-03T04:00:00Z. After it, it refuses if the tag is missing, if the working copy of the plan
+differs from the tagged one, if the tag does not point at the commit above, or if one of the two
+earlier plans or the two analysis scripts differs from its copy at the tag. It runs the code of
+`evals/usability_analysis.py` and `evals/assist_analysis.py` as it is, on the sittings that
+started inside the window.

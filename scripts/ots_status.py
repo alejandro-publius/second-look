@@ -53,12 +53,15 @@ USER_AGENT = "second-look ots_status (github.com/alejandro-publius/second-look)"
 TARGETS = {
     "analysis_plan.md.ots": "docs/analysis_plan.md",
     "analysis_plan_v2.md.ots": "docs/analysis_plan_v2.md",
+    "analysis_plan_v3.md.ots": "docs/analysis_plan_v3.md",
 }
 WHAT = {
     "prereg-v1.tag.ots": "prereg_tag",
     "analysis_plan.md.ots": "analysis_plan",
     "prereg-v2.tag.ots": "prereg_tag_v2",
     "analysis_plan_v2.md.ots": "analysis_plan_v2",
+    "prereg-v3.tag.ots": "prereg_tag_v3",
+    "analysis_plan_v3.md.ots": "analysis_plan_v3",
 }
 
 # Returns the 80 byte header of the block at a height, and the id the explorer gave it.

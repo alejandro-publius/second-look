@@ -122,39 +122,94 @@ def test_the_pick_list_creeks_come_from_every_region_in_the_build(tmp_path: Path
     assert call(f"m.pickListCreeks({json.dumps(str(tmp_path / 'none.json'))})") == []
 
 
-def test_judge_mode_is_expected_shut_before_the_lock_and_open_from_it_on() -> None:
+def test_judge_mode_is_expected_shut_before_the_second_lock_and_open_from_it_on() -> None:
     """The lock job runs this check after the lock, when /demo is open. The check once waited for
-    the shut page at any hour, so the job failed its own phone check on 2026-09-28."""
-    from core.lock import DATA_LOCK_UTC
+    the shut page at any hour, so the job failed its own phone check on 2026-09-28. Since
+    UPDATE_33 judge mode opens at the second lock, and the check goes by that."""
+    from core.lock import JUDGE_MODE_OPENS_UTC
 
     words = json.loads((ROOT / "content" / "locales" / "en.json").read_text(encoding="utf-8"))
-    lock = DATA_LOCK_UTC.strftime("%Y-%m-%dT%H:%M:%SZ")
-    before = call("m.judgeModeExpected(new Date('2026-09-28T00:59:59Z'))")
-    assert before == {
+    opens = JUDGE_MODE_OPENS_UTC.strftime("%Y-%m-%dT%H:%M:%SZ")
+    assert opens == "2026-10-03T04:00:00Z"
+    shut = {
         "open": False,
         "name": "judge mode says when it opens",
         "heading": words["demo.shut_title"],
+        "part2Heading": words["demo.shut_title"],
     }
-    for moment in (lock, "2026-09-28T01:17:42Z", "2026-10-15T00:00:00Z"):
+    # Shut before the first lock, at it, between the two locks, and one second before the second.
+    for moment in (
+        "2026-09-28T00:59:59Z",
+        "2026-09-28T01:00:00Z",
+        "2026-09-29T21:00:00Z",
+        "2026-09-30T04:00:00Z",
+        "2026-10-03T03:59:59Z",
+    ):
+        assert call(f"m.judgeModeExpected(new Date({json.dumps(moment)}))") == shut, moment
+    for moment in (opens, "2026-10-03T04:10:00Z", "2026-10-15T00:00:00Z"):
         after = call(f"m.judgeModeExpected(new Date({json.dumps(moment)}))")
-        assert after["open"] is True, moment
-        assert after["heading"] == words["demo.title"], moment
-    # The two headings must differ by more than a prefix match would see.
-    assert words["demo.title"] != words["demo.shut_title"]
+        assert after == {
+            "open": True,
+            "name": "judge mode is open, as it is from the second lock on",
+            "heading": words["demo.title"],
+            "part2Heading": words["part2.demo_title"],
+        }, moment
+    # The headings must differ by more than a prefix match would see.
+    assert len({words["demo.title"], words["demo.shut_title"], words["part2.demo_title"]}) == 3
 
 
-def test_judge_mode_reads_the_lock_the_page_is_built_from(tmp_path: Path) -> None:
-    from core.lock import DATA_LOCK_UTC
+def test_the_shut_page_names_the_instant_judge_mode_opens() -> None:
+    # The heading and both bodies say when, in both time zones, from the instant in core/lock.py.
+    from zoneinfo import ZoneInfo
+
+    from core.lock import JUDGE_MODE_OPENS_UTC
+
+    words = json.loads((ROOT / "content" / "locales" / "en.json").read_text(encoding="utf-8"))
+    utc = JUDGE_MODE_OPENS_UTC
+    local = utc.astimezone(ZoneInfo("America/Los_Angeles"))
+    day = f"{utc:%b} {utc.day}"
+    when = (
+        f"{day} at {utc:%H:%M} UTC, which is "
+        f"{local:%A %b} {local.day} at {local:%H:%M} {local.tzname()}"
+    )
+    assert when == "Oct 3 at 04:00 UTC, which is Friday Oct 2 at 21:00 PDT"
+    assert words["demo.shut_title"] == f"Judge mode opens on {day}"
+    for key in ("demo.shut_body", "part2.demo_shut_body"):
+        assert when in words[key], key
+        assert "second wave of the study" in words[key], key
+        assert "Sep 2" not in words[key], key
+
+
+def test_judge_mode_reads_the_instant_the_page_is_built_from(tmp_path: Path) -> None:
+    from core.lock import DATA_LOCK_UTC, JUDGE_MODE_OPENS_UTC
 
     page_lock = (ROOT / "apps" / "web" / "lib" / "lock.ts").read_text(encoding="utf-8")
     assert DATA_LOCK_UTC.strftime("%Y-%m-%dT%H:%M:%SZ") in page_lock
-    # A lock file with no instant in it is an error, never a silent "open".
-    empty = tmp_path / "lock.ts"
-    empty.write_text("export const NOTHING = 1;\n", encoding="utf-8")
-    body = (
-        f"const m = await import({json.dumps(SCRIPT.as_uri())});\n"
-        f"m.judgeModeExpected(new Date(), {json.dumps(str(empty))});"
+    assert JUDGE_MODE_OPENS_UTC.strftime("%Y-%m-%dT%H:%M:%SZ") in page_lock
+    # It goes by the file it is handed, not by a time of its own: a page built to open at
+    # another time is expected open from that time.
+    other = tmp_path / "other.ts"
+    other.write_text(
+        'export const SECOND_LOCK_UTC = "2026-11-01T00:00:00Z";\n'
+        "export const JUDGE_MODE_OPENS_UTC = SECOND_LOCK_UTC;\n",
+        encoding="utf-8",
     )
-    done = node("--input-type=module", "-e", body)
-    assert done.returncode != 0
-    assert "no DATA_LOCK_UTC" in done.stderr
+    path = json.dumps(str(other))
+    assert call(f"m.judgeModeExpected(new Date('2026-10-31T23:59:59Z'), {path})")["open"] is False
+    assert call(f"m.judgeModeExpected(new Date('2026-11-01T00:00:00Z'), {path})")["open"] is True
+    # A lock file without that instant is an error, never a silent "open": not an empty file, and
+    # not one that holds the first lock only, which is what judge mode once went by.
+    for name, text in (
+        ("empty.ts", "export const NOTHING = 1;\n"),
+        ("first_only.ts", 'export const DATA_LOCK_UTC = "2026-09-28T01:00:00Z";\n'),
+        ("not_a_time.ts", 'export const JUDGE_MODE_OPENS_UTC = "soon";\n'),
+    ):
+        bad = tmp_path / name
+        bad.write_text(text, encoding="utf-8")
+        body = (
+            f"const m = await import({json.dumps(SCRIPT.as_uri())});\n"
+            f"m.judgeModeExpected(new Date(), {json.dumps(str(bad))});"
+        )
+        done = node("--input-type=module", "-e", body)
+        assert done.returncode != 0, name
+        assert "no JUDGE_MODE_OPENS_UTC" in done.stderr, name

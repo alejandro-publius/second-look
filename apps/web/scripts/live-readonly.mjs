@@ -4,7 +4,7 @@
 // end tests pass against production. A whole sitting needs the Worker's QA key, which only Alex
 // holds (docs/ALEX_TODO.md); without it the sitting would be stored as real. So this check walks
 // every screen a phone reaches without starting a study session: the landing page and the guess,
-// the consent screen, judge mode, the judges' door, a whole video walk with its record made on the
+// the consent screen, both judge modes, the judges' door, a whole video walk with its record made on the
 // phone and its demo creek, and the pages that read the API. It fails if any request writes to
 // the study routes, if the public counts move, or if the counts cannot be read before and after.
 //
@@ -14,26 +14,29 @@
 // Run: SITE_URL=https://second-look-79t.pages.dev API_URL=... node scripts/live-readonly.mjs
 import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { webLockConstants } from "./lock-mirror.mjs";
 
 const CONTENT = fileURLToPath(new URL("../generated/content.json", import.meta.url));
 const LOCK_TS = fileURLToPath(new URL("../lib/lock.ts", import.meta.url));
 const WORDS = fileURLToPath(new URL("../../../content/locales/en.json", import.meta.url));
 
 /**
- * What /demo must show at a given moment. Judge mode is shut until the data lock and open from it
- * on, and the page decides by the browser's own clock (apps/web/lib/lock.ts). This check once
- * waited for the shut page at any hour, so the lock job, which runs after the lock, could never
- * pass its own phone check (2026-09-28). The lock's instant and the two headings are read from
- * the files the page is built from, so they cannot drift.
+ * What /demo and /t2/demo must show at a given moment. Judge mode is shut until the second lock
+ * and open from it on (UPDATE_33: a second wave of the study runs until then), and the pages
+ * decide by the browser's own clock (apps/web/lib/lock.ts). This check once waited for the shut
+ * page at any hour, so the lock job, which runs after the lock, could never pass its own phone
+ * check (2026-09-28). The instant judge mode opens and the headings are read from the files the
+ * pages are built from, so they cannot drift. Both pages share the shut heading; each has its
+ * own open one.
  */
 export function judgeModeExpected(now = new Date(), lockPath = LOCK_TS, wordsPath = WORDS) {
-  const found = /DATA_LOCK_UTC\s*=\s*"([^"]+)"/.exec(readFileSync(lockPath, "utf8"));
-  if (!found || Number.isNaN(Date.parse(found[1]))) throw new Error(`no DATA_LOCK_UTC in ${lockPath}`);
+  const opens = webLockConstants(readFileSync(lockPath, "utf8")).JUDGE_MODE_OPENS_UTC;
+  if (opens === undefined || Number.isNaN(Date.parse(opens))) throw new Error(`no JUDGE_MODE_OPENS_UTC in ${lockPath}`);
   const words = JSON.parse(readFileSync(wordsPath, "utf8"));
-  const open = now.getTime() >= Date.parse(found[1]);
+  const open = now.getTime() >= Date.parse(opens);
   return open
-    ? { open, name: "judge mode is open, as it is from the data lock on", heading: String(words["demo.title"]) }
-    : { open, name: "judge mode says when it opens", heading: String(words["demo.shut_title"]) };
+    ? { open, name: "judge mode is open, as it is from the second lock on", heading: String(words["demo.title"]), part2Heading: String(words["part2.demo_title"]) }
+    : { open, name: "judge mode says when it opens", heading: String(words["demo.shut_title"]), part2Heading: String(words["demo.shut_title"]) };
 }
 
 /**
@@ -151,6 +154,10 @@ async function main() {
   await step(judgeMode.name, async () => {
     await page.goto(`${site}/demo`);
     await page.getByRole("heading", { level: 1, name: judgeMode.heading, exact: true }).waitFor({ timeout: 15000 });
+  });
+  await step(`part 2: ${judgeMode.name}`, async () => {
+    await page.goto(`${site}/t2/demo`);
+    await page.getByRole("heading", { level: 1, name: judgeMode.part2Heading, exact: true }).waitFor({ timeout: 15000 });
   });
   await step("the judges' door", async () => {
     await page.goto(`${site}/judges`);
