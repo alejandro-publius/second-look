@@ -52,7 +52,10 @@ models are only measured: on the 16 test photos and on frames from open creek fo
 Part 2 of the test, `/t2`, is the assisted second look: after the score, a person may
 answer <!--v:results/data_card.json#/photos/part2/rows-->8<!--/v--> more photos, one question each.
 Its plan is `docs/analysis_plan_v2.md`, tagged `prereg-v2` before any part 2 session. It is the
-one place where a person meets a question that came from a model.
+one place where a person meets a question that came from a model. Judge mode for part 2,
+`/t2/demo`, shows the same photos with feedback after every answer, so it is shut while the
+second wave of the study runs (`docs/analysis_plan_v3.md`). It opens at the second lock, Oct 3
+at 04:00 UTC, which is Fri Oct 2 at 21:00 PDT.
 
 - **No model is called while a person answers.** The four models answered the part 2 photos
   once, in <!--v:results/assist_answers_20260925T230654Z.json#/runs-->3<!--/v--> runs each, and the answers

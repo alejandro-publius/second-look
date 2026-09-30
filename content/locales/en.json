@@ -299,7 +299,7 @@
   "about.p1": "Professional stream surveyors pass a test before their data counts. Some volunteer programs certify people for a method, such as water chemistry. None we know of measures how well each volunteer sees each feature, or keeps that score with every observation. Second Look gives volunteers a short lesson and a sixteen-photo test on four kinds of creek damage, and saves the score with every observation they make.",
   "about.p2": "The test is a usability study with a pre-registered analysis plan. Half the people see the lesson first and half see it after. We publish the result either way.",
   "about.p3": "Built for the OneAquaHealth hackathon, track 3, AI-Supported Assessment. It is set up for Berkeley the way a follower city would set it up, though the city has not adopted it and no volunteer has used it yet. Strawberry Creek is the creek we worked through.",
-  "about.licence": "Code is MIT. Our own photos and copy are CC BY 4.0.",
+  "about.licence": "Code is MIT. Our own photos and copy are CC BY 4.0. The creek check's questions and answers are the OneAquaHealth app's own words. They stay theirs and are under neither licence; see the credits page.",
   "a11y.title": "Accessibility",
   "a11y.intro": "We aim for WCAG 2.2 at level AA on every screen, on a phone and on a computer, in light and dark mode.",
   "a11y.checked_title": "How we check it",
