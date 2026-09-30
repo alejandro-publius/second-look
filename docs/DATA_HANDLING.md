@@ -6,6 +6,13 @@ CLAUDE.md are the source; docs/CONTRACTS.md has the table columns.
 
 ## What our code stores
 
+The study has two windows. The first ran until the first data lock, 2026-09-28T01:00:00Z, under
+`docs/analysis_plan.md` (tag `prereg-v1`) and `docs/analysis_plan_v2.md` (tag `prereg-v2`). The
+second wave runs from 2026-09-30T04:00:00Z to the second lock, 2026-10-03T04:00:00Z, under
+`docs/analysis_plan_v3.md` (tag `prereg-v3`). Both windows write the same tables and the same
+fields, listed below; the second wave stores nothing the first did not (plan v3 item 9). Which
+window a sitting belongs to is read from its start time, not from a field of its own.
+
 Usability test (the two-minute test at `/t`):
 
 - `session`: a random session id, the arm (trained or untrained), the block id, the item order,
@@ -13,7 +20,8 @@ Usability test (the two-minute test at `/t`):
   test started and finished, seconds spent on each lesson screen, a hash of a random browser
   token, a coarse device class (phone, tablet or desktop), a QA flag, the coarse source label
   from the link (poster, chat, friends, creek_group, panel or other), whether the hidden form field was
-  filled, whether the session started after data lock, the optional yes or no to "Have you ever
+  filled, whether the session started after the first data lock (`post_lock`, read against
+  2026-09-28T01:00:00Z, so every second wave sitting carries it), the optional yes or no to "Have you ever
   assessed a stream before?", the warm-up choice, and how many answers the phone had given that
   the server did not hold when the test ended (`unsent_count`).
 - `response`: session id, item id, the answer (yes, no or can't tell), the reaction time in
@@ -33,7 +41,8 @@ Worker only, the Python API has no part 2):
   holds a random id of its own, the id of the part 1 session it follows, that session's arm, the
   part 2 arm (assisted or unassisted), the block id, the order of the eight photos, when the
   offer was answered, whether it was declined, when part 2 started and finished, a second copy
-  of the same hash of the random browser token, a QA flag, and whether it began after data lock.
+  of the same hash of the random browser token, a QA flag, and whether it began after the first
+  data lock (the same `post_lock` mark, which every second wave sitting carries).
   A row for "No thanks" has no arm, no block and no photo order.
 - `part2_response`: for each of the eight photos, the part 2 id, the item id, the position, the
   first answer, the final answer, whether the checker's question was shown, the choice made
@@ -201,6 +210,11 @@ if we change hosts, change both this file and the consent text.
   anonymous response table (the export CSVs) is published with the results and the raw tables
   are dropped. Dry-run rows are wiped at launch by `scripts/wipe_for_launch.py`, which writes
   the wipe into docs/deviations.md and the audit log.
+- The second wave's sittings sit in the same four tables as the first wave's, and are kept and
+  published the same way: `docs/analysis_plan_v3.md` item 8 publishes the anonymous response
+  tables as they stand at the second lock, with the results, whatever they show. The first
+  wave's rows are not wiped when the second wave opens; the second wave's analysis leaves them
+  out by their start time (plan v3 item 4), and the two waves are never pooled.
 - `observer` rows: a score expires after 90 days and the person retakes the test. Expired rows
   are shown as expired, not used.
 - Creek records (`spot`, `visit`, `check_result`): kept; they are the point of the product.
@@ -257,14 +271,18 @@ Sep 30. So the dump is kept out of Actions artifacts there: the workflow's job r
 repository is private, and on a public one it is skipped. An artifact made before the flip would
 turn public with it, so none should be made; on Sep 25 there were none.
 
-Nobody computes outcomes from a backup before the lock. The only code that computes outcomes is
-`evals/usability_analysis.py`, which refuses to run before data lock (2026-09-28T01:00:00Z)
-and refuses to run without the `prereg-v1` tag. At the lock, `make lock-analysis` takes one more
-backup on this Mac and exports the two study tables from it (`scripts/study_export.py`, the same
-files the export route gives), so the one pre-registered run reads exactly the snapshot that is
-kept. That export stays outside the repo: in `data/export`, which git ignores, and in a copy next
-to the backup in `~/second-look-backups/`. A restore drill was run once before launch;
-docs/internal/BUILD_LOG.md records it.
+Nobody computes outcomes from a backup before a lock. The only code that computes outcomes is
+`evals/usability_analysis.py` and `evals/assist_analysis.py`, which refuse to run before the
+first data lock (2026-09-28T01:00:00Z) and refuse to run without the `prereg-v1` and `prereg-v2`
+tags, and `evals/wave2_analysis.py`, which calls those two on the second wave's window and
+refuses to run before the second lock (2026-10-03T04:00:00Z) or without the `prereg-v3` tag. At
+each lock the lock job (`make lock-analysis` at the first, `make lock-analysis-2` at the second,
+both `scripts/lock_analysis.py`) takes one more backup on this Mac and exports the study tables
+from it (`scripts/study_export.py`, the same files the export route gives), so the one
+pre-registered run of each wave reads exactly the snapshot that is kept. That export stays
+outside the repo: in `data/export`, which git ignores, and in a copy next to the backup in
+`~/second-look-backups/`. A restore drill was run once before launch; docs/internal/BUILD_LOG.md
+records it.
 
 ## The audit log
 

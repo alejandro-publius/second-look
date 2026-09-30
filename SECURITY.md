@@ -86,21 +86,36 @@ treats the placeholder in `.env.example` as not set; the Worker does not check f
 - **The model key** is read by the eval scripts alone. It is never exported in the shell that runs
   a coding agent, and `make judge-check` and `make demo-offline` remove it before they start.
 
-## The lock
+## The locks
 
-The data lock is 2026-09-28T01:00:00Z, one constant in `core/lock.py` and in `worker/src/index.ts`.
+The study has two windows and two data locks, each one constant in `core/lock.py` and in
+`worker/src/index.ts`. The first lock is 2026-09-28T01:00:00Z (`DATA_LOCK_UTC`); nobody had taken
+the test by then. The second wave runs from 2026-09-30T04:00:00Z to the second lock,
+2026-10-03T04:00:00Z (`SECOND_LOCK_UTC`), under `docs/analysis_plan_v3.md`. The second wave stores
+nothing the first did not.
 
-- **Judge mode's answer route is shut until then.** Before the lock, `POST /api/demo/answer`
-  answers 403 on both servers, because sixteen answers would be the live test's key. After it,
-  the route says only whether an answer was right, never the gold label, and stores nothing
-  (`apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`, and the Worker e2e
-  section "judge mode shut before the lock").
+- **Judge mode's answer routes are shut until the second lock.** `POST /api/demo/answer` answers
+  403 on both servers, and `POST /api/t2/demo` on the Worker, which alone has part 2, because the
+  answers to the study's photos would be the live test's key. They were open from the first lock
+  until they were shut again on Sep 29, before the second wave opened. They open at the second
+  lock, Oct 3 at 04:00 UTC, which is Fri Oct 2 at 21:00 PDT (`JUDGE_MODE_OPENS_UTC`). Open, the
+  routes say only whether an answer was right, never the gold label, and store nothing
+  (`apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`,
+  `::test_demo_answer_is_shut_between_the_two_locks_where_it_was_once_open`,
+  `::test_demo_answer_opens_at_the_second_lock`, and the Worker e2e sections "judge mode shut one
+  second before the second lock", "judge mode shut at the first lock, where it once opened" and
+  "judge mode open at the second lock").
 - **The answer key never ships to a browser.** After every build, `apps/web/scripts/check-bundle.mjs`
   reads every file the site serves and fails the build if one carries a gold label.
-- **The analysis refuses real data before the lock,** and also without the git tag `prereg-v1` on
-  its pinned commit, or when `docs/analysis_plan.md` differs from the tagged, hashed plan. No option
-  or variable stands in for the clock or the repository
-  (`evals/tests/test_usability_refusal.py::test_no_option_or_variable_fakes_the_clock_or_the_repo`).
+- **The analysis refuses real data before its lock.** The first wave's two scripts refuse to run
+  before the first lock, and also without the git tags `prereg-v1` and `prereg-v2` on their
+  pinned commits, or when a tagged plan differs from the tagged, hashed copy. The second wave's
+  `evals/wave2_analysis.py` calls those two scripts as they are and refuses to run before the
+  second lock, without the tag `prereg-v3`, or when a plan or a script differs from its copy at
+  that tag. No option or variable stands in for the clock or the repository
+  (`evals/tests/test_usability_refusal.py::test_no_option_or_variable_fakes_the_clock_or_the_repo`,
+  `evals/tests/test_wave2_analysis.py::test_refuses_before_the_second_lock_even_with_everything_pinned`,
+  `evals/tests/test_wave2_analysis.py::test_no_option_fakes_the_clock_or_the_repository`).
 
 ## Rate limits
 

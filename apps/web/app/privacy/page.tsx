@@ -17,6 +17,7 @@ export default function PrivacyPage() {
         <li>{t("privacy.stored_walk")}</li>
         <li>{t("privacy.stored_phone")}</li>
       </ul>
+      <p>{t("privacy.windows")}</p>
       <h2>{t("privacy.not_stored_title")}</h2>
       <ul>
         <li>{t("privacy.not_stored_1")}</li>
