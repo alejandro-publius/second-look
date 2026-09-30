@@ -21,7 +21,9 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results" / "data_card.json"
-ROLES = ("test", "lesson", "practice", "warmup", "benchmark")
+# Every role a photo row can have gets its own group, so the groups add up to the total. part2 is
+# the eight photos of the assisted second look (content/part2_items.yaml).
+ROLES = ("test", "part2", "lesson", "practice", "warmup", "benchmark")
 HOSTS = {
     "commons.wikimedia.org": "Wikimedia Commons",
     "www.inaturalist.org": "iNaturalist",

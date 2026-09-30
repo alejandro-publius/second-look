@@ -4,7 +4,8 @@ Run: uv run python scripts/third_party.py
 Python licenses come from the installed package metadata (importlib.metadata); npm licenses from
 the lockfile or each installed package's package.json. The npm lockfiles are apps/web's, the
 Worker's and tools/diagrams', the pinned Mermaid renderer. Where neither says, the table says so.
-The external services section is written here too, so the file is always whole.
+The external services section is written here too, so the file is always whole. So is the entry
+for the words we quote from the official app: its facts are read from content/app_strings.json.
 """
 
 from __future__ import annotations
@@ -23,6 +24,16 @@ ROOT = Path(__file__).resolve().parents[1]
 NOT_STATED = "not stated in package metadata"
 LICENSE_FILES = ("LICENSE", "LICENSE.md", "LICENSE.txt", "license", "license.md", "LICENCE")
 MIT_HEADING = re.compile(r"(The )?MIT License( \(MIT\))?")
+# The languages the official app has, by the code content/app_strings.json lists them under.
+LANGUAGE_NAMES = {
+    "el": "Greek",
+    "en": "English",
+    "fr": "French",
+    "it": "Italian",
+    "nl": "Dutch",
+    "no": "Norwegian",
+    "pt": "Portuguese",
+}
 
 SERVICES = """## External services
 
@@ -115,6 +126,50 @@ TIMESTAMPS = """## Timestamps
   the finished proof and reads block headers from the public Blockstream explorer
   (`blockstream.info/api`), read only, to check a confirmed proof without a Bitcoin node.
 """
+
+
+def listed(names: list[str]) -> str:
+    """Names as a sentence lists them: a, b and c."""
+    if len(names) < 2:
+        return "".join(names)
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
+def quoted_words(root: Path) -> str:
+    """The entry for the official app's wording, which is quoted and is not ours.
+
+    Every fact in it, the app, the address, the day, the hash and the languages, is read from
+    content/app_strings.json, the file scripts/app_strings.py writes, so none is typed here.
+    """
+    path = root / "content" / "app_strings.json"
+    if not path.is_file():
+        return ""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    source = doc["source"]
+    unknown = sorted(set(doc["languages"]) - set(LANGUAGE_NAMES))
+    if unknown:
+        raise ValueError(f"third-party: no name for the language {listed(unknown)}")
+    languages = [LANGUAGE_NAMES[code] for code in doc["languages"]]
+    fallbacks = sum(len(v) for v in doc.get("fallback", {}).values())
+    lines = [
+        "## Words we quote",
+        "",
+        f"- {source['app']} ({source['app_url'].rstrip('/')}): the creek check and the video "
+        "walks ask its questions and show its answers word for word, "
+        f"in {len(languages)} of its languages ({listed(languages)}). The words were read from "
+        f"the app's public translation file on {source['fetched']}; no login was needed and none "
+        f"was used. `content/app_strings.json` records that file's address and its SHA-256 "
+        f"(`{source['bundle_sha256']}`), and `make app-strings-check` fetches it again and fails "
+        "if a quoted string has changed. The file itself is not committed and no code from it "
+        "runs; `scripts/app_strings.py` reads it as data and keeps only the strings we quote. "
+        f"Where a translation's meaning differs from the English ({fallbacks} strings), the "
+        "English shows in its place, marked (docs/notes/app_translations.md). "
+        "**The words belong to the OneAquaHealth project. They are quoted with credit, on the "
+        "creek check's first screen and on `/credits`, and they are not under our MIT or "
+        "CC BY 4.0 licences.** What is quoted, and the small edits made to it, is in "
+        "docs/notes/app_strings.md.",
+    ]
+    return "\n".join(lines) + "\n"
 
 
 def python_license(name: str) -> str:
@@ -214,16 +269,19 @@ def build(root: Path) -> str:
     diagrams_lock = root / "tools" / "diagrams" / "package-lock.json"
     diagrams = npm_packages(diagrams_lock) if diagrams_lock.exists() else []
     today = datetime.now(UTC).strftime("%Y-%m-%d")
+    words = quoted_words(root)
     out = [
         "# Third party dependencies",
         "",
         f"Generated on {today} by `uv run python scripts/third_party.py` from `uv.lock`, "
         "`apps/web/package-lock.json`, `worker/package-lock.json` and "
         "`tools/diagrams/package-lock.json`. Do not edit by hand; rerun the script. Our own code "
-        "is MIT; our photos and copy are CC BY 4.0 (README).",
+        "is MIT; our photos and copy are CC BY 4.0 (README). Words we quote from someone else "
+        "stay theirs and are under neither licence; they are listed below.",
         "",
         SERVICES.rstrip(),
         "",
+        *([words.rstrip(), ""] if words else []),
         REFERENCES.rstrip(),
         "",
         DIAGRAMS.rstrip(),

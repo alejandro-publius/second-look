@@ -33,6 +33,48 @@ def test_the_committed_file_is_what_the_manifests_say() -> None:
     assert data_card.main(["--check"]) == 0
 
 
+def test_the_photo_sets_add_up_to_every_row() -> None:
+    """The card once listed sets that came to 84 beside a total of 92: part 2 had no group."""
+    photos = data_card.build()["photos"]
+    assert photos["other_roles"] == [], "a role with no group: add it to ROLES and to the card"
+    assert sum(photos[role]["rows"] for role in data_card.ROLES) == photos["rows"]
+
+
+def section(card: str, heading: str) -> str:
+    """The text under one second level heading of the card, up to the next one."""
+    _, found, rest = card.partition(f"\n## {heading}\n")
+    assert found, f"docs/DATA_CARD.md has no section named {heading}"
+    return rest.split("\n## ", 1)[0]
+
+
+def test_the_card_has_a_line_for_every_photo_set() -> None:
+    """Each table is read by itself: a set named in one can still be missing in the other."""
+    card = (data_card.ROOT / "docs" / "DATA_CARD.md").read_text(encoding="utf-8")
+    tables = {"rows": "The sets", "labelled": "What is labelled and what is not"}
+    for count, heading in tables.items():
+        lines = [x for x in section(card, heading).splitlines() if x.startswith("|")]
+        for role in data_card.ROLES:
+            pointer = f"<!--v:results/data_card.json#/photos/{role}/{count}-->"
+            assert any(pointer in x for x in lines), (
+                f"the table under {heading!r} has no line for the {role} photos"
+            )
+
+
+def test_part_2_photos_are_a_set_of_their_own(tmp_path: Path) -> None:
+    root = fixture(
+        tmp_path,
+        [
+            "a,test,pipe_running,present,,says a pipe,https://commons.wikimedia.org/wiki/F,CC0,false,false\n",
+            "p,part2,pipe_running,absent,,says none,https://www.inaturalist.org/o/3,CC0,false,false\n",
+        ],
+    )
+    photos = data_card.build(root)["photos"]
+    assert photos["other_roles"] == []
+    assert photos["part2"]["rows"] == 1
+    assert photos["part2"]["per_feature"] == {"pipe_running": {"absent": 1}}
+    assert photos["test"]["rows"] == 1
+
+
 def test_labels_are_counted_per_role_and_feature_and_blank_is_unlabelled(tmp_path: Path) -> None:
     root = fixture(
         tmp_path,

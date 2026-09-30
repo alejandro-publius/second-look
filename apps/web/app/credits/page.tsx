@@ -35,6 +35,10 @@ export default function CreditsPage() {
   // The photos iNaturalist was asked about, with its answer beside each (UPDATE_29 section 8).
   const inat = content.inat_checks ?? { checked_at: "", photos: {} };
   const inatCount = real.filter((p) => inat.photos[p.id]).length;
+  // The creek check's questions are the official app's own words, quoted, and they stay theirs:
+  // neither of our licences covers them (docs/notes/app_strings.md, docs/THIRD_PARTY.md).
+  const app = content.app_strings.source;
+  const appLanguages = content.app_strings.languages.filter((l) => l in content.app_strings.strings).length;
   return (
     <div className="stack">
       <FocusHeading>{t("credits.title")}</FocusHeading>
@@ -77,6 +81,16 @@ export default function CreditsPage() {
         <p>
           <a href={INAT_TERMS} rel="noreferrer">
             {t("credits.inat_terms")}
+          </a>
+        </p>
+      </section>
+      <section className="stack" aria-labelledby="app-credits">
+        <h2 id="app-credits">{t("credits.app_title")}</h2>
+        <p>{t("credits.app_body", { app: app.app, n: appLanguages })}</p>
+        <p>{t("credits.app_owner")}</p>
+        <p>
+          <a href={app.app_url} rel="noreferrer">
+            {t("credits.app_link", { app: app.app })}
           </a>
         </p>
       </section>

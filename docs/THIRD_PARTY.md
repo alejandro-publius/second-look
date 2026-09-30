@@ -1,6 +1,6 @@
 # Third party dependencies
 
-Generated on 2026-09-30 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json`, `worker/package-lock.json` and `tools/diagrams/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
+Generated on 2026-09-30 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json`, `worker/package-lock.json` and `tools/diagrams/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README). Words we quote from someone else stay theirs and are under neither licence; they are listed below.
 
 ## External services
 
@@ -31,6 +31,10 @@ Generated on 2026-09-30 by `uv run python scripts/third_party.py` from `uv.lock`
   The plant photos in the lesson, the practice and the test that come from iNaturalist carry their
   own CC BY or CC0 licence and are credited by author on `/credits`; `scripts/verify_inat_photos.py`
   asked iNaturalist whether each is research grade and from California (`results/inat_photos.json`).
+
+## Words we quote
+
+- OneAquaHealth Citizen Science App (https://apps.oneaquahealth.eu): the creek check and the video walks ask its questions and show its answers word for word, in 6 of its languages (English, Portuguese, Dutch, Norwegian, French and Italian). The words were read from the app's public translation file on 2026-09-26; no login was needed and none was used. `content/app_strings.json` records that file's address and its SHA-256 (`c5a15e8ebf913c49e03ec6d71716361126301187407d4a12cd6bf4c8bd9eff51`), and `make app-strings-check` fetches it again and fails if a quoted string has changed. The file itself is not committed and no code from it runs; `scripts/app_strings.py` reads it as data and keeps only the strings we quote. Where a translation's meaning differs from the English (14 strings), the English shows in its place, marked (docs/notes/app_translations.md). **The words belong to the OneAquaHealth project. They are quoted with credit, on the creek check's first screen and on `/credits`, and they are not under our MIT or CC BY 4.0 licences.** What is quoted, and the small edits made to it, is in docs/notes/app_strings.md.
 
 ## Design references
 
