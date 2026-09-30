@@ -8,8 +8,12 @@ that day: the freeze, 36 hours before the deadline. We submit on Sun Oct 4 by 18
 
 The second wave of the study locks on Fri Oct 2 at 21:00, and its job runs at 21:10: it runs
 the analysis once, fills the README's rows for that wave, deploys and pushes. Going public comes
-after it. If the status issue has no line from that job on Saturday morning, run
-`make lock-analysis-2` in `~/second-look-depth` first and wait for it.
+after it. The job puts a notice on the Mac's screen either way. At 21:50 on Friday look for
+"Second data lock done" on the status issue; if it is not there, run `make lock-analysis-2` in
+`~/second-look-depth` that night and wait for it (about 30 minutes), so Saturday morning is free.
+Run nothing heavy on the Mac from 21:00 to 22:00 on Friday. Before 21:00, if
+`~/second-look-backups/logs/repush.log` says their sandbox answered this week, commit
+`fhir/sandbox_ledger.jsonl` on depth by hand.
 
 `make go-public` can be run from any Claude Code window on the Mac. Open one in `~/second-look`
 (the checkout on `main`) and paste the command; nothing else is needed. The Mac needs `gh`

@@ -37,6 +37,14 @@ def test_words_before_the_json_are_skipped() -> None:
     assert d.state(notice + answer("kind"), "language") == d.MISSING
 
 
+def test_a_bracketed_notice_before_the_json_is_skipped_too() -> None:
+    # The first "[" is not the answer, and a deploy must not stop on it.
+    notice = "[wrangler] Update available: 4.141.0\n[wrangler:inf] Executing on remote database\n"
+    assert d.state(notice + answer("language"), "language") == d.PRESENT
+    assert d.state(notice + answer("kind"), "language") == d.MISSING
+    assert d.state(notice + "no answer at all", "language") == d.UNREADABLE
+
+
 def test_a_column_is_matched_whole_not_as_part_of_another_name() -> None:
     assert d.state(answer("language_code", "languages"), "language") == d.MISSING
 

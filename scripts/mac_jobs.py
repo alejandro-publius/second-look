@@ -24,7 +24,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, tzinfo
+from datetime import UTC, date, datetime, tzinfo
 from pathlib import Path
 from typing import Any
 
@@ -348,6 +348,16 @@ def ran_today(job: Job, home: Path, now: datetime | None = None) -> tuple[bool, 
             False,
             f"{job.name}: {path.name} last written at {stamp}, "
             f"over {job.recent_minutes} minutes ago",
+        )
+    if job.calendar is not None and {"Month", "Day"} <= set(job.calendar):
+        # A one-shot job runs on its own day; asked on any later morning, it ran if its log was
+        # written that day or after it.
+        day = date(now.year, job.calendar["Month"], job.calendar["Day"])
+        if written.date() >= day:
+            return True, f"{job.name}: ran on {written.date()}, {path.name} written at {stamp}"
+        return (
+            False,
+            f"{job.name}: not since its day {day}, {path.name} last written at {stamp}",
         )
     if written.date() == now.date():
         return True, f"{job.name}: ran today, {path.name} written at {stamp}"

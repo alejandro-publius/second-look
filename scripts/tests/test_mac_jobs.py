@@ -208,6 +208,24 @@ def test_ran_today_reads_the_log_date_and_uptime_reads_the_last_minutes(tmp_path
     assert not mac_jobs.ran_today(up, tmp_path)[0]
 
 
+def test_a_one_shot_job_ran_if_its_log_was_written_on_its_day_or_after(tmp_path: Path) -> None:
+    # Asked on the morning after, the second lock's job ran the evening before.
+    (tmp_path / "second-look-backups").mkdir(parents=True)
+    log = tmp_path / "second-look-backups" / "lock.log"
+    log.write_text("x\n")
+    lock2 = mac_jobs.by_name("lock2")
+    year, month, day = datetime.now().year, lock2.calendar["Month"], lock2.calendar["Day"]
+    evening = datetime(year, month, day, 21, 41).astimezone()
+    os.utime(log, (evening.timestamp(), evening.timestamp()))
+    morning_after = datetime(year, month, day, 8, 0).astimezone() + timedelta(days=1)
+    ok, line = mac_jobs.ran_today(lock2, tmp_path, now=morning_after)
+    assert ok and f"ran on {evening.date()}" in line
+    before = datetime(year, month, day, 21, 41).astimezone() - timedelta(days=1)
+    os.utime(log, (before.timestamp(), before.timestamp()))
+    ok, line = mac_jobs.ran_today(lock2, tmp_path, now=morning_after)
+    assert not ok and "not since its day" in line
+
+
 def test_the_lock_job_leaves_exactly_the_files_the_other_jobs_write() -> None:
     assert set(mac_jobs.mac_job_files()) == {
         "proofs/",

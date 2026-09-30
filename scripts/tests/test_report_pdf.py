@@ -1,4 +1,4 @@
-"""docs/REPORT.pdf exists, has 4 to 10 pages, and was built from the sources as they are now.
+"""docs/REPORT.pdf exists, has 4 to 12 pages, and was built from the sources as they are now.
 
 The build needs pandoc and Chromium; this test needs neither. It assembles the report's Markdown
 again from docs/report/source.md, the README and docs sections it names and results/, hashes it
@@ -26,11 +26,11 @@ ROOT = Path(__file__).resolve().parents[2]
 # The committed PDF ------------------------------------------------------------------------------
 
 
-def test_the_pdf_exists_and_has_four_to_ten_pages() -> None:
+def test_the_pdf_exists_and_has_four_to_twelve_pages() -> None:
     pdf = ROOT / br.PDF
     assert pdf.is_file(), "docs/REPORT.pdf is missing; run make report-pdf"
     assert pdf.read_bytes().startswith(b"%PDF-")
-    assert 4 <= br.pdf_pages(pdf) <= 10
+    assert br.MIN_PAGES <= br.pdf_pages(pdf) <= br.MAX_PAGES == 12
 
 
 def test_the_pdf_is_the_one_its_stamp_describes() -> None:

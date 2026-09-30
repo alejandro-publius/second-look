@@ -23,13 +23,19 @@ PRESENT, MISSING, UNREADABLE = 0, 1, 2
 
 def columns(text: str) -> list[str] | None:
     """The column names in wrangler's answer, or None when it holds no readable answer."""
+    # wrangler may print a bracketed notice such as "[wrangler] Update available" before the
+    # answer, so every "[" is tried until one opens a JSON list.
+    decoder = json.JSONDecoder()
+    doc: object = None
     start = text.find("[")
-    if start < 0:
-        return None
-    try:
-        doc = json.JSONDecoder().raw_decode(text[start:])[0]
-    except ValueError:
-        return None
+    while start >= 0:
+        try:
+            doc = decoder.raw_decode(text[start:])[0]
+        except ValueError:
+            doc = None
+        if isinstance(doc, list):
+            break
+        start = text.find("[", start + 1)
     if not isinstance(doc, list) or not doc:
         return None
     names: list[str] = []

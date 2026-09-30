@@ -19,6 +19,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 from collections.abc import Mapping, Sequence
@@ -33,7 +34,7 @@ import evals.common as common
 import evals.usability_analysis as ua
 import evals.wave2_analysis as w2
 from core.lock import DATA_LOCK_UTC
-from scripts import audit_log, render_readme
+from scripts import audit_log, judge_check, render_readme
 from scripts import deploy_record as dr
 from scripts import lock_analysis as la
 from scripts.outward import Done, Reply
@@ -267,6 +268,7 @@ class FakeLocal(la.Local):
         self.world = world
         self.calls: list[list[str]] = []
         self.cwds: list[Path] = []
+        self.envs: list[dict[str, str]] = []
         self.fail: dict[tuple[str, ...], Done] = {}
 
     def run(
@@ -280,6 +282,7 @@ class FakeLocal(la.Local):
         args = list(argv)
         self.calls.append(args)
         self.cwds.append(cwd)
+        self.envs.append(dict(env or {}))
         for prefix, result in self.fail.items():
             if tuple(args[: len(prefix)]) == prefix:
                 return result
@@ -767,6 +770,78 @@ def test_ready_names_each_problem(world: World, monkeypatch: pytest.MonkeyPatch)
     for words in ("README.md", "pandoc", "worker/node_modules", "gh is not logged in", "QA_KEY"):
         assert words in text
     assert "commit 9999999" in text
+
+
+def test_ready_says_when_origin_main_and_depth_disagree(
+    world: World, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(la.shutil, "which", lambda tool: f"/usr/bin/{tool}")
+    for folder in ("apps/web/node_modules", "worker/node_modules", "tools/diagrams/node_modules"):
+        (world.root / folder).mkdir(parents=True)
+    same = "a" * 40
+    world.out.answer(
+        ["git", "ls-remote"], Done(0, f"{same}\trefs/heads/depth\n{same}\trefs/heads/main\n")
+    )
+    assert world.lock().readiness() == []
+    world.out.answer(
+        ["git", "ls-remote"],
+        Done(0, f"{'a' * 40}\trefs/heads/depth\n{'b' * 40}\trefs/heads/main\n"),
+    )
+    problems = world.lock().readiness()
+    assert len(problems) == 1 and "git push origin main main:depth" in problems[0]
+    assert "origin/main is at bbbbbbb and origin/depth at aaaaaaa" in problems[0]
+
+
+def test_make_check_runs_on_a_port_that_is_free(world: World) -> None:
+    # Another checkout's make check holds the port the job would take by default.
+    with socket.socket() as taken:
+        taken.bind(("127.0.0.1", judge_check.preferred_web_port()))
+        taken.listen(1)
+        assert world.lock().run() == 0
+    checks = [
+        env
+        for args, env in zip(world.local.calls, world.local.envs, strict=True)
+        if args == ["make", "check"]
+    ]
+    assert len(checks) == 1 and checks[0]["WEB_PORT"].isdigit()
+    port = int(checks[0]["WEB_PORT"])
+    assert port != judge_check.preferred_web_port() and judge_check.port_free(port)
+
+
+def test_a_network_drop_before_the_lock_work_is_tried_again(world: World) -> None:
+    drops = {"n": 0}
+
+    def flaky(args: list[str], cwd: Path | None, env: Mapping[str, str] | None) -> Done:
+        drops["n"] += 1
+        if drops["n"] <= 2:
+            return Done(1, "", "getaddrinfo ENOTFOUND api.cloudflare.com")
+        return Done(0, "logged in")
+
+    world.out.answer(["npx", "wrangler", "whoami"], flaky)
+    waits: list[float] = []
+    assert world.lock(sleep=waits.append).run() == 0
+    assert waits == [la.NETWORK_PAUSE, la.NETWORK_PAUSE] and drops["n"] == 3
+    log = (world.backups / "lock.log").read_text()
+    assert "wrangler whoami failed on try 1 of 3: getaddrinfo ENOTFOUND" in log
+    assert "wrangler whoami failed on try 2 of 3" in log
+    assert world.out.notes[-1][0] == "Second Look: Data lock done"
+    assert world.out.notes[-1][1].startswith("Data lock done")
+
+
+def test_a_drop_that_lasts_fails_the_step_after_three_tries_and_says_so_on_screen(
+    world: World,
+) -> None:
+    world.out.answer(["git", "fetch"], Done(1, "", "nodename nor servname provided"))
+    waits: list[float] = []
+    start, origin = world.head(), world.origin_refs()
+    assert world.lock(sleep=waits.append).run() == 1
+    assert waits == [la.NETWORK_PAUSE, la.NETWORK_PAUSE]
+    assert len(world.out.ran("git", "fetch")) == 3
+    assert_as_it_was(world, start, origin)
+    assert "FAILED at fresh checkout: git fetch origin failed on 3 tries" in world.out.comments[-1]
+    assert world.out.notes == [
+        ("Second Look: Data lock job FAILED", world.out.comments[-1].split(": ", 1)[1][:180])
+    ]
 
 
 def test_part2_row_says_too_few_with_claim_tokens_or_gives_the_test() -> None:

@@ -66,6 +66,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
@@ -75,7 +76,7 @@ from typing import Any
 from core.lock import DATA_LOCK_UTC
 from evals import wave2_analysis
 from evals.wave2_analysis import SECOND_LOCK_UTC
-from scripts import audit_log, mac_jobs, panel_status, study_export
+from scripts import audit_log, judge_check, mac_jobs, panel_status, study_export
 from scripts import deploy_record as dr
 from scripts import rollback as rb
 from scripts.outward import Done, Outward
@@ -85,6 +86,10 @@ SITE = "https://second-look-79t.pages.dev"
 SCRIPT = "scripts/lock_analysis.py"
 RECORD = "results/lock_analysis.json"
 HOSTING = "docs/notes/hosting.md"
+# A command that only reads from the network is tried this many times, this far apart: the run
+# of Sep 29 died on one DNS drop, and the job is a one-shot with nobody watching at 21:10.
+NETWORK_TRIES = 3
+NETWORK_PAUSE = 90.0
 PART2_START = "<!-- human-row-2 -->"
 PART2_END = "<!-- /human-row-2 -->"
 PART2_FILES = ("part2_sessions.csv", "part2_responses.csv")
@@ -504,8 +509,10 @@ class Lock:
         qa_key: Callable[[], str | None] = lambda: None,
         say: Callable[[str], None] = print,
         wave: Wave = FIRST,
+        sleep: Callable[[float], None] = time.sleep,
     ) -> None:
         self.wave = wave
+        self.sleep = sleep
         self.root = root
         self.out = out
         self.local = local
@@ -546,6 +553,33 @@ class Lock:
 
     def head(self) -> str:
         return self.must("git", self.git("rev-parse", "HEAD"), "git rev-parse").out.strip()
+
+    def outward(
+        self,
+        step: str,
+        argv: Sequence[str],
+        what: str,
+        *,
+        cwd: Path,
+        env: Mapping[str, str] | None = None,
+        timeout: float = 1800,
+    ) -> Done:
+        """A command that leaves this Mac and changes nothing when it fails: tried up to
+        NETWORK_TRIES times, NETWORK_PAUSE seconds apart, because a network drop is the one
+        failure that a wait cures (UPDATE_33 item 1). The deploy is not one of these: a deploy
+        that fails half way is undone, not repeated."""
+        done = Done(127, "", "not run")
+        for attempt in range(1, NETWORK_TRIES + 1):
+            done = self.out.run(argv, cwd=cwd, env=env, timeout=timeout)
+            if done.ok:
+                return done
+            if attempt < NETWORK_TRIES:
+                self.log(
+                    f"{what} failed on try {attempt} of {NETWORK_TRIES}: {done.tail()}; "
+                    f"trying again in {NETWORK_PAUSE:.0f} seconds"
+                )
+                self.sleep(NETWORK_PAUSE)
+        raise Failed(step, f"{what} failed on {NETWORK_TRIES} tries: {done.tail()}")
 
     # -- the steps ---------------------------------------------------------
 
@@ -673,8 +707,9 @@ class Lock:
             self.log(
                 "set aside until the end, written by the other Mac jobs: " + ", ".join(changed)
             )
-        fetched = self.out.run(["git", "fetch", "origin", "depth", "main"], cwd=self.root)
-        self.must(step, fetched, "git fetch origin")
+        self.outward(
+            step, ["git", "fetch", "origin", "depth", "main"], "git fetch origin", cwd=self.root
+        )
         self.must(step, self.git("merge", "--ff-only", "origin/depth"), "fast-forward")
         after = self.head()
         self.start = Start(after, before, kept, carried)
@@ -693,12 +728,10 @@ class Lock:
         ff = self.git("merge-base", "--is-ancestor", "origin/main", "HEAD")
         if not ff.ok:
             raise Failed(step, "origin/main has commits depth does not; merge forward by hand")
-        self.must(
-            step,
-            self.out.run(["npx", "wrangler", "whoami"], cwd=self.root / "worker"),
-            "wrangler whoami",
+        self.outward(
+            step, ["npx", "wrangler", "whoami"], "wrangler whoami", cwd=self.root / "worker"
         )
-        self.must(step, self.out.run(["gh", "auth", "status"], cwd=self.root), "gh auth status")
+        self.outward(step, ["gh", "auth", "status"], "gh auth status", cwd=self.root)
         self.qa_key = self.read_qa_key()
         if not self.qa_key:
             raise Failed(
@@ -708,11 +741,12 @@ class Lock:
         rows = dr.load(hosting)
         live_w, live_p = dr.live_worker(self.out, self.root), dr.live_pages(self.out, self.root)
         # A recorded deploy that passes the read-only phone check now counts as good.
-        readonly = self.out.run(
-            ["node", "apps/web/scripts/live-readonly.mjs"], cwd=self.root, env={"SITE_URL": SITE}
-        )
-        self.must(
-            step, readonly, "the read-only phone check against production before the lock work"
+        self.outward(
+            step,
+            ["node", "apps/web/scripts/live-readonly.mjs"],
+            "the read-only phone check against production before the lock work",
+            cwd=self.root,
+            env={"SITE_URL": SITE},
         )
         live_commit = (live_p or {}).get("commit", "")[:7]
 
@@ -734,13 +768,14 @@ class Lock:
 
     def backup(self) -> None:
         step = "backup"
-        done = self.out.run(
+        self.outward(
+            step,
             ["bash", "scripts/backup_d1.sh"],
+            "scripts/backup_d1.sh",
             cwd=self.root,
             env={"BACKUP_DIR": str(self.backups)},
             timeout=900,
         )
-        self.must(step, done, "scripts/backup_d1.sh")
         try:
             meta = json.loads((self.backups / "last_backup.json").read_text(encoding="utf-8"))
             made = datetime.fromisoformat(str(meta["generated_at_utc"]).replace("Z", "+00:00"))
@@ -910,7 +945,13 @@ class Lock:
         )
 
     def check(self) -> None:
-        done = self.local.run(["make", "check"], cwd=self.root, timeout=5400)
+        # design-check inside make check serves the built site on WEB_PORT and fails when the
+        # port is taken; another checkout's make check or make e2e at the same hour must not
+        # fail the lock, so the job takes 3100 when it is free and a free port otherwise.
+        port = judge_check.pick_web_port()
+        done = self.local.run(
+            ["make", "check"], cwd=self.root, env={"WEB_PORT": str(port)}, timeout=5400
+        )
         self.must("make check", done, "make check")
         self.git("checkout", "--", *REWRITTEN_BY_CHECK)
         self.log("make check is green")
@@ -1001,7 +1042,7 @@ class Lock:
         argv = ["git", "push", "--atomic", *(["--dry-run"] if dry else []), "origin",
                 "HEAD:refs/heads/depth", "HEAD:refs/heads/main"]  # fmt: skip
         step = "push dry run" if dry else "push"
-        self.must(step, self.out.run(argv, cwd=self.root, timeout=600), " ".join(argv[:4]))
+        self.outward(step, argv, " ".join(argv[:4]), cwd=self.root, timeout=600)
         if not dry:
             self.pushed = True
             self.log(f"pushed {self.head()[:7]} to depth and main in one atomic push")
@@ -1060,6 +1101,7 @@ class Lock:
         )
         if not posted.ok:
             self.log(f"could not write to the status issue either: {posted.tail()}")
+        self.out.notify(f"Second Look: {self.wave.job_words} job FAILED", line[:180])
 
     def undo_production(self) -> str:
         worker_row, web_row = self.targets
@@ -1143,6 +1185,26 @@ class Lock:
             problems.append("gh is not logged in (gh auth login)")
         if not self.read_qa_key():
             problems.append("no QA_KEY in the environment or this checkout's .env")
+        # The job fast-forwards to origin/depth and refuses when origin/main has more, so a push
+        # to main alone before the lock would stop it.
+        heads = self.out.run(
+            ["git", "ls-remote", "--heads", "origin", "main", "depth"], cwd=self.root, timeout=120
+        )
+        if heads.ok:
+            at = {}
+            for line in heads.out.splitlines():
+                parts = line.split()
+                if len(parts) == 2:
+                    at[parts[1].removeprefix("refs/heads/")] = parts[0]
+            if at.get("main") != at.get("depth"):
+                problems.append(
+                    f"origin/main is at {(at.get('main') or 'nothing')[:7]} and origin/depth at "
+                    f"{(at.get('depth') or 'nothing')[:7]}; the job fast-forwards to depth and "
+                    "refuses when main has more, so push main to both: "
+                    "git push origin main main:depth"
+                )
+        else:
+            problems.append(f"git ls-remote origin failed: {heads.tail()}")
         rows = dr.load(self.root / HOSTING)
         live_w, live_p = dr.live_worker(self.out, self.root), dr.live_pages(self.out, self.root)
         # Rows not yet marked good still count: the job marks them after its read-only check.
@@ -1223,6 +1285,7 @@ class Lock:
             self.log(
                 f"the lock is done, but the status issue could not be written: {posted.tail()}"
             )
+        self.out.notify(f"Second Look: {self.wave.job_words} done", line[:180])
         counts = panel_status.read_counts(self.out, SITE)
         if counts is not None:
             self.log(
