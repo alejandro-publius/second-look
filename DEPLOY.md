@@ -3,7 +3,7 @@
 How to run it on your own machine, how to put it on Cloudflare, what the database holds, which
 secrets exist (names only), which jobs run on the Mac, and every setting the code reads. The
 record of why the hosting looks like this is `docs/notes/hosting.md`; the decisions are in
-`docs/adr/`.
+`docs/adr/`. A follower city's path on one page is `docs/ADOPT.md`.
 
 ## What you need
 
