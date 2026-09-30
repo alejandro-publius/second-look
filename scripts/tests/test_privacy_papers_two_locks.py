@@ -82,5 +82,7 @@ def test_the_privacy_page_words_for_the_second_lock_match_the_code_labels() -> N
     """core/lock.py carries its own local label; the page must agree with it on the day and hour."""
     label = lock.SECOND_LOCK_LOCAL_LABEL  # "Friday Oct 2, 2026 at 21:00 PDT"
     body = privacy_strings()["privacy.windows"]
-    day, hour = re.search(r"(\w+ \d+), 2026 at (\d\d:\d\d \w+)", label).groups()
+    found = re.search(r"(\w+ \d+), 2026 at (\d\d:\d\d \w+)", label)
+    assert found is not None, f"core/lock.py's label {label!r} is not a day and an hour"
+    day, hour = found.groups()
     assert day in body and hour in body, f"{body!r} does not match {label!r}"
