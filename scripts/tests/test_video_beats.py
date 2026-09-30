@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import re
 
 import pytest
+import yaml
 
 from scripts.fetch_footage import FETCHED
 from scripts.submit_check import video_links
@@ -103,6 +105,46 @@ def test_the_person_on_camera_beat_is_a_screen_recording_in_a_phone_frame() -> N
 
 def test_every_beat_the_table_names_is_in_the_shot_list() -> None:
     assert set(TABLE) <= {b["time"] for b in BEATS}
+
+
+ROOT = SHOTLIST.parents[2]
+RECORDER = ROOT / "apps" / "web" / "scripts" / "record-clips.mjs"
+FORM = ROOT / "content" / "form.yaml"
+LOCALE = ROOT / "content" / "locales" / "en.json"
+
+
+def recorder_labels() -> set[str]:
+    """Every button label apps/web/scripts/record-clips.mjs clicks by its exact name."""
+    source = RECORDER.read_text(encoding="utf-8")
+    labels = set(re.findall(r'click\(page, "([^"]+)"\)', source))
+    labels |= set(re.findall(r'getByRole\("button", \{ name: "([^"]+)", exact: true \}\)', source))
+    answer_list = r"\[((?:\"[^\"]+\", )+\"[^\"]+\")\]\.find\(\(b\) => buttons\.includes"
+    answers = re.search(answer_list, source)
+    assert answers, "the check's answer list in record-clips.mjs"
+    labels |= set(re.findall(r'"([^"]+)"', answers.group(1)))
+    return labels
+
+
+def test_the_recorder_clicks_only_labels_the_app_has_today() -> None:
+    # The check's answers are the OneAquaHealth app's own words, and they changed on Sep 26
+    # (audit finding docs-consistency-1): the recorder still clicked "U shape" and "Clear or
+    # transparent", which no button had any more, so beat 9 could not be recorded again. Every
+    # label it clicks must be an answer in content/form.yaml or a string of the app's own.
+    form = yaml.safe_load(FORM.read_text(encoding="utf-8"))
+    answers = {o["label"] for item in form["items"] for o in item.get("options", [])}
+    strings = set(json.loads(LOCALE.read_text(encoding="utf-8")).values())
+    labels = recorder_labels()
+    assert {"U Shape", "Clear/transparent", "Start the check"} <= labels
+    unknown = sorted(label for label in labels if label not in answers | strings)
+    assert unknown == [], f"record-clips.mjs clicks labels the app has not: {unknown}"
+
+
+def test_the_recorder_never_sets_the_clock_past_a_lock() -> None:
+    # Judge mode is shut until the second lock (UPDATE_33). A recording made with a clock set past
+    # it would show judge mode open, which no judge sees today; the cut shows what a judge sees.
+    source = RECORDER.read_text(encoding="utf-8")
+    assert "clock.install" not in source
+    assert "as a judge sees it today" in source
 
 
 def part(clip: str, seconds: float | None, before: bool = False, start: float = 0.0) -> Part:

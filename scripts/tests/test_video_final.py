@@ -192,17 +192,24 @@ def test_no_caption_points_below_the_video_and_the_link_shows_when_one_points_at
     assert phone_box()[2] < left and right <= 1920 and 0 <= top and bottom <= 1080
 
 
-def test_the_check_beat_says_its_wording_is_draft_and_never_that_it_follows_the_app() -> None:
+def test_the_check_beat_says_the_words_are_the_apps_own_in_six_languages_and_never_draft() -> None:
+    # Since Sep 26 the check asks the app's own questions word for word, in six languages, and
+    # nothing is marked draft (audit finding docs-consistency-1). The first cut said draft.
     words = next(b.words for b in BEATS if "one question at a time" in b.words)
-    assert "follows the official" not in words
-    assert "draft" in words
+    assert "in the words and order of the OneAquaHealth app" in words
+    assert "six of its languages" in words
+    assert "draft" not in words.lower()
+    assert "draft" not in " ".join(c.text for c in CUT.cues).lower()
+    check = next(p for p in footage_parts(TEXT)["2:20"] if p.clip == PHONE)
+    assert "word for word" in check.shows and "six languages" in check.shows
+    assert "draft" not in check.shows.lower()
 
 
 def test_a_left_out_beat_is_not_in_the_cut_and_the_summary_says_why() -> None:
     every = beats_from(TEXT, leave_out={})
     gone = [b for b in every if b.screen in LEFT_OUT]
     assert [b.screen for b in gone] == ["11-two"]
-    assert "sandbox does not answer" in LEFT_OUT["11-two"]
+    assert "the mock's lab result, not theirs" in LEFT_OUT["11-two"]
     assert [b for b in every if b not in gone] == BEATS
     said = " ".join(c.text for c in CUT.cues)
     assert clean(gone[0].words)[:40] not in said

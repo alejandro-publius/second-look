@@ -137,9 +137,10 @@ LINK_CUE = "the link on screen"
 # Beats the shot list keeps but the cut leaves out, by screen recording, with the reason.
 LEFT_OUT = {
     "11-two": (
-        "their sandbox does not answer: GET /api/two on the live site said theirs_status down on "
-        "2026-09-25, so the lab result the recording shows would be the mock's, and "
-        "docs/video/VOICE_SCRIPT.md says to cut beat 11 then"
+        "the recording would show the mock's lab result, not theirs: the clips are recorded "
+        "against the mock API, whose lab result is made up, and on 2026-09-25 GET /api/two on the "
+        "live site said theirs_status down as well, so docs/video/VOICE_SCRIPT.md says to cut "
+        "beat 11"
     ),
 }
 
