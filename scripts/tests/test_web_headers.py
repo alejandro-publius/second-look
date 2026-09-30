@@ -4,12 +4,18 @@ Pages wrote these headers itself from the pages' preload tags until the project 
 Functions. After that the first screen on a throttled phone went from about 1.5 to 8.5 seconds.
 Since Update 22 the two warm-up photos have smaller AVIF and WebP copies, and the header preloads
 the AVIF set the page will use instead of the JPEG, so no phone downloads both.
+
+The file that carries them, apps/web/public/_headers, is tracked, and Cloudflare Pages sends what
+it says. So the tracked copy has to be the policy production sends: a test build once left its
+mock API's local address in the committed policy line.
 """
 
 from __future__ import annotations
 
 import csv
 import json
+import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -22,6 +28,12 @@ ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "apps" / "web"
 MODULE = WEB / "security-headers.mjs"
 SOURCES = WEB / "photo-sources.mjs"
+TRACKED = "apps/web/public/_headers"
+# An address on this machine or on the local network, as a policy line would hold it.
+LOCAL_ADDRESS = re.compile(
+    r"(?:^|[/.\s])localhost(?=[:/;\s]|$)|\[::1\]|\b(?:127|10)\.\d+\.\d+\.\d+|\b0\.0\.0\.0\b"
+    r"|\b192\.168\.\d+\.\d+|\b169\.254\.\d+\.\d+|\b172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+"
+)
 
 CONTENT: dict[str, Any] = {
     "warmup": [{"photo_id": "a"}, {"photo_id": "b"}, {"photo_id": "c"}],
@@ -242,3 +254,207 @@ def test_the_committed_headers_file_preloads_the_avif_copies_of_the_real_warmup_
         assert f"\n{page}\n{want}\n" in committed
         assert 'type="image/avif"' in want and "imagesrcset=" in want
         assert ".jpg" not in want
+
+
+def tracked_copies() -> dict[str, str]:
+    """The headers file as it is on disk and, in a git checkout, as the last commit holds it."""
+    copies = {"the file on disk": (ROOT / TRACKED).read_text(encoding="utf-8")}
+    if shutil.which("git") is not None:
+        shown = subprocess.run(
+            ["git", "show", f"HEAD:{TRACKED}"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        if shown.returncode == 0:
+            copies["the copy in the last commit"] = shown.stdout
+    return copies
+
+
+def production_headers() -> str:
+    """The headers file as scripts/deploy.sh builds it: an empty API origin, the real photos."""
+    rows = manifest(ROOT / "photos" / "manifest.csv")
+    derived = manifest(ROOT / "photos" / "derived" / "manifest.csv")
+    warmup = yaml.safe_load((ROOT / "content" / "test_items.yaml").read_text(encoding="utf-8"))[
+        "warmup"
+    ]
+    copies = call(f"m.derivedSources({json.dumps(rows)}, {json.dumps(derived)})", SOURCES)
+    photos = {
+        w["photo_id"]: {"url": f"/photos/{w['photo_id']}.jpg", **copies.get(w["photo_id"], {})}
+        for w in warmup
+    }
+    content = {"warmup": warmup, "photos": photos}
+    built: str = call(
+        f"m.headersFile({{ apiOrigin: '', preloads: m.photoPreloads({json.dumps(content)}) }})"
+    )
+    return built
+
+
+@pytest.mark.parametrize(
+    ("origin", "local"),
+    [
+        ("", False),
+        ("https://api.example", False),
+        ("https://localhost.example.org", False),
+        ("https://172.32.0.1", False),
+        ("not an address", False),
+        ("http://localhost:8000", True),
+        ("http://127.0.0.1:8100", True),
+        ("http://[::1]:8000", True),
+        ("http://0.0.0.0:8000", True),
+        ("http://app.localhost:3000", True),
+        ("http://192.168.1.4:8000", True),
+        ("http://10.0.0.2", True),
+        ("http://172.16.0.1", True),
+    ],
+)
+def test_an_address_on_this_machine_or_the_local_network_is_local(origin: str, local: bool) -> None:
+    assert call(f"m.isLocalOrigin({json.dumps(origin)})") is local
+    assert bool(LOCAL_ADDRESS.search(origin)) is local
+
+
+def test_a_headers_file_is_never_built_for_a_local_address() -> None:
+    for origin in ("http://127.0.0.1:8100", "http://localhost:8000"):
+        err = fails(f"m.headersFile({{ apiOrigin: {json.dumps(origin)} }})")
+        assert "is a local address" in err
+    apart = call("m.headersFile({ apiOrigin: 'https://api.example' })")
+    assert "connect-src 'self' https://api.example;" in apart
+
+
+def test_the_tracked_headers_file_is_the_one_production_sends() -> None:
+    """privacy-security-5: the committed policy line held connect-src 'self'
+    http://127.0.0.1:8100, left by a test build, while production sent connect-src 'self'."""
+    want = production_headers()
+    policy = "  Content-Security-Policy: " + call("m.buildHeaders({ apiOrigin: '' }).csp")
+    assert "connect-src 'self';" in policy
+    for where, text in tracked_copies().items():
+        found = LOCAL_ADDRESS.search(text)
+        assert found is None, f"{where} holds the local address {found and found.group(0)}"
+        assert policy in text.splitlines(), f"{where} does not hold production's policy line"
+        assert text == want, f"{where} is not what a production build writes"
+
+
+def build_headers_in_a_copy(tmp_path: Path, origin: str | None) -> tuple[str, str]:
+    """Runs scripts/build-headers.mjs in a copy of the web folder, so the tracked file stays."""
+    if shutil.which("node") is None:
+        pytest.skip("needs node")
+    web = tmp_path / "web"
+    (web / "scripts").mkdir(parents=True)
+    (web / "public").mkdir()
+    for name in ("security-headers.mjs", "photo-sources.mjs", "scripts/build-headers.mjs"):
+        shutil.copy(WEB / name, web / name)
+    env = {k: v for k, v in os.environ.items() if k != "NEXT_PUBLIC_API_ORIGIN"}
+    if origin is not None:
+        env["NEXT_PUBLIC_API_ORIGIN"] = origin
+    done = subprocess.run(
+        ["node", "scripts/build-headers.mjs"],
+        cwd=web,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert done.returncode == 0, done.stderr
+    return (web / "public" / "_headers").read_text(encoding="utf-8"), done.stdout
+
+
+@pytest.mark.parametrize("origin", ["http://127.0.0.1:8100", "http://localhost:8000", None, ""])
+def test_a_test_build_writes_the_policy_production_sends(
+    tmp_path: Path, origin: str | None
+) -> None:
+    """make e2e builds with the mock API's address and a plain build with no address at all,
+    which means localhost. Neither may change the tracked policy line."""
+    text, said = build_headers_in_a_copy(tmp_path, origin)
+    assert LOCAL_ADDRESS.search(text) is None
+    assert "connect-src 'self';" in text
+    assert "own origin only" in said
+
+
+def test_a_build_for_an_api_on_another_host_names_it_in_the_policy(tmp_path: Path) -> None:
+    text, said = build_headers_in_a_copy(tmp_path, "https://api.example/")
+    assert "connect-src 'self' https://api.example;" in text
+    assert "api origin https://api.example," in said
+
+
+def pages_rules(text: str) -> list[tuple[str, list[tuple[str, str]]]]:
+    """The rules of a Pages _headers file: a path line, then indented header lines."""
+    rules: list[tuple[str, list[tuple[str, str]]]] = []
+    for line in text.splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        if not line.startswith(" "):
+            rules.append((line.strip(), []))
+        else:
+            name, _, value = line.strip().partition(":")
+            rules[-1][1].append((name.strip(), value.strip()))
+    return rules
+
+
+def sent_with(text: str, path: str) -> dict[str, str]:
+    """The headers Pages adds to one path. It matches a rule the way wrangler's rules engine
+    does: the whole path, a * for any run of characters, a :name for one path part."""
+    out: dict[str, str] = {}
+    for pattern, headers in pages_rules(text):
+        parts = [re.sub(r":[A-Za-z]\w*", "[^/]+", re.escape(p)) for p in pattern.split("*")]
+        if re.fullmatch("(.*)".join(parts), path):
+            for name, value in headers:
+                out[name] = f"{out[name]}, {value}" if name in out else value
+    return out
+
+
+def headers_files() -> dict[str, str]:
+    return {"a fresh build": call("m.headersFile({ apiOrigin: '' })"), **tracked_copies()}
+
+
+def test_a_proof_file_is_sent_as_plain_bytes_and_not_as_a_spreadsheet() -> None:
+    """privacy-security-5: Pages sent /proofs/prereg-v1.tag.ots as
+    application/vnd.oasis.opendocument.spreadsheet-template, the other file type that ends in
+    .ots. The files that were stamped keep the type Pages gives them."""
+    proofs = sorted(p.name for p in (ROOT / "proofs").glob("*.ots"))
+    assert len(proofs) >= 6
+    stamped = [name.removesuffix(".ots") for name in proofs]
+    for where, text in headers_files().items():
+        for name in proofs:
+            sent = sent_with(text, f"/proofs/{name}")
+            assert sent.get("Content-Type") == "application/octet-stream", f"{where}: {name}"
+            assert "Content-Security-Policy" in sent
+        for path in [*(f"/proofs/{name}" for name in stamped), "/proofs/", "/verify", "/a.ots"]:
+            assert "Content-Type" not in sent_with(text, path), f"{where}: {path}"
+
+
+SHARE_ROUTE = WEB / "app" / "api" / "share" / "[score]" / "route.ts"
+SVG = "image/svg+xml; charset=utf-8"
+
+
+def test_only_the_share_cards_that_exist_are_sent_as_svg() -> None:
+    """privacy-security-5: GET /api/share/999 answered 404 with the HTML not found page as its
+    body and image/svg+xml as its type, because the rule was /api/share/* and Pages adds a
+    rule's headers to its not found page too. A browser showed an XML error."""
+    found = re.search(r"^const TOTAL = (\d+);$", SHARE_ROUTE.read_text(encoding="utf-8"), re.M)
+    assert found is not None
+    total = int(found.group(1))
+    assert call("m.SHARE_CARD_TOTAL") == total == 16
+    missing = [total + 1, 999, "", "abc", "01", "1/2", "7.svg", "-1"]
+    for where, text in headers_files().items():
+        for score in range(total + 1):
+            sent = sent_with(text, f"/api/share/{score}")
+            assert sent.get("Content-Type") == SVG, f"{where}: card {score}"
+        for name in missing:
+            path = f"/api/share/{name}"
+            assert "Content-Type" not in sent_with(text, path), f"{where}: {path}"
+        assert "Content-Type" not in sent_with(text, "/share/7")
+        starred = [rule for rule, _ in pages_rules(text) if "share" in rule and "*" in rule]
+        assert starred == [], f"{where}: {starred}"
+
+
+def test_a_headers_file_with_more_rules_than_pages_reads_fails_the_build() -> None:
+    always = len(pages_rules(call("m.headersFile({ apiOrigin: '' })")))
+    fits = {f"/page-{n}": [{"href": "/photos/a.jpg"}] for n in range(100 - always)}
+    text = call(f"m.headersFile({{ apiOrigin: '', preloads: {json.dumps(fits)} }})")
+    assert len(pages_rules(text)) == 100
+    over = {**fits, "/one-more": [{"href": "/photos/a.jpg"}]}
+    err = fails(f"m.headersFile({{ apiOrigin: '', preloads: {json.dumps(over)} }})")
+    assert "101 rules, over the 100" in err

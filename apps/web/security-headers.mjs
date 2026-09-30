@@ -5,6 +5,32 @@ import { firstUrl } from "./photo-sources.mjs";
 
 // Cloudflare Pages reads at most this many characters on one line of _headers.
 export const HEADERS_LINE_LIMIT = 2000;
+// And at most this many rules in the whole file.
+export const HEADERS_RULE_LIMIT = 100;
+// The share cards are /api/share/0 up to this number, one for each score a person can get. It is
+// TOTAL in app/api/share/[score]/route.ts, and scripts/tests/test_web_headers.py holds the two
+// together.
+export const SHARE_CARD_TOTAL = 16;
+
+/**
+ * True when the API origin is an address on this machine or on the local network. Only a test
+ * or development build has one, and Cloudflare Pages could never reach it.
+ */
+export function isLocalOrigin(origin) {
+  if (!origin) return false;
+  let host;
+  try {
+    host = new URL(origin).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (host === "localhost" || host.endsWith(".localhost")) return true;
+  if (host === "[::1]" || host === "::1" || host === "0.0.0.0") return true;
+  const part = host.split(".").map(Number);
+  if (part.length !== 4 || part.some((n) => !Number.isInteger(n))) return false;
+  const [a, b] = part;
+  return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
+}
 
 export function buildHeaders({ apiOrigin, isDev = false }) {
   // Next's App Router hydrates through inline <script> tags it writes itself, so script-src needs
@@ -96,6 +122,11 @@ export function linkEntry(entry) {
 
 /** The Cloudflare Pages _headers format: a path, then one indented header line each. */
 export function headersFile({ apiOrigin, preloads = {} }) {
+  // The file is tracked and only Pages reads it. A test build once left its mock API's address
+  // in the committed policy line, so a local address is refused here, whoever asks.
+  if (isLocalOrigin(apiOrigin)) {
+    throw new Error(`public/_headers is the policy Cloudflare Pages sends, and ${apiOrigin} is a local address. A test or development build writes the file for an empty API origin.`);
+  }
   const { everywhere } = buildHeaders({ apiOrigin });
   const block = (path, list) => `${path}\n${list.map((h) => `  ${h.key}: ${h.value}`).join("\n")}\n`;
   const link = (entries) => ({ key: "Link", value: entries.map(linkEntry).join(", ") });
@@ -105,12 +136,20 @@ export function headersFile({ apiOrigin, preloads = {} }) {
     block("/*", everywhere),
     ...Object.entries(preloads).map(([path, urls]) => block(path, [link(urls)])),
     "/sw.js\n  Cache-Control: no-cache\n",
+    // An OpenTimestamps proof is a small binary file. Pages guesses the type from the ending, and
+    // .ots is also the ending of a spreadsheet template, so a phone offered to open a proof in a
+    // spreadsheet app. Plain bytes make the browser save the file, which is what /verify asks for.
+    "/proofs/*.ots\n  Content-Type: application/octet-stream\n",
     // The share cards are written as extensionless files by the static export, so Pages would
-    // guess application/octet-stream and no chat window would render the preview.
-    "/api/share/*\n  Content-Type: image/svg+xml; charset=utf-8\n",
+    // guess application/octet-stream and no chat window would render the preview. One rule for
+    // each card that exists, and none with a star: Pages adds a rule's headers to its not found
+    // page too, so /api/share/* sent the HTML of that page for /api/share/999 as an SVG image.
+    ...Array.from({ length: SHARE_CARD_TOTAL + 1 }, (_, score) => `/api/share/${score}\n  Content-Type: image/svg+xml; charset=utf-8\n`),
   ].join("\n");
   // Pages drops a longer line without a word, and the Early Hints with it.
   const long = text.split("\n").find((line) => line.length > HEADERS_LINE_LIMIT);
   if (long) throw new Error(`a _headers line is ${long.length} characters, over the ${HEADERS_LINE_LIMIT} Pages reads: ${long.slice(0, 80)}`);
+  const rules = text.split("\n").filter((line) => /^(\/|https:\/\/)/.test(line)).length;
+  if (rules > HEADERS_RULE_LIMIT) throw new Error(`_headers holds ${rules} rules, over the ${HEADERS_RULE_LIMIT} Pages reads`);
   return text;
 }
