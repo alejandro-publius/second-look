@@ -50,3 +50,5 @@ bb051460a4d967ededb2a3694fa2ffde10297014:worker/golden/fhir_emit.json:generic-ap
 # line of worker/src/index.ts listed above, in the built copy of the Worker's unit tests, which
 # load the Worker itself since 2026-09-29 to test its routes.
 2fc316b84e63fa3e73a8156e2d22ea0e3d91d92d:worker/dist/golden.test.mjs:generic-api-key:6518
+# The same alphabet line in the built Worker tests, rebuilt again at the merge of the fix packages
+44b842758b16733013713d9b1fefbaa75668b9b2:worker/dist/golden.test.mjs:generic-api-key:6583
