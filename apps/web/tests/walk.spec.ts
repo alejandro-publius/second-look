@@ -1134,6 +1134,9 @@ test("the list of languages is whole on the first screen of every walk, and its 
     await expect(label).toBeVisible();
     expect(en["check.lang_label_short"]).toBe("Questions in");
     const labelBox = (await label.boundingBox())!;
+    // Visible to sight, not a one pixel span kept for screen readers: a readable size.
+    expect(labelBox.width, w.id).toBeGreaterThan(40);
+    expect(labelBox.height, w.id).toBeGreaterThan(12);
     expect(labelBox.x + labelBox.width, w.id).toBeLessThanOrEqual(box.x);
     const labelMiddle = labelBox.y + labelBox.height / 2;
     expect(labelMiddle, w.id).toBeGreaterThan(box.y);
