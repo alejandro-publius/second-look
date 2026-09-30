@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-27T04:57:45+00:00",
+  "generated_at_utc": "2026-09-30T05:11:48+00:00",
   "script": "scripts/mutation.py",
   "synthetic": false,
   "tool": "mutmut",
@@ -12,7 +12,7 @@
     "core/gate.py": "ac9c68bd55cd3bde510b69d8b1d6e5372fae93d93f3a566bb25fe9d68f884507",
     "core/followups.py": "bfa4b040982d1b3e8594669efdea9d6612ec090ae246740ed2e64eb6ec0d392a",
     "core/scoring.py": "88598f458a5dc42b0a275c2b479ef7e2ed81f32d612182192bfa4f199a9a53ab",
-    "core/fhir_emit.py": "d8b7828c825ad7c72857830f73260a58b2e17d439d5bf080e4a4a650778f1579"
+    "core/fhir_emit.py": "40c607ad27735c00c9defe8269f2661a995955f9e97089327c02ea95abac2cd6"
   },
   "modules": {
     "core/gate.py": {
@@ -53,31 +53,24 @@
       "survivors": []
     },
     "core/fhir_emit.py": {
-      "mutants": 1747,
-      "killed": 1666,
-      "survived": 81,
+      "mutants": 1752,
+      "killed": 1678,
+      "survived": 74,
       "timeout": 0,
       "other": {},
-      "score_percent": 95.4,
+      "score_percent": 95.8,
       "survivors": [
         "core.fhir_emit.x__if_none_exist__mutmut_26",
         "core.fhir_emit.x__if_none_exist__mutmut_28",
         "core.fhir_emit.x__if_none_exist__mutmut_31",
         "core.fhir_emit.x__practitioner_id__mutmut_5",
         "core.fhir_emit.x__rating_observation__mutmut_1",
-        "core.fhir_emit.x__rating_observation__mutmut_11",
         "core.fhir_emit.x__rating_observation__mutmut_2",
-        "core.fhir_emit.x__rating_observation__mutmut_20",
-        "core.fhir_emit.x__rating_observation__mutmut_21",
-        "core.fhir_emit.x__rating_observation__mutmut_26",
-        "core.fhir_emit.x__rating_observation__mutmut_27",
         "core.fhir_emit.x__rating_observation__mutmut_3",
-        "core.fhir_emit.x__rating_observation__mutmut_32",
-        "core.fhir_emit.x__rating_observation__mutmut_33",
         "core.fhir_emit.x__rating_observation__mutmut_4",
         "core.fhir_emit.x__rating_observation__mutmut_5",
         "core.fhir_emit.x__rating_observation__mutmut_6",
-        "core.fhir_emit.x__rating_observation__mutmut_9",
+        "core.fhir_emit.x__value_words__mutmut_3",
         "core.fhir_emit.x__visit_response__mutmut_50",
         "core.fhir_emit.x_bundle_keys__mutmut_10",
         "core.fhir_emit.x_bundle_keys__mutmut_12",
@@ -167,18 +160,18 @@
       "score_percent": 100.0
     },
     "fhir_emit": {
-      "mutants": 1747,
-      "killed": 1666,
-      "survived": 81,
+      "mutants": 1752,
+      "killed": 1678,
+      "survived": 74,
       "timeout": 0,
-      "score_percent": 95.4
+      "score_percent": 95.8
     }
   },
   "total": {
-    "mutants": 2370,
-    "killed": 2281,
-    "survived": 89,
+    "mutants": 2375,
+    "killed": 2293,
+    "survived": 82,
     "timeout": 0,
-    "score_percent": 96.2
+    "score_percent": 96.5
   }
 }

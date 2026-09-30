@@ -90,7 +90,7 @@ The seven files are the FSH example Bundle SUSHI builds from `fhir/fsh/`, the He
 
 ## The FSH example
 
-`fhir/fsh/` holds our CodeSystem (`second-look`), two ValueSets (feature codes, answer values), the two Questionnaires (the observer test and the creek check, the second generated from our form so every linkId and answer option matches), one complete visit example, and the Heraklion scaffold: four nested Locations under `LocationOah` for a follower city, written by `make new-city`. `scripts/fhir_build.sh` copies them into `input/fsh/second-look/` inside a copy of your guide at the pinned commit and runs SUSHI 3.20.1: 0 errors, 0 warnings. That build runs in our CI on every commit, so the example cannot drift from the guide without someone noticing.
+`fhir/fsh/` holds our CodeSystem (`second-look`), two ValueSets (feature codes, answer values), the two Questionnaires (the observer test and the creek check, the second held to our form by a test, so every linkId, answer option and question text matches it), one complete visit example, and the Heraklion scaffold: four nested Locations under `LocationOah` for a follower city, written by `make new-city`. `scripts/fhir_build.sh` copies them into `input/fsh/second-look/` inside a copy of your guide at the pinned commit and runs SUSHI 3.20.1: 0 errors, 0 warnings. That build runs in our CI on every commit, so the example cannot drift from the guide without someone noticing.
 
 ## What we would add to the guide
 

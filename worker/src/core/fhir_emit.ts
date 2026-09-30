@@ -122,6 +122,32 @@ function itemCategory(item: FormItem): Resource {
   return oahCoding(item.fhir.category || item.fhir.code);
 }
 
+/** core/fhir_emit.py _finding: what an answer to this item found, in a few words, or no words
+ *  when the form has none. Our own feature code's display (Artificial bank), else the short
+ *  phrase content/form.yaml keeps under fhir.finding. */
+function finding(item: FormItem): string {
+  const fhir = item.fhir;
+  if (fhir.code_system === "sl") return String(slCoding(fhir.code).display);
+  const phrase = fhir.finding;
+  return typeof phrase === "string" ? phrase.trim() : "";
+}
+
+/** core/fhir_emit.py _item_label: the finding, then the app's own name in brackets. The app's
+ *  name is its short name for the question (Bank Type), else the question, else the item's id.
+ *  With no finding the app's name stands alone. */
+function itemLabel(item: FormItem): string {
+  const name = String(item.name || item.text || item.id);
+  const found = finding(item);
+  return found ? `${found} (${name})` : name;
+}
+
+/** core/fhir_emit.py _value_words: an answer in the words of its coded display (Can't tell),
+ *  else as it was given. */
+function valueWords(value: unknown): string {
+  const c = typeof value === "string" ? codeForAnswer(value) : null;
+  return c ? String(c.display) : String(value).replace(/_/g, " ");
+}
+
 function quantity(value: number, unit: string): Resource {
   return { value, unit: UCUM_DISPLAYS[unit] ?? unit, system: UCUM_SYSTEM, code: unit };
 }
@@ -321,8 +347,8 @@ function observation(
   score: FeatureScore | null,
 ): Resource | null {
   const fhir = item.fhir;
-  // The app's short name for the item (Water Flow), else its question (content/form.yaml).
-  const label = item.name || (item.text ?? item.id);
+  // What was found, then the app's name for the question: Artificial bank (Bank Type).
+  const label = itemLabel(item);
   let words = `${label} at ${visit.spot.spot_name}: `;
   let valuePart: Resource;
   if (typeof value === "boolean") {
@@ -331,7 +357,8 @@ function observation(
   if (Array.isArray(value)) {
     if (value.length === 0) return null;
     valuePart = { component: components(item, value) };
-    words += value.map((v) => String(v).replace(/_/g, " ")).join(", ") + ".";
+    // A display may hold a comma (Riffles, rapids or falls), so a semicolon parts the list.
+    words += value.map((v) => valueWords(v)).join("; ") + ".";
   } else if (typeof value === "number") {
     const unit = fhir.unit || item.unit;
     if (!unit) throw new FhirEmitError(`item ${item.id}: a number needs a UCUM unit in form.yaml`);
@@ -339,7 +366,7 @@ function observation(
     words += `${pyFloat(value)} ${UCUM_DISPLAYS[unit] ?? unit}.`;
   } else {
     valuePart = { valueCodeableConcept: valueConcept(value) };
-    words += value.replace(/_/g, " ") + ".";
+    words += valueWords(value) + ".";
   }
   if (score !== null) {
     words += ` The observer scored ${score.correct} of ${score.total} on this feature, tested ${score.tested_on}.`;
@@ -381,10 +408,13 @@ function ratingChange(visit: VisitRecord, items: FormItem[]): { first: string; k
  *  given first. A rating that did not change adds no Observation and no component. */
 function ratingObservation(visit: VisitRecord, item: FormItem, first: string, kept: string, pid: string, spotLocationId: string, visitQrId: string): Resource {
   if (item.fhir) throw new FhirEmitError(`item ${item.id}: a changed rating needs the item mapped to none`);
+  // The app has no short name for this question, so the code's own display names the record.
+  // The question itself is one step away, in the Questionnaire the visit response names.
+  const label = String(slCoding("overall-rating").display);
   const words =
-    `${item.text ?? item.id} at ${visit.spot.spot_name}: ${kept.replace(/_/g, " ")}.` +
-    ` The first rating was ${first.replace(/_/g, " ")}.` +
-    ` On the rating check the volunteer changed it to ${kept.replace(/_/g, " ")}.`;
+    `${label} at ${visit.spot.spot_name}: ${valueWords(kept)}.` +
+    ` The first answer was ${valueWords(first)}.` +
+    ` On the rating check the volunteer changed it to ${valueWords(kept)}.`;
   return {
     resourceType: "Observation",
     id: fhirId("sl-obs", visit.visit_id, item.id),
@@ -392,7 +422,7 @@ function ratingObservation(visit: VisitRecord, item: FormItem, first: string, ke
     text: narrative(words),
     identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
     status: "final",
-    code: concept(slCoding("overall-rating"), item.text),
+    code: concept(slCoding("overall-rating"), label),
     subject: ref("Location", spotLocationId),
     effectiveDateTime: instant(visit.answered_at),
     performer: [ref("Practitioner", pid)],

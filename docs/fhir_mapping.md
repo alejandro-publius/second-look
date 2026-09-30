@@ -23,6 +23,12 @@ Proof P2 passed on 2026-09-20. The HL7 validator (6.10.4, FHIR 4.0.1) checked ou
 - Coding displays must be the code system's own display. The words a person sees on screen live in `content/form.yaml`, never in the coding.
 - Units are UCUM (`m` for water height).
 
+## What a record calls itself
+
+- `Observation.code.text` and the narrative say what was found and keep the app's own name for the question beside it in brackets, as in `Artificial bank (Bank Type)`. For an item on one of our feature codes the finding is that code's display. For the other yes or no items it is a short phrase kept in `content/form.yaml` under `fhir.finding`. An item with other answers, such as Water Flow, is named by the app alone. The rating Observation, which exists only when the rating check changed the rating, is named by its code's display, `Overall rating`, because the app has no short name for that question; the question is in the Questionnaire the visit response names.
+- In the narrative each coded value reads as its display does, such as `Present` or `Can't tell`. The values of a list are parted by a semicolon, because a display may hold a comma.
+- Several items share one group code. Channel form, bottom type, habitats, natural debris, barriers and construction all carry `#morophology` as `Observation.code`. They are told apart by `code.text` and by the identifier, which ends in the form item id. Answer options that map to the same value are not kept apart: muddy water, foam and a changed colour are all stored as `present`.
+
 ## What the validator said, in plain words
 
 - Our Observations conform to their indicator profile, including the fixed `status`, the required `subject` that must be one of their Locations, and the required `performer`.

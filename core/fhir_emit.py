@@ -235,6 +235,37 @@ def _item_category(item: Mapping[str, Any]) -> dict[str, Any]:
     return oah_coding(fhir.get("category") or fhir["code"])
 
 
+def _finding(item: Mapping[str, Any]) -> str:
+    """What an answer to this item found, in a few words, or no words when the form has none.
+
+    For an item on one of our own feature codes it is that code's display (Artificial bank).
+    For any other item it is the short phrase content/form.yaml keeps under fhir.finding.
+    """
+    fhir = item["fhir"]
+    if fhir.get("code_system") == "sl":
+        return SL_DISPLAYS[fhir["code"]]
+    phrase = fhir.get("finding")
+    return phrase.strip() if isinstance(phrase, str) else ""
+
+
+def _item_label(item: Mapping[str, Any]) -> str:
+    """How an Observation names itself: the finding, then the app's own name in brackets.
+
+    The app's name is its short name for the question (Bank Type), else the question, else
+    the item's id. With no finding the app's name stands alone, as it does for Water Flow or
+    Water height.
+    """
+    name = str(item.get("name") or item.get("text") or item["id"])
+    finding = _finding(item)
+    return f"{finding} ({name})" if finding else name
+
+
+def _value_words(value: object) -> str:
+    """An answer in the words of its coded display (Can't tell), else as it was given."""
+    coding = code_for_answer(value) if isinstance(value, str) else None
+    return str(coding["display"]) if coding else str(value).replace("_", " ")
+
+
 def _quantity(value: float, unit: str) -> dict[str, Any]:
     return {
         "value": value,
@@ -478,8 +509,8 @@ def _observation(
 ) -> dict[str, Any] | None:
     """One Observation for one answered item, or None when a list answer is empty."""
     fhir = item["fhir"]
-    # The app's short name for the item (Water Flow), else its question (content/form.yaml).
-    label = item.get("name") or item.get("text", item["id"])
+    # What was found, then the app's name for the question: Artificial bank (Bank Type).
+    label = _item_label(item)
     words = f"{label} at {visit.spot.spot_name}: "
     value_part: dict[str, Any]
     if isinstance(value, bool):
@@ -490,7 +521,8 @@ def _observation(
         if not value:
             return None
         value_part = {"component": _components(item, value)}
-        words += ", ".join(str(v).replace("_", " ") for v in value) + "."
+        # A display may hold a comma (Riffles, rapids or falls), so a semicolon parts the list.
+        words += "; ".join(_value_words(v) for v in value) + "."
     elif isinstance(value, int | float):
         unit = fhir.get("unit") or item.get("unit")
         if not unit:
@@ -499,7 +531,7 @@ def _observation(
         words += f"{value} {UCUM_DISPLAYS.get(unit, unit)}."
     else:
         value_part = {"valueCodeableConcept": _value_concept(value)}
-        words += value.replace("_", " ") + "."
+        words += _value_words(value) + "."
     if score is not None:
         words += (
             f" The observer scored {score.correct} of {score.total} on this feature,"
@@ -562,10 +594,13 @@ def _rating_observation(
     """
     if item.get("fhir"):
         raise FhirEmitError(f"item {item['id']}: a changed rating needs the item mapped to none")
+    # The app has no short name for this question, so the code's own display names the record.
+    # The question itself is one step away, in the Questionnaire the visit response names.
+    label = SL_DISPLAYS["overall-rating"]
     words = (
-        f"{item.get('text', item['id'])} at {visit.spot.spot_name}: {kept.replace('_', ' ')}."
-        f" The first rating was {first.replace('_', ' ')}."
-        f" On the rating check the volunteer changed it to {kept.replace('_', ' ')}."
+        f"{label} at {visit.spot.spot_name}: {_value_words(kept)}."
+        f" The first answer was {_value_words(first)}."
+        f" On the rating check the volunteer changed it to {_value_words(kept)}."
     )
     return {
         "resourceType": "Observation",
@@ -574,7 +609,7 @@ def _rating_observation(
         "text": _narrative(words),
         "identifier": [_identifier(ID_SYSTEM_OBSERVATION, f"{visit.visit_id}-{item['id']}")],
         "status": "final",
-        "code": _concept(sl_coding("overall-rating"), item.get("text")),
+        "code": _concept(sl_coding("overall-rating"), label),
         "subject": _ref("Location", spot_location_id),
         "effectiveDateTime": _instant(visit.answered_at),
         "performer": [_ref("Practitioner", practitioner_id)],

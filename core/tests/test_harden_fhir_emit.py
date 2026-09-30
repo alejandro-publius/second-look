@@ -101,15 +101,19 @@ def broken_copy(bundle: dict[str, Any]) -> dict[str, Any]:
 
 
 def item_text(item_id: str) -> str:
-    """The Observation code text for an item: its short name, else its question, as
-    content/form.yaml has them, so a wording change moves no test."""
+    """The app's name for an item: its short name, else its question, as content/form.yaml
+    has them, so a wording change moves no test. An item with no finding is named by it alone."""
     item = next(i for i in form_items() if i["id"] == item_id)
     return str(item.get("name") or item["text"])
 
 
 def observation_answer(bundle: dict[str, Any], item_id: str) -> dict[str, Any]:
-    text = item_text(item_id)
-    return next(o for o in resources(bundle, "Observation") if o["code"].get("text") == text)
+    """The Observation of one item, found by its identifier, which ends in the item id."""
+    return next(
+        o
+        for o in resources(bundle, "Observation")
+        if o["identifier"][0]["value"].endswith(f"-{item_id}")
+    )
 
 
 def visit_response_answers(bundle: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:

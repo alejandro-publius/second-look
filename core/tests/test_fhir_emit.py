@@ -425,8 +425,10 @@ def test_second_visit_structure() -> None:
         c["valueCodeableConcept"]["coding"][0]["code"] == "present" for c in habitats["component"]
     )
     # an empty multi-select is not an Observation
+    assert second_visit().answers["natural_debris"] == []
     assert not any(
-        o["code"].get("text") == "Natural debris" for o in resources(bundle, "Observation")
+        o["identifier"][0]["value"].endswith("-natural_debris")
+        for o in resources(bundle, "Observation")
     )
     # a number
     height = next(o for o in resources(bundle, "Observation") if "valueQuantity" in o)
@@ -522,6 +524,26 @@ def test_check_questionnaire_fsh_mirrors_the_form() -> None:
             coding = code_for_answer(value)
             assert coding is not None, (item["id"], value)
             assert f"#{coding['code']} " in block, (item["id"], value)
+
+
+def check_questionnaire_texts(fsh: str) -> dict[str, str]:
+    """linkId to item text, as the creek check Questionnaire in the FSH states them."""
+    check = fsh[fsh.index("Instance: sl-questionnaire-check") :]
+    link_ids = dict(re.findall(r'^\* item\[(\d+)\]\.linkId = "([^"]+)"', check, flags=re.MULTILINE))
+    texts = re.findall(r'^\* item\[(\d+)\]\.text = "((?:[^"\\]|\\.)*)"$', check, flags=re.MULTILINE)
+    return {link_ids[n]: re.sub(r"\\(.)", r"\1", text) for n, text in texts}
+
+
+def test_check_questionnaire_fsh_asks_the_forms_own_questions() -> None:
+    """Every item text of the creek check Questionnaire is the form's text, word for word.
+
+    Each visit's QuestionnaireResponse names this Questionnaire, so a reader who opens it must
+    find the questions the volunteer saw (content/form.yaml, quoted from the official app).
+    """
+    fsh = (ROOT / "fhir" / "fsh" / "questionnaires-second-look.fsh").read_text(encoding="utf-8")
+    expected = {item["id"]: item["text"] for item in form_items() if item["type"] != "sliders"}
+    assert len(expected) == 23
+    assert check_questionnaire_texts(fsh) == expected
 
 
 def test_sliders_are_not_carried_in_the_response() -> None:
@@ -690,7 +712,15 @@ def test_a_rating_changed_at_the_rating_check_is_the_value_and_the_first_is_a_co
             },
         }
     ]
-    assert "The first rating was good" in rating["text"]["div"]
+    # The record names itself by its code's display, and every rating reads as its display.
+    assert rating["code"]["text"] == "Overall rating"
+    assert rating["text"]["div"] == (
+        '<div xmlns="http://www.w3.org/1999/xhtml"><p>'
+        "Overall rating at Codornices Creek, lower reach, spot 2: Poor overall rating."
+        " The first answer was Good overall rating."
+        " On the rating check the volunteer changed it to Poor overall rating."
+        "</p></div>"
+    )
     (provenance,) = resources(bundle, "Provenance")
     assert {"reference": f"Observation/{rating['id']}"} in provenance["target"]
     # The stored answers stay as given.
@@ -718,3 +748,226 @@ def test_a_final_rating_with_no_rating_answered_adds_no_rating() -> None:
     bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
     assert _rating_observations(bundle) == []
     assert "poor" not in json.dumps(bundle)
+
+
+# What an Observation calls itself, and how its narrative says the answer
+
+PRESENCE_VALUES = {"present", "absent", "cant_tell"}
+DIV_OPEN = '<div xmlns="http://www.w3.org/1999/xhtml"><p>'
+DIV_CLOSE = "</p></div>"
+
+
+def observation_of(bundle: dict, item_id: str) -> dict:
+    """The Observation of one form item, found by its identifier, which ends in the item id."""
+    (found,) = [
+        o
+        for o in resources(bundle, "Observation")
+        if o["identifier"][0]["value"].endswith(f"-{item_id}")
+    ]
+    return found
+
+
+def words_of(observation: dict) -> str:
+    div = str(observation["text"]["div"])
+    assert div.startswith(DIV_OPEN) and div.endswith(DIV_CLOSE)
+    return div[len(DIV_OPEN) : -len(DIV_CLOSE)]
+
+
+def answer_values(item: dict) -> set[str]:
+    """Every value an answer to this form item can have."""
+    if item["type"] == "yesno":
+        return set(PRESENCE_VALUES)
+    return {str(o["value"]) for o in item.get("options", [])}
+
+
+def test_a_tested_feature_is_named_by_its_code_with_the_apps_name_beside_it(
+    golden_bundle: dict,
+) -> None:
+    """The record says what was found, Artificial bank, and keeps the app's name, Bank Type, so
+    the link to the app's question stays in sight. The score sentence is as it was: the record
+    card on /two reads the score from it (apps/web/components/RecordCard.tsx)."""
+    bank = observation_of(golden_bundle, "bank_type")
+    assert bank["code"]["text"] == "Artificial bank (Bank Type)"
+    assert words_of(bank) == (
+        "Artificial bank (Bank Type) at Strawberry Creek, campus reach, spot 1: Present."
+        " The observer scored 4 of 4 on this feature, tested 2026-09-23."
+    )
+    pipes = observation_of(golden_bundle, "draining_pipes")
+    assert pipes["code"]["text"] == "Pipe running (Draining Pipes)"
+    assert words_of(pipes) == (
+        "Pipe running (Draining Pipes) at Strawberry Creek, campus reach, spot 1: Can't tell."
+        " The observer scored 4 of 4 on this feature, tested 2026-09-23."
+    )
+    invasive = observation_of(golden_bundle, "invasive_species")
+    assert invasive["code"]["text"] == "Invasive plant (Invasive Species)"
+
+
+def test_another_yes_or_no_item_is_named_by_the_forms_finding_phrase() -> None:
+    answers = {"bottom_type": "present", "water_aspect": "cant_tell", "barriers": "absent"}
+    visit = strawberry_visit().model_copy(update={"answers": answers})
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
+    assert check_bundle(bundle) == []
+    spot = "Strawberry Creek, campus reach, spot 1"
+    bottom = observation_of(bundle, "bottom_type")
+    assert bottom["code"]["text"] == "Artificial channel bottom (Bottom Type)"
+    assert words_of(bottom) == f"Artificial channel bottom (Bottom Type) at {spot}: Present."
+    water = observation_of(bundle, "water_aspect")
+    assert water["code"]["text"] == "Muddy water, foam or a changed colour (Water Aspect)"
+    assert words_of(water) == (
+        f"Muddy water, foam or a changed colour (Water Aspect) at {spot}: Can't tell."
+    )
+    barriers = observation_of(bundle, "barriers")
+    assert (
+        words_of(barriers)
+        == f"Dam or other barrier across the stream (Barriers) at {spot}: Absent."
+    )
+    # The codes and the values are what they were: only the words moved.
+    assert bottom["code"]["coding"] == [
+        {"system": OAH_SYSTEM, "code": "morophology", "display": "Morphology of the streams"}
+    ]
+    assert water["code"]["coding"][0]["code"] == "foam"
+    assert [o["valueCodeableConcept"]["coding"][0]["code"] for o in (bottom, water, barriers)] == [
+        "present",
+        "cant-tell",
+        "absent",
+    ]
+
+
+def test_an_item_with_no_finding_is_named_by_the_app_alone() -> None:
+    bundle = emit_visit(second_visit(), test_sitting=None, emitted_at=EMITTED_AT)
+    spot = "Codornices Creek, lower reach, spot 2"
+    flow = observation_of(bundle, "water_flow")
+    assert flow["code"]["text"] == "Water Flow"
+    assert words_of(flow) == f"Water Flow at {spot}: Slow flow."
+    height = observation_of(bundle, "water_height_m")
+    assert height["code"]["text"] == "Water height"
+    assert words_of(height) == f"Water height at {spot}: 0.35 metre."
+    # A display may hold a comma, so the values of a list are parted by a semicolon.
+    habitats = observation_of(bundle, "habitats")
+    assert habitats["code"]["text"] == "Habitats"
+    assert words_of(habitats) == f"Habitats at {spot}: Sand banks; Riffles, rapids or falls."
+    # A display with an angle bracket is escaped in the narrative, as XHTML asks.
+    trees = observation_of(bundle, "vegetation_type_left")
+    assert words_of(trees) == f"Vegetation Type (Left) at {spot}: Trees (height &gt;3m)."
+    # An item with no short name in the app keeps its question beside the finding.
+    which = observation_of(bundle, "invasive_which")
+    assert which["code"]["text"] == "Invasive plant (Which ones?)"
+    assert words_of(which) == f"Invasive plant (Which ones?) at {spot}: Can't tell."
+
+
+def test_the_narrative_says_every_coded_value_as_its_display_does() -> None:
+    """One Observation per item of the form that takes a yes, no or can't tell, each value in
+    turn: the narrative ends with the very display the coded value carries."""
+    checked = 0
+    for item in form_items():
+        if not item.get("fhir") or item["type"] in {"multi", "number", "pick_region_list"}:
+            continue
+        for value in sorted(answer_values(item)):
+            visit = strawberry_visit().model_copy(update={"answers": {item["id"]: value}})
+            bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
+            obs = observation_of(bundle, item["id"])
+            display = obs["valueCodeableConcept"]["coding"][0]["display"]
+            shown = display.replace("<", "&lt;").replace(">", "&gt;")
+            first_sentence = words_of(obs).split(" The observer scored")[0]
+            assert first_sentence.endswith(f": {shown}."), (item["id"], value)
+            assert "_" not in first_sentence and "cant tell" not in first_sentence
+            checked += 1
+    assert checked >= 50
+
+
+def test_a_value_with_no_code_is_said_as_it_was_given() -> None:
+    visit = strawberry_visit().model_copy(update={"answers": {"invasive_which": ["arundo_donax"]}})
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT)
+    which = observation_of(bundle, "invasive_which")
+    assert words_of(which).startswith(
+        "Invasive plant (Which ones?) at Strawberry Creek, campus reach, spot 1: arundo donax."
+    )
+
+
+def test_every_yes_or_no_item_of_the_form_names_a_finding() -> None:
+    """A mapped item whose every answer is present, absent or can't tell says what was found:
+    through our own feature code, or through a finding phrase in content/form.yaml. A phrase on
+    any other item would read wrong (a finding beside Slow flow), so none may carry one."""
+    named: dict[str, str] = {}
+    for item in form_items():
+        fhir = item.get("fhir")
+        if not fhir:
+            continue
+        phrase = fhir.get("finding")
+        yes_or_no = bool(answer_values(item)) and answer_values(item) <= PRESENCE_VALUES
+        if fhir["code_system"] == "sl":
+            assert phrase is None, f"{item['id']}: our own code names the finding already"
+            continue
+        if not yes_or_no:
+            assert phrase is None, f"{item['id']}: a finding phrase on an item with other answers"
+            continue
+        assert isinstance(phrase, str) and phrase, f"{item['id']}: no finding phrase"
+        assert phrase == phrase.strip() and phrase[0].isupper(), item["id"]
+        assert not phrase.endswith(".") and len(phrase) <= 60, item["id"]
+        assert chr(0x2014) not in phrase and chr(0x2013) not in phrase, item["id"]
+        named[item["id"]] = phrase
+    assert sorted(named) == [
+        "barriers",
+        "bottom_type",
+        "construction",
+        "impervious_left",
+        "impervious_right",
+        "vegetation_cuts",
+        "vegetation_left",
+        "vegetation_right",
+        "water_aspect",
+        "water_withdrawal",
+    ]
+    assert len(set(named.values())) == len(named), "two items share one finding phrase"
+
+
+@pytest.mark.parametrize(
+    ("fhir_extra", "item_extra", "expected"),
+    [
+        (
+            {"finding": "  Dam across the stream  "},
+            {"name": "Barriers"},
+            "Dam across the stream (Barriers)",
+        ),
+        ({"finding": "   "}, {"name": "Barriers"}, "Barriers"),
+        ({"finding": ""}, {"name": "Barriers"}, "Barriers"),
+        ({"finding": 7}, {"name": "Barriers"}, "Barriers"),
+        ({"finding": None}, {"name": "Barriers"}, "Barriers"),
+        ({}, {"name": "Barriers"}, "Barriers"),
+        ({"finding": "Dam"}, {"name": "", "text": "Any dams?"}, "Dam (Any dams?)"),
+        ({"finding": "Dam"}, {"text": "Any dams?"}, "Dam (Any dams?)"),
+        ({"finding": "Dam"}, {}, "Dam (odd_item)"),
+        ({}, {}, "odd_item"),
+    ],
+)
+def test_the_name_of_an_observation_from_the_parts_the_form_gives(
+    fhir_extra: dict, item_extra: dict, expected: str
+) -> None:
+    item = {
+        "id": "odd_item",
+        "type": "yesno",
+        "fhir": {"code_system": "oah", "code": "hydrology", **fhir_extra},
+        **item_extra,
+    }
+    visit = strawberry_visit().model_copy(update={"answers": {"odd_item": "present"}})
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT, items=[item])
+    obs = observation_of(bundle, "odd_item")
+    assert obs["code"]["text"] == expected
+    assert words_of(obs) == f"{expected} at Strawberry Creek, campus reach, spot 1: Present."
+
+
+def test_a_finding_phrase_does_not_rename_an_item_on_our_own_code() -> None:
+    item = {
+        "id": "odd_item",
+        "type": "yesno",
+        "name": "Bank Type",
+        "fhir": {
+            "code_system": "sl",
+            "code": "artificial-bank",
+            "category": "morophology",
+            "finding": "Other words",
+        },
+    }
+    visit = strawberry_visit().model_copy(update={"answers": {"odd_item": "absent"}})
+    bundle = emit_visit(visit, test_sitting=None, emitted_at=EMITTED_AT, items=[item])
+    assert observation_of(bundle, "odd_item")["code"]["text"] == "Artificial bank (Bank Type)"

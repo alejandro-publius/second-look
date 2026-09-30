@@ -176,7 +176,8 @@ def test_a_unit_with_no_plain_name_is_shown_by_its_code_and_an_item_by_its_id() 
 
 def test_a_list_answer_reads_as_a_list() -> None:
     obs = the(emit(visit({"habitats": ["sand_banks", "stone_deposits"]})), "Observation")
-    assert narrative(obs) == "Habitats at Below the footbridge: sand banks, stone deposits."
+    # Each value in the words of its coded display, parted by a semicolon.
+    assert narrative(obs) == "Habitats at Below the footbridge: Sand banks; Stone deposits."
     assert len(obs["component"]) == 2
 
 

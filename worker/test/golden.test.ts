@@ -186,6 +186,25 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
   assert.ok(checkBundle(broken as never).some((p) => p.includes("does not resolve")));
 });
 
+test("fhir_emit: an Observation names the finding and says each value as its display does, as Python", () => {
+  const doc = golden("fhir_emit");
+  assert.ok(doc.named.length > 0, "the named cases are there");
+  for (const c of doc.named) {
+    const bundle = emitVisit(c.input.visit, null, c.input.emitted_at, c.input.items);
+    same(bundle, c.expected, c.name);
+    assert.deepEqual(checkBundle(bundle), [], `${c.name}: structural check`);
+  }
+  // On the real form: the finding first, the app's name beside it, the value as its display.
+  type Obs = { resourceType: string; id: string; code: { text: string }; text: { div: string } };
+  const first = doc.cases[0];
+  const bundle = emitVisit(first.input.visit, first.input.test_sitting, first.input.emitted_at) as { entry: { resource: Obs }[] };
+  const bank = bundle.entry.map((e) => e.resource).find((r) => r.id.endsWith("-bank-type"))!;
+  assert.equal(bank.code.text, "Artificial bank (Bank Type)");
+  assert.ok(bank.text.div.includes("<p>Artificial bank (Bank Type) at Strawberry Creek, campus reach, spot 1: Present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p>"));
+  const pipes = bundle.entry.map((e) => e.resource).find((r) => r.id.endsWith("-draining-pipes"))!;
+  assert.ok(pipes.text.div.includes(": Can't tell. The observer scored"));
+});
+
 test("fhir_emit: a rating changed at the rating check is the value, and the first is a component", () => {
   type Obs = { id: string; valueCodeableConcept: { coding: { code: string }[] }; component: { code: { coding: { code: string }[] }; valueCodeableConcept: { coding: { code: string }[] } }[] };
   type Entry = { resource: { resourceType: string; id: string; item?: { linkId: string; answer: { valueCoding: { code: string } }[] }[]; target?: { reference: string }[] } };

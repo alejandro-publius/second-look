@@ -16,7 +16,7 @@ var content_default = {
     "fr",
     "it"
   ],
-  content_hash: "4823dbd5f58cdd5a",
+  content_hash: "74dcb7ca36949bca",
   creeks: [
     {
       name: "Strawberry Creek",
@@ -297,7 +297,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "morophology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Artificial channel bottom"
       },
       id: "bottom_type",
       name: "Bottom Type",
@@ -484,7 +485,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "foam",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Muddy water, foam or a changed colour"
       },
       id: "water_aspect",
       name: "Water Aspect",
@@ -526,7 +528,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "hydrology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Water taken from the stream"
       },
       id: "water_withdrawal",
       name: "Water Withdrawal",
@@ -541,7 +544,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "morophology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Dam or other barrier across the stream"
       },
       id: "barriers",
       name: "Barriers",
@@ -589,7 +593,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "morophology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Construction or works in the stream"
       },
       id: "construction",
       name: "Construction",
@@ -621,7 +626,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "LandUse",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Left margin more than one third paved or built on"
       },
       id: "impervious_left",
       name: "Impervious Areas (Left)",
@@ -637,7 +643,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "LandUse",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Right margin more than one third paved or built on"
       },
       id: "impervious_right",
       name: "Impervious Areas (Right)",
@@ -653,7 +660,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "riparianVegetation",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Left margin covered by vegetation"
       },
       id: "vegetation_left",
       name: "Vegetation (Left)",
@@ -668,7 +676,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "riparianVegetation",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Right margin covered by vegetation"
       },
       id: "vegetation_right",
       name: "Vegetation (Right)",
@@ -795,7 +804,8 @@ var content_default = {
       feature: null,
       fhir: {
         code: "riparianVegetation",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Recent cuts of vegetation on the banks"
       },
       id: "vegetation_cuts",
       name: "Vegetation Cuts",
@@ -1500,7 +1510,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "morophology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Artificial channel bottom"
       },
       id: "bottom_type",
       name: "Bottom Type",
@@ -1687,7 +1698,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "foam",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Muddy water, foam or a changed colour"
       },
       id: "water_aspect",
       name: "Water Aspect",
@@ -1729,7 +1741,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "hydrology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Water taken from the stream"
       },
       id: "water_withdrawal",
       name: "Water Withdrawal",
@@ -1744,7 +1757,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "morophology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Dam or other barrier across the stream"
       },
       id: "barriers",
       name: "Barriers",
@@ -1792,7 +1806,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "morophology",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Construction or works in the stream"
       },
       id: "construction",
       name: "Construction",
@@ -1824,7 +1839,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "LandUse",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Left margin more than one third paved or built on"
       },
       id: "impervious_left",
       name: "Impervious Areas (Left)",
@@ -1840,7 +1856,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "LandUse",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Right margin more than one third paved or built on"
       },
       id: "impervious_right",
       name: "Impervious Areas (Right)",
@@ -1856,7 +1873,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "riparianVegetation",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Left margin covered by vegetation"
       },
       id: "vegetation_left",
       name: "Vegetation (Left)",
@@ -1871,7 +1889,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "riparianVegetation",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Right margin covered by vegetation"
       },
       id: "vegetation_right",
       name: "Vegetation (Right)",
@@ -1998,7 +2017,8 @@ var core_content_default = {
       feature: null,
       fhir: {
         code: "riparianVegetation",
-        code_system: "oah"
+        code_system: "oah",
+        finding: "Recent cuts of vegetation on the banks"
       },
       id: "vegetation_cuts",
       name: "Vegetation Cuts",
@@ -2501,10 +2521,10 @@ function looksLikeATestName(name) {
   if (words.some((w) => TEST_NAME_WORDS.has(w))) return true;
   return !/\p{L}/u.test(name);
 }
-function downstreamNote(finding, featureName, reachSlugs) {
-  const n = finding.observers.length;
+function downstreamNote(finding2, featureName, reachSlugs) {
+  const n = finding2.observers.length;
   const people = n === 1 ? "one person" : `${n} people`;
-  const line = `Upstream of here, ${people} reported ${featureName} on ${shortDate(finding.last_seen)}.`;
+  const line = `Upstream of here, ${people} reported ${featureName} on ${shortDate(finding2.last_seen)}.`;
   return Object.fromEntries(reachSlugs.map((slug) => [slug, line]));
 }
 function notesBelow(findings, reachOfSpot, creek, labels) {
@@ -2813,6 +2833,21 @@ function itemCode(item) {
 function itemCategory(item) {
   return oahCoding(item.fhir.category || item.fhir.code);
 }
+function finding(item) {
+  const fhir = item.fhir;
+  if (fhir.code_system === "sl") return String(slCoding(fhir.code).display);
+  const phrase = fhir.finding;
+  return typeof phrase === "string" ? phrase.trim() : "";
+}
+function itemLabel(item) {
+  const name = String(item.name || item.text || item.id);
+  const found = finding(item);
+  return found ? `${found} (${name})` : name;
+}
+function valueWords(value) {
+  const c = typeof value === "string" ? codeForAnswer(value) : null;
+  return c ? String(c.display) : String(value).replace(/_/g, " ");
+}
 function quantity(value, unit) {
   return { value, unit: UCUM_DISPLAYS[unit] ?? unit, system: UCUM_SYSTEM, code: unit };
 }
@@ -2981,7 +3016,7 @@ function components(item, values) {
 }
 function observation(visit, item, value, pid, spotLocationId, visitQrId, score) {
   const fhir = item.fhir;
-  const label = item.name || (item.text ?? item.id);
+  const label = itemLabel(item);
   let words = `${label} at ${visit.spot.spot_name}: `;
   let valuePart;
   if (typeof value === "boolean") {
@@ -2990,7 +3025,7 @@ function observation(visit, item, value, pid, spotLocationId, visitQrId, score) 
   if (Array.isArray(value)) {
     if (value.length === 0) return null;
     valuePart = { component: components(item, value) };
-    words += value.map((v) => String(v).replace(/_/g, " ")).join(", ") + ".";
+    words += value.map((v) => valueWords(v)).join("; ") + ".";
   } else if (typeof value === "number") {
     const unit = fhir.unit || item.unit;
     if (!unit) throw new FhirEmitError(`item ${item.id}: a number needs a UCUM unit in form.yaml`);
@@ -2998,7 +3033,7 @@ function observation(visit, item, value, pid, spotLocationId, visitQrId, score) 
     words += `${pyFloat(value)} ${UCUM_DISPLAYS[unit] ?? unit}.`;
   } else {
     valuePart = { valueCodeableConcept: valueConcept(value) };
-    words += value.replace(/_/g, " ") + ".";
+    words += valueWords(value) + ".";
   }
   if (score !== null) {
     words += ` The observer scored ${score.correct} of ${score.total} on this feature, tested ${score.tested_on}.`;
@@ -3031,7 +3066,8 @@ function ratingChange(visit, items) {
 }
 function ratingObservation(visit, item, first, kept, pid, spotLocationId, visitQrId) {
   if (item.fhir) throw new FhirEmitError(`item ${item.id}: a changed rating needs the item mapped to none`);
-  const words = `${item.text ?? item.id} at ${visit.spot.spot_name}: ${kept.replace(/_/g, " ")}. The first rating was ${first.replace(/_/g, " ")}. On the rating check the volunteer changed it to ${kept.replace(/_/g, " ")}.`;
+  const label = String(slCoding("overall-rating").display);
+  const words = `${label} at ${visit.spot.spot_name}: ${valueWords(kept)}. The first answer was ${valueWords(first)}. On the rating check the volunteer changed it to ${valueWords(kept)}.`;
   return {
     resourceType: "Observation",
     id: fhirId("sl-obs", visit.visit_id, item.id),
@@ -3039,7 +3075,7 @@ function ratingObservation(visit, item, first, kept, pid, spotLocationId, visitQ
     text: narrative(words),
     identifier: [identifier(ID_SYSTEM_OBSERVATION, `${visit.visit_id}-${item.id}`)],
     status: "final",
-    code: concept(slCoding("overall-rating"), item.text),
+    code: concept(slCoding("overall-rating"), label),
     subject: ref("Location", spotLocationId),
     effectiveDateTime: instant(visit.answered_at),
     performer: [ref("Practitioner", pid)],
@@ -3926,6 +3962,22 @@ test("fhir_emit: the same Bundle as Python, and it passes the structural check",
   const prov = broken.entry.find((e) => e.resource.resourceType === "Provenance");
   prov.resource.target.push({ reference: "Observation/nowhere" });
   assert.ok(checkBundle(broken).some((p) => p.includes("does not resolve")));
+});
+test("fhir_emit: an Observation names the finding and says each value as its display does, as Python", () => {
+  const doc = golden("fhir_emit");
+  assert.ok(doc.named.length > 0, "the named cases are there");
+  for (const c of doc.named) {
+    const bundle2 = emitVisit(c.input.visit, null, c.input.emitted_at, c.input.items);
+    same(bundle2, c.expected, c.name);
+    assert.deepEqual(checkBundle(bundle2), [], `${c.name}: structural check`);
+  }
+  const first = doc.cases[0];
+  const bundle = emitVisit(first.input.visit, first.input.test_sitting, first.input.emitted_at);
+  const bank = bundle.entry.map((e) => e.resource).find((r) => r.id.endsWith("-bank-type"));
+  assert.equal(bank.code.text, "Artificial bank (Bank Type)");
+  assert.ok(bank.text.div.includes("<p>Artificial bank (Bank Type) at Strawberry Creek, campus reach, spot 1: Present. The observer scored 4 of 4 on this feature, tested 2026-09-23.</p>"));
+  const pipes = bundle.entry.map((e) => e.resource).find((r) => r.id.endsWith("-draining-pipes"));
+  assert.ok(pipes.text.div.includes(": Can't tell. The observer scored"));
 });
 test("fhir_emit: a rating changed at the rating check is the value, and the first is a component", () => {
   const base = golden("fhir_emit").cases.find((c) => c.name.startsWith("a coarse pin")).input.visit;

@@ -324,7 +324,7 @@
                     "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                   }
                 ],
-                "text": "Bank Type"
+                "text": "Artificial bank (Bank Type)"
               },
               "derivedFrom": [
                 {
@@ -362,7 +362,7 @@
                 "reference": "Location/sl-loc-walk-v03-spot"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at The stretch in the clip: present.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at The stretch in the clip: Present.</p></div>",
                 "status": "generated"
               },
               "valueCodeableConcept": {
@@ -398,7 +398,7 @@
                     "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                   }
                 ],
-                "text": "Draining Pipes"
+                "text": "Pipe running (Draining Pipes)"
               },
               "derivedFrom": [
                 {
@@ -436,7 +436,7 @@
                 "reference": "Location/sl-loc-walk-v03-spot"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Draining Pipes at The stretch in the clip: present.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Pipe running (Draining Pipes) at The stretch in the clip: Present.</p></div>",
                 "status": "generated"
               },
               "valueCodeableConcept": {
@@ -923,7 +923,7 @@
                     "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                   }
                 ],
-                "text": "Bank Type"
+                "text": "Artificial bank (Bank Type)"
               },
               "derivedFrom": [
                 {
@@ -961,7 +961,7 @@
                 "reference": "Location/sl-loc-walk-v03-spot"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at The stretch in the clip: absent.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at The stretch in the clip: Absent.</p></div>",
                 "status": "generated"
               },
               "valueCodeableConcept": {
@@ -1393,7 +1393,7 @@
                     "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                   }
                 ],
-                "text": "Bank Type"
+                "text": "Artificial bank (Bank Type)"
               },
               "derivedFrom": [
                 {
@@ -1431,7 +1431,7 @@
                 "reference": "Location/sl-loc-walk-v03-spot"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at The stretch in the clip: present.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at The stretch in the clip: Present.</p></div>",
                 "status": "generated"
               },
               "valueCodeableConcept": {
@@ -1467,7 +1467,7 @@
                     "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                   }
                 ],
-                "text": "Sewage discharge"
+                "text": "Pipe running (Sewage discharge)"
               },
               "derivedFrom": [
                 {
@@ -1505,7 +1505,7 @@
                 "reference": "Location/sl-loc-walk-v03-spot"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Sewage discharge at The stretch in the clip: present.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Pipe running (Sewage discharge) at The stretch in the clip: Present.</p></div>",
                 "status": "generated"
               },
               "valueCodeableConcept": {
@@ -1943,7 +1943,7 @@
                     "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                   }
                 ],
-                "text": "Bank Type"
+                "text": "Artificial bank (Bank Type)"
               },
               "derivedFrom": [
                 {
@@ -1981,7 +1981,7 @@
                 "reference": "Location/sl-loc-walk-v03-spot"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at The stretch in the clip: present.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at The stretch in the clip: Present.</p></div>",
                 "status": "generated"
               },
               "valueCodeableConcept": {
@@ -2017,7 +2017,7 @@
                     "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                   }
                 ],
-                "text": "Sewage discharge"
+                "text": "Pipe running (Sewage discharge)"
               },
               "derivedFrom": [
                 {
@@ -2055,7 +2055,7 @@
                 "reference": "Location/sl-loc-walk-v03-spot"
               },
               "text": {
-                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Sewage discharge at The stretch in the clip: present.</p></div>",
+                "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Pipe running (Sewage discharge) at The stretch in the clip: Present.</p></div>",
                 "status": "generated"
               },
               "valueCodeableConcept": {
@@ -2935,7 +2935,7 @@
                       "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                     }
                   ],
-                  "text": "Bank Type"
+                  "text": "Artificial bank (Bank Type)"
                 },
                 "derivedFrom": [
                   {
@@ -2973,7 +2973,7 @@
                   "reference": "Location/sl-loc-walk-v03-spot"
                 },
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at The stretch in the clip: present.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at The stretch in the clip: Present.</p></div>",
                   "status": "generated"
                 },
                 "valueCodeableConcept": {
@@ -3009,7 +3009,7 @@
                       "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                     }
                   ],
-                  "text": "Sewage discharge"
+                  "text": "Pipe running (Sewage discharge)"
                 },
                 "derivedFrom": [
                   {
@@ -3047,7 +3047,7 @@
                   "reference": "Location/sl-loc-walk-v03-spot"
                 },
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Sewage discharge at The stretch in the clip: present.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Pipe running (Sewage discharge) at The stretch in the clip: Present.</p></div>",
                   "status": "generated"
                 },
                 "valueCodeableConcept": {
@@ -3477,7 +3477,7 @@
                       "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                     }
                   ],
-                  "text": "Bank Type"
+                  "text": "Artificial bank (Bank Type)"
                 },
                 "derivedFrom": [
                   {
@@ -3515,7 +3515,7 @@
                   "reference": "Location/sl-loc-walk-v03-spot"
                 },
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at The stretch in the clip: present.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at The stretch in the clip: Present.</p></div>",
                   "status": "generated"
                 },
                 "valueCodeableConcept": {
@@ -4018,7 +4018,7 @@
                       "system": "https://github.com/alejandro-publius/second-look/fhir/CodeSystem/second-look"
                     }
                   ],
-                  "text": "Bank Type"
+                  "text": "Artificial bank (Bank Type)"
                 },
                 "derivedFrom": [
                   {
@@ -4056,7 +4056,7 @@
                   "reference": "Location/sl-loc-walk-v03-spot"
                 },
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Bank Type at The stretch in the clip: absent.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Artificial bank (Bank Type) at The stretch in the clip: Absent.</p></div>",
                   "status": "generated"
                 },
                 "valueCodeableConcept": {
@@ -4152,7 +4152,7 @@
                   "reference": "Location/sl-loc-walk-v03-spot"
                 },
                 "text": {
-                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Habitats at The stretch in the clip: riffles.</p></div>",
+                  "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Habitats at The stretch in the clip: Riffles, rapids or falls.</p></div>",
                   "status": "generated"
                 }
               }
