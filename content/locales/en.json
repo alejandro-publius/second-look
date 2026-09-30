@@ -360,7 +360,7 @@
   "how.gate_rule": "A model may only flag a feature it passed on the test. The gate drops every other flag, so the model never decides.",
   "how.from": "From {files}, run on {date}.",
   "how.example_title": "One flag kept, one dropped",
-  "how.example_intro": "On the live site the checker is off today, so no volunteer has seen one of its questions. This is the record of our paid run on creek footage, not something a volunteer saw.",
+  "how.example_intro": "On the live site the checker is off today in the creek check, and no walk carries its question, so nobody has met it there. Part 2 of the test is the one place a person meets it: the words \"The checker noticed something here. Look again?\", with no note. This is the record of our paid run on creek footage, not something a volunteer saw.",
   "how.example_frame": "Frame",
   "how.example_model": "Model",
   "how.example_feature": "Feature",

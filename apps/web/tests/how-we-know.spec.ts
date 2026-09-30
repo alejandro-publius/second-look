@@ -199,6 +199,11 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   await page.goto("/how-we-know");
   await expect(page.getByText(en["how.example_intro"])).toBeVisible();
   expect(en["how.example_intro"]).toContain("On the live site the checker is off today");
+  // Since part 2 of the test opened, "no volunteer has seen one of its questions" stopped being
+  // true: a paid participant in the assisted half meets the checker's one question there
+  // (components/Part2Items.tsx, docs/MODEL_CARD.md). The line names that one place instead.
+  expect(en["how.example_intro"]).not.toContain("no volunteer has seen");
+  expect(en["how.example_intro"]).toContain(`Part 2 of the test is the one place a person meets it: the words "${en["part2.question"]}", with no note.`);
 
   const rowValue = (card: Locator, key: string) => card.locator(".row").filter({ hasText: en[key] }).locator(".row-value");
   const credit = async (card: Locator, c: { manifest_row: { author: string; license: string; source_url: string } }) => {
