@@ -231,6 +231,12 @@ test("/check in Italian and in Dutch: the app's own translations, our words mark
   await expect(
     page.locator("#question").getByTestId("english-tag"),
   ).toBeVisible();
+  // WCAG 1.3.1: a screen reader hears "shown in English", not the word English tacked onto the
+  // question. The visible word is hidden from it; the hidden words are read.
+  const tag = page.locator("#question").getByTestId("english-tag");
+  await expect(tag.locator("[aria-hidden=true]")).toHaveText(en["check.english_tag"]);
+  await expect(tag.locator(".visually-hidden")).toHaveText(en["check.english_tag_sr"]);
+  expect(en["check.english_tag_sr"]).toBe("shown in English");
   await expect(
     page.getByRole("button", { name: it.draining_pipes.options.present }),
   ).toBeVisible();

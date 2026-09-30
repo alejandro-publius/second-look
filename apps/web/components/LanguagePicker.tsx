@@ -59,11 +59,16 @@ export function LanguagePicker({
   );
 }
 
-/** Marks English words shown inside another language, for sighted readers and screen readers alike. */
+/**
+ * Marks English words shown inside another language. A sighted reader sees the word English; a
+ * screen reader hears "shown in English" instead, so the word is not read as part of the question
+ * (WCAG 1.3.1).
+ */
 export function EnglishTag() {
   return (
     <span className="badge badge-lang" lang="en" data-testid="english-tag">
-      {t("check.english_tag")}
+      <span aria-hidden="true">{t("check.english_tag")}</span>
+      <span className="visually-hidden">{t("check.english_tag_sr")}</span>
     </span>
   );
 }
