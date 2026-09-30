@@ -1,10 +1,38 @@
 # The panel study: 80 strangers, paid by a research panel
 
-For Alex, about 15 minutes, by Saturday Sep 26 in the evening (UPDATE_29 section 1). Everything
-below goes into the panel's study form as written. Nobody is recruited by us: the panel shows the
-study to its own members, pays them, and checks the completion code. The analysis plan was tagged
-before any participant (`prereg-v1`), and every session that ends before the data lock,
-2026-09-28T01:00:00Z, is in the one pre-registered analysis.
+For Alex, about 15 minutes, on Tuesday Sep 29, 2026, at or after 21:00 PDT (UPDATE_33 item 4;
+first written for UPDATE_29 section 1). Everything below goes into the panel's study form as
+written. Nobody is recruited by us: the panel shows the study to its own members, pays them, and
+checks the completion code.
+
+This is the second wave of the study (`docs/analysis_plan_v3.md`, tag `prereg-v3`). Nobody took
+part before the first lock, 2026-09-28T01:00:00Z, and the deadline moved to Sunday Oct 4 at 21:00
+PDT, so the same test runs a second time with the same design and the same analysis.
+
+## The window
+
+| What | Pacific time | UTC |
+|---|---|---|
+| The wave opens. Do not publish before this | Tue Sep 29, 21:00 PDT | 2026-09-30T04:00:00Z |
+| Stop taking people: pause the study on the panel | Fri Oct 2, by 17:00 PDT | 2026-10-03T00:00:00Z |
+| The second lock | Fri Oct 2, 21:00 PDT | 2026-10-03T04:00:00Z |
+| The one analysis runs by itself | Fri Oct 2, 21:10 PDT | 2026-10-03T04:10:00Z |
+
+A sitting counts when it started at or after the opening and before the second lock. One that
+starts before the opening is left out as a dry run, and that person's browser is left out of
+the wave for good, so publishing early loses people. One that starts at or after the lock is
+left out too. That is why the study stops taking people four hours before the lock: nobody
+should start and then find that the sitting did not count.
+
+## Before you publish: two things must be true
+
+1. The session lead has said that `prereg-v3` is tagged and stamped. The plan is fixed before
+   any sitting of the wave, or the wave is not pre-registered. Check:
+   `git -C ~/second-look-depth tag -l prereg-v3` prints `prereg-v3`.
+2. Judge mode is shut on the live site. It shows the answers to the same photos. Check: open
+   `https://second-look-79t.pages.dev/demo` on your phone. It must say that judge mode is shut.
+
+If either is not true at 21:00 PDT, wait. Publishing later the same night costs nothing.
 
 ## The steps
 
@@ -21,8 +49,10 @@ before any participant (`prereg-v1`), and every session that ends before the dat
    it as a student under a university whose rules call a paid study human subjects research, it
    needs that review first, so do not launch, and the analysis reports whatever arrived through the
    public link.
-4. Publish it. The study runs itself. Watch it with `make panel-status`.
-5. Before you approve any payment, compare the number of completion codes the panel shows as
+4. Publish it, at or after 21:00 PDT on Tue Sep 29. The study runs itself. Watch it with
+   `make panel-status`.
+5. Pause it on the panel by Fri Oct 2 at 17:00 PDT, full or not.
+6. Before you approve any payment, compare the number of completion codes the panel shows as
    submitted with the completed `panel` sessions that `make panel-status` prints. The code is the
    same for everyone and is visible in the page source, where anyone can read it, so a code alone
    does not prove a finished session. The analysis counts only finished sessions. If the panel
@@ -43,6 +73,31 @@ before any participant (`prereg-v1`), and every session that ends before the dat
 | Who may take part | Adults (18 or older), fluent in English |
 | Devices | Phone, tablet or laptop: all work |
 | Completion code | `SLCREEK26`, the same code in two places: after the score, for everyone, and again at the end of part 2, the second look, for those who take it. Only for this link. |
+
+The description says nothing about a first or a second wave, and nothing about judge mode. A
+participant needs neither, and the words above are the ones the plan was written for.
+
+The link carries the source label `src=panel`. It is how the results tell panel sittings from
+those that came through the public link, and it is the only thing kept from the address.
+
+## How many people
+
+Ask for 80 places. It is the target of the plan, 40 in each group.
+
+The plans' rule is that the test counts as a test only with 20 finished sittings kept in each
+group. With fewer it is a description, and the README says so. Some finished sittings are
+dropped by the plan's rules: a test done in under 40 seconds, a second visit from the same
+browser, a sitting that started outside the window. The server gives out the two groups in turn,
+in blocks of 4, so 80 places come out near 40 and 40.
+
+- 50 places is the least that can be expected to reach the rule: about 25 in each group, which
+  leaves room for 5 dropped sittings in each.
+- 80 places leaves room for 20 dropped sittings in each group.
+- Part 2 has the same rule, 20 kept in each of its two groups, and it is optional. With 80
+  places it is reached only if more than half of the people take the second block.
+
+If the places fill slowly, leave the study open until the pause on Friday. Do not raise the
+reward in the middle: everyone is paid the same.
 
 ## What a participant sees
 
@@ -76,11 +131,18 @@ endpoint, `https://second-look-79t.pages.dev/api/test/counts`, which leaves test
 It also prints part 2 by arm: started, finished and declined, from
 `https://second-look-79t.pages.dev/api/t2/counts`.
 
-## After the data lock
+Those counts are of every sitting the site ever stored that was not one of our checks, not only
+of the second wave. Before the launch they read 1 completed session, in the trained group, with
+the source `other`: our own automated walk of Sep 25, which the plan's rules drop
+(`docs/deviations.md`). The `panel` line starts at 0, so it counts the wave's panel sittings and
+nothing else. Counts per group are all anyone looks at before the lock.
 
-On Sep 28, after 2026-09-28T01:00:00Z, a session runs the pre-registered analysis once, exactly as
-tagged, and the README's human row reports what it shows, whatever that is. If the panel was not
-launched, the row stays as it is and says so.
+## After the second lock
 
-The same job then runs the part 2 analysis once, as tagged in `prereg-v2`, and the README's second
-human row reports it, or says that too few finished part 2.
+On Fri Oct 2 at 21:10 PDT, which is 2026-10-03T04:10:00Z, the lock job runs the analysis of the
+second wave once, as `prereg-v3` says, and the README reports what it shows in the second wave's
+own rows, whatever that is. The first wave's rows stay as they are. If the panel was not
+launched, the second wave's row says that nobody finished the test in its window.
+
+The same run does part 2 for the second wave, and the README's row for it reports the result, or
+says that too few finished part 2.

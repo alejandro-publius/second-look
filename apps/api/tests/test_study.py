@@ -18,7 +18,7 @@ from apps.api.db import engine
 from apps.api.models import ItemResponse, ObserverRow, RandomizationCounter, StudySession
 from apps.api.tests.conftest import SESSION_BODY, freeze_now, full_session
 from core.allocator import replay
-from core.lock import DATA_LOCK_UTC
+from core.lock import DATA_LOCK_UTC, JUDGE_MODE_OPENS_UTC, SECOND_LOCK_UTC, WAVE2_OPEN_UTC
 
 NOW = datetime(2026, 9, 23, 12, 0, tzinfo=UTC)
 
@@ -481,18 +481,49 @@ def test_the_confirmed_answer_is_scored_and_the_trail_is_stored(client):
 # Demo -------------------------------------------------------------------------------------------
 
 
-AFTER_LOCK = datetime(2026, 9, 28, 1, 0, 1, tzinfo=UTC)
+# Judge mode opens at the second lock (UPDATE_33): a second wave of the study runs until then.
+AFTER_LOCK = JUDGE_MODE_OPENS_UTC + timedelta(seconds=1)
+JUDGE_SHUT = {"detail": "Judge mode opens on Oct 3."}
 
 
 def test_demo_answer_is_shut_before_the_lock(client):
-    # Review finding F86: before the lock, sixteen answers would be the live test's key.
-    freeze_now(AFTER_LOCK - timedelta(seconds=2))
+    # Review finding F86: before the lock, sixteen answers would be the live test's key. The
+    # lock is the second one now. This test keeps its name: README.md, WRITEUP.md, SECURITY.md
+    # and docs/THREAT_MODEL.md point at it.
+    freeze_now(JUDGE_MODE_OPENS_UTC - timedelta(seconds=1))
     shut = client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"})
     assert shut.status_code == 403
-    assert shut.json() == {"detail": "Judge mode opens on Sep 28."}
+    assert shut.json() == JUDGE_SHUT
+    # Shut whatever is asked: an item nobody knows gets the same 403, not a 404.
+    unknown = client.post("/api/demo/answer", json={"item_id": "t99", "answer": "yes"})
+    assert (unknown.status_code, unknown.json()) == (403, JUDGE_SHUT)
+
+
+def test_demo_answer_opens_at_the_second_lock(client):
+    freeze_now(JUDGE_MODE_OPENS_UTC)
+    at_lock = client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"})
+    assert at_lock.status_code == 200
+    assert at_lock.json() == {"correct": True}
     freeze_now(AFTER_LOCK)
-    open_ = client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"})
-    assert open_.status_code == 200
+    assert (
+        client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"}).status_code == 200
+    )
+
+
+def test_demo_answer_is_shut_between_the_two_locks_where_it_was_once_open(client):
+    # Judge mode opened at the first lock. UPDATE_33 shut it again until the second lock, so the
+    # second wave's answers cannot be read from it.
+    assert JUDGE_MODE_OPENS_UTC == SECOND_LOCK_UTC
+    for moment in (
+        DATA_LOCK_UTC,
+        DATA_LOCK_UTC + timedelta(seconds=1),
+        datetime(2026, 9, 29, 12, 0, tzinfo=UTC),
+        WAVE2_OPEN_UTC,
+        WAVE2_OPEN_UTC + timedelta(days=1),
+    ):
+        freeze_now(moment)
+        shut = client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"})
+        assert (shut.status_code, shut.json()) == (403, JUDGE_SHUT), moment
 
 
 def test_demo_answer_stores_nothing(client):
@@ -549,6 +580,20 @@ def test_at_and_after_lock_sessions_are_marked_post_lock_and_still_answered(clie
     assert client.get("/api/test/counts").json()["post_lock"] == 3
     files = _read_zip(client.get("/api/test/export?token=test-export-token-1234567890").content)
     assert all(row["post_lock"] == "1" for row in files["sessions.csv"])
+
+
+def test_a_session_between_the_two_locks_is_still_marked_post_lock(client):
+    # UPDATE_33 moved judge mode's opening, not the study's mark: a sitting of the second wave
+    # is stored with post_lock true, like every sitting after the first lock. The second wave
+    # goes by the session's start time, not by this mark.
+    for moment in (WAVE2_OPEN_UTC, SECOND_LOCK_UTC - timedelta(seconds=1), SECOND_LOCK_UTC):
+        freeze_now(moment)
+        r = client.post("/api/test/session", json=SESSION_BODY)
+        assert r.status_code == 200
+        with Session(engine) as db:
+            row = must(db.get(StudySession, r.json()["session_id"]))
+        assert row.post_lock is True, moment
+        assert row.started_at.replace(tzinfo=UTC) == moment
 
 
 def test_one_browser_keeps_one_arm_however_often_it_reloads(client):

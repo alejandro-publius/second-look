@@ -34,6 +34,10 @@ export interface Env {
 }
 
 const DATA_LOCK_UTC = Date.parse("2026-09-28T01:00:00Z");
+// Judge mode opens at the second lock (JUDGE_MODE_OPENS_UTC in core/lock.py, UPDATE_33). A second
+// wave of the study runs until then, and judge mode shows the answers to its photos. Only the
+// two judge mode routes read this. createSession still marks post_lock by DATA_LOCK_UTC.
+const JUDGE_MODE_OPENS_UTC = Date.parse("2026-10-03T04:00:00Z");
 // "panel" added on 2026-09-24 for the panel study (UPDATE_29 section 1, docs/deviations.md).
 const SOURCE_LABELS = ["poster", "chat", "friends", "creek_group", "other", "panel"];
 const UA_CLASSES = ["phone", "tablet", "desktop", "other"];
@@ -550,15 +554,15 @@ export default {
       if (path === "/api/t2/resume") return reply(env, await part2.resume(env, url.searchParams.get("part2_id") ?? ""));
       if (path === "/api/t2/counts") return reply(env, await part2.counts(env));
       if (path === "/api/t2/demo" && request.method === "POST") {
-        // Shut until the data lock, like part 1's judge mode: before it, the feedback would hand
-        // anyone part 2's answer key.
-        if (lockClock(env) < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
+        // Shut until the second lock, like part 1's judge mode: before it, the feedback would
+        // hand anyone in the second wave part 2's answer key.
+        if (lockClock(env) < JUDGE_MODE_OPENS_UTC) return json(env, { detail: "Judge mode opens on Oct 3." }, 403);
         return reply(env, part2.demo(body));
       }
       if (path === "/api/demo/answer" && request.method === "POST") {
-        // Shut until the data lock, as the page says (review finding F86): before it, sixteen of
-        // these would hand anyone the live test's answer key.
-        if (lockClock(env) < DATA_LOCK_UTC) return json(env, { detail: "Judge mode opens on Sep 28." }, 403);
+        // Shut until the second lock, as the page says (review finding F86, UPDATE_33): before
+        // it, sixteen of these would hand anyone the live test's answer key.
+        if (lockClock(env) < JUDGE_MODE_OPENS_UTC) return json(env, { detail: "Judge mode opens on Oct 3." }, 403);
         const gold = GOLD[String(body.item_id ?? "")];
         if (!gold) return json(env, { detail: "We do not know that test item." }, 404);
         // Only whether they were right. The gold label itself never leaves the server.

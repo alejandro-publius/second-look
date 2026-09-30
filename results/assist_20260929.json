@@ -1,0 +1,105 @@
+{
+  "generated_at_utc": "2026-09-29T20:31:36Z",
+  "script": "evals/assist_analysis.py",
+  "synthetic": false,
+  "stamp": "20260929",
+  "plan_sha256": "723f7980a2e05eba3b74f43826e0afbf2211a7c35da6dcc18581dba3df73a8c3",
+  "exclusions": [
+    {
+      "order": 0,
+      "rule": "offered or started at or after the data lock",
+      "removed": 0,
+      "remaining": 6
+    },
+    {
+      "order": 1,
+      "rule": "did not finish all 8 items",
+      "removed": 0,
+      "remaining": 6
+    },
+    {
+      "order": 2,
+      "rule": "finished the 8 in under 20 seconds",
+      "removed": 1,
+      "remaining": 5
+    },
+    {
+      "order": 3,
+      "rule": "QA session, or its part 1 session was QA",
+      "removed": 5,
+      "remaining": 0
+    },
+    {
+      "order": 4,
+      "rule": "repeat part 2 session from the same browser token",
+      "removed": 0,
+      "remaining": 0
+    }
+  ],
+  "counts": {
+    "offered": 6,
+    "offered_by_part1_arm": {
+      "untrained": 3,
+      "trained": 3
+    },
+    "declined": 0,
+    "declined_by_part1_arm": {
+      "untrained": 0,
+      "trained": 0
+    },
+    "randomized": {
+      "unassisted": 3,
+      "assisted": 3
+    },
+    "started": {
+      "unassisted": 3,
+      "assisted": 3
+    },
+    "finished": {
+      "unassisted": 3,
+      "assisted": 3
+    },
+    "analysed": {
+      "unassisted": 0,
+      "assisted": 0
+    }
+  },
+  "primary": {
+    "n_assisted": 0,
+    "n_unassisted": 0,
+    "difference": null,
+    "ci_low": null,
+    "ci_high": null,
+    "permutation_p": null,
+    "status": "not computed: an arm is empty"
+  },
+  "secondary": {
+    "assisted_items": 0,
+    "question_shown": 0,
+    "question_shown_share": null,
+    "changed_after_question": 0,
+    "changed_share_of_shown": null,
+    "accuracy_changed": null,
+    "accuracy_kept_after_question": null,
+    "right_to_wrong": 0,
+    "wrong_to_right": 0,
+    "changed_without_question": 0,
+    "accuracy_by_feature": {
+      "unassisted": {},
+      "assisted": {}
+    },
+    "accuracy_by_part1_arm": {
+      "unassisted": {},
+      "assisted": {}
+    },
+    "median_seconds_per_item": {
+      "unassisted": null,
+      "assisted": null
+    },
+    "cant_tell_share": {
+      "unassisted": null,
+      "assisted": null
+    }
+  },
+  "readme_row": "Too few people finished part 2 for the plan's test: 0 assisted and 0 unassisted, and the plan needs 20 in each."
+}
