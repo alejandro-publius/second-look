@@ -7,7 +7,7 @@
     "fr",
     "it"
   ],
-  "content_hash": "74dcb7ca36949bca",
+  "content_hash": "771e4a1e31300413",
   "creeks": [
     {
       "name": "Strawberry Creek",
@@ -288,8 +288,7 @@
       "feature": null,
       "fhir": {
         "code": "morophology",
-        "code_system": "oah",
-        "finding": "Artificial channel bottom"
+        "code_system": "oah"
       },
       "id": "bottom_type",
       "name": "Bottom Type",
@@ -476,8 +475,7 @@
       "feature": null,
       "fhir": {
         "code": "foam",
-        "code_system": "oah",
-        "finding": "Muddy water, foam or a changed colour"
+        "code_system": "oah"
       },
       "id": "water_aspect",
       "name": "Water Aspect",
@@ -519,8 +517,7 @@
       "feature": null,
       "fhir": {
         "code": "hydrology",
-        "code_system": "oah",
-        "finding": "Water taken from the stream"
+        "code_system": "oah"
       },
       "id": "water_withdrawal",
       "name": "Water Withdrawal",
@@ -535,8 +532,7 @@
       "feature": null,
       "fhir": {
         "code": "morophology",
-        "code_system": "oah",
-        "finding": "Dam or other barrier across the stream"
+        "code_system": "oah"
       },
       "id": "barriers",
       "name": "Barriers",
@@ -584,8 +580,7 @@
       "feature": null,
       "fhir": {
         "code": "morophology",
-        "code_system": "oah",
-        "finding": "Construction or works in the stream"
+        "code_system": "oah"
       },
       "id": "construction",
       "name": "Construction",
@@ -617,8 +612,7 @@
       "feature": null,
       "fhir": {
         "code": "LandUse",
-        "code_system": "oah",
-        "finding": "Left margin more than one third paved or built on"
+        "code_system": "oah"
       },
       "id": "impervious_left",
       "name": "Impervious Areas (Left)",
@@ -634,8 +628,7 @@
       "feature": null,
       "fhir": {
         "code": "LandUse",
-        "code_system": "oah",
-        "finding": "Right margin more than one third paved or built on"
+        "code_system": "oah"
       },
       "id": "impervious_right",
       "name": "Impervious Areas (Right)",
@@ -651,8 +644,7 @@
       "feature": null,
       "fhir": {
         "code": "riparianVegetation",
-        "code_system": "oah",
-        "finding": "Left margin covered by vegetation"
+        "code_system": "oah"
       },
       "id": "vegetation_left",
       "name": "Vegetation (Left)",
@@ -667,8 +659,7 @@
       "feature": null,
       "fhir": {
         "code": "riparianVegetation",
-        "code_system": "oah",
-        "finding": "Right margin covered by vegetation"
+        "code_system": "oah"
       },
       "id": "vegetation_right",
       "name": "Vegetation (Right)",
@@ -795,8 +786,7 @@
       "feature": null,
       "fhir": {
         "code": "riparianVegetation",
-        "code_system": "oah",
-        "finding": "Recent cuts of vegetation on the banks"
+        "code_system": "oah"
       },
       "id": "vegetation_cuts",
       "name": "Vegetation Cuts",

@@ -10,22 +10,37 @@ points to; this page follows it and adds the security side. Every route, with it
 - **The two-minute test.** A sitting (`session`): a random id, the arm, the item order, the consent
   version, the content and build hashes, the times, seconds per lesson screen, a hash of a random
   browser token, a coarse device class, the coarse source of the link, a test flag and the warm-up
-  choice. Its answers (`response`): yes, no or can't tell per photo, with timing.
+  choice. Its answers (`response`): yes, no or can't tell per photo, with the first choice, the
+  count of changes and timing.
+- **The second look (part 2, `/t2`),** for a person who is offered it after the score. A sitting
+  (`part2_session`): a random id, the id of the test sitting it follows and that sitting's arm,
+  the part 2 arm, the photo order, the times, whether the offer was declined, the same hash of
+  the browser token and a test flag. Its answers (`part2_response`): the first and the final
+  answer per photo, whether the checker's question was shown, keep or change, with timing.
 - **A kept score,** only when the person ticks "Keep my score": a random contributor token, the
   four scores and the test date (`observer`). It is not linked to the sitting.
 - **Creek checks.** The spot (a coarse point about a kilometre wide, unless the person placed the
-  pin), the answers as coded values from pick lists, the ratings, the follow-up questions asked and
-  their answers, the contributor token if the person chose to carry their score, and the FHIR
-  Bundle of the visit. The public FHIR record names the person only by a hash of that token
+  pin), the answers as coded values from pick lists, the language the questions were shown in,
+  the ratings, the follow-up questions asked and their answers, what the rainfall lookup said,
+  the contributor token if the person chose to carry their score, and the FHIR Bundle of the
+  visit. The public FHIR record names the person only by a hash of that token
   (`core/tests/test_fhir_emit.py::test_the_contributor_token_itself_never_appears_in_the_record`).
 - **Photos people upload,** with their camera metadata cut out, readable only with the one token
-  handed to the uploader, and deleted after 30 days.
+  handed to the uploader, and deleted after 30 days. Each photo has a row: its id, a hash of that
+  token, the file type, the size and the time. On the live site no code deletes that row yet, so
+  it stays after the photo is gone.
 - **One laboratory record** copied from the OneAquaHealth sandbox for `/two`.
 - **A finished video walk's demo record,** so its link opens on any device: the walk's id, the
-  answers as coded values, the time, its FHIR Bundle, tagged as a demo, and the follow-up checks
-  the rules asked with their coded answers, in tables of their own.
+  answers as coded values, the time, its FHIR Bundle, tagged as a demo, which states the language
+  the questions were shown in, and the follow-up checks the rules asked with their coded answers,
+  in tables of their own.
   No token, no position, no free text. At most 200 a day, deleted after 30 days, never counted
   and never mirrored (`POST /api/walk`, `docs/DATA_HANDLING.md`).
+- **On the phone,** in the browser's own storage for this site: the random browser token, the
+  contributor token, saved spots, the ids of the open test sitting and of the open second look,
+  the language chosen for the questions (`sl.check_lang`), checks and walks that wait to be sent,
+  a check that waited, which stays without its photos after it is sent, and a walk's answers
+  while it is being made. `docs/DATA_HANDLING.md` names each key.
 
 ## What we never keep
 
@@ -64,28 +79,43 @@ treats the placeholder in `.env.example` as not set; the Worker does not check f
   `apps/web/scripts/live-check.mjs` reads the public counts before and after and fails if they
   moved. The web app can carry a QA key of its own (`NEXT_PUBLIC_QA_KEY`) only in a dry-run build;
   the launch build leaves it empty.
-- **The export token** opens `/api/test/export`, the two anonymous CSV files. Without it the route
-  answers 404, as if it did not exist
+- **The export token** opens `/api/test/export`, the anonymous CSV files of the test and, on the
+  live site, of part 2. Without it the route answers 404, as if it did not exist
   (`apps/api/tests/test_study.py::test_export_needs_the_token_and_returns_the_exact_schema`,
   `apps/api/tests/test_study.py::test_export_holds_no_identifier_columns`).
 - **The model key** is read by the eval scripts alone. It is never exported in the shell that runs
   a coding agent, and `make judge-check` and `make demo-offline` remove it before they start.
 
-## The lock
+## The locks
 
-The data lock is 2026-09-28T01:00:00Z, one constant in `core/lock.py` and in `worker/src/index.ts`.
+The study has two windows and two data locks, each one constant in `core/lock.py` and in
+`worker/src/index.ts`. The first lock is 2026-09-28T01:00:00Z (`DATA_LOCK_UTC`); nobody had taken
+the test by then. The second wave runs from 2026-09-30T04:00:00Z to the second lock,
+2026-10-03T04:00:00Z (`SECOND_LOCK_UTC`), under `docs/analysis_plan_v3.md`. The second wave stores
+nothing the first did not.
 
-- **Judge mode's answer route is shut until then.** Before the lock, `POST /api/demo/answer`
-  answers 403 on both servers, because sixteen answers would be the live test's key. After it,
-  the route says only whether an answer was right, never the gold label, and stores nothing
-  (`apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`, and the Worker e2e
-  section "judge mode shut before the lock").
+- **Judge mode's answer routes are shut until the second lock.** `POST /api/demo/answer` answers
+  403 on both servers, and `POST /api/t2/demo` on the Worker, which alone has part 2, because the
+  answers to the study's photos would be the live test's key. They were open from the first lock
+  until they were shut again on Sep 29, Pacific time, before the second wave opened. They open at
+  the second lock, Oct 3 at 04:00 UTC, which is Fri Oct 2 at 21:00 PDT (`JUDGE_MODE_OPENS_UTC`).
+  Open, the routes say only whether an answer was right, never the gold label, and store nothing
+  (`apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`,
+  `::test_demo_answer_is_shut_between_the_two_locks_where_it_was_once_open`,
+  `::test_demo_answer_opens_at_the_second_lock`, and the Worker e2e sections "judge mode shut one
+  second before the second lock", "judge mode shut at the first lock, where it once opened" and
+  "judge mode open at the second lock").
 - **The answer key never ships to a browser.** After every build, `apps/web/scripts/check-bundle.mjs`
   reads every file the site serves and fails the build if one carries a gold label.
-- **The analysis refuses real data before the lock,** and also without the git tag `prereg-v1` on
-  its pinned commit, or when `docs/analysis_plan.md` differs from the tagged, hashed plan. No option
-  or variable stands in for the clock or the repository
-  (`evals/tests/test_usability_refusal.py::test_no_option_or_variable_fakes_the_clock_or_the_repo`).
+- **The analysis refuses real data before its lock.** The first wave's two scripts refuse to run
+  before the first lock, and also without the git tags `prereg-v1` and `prereg-v2` on their
+  pinned commits, or when a tagged plan differs from the tagged, hashed copy. The second wave's
+  `evals/wave2_analysis.py` calls those two scripts as they are and refuses to run before the
+  second lock, without the tag `prereg-v3`, or when a plan or a script differs from its copy at
+  that tag. No option or variable stands in for the clock or the repository
+  (`evals/tests/test_usability_refusal.py::test_no_option_or_variable_fakes_the_clock_or_the_repo`,
+  `evals/tests/test_wave2_analysis.py::test_refuses_before_the_second_lock_even_with_everything_pinned`,
+  `evals/tests/test_wave2_analysis.py::test_no_option_fakes_the_clock_or_the_repository`).
 
 ## Rate limits
 

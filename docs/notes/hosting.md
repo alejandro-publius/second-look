@@ -2,7 +2,7 @@
 
 Update 09 section 2. Hosting is Cloudflare only: Pages for the web, a Worker with D1 and KV for the API. Nothing here needs a card.
 
-Cloudflare account: `thealexschroeder@gmail.com`, account id `b8a915bd28ade9fec05659028b395865`.
+Cloudflare account: the team's own. Its login and its id are in the wrangler login on the Mac, not in this repository.
 `npx wrangler whoami` was already logged in, so nothing is waiting on Alex to run a command.
 
 ## Web: static export to Cloudflare Pages. This won.
