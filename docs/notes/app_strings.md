@@ -28,9 +28,15 @@ Every item of `content/form.yaml`: the question the app shows (`questiontext`, o
 pick-several items the app's own yes or no line, `questiontextshow`), the app's short name for it
 (`question`, used as the FHIR Observation's code text), every answer, the three overall ratings with
 their descriptions, the four feelings, and the section titles "What do you see from where you
-stand" and "In the margins/riparian zone". The yes or no answers are the app's per item. Each item
+stand" and "In the margins/riparian zone". The plant list under "Which ones?" ends on the not
+sure answer of the app's invasive species question. The yes or no answers are the app's per item. Each item
 is marked `verified_against_app: true` with `source: app public bundle, c5a15e8ebf91, 2026-09-26`,
 and a test (`scripts/tests/test_app_strings.py`) holds the form's English to the quoted English.
+
+Six buttons and labels are quoted too, in the five other languages: Back (the app's Previous),
+Next, Send (the app's Submit), Latitude, Longitude and the name of the spot (the app's Site
+Name). In English these six stay our own words. The app's English is kept in the file so the
+check can see it change, but it is never shown: its longitude label reads "Logitude".
 
 Three edits, the same in every language, all made by `tidy()` in the script:
 
@@ -45,18 +51,24 @@ in the note to the organizers.
 
 ## What stays ours
 
-The words around the questions: buttons, the follow-up questions, the health card and the notes.
-They have no checked translation yet, so in another language they show in English: a question,
-note or follow-up carries a small "English" tag, and the buttons carry `lang="en"` for screen
-readers. The four test questions in `content/features.yaml` belong to the frozen two-minute
+The words around the questions, apart from the six above: the other buttons (Skip, None of
+these, Finish, Start the check, Add a photo), the follow-up questions, the health card and the
+notes. They have no checked translation yet, so in another language they show in English: a
+question, note or follow-up carries a small "English" tag, and a button in English carries
+`lang="en"` for screen readers. Three of our five section titles are ours as well; in another
+language they are left out, since an English line right above a translated question read as
+the question shown twice. The four test questions in `content/features.yaml` belong to the frozen two-minute
 test and are unchanged; the dug-out channel question there is ours by design, as the app has no
 matching item, and the creek check has no dug-out item.
 
 ## Translations
 
-The creek check and the walks offer every language above. Before any translation reached the
-screen it was read beside the English for meaning; 14 strings differ and fall back to English in
-their language. See `docs/notes/app_translations.md`.
+The creek check and the walks offer every language above. With no language picked yet, they
+open in the first of the browser's own languages that the app has, else in English. Before any
+translation reached the screen it was read beside the English for meaning; 14 strings differ
+and fall back to English in their language. See `docs/notes/app_translations.md`. A record
+reads the answers back in the language they were given in, and says which one in the
+`language` of its QuestionnaireResponse.
 
 ## History: the Sep 20 check of the four test questions
 

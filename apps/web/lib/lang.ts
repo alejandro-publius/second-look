@@ -1,9 +1,10 @@
 // The creek check and the walks in the official app's own languages (UPDATE_32 section 2).
-// Mirrored questions and answers come from the app's own translations (content/app_strings.json).
-// A translation whose meaning was found to differ from the English falls back to English, and so
-// do our own words around the questions, which have no checked translation yet. A question, answer,
-// note or follow-up shown in English inside another language carries a small English tag; the
-// buttons carry lang="en" for screen readers.
+// Mirrored questions and answers come from the app's own translations (content/app_strings.json),
+// and so do the few buttons and labels the app has its own word for: Back, Next, Send and the
+// three labels of a pin (uiText below). A translation whose meaning was found to differ from the
+// English falls back to English, and so do our own words around the questions, which have no
+// checked translation yet. A question, answer, note or follow-up shown in English inside another
+// language carries a small English tag; a button in English carries lang="en" for screen readers.
 import { useSyncExternalStore } from "react";
 import { content, type FormItem, type FormSection } from "./content";
 
@@ -30,14 +31,40 @@ export function checkLanguages(): string[] {
 // The choice when this browser refuses storage, so it lasts until the page closes.
 let chosen: string | null = null;
 
+/**
+ * The first of the browser's own languages that the check offers, or null. The phone lists its
+ * languages in the order its owner likes them, such as pt-PT then en. Only the part before the
+ * first hyphen counts, and the two written forms of Norwegian, nb and nn, are the app's "no".
+ */
+export function browserLang(): string | null {
+  try {
+    const offered = checkLanguages();
+    const tags =
+      navigator.languages && navigator.languages.length > 0
+        ? navigator.languages
+        : [navigator.language];
+    for (const tag of tags) {
+      const first = String(tag ?? "")
+        .toLowerCase()
+        .split("-")[0];
+      const lang = first === "nb" || first === "nn" ? "no" : first;
+      if (offered.includes(lang)) return lang;
+    }
+  } catch {
+    // No navigator here: no language to go by.
+  }
+  return null;
+}
+
+/** A stored choice wins, then a choice made on this page, then the browser's language, then English. */
 export function getCheckLang(): string {
   try {
     const v = localStorage.getItem(LANG_KEY);
     if (v && checkLanguages().includes(v)) return v;
   } catch {
-    // Storage blocked: the choice made on this page, else English.
+    // Storage blocked: the choice made on this page, else the browser's language.
   }
-  return chosen ?? "en";
+  return chosen ?? browserLang() ?? "en";
 }
 
 export function setCheckLang(lang: string): void {
@@ -60,7 +87,8 @@ function subscribe(onChange: () => void): () => void {
   };
 }
 
-/** The chosen language, remembered on this phone, and a setter. English on the server render. */
+/** The chosen language, remembered on this phone, and a setter. With no choice yet it is the
+ * browser's own language when the check offers it. English on the server render. */
 export function useCheckLang(): [string, (lang: string) => void] {
   const lang = useSyncExternalStore(subscribe, getCheckLang, () => "en");
   return [lang, setCheckLang];
@@ -128,6 +156,26 @@ export function optionDescription(
 /** The app's own English answers for this item (yes, no and not sure; the feelings), or null. */
 export function englishOptions(item: FormItem): Record<string, string> | null {
   return content.app_strings.strings.en?.items[item.id]?.options ?? null;
+}
+
+/** The buttons and labels the app has its own word for (UI in scripts/app_strings.py). */
+export type UiKey =
+  | "back"
+  | "next"
+  | "send"
+  | "latitude"
+  | "longitude"
+  | "spot_name";
+
+/**
+ * A button or label of ours in the app's own word for it. `english` is our own English, which
+ * English always shows: the app's English is never shown, as one of its labels has a typo.
+ */
+export function uiText(key: UiKey, english: string, lang: string): Shown {
+  const block = content.app_strings.strings[lang] as
+    | { ui?: Record<string, string> }
+    | undefined;
+  return pick(lang, `ui:${key}`, block?.ui?.[key], english);
 }
 
 export function sectionTitle(section: FormSection, lang: string): Shown {

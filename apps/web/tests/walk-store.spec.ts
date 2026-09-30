@@ -467,3 +467,69 @@ test("a finished walk opens on its record with no clip painted first", async ({ 
   await expect(page.getByTestId("walk-record-link")).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __clipSeen: boolean[] }).__clipSeen.length)).toBe(0);
 });
+
+// Audit finding phone-ux-languages-2: a record reads the answers back in the language they were
+// given in. The stored record has no language field of its own, so the page reads the one its
+// QuestionnaireResponse states. The second browser here is set to English and has nothing stored,
+// so the Portuguese it shows can only come from the record.
+test("a walk taken in Portuguese opens from its link in Portuguese, in a browser that never picked a language", async ({ page, browser }) => {
+  const walkStore = new Map<string, unknown>();
+  // The mock hands over its list of calls only once it is set up, and the store's Bundle is
+  // built later, when the walk is sent: by then the list holds the walk with its language.
+  type Call = { method: string; path: string; body: { language?: string } };
+  const seen: { calls: Call[] } = { calls: [] };
+  const walkPosts = () => seen.calls.filter((c) => c.method === "POST" && c.path === "/api/walk");
+  const bundleInItsLanguage = (walkId: string, answers: Record<string, AnswerValue>, answeredAt: string, finalRating: string | null = null) => {
+    const w = content.walks.find((x: { id: string }) => x.id === walkId);
+    return walkBundle({ id: w.id, spot_name: w.spot_name, creek_name: w.creek_name }, answers, answeredAt, finalRating, walkPosts().at(-1)!.body.language);
+  };
+  seen.calls = await mockApi(page, { walkStore, walkBundle: bundleInItsLanguage });
+  await page.goto(`${BASE}/walk/${walk.id}`);
+  await page.getByLabel(en["check.lang_label"]).selectOption("pt");
+  await page.getByRole("button", { name: en["walk.start"] }).click();
+  const done = page.getByRole("heading", { name: en["walk.done_title"], level: 1 });
+  for (let i = 0; i < 60 && !(await done.isVisible()); i++) {
+    const finish = page.getByRole("button", { name: en["check.finish"], exact: true });
+    if (await finish.isVisible()) {
+      await finish.click();
+      continue;
+    }
+    const q = await question(page);
+    const none = page.getByRole("button", { name: en["check.none_of_these"], exact: true });
+    const skip = page.getByRole("button", { name: en["check.skip"], exact: true });
+    if (await none.isVisible()) await none.click();
+    else if (await skip.isVisible()) await skip.click();
+    else if (await page.locator("button.option").first().isVisible()) await page.locator("button.option").first().click();
+    else await page.locator(".btn-row .btn:not(.btn-secondary)").last().click();
+    await page.waitForFunction((was) => document.querySelector("h1#question")?.textContent?.trim() !== was, q);
+  }
+  const link = page.getByTestId("walk-record-link");
+  await expect(link).toHaveText(en["walk.stored_link"]);
+  const href = (await link.getAttribute("href"))!;
+  expect(walkPosts().map((c) => c.body.language)).toEqual(["pt"]);
+
+  const pt = content.app_strings.strings.pt.items;
+  const lines = page.getByTestId("walk-answers").locator(".answer-line");
+  await expect(lines.first().locator(".muted span[lang=pt]")).toHaveText(pt.channel_form.text);
+  await expect(lines.first().locator("strong span[lang=pt]")).toHaveText(pt.channel_form.options.flat);
+  const rows = await lines.allInnerTexts();
+  const tags = await page.getByTestId("walk-answers").getByTestId("english-tag").count();
+  // Yes to every yes or no question asks all three questions whose Portuguese fell back.
+  expect(Object.keys(content.app_strings.fallback.pt).sort()).toEqual(["sewage_discharge.text", "vegetation_type_left.text", "vegetation_type_right.text"]);
+  expect(tags).toBe(3);
+
+  const other = await freshPage(browser, walkStore);
+  await other.goto(`${BASE}${href}`);
+  await expect(other.getByRole("heading", { name: en["walk.stored_title"], level: 1 })).toBeVisible();
+  expect(await other.evaluate(() => localStorage.getItem("sl.check_lang"))).toBeNull();
+  const stored = other.getByTestId("walk-answers").locator(".answer-line");
+  await expect(stored.first().locator(".muted span[lang=pt]")).toHaveText(pt.channel_form.text);
+  expect(await stored.allInnerTexts()).toEqual(rows);
+  await expect(other.getByTestId("walk-answers").getByTestId("english-tag")).toHaveCount(3);
+  // The record itself says the language, which is where the page read it.
+  await other.getByRole("button", { name: en["spot.view_fhir"] }).click();
+  const bundle = JSON.parse(await other.locator("pre.code").last().innerText());
+  const qr = bundle.entry.map((e: { resource: { resourceType: string } }) => e.resource).find((r: { resourceType: string }) => r.resourceType === "QuestionnaireResponse");
+  expect(qr.language).toBe("pt");
+  await other.context().close();
+});

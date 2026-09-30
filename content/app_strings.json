@@ -195,7 +195,10 @@
     }
    },
    "invasive_which": {
-    "text": "questions_3_3.invasive_species.placeholder"
+    "text": "questions_3_3.invasive_species.placeholder",
+    "options": {
+     "cant_tell": "questions_3_3.invasive_species.labels.I am not sure"
+    }
    },
    "vegetation_cuts": {
     "text": "questions_3_3.vegetation_cut.questiontext",
@@ -232,6 +235,14 @@
   "sections": {
    "what_you_see": "questions_1_3.title",
    "margins": "questions_3_3.title"
+  },
+  "ui": {
+   "back": "previous",
+   "next": "next",
+   "send": "submit",
+   "latitude": "latitude",
+   "longitude": "longitude",
+   "spot_name": "site_name"
   }
  },
  "strings": {
@@ -423,7 +434,10 @@
      }
     },
     "invasive_which": {
-     "text": "Which ones?"
+     "text": "Which ones?",
+     "options": {
+      "cant_tell": "I’m not sure"
+     }
     },
     "vegetation_cuts": {
      "name": "Vegetation Cuts",
@@ -461,6 +475,14 @@
    "sections": {
     "what_you_see": "What do you see from where you stand (in ca. 100m)?",
     "margins": "In the margins/riparian zone (5-10m from the channel banktop)"
+   },
+   "ui": {
+    "back": "Previous",
+    "next": "Next",
+    "send": "Submit",
+    "latitude": "Latitude",
+    "longitude": "Logitude",
+    "spot_name": "Site Name"
    }
   },
   "pt": {
@@ -651,7 +673,10 @@
      }
     },
     "invasive_which": {
-     "text": "Quais?"
+     "text": "Quais?",
+     "options": {
+      "cant_tell": "Não tenho a certeza"
+     }
     },
     "vegetation_cuts": {
      "name": "Corte de Vegetação",
@@ -689,6 +714,14 @@
    "sections": {
     "what_you_see": "O que observa num raio de aproximadamente 100m?",
     "margins": "Nas margens/zona ripária (5-10m desde o topo da margem)"
+   },
+   "ui": {
+    "back": "Anterior",
+    "next": "Seguinte",
+    "send": "Submeter",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "spot_name": "Nome do Local"
    }
   },
   "nl": {
@@ -879,7 +912,10 @@
      }
     },
     "invasive_which": {
-     "text": "Welke?"
+     "text": "Welke?",
+     "options": {
+      "cant_tell": "Ik weet het niet zeker"
+     }
     },
     "vegetation_cuts": {
      "name": "Vegetatiesnoei",
@@ -917,6 +953,14 @@
    "sections": {
     "what_you_see": "Wat zie je vanaf waar je staat (in ca. 100m)?",
     "margins": "In de oevers/rivierzone (5-10m vanaf de oeverrand)"
+   },
+   "ui": {
+    "back": "Vorige",
+    "next": "Volgende",
+    "send": "Indienen",
+    "latitude": "Breedtegraad",
+    "longitude": "Lengtegraad",
+    "spot_name": "Locatienaam"
    }
   },
   "no": {
@@ -1107,7 +1151,10 @@
      }
     },
     "invasive_which": {
-     "text": "Hvilke?"
+     "text": "Hvilke?",
+     "options": {
+      "cant_tell": "Jeg er ikke sikker"
+     }
     },
     "vegetation_cuts": {
      "name": "Vegetasjonskutt",
@@ -1145,6 +1192,14 @@
    "sections": {
     "what_you_see": "Hva ser du fra der du står (innen ca. 100 meter)?",
     "margins": "I kantsonene/randsonene (5-10 m fra elvebreddens topp)"
+   },
+   "ui": {
+    "back": "Forrige",
+    "next": "Neste",
+    "send": "Send inn",
+    "latitude": "Breddegrad",
+    "longitude": "Lengdegrad",
+    "spot_name": "Stedsnavn"
    }
   },
   "fr": {
@@ -1335,7 +1390,10 @@
      }
     },
     "invasive_which": {
-     "text": "Lesquelles ?"
+     "text": "Lesquelles ?",
+     "options": {
+      "cant_tell": "Je ne suis pas sûr-e"
+     }
     },
     "vegetation_cuts": {
      "name": "Coupes de végétation",
@@ -1373,6 +1431,14 @@
    "sections": {
     "what_you_see": "Que voyez-vous depuis votre position (dans un rayon d’environ 100 m) ?",
     "margins": "Dans les marges / la zone riveraine (5 à 10 m depuis le sommet de la berge)"
+   },
+   "ui": {
+    "back": "Précédent",
+    "next": "Suivant",
+    "send": "Soumettre",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "spot_name": "Nom du site"
    }
   },
   "it": {
@@ -1563,7 +1629,10 @@
      }
     },
     "invasive_which": {
-     "text": "Quali?"
+     "text": "Quali?",
+     "options": {
+      "cant_tell": "Non sono sicuro"
+     }
     },
     "vegetation_cuts": {
      "name": "Tagli di vegetazione",
@@ -1601,6 +1670,14 @@
    "sections": {
     "what_you_see": "Cosa vedi dal punto in cui ti trovi (circa 100m)?",
     "margins": "Nelle zone marginali/ripariali (5-10m dalla sommità dell'argine)"
+   },
+   "ui": {
+    "back": "Indietro",
+    "next": "Avanti",
+    "send": "Invia",
+    "latitude": "Latitudine",
+    "longitude": "Longitudine",
+    "spot_name": "Nome del sito"
    }
   }
  },

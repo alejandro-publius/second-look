@@ -17,9 +17,13 @@ import {
   optionDescription,
   optionText,
   sectionTitle,
+  uiText,
   type Shown,
 } from "@/lib/lang";
 import { t } from "@/lib/t";
+
+/** A question longer than this many letters is set one size down, so its answers fit. */
+const LONG_QUESTION = 90;
 
 /** A string in the language it is in; English inside another language carries its tag. */
 function Words({ shown }: { shown: Shown }) {
@@ -123,6 +127,8 @@ export function FormQuestion({
         });
       }
     }
+    // The last answer is worded in another language as the app words it on its own invasive
+    // species question, whose placeholder "Which ones?" is (scripts/app_strings.py).
     options.push({
       id: "cant_tell",
       label: t("check.not_sure"),
@@ -149,14 +155,27 @@ export function FormQuestion({
     };
   }
 
+  // The app has a title for two of our five sections. The other three titles are our own English
+  // words, and right above a translated question an English line such as "How is the water?" read
+  // as the question shown twice, so another language leaves it out (audit finding
+  // phone-ux-languages-6).
+  const sectionWords = section ? sectionTitle(section, lang) : null;
+  // The app's longest questions run six or seven lines at the heading's size and push the last
+  // answer off a phone's first screen, so a long one is set one size down (finding 4).
+  const long = shownText.text.length > LONG_QUESTION;
+
   const head = (
     <>
-      {section ? (
-        <p className="small muted">
-          <Words shown={sectionTitle(section, lang)} />
+      {sectionWords && !sectionWords.english ? (
+        <p className="small muted" data-testid="section-line">
+          <Words shown={sectionWords} />
         </p>
       ) : null}
-      <h1 tabIndex={-1} id="question">
+      <h1
+        tabIndex={-1}
+        id="question"
+        className={long ? "question-long" : undefined}
+      >
         <span lang={shownText.lang}>{shownText.text}</span>
         {item.unit ? ` (${item.unit})` : ""}
         {shownText.english ? (
@@ -179,10 +198,19 @@ export function FormQuestion({
     </>
   );
 
+  // Back and Next are in the app's own words (audit finding phone-ux-languages-3). Skip and
+  // None of these have no app word, so they stay English and say so to a screen reader.
+  const back = uiText("back", t("check.back"), lang);
+  const next = uiText("next", t("check.next"), lang);
   const nav = (extra?: React.ReactNode) => (
-    <div className="btn-row" {...ours}>
-      <button type="button" className="btn btn-secondary" onClick={onBack}>
-        {t("check.back")}
+    <div className="btn-row">
+      <button
+        type="button"
+        className="btn btn-secondary"
+        onClick={onBack}
+        lang={back.lang}
+      >
+        {back.text}
       </button>
       {extra}
     </div>
@@ -259,13 +287,16 @@ export function FormQuestion({
               data-testid="region-list-note"
               {...ours}
             >
-              {plants.note}
-              {other ? (
-                <>
-                  {" "}
-                  <EnglishTag />
-                </>
-              ) : null}
+              {/* One child, so the notice's row keeps the tag on the note's last line. */}
+              <span>
+                {plants.note}
+                {other ? (
+                  <>
+                    {" "}
+                    <EnglishTag />
+                  </>
+                ) : null}
+              </span>
             </p>
           ) : null}
           <div className="option-list" role="group" aria-labelledby="question">
@@ -277,10 +308,12 @@ export function FormQuestion({
                   onChange={() => toggle(o.value)}
                 />
                 <span>
-                  {plants ? (
-                    o.label
-                  ) : (
+                  {!plants || o.id === "cant_tell" ? (
                     <Words shown={optionText(item, o.id, o.label, lang)} />
+                  ) : (
+                    // A plant's name is from our own region list: English, and the note above
+                    // the list carries the English tag for all of them.
+                    <span {...ours}>{o.label}</span>
                   )}
                 </span>
               </label>
@@ -292,6 +325,7 @@ export function FormQuestion({
                 type="button"
                 className="btn btn-secondary"
                 onClick={onSkip}
+                {...ours}
               >
                 {t("check.none_of_these")}
               </button>
@@ -299,8 +333,9 @@ export function FormQuestion({
                 type="button"
                 className="btn"
                 onClick={() => onAnswer(chosen)}
+                lang={next.lang}
               >
-                {t("check.next")}
+                {next.text}
               </button>
             </>,
           )}
@@ -355,11 +390,12 @@ export function FormQuestion({
                 type="button"
                 className="btn btn-secondary"
                 onClick={onSkip}
+                {...ours}
               >
                 {t("check.skip")}
               </button>
-              <button type="submit" className="btn">
-                {t("check.next")}
+              <button type="submit" className="btn" lang={next.lang}>
+                {next.text}
               </button>
             </>,
           )}
@@ -450,8 +486,9 @@ export function FormQuestion({
                 if (out.length === 0) onSkip();
                 else onAnswer(out);
               }}
+              lang={next.lang}
             >
-              {t("check.next")}
+              {next.text}
             </button>,
           )}
         </div>

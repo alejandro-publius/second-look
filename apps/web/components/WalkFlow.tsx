@@ -34,7 +34,7 @@ import {
   startQueueWatcher,
   type WalkState,
 } from "@/lib/offline";
-import { shownOptions, useCheckLang } from "@/lib/lang";
+import { shownOptions, uiText, useCheckLang } from "@/lib/lang";
 import { t } from "@/lib/t";
 import { buildRecord, settleFollowups, walkQuestions } from "@/lib/walks";
 
@@ -443,10 +443,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
     case "watch":
       body = (
         <>
-          <p>{t("walk.intro")}</p>
+          <p className="walk-lead">{t("walk.intro")}</p>
           {/* The clips show natural creeks, so an honest check finds little for a city to do. This
               says how to see a measure before the check starts (CRITIC_09 Q01). */}
-          <p data-testid="walk-honest-note">{t("walk.honest_note")}</p>
+          <p className="walk-lead" data-testid="walk-honest-note">
+            {t("walk.honest_note")}
+          </p>
           {/* The button before the demo notice, so it is on the first screen of every walk on a
               390 by 844 phone (CRITIC_11 V01). */}
           <button
@@ -457,7 +459,8 @@ export function WalkFlow({ walk }: { walk: Walk }) {
             {t("walk.start")}
           </button>
           <p className="notice notice-warn">{t("walk.demo_notice")}</p>
-          <LanguagePicker />
+          {/* The list of languages is under the title, above the clip; its note stays here. */}
+          <LanguagePicker part="note" />
         </>
       );
       break;
@@ -542,8 +545,9 @@ export function WalkFlow({ walk }: { walk: Walk }) {
                   index: Math.max(0, items.length - 1),
                 })
               }
+              lang={uiText("back", t("check.back"), lang).lang}
             >
-              {t("check.back")}
+              {uiText("back", t("check.back"), lang).text}
             </button>
             <button type="button" className="btn" onClick={afterFollowups}>
               {t("check.finish")}
@@ -677,7 +681,11 @@ export function WalkFlow({ walk }: { walk: Walk }) {
               </p>
             )}
           </section>
-          <WalkAnswers answers={answers} title={t("walk.answers_title")} />
+          <WalkAnswers
+            answers={answers}
+            title={t("walk.answers_title")}
+            lang={walkLang ?? lang}
+          />
           <ChecksThatRan checks={checked.checks} ratings={checked} level="h2" />
           <p className="small muted">{checkerLine(walk)}</p>
           <FhirView
@@ -744,6 +752,9 @@ export function WalkFlow({ walk }: { walk: Walk }) {
   return (
     <div className="stack">
       <FocusHeading>{walk.creek_name}</FocusHeading>
+      {/* The languages right under the title, so the first screen of a phone shows them before
+          the walk starts (audit finding phone-ux-languages-5). Start still fits that screen. */}
+      {stage.name === "watch" ? <LanguagePicker part="list" /> : null}
       {stage.name === "loading" ? null : <Clip walk={walk} />}
       {body}
     </div>

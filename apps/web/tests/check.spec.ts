@@ -8,18 +8,41 @@ const en: Record<string, string> = JSON.parse(
   readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
 ).locale;
 
-/** Drops a pin (the denied-location path) and names the spot. */
-async function placePin(page: import("@playwright/test").Page) {
+/** The app's own word for one of our buttons or labels in a language, else our English. */
+function appWord(lang: string, key: string, english: string): string {
+  const doc = JSON.parse(
+    readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+  ).app_strings;
+  if (lang === "en" || doc.fallback[lang]?.[`ui:${key}`]) return english;
+  return doc.strings[lang].ui[key];
+}
+
+/** Drops a pin (the denied-location path) and names the spot. In another language the three
+ * labels and Next are the official app's own words; the rest of the screen is ours, in English. */
+async function placePin(
+  page: import("@playwright/test").Page,
+  { latitude = "37.8719", longitude = "-122.2585", lang = "en" } = {},
+) {
   await page.getByRole("button", { name: "Start the check" }).click();
   await expect(
     page.getByRole("heading", { name: "Where are you?" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Drop a pin instead" }).click();
   await expect(page.getByText("No map tiles here")).toBeVisible();
-  await page.getByLabel("Latitude").fill("37.8719");
-  await page.getByLabel("Longitude").fill("-122.2585");
-  await page.getByLabel("Name for this spot").fill("Footbridge");
-  await page.getByRole("button", { name: "Next" }).click();
+  await page
+    .getByLabel(appWord(lang, "latitude", "Latitude"), { exact: true })
+    .fill(latitude);
+  await page
+    .getByLabel(appWord(lang, "longitude", "Longitude"), { exact: true })
+    .fill(longitude);
+  await page
+    .getByLabel(appWord(lang, "spot_name", "Name for this spot"), {
+      exact: true,
+    })
+    .fill("Footbridge");
+  await page
+    .getByRole("button", { name: appWord(lang, "next", "Next"), exact: true })
+    .click();
 }
 
 /** Answers every question in the form's order. Overall rating Good so the rating check fires.
@@ -143,7 +166,7 @@ test("/check in Italian and in Dutch: the app's own translations, our words mark
   await mockApi(page);
   await page.goto("/check");
   await page.getByLabel("Language of the questions").selectOption("it");
-  await placePin(page);
+  await placePin(page, { lang: "it" });
   await expect(
     page.getByRole("heading", { name: it.channel_form.text }),
   ).toBeVisible();
@@ -153,13 +176,20 @@ test("/check in Italian and in Dutch: the app's own translations, our words mark
   await expect(
     page.getByRole("button", { name: it.channel_form.options.u_shape }),
   ).toBeVisible();
-  await expect(page.locator(".btn-row[lang=en]").first()).toBeVisible();
+  // Back is the app's own word, in Italian. No row of buttons is marked English as a whole.
+  const ui = content.app_strings.strings.it.ui;
+  expect(ui.back).toBe("Indietro");
+  await expect(
+    page.getByRole("button", { name: ui.back, exact: true }),
+  ).toHaveAttribute("lang", "it");
+  await expect(page.getByRole("button", { name: "Back" })).toHaveCount(0);
+  await expect(page.locator(".btn-row[lang]")).toHaveCount(0);
   // Remembered on the phone: a reload keeps Italian.
   await page.reload();
   await expect(page.getByLabel("Language of the questions")).toHaveValue("it");
   // Dutch now, and on to the pipes question, whose Italian falls back to English.
   await page.getByLabel("Language of the questions").selectOption("nl");
-  await placePin(page);
+  await placePin(page, { lang: "nl" });
   await expect(
     page.getByRole("heading", { name: nl.channel_form.text }),
   ).toBeVisible();
@@ -173,14 +203,23 @@ test("/check in Italian and in Dutch: the app's own translations, our words mark
   await page.goto("/check");
   await page.getByLabel("Language of the questions").selectOption("it");
   expect(content.app_strings.fallback.it["draining_pipes.text"]).toBeTruthy();
-  await placePin(page);
+  await placePin(page, { lang: "it" });
   for (let i = 0; i < 20; i++) {
     const h = (await page.locator("#question").textContent()) ?? "";
     if (h.includes("Are there pipes draining polluted water into the stream?"))
       break;
     const skip = page.getByRole("button", { name: "None of these" });
-    if (await skip.isVisible()) await skip.click();
-    else await page.locator(".option").first().click();
+    if (await skip.isVisible()) {
+      // On a list: Back and Next in the app's Italian, None of these in our English, marked.
+      await expect(skip).toHaveAttribute("lang", "en");
+      await expect(
+        page.getByRole("button", { name: ui.next, exact: true }),
+      ).toHaveAttribute("lang", "it");
+      await expect(
+        page.getByRole("button", { name: "Next", exact: true }),
+      ).toHaveCount(0);
+      await skip.click();
+    } else await page.locator(".option").first().click();
   }
   await expect(page.locator("#question > span").first()).toHaveAttribute(
     "lang",
@@ -541,7 +580,13 @@ test("/check in Portuguese: the follow-ups say they are English, the rating chec
   await mockApi(page);
   await page.goto("/check");
   await page.getByLabel("Language of the questions").selectOption("pt");
-  await placePin(page);
+  const words = content.app_strings.strings.pt.ui;
+  expect([words.back, words.next, words.send]).toEqual([
+    "Anterior",
+    "Seguinte",
+    "Submeter",
+  ]);
+  await placePin(page, { lang: "pt" });
   for (let i = 0; i < 40; i++) {
     if (await page.getByRole("heading", { name: "Photos" }).isVisible()) break;
     const good = page.getByRole("button", { name: new RegExp(`^${pt.options.good}`) });
@@ -552,10 +597,20 @@ test("/check in Portuguese: the follow-ups say they are English, the rating chec
     else if (await skip.first().isVisible()) await skip.first().click();
     else if (await page.locator(".option").first().isVisible()) await page.locator(".option").first().click();
     // The feelings sliders: none moved, so Next leaves the question out.
-    else await page.getByRole("button", { name: "Next", exact: true }).click();
+    else
+      await page.getByRole("button", { name: words.next, exact: true }).click();
     await page.waitForTimeout(50);
   }
-  await page.getByRole("button", { name: "Send" }).click();
+  // The photo step: Back and Send in the app's Portuguese, and no English Send beside them.
+  await expect(
+    page.getByRole("button", { name: words.back, exact: true }),
+  ).toHaveAttribute("lang", "pt");
+  await expect(
+    page.getByRole("button", { name: "Send", exact: true }),
+  ).toHaveCount(0);
+  const send = page.getByRole("button", { name: words.send, exact: true });
+  await expect(send).toHaveAttribute("lang", "pt");
+  await send.click();
   await expect(page.getByRole("heading", { name: "One or two follow-ups" })).toBeVisible();
   const card = page.locator("section.card[data-rule]").first();
   await expect(card).toHaveAttribute("lang", "en");
@@ -565,3 +620,294 @@ test("/check in Portuguese: the follow-ups say they are English, the rating chec
   await expect(moderate).toBeVisible();
   await expect(moderate).toHaveAttribute("lang", "pt");
 });
+
+// Audit finding phone-ux-languages-1: a phone set to Portuguese opened the check in English,
+// because only a stored choice was read. With nothing stored, the first of the browser's own
+// languages that the check offers is the default. A stored choice still wins, and a browser
+// whose languages the check does not offer stays English.
+const PICKER = "Language of the questions";
+for (const [locale, want] of [
+  ["pt-PT", "pt"],
+  ["nb-NO", "no"],
+  ["nn-NO", "no"],
+  ["fr-CA", "fr"],
+  ["en-US", "en"],
+  ["de-DE", "en"],
+] as const) {
+  test.describe(`a browser set to ${locale}`, () => {
+    test.use({ locale });
+    test(`opens the check in ${want} when nothing is stored`, async ({
+      page,
+    }) => {
+      await mockApi(page);
+      await page.goto("/check");
+      await expect(page.getByLabel(PICKER)).toHaveValue(want);
+      expect(
+        await page.evaluate(() => localStorage.getItem("sl.check_lang")),
+      ).toBeNull();
+      // The page itself stays English: only the questions follow the language.
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    });
+  });
+}
+
+test.describe("a browser set to pt-PT with a stored choice", () => {
+  test.use({ locale: "pt-PT" });
+  test("the stored choice wins over the browser's language", async ({
+    page,
+  }) => {
+    await mockApi(page);
+    await page.addInitScript(() =>
+      localStorage.setItem("sl.check_lang", "fr"),
+    );
+    await page.goto("/check");
+    await expect(page.getByLabel(PICKER)).toHaveValue("fr");
+  });
+
+  test("the first question is in the browser's language, and a pick is kept", async ({
+    page,
+  }) => {
+    const content = JSON.parse(
+      readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+    );
+    await mockApi(page);
+    await page.goto("/check");
+    await expect(page.getByLabel(PICKER)).toHaveValue("pt");
+    await placePin(page, { lang: "pt" });
+    await expect(page.locator("#question > span[lang=pt]")).toHaveText(
+      content.app_strings.strings.pt.items.channel_form.text,
+    );
+    await page.goto("/check");
+    await page.getByLabel(PICKER).selectOption("en");
+    await page.reload();
+    await expect(page.getByLabel(PICKER)).toHaveValue("en");
+  });
+});
+
+// Audit finding phone-ux-languages-2, second case: the plant list's last answer was "Can't tell"
+// in English with no tag, while every other question said it in the app's own words. It now uses
+// the words of the app's invasive species question, which "Which ones?" belongs to. The plants'
+// names are from our own list, so they stay English and say so to a screen reader.
+test("/check in Portuguese: the plant list ends on the app's own not sure answer", async ({
+  page,
+}) => {
+  const content = JSON.parse(
+    readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+  );
+  const pt = content.app_strings.strings.pt.items;
+  await mockApi(page);
+  await page.goto("/check");
+  await page.getByLabel(PICKER).selectOption("pt");
+  await placePin(page, { lang: "pt" });
+  for (let i = 0; i < 30; i++) {
+    const h = (
+      (await page.locator("#question > span").first().textContent()) ?? ""
+    ).trim();
+    if (h === pt.invasive_which.text) break;
+    const none = page.getByRole("button", { name: "None of these" });
+    const skip = page.getByRole("button", { name: "Skip" });
+    if (await none.isVisible()) await none.click();
+    else if (await skip.isVisible()) await skip.click();
+    else await page.locator("button.option").first().click();
+    await page.waitForFunction(
+      (was) =>
+        document.querySelector("#question > span")?.textContent?.trim() !==
+        was,
+      h,
+    );
+  }
+  await expect(page.locator("#question > span[lang=pt]")).toHaveText(
+    pt.invasive_which.text,
+  );
+  const options = page.locator("label.option");
+  const last = options.last();
+  await expect(last.locator("span[lang=pt]")).toHaveText(
+    pt.invasive_species.options.cant_tell,
+  );
+  await expect(last.getByTestId("english-tag")).toHaveCount(0);
+  await expect(page.getByText("Can't tell", { exact: true })).toHaveCount(0);
+  // A plant of the Bay Area list, where the pin is: our own English words.
+  expect(await options.count()).toBeGreaterThan(1);
+  await expect(options.first().locator("span[lang=en]")).toBeVisible();
+});
+
+// Audit findings phone-ux-languages-4 and 6, on the phone profile (390 by 664). The app's long
+// questions ran six or seven lines and pushed the last answer off the first screen in four
+// languages, and on 9 of 24 screens an English section line sat right above the translated
+// question. Now a long question is set one size down, a section line shows only in the language
+// of the questions, and the English tag is a small outlined label on one line.
+const formSections: { id: string; title: string }[] = JSON.parse(
+  readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+).form.sections;
+for (const lang of ["en", "pt", "nl", "no", "fr", "it"]) {
+  test(`every question screen in ${lang}: the answers fit the first screen and no stray English line`, async ({
+    page,
+  }) => {
+    const content = JSON.parse(
+      readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+    );
+    const app = content.app_strings.strings[lang];
+    await mockApi(page);
+    await page.goto("/check");
+    await page.getByLabel(PICKER).selectOption(lang);
+    // A pin in Lisbon, outside every plant list, so the plant question is a short one too.
+    await placePin(page, {
+      latitude: "38.7223",
+      longitude: "-9.1393",
+      lang,
+    });
+    const seen: string[] = [];
+    const lines: Record<string, number> = {};
+    for (const item of content.form.items as {
+      id: string;
+      type: string;
+      section: string;
+      text: string;
+    }[]) {
+      const heading = page.locator("h1#question");
+      const shown =
+        lang !== "en" && content.app_strings.fallback[lang]?.[`${item.id}.text`]
+          ? item.text
+          : app.items[item.id].text;
+      await expect(heading.locator("span").first()).toHaveText(shown);
+      seen.push(item.id);
+      await page.evaluate(() => window.scrollTo(0, 0));
+
+      // The section line: the app's own title in this language, or none.
+      const line = page.getByTestId("section-line");
+      const title = app.sections[item.section];
+      if (title) {
+        await expect(line.locator(`span[lang=${lang}]`)).toHaveText(title);
+        lines[item.section] = (lines[item.section] ?? 0) + 1;
+      } else if (lang === "en") {
+        await expect(line).toHaveText(
+          formSections.find((x) => x.id === item.section)!.title,
+        );
+      } else await expect(line).toHaveCount(0);
+      if (lang !== "en")
+        await expect(line.getByTestId("english-tag")).toHaveCount(0);
+
+      // Every answer of a pick-one question ends on the first screen.
+      if (item.type === "choice" || item.type === "yesno") {
+        const height = page.viewportSize()!.height;
+        const boxes = await page
+          .locator("button.option")
+          .evaluateAll((els) =>
+            els.map((e) => Math.round(e.getBoundingClientRect().bottom)),
+          );
+        expect(boxes.length).toBeGreaterThan(1);
+        for (const bottom of boxes)
+          expect(bottom, `${item.id} in ${lang}`).toBeLessThanOrEqual(height);
+      }
+
+      // A long question is one size down; the rest keep the heading's size.
+      const size = await heading.evaluate((h) => getComputedStyle(h).fontSize);
+      expect(size, item.id).toBe(shown.length > 90 ? "24px" : "30px");
+
+      // Each English tag on the screen is a label on one line, with an outline.
+      for (const tag of await page.getByTestId("english-tag").all()) {
+        const look = await tag.evaluate((e) => {
+          const c = getComputedStyle(e);
+          const line = parseFloat(c.lineHeight) || parseFloat(c.fontSize) * 1.5;
+          return {
+            oneLine: e.getBoundingClientRect().height < 2 * line,
+            weight: c.fontWeight,
+            outline: c.borderTopColor !== c.backgroundColor,
+            clear: c.borderTopColor.includes(", 0)"),
+          };
+        });
+        expect(look, item.id).toEqual({
+          oneLine: true,
+          weight: "400",
+          outline: true,
+          clear: false,
+        });
+      }
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBeLessThanOrEqual(page.viewportSize()!.width);
+
+      // The note above the plant list runs several lines, and its tag follows its last word:
+      // it is not a column of its own beside the note.
+      if (item.type === "pick_region_list" && lang !== "en") {
+        const note = page.getByTestId("region-list-note");
+        const noteBox = (await note.boundingBox())!;
+        const tagBox = (await note.getByTestId("english-tag").boundingBox())!;
+        expect(noteBox.height).toBeGreaterThan(3 * tagBox.height);
+        expect(tagBox.y).toBeGreaterThan(noteBox.y + noteBox.height / 2);
+      }
+
+      const none = page.getByRole("button", { name: "None of these" });
+      const skip = page.getByRole("button", { name: "Skip" });
+      if (item.type === "multi" || item.type === "pick_region_list")
+        await none.click();
+      else if (item.type === "number") await skip.click();
+      else if (item.type === "sliders")
+        await page.locator(".btn-row .btn:not(.btn-secondary)").last().click();
+      else await page.locator("button.option").first().click();
+    }
+    await expect(page.getByRole("heading", { name: "Photos" })).toBeVisible();
+    // Yes everywhere asks every question, the plant list too.
+    expect(seen.length).toBe(content.form.items.length);
+    if (lang !== "en")
+      expect(Object.keys(lines).sort()).toEqual(["margins", "what_you_see"]);
+  });
+}
+
+// Audit finding phone-ux-languages-3: the official app has its own words for Next, Previous and
+// Submit and for the three labels of a pin, in all six languages, and the check showed ours in
+// English on every screen. They are the app's now, each read beside the English for meaning
+// (docs/notes/app_translations.md). English keeps our own words, as the app's English has a typo.
+for (const lang of ["en", "pt", "nl", "no", "fr", "it"]) {
+  test(`the pin's labels, Back and Next in ${lang} are the app's own words, or ours in English`, async ({
+    page,
+  }) => {
+    const content = JSON.parse(
+      readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"),
+    );
+    const ui = content.app_strings.strings[lang].ui;
+    const want =
+      lang === "en"
+        ? {
+            latitude: "Latitude",
+            longitude: "Longitude",
+            spot_name: "Name for this spot",
+            back: "Back",
+            next: "Next",
+          }
+        : {
+            latitude: ui.latitude,
+            longitude: ui.longitude,
+            spot_name: ui.spot_name,
+            back: ui.back,
+            next: ui.next,
+          };
+    expect(Object.values(want).every((w) => typeof w === "string" && w)).toBe(
+      true,
+    );
+    await mockApi(page);
+    await page.goto("/check");
+    await page.getByLabel(PICKER).selectOption(lang);
+    await page.getByRole("button", { name: "Start the check" }).click();
+    await page.getByRole("button", { name: "Drop a pin instead" }).click();
+    const labels = page.locator("form .field-label");
+    await expect(labels).toHaveText([
+      want.latitude,
+      want.longitude,
+      want.spot_name,
+    ]);
+    for (const label of await labels.all())
+      await expect(label).toHaveAttribute("lang", lang);
+    const buttons = page.locator("form .btn-row button");
+    await expect(buttons).toHaveText([want.back, want.next]);
+    for (const b of await buttons.all())
+      await expect(b).toHaveAttribute("lang", lang);
+    // The app's English typo never shows.
+    await expect(page.getByText("Logitude")).toHaveCount(0);
+    // Back goes back, whatever it is called.
+    await buttons.first().click();
+    await expect(
+      page.getByRole("heading", { name: "Creek check", level: 1 }),
+    ).toBeVisible();
+  });
+}
