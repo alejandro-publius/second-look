@@ -1,6 +1,6 @@
 """No file git would commit names a personal mail address or a Cloudflare account id.
 
-The repository turns public on Sep 30. `docs/internal` leaves the tip before it does
+The repository turns public on Oct 3. `docs/internal` leaves the tip before it does
 (`scripts/go_public.py`), so that folder alone is left out of the scan. An address at a
 university or a company is not a hit: the consent screen gives one on purpose, as the contact.
 

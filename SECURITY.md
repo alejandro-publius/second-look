@@ -97,9 +97,9 @@ nothing the first did not.
 - **Judge mode's answer routes are shut until the second lock.** `POST /api/demo/answer` answers
   403 on both servers, and `POST /api/t2/demo` on the Worker, which alone has part 2, because the
   answers to the study's photos would be the live test's key. They were open from the first lock
-  until they were shut again on Sep 29, before the second wave opened. They open at the second
-  lock, Oct 3 at 04:00 UTC, which is Fri Oct 2 at 21:00 PDT (`JUDGE_MODE_OPENS_UTC`). Open, the
-  routes say only whether an answer was right, never the gold label, and store nothing
+  until they were shut again on Sep 29, Pacific time, before the second wave opened. They open at
+  the second lock, Oct 3 at 04:00 UTC, which is Fri Oct 2 at 21:00 PDT (`JUDGE_MODE_OPENS_UTC`).
+  Open, the routes say only whether an answer was right, never the gold label, and store nothing
   (`apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`,
   `::test_demo_answer_is_shut_between_the_two_locks_where_it_was_once_open`,
   `::test_demo_answer_opens_at_the_second_lock`, and the Worker e2e sections "judge mode shut one

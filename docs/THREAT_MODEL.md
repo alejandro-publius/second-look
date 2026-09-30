@@ -24,7 +24,7 @@ a stolen laptop. `SECURITY.md` says what we keep and how to report a problem;
 - **A bored participant.** Opens the public link, wants a high score or wants to see what breaks.
   Has a browser and maybe a script, no inside knowledge.
 - **A competitor.** Another hackathon team or someone who wants our numbers to look bad. Can read
-  the repository once it opens on Sep 30, and can write to the shared sandbox, which is open to
+  the repository once it opens on Oct 3, and can write to the shared sandbox, which is open to
   anyone.
 - **A curious judge.** Reads the code, opens the browser's developer tools, tries the routes the
   code names, and checks whether the numbers are real.
@@ -36,7 +36,7 @@ a stolen laptop. `SECURITY.md` says what we keep and how to report a problem;
 
 | What they could do | What stops it | Test | Stopped? |
 |---|---|---|---|
-| Rebuild the key through judge mode while the study runs | judge mode's answer routes answer 403 until the second lock, 2026-10-03T04:00:00Z, on both servers. They were open from the first lock, 2026-09-28T01:00:00Z, until Sep 29, before the second wave opened; a person who used them then may know answers, and `docs/analysis_plan_v3.md` item 5 says so | `apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`, `::test_demo_answer_is_shut_between_the_two_locks_where_it_was_once_open`, `::test_demo_answer_opens_at_the_second_lock`, `worker/test/e2e.mjs` ("judge mode shut one second before the second lock", "judge mode shut at the first lock, where it once opened" and "judge mode open at the second lock", with the Worker's clock fixed at those times), `scripts/tests/test_worker_lock.py::test_the_worker_lock_is_the_python_lock` | yes, from Sep 29 on |
+| Rebuild the key through judge mode while the study runs | judge mode's answer routes answer 403 until the second lock, 2026-10-03T04:00:00Z, on both servers. They were open from the first lock, 2026-09-28T01:00:00Z, until Sep 29, Pacific time, before the second wave opened; a person who used them then may know answers, and `docs/analysis_plan_v3.md` item 5 says so | `apps/api/tests/test_study.py::test_demo_answer_is_shut_before_the_lock`, `::test_demo_answer_is_shut_between_the_two_locks_where_it_was_once_open`, `::test_demo_answer_opens_at_the_second_lock`, `worker/test/e2e.mjs` ("judge mode shut one second before the second lock", "judge mode shut at the first lock, where it once opened" and "judge mode open at the second lock", with the Worker's clock fixed at those times), `scripts/tests/test_worker_lock.py::test_the_worker_lock_is_the_python_lock` | yes, from Sep 29 on |
 | Read the key from the site's files or from an answer | no served file carries a gold label, or the build fails (`apps/web/scripts/check-bundle.mjs`); an answer's reply never says whether it was right | `apps/api/tests/test_study.py::test_response_body_never_reveals_correctness` | yes |
 | Rebuild the key by taking the test again and again, reading the score per feature | only the first completed sitting from a browser counts in the analysis | `evals/tests/test_usability_analysis.py::test_repeat_token_keeps_only_the_first_completed_session` | no: a new browser is a new person, and the score screen shows each feature's score |
 | Rebuild the key after the second lock, when judge mode says right or wrong | nothing; both waves are locked by then, and the route stores nothing | `apps/api/tests/test_study.py::test_demo_answer_stores_nothing` | no: a volunteer who does this can carry a perfect score into their creek checks |

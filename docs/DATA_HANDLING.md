@@ -267,7 +267,7 @@ read it, and it keeps the newest 30 dumps (`BACKUP_KEEP`). No dump goes to git o
 starts it by hand, and nobody has: the two secrets it needs were never added, and its only two
 runs, scheduled on Sep 21 and 22, failed. It would keep the dump as a GitHub Actions artifact. On
 a public repository anyone signed in to GitHub can download those, and this one turns public on
-Sep 30. So the dump is kept out of Actions artifacts there: the workflow's job runs only while the
+Oct 3. So the dump is kept out of Actions artifacts there: the workflow's job runs only while the
 repository is private, and on a public one it is skipped. An artifact made before the flip would
 turn public with it, so none should be made; on Sep 25 there were none.
 
