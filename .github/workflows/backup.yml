@@ -1,6 +1,6 @@
 # A dump of the live D1 database as a GitHub Actions artifact, made only by hand and only while the
 # repository is private. Anyone signed in to GitHub can download a public repository's artifacts,
-# and this one turns public on Sep 30, so on a public repository the job is skipped and the dump
+# and this one turns public on Oct 3, so on a public repository the job is skipped and the dump
 # stays out of Actions artifacts. An artifact made while private turns public with the repository,
 # so make none before the flip. Nobody computes outcomes from a backup: only
 # evals/usability_analysis.py does that, and it refuses before the data lock and without the

@@ -87,7 +87,9 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
     and tags v1.0. This page, `docs/HANDOFF_NEXT.md` and `PLAN.md` stay, each marked as notes.
     From 09:00 that day nothing changes any more: the freeze, 36 hours before the deadline.
 
-11. **Sun Oct 4, by 18:00: submit.** The organizers' deadline is 21:00.
+11. **Sun Oct 4, by 18:00: submit.** The organizers' deadline is 21:00. Before you press
+    Submit, remove the report attached on Thursday and attach `docs/REPORT.pdf` from main again:
+    the lock job rebuilt it on Fri Oct 2 with the second wave's rows.
 
 Their sandbox's name, `sandbox.hl7europe.eu`, stopped resolving on Sep 23 (we reported it as
 hl7-eu/oah issue 8) and came back on Sep 28; it has dropped out again since, so it comes and

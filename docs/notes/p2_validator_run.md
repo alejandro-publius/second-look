@@ -33,7 +33,7 @@ java -Xmx3g -jar fhir/tools/validator_cli.jar \
 - Java: `17.0.20.1` from Homebrew openjdk@17
 - FHIR version: R4 4.0.1
 - Their guide: `hl7-eu/oah` at pinned commit `b907cf0`, built by SUSHI 3.20.1.
-  The validator log line was `Load /Users/alexvintera/second-look/fhir/build/ig/fsh-generated/resources - 510 resources (00:00.198)`.
+  The validator log line was `Load ~/second-look/fhir/build/ig/fsh-generated/resources - 510 resources (00:00.198)`.
 - Terminology: **it ran.** The log line was
   `Terminology server https://tx.fhir.org - Version Connected to Terminology Server at https://tx.fhir.org (00:01.104)`.
 - When: 2026-09-21 02:59 UTC. The whole run took about 14 seconds.

@@ -56,7 +56,7 @@ Upload the video and paste its link into `README.md` and `docs/devpost.md` (step
 | Time | Step | Command | Check after it |
 |---|---|---|---|
 | 10:00 | The gate, once more | `cd ~/second-look && git switch main && git pull --ff-only && make submit-check` | The last line is `submit-check: 0 failed: none`. `main` is the commit that went public, plus nothing. |
-| 10:10 | Submit | The saved Devpost draft: paste the video link and any field that changed since Oct 1 (compare with `docs/devpost.md`), check the report is attached and Rachel is on the team, then Submit | Devpost shows the project as submitted to the OneAquaHealth hackathon. |
+| 10:10 | Submit | The saved Devpost draft: paste the video link and any field that changed since Oct 1 (compare with `docs/devpost.md`), remove the attached report and attach `docs/REPORT.pdf` from main again (the lock job rebuilt it on Fri Oct 2 with the second wave's rows), check Rachel is on the team, then Submit | Devpost shows the project as submitted to the OneAquaHealth hackathon. |
 | 10:25 | Record the page | Put the project's devpost.com/software link in `docs/devpost.md`, commit and push. It is the one change after the freeze, and it changes no code | `uv run python scripts/done_items.py devpost-submitted` ends `done-item devpost-submitted: ok`. |
 
 ## If a step says FAIL

@@ -30,16 +30,16 @@ sessions created: 5, responses: 16, observer tokens: 1, correct_total: 8
 == 2. rows before backup
 5|16|1|5
 == 3. bash scripts/backup_db.sh
-backup_db: wrote /Users/alexvintera/second-look/data/backups/sl-20260921T000836Z.dump (19517 bytes)
+backup_db: wrote ~/second-look/data/backups/sl-20260921T000836Z.dump (19517 bytes)
 == 4. simulate the loss: delete every study row
 DELETE 16
 DELETE 1
 DELETE 5
 UPDATE 1
 0|0|0|0
-== 5. bash scripts/restore_db.sh /Users/alexvintera/second-look/data/backups/sl-20260921T000836Z.dump
+== 5. bash scripts/restore_db.sh ~/second-look/data/backups/sl-20260921T000836Z.dump
 restore_db: safety copy of the current database first
-backup_db: wrote /Users/alexvintera/second-look/data/backups/sl-20260921T000837Z-before-restore-25017.dump (18751 bytes)
+backup_db: wrote ~/second-look/data/backups/sl-20260921T000837Z-before-restore-25017.dump (18751 bytes)
 pg_restore: error: could not execute query: ERROR:  unrecognized configuration parameter "transaction_timeout"
 Command was: SET transaction_timeout = 0;
 == 6. rows after restore
@@ -49,11 +49,11 @@ Command was: SET transaction_timeout = 0;
 == 8. second pass after fixing the version mismatch in restore_db.sh
 delete every study row again
 0|0|0|0
-== bash scripts/restore_db.sh /Users/alexvintera/second-look/data/backups/sl-20260921T000836Z.dump
+== bash scripts/restore_db.sh ~/second-look/data/backups/sl-20260921T000836Z.dump
 restore_db: safety copy of the current database first
-backup_db: wrote /Users/alexvintera/second-look/data/backups/sl-20260921T000911Z-before-restore-25235.dump (18727 bytes)
+backup_db: wrote ~/second-look/data/backups/sl-20260921T000911Z-before-restore-25235.dump (18727 bytes)
  set_config 
-restore_db: restored from /Users/alexvintera/second-look/data/backups/sl-20260921T000836Z.dump
+restore_db: restored from ~/second-look/data/backups/sl-20260921T000836Z.dump
 exit code: 0
 == rows after restore
 5|16|1|5
