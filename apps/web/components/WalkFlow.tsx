@@ -519,7 +519,7 @@ export function WalkFlow({ walk }: { walk: Walk }) {
                 ? "check.followups_title_one"
                 : "check.followups_title",
             )}
-          </h2>
+          </FocusHeading>
           <p className="small muted">{t("check.followups_intro")}</p>
           {asked.map(({ card }) => (
             <FollowupCard
