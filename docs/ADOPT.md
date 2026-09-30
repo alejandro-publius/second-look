@@ -23,7 +23,7 @@ long form is `DEPLOY.md`.
    guide; the check runs the HL7 validator over every record the code makes.
 6. `bash scripts/deploy.sh worker`, then `bash scripts/deploy.sh web`, from your `main`. Do not
    edit `scripts/deploy.sh` before Oct 3 2026: the lock job runs it on the night of Oct 2. The
-   web deploy first cuts our four walk clips from a video cache that is not in git and stops
+   web deploy first cuts our walk clips from a video cache that is not in git and stops
    without it (`scripts/build_walks.py --clips-only`), so a city changes that line after Oct 3.
 
 ## The lines that name our site, and would name yours

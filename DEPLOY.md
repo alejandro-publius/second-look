@@ -174,8 +174,9 @@ Which of the nine a follower city would run at all:
   `theirs`, which feeds the `/two` demo.
 - Three a city would run. `backup`: D1 keeps its own point in time copy by itself, 7 days on the
   free plan (Cloudflare calls it Time Travel); the daily export is a second copy outside
-  Cloudflare. `inaturalist`: one GET to iNaturalist per creek spot that has a position, every
-  listed plant in that one query, at one request a second, which a second Worker cron could make.
+  Cloudflare. `inaturalist`: one query to iNaturalist per creek spot that has a position, every
+  listed plant in that one query, more pages only past 200 sightings, at one request a second,
+  which a second Worker cron could make.
   `repush`: the follower city's step 5, publish to the sandbox and repeat.
 - The Worker has one cron today, `17 4 * * *` in `worker/wrangler.jsonc`, and `scheduled` in
   `worker/src/index.ts` runs only the two purges on it. A job moved into the Worker is new code.
