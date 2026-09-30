@@ -1,6 +1,6 @@
 # The checker on real creek footage: one flag kept, one dropped
 
-On the live site the checker is off today (CHECKER_ENABLED), so no volunteer has seen a checker question. This is the paid footage run's record, not something a volunteer saw.
+On the live site the checker is off today (CHECKER_ENABLED), so nobody has met a checker question there; part 2 of the test is the one place a person meets one, without its note. This is the paid footage run's record, not something a volunteer saw.
 
 This page and [`example.json`](example.json) are written by [`evals/footage_example.py`](../../evals/footage_example.py) from committed files only. No model was called to make them. `make check` fails if either is not what the script writes.
 

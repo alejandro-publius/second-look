@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FocusHeading } from "@/components/FocusHeading";
 import { Row } from "@/components/ui/Row";
-import { content, licenseName, licenseUrl, shownPhotos, type InatChecks } from "@/lib/content";
+import { content, licenseName, licenseUrl, shownPhotos, withParts, type InatChecks } from "@/lib/content";
 import { t } from "@/lib/t";
 
 export const metadata: Metadata = { title: `${t("credits.title")}: ${t("app.name")}` };
@@ -99,16 +99,18 @@ export default function CreditsPage() {
           <h2>{t("credits.footage_title")}</h2>
           <p>{t("credits.footage_intro")}</p>
           {/* A title is long and goes in the value, which wraps; the end slot never shrinks, and a
-              title there made this page 713 pixels wide on a phone (REVIEW_03 R26). */}
+              title there made this page 713 pixels wide on a phone (REVIEW_03 R26). The title and
+              the author are in the video's own language, marked so a screen reader says a Russian
+              title as Russian (WCAG 3.1.2); the language comes from videos/manifest.csv. */}
           <div className="card">
             {content.footage_credits.map((v) => (
               <Row
                 key={v.id}
-                label={t("credits.by", { author: v.author })}
+                label={withParts(t("credits.by"), { author: <span lang={v.lang}>{v.author}</span> })}
                 value={
                   <>
                     <a href={v.source_url} rel="noreferrer nofollow">
-                      {v.title}
+                      <span lang={v.lang}>{v.title}</span>
                     </a>
                     <br />
                     {licenseUrl(v.license) ? (

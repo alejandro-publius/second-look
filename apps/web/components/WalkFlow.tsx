@@ -18,6 +18,7 @@ import {
   licenseName,
   licenseUrl,
   questionCount,
+  withParts,
   type FormItem,
   type Walk,
 } from "@/lib/content";
@@ -98,7 +99,12 @@ function Clip({ walk }: { walk: Walk }) {
         <Photo id={walk.poster_photo_id} />
       </video>
       <figcaption className="small">
-        {t("walk.credit", { title: walk.title, author: walk.author })}{" "}
+        {/* The title and author are in the video's own language, marked so a screen reader says
+            a Russian title as Russian (WCAG 3.1.2); walk.lang comes from videos/manifest.csv. */}
+        {withParts(t("walk.credit"), {
+          title: <span lang={walk.lang}>{walk.title}</span>,
+          author: <span lang={walk.lang}>{walk.author}</span>,
+        })}{" "}
         {licenseUrl(walk.license) ? (
           <a href={licenseUrl(walk.license)} rel="license noreferrer">
             {licenseName(walk.license)}
@@ -512,13 +518,14 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           aria-labelledby="walk-followups-title"
           data-testid="walk-followups"
         >
-          <h2 id="walk-followups-title">
+          {/* Takes focus when the follow-ups appear, as each question's heading does (WCAG 2.4.3). */}
+          <FocusHeading level={2} id="walk-followups-title">
             {t(
               asked.length === 1
                 ? "check.followups_title_one"
                 : "check.followups_title",
             )}
-          </h2>
+          </FocusHeading>
           <p className="small muted">{t("check.followups_intro")}</p>
           {asked.map(({ card }) => (
             <FollowupCard

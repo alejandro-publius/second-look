@@ -231,6 +231,12 @@ test("/check in Italian and in Dutch: the app's own translations, our words mark
   await expect(
     page.locator("#question").getByTestId("english-tag"),
   ).toBeVisible();
+  // WCAG 1.3.1: a screen reader hears "shown in English", not the word English tacked onto the
+  // question. The visible word is hidden from it; the hidden words are read.
+  const tag = page.locator("#question").getByTestId("english-tag");
+  await expect(tag.locator("[aria-hidden=true]")).toHaveText(en["check.english_tag"]);
+  await expect(tag.locator(".visually-hidden")).toHaveText(en["check.english_tag_sr"]);
+  expect(en["check.english_tag_sr"]).toBe("shown in English");
   await expect(
     page.getByRole("button", { name: it.draining_pipes.options.present }),
   ).toBeVisible();
@@ -248,6 +254,16 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await placePin(page);
   await expect(page.getByText("Question 1 of")).toBeVisible();
   await expect(page.getByText("Draft wording")).toHaveCount(0);
+  // WCAG 2.4.3: an answer moves to the next question, and its heading takes focus, so a keyboard
+  // or screen reader user lands on the new question and not at the top of the page. The quick
+  // check does this already (tests/record.spec.ts); the creek check and the walks dropped focus.
+  await expect(page.getByRole("heading", { name: "Channel form" })).toBeVisible();
+  await page.getByRole("button", { name: "U shape" }).click();
+  await expect(page.locator("h1#question")).toBeFocused();
+  await expect(page.locator("h1#question")).not.toContainText(/channel form/i);
+  await page.getByRole("button", { name: "Back" }).click();
+  await expect(page.locator("h1#question")).toContainText(/channel form/i);
+  await expect(page.locator("h1#question")).toBeFocused();
   await answerForm(page);
   // Judge walk W01: Send is what writes, and the follow-ups come after it. The Photos screen says
   // so before the button, and nothing has been sent yet.
@@ -682,6 +698,20 @@ test.describe("a browser set to pt-PT with a stored choice", () => {
     await page.reload();
     await expect(page.getByLabel(PICKER)).toHaveValue("en");
   });
+});
+
+// Some Android WebViews write the language with an underscore, pt_BR, and the check opened in
+// English on them, because only a hyphen was split on.
+test("a browser that writes its language as pt_BR opens the check in Portuguese", async ({
+  page,
+}) => {
+  await mockApi(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "languages", { get: () => ["pt_BR", "en-US"] });
+    Object.defineProperty(navigator, "language", { get: () => "pt_BR" });
+  });
+  await page.goto("/check");
+  await expect(page.getByLabel(PICKER)).toHaveValue("pt");
 });
 
 // Audit finding phone-ux-languages-2, second case: the plant list's last answer was "Can't tell"

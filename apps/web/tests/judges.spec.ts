@@ -362,3 +362,22 @@ test("the door to the AI's one question says it is judge mode for part 2, shut w
   await expect(page.getByRole("heading", { level: 1, name: "Judge mode opens on Oct 3", exact: true })).toBeVisible();
   await expect(page.getByText(EN["demo.shut_body"], { exact: true })).toBeVisible();
 });
+
+// The judge's first minute while judge mode is shut (UPDATE_33): the door to the AI's one question
+// says where to meet the question meanwhile, the page How we know, which is below it on /judges,
+// and that page's own door says it shows the question and the checker's note.
+test("while judge mode is shut, the assist door points to How we know, below it, whose door names the question and the note", async ({ page }) => {
+  expect(EN["judges.assist_note"]).toContain(
+    `${JUDGE_MODE_OPEN_FROM} While it is shut, the page How we know, below, shows the question a person at a creek would be asked. It shows the checker's own note too, from our run on real creek footage.`,
+  );
+  expect(EN["judges.how_note"]).toBe(
+    "Which features each vision model passed, what the gate did on real creek footage, and the one question a person would be asked, with the checker's own note. Read from our results files. About a minute.",
+  );
+  await mockApi(page);
+  await page.goto("/judges");
+  const lines = await page.getByRole("navigation", { name: "For judges" }).locator(".row-value").allTextContents();
+  const assist = lines.indexOf(EN["judges.assist_note"]);
+  const how = lines.indexOf(EN["judges.how_note"]);
+  expect(assist).toBeGreaterThanOrEqual(0);
+  expect(how).toBeGreaterThan(assist);
+});

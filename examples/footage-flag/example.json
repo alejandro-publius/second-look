@@ -1,7 +1,7 @@
 {
   "what": "One frame of the paid footage run where core/gate.py kept a model's flag, and one where it dropped one, with the question the kept flag makes eligible",
   "written_by": "evals/footage_example.py",
-  "live_site": "On the live site the checker is off today (CHECKER_ENABLED), so no volunteer has seen a checker question. This is the paid footage run's record, not something a volunteer saw.",
+  "live_site": "On the live site the checker is off today (CHECKER_ENABLED), so nobody has met a checker question there; part 2 of the test is the one place a person meets one, without its note. This is the paid footage run's record, not something a volunteer saw.",
   "run": {
     "results": "results/footage_20260924T060539Z.json",
     "generated_at_utc": "2026-09-24T06:05:39+00:00",

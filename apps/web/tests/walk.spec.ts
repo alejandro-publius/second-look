@@ -22,6 +22,7 @@ const walks: {
   creek_name: string;
   title: string;
   author: string;
+  lang: string;
   question: unknown;
   checker_run: string;
   checker_dropped: number;
@@ -109,12 +110,23 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
   await expect(
     page.getByText(w.author, { exact: false }).first(),
   ).toBeVisible();
+  // WCAG 3.1.2: the clip's title and author are in the video's own language, and the credit says
+  // which, so a screen reader reads a Russian title as Russian. The language comes from the lang
+  // column of videos/manifest.csv through content/walks.yaml: ru for a Cyrillic title, en else.
+  for (const walk of walks)
+    expect(walk.lang, walk.id).toBe(/[\u0400-\u04FF]/.test(walk.title) ? "ru" : "en");
+  await expect(page.locator("figcaption").locator(`span[lang="${w.lang}"]`)).toHaveText([
+    w.title,
+    w.author,
+  ]);
   await expect(page.getByText(en["walk.demo_notice"])).toBeVisible();
   await expect(page.getByText(en["walk.demo_notice"])).toContainText(
     "never counted",
   );
   await page.getByRole("button", { name: "Start the check" }).click();
   await page.getByRole("button", { name: "U shape" }).click(); // channel form
+  // WCAG 2.4.3: the next question's heading takes focus (tests/check.spec.ts says why).
+  await expect(page.locator("h1#question")).toBeFocused();
   // The count's total stays the same when a follow-up such as "Which ones?" appears (REVIEW_03 R42).
   const counts: string[] = [];
   let sawFollowUp = false;
@@ -130,6 +142,10 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
     if (await page.getByRole("heading", { name: "Which ones?" }).isVisible())
       sawFollowUp = true;
     if (await page.getByRole("button", { name: "Finish" }).isVisible()) {
+      // The follow-ups' heading takes focus when they appear, as each question's does.
+      await expect(
+        page.getByTestId("walk-followups").getByRole("heading", { level: 2 }),
+      ).toBeFocused();
       await page.getByRole("button", { name: "Finish" }).click();
       continue;
     }
@@ -1022,7 +1038,7 @@ for (const [lang, pick, fellBack] of [
     await mockApi(page, {});
     const w = walks[0];
     await page.goto(`${BASE}/walk/${w.id}`);
-    await page.getByLabel(en["check.lang_label"]).selectOption(lang);
+    await page.getByLabel(en["check.lang_label_short"]).selectOption(lang);
     await page.getByRole("button", { name: en["walk.start"] }).click();
     const rows = await walkIn(page, lang, pick as Record<string, string[]>);
     // The words are the app's own: the first row is its translation of the channel form.
@@ -1083,7 +1099,7 @@ test("the list of languages is whole on the first screen of every walk, and its 
   expect(height).toBeLessThanOrEqual(664);
   for (const w of walks) {
     await page.goto(`${BASE}/walk/${w.id}`);
-    const list = page.getByLabel(en["check.lang_label"]);
+    const list = page.getByLabel(en["check.lang_label_short"]);
     await expect(list).toBeVisible();
     await expect(list).toHaveValue("en");
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -1111,10 +1127,24 @@ test("the list of languages is whole on the first screen of every walk, and its 
       en["check.lang_note"],
     );
     expect(note.y).toBeGreaterThan(start.y + start.height);
+    // WCAG 3.3.2: the list has a label a sighted person can read, on its left on the same line,
+    // so the pair is no taller than the list alone and Start the check stays whole on the first
+    // screen of a 390 by 844 phone, which the test above holds.
+    const label = page.getByText(en["check.lang_label_short"], { exact: true });
+    await expect(label).toBeVisible();
+    expect(en["check.lang_label_short"]).toBe("Questions in");
+    const labelBox = (await label.boundingBox())!;
+    // Visible to sight, not a one pixel span kept for screen readers: a readable size.
+    expect(labelBox.width, w.id).toBeGreaterThan(40);
+    expect(labelBox.height, w.id).toBeGreaterThan(12);
+    expect(labelBox.x + labelBox.width, w.id).toBeLessThanOrEqual(box.x);
+    const labelMiddle = labelBox.y + labelBox.height / 2;
+    expect(labelMiddle, w.id).toBeGreaterThan(box.y);
+    expect(labelMiddle, w.id).toBeLessThan(box.y + box.height);
     await expect(page.locator("select")).toHaveCount(1);
   }
   // The list is for choosing before the walk starts: a question screen has none.
-  await page.getByLabel(en["check.lang_label"]).selectOption("it");
+  await page.getByLabel(en["check.lang_label_short"]).selectOption("it");
   await page.getByRole("button", { name: en["walk.start"] }).click();
   await expect(page.locator("h1#question > span[lang=it]")).toHaveText(
     content.app_strings.strings.it.items.channel_form.text,

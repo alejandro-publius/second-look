@@ -1,6 +1,6 @@
 import { expect, test, type Locator } from "@playwright/test";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { footageCases } from "../lib/footage-example.mjs";
 import { howNumbers, keptSplit } from "../lib/how-numbers.mjs";
@@ -89,7 +89,9 @@ test("/how-we-know shows the pass table and the gate on real footage as the file
   ).toBeVisible();
 
   // Nobody typed a number into the page's own words: every number comes in through a placeholder.
-  const typed = Object.entries(en).filter(([k, v]) => k.startsWith("how.") && /\d/.test(v.replace(/\{\w+\}/g, "")));
+  // Two names carry a digit and are not numbers: part 2 of the test, and a plan's tag, prereg-v2.
+  const NAMES = /\bpart 2\b|\bprereg-v\d\b/gi;
+  const typed = Object.entries(en).filter(([k, v]) => k.startsWith("how.") && /\d/.test(v.replace(/\{\w+\}/g, "").replace(NAMES, "")));
   expect(typed.map(([k]) => k)).toEqual([]);
 });
 
@@ -199,6 +201,11 @@ test("/how-we-know shows the footage example's kept and dropped flags as example
   await page.goto("/how-we-know");
   await expect(page.getByText(en["how.example_intro"])).toBeVisible();
   expect(en["how.example_intro"]).toContain("On the live site the checker is off today");
+  // Since part 2 of the test opened, "no volunteer has seen one of its questions" stopped being
+  // true: a paid participant in the assisted half meets the checker's one question there
+  // (components/Part2Items.tsx, docs/MODEL_CARD.md). The line names that one place instead.
+  expect(en["how.example_intro"]).not.toContain("no volunteer has seen");
+  expect(en["how.example_intro"]).toContain(`Part 2 of the test is the one place a person meets it: the words "${en["part2.question"]}", with no note.`);
 
   const rowValue = (card: Locator, key: string) => card.locator(".row").filter({ hasText: en[key] }).locator(".row-value");
   const credit = async (card: Locator, c: { manifest_row: { author: string; license: string; source_url: string } }) => {
@@ -427,4 +434,23 @@ test("the footage example's reader follows the file: a changed copy changes what
   expect(footageCases(doc, { ...run, real: false })).toBeNull();
   expect(footageCases(doc, { ...run, synthetic: true })).toBeNull();
   expect(footageCases(null, run)).toBeNull();
+});
+
+// The judge's first minute while judge mode is shut (UPDATE_33): the page says what part 2 is,
+// in the words of README.md and docs/MODEL_CARD.md, as a sixth step, and names all three tagged
+// plans, each with its proof in proofs/.
+test("/how-we-know names part 2 as the sixth step and the three tagged plans", async ({ page }) => {
+  await page.goto("/how-we-know");
+  const steps = page.locator("article > ol > li");
+  await expect(steps).toHaveCount(6);
+  await expect(steps.nth(5)).toHaveText(en["how.flow_6"]);
+  expect(en["how.flow_6"]).toContain(`"${en["part2.question"]}"`);
+  expect(en["how.flow_6"]).toContain("the final answer is their own");
+  const plan = fill("how.plan", { tag: "prereg-v1" });
+  await expect(page.getByText(plan, { exact: true })).toBeVisible();
+  for (const tag of ["prereg-v1", "prereg-v2", "prereg-v3"]) {
+    expect(plan).toContain(tag);
+    expect(existsSync(join(ROOT, "proofs", `${tag}.tag.ots`)), tag).toBe(true);
+  }
+  expect(plan).toContain("Each plan was tagged before its first participant");
 });

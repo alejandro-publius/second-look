@@ -79,8 +79,9 @@ FOLLOWUP_CALL = (
     "the form in content/form.yaml and the checker switched on"
 )
 LIVE_SITE = (
-    "On the live site the checker is off today (CHECKER_ENABLED), so no volunteer has seen a "
-    "checker question. This is the paid footage run's record, not something a volunteer saw."
+    "On the live site the checker is off today (CHECKER_ENABLED), so nobody has met a checker "
+    "question there; part 2 of the test is the one place a person meets one, without its note. "
+    "This is the paid footage run's record, not something a volunteer saw."
 )
 MANIFEST_FIELDS = ("id", "file", "source_url", "author", "license", "coarse_location", "gold_label")
 

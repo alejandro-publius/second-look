@@ -34,7 +34,8 @@ let chosen: string | null = null;
 /**
  * The first of the browser's own languages that the check offers, or null. The phone lists its
  * languages in the order its owner likes them, such as pt-PT then en. Only the part before the
- * first hyphen counts, and the two written forms of Norwegian, nb and nn, are the app's "no".
+ * first hyphen or underscore counts (some Android WebViews write pt_BR), and the two written forms
+ * of Norwegian, nb and nn, are the app's "no".
  */
 export function browserLang(): string | null {
   try {
@@ -46,7 +47,7 @@ export function browserLang(): string | null {
     for (const tag of tags) {
       const first = String(tag ?? "")
         .toLowerCase()
-        .split("-")[0];
+        .split(/[-_]/)[0];
       const lang = first === "nb" || first === "nn" ? "no" : first;
       if (offered.includes(lang)) return lang;
     }

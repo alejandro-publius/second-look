@@ -152,7 +152,7 @@ test("every photograph a visitor can see is named on the credits page", async ({
 // (hard rules 13 and 15), so the page names it without a caveat (REVIEW_03 R30).
 test("the how we know page names the plan's tag as made", async ({ page }) => {
   await page.goto("/how-we-know");
-  await expect(page.getByText("Analysis plan tag: prereg-v1. The plan names")).toBeVisible();
+  await expect(page.getByText("Analysis plan tags: prereg-v1 for the test, prereg-v2 for part 2, prereg-v3 for the second wave.")).toBeVisible();
   await expect(page.locator("main")).not.toContainText("not yet tagged");
 });
 
@@ -169,3 +169,20 @@ for (const [path, title] of [
     await expect(page).toHaveTitle(title);
   });
 }
+
+// The accessibility statement said every screen and every sentence is checked for plain words,
+// which is true of English only. It now says which parts come in the app's languages, in the app's
+// own translations that we have not checked, and that the rest of the site is English. The count
+// of languages is the one the check offers, so the word "six" cannot drift from the data.
+test("the accessibility statement says which parts are in the app's languages and that the rest is English", async ({ page }) => {
+  const en: Record<string, string> = content.locale;
+  const offered = content.app_strings.languages.filter((l: string) => l in content.app_strings.strings);
+  expect(offered).toHaveLength(6);
+  const body = en["a11y.limits_body"];
+  expect(body).toContain("come in the six languages of the OneAquaHealth app, in its own translations, which we have not checked for plain words");
+  expect(body).toContain("The rest of the site, this page included, is in English.");
+  expect(body).toContain("each part tells a screen reader which language it is in");
+  await mockApi(page);
+  await page.goto("/accessibility");
+  await expect(page.getByText(body, { exact: true })).toBeVisible();
+});

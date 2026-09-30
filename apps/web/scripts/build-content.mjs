@@ -359,6 +359,13 @@ function main() {
     if (!photos[id]) fail(`the footage example shows frame ${id}, which has no manifest row`);
     if (!locale[`photo.alt.${id}`]) fail(`frame ${id} on /how-we-know needs its own alt text, photo.alt.${id}, in content/locales/en.json`);
   }
+  // The language of a clip's title and author, written by scripts/build_walks.py from the lang
+  // column of videos/manifest.csv. The walk and /credits mark them with it, so a screen reader
+  // says a Russian title as Russian (WCAG 3.1.2). A walk with none is refused, not read as English.
+  const walkLang = (w) => {
+    if (!/^[a-z]{2,3}$/.test(String(w.lang ?? ""))) fail(`walk ${w.id} has no lang in content/walks.yaml; run uv run python scripts/build_walks.py --no-clips`);
+    return String(w.lang);
+  };
   // What a walk page needs, and nothing about which model said what beyond the one question.
   const walks = walksRaw.map((w) => ({
     id: String(w.id),
@@ -367,6 +374,7 @@ function main() {
     license: w.license,
     source_url: w.source_url,
     country: w.country,
+    lang: walkLang(w),
     creek_name: w.creek_name,
     spot_name: w.spot_name,
     clip: w.clip,
@@ -386,6 +394,7 @@ function main() {
     license: w.license,
     source_url: w.source_url,
     country: w.country,
+    lang: walkLang(w),
   }));
   // The open creek footage and photos in the video (UPDATE_22 6.6), written by
   // scripts/fetch_footage.py. Several are CC BY-SA, so the build refuses one without its author,
