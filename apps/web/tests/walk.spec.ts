@@ -22,6 +22,7 @@ const walks: {
   creek_name: string;
   title: string;
   author: string;
+  lang: string;
   question: unknown;
   checker_run: string;
   checker_dropped: number;
@@ -109,6 +110,15 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
   await expect(
     page.getByText(w.author, { exact: false }).first(),
   ).toBeVisible();
+  // WCAG 3.1.2: the clip's title and author are in the video's own language, and the credit says
+  // which, so a screen reader reads a Russian title as Russian. The language comes from the lang
+  // column of videos/manifest.csv through content/walks.yaml: ru for a Cyrillic title, en else.
+  for (const walk of walks)
+    expect(walk.lang, walk.id).toBe(/[\u0400-\u04FF]/.test(walk.title) ? "ru" : "en");
+  await expect(page.locator("figcaption").locator(`span[lang="${w.lang}"]`)).toHaveText([
+    w.title,
+    w.author,
+  ]);
   await expect(page.getByText(en["walk.demo_notice"])).toBeVisible();
   await expect(page.getByText(en["walk.demo_notice"])).toContainText(
     "never counted",

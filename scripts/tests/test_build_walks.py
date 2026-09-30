@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -119,8 +120,8 @@ def _walk_tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """A one video repo in tmp_path, with every path build_walks reads or writes pointed at it."""
     videos = tmp_path / "videos.csv"
     videos.write_text(
-        "id,title,author,license,source_url,country,duration_s,cache_file\n"
-        f"v01,A creek,Someone,CC BY 4.0,{URL},Chile,120,v01.mp4\n",
+        "id,title,author,license,source_url,country,duration_s,cache_file,lang\n"
+        f"v01,A creek,Someone,CC BY 4.0,{URL},Chile,120,v01.mp4,en\n",
         encoding="utf-8",
     )
     photos = tmp_path / "photos.csv"
@@ -158,6 +159,35 @@ def test_the_clip_window_keeps_clear_of_what_a_person_saw_and_a_fake_run_asks_no
     # Vision found every second clean, so only the review keeps the clip off seconds 27 to 33.
     assert not set(range(start - 1, start + seconds + 1)) & set(range(27, 34))
     assert walk["checker"]["question"] is None and walk["checker"]["footage_run"] == "synthetic"
+
+
+def test_the_walk_carries_the_language_of_its_title_and_author(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # WCAG 3.1.2: a screen reader says a Russian title right only when the page marks it ru. The
+    # lang column of videos/manifest.csv travels into the walk, and a row with none is refused
+    # rather than read as English.
+    cache = _walk_tree(tmp_path, monkeypatch)
+    (tmp_path / "pass_table.json").write_text(json.dumps(PASSED))
+    yes = [ans("m", "v01-00050", "pipe_running", "yes") for _ in range(3)]
+    (tmp_path / "footage.json").write_text(json.dumps({"real": False, "answers": yes}))
+    assert bw.main(["--no-clips", "--cache", str(cache)]) == 0
+    (walk,) = yaml.safe_load((tmp_path / "walks.yaml").read_text())["walks"]
+    assert walk["lang"] == "en"
+
+    videos = bw.VIDEOS
+    videos.write_text(videos.read_text(encoding="utf-8").replace(",en\n", ",\n"), encoding="utf-8")
+    with pytest.raises(SystemExit, match="has no lang"):
+        bw.main(["--no-clips", "--cache", str(cache)])
+
+
+def test_the_committed_walks_name_the_language_their_title_is_in() -> None:
+    walks = yaml.safe_load(bw.OUT_YAML.read_text(encoding="utf-8"))["walks"]
+    videos = {v["id"]: v for v in bw.read_csv(bw.VIDEOS)}
+    assert walks
+    for w in walks:
+        assert w["lang"] == videos[w["id"]]["lang"], w["id"]
+        assert w["lang"] == ("ru" if re.search(r"[\u0400-\u04FF]", w["title"]) else "en"), w["id"]
 
 
 def _clip_tree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, list[str]]:

@@ -1,5 +1,6 @@
 // Typed access to the content built by scripts/build-content.mjs. The JSON never carries gold labels
 // for test items or photos; the server scores.
+import { createElement, Fragment, type ReactNode } from "react";
 import raw from "@/generated/content.json";
 
 export type FeatureId = "artificial_bank" | "dug_out_channel" | "invasive_plant" | "pipe_running";
@@ -168,6 +169,8 @@ export interface Walk {
   license: string;
   source_url: string;
   country: string;
+  /** The language of the title and author, from videos/manifest.csv, so a page can mark them. */
+  lang: string;
   creek_name: string;
   spot_name: string;
   clip: { file: string; start_s: number; seconds: number };
@@ -180,6 +183,33 @@ export interface Walk {
   region?: string | null;
 }
 
+/**
+ * A locale string with each {name} replaced by an element instead of text, so one part can carry
+ * its own lang: a clip's Russian title inside an English credit line (WCAG 3.1.2). A name with no
+ * part stays as written, as t() leaves it. Here and not in lang.ts, whose hook is client only,
+ * because the server-rendered /credits page uses it.
+ */
+export function withParts(
+  template: string,
+  parts: Record<string, ReactNode>,
+): ReactNode[] {
+  const out: ReactNode[] = [];
+  const re = /\{(\w+)\}/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(template)) !== null) {
+    if (m.index > last) out.push(template.slice(last, m.index));
+    out.push(
+      m[1] in parts
+        ? createElement(Fragment, { key: `${m[1]}-${m.index}` }, parts[m[1]])
+        : m[0],
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < template.length) out.push(template.slice(last));
+  return out;
+}
+
 export interface FootageCredit {
   id: string;
   title: string;
@@ -187,6 +217,8 @@ export interface FootageCredit {
   license: string;
   source_url: string;
   country: string;
+  /** The language of the title and author (WCAG 3.1.2). */
+  lang: string;
 }
 
 /** The open creek footage and photos in the video (UPDATE_22 6.6), from content/video_credits.yaml. */

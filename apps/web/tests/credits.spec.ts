@@ -44,3 +44,23 @@ test("the app's credit sits with the other credits and the page still fits a pho
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+// WCAG 3.1.2: a clip's title and author are in the video's own language, so the page marks them
+// with it and a screen reader says a Russian title as Russian. The language is the lang column of
+// videos/manifest.csv, carried through content/walks.yaml: ru for a Cyrillic title, en else.
+test("the footage credits mark each title and author with the clip's own language", async ({ page }) => {
+  const content = JSON.parse(readFileSync(join(__dirname, "..", "generated", "content.json"), "utf8"));
+  const credits: { id: string; title: string; author: string; lang: string }[] = content.footage_credits;
+  expect(credits.length).toBeGreaterThan(0);
+  expect(credits.map((c) => c.lang)).toContain("ru");
+  await mockApi(page);
+  await page.goto("/credits");
+  const section = page.locator("section").filter({ has: page.getByRole("heading", { name: en["credits.footage_title"], level: 2 }) });
+  for (const c of credits) {
+    expect(c.lang, c.id).toBe(/[\u0400-\u04FF]/.test(c.title) ? "ru" : "en");
+    const row = section.locator(".row").filter({ hasText: c.author });
+    // The row's label (the author) comes before its value (the title).
+    await expect(row.locator(`span[lang="${c.lang}"]`)).toHaveText([c.author, c.title]);
+    await expect(row.getByRole("link", { name: c.title, exact: true })).toBeVisible();
+  }
+});

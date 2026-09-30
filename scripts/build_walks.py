@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -162,6 +163,22 @@ def screen_seconds(src: Path, cache_dir: Path) -> set[int]:
     memo.parent.mkdir(parents=True, exist_ok=True)
     memo.write_text(json.dumps({"mtime": src.stat().st_mtime, "clean": sorted(clean)}))
     return clean
+
+
+def walk_lang(video: dict[str, str]) -> str:
+    """The language of the video's title and author, from the lang column of videos/manifest.csv.
+
+    A screen reader says a Russian title right only when the page marks it ru (WCAG 3.1.2), so
+    the web build wraps the title and author in that language. A row with no language is refused
+    rather than read as English.
+    """
+    lang = (video.get("lang") or "").strip().lower()
+    if not re.fullmatch(r"[a-z]{2,3}", lang):
+        raise SystemExit(
+            f"walks: {video['id']} has no lang in {VIDEOS}; "
+            "add the two-letter code of its title's language"
+        )
+    return lang
 
 
 def reviewed_seconds(review_frames: dict[str, str], source_url: str) -> set[int]:
@@ -383,6 +400,7 @@ def main(argv: list[str] | None = None) -> int:
             "license": license_code(v["license"]),
             "source_url": v["source_url"],
             "country": v["country"],
+            "lang": walk_lang(v),
             "creek_name": creek_name(v["country"]),
             "spot_name": "The stretch in the clip",
             "clip": {

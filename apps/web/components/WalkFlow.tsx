@@ -18,6 +18,7 @@ import {
   licenseName,
   licenseUrl,
   questionCount,
+  withParts,
   type FormItem,
   type Walk,
 } from "@/lib/content";
@@ -98,7 +99,12 @@ function Clip({ walk }: { walk: Walk }) {
         <Photo id={walk.poster_photo_id} />
       </video>
       <figcaption className="small">
-        {t("walk.credit", { title: walk.title, author: walk.author })}{" "}
+        {/* The title and author are in the video's own language, marked so a screen reader says
+            a Russian title as Russian (WCAG 3.1.2); walk.lang comes from videos/manifest.csv. */}
+        {withParts(t("walk.credit"), {
+          title: <span lang={walk.lang}>{walk.title}</span>,
+          author: <span lang={walk.lang}>{walk.author}</span>,
+        })}{" "}
         {licenseUrl(walk.license) ? (
           <a href={licenseUrl(walk.license)} rel="license noreferrer">
             {licenseName(walk.license)}
