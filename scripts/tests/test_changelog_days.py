@@ -10,7 +10,7 @@ for every day up to Oct 2.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -55,7 +55,9 @@ def test_the_release_section_names_the_flip_day_and_not_sep_30() -> None:
 
 def test_the_days_run_from_the_first_to_the_written_day_with_no_gap() -> None:
     days = gp.days_named(real_notes())
-    every = {date(2026, 9, d) for d in range(gp.FIRST_DAY.day, WRITTEN_UP_TO.day)}
+    # Every calendar day from the first to the day before WRITTEN_UP_TO, across the month's end.
+    every = {gp.FIRST_DAY + timedelta(days=n) for n in range((WRITTEN_UP_TO - gp.FIRST_DAY).days)}
+    assert len(every) >= 14
     assert sorted(every - days) == []
 
 
