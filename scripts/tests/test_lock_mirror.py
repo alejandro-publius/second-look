@@ -83,7 +83,6 @@ def test_the_design_gate_runs_the_comparison() -> None:
     # UPDATE_33 it said so and the gate held no such check.
     gate = DESIGN_CHECK.read_text(encoding="utf-8")
     assert "fails.push(...lockMirrorFails(" in gate
-    assert "fails.push(...strayBeforeLockCallers(" in gate
     assert "design-check.mjs fails the build" in LOCK_TS.read_text(encoding="utf-8")
 
 
@@ -241,23 +240,9 @@ def test_an_instant_that_is_not_a_time_is_a_fault() -> None:
     ]
 
 
-def test_only_the_two_judge_mode_pages_may_call_is_before_lock() -> None:
-    files = [
-        {"path": "apps/web/app/demo/page.tsx", "text": "() => isBeforeLock(),"},
-        {"path": "apps/web/app/t2/demo/page.tsx", "text": "() => isBeforeLock(),"},
-        {"path": "apps/web/lib/lock.ts", "text": "export function isBeforeLock() {}"},
-        {"path": "apps/web/app/t/page.tsx", "text": "const a = 1;\nif (isBeforeLock()) go();"},
-        {"path": "apps/web/components/A.tsx", "text": "// isBeforeLock is named in a comment"},
-        {"path": "apps/web/components/B.tsx", "text": "const isBeforeLocked = true;"},
-    ]
-    got = call(f"m.strayBeforeLockCallers({json.dumps(files)})")
-    assert len(got) == 1
-    assert got[0].startswith("apps/web/app/t/page.tsx:2 calls isBeforeLock")
-
-
-def test_nothing_else_in_the_repo_calls_is_before_lock() -> None:
-    # The name now answers whether judge mode is shut. Every file of the web app, its scripts
-    # and its tests is read here, as the design gate reads them.
+def names_in_code(name: str) -> list[str]:
+    """The files of the web app, its scripts and its tests that name this in code, not in a
+    line of comment."""
     found = []
     web = ROOT / "apps" / "web"
     for folder in ("app", "components", "lib", "scripts", "tests"):
@@ -266,15 +251,33 @@ def test_nothing_else_in_the_repo_calls_is_before_lock() -> None:
                 continue
             text = path.read_text(encoding="utf-8", errors="replace")
             code = [line for line in text.splitlines() if not re.match(r"^\s*(//|/?\*)", line)]
-            if any(re.search(r"\bisBeforeLock\b", line) for line in code):
+            if any(re.search(rf"\b{name}\b", line) for line in code):
                 found.append(path.relative_to(ROOT).as_posix())
-    assert found == [
+    return found
+
+
+def test_the_old_name_is_before_lock_is_gone_from_the_web_app() -> None:
+    # isBeforeLock once read the first lock, then stood for isJudgeModeShut while the two judge
+    # mode pages still called it. They call isJudgeModeShut now, so the old name is gone, and
+    # with it the design gate's rule that kept other callers from it. A caller that comes back
+    # with a merge does not build, because lock.ts exports no such name.
+    assert names_in_code("isBeforeLock") == []
+    assert "strayBeforeLockCallers" not in DESIGN_CHECK.read_text(encoding="utf-8")
+    assert "strayBeforeLockCallers" not in MIRROR.read_text(encoding="utf-8")
+
+
+def test_the_two_judge_mode_pages_ask_if_judge_mode_is_shut() -> None:
+    assert names_in_code("isJudgeModeShut") == [
         "apps/web/app/demo/page.tsx",
         "apps/web/app/t2/demo/page.tsx",
         "apps/web/lib/lock.ts",
-        # The check itself: it names the function to look for it, and calls nothing.
-        "apps/web/scripts/lock-mirror.mjs",
     ]
+    for page in ("apps/web/app/demo/page.tsx", "apps/web/app/t2/demo/page.tsx"):
+        text = (ROOT / page).read_text(encoding="utf-8")
+        assert 'import { isJudgeModeShut } from "@/lib/lock";' in text
+        assert '() => (isJudgeModeShut() ? "shut" : "open"),' in text
+        # No page reads an instant by itself: the one in lock.ts is the one the gate checks.
+        assert "Date.parse" not in text and "DATA_LOCK_UTC" not in text
 
 
 # What lock.ts answers ---------------------------------------------------------------------------
@@ -333,17 +336,10 @@ def test_the_page_holds_judge_mode_shut_until_the_second_lock() -> None:
     ]
 
 
-def test_is_before_lock_is_the_same_answer_under_its_old_name() -> None:
-    # The two judge mode pages call it. It must not read the first lock any more.
-    moments = SHUT_MOMENTS + OPEN_MOMENTS
-    got = lock_ts(f"{json.dumps(moments)}.map((t) => m.isBeforeLock(new Date(t)))")
-    assert got == [True] * len(SHUT_MOMENTS) + [False] * len(OPEN_MOMENTS)
-
-
 def test_the_page_exports_the_times_as_text() -> None:
     got = lock_ts(
         "[m.DATA_LOCK_UTC, m.WAVE2_OPEN_UTC, m.SECOND_LOCK_UTC, m.JUDGE_MODE_OPENS_UTC, "
-        "typeof m.isJudgeModeShut(), typeof m.isBeforeLock()]"
+        "typeof m.isJudgeModeShut(), typeof m.isBeforeLock]"
     )
     assert got == [
         "2026-09-28T01:00:00Z",
@@ -351,5 +347,6 @@ def test_the_page_exports_the_times_as_text() -> None:
         "2026-10-03T04:00:00Z",
         "2026-10-03T04:00:00Z",
         "boolean",
-        "boolean",
+        # The old name is exported no more.
+        "undefined",
     ]

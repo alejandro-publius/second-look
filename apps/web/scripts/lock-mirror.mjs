@@ -82,23 +82,3 @@ export function lockMirrorFails(pythonText, webText) {
   }
   return out;
 }
-
-/**
- * Callers of isBeforeLock other than the two judge mode pages. The name now answers whether judge
- * mode is shut (apps/web/lib/lock.ts says why), so a new caller that wants the first lock would
- * get the wrong answer. files is [{ path, text }], with path from the repo's root.
- */
-export const BEFORE_LOCK_CALLERS = ["apps/web/app/demo/page.tsx", "apps/web/app/t2/demo/page.tsx", "apps/web/lib/lock.ts"];
-
-export function strayBeforeLockCallers(files) {
-  const out = [];
-  for (const { path, text } of files) {
-    if (BEFORE_LOCK_CALLERS.includes(path)) continue;
-    text.split("\n").forEach((line, i) => {
-      // A line of comment may name it; only code that imports or calls it counts.
-      if (/^\s*(\/\/|\/?\*)/.test(line)) return;
-      if (/\bisBeforeLock\b/.test(line)) out.push(`${path}:${i + 1} calls isBeforeLock, which now means judge mode is shut: use isJudgeModeShut, or DATA_LOCK_UTC for the first lock`);
-    });
-  }
-  return out;
-}
