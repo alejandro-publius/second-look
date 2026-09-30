@@ -166,6 +166,7 @@ holds the table they are built from.
 | `com.secondlook.hl7` | daily at 09:00 | `scripts/hl7_watch.py`: reads hl7-eu/oah pull request 5 and issues 6, 7 and 8 with `gh`; a new comment from a maintainer goes to the status issue. It never replies | `make mac-jobs-install` |
 | `com.secondlook.uptime` | every 10 minutes | `scripts/uptime.py`: GETs `/`, `/judges`, `/city`, one walk, `/health` and the counts on the live site; two failures in a row write `~/second-look-backups/uptime.log`, one status issue comment and a notification | `make mac-jobs-install` |
 | `com.secondlook.lock` | once, at 18:10 on Sep 27 in California (2026-09-28T01:10:00Z) | `scripts/lock_analysis.py`: the data lock, `make lock-analysis` | `make lock-analysis-install` |
+| `com.secondlook.lock2` | once, at 21:10 on Oct 2 in California (2026-10-03T04:10:00Z) | `scripts/lock_analysis.py --wave 2`: the second data lock, for the second wave of the study, `make lock-analysis-2` | `make lock-analysis-2-install` |
 
 Each one-job installer takes `--remove`. Logs go to `~/second-look-backups/`.
 `make rollback` puts the last good deploy back (`docs/notes/hosting.md`).

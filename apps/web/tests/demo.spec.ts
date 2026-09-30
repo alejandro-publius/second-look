@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // Update 09 section 4.5: /demo gives feedback on the same sixteen photos the study uses, so it
-// stays shut until the data lock. These tests move the browser clock past it.
-const AFTER_LOCK = new Date("2026-09-29T00:00:00Z");
+// stays shut while the study runs. Since UPDATE_33 that is until the second lock,
+// 2026-10-03T04:00:00Z: a second wave of the study runs until then. These tests move the browser
+// clock past it. tests/judge-mode-second-lock.spec.ts holds both sides of that instant.
+const AFTER_LOCK = new Date("2026-10-04T00:00:00Z");
 import { assertOnlyOurOrigins, goldFor, mockApi, watchRequests } from "./mock-api.mjs";
 import { answerAllItems, BASE } from "./helpers";
 
@@ -78,19 +80,20 @@ test("?script=1 fixes the item order for the screen recording", async ({ page })
   expect(a).toEqual(b);
 });
 
-test("judge mode is shut before the lock and open after it", async ({ page }) => {
+test("judge mode is shut before the second lock and open after it", async ({ page }) => {
   await mockApi(page);
-  await page.clock.install({ time: new Date("2026-09-24T12:00:00Z") });
+  // A day after the first lock, when judge mode was open for a while: shut again (UPDATE_33).
+  await page.clock.install({ time: new Date("2026-09-29T00:00:00Z") });
   await page.goto("/demo");
-  await expect(page.getByRole("heading", { name: "Judge mode opens on Sep 28" })).toBeVisible();
-  // One moment, said once in both zones, so the heading's Sep 28 and the Sep 27 below it agree
+  await expect(page.getByRole("heading", { name: "Judge mode opens on Oct 3" })).toBeVisible();
+  // One moment, said once in both zones, so the heading's Oct 3 and the Oct 2 below it agree
   // (REVIEW_03 R44).
-  await expect(page.getByText("It opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.")).toBeVisible();
+  await expect(page.getByText("It opens when the data locks: Oct 3 at 04:00 UTC, which is Friday Oct 2 at 21:00 PDT.", { exact: false })).toBeVisible();
   // Shut means shut: no photo is fetched and no start button exists.
   await expect(page.locator("img.photo, img.photo-large")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start judge mode" })).toHaveCount(0);
 
-  await page.clock.install({ time: new Date("2026-09-29T00:00:00Z") });
+  await page.clock.install({ time: AFTER_LOCK });
   await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Judge mode" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Start judge mode" })).toBeVisible();

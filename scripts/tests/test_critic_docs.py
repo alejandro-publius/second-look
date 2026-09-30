@@ -34,7 +34,7 @@ def workflow_triggers(path: Path) -> set[str]:
 
 def test_the_backup_workflow_is_manual_and_never_runs_on_a_public_repository() -> None:
     # A03: an artifact on a public repository can be downloaded by anyone signed in to GitHub, and
-    # the repository turns public on Sep 30, so the dump must never become one there.
+    # the repository turns public on Oct 3, so the dump must never become one there.
     assert workflow_triggers(BACKUP_WORKFLOW) == {"workflow_dispatch"}
     jobs = yaml.safe_load(text(BACKUP_WORKFLOW))["jobs"]
     for name, job in jobs.items():
