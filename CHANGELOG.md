@@ -103,8 +103,8 @@ checked against `results/`.
 
 - Nothing was committed. Judge mode opened by its lock constant at the first lock, Sep 27 at
   18:00 PDT, and stayed open until Sep 29.
-- The Mac's data lock job started at 18:17 PDT and stopped at its own phone check, before any
-  backup or analysis; the fix is under Sep 29.
+- The Mac's data lock job, due at 18:10 PDT, stopped at 18:17 PDT at its own phone check, before
+  any backup or analysis; the fix is under Sep 29.
 - OneAquaHealth's sandbox answered again on Sep 28, and the re-push job put our golden visit back.
 
 ### Tue Sep 29
