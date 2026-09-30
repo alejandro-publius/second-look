@@ -49,7 +49,9 @@ STAMP = Path("results") / "report_pdf.json"
 PANDOC_VERSION = "3.9.0.2"
 PLAYWRIGHT_VERSION = "1.63.0"
 REPO_URL = "https://github.com/alejandro-publius/second-look/blob/main/"
-MIN_PAGES, MAX_PAGES = 4, 10
+# The rows the lock job fills on Fri Oct 2 bring the report to 10 pages, so the cap leaves room
+# for them and a little prose; the README's page count token is what a reader is told.
+MIN_PAGES, MAX_PAGES = 4, 12
 FONT_DIRS = {
     "next": Path("apps/web/node_modules/@fontsource-variable/atkinson-hyperlegible-next"),
     "mono": Path("apps/web/node_modules/@fontsource/atkinson-hyperlegible-mono"),

@@ -45,7 +45,14 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    Battery, Options, then turn on "Prevent automatic sleeping on power adapter when the display
    is off". Keep the lid open and the charger in: on Tue Sep 29 the battery fell to 4 percent
    in the middle of the work. The second lock's job runs on Fri Oct 2 at 21:10, and the uptime
-   check and the daily jobs run only while the Mac is awake.
+   check and the daily jobs run only while the Mac is awake. On Fri Oct 2 from 21:00 to 22:00,
+   run nothing heavy on the Mac (no `make check`, `make e2e` or `make dev` in any checkout).
+   The job puts a notice on the Mac's screen when it is done or when it failed; at 21:50 look
+   for "Second data lock done" on the status issue, and if it is not there, run
+   `make lock-analysis-2` in `~/second-look-depth` that night and wait for it (about 30 minutes).
+   Before 21:00 that day: if `~/second-look-backups/logs/repush.log` says their sandbox answered
+   this week, commit `fhir/sandbox_ledger.jsonl` on depth by hand, so the audit line the job
+   carries has its ledger row beside it.
 
 5. **By Thu Oct 1, 20 minutes: Devpost.** Paste the fields from `docs/devpost.md` into the draft
    and invite Rachel to it. Upload the five gallery images in `docs/submission/gallery/` with
