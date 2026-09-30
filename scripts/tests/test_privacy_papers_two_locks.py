@@ -61,8 +61,9 @@ def test_each_paper_names_both_locks_and_the_second_wave_plan() -> None:
 def test_the_papers_name_no_lock_instant_the_code_does_not_hold() -> None:
     """A date written as a lock must be one of the two locks or the wave's opening."""
     known = {iso(lock.DATA_LOCK_UTC), iso(lock.SECOND_LOCK_UTC), iso(lock.WAVE2_OPEN_UTC)}
+    instant = re.compile(r"\b2026-\d\d-\d\dT\d\d:\d\d:\d\dZ\b")
     for name, path in PAPERS.items():
-        found = set(re.findall(r"\b2026-\d\d-\d\dT\d\d:\d\d:\d\dZ\b", path.read_text(encoding="utf-8")))
+        found = set(instant.findall(path.read_text(encoding="utf-8")))
         strange = found - known
         assert not strange, f"{name} names instants the code does not hold: {sorted(strange)}"
 
