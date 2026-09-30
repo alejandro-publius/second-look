@@ -549,7 +549,7 @@ Every number is graded by code and written to [`results/`](results/); [`scripts/
 
 `make check` runs everything below except the browser suite, the Worker end to end and the mutation run, and prints `CHECK GREEN`. The counts are taken by [`scripts/count_tests.py`](scripts/count_tests.py) into [`results/test_counts.json`](results/test_counts.json).
 
-- **Python:** <!--v:results/test_counts.json#/python/tests-->2522<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
+- **Python:** <!--v:results/test_counts.json#/python/tests-->2545<!--/v--> tests (`uv run pytest`), including property tests that throw arbitrary model output at the gate and the follow-up selector.
 - **Ports:** <!--v:results/test_counts.json#/worker_golden/cases-->281<!--/v--> golden cases written by the Python reference, which the TypeScript Worker must reproduce exactly, in <!--v:results/test_counts.json#/worker_golden/node_tests-->19<!--/v--> tests (`make worker-check`).
 - **Browser:** <!--v:results/test_counts.json#/playwright/tests-->199<!--/v--> Playwright tests in <!--v:results/test_counts.json#/playwright/spec_files-->29<!--/v--> spec files on a phone viewport, against the production build and a mock API that refuses what the servers refuse (`make e2e`).
 - **Worker end to end:** <!--v:results/test_counts.json#/worker_e2e/sections-->18<!--/v--> sections that drive the real Worker's routes under `wrangler dev` with a local D1 and KV (`make worker-e2e`, in CI).
