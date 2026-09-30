@@ -1,6 +1,6 @@
 # The 20 hardest questions, with honest answers
 
-For the live judging and for anyone reading the repo. First written in this repository's own pull request #5 (not the one we sent to hl7-eu/oah), checked against `main` on 2026-09-24; questions 4 and 18 were brought up to date on 2026-09-25. Short answers, then the file or command that proves each one. Where the honest answer is "not yet" or "no", it says so.
+For the live judging and for anyone reading the repo. First written in this repository's own pull request #5 (not the one we sent to hl7-eu/oah), checked against `main` on 2026-09-24; questions 4 and 18 were brought up to date on 2026-09-25, and questions 13, 15, 19 and 20 on 2026-09-30, for the second wave of the study. Short answers, then the file or command that proves each one. Where the honest answer is "not yet" or "no", it says so.
 
 ## Freshwater ecologist
 
@@ -60,15 +60,15 @@ Proof: `content/approved_sentences.yaml`; CLAUDE.md hard rule 5; `core/tests/tes
 ## Digital health and outreach
 
 **13. Did the lesson actually help people?**
-We do not know yet and we will not pretend. The tagged plan did not plan recruitment; a paid research panel may add sessions before the lock on Sep 28 if Alex launches it, a logged deviation. After the lock the pre-registered analysis runs once: with at least 20 finished sessions per arm it makes its one confirmatory test, with fewer it reports a description with counts, and nothing else depends on them.
-Proof: `docs/analysis_plan.md` item 7; `docs/deviations.md`.
+We do not know yet and we will not pretend. The tagged plan did not plan recruitment, and no person finished the test before the first lock on Sep 28: the one analysis ran once and said an arm was empty. So the same study runs a second time, up to the second lock on Fri Oct 2 at 21:00 PDT, under plan v3, with a paid research panel beside the public link once Alex launches it; its participants are paid, a difference the plan records. Ten minutes after that lock the pre-registered analysis runs once: with at least 20 finished sessions per arm it makes its one confirmatory test, with fewer it reports a description with counts, and nothing else depends on them. Judge mode was open for two days between the waves, so a person who used it may know the answers; the plan says to hold that against the wave.
+Proof: `docs/analysis_plan.md` item 7; `docs/analysis_plan_v3.md` items 1, 5 and 7; `results/usability_20260929.md`; `docs/deviations.md`.
 
 **14. Is the health advice safe?**
 Each sentence is approved with a source and a quote from that source. We never state a risk for a specific site and never diagnose.
 Proof: `content/approved_sentences.yaml` (`source`, `source_quote`, `approved_by`).
 
 **15. What do you keep about people?**
-For the test: a random session id and a hashed random browser token, no names, emails, IPs or free text. For the creek check: a random contributor token, EXIF stripped, uploads private and deleted after 30 days.
+For the test: a random session id and a hashed random browser token, no names, emails, IPs or free text. Part 2, the second look, adds its own answers and times, joined to the test by the session id. For the creek check: a random contributor token, the language the questions were shown in, EXIF stripped, uploads private and deleted after 30 days.
 Proof: `docs/DATA_HANDLING.md`; `apps/api/tests/test_privacy.py`.
 
 **16. Is it readable for a 12 year old?**
@@ -86,11 +86,11 @@ Yes, with one limit it names. `make judge-check` runs the tests, grades the AI n
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**
-Answer on the day from the Actions tab. It was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's). It was red on Sep 24 from 0326e78 to bef7015, and on Sep 25 at e9898ed and 635955f, when a test count moved and WRITEUP.md and docs/ACCEPTANCE.md were rendered but not committed; since then `make test-counts` renders every doc itself and `verify-claims` names the doc that drifted. On Sep 25 two browser tests also timed out or raced on depth (90c4045 and 65a4a29) and were made robust. It was green on both branches again from a7b563a.
+Answer on the day from the Actions tab. As of Sep 30 the last run that started, at 93bb002 on Sep 26, was green on both branches. From a334b11 on, GitHub has started no job: each run ends in about 3 seconds with GitHub's own note that the account's payments failed or its spending limit needs to be raised. That is the account's billing, not the code; `make check` and `make judge-check` run the same steps on any machine. Before that it was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's). It was red on Sep 24 from 0326e78 to bef7015, and on Sep 25 at e9898ed and 635955f, when a test count moved and WRITEUP.md and docs/ACCEPTANCE.md were rendered but not committed; since then `make test-counts` renders every doc itself and `verify-claims` names the doc that drifted. On Sep 25 two browser tests also timed out or raced on depth (90c4045 and 65a4a29) and were made robust. It was green on both branches again from a7b563a to 93bb002.
 Proof: https://github.com/alejandro-publius/second-look/actions
 
 ## Blockchain
 
 **20. Is this on a blockchain?**
-No. It is a hash-chained audit log: each line carries the hash of the one before, so a changed line breaks the chain. So far it records the key freeze, the launch wipe and the plan tag; the data lock joins it on Sep 28. No tokens, no consensus, no ledger shared with anyone. Since Sep 24 its last hash is stamped with OpenTimestamps on each day the log has changed, a public timestamp service that anchors many hashes in one Bitcoin transaction: a timestamp for our log, not a chain of ours (`/verify`, `proofs/`).
+No. It is a hash-chained audit log: each line carries the hash of the one before, so a changed line breaks the chain. So far it records the key freeze, the launch wipe, the three plan tags (`prereg-v1`, `prereg-v2` and `prereg-v3`), the sandbox re-push of Sep 28 and the first data lock; the second lock joins it when the second wave's analysis runs. No tokens, no consensus, no ledger shared with anyone. Since Sep 24 its last hash is stamped with OpenTimestamps on each day the log has changed, a public timestamp service that anchors many hashes in one Bitcoin transaction: a timestamp for our log, not a chain of ours (`/verify`, `proofs/`).
 Proof: `audit/log.jsonl`; `uv run python scripts/verify_audit.py`; `docs/notes/plan_hash.md`.

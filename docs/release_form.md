@@ -4,7 +4,7 @@ DRAFT template, written 2026-09-20. This is a plain template written by students
 
 ---
 
-**Project:** Second Look, a student entry in the OneAquaHealth IEEE Global Hackathon 2026 (build window Sep 16 to 30, 2026).
+**Project:** Second Look, a student entry in the OneAquaHealth IEEE Global Hackathon 2026 (built from Sep 16, 2026 to the freeze on Oct 3, 2026; submissions close Oct 4).
 
 **Who is asking:** Alex and Rachel, students at UC Berkeley. Contact: ____________________ (email).
 
@@ -26,7 +26,7 @@ DRAFT template, written 2026-09-20. This is a plain template written by students
 
 **What we will not do:** We will not record your name, address or contact details in the project data. We will not state anything about your health. Your test answers, if you take the real test, are anonymous and stay separate from the video.
 
-**Changing your mind:** You can ask us to stop recording at any time. You can ask us to leave you out of anything not yet published by contacting us at the email above before Sep 28, 2026. After the video is submitted we cannot recall copies the organizers hold, but we will remove you from anything we control.
+**Changing your mind:** You can ask us to stop recording at any time. You can ask us to leave you out of anything not yet published by contacting us at the email above before Oct 3, 2026. After the video is submitted we cannot recall copies the organizers hold, but we will remove you from anything we control.
 
 **The organizers' waiver:** The hackathon organizers may also ask people who appear in entries to sign their own waiver. We will tell you if that happens.
 

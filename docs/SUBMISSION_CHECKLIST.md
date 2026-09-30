@@ -2,7 +2,7 @@
 
 Two lists. The first is what `make submit-check` (scripts/submit_check.py) proves by itself.
 The second is what a person must do and tick by hand. Submit only when both are done.
-Deadline: Wednesday Sep 30, 2026, 18:00 PDT. Repo public first, then the incognito check.
+Deadline: Sunday Oct 4, 2026, 21:00 PDT (Devpost, read on Sep 29; we submit by 18:00 that day). The repository goes public on the morning of Sat Oct 3, after the second wave's lock job has run, and nothing changes after 09:00 that day. Repo public first, then the incognito check.
 
 ## Checked by `make submit-check`
 
@@ -22,7 +22,7 @@ Deadline: Wednesday Sep 30, 2026, 18:00 PDT. Repo public first, then the incogni
 | secrets_scan | No key shapes (AWS, Anthropic, OpenAI, GitHub, Slack, Google, private key blocks, quoted assigned secrets) in tracked or untracked files; gitleaks over the history when installed | pass |
 | verify_claims | `scripts/verify_claims.py` without `--synthetic` passes: every README number traces to a real results file | pass |
 | audit_log | `audit/log.jsonl` chain verifies | pass |
-| repo_public | `gh repo view --json visibility` says PUBLIC | fails until Sep 30 |
+| repo_public | `gh repo view --json visibility` says PUBLIC | fails until Sat Oct 3 |
 
 Expected failures before submission day: video_link and repo_public.
 Anything else failing is our fault and gets fixed first.
@@ -32,11 +32,12 @@ Anything else failing is our fault and gets fixed first.
 - [ ] Video recorded to docs/video/SHOTLIST.md, read from docs/video/VOICE_SCRIPT.md, edited to 3 to 5 minutes (target 3:45), uploaded,
       link pasted into README.md and docs/devpost.md, and `make submit-check --video` run on the file.
 - [ ] Devpost page filled from docs/devpost.md, the track statement first, the five headers in
-      order, docs/REPORT.pdf attached, both of us on the team; the dry run on Mon Sep 28 and the
-      order for Sep 30 are in docs/SUBMISSION_DAY.md.
+      order, docs/REPORT.pdf attached, both of us on the team; the dry run on Thu Oct 1, the flip on
+      Sat Oct 3 and the order for Sun Oct 4 are in docs/SUBMISSION_DAY.md.
 - [ ] Demo deployed and awake: the landing page paints without the API; `make smoke` passes
       against the public URL; the API does not sleep (scheduled ping or a host that stays up).
-- [ ] Repo made public on Sep 30, then `make submit-check` rerun and fully green.
+- [ ] Repo made public on Sat Oct 3 (`make go-public GO=yes`, after the second lock's job has
+      pushed), then `make submit-check` rerun and fully green.
 - [ ] Incognito check on a phone: landing, `/t` both arms, `/demo`, `/check`, `/spot/[id]`,
       View as FHIR, `/two`. No login wall, no console errors, no request to a third-party origin.
 - [ ] README first screen: the one sentence, the two warm-up photos, the results table with the
@@ -50,10 +51,13 @@ Anything else failing is our fault and gets fixed first.
 - [ ] docs/THIRD_PARTY.md regenerated (`uv run python scripts/third_party.py`) and the licenses
       it could not find checked by hand.
 - [ ] `make check` green on main; CI green; no em or en dashes (`scripts/check_dashes.py`).
-- [ ] The data lock passed (2026-09-28T01:00:00Z), the analysis ran once, and the anonymous
-      response table is published beside the results.
+- [ ] The first data lock passed (2026-09-28T01:00:00Z) and its analysis ran once (an arm was
+      empty). The second lock passed (2026-10-03T04:00:00Z), its analysis ran once, the README's
+      rows for the second wave are filled, and the anonymous response tables are published
+      beside the results.
 - [ ] Alex posted the last audit hash publicly (the README prints it at freeze).
 - [ ] Waiver and consent: the organizers' participation waiver or terms accepted on Devpost by
       Alex; the study consent text still matches docs/DATA_HANDLING.md.
-- [ ] Nothing in the repo names a participant, an email, an address or a secret. `.env` is not
-      tracked. ANTHROPIC_API_KEY is not in any committed file.
+- [ ] Nothing in the repo's tip names a participant, an email, an address or a secret. `.env` is
+      not tracked. ANTHROPIC_API_KEY is not in any committed file. Git history keeps what was
+      committed before (history is never rewritten), which is Alex's call to accept.
