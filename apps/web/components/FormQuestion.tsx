@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GlossaryAside } from "./Glossary";
 import { EnglishTag } from "./LanguagePicker";
 import type { AnswerValue } from "@/lib/api";
@@ -97,6 +97,13 @@ export function FormQuestion({
   lang?: string;
 }) {
   const [draft, setDraft] = useState<AnswerValue | undefined>(value);
+  // WCAG 2.4.3: each new question's heading takes focus, as the quick check's does (FocusHeading),
+  // so a keyboard or screen reader user lands on the question and not at the top of the page.
+  // The check and the walks key this component by item.id, so this runs once per question.
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    heading.current?.focus();
+  }, [item.id]);
   const section = content.form.sections.find((s) => s.id === item.section);
   const unverified = !item.verified_against_app;
   const english = englishOptions(item);
@@ -172,6 +179,7 @@ export function FormQuestion({
         </p>
       ) : null}
       <h1
+        ref={heading}
         tabIndex={-1}
         id="question"
         className={long ? "question-long" : undefined}

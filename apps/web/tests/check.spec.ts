@@ -254,6 +254,16 @@ test("guided check: one question per screen, follow-ups in place, finalize", asy
   await expect(page.getByTestId("send-note")).toHaveText(
     "Send stores this spot and your check on the live site. Any follow-up questions come after that.",
   );
+  // WCAG 2.4.3: an answer moves to the next question, and its heading takes focus, so a keyboard
+  // or screen reader user lands on the new question and not at the top of the page. The quick
+  // check does this already (tests/record.spec.ts); the creek check and the walks dropped focus.
+  await expect(page.getByRole("heading", { name: "Channel form" })).toBeVisible();
+  await page.getByRole("button", { name: "U shape" }).click();
+  await expect(page.locator("h1#question")).toBeFocused();
+  await expect(page.locator("h1#question")).not.toHaveText("Channel form");
+  await page.getByRole("button", { name: "Back" }).click();
+  await expect(page.locator("h1#question")).toHaveText("Channel form");
+  await expect(page.locator("h1#question")).toBeFocused();
   expect(calls.filter((c) => c.path.startsWith("/api/check"))).toEqual([]);
   await page.getByRole("button", { name: "Send" }).click();
 

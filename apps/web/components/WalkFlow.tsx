@@ -512,7 +512,8 @@ export function WalkFlow({ walk }: { walk: Walk }) {
           aria-labelledby="walk-followups-title"
           data-testid="walk-followups"
         >
-          <h2 id="walk-followups-title">
+          {/* Takes focus when the follow-ups appear, as each question's heading does (WCAG 2.4.3). */}
+          <FocusHeading level={2} id="walk-followups-title">
             {t(
               asked.length === 1
                 ? "check.followups_title_one"

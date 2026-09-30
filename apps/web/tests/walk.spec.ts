@@ -125,6 +125,8 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
         .isVisible()
     )
       break;
+  // WCAG 2.4.3: the next question's heading takes focus (tests/check.spec.ts says why).
+  await expect(page.locator("h1#question")).toBeFocused();
     const count = page.getByText(/^Question \d+ of \d+$/);
     if (await count.isVisible()) counts.push(await count.innerText());
     if (await page.getByRole("heading", { name: "Which ones?" }).isVisible())
@@ -140,6 +142,10 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
       .getByRole("main")
       .getByRole("group")
       .first()
+      // The follow-ups' heading takes focus when they appear, as each question's does.
+      await expect(
+        page.getByTestId("walk-followups").getByRole("heading", { level: 2 }),
+      ).toBeFocused();
       .getByRole("button");
     if (await skip.first().isVisible()) await skip.first().click();
     else if (await none.isVisible()) await none.click();
