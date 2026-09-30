@@ -176,6 +176,8 @@ job checks before it deploys anything.
 <!-- deploys:start -->
 | When (UTC) | Part | Commit | Id | Archive | Checked |
 |---|---|---|---|---|---|
+| 2026-09-30T09:44:52Z | web | `e7f96ac` | `14c42a5f` | `~/second-look-backups/deploys/web-20260930T094452Z-e7f96ac` | yes |
+| 2026-09-30T09:43:51Z | worker | `e7f96ac` | `bc866aae-3794-4599-9f82-fe883762ffd6` |  | yes |
 | 2026-09-30T07:03:52Z | web | `6738ffc` | `3a4bdfce` | `~/second-look-backups/deploys/web-20260930T070352Z-6738ffc` | yes |
 | 2026-09-30T07:02:40Z | worker | `6738ffc` | `17be26c0-d307-4bcf-904c-6bf5fb76d73c` |  | yes |
 | 2026-09-30T00:47:52Z | web | `5f160ed` | `d2acb51c` | `~/second-look-backups/deploys/web-20260930T004752Z-5f160ed` | yes |
@@ -194,8 +196,6 @@ job checks before it deploys anything.
 | 2026-09-25T22:09:48Z | worker | `8d04135` | `36aa2ae4-2714-4f2a-8194-0aa2e14478bd` |  | yes |
 | 2026-09-25T20:08:43Z | web | `ead37a6` | `3bed84af` | `~/second-look-backups/deploys/web-20260925T200843Z-ead37a6` | yes |
 | 2026-09-25T20:07:45Z | worker | `ead37a6` | `4677a919-d533-4e15-a999-536e3fdd1eef` |  | yes |
-| 2026-09-25T17:18:19Z | worker | `c5b608c` | `3197b45a-0bc6-4d44-b9e8-5903a9d82d36` |  | yes |
-| 2026-09-25T17:17:52Z | web | `c5b608c` | `7827652f` | `~/second-look-backups/deploys/web-20260925T171752Z-c5b608c` | yes |
 <!-- deploys:end -->
 
 ## What is not done
