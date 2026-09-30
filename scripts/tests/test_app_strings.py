@@ -207,3 +207,9 @@ def test_the_same_bundle_read_again_keeps_its_date_and_a_new_bundle_moves_it() -
     moved = a.build("https://example.org/two.js", src + " ", "2026-09-29", first)
     assert moved["source"]["fetched"] == "2026-09-29"
     assert moved["source"]["bundle_url"] == "https://example.org/two.js"
+
+
+def test_the_file_names_the_same_app_key_for_every_quote_as_the_map_does() -> None:
+    """The file says which app key each quote came from. That must be the map's own key, or the
+    file would name one source while the script reads another."""
+    assert a.app_keys() == DOC["app_keys"]
