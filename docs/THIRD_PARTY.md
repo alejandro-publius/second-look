@@ -1,6 +1,6 @@
 # Third party dependencies
 
-Generated on 2026-09-25 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json`, `worker/package-lock.json` and `tools/diagrams/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
+Generated on 2026-09-30 by `uv run python scripts/third_party.py` from `uv.lock`, `apps/web/package-lock.json`, `worker/package-lock.json` and `tools/diagrams/package-lock.json`. Do not edit by hand; rerun the script. Our own code is MIT; our photos and copy are CC BY 4.0 (README).
 
 ## External services
 
