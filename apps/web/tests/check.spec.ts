@@ -700,6 +700,20 @@ test.describe("a browser set to pt-PT with a stored choice", () => {
   });
 });
 
+// Some Android WebViews write the language with an underscore, pt_BR, and the check opened in
+// English on them, because only a hyphen was split on.
+test("a browser that writes its language as pt_BR opens the check in Portuguese", async ({
+  page,
+}) => {
+  await mockApi(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "languages", { get: () => ["pt_BR", "en-US"] });
+    Object.defineProperty(navigator, "language", { get: () => "pt_BR" });
+  });
+  await page.goto("/check");
+  await expect(page.getByLabel(PICKER)).toHaveValue("pt");
+});
+
 // Audit finding phone-ux-languages-2, second case: the plant list's last answer was "Can't tell"
 // in English with no tag, while every other question said it in the app's own words. It now uses
 // the words of the app's invasive species question, which "Which ones?" belongs to. The plants'
