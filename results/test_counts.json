@@ -1,26 +1,26 @@
 {
   "script": "scripts/count_tests.py",
   "synthetic": false,
-  "generated_at_utc": "2026-09-30T06:23:05+00:00",
-  "measured_at_commit": "037b204",
-  "tree_had_changes": false,
+  "generated_at_utc": "2026-09-30T06:47:57+00:00",
+  "measured_at_commit": "9c4f88a",
+  "tree_had_changes": true,
   "python": {
-    "tests": 2545,
-    "files": 141,
+    "tests": 2624,
+    "files": 148,
     "command": "uv run pytest --collect-only -q"
   },
   "worker_golden": {
-    "cases": 281,
+    "cases": 282,
     "files": 9,
-    "node_tests": 19
+    "node_tests": 27
   },
   "playwright": {
-    "tests": 199,
-    "spec_files": 29,
+    "tests": 253,
+    "spec_files": 33,
     "command": "npx playwright test --list"
   },
   "worker_e2e": {
-    "sections": 18,
+    "sections": 19,
     "names": [
       "an empty store",
       "sessions and visits",
@@ -33,6 +33,7 @@
       "a plant on the city view",
       "a video walk's demo record",
       "a video walk's follow-up checks",
+      "a broken percent code in the address",
       "judge mode shut one second before the second lock",
       "judge mode shut at the first lock, where it once opened",
       "judge mode open at the second lock",
