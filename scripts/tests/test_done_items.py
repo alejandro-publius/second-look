@@ -3,6 +3,7 @@ fails, naming the gap, on the same tree with the thing broken or missing."""
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
@@ -1415,3 +1416,257 @@ def test_reproduce_needs_judge_check_to_call_its_step_not_a_comment(update29: Pa
     judge.write_text(judge.read_text().replace("lambda: step_reproduce(root, env),", ""))
     assert "its second step is make reproduce" in (update29 / "Makefile").read_text()
     assert has(di.check_reproduce_wired(update29), "does not run make reproduce")
+
+
+# UPDATE_33: the second wave
+
+REAL_ROOT = Path(__file__).resolve().parents[2]
+WINDOW = {
+    "open_utc": "2026-09-30T04:00:00Z",
+    "lock_utc": "2026-10-03T04:00:00Z",
+    "lock_job_utc": "2026-10-03T04:10:00Z",
+}
+FIRST_ROWS_TEXT = (
+    "<!-- human-row -->\n\nNo finished test from a person was kept.\n\n<!-- /human-row -->\n\n"
+    "<!-- human-row-2 -->\nToo few people finished part 2.\n<!-- /human-row-2 -->\n"
+)
+HELD = "<!--v:results/wave2_window.json#/lock_utc-->2026-10-03T04:00:00Z<!--/v-->"
+WAVE2_README = (
+    "# Second Look\n\n"
+    + FIRST_ROWS_TEXT
+    + f"\n<!-- wave2-row -->\n\nA second wave runs to the second lock at {HELD}, under plan v3 "
+    "([`docs/analysis_plan_v3.md`](docs/analysis_plan_v3.md)). Its result is reported here "
+    "once.\n\n<!-- /wave2-row -->\n\n<!-- wave2-row-2 -->\nPart 2 of the second wave is "
+    "reported here once.\n<!-- /wave2-row-2 -->\n\n## Evals\n\n"
+    f"- The second wave: the same study runs a second time, to the second lock at {HELD}, under "
+    "[`docs/analysis_plan_v3.md`](docs/analysis_plan_v3.md), tagged `prereg-v3`. "
+    "[`evals/wave2_analysis.py`](evals/wave2_analysis.py) calls the two scripts. The plan says "
+    "that judge mode was open between the first lock and the wave.\n"
+)
+
+
+def git_at(root: Path, when: str, *args: str) -> str:
+    """git with the clock set, so a commit or a tag carries the time the test names."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    env |= {"GIT_COMMITTER_DATE": when, "GIT_AUTHOR_DATE": when}
+    who = ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false"]
+    proc = subprocess.run(
+        ["git", *who, *args], cwd=root, env=env, capture_output=True, text=True, check=True
+    )
+    return proc.stdout.strip()
+
+
+def window_file(root: Path, **over: str) -> None:
+    write(root, di.WAVE2_WINDOW, json.dumps({**WINDOW, **over}))
+
+
+def test_plan_v3_says_what_the_brief_asks_and_gives_the_window(tmp_path: Path) -> None:
+    assert di.check_plan_v3(REAL_ROOT) == []
+    assert has(di.check_plan_v3(tmp_path), "does not exist")
+    plan = (REAL_ROOT / di.PLAN_V3).read_text(encoding="utf-8")
+    write(tmp_path, di.PLAN_V3, plan)
+    assert has(di.check_plan_v3(tmp_path), "results/wave2_window.json does not exist")
+    window_file(tmp_path)
+    assert di.check_plan_v3(tmp_path) == []
+    for words, what in (
+        ("this plan cannot tell who did", "cannot tell who used judge mode"),
+        ("ignores the stored mark", "the stored post_lock mark is ignored"),
+        ("showed no outcome", "the first analysis had run and shown no outcome"),
+        ("paid research panel", "the recruitment"),
+        ("first wave's result stays as reported", "stays as reported"),
+        ("results/assist_20260929.json", "the first wave's two results files"),
+    ):
+        write(tmp_path, di.PLAN_V3, plan.replace(words, "and so on"))
+        assert has(di.check_plan_v3(tmp_path), what), words
+    write(tmp_path, di.PLAN_V3, plan.replace("2026-10-03T04:10:00Z", "2026-10-03T05:10:00Z"))
+    assert has(di.check_plan_v3(tmp_path), "does not give lock_job_utc, 2026-10-03T04:10:00Z")
+    write(tmp_path, di.PLAN_V3, plan.replace("\n3. ", "\n4. "))
+    assert has(di.check_plan_v3(tmp_path), "is not in numbered items")
+
+
+def tagged_tree(root: Path, tagged_at: str = "2026-09-30T02:00:00Z") -> tuple[str, str]:
+    """A repository with plan v3 tagged at the time given, and everything pinned to the tag."""
+    plan = "**Plan v3**\n\n1. Why.\n"
+    write(root, di.PLAN_V3, plan)
+    window_file(root)
+    git(root, "init", "-q")
+    git(root, "add", "-A")
+    git_at(root, "2026-09-30T01:00:00Z", "commit", "-q", "-m", "plan v3")
+    git_at(root, tagged_at, "tag", "-a", di.PLAN_V3_TAG, "-m", "plan v3")
+    commit = git(root, "rev-parse", "HEAD")
+    sha = hashlib.sha256(plan.encode()).hexdigest()
+    write(root, "docs/notes/plan_hash.md", f"| Commit | `{commit}` |\n| SHA-256 | `{sha}` |\n")
+    write(root, di.WAVE2_SCRIPT, f'PLAN_COMMIT = "{commit}"\nPLAN_SHA256 = "{sha}"\n')
+    write(root, "proofs/prereg-v3.tag.ots", "proof")
+    write(root, "proofs/analysis_plan_v3.md.ots", "proof")
+    times = ("2026-09-22T05:36:06Z", "2026-09-26T01:34:28Z", "2026-09-30T02:05:00Z")
+    lines = [json.dumps({"kind": "plan_tagged", "ts_utc": t}) for t in times]
+    write(root, "audit/log.jsonl", "\n".join(lines) + "\n")
+    return commit, sha
+
+
+def test_plan_v3_tagged_needs_the_tag_before_the_wave_and_every_pin(tmp_path: Path) -> None:
+    assert has(di.check_plan_v3_tagged(tmp_path), "results/wave2_window.json does not exist")
+    root = tmp_path / "tagged"
+    root.mkdir()
+    commit, sha = tagged_tree(root)
+    assert di.check_plan_v3_tagged(root) == []
+    edit(root, "docs/notes/plan_hash.md", commit, "not tagged yet, so no commit")
+    assert has(di.check_plan_v3_tagged(root), "plan_hash.md does not give the commit")
+    edit(root, di.WAVE2_SCRIPT, f'"{sha}"', "None")
+    assert has(di.check_plan_v3_tagged(root), "is not pinned to the SHA-256 of prereg-v3")
+    (root / "proofs/analysis_plan_v3.md.ots").unlink()
+    assert has(di.check_plan_v3_tagged(root), "proofs/analysis_plan_v3.md.ots does not exist")
+    log = root / "audit/log.jsonl"
+    log.write_text("\n".join(log.read_text().splitlines()[:2]) + "\n")
+    assert has(di.check_plan_v3_tagged(root), "no third plan_tagged entry")
+    edit(root, di.PLAN_V3, "Why.", "Why, in other words.")
+    assert has(di.check_plan_v3_tagged(root), "differs from the version tagged prereg-v3")
+    git(root, "tag", "-d", di.PLAN_V3_TAG)
+    assert di.check_plan_v3_tagged(root) == ["the tag prereg-v3 does not exist"]
+
+
+def test_plan_v3_tagged_refuses_a_tag_made_after_the_wave_opened(tmp_path: Path) -> None:
+    tagged_tree(tmp_path, tagged_at="2026-09-30T04:00:00Z")
+    problems = di.check_plan_v3_tagged(tmp_path)
+    assert has(problems, "was made at 2026-09-30T04:00:00Z, not before the wave opened")
+    edit(tmp_path, "audit/log.jsonl", "2026-09-30T02:05:00Z", "2026-09-30T04:05:00Z")
+    assert has(di.check_plan_v3_tagged(tmp_path), "plan_tagged entry is not from before the wave")
+
+
+def test_wave2_readme_needs_both_places_in_order_and_rendered_times(tmp_path: Path) -> None:
+    assert di.check_wave2_readme(REAL_ROOT) == []
+    assert di.check_wave2_readme(tmp_path)
+    write(tmp_path, "README.md", WAVE2_README)
+    assert di.check_wave2_readme(tmp_path) == []
+    edit(tmp_path, "README.md", "<!-- /wave2-row-2 -->", "")
+    assert has(di.check_wave2_readme(tmp_path), "lacks the second wave's two places")
+    moved = WAVE2_README.replace("<!-- wave2-row -->\n", "").replace(
+        "<!-- human-row -->", "<!-- wave2-row -->\n<!-- human-row -->"
+    )
+    write(tmp_path, "README.md", moved)
+    assert has(di.check_wave2_readme(tmp_path), "in order, after the first rows")
+    write(tmp_path, "README.md", WAVE2_README.replace(HELD, "2026-10-03T04:00:00Z", 1))
+    problems = di.check_wave2_readme(tmp_path)
+    assert has(problems, "gives a time that is not rendered from results/")
+    assert has(problems, "cites no number from results/")
+    write(tmp_path, "README.md", WAVE2_README.replace("- The second wave:", "- A wave:"))
+    assert has(di.check_wave2_readme(tmp_path), "no paragraph that starts with")
+    write(tmp_path, "README.md", WAVE2_README.replace("tagged `prereg-v3`", "tagged"))
+    assert has(di.check_wave2_readme(tmp_path), "does not name the tag")
+
+
+def test_first_wave_rows_are_held_to_the_words_the_first_lock_wrote(tmp_path: Path) -> None:
+    assert di.check_first_wave_rows(REAL_ROOT) == []
+    rows = FIRST_ROWS_TEXT.rstrip("\n")
+    sha = hashlib.sha256(rows.encode()).hexdigest()
+    assert has(di.check_first_wave_rows(tmp_path, sha), "no longer holds the first wave's rows")
+    write(tmp_path, "README.md", WAVE2_README)
+    assert di.check_first_wave_rows(tmp_path, sha) == []
+    assert has(di.check_first_wave_rows(tmp_path), "differ from the ones the first lock job wrote")
+    # The second wave's own rows may change. The first wave's may not, by one word.
+    edit(tmp_path, "README.md", "Part 2 of the second wave", "Part 2, second wave")
+    assert di.check_first_wave_rows(tmp_path, sha) == []
+    edit(tmp_path, "README.md", "No finished test from a person", "No finished test of anyone")
+    assert has(di.check_first_wave_rows(tmp_path, sha), "differ from the ones the first lock")
+    edit(tmp_path, "README.md", "<!-- human-row -->", "")
+    assert has(di.check_first_wave_rows(tmp_path, sha), "no longer holds the first wave's rows")
+
+
+@pytest.mark.skipif(
+    not REAL_ROOT.joinpath("docs", "internal", "PANEL_STUDY.md").is_file(),
+    reason="the working notes were removed at go-public",
+)
+def test_the_panel_study_is_ready_for_the_launch_of_the_second_wave(tmp_path: Path) -> None:
+    assert di.check_panel_launch(REAL_ROOT) == []
+    assert di.check_panel_launch(tmp_path) == ["the panel study document does not exist"]
+    rel = "/".join(("docs", "internal", "PANEL_STUDY.md"))
+    study = REAL_ROOT.joinpath(rel).read_text(encoding="utf-8")
+    window_file(tmp_path)
+    write(tmp_path, rel, study)
+    assert di.check_panel_launch(tmp_path) == []
+    for words, what in (
+        ("Tue Sep 29, 21:00 PDT", "must not be published"),
+        ("Fri Oct 2, by 17:00 PDT", "when to stop taking people"),
+        ("udge mode is shut", "judge mode is shut before publishing"),
+        ("tag -l prereg-v3", "the plan is tagged before publishing"),
+        ("Ask for 80 places", "how many places to ask for"),
+        ("20 finished sittings kept in each", "the plans' rule of 20"),
+        ("The ethics question, in one minute", "the ethics step"),
+        ("2026-10-03T04:00:00Z", "does not give lock_utc"),
+    ):
+        write(tmp_path, rel, study.replace(words, "and so on"))
+        assert has(di.check_panel_launch(tmp_path), what), words
+
+
+def test_the_second_data_lock_needs_an_entry_after_the_second_lock(tmp_path: Path) -> None:
+    assert has(di.check_data_lock_w2(tmp_path), "results/wave2_window.json does not exist")
+    window_file(tmp_path)
+    first = {"kind": "data_lock", "ts_utc": "2026-09-29T20:31:36Z"}
+    early = {"kind": "data_lock", "ts_utc": "2026-10-03T03:59:59Z"}
+    other = {"kind": "sandbox_push", "ts_utc": "2026-10-03T04:20:00Z"}
+    lines = [json.dumps(e) for e in (first, early, other)]
+    write(tmp_path, "audit/log.jsonl", "\n".join(lines) + "\n")
+    assert has(di.check_data_lock_w2(tmp_path), "no data_lock entry at or after the second lock")
+    lines.append(json.dumps({"kind": "data_lock", "ts_utc": "2026-10-03T04:00:00Z"}))
+    write(tmp_path, "audit/log.jsonl", "\n".join(lines) + "\n")
+    assert di.check_data_lock_w2(tmp_path) == []
+    # The first wave's own check is as it was: the first lock's entry is enough for it.
+    assert di.check_data_lock(tmp_path) == []
+
+
+def wave2_result(when: str = "2026-10-03T04:12:00Z", **over: object) -> str:
+    doc = {
+        "generated_at_utc": when,
+        "script": "evals/wave2_analysis.py",
+        "synthetic": False,
+        "primary": {"status": "descriptive"},
+        "window": {"open_utc": WINDOW["open_utc"], "lock_utc": WINDOW["lock_utc"]},
+        **over,
+    }
+    return json.dumps(doc)
+
+
+def test_the_second_waves_analysis_ran_once_after_its_lock(tmp_path: Path) -> None:
+    window_file(tmp_path)
+    assert has(di.check_analysis_once_w2(tmp_path), "0 real results of the second wave")
+    # The first wave's result and a generated one are not the second wave's.
+    write(tmp_path, "results/usability_20260929.json", analysis("2026-09-29T20:31:00Z"))
+    write(tmp_path, "results/usability_w2_synthetic.json", wave2_result(synthetic=True))
+    assert has(di.check_analysis_once_w2(tmp_path), "0 real results of the second wave")
+    write(tmp_path, "results/usability_w2_20261003.json", wave2_result())
+    assert di.check_analysis_once_w2(tmp_path) == []
+    assert di.check_analysis_once(tmp_path) == []
+    empty = wave2_result(primary={"status": "not computed: an arm is empty"})
+    write(tmp_path, "results/usability_w2_20261003.json", empty)
+    assert di.check_analysis_once_w2(tmp_path) == []
+    write(tmp_path, "results/usability_w2_20261003.json", wave2_result("2026-10-03T03:59:00Z"))
+    assert has(di.check_analysis_once_w2(tmp_path), "before the second lock")
+    late = wave2_result(window={"open_utc": WINDOW["open_utc"], "lock_utc": "2026-10-04T04:00:00Z"})
+    write(tmp_path, "results/usability_w2_20261003.json", late)
+    assert has(di.check_analysis_once_w2(tmp_path), "gives another lock_utc")
+    write(tmp_path, "results/usability_w2_20261003.json", wave2_result(script="evals/other.py"))
+    assert has(di.check_analysis_once_w2(tmp_path), "was not written by evals/wave2_analysis.py")
+    write(tmp_path, "results/usability_w2_20261003.json", wave2_result())
+    write(tmp_path, "results/usability_w2_20261004.json", wave2_result("2026-10-04T04:12:00Z"))
+    assert has(di.check_analysis_once_w2(tmp_path), "2 real results of the second wave")
+
+
+def test_the_second_waves_row_cites_its_result_and_leaves_the_first_rows(tmp_path: Path) -> None:
+    sha = hashlib.sha256(FIRST_ROWS_TEXT.rstrip("\n").encode()).hexdigest()
+    window_file(tmp_path)
+    write(tmp_path, "README.md", WAVE2_README)
+    assert has(di.check_wave2_row(tmp_path, sha), "0 real results of the second wave")
+    write(tmp_path, "results/usability_w2_20261003.json", wave2_result())
+    problems = di.check_wave2_row(tmp_path, sha)
+    assert has(problems, "cites no number from its result")
+    assert has(problems, "row still holds the words from before the lock")
+    assert has(problems, "part 2 row still holds the words from before the lock")
+    cited = "<!--v:results/usability_w2_20261003.json#/counts/completed_trained-->21<!--/v-->"
+    text = WAVE2_README.replace(
+        f"A second wave runs to the second lock at {HELD}", f"People in the second wave: {cited}"
+    ).replace("Part 2 of the second wave is reported here once.", "Too few finished part 2.")
+    write(tmp_path, "README.md", text)
+    assert di.check_wave2_row(tmp_path, sha) == []
+    edit(tmp_path, "README.md", "Too few people finished part 2.", "Enough people finished.")
+    assert has(di.check_wave2_row(tmp_path, sha), "the first wave's rows differ")

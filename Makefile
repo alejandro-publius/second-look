@@ -234,6 +234,33 @@ lock-analysis-install:
 mac-jobs-today:
 	$(PY) scripts/mac_jobs.py today
 
+# UPDATE_33: the second wave (docs/analysis_plan_v3.md). lock-analysis-2 is the lock job's second
+# run: it refuses before the second lock, 2026-10-03T04:00:00Z, by the real clock, runs
+# evals/wave2_analysis.py once, and fills the second wave's own rows in the README; the first
+# wave's rows and result stay as they are. lock-analysis-2-ready says what would stop it, on any
+# day, changing nothing. lock-analysis-2-install installs only that job, for 2026-10-03T04:10:00Z.
+# wave2-window writes results/wave2_window.json, the window as the README quotes it before the
+# second lock. wave2-synthetic runs the second wave's analysis on made up sittings, into a folder
+# outside the repo. mac-jobs-doc writes the jobs table into docs/internal/MAC_JOBS.md.
+.PHONY: lock-analysis-2 lock-analysis-2-ready lock-analysis-2-install wave2-window wave2-synthetic mac-jobs-doc
+lock-analysis-2:
+	$(PY) scripts/lock_analysis.py --wave 2
+
+lock-analysis-2-ready:
+	$(PY) scripts/lock_analysis.py --wave 2 --ready
+
+lock-analysis-2-install:
+	$(PY) scripts/mac_jobs.py install --root $(JOBS_ROOT) --only lock2
+
+wave2-window:
+	$(PY) evals/wave2_analysis.py --window
+
+wave2-synthetic:
+	$(PY) evals/wave2_analysis.py --synthetic --out-dir $${TMPDIR:-/tmp}/second-look-wave2-synthetic
+
+mac-jobs-doc:
+	$(PY) scripts/mac_jobs.py doc
+
 done-check:
 	$(PY) scripts/done_check.py
 
