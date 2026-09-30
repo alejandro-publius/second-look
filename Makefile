@@ -177,9 +177,10 @@ mcp:
 # A follower city in one command (Update 10 tier 2 item 3): a region pack stub, the nested
 # Locations in FSH inside their guide, a poster and the five step checklist. No claims are made.
 #   make new-city NAME=Heraklion COUNTRY=Greece LAT=35.3387 LON=25.1442
+# SITE=https://your.site is the site the poster's QR opens; ours when it is not given.
 new-city:
-	@test -n "$(NAME)" || { echo "make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon>"; exit 1; }
-	$(PY) scripts/new_city.py --name "$(NAME)" --country "$(COUNTRY)" --lat $(LAT) --lon $(LON)
+	@test -n "$(NAME)" || { echo "make new-city NAME=<city> COUNTRY=<country> LAT=<lat> LON=<lon> [SITE=<site>]"; exit 1; }
+	$(PY) scripts/new_city.py --name "$(NAME)" --country "$(COUNTRY)" --lat $(LAT) --lon $(LON) $(if $(SITE),--site "$(SITE)")
 
 e2e:
 	cd $(WEB) && npm run build --silent && WEB_PORT=$(WEB_PORT) npx playwright test

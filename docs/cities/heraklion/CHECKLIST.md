@@ -43,6 +43,8 @@ Each step below names the files and commands in this repository that do it.
       the observer's score: `core/fhir_emit.py`, nothing to change.
 - [ ] `make check` validates every emitted record in CI before it is stored or mirrored.
 - [ ] Print `docs/cities/heraklion/poster.html` on Letter or A4 once two local photos are in.
+      Its QR opens https://second-look-79t.pages.dev. Pass `SITE=` to `make new-city` to point it at
+      your own site. The poster's words are English.
 
 ## 5. Publish and repeat
 

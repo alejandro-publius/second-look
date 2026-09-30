@@ -1,6 +1,7 @@
 """Scaffold a follower city (Update 10 tier 2 item 3).
 
   uv run python scripts/new_city.py --name Heraklion --country Greece --lat 35.3387 --lon 25.1442
+  ... --site https://your.site    the site the poster's QR opens; ours when not given
 
 Given a name and coordinates it writes four things and makes no claim about any of them:
 
@@ -218,7 +219,7 @@ def poster_html(name: str, hook: str, scan: str, url: str, svg: str | None) -> s
 """
 
 
-def checklist(slug: str, name: str, country: str, lat: float, lon: float) -> str:
+def checklist(slug: str, name: str, country: str, lat: float, lon: float, site: str) -> str:
     today = datetime.now(UTC).date().isoformat()
     return f"""# {name}, {country}: a follower city checklist
 
@@ -265,6 +266,8 @@ Each step below names the files and commands in this repository that do it.
       the observer's score: `core/fhir_emit.py`, nothing to change.
 - [ ] `make check` validates every emitted record in CI before it is stored or mirrored.
 - [ ] Print `docs/cities/{slug}/poster.html` on Letter or A4 once two local photos are in.
+      Its QR opens {site}. Pass `SITE=` to `make new-city` to point it at
+      your own site. The poster's words are English.
 
 ## 5. Publish and repeat
 
@@ -339,7 +342,7 @@ def scaffold(
         ("pack", region_pack(slug, name, country)),
         ("fsh", locations_fsh(slug, name, country, lat, lon)),
         ("poster", poster_html(name, hook, scan, url, qr_svg(url))),
-        ("checklist", checklist(slug, name, country, lat, lon)),
+        ("checklist", checklist(slug, name, country, lat, lon, site.rstrip("/"))),
     ):
         path = targets[key]
         path.parent.mkdir(parents=True, exist_ok=True)
