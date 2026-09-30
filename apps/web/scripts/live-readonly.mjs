@@ -56,12 +56,24 @@ export async function readCounts(api, fetchImpl = fetch) {
   }
 }
 
-/** The counts check: it passes only when both reads worked and say the same thing. */
-export function countsCheck(before, after) {
+/**
+ * The counts check: both reads must work, and nothing this check sent may have written. The counts
+ * may move while the check runs, because the study is public and a person may start or finish a
+ * sitting in these two minutes; that is theirs, not ours, and it must not fail a lock job's
+ * check. What would fail it: a failed read, or a write of ours (writes is how many this check saw).
+ */
+export function countsCheck(before, after, writes = 0) {
   if (before.error !== undefined || after.error !== undefined) {
     return { pass: false, detail: `before: ${before.error ?? before.value}; after: ${after.error ?? after.value}` };
   }
-  return { pass: before.value === after.value, detail: `${before.value} then ${after.value}` };
+  if (writes > 0) {
+    return { pass: false, detail: `${writes} request(s) of this check wrote; counts ${before.value} then ${after.value}` };
+  }
+  if (before.value === after.value) return { pass: true, detail: `${before.value} then ${after.value}` };
+  return {
+    pass: true,
+    detail: `the public counts moved while this ran (someone is taking the test); no request of this check wrote: ${before.value} then ${after.value}`,
+  };
 }
 
 /** The walk to check: WALK_ID if set, else the first walk the web build knows, else none. */
@@ -233,8 +245,8 @@ async function main() {
   await browser.close();
   const after = await readCounts(api);
   ok("no request wrote to the study, check, quick, upload or walk routes", writes.length === 0, writes.join(", "));
-  const counts = countsCheck(before, after);
-  ok("the public counts did not move", counts.pass, counts.detail);
+  const counts = countsCheck(before, after, writes.length);
+  ok("the public counts were read twice and this check wrote nothing", counts.pass, counts.detail);
   const failed = results.filter((r) => !r.pass);
   console.log(`live-readonly: ${results.length - failed.length} of ${results.length} passed${notYet.length ? `, ${notYet.length} not yet (${notYet.join("; ")})` : ""}`);
   process.exit(failed.length ? 1 : 0);

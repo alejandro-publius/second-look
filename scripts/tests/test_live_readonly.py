@@ -77,11 +77,17 @@ def test_two_failed_reads_do_not_pass_the_counts_check() -> None:
     assert call(f"m.countsCheck({json.dumps(bad)}, {json.dumps(good)})")["pass"] is False
 
 
-def test_the_counts_check_passes_only_when_the_counts_hold() -> None:
+def test_the_counts_check_passes_when_the_reads_work_and_nothing_of_ours_wrote() -> None:
     same = {"value": '{"a":1}'}
     moved = {"value": '{"a":2}'}
     assert call(f"m.countsCheck({json.dumps(same)}, {json.dumps(same)})")["pass"] is True
-    assert call(f"m.countsCheck({json.dumps(same)}, {json.dumps(moved)})")["pass"] is False
+    # A person may start or finish a sitting while the check runs: that is theirs, and it passes.
+    got = call(f"m.countsCheck({json.dumps(same)}, {json.dumps(moved)}, 0)")
+    assert got["pass"] is True and "someone is taking the test" in got["detail"]
+    # A write of ours fails it, whether or not the counts moved.
+    got = call(f"m.countsCheck({json.dumps(same)}, {json.dumps(moved)}, 1)")
+    assert got["pass"] is False and "1 request(s) of this check wrote" in got["detail"]
+    assert call(f"m.countsCheck({json.dumps(same)}, {json.dumps(same)}, 2)")["pass"] is False
 
 
 def test_walk_id_wins_then_the_first_built_walk_then_none(tmp_path: Path) -> None:
