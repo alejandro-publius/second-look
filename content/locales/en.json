@@ -317,7 +317,7 @@
   "a11y.checked_words": "Every sentence is checked for plain words, aiming at a reading age of about 12.",
   "a11y.checked_alt": "Every photo has a text description, and it never gives away the answer to a test question.",
   "a11y.limits_title": "What is not perfect yet",
-  "a11y.limits_body": "The test is about what you can see in photos, so it cannot be taken without sight. The creek videos have no sound, so they need no captions, but they have no audio description either.",
+  "a11y.limits_body": "The test is about what you can see in photos, so it cannot be taken without sight. The creek videos have no sound, so they need no captions, but they have no audio description either. The creek check's questions and answers come in the six languages of the OneAquaHealth app, in its own translations, which we have not checked for plain words. The rest of the site, this page included, is in English. A question with no checked translation is shown in English with a small English tag, and each part tells a screen reader which language it is in.",
   "a11y.tell_title": "Tell us about a problem",
   "nav.accessibility": "Accessibility",
   "privacy.title": "Privacy",
