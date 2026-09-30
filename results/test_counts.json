@@ -1,9 +1,9 @@
 {
   "script": "scripts/count_tests.py",
   "synthetic": false,
-  "generated_at_utc": "2026-09-30T01:00:44+00:00",
-  "measured_at_commit": "3986ae4",
-  "tree_had_changes": true,
+  "generated_at_utc": "2026-09-30T01:13:04+00:00",
+  "measured_at_commit": "37c08cb",
+  "tree_had_changes": false,
   "python": {
     "tests": 2538,
     "files": 142,
