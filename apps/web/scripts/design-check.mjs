@@ -6,7 +6,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { connect, createServer } from "node:net";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { lockMirrorFails, strayBeforeLockCallers } from "./lock-mirror.mjs";
+import { lockMirrorFails } from "./lock-mirror.mjs";
 import { WEB_ORIGIN, WEB_PORT } from "./web-port.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -135,13 +135,10 @@ for (const f of [...cssFiles, ...tsxFiles, ...tsFiles]) {
 
 // 6b. The study's instants in apps/web/lib/lock.ts mirror core/lock.py: the first lock, the second
 // wave's opening, the second lock and the time judge mode opens. The browser decides by its own
-// copy, so a copy that drifts would open judge mode at the wrong time. isBeforeLock keeps its old
-// name for the two judge mode pages only (lock.ts says why); nothing else may call it.
-{
-  fails.push(...lockMirrorFails(readFileSync(join(repo, "core", "lock.py"), "utf8"), readFileSync(join(web, "lib", "lock.ts"), "utf8")));
-  const callers = [...code, ...walk(join(web, "scripts"), [".mjs"]), ...walk(join(web, "tests"), [".ts", ".mjs"])].filter((f) => !f.endsWith("lock-mirror.mjs"));
-  fails.push(...strayBeforeLockCallers(callers.map((f) => ({ path: rel(f), text: readFileSync(f, "utf8") }))));
-}
+// copy, so a copy that drifts would open judge mode at the wrong time. The two judge mode pages
+// call isJudgeModeShut; the old name isBeforeLock, and the rule that kept other callers from it,
+// went once they did.
+fails.push(...lockMirrorFails(readFileSync(join(repo, "core", "lock.py"), "utf8"), readFileSync(join(web, "lib", "lock.ts"), "utf8")));
 
 // 7. Contrast, computed from the tokens themselves.
 function srgb(hex) {

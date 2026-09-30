@@ -225,6 +225,36 @@ export const exampleObservation = (performer, method, note) => ({
   note: note ? [{ text: note }] : undefined,
 });
 
+// Shaped like the lab record the OneAquaHealth sandbox gives for the Almyros reach, with made-up
+// numbers and a made-up performer: no single value and no one moment, but five figures for a year,
+// each a component with a valueQuantity, an effectivePeriod, and a performer named only by display.
+const STATISTICS = "http://terminology.hl7.org/CodeSystem/observation-statistics";
+const labFigure = (code, display, value) => ({
+  code: { coding: [{ system: STATISTICS, code, display }] },
+  valueQuantity: { value, unit: "milligram per liter", system: "http://unitsofmeasure.org", code: "mg/L" },
+});
+export const exampleLabComponents = {
+  resourceType: "Observation",
+  id: "Obs-Almyros-DissolvedOxygen-2020",
+  meta: { profile: ["http://hl7.eu/fhir/ig/oah/StructureDefinition/observation-with-component-oah"] },
+  status: "final",
+  category: [{ coding: [{ system: "http://terminology.hl7.org/CodeSystem/observation-category", code: "laboratory", display: "Laboratory" }] }],
+  code: {
+    coding: [{ system: "http://hl7.eu/fhir/ig/oah/CodeSystem/temporarySystem-oah-eu", code: "dissolved-oxygen", display: "Dissolved Oxygen" }],
+    text: "Dissolved Oxygen",
+  },
+  subject: { reference: "Location/Loc-Almyros" },
+  effectivePeriod: { start: "2020-01-01", end: "2020-12-31" },
+  performer: [{ display: "A government chemical service" }],
+  component: [
+    labFigure("average", "Average", 7.4),
+    labFigure("maximum", "Maximum", 9.1),
+    labFigure("minimum", "Minimum", 5.2),
+    labFigure("std-dev", "Standard Deviation", 0.85),
+    labFigure("median", "Median", 7.5),
+  ],
+};
+
 export const exampleValidation = { ran_at_utc: "2026-09-20T22:58:03+00:00", validator_version: "6.10.4", ig_commit: "b907cf0", fhir_version: "4.0.1", terminology_checks_ran: false, errors: 0, warnings: 15, files_validated: 14, walk_records_validated: 2 };
 
 // A finished walk's stored record (UPDATE_30 section 1 item 3): the id is the walk visit's own,
@@ -239,6 +269,8 @@ export const walkRecordId = (walkId, answeredAt) => "walk-" + createHash("sha256
 
 /**
  * Registers the fake API on a page. Options: lessonFirst (bool), followups (array), theirsStatus,
+ * theirsShape ("components": their record as the sandbox gives it, with a period and five
+ * components in place of one value at one moment; the default is a record with a plain value),
  * offline (object with a mutable `value` flag; when true every API request fails like a dead network),
  * walkStore (a Map of stored walk records; hand the same one to two pages, in two browser contexts,
  * and a record one stores opens in the other, as on the real store), walkBundle (walkId, answers,
@@ -386,7 +418,12 @@ export async function mockApi(page, options = {}) {
         ours,
         ours_example: Boolean(options.oursExample),
         ours_place: options.oursExample ? "Strawberry Creek, campus reach, spot 1" : "Footbridge below the library",
-        theirs: status === "down" ? null : exampleObservation("Organization/almyros-lab", "Laboratory analysis", null),
+        theirs:
+          status === "down"
+            ? null
+            : options.theirsShape === "components"
+              ? exampleLabComponents
+              : exampleObservation("Organization/almyros-lab", "Laboratory analysis", null),
         theirs_status: status,
         fetched_at: "2026-09-20T20:00:00Z",
       });

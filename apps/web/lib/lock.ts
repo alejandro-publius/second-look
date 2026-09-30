@@ -18,15 +18,3 @@ export const JUDGE_MODE_OPENS_UTC = SECOND_LOCK_UTC;
 export function isJudgeModeShut(when: Date = new Date()): boolean {
   return when.getTime() < Date.parse(JUDGE_MODE_OPENS_UTC);
 }
-
-/**
- * Kept under its old name for the two judge mode pages, app/demo/page.tsx and
- * app/t2/demo/page.tsx, the only callers. It no longer reads the first lock: it answers whether
- * judge mode is shut, which is until the second lock. The name stays because another change was
- * editing those two pages when this was written (UPDATE_33), so this change could not rename
- * their call. Once both are merged the pages call isJudgeModeShut and this goes. Nothing else may
- * call it: scripts/design-check.mjs fails the build if anything does.
- */
-export function isBeforeLock(when: Date = new Date()): boolean {
-  return isJudgeModeShut(when);
-}

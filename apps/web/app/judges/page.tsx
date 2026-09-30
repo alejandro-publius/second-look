@@ -10,8 +10,13 @@ import { logStampDay } from "@/lib/verify-text";
 
 export const metadata: Metadata = { title: `${t("judges.title")}: ${t("app.name")}` };
 
-// The repository is private until Sep 30 (hard rule 15). These links open on that day, and each
-// door's line says so.
+// The repository is private until Oct 3 (hard rule 15; the deadline moved, UPDATE_33) and public
+// from that day. Each door's line says "public from Oct 3", which is true before that day and
+// after it, so the words need no clock and no second deploy. Judge mode's two doors speak the
+// same way: judge mode is shut while the second wave of the study runs and open from the second
+// lock, 2026-10-03T04:00:00Z (apps/web/lib/lock.ts, JUDGE_MODE_OPENS_UTC), and each door says
+// "shut while the second wave of the study runs" and "open from Oct 3 at 04:00 UTC".
+// apps/web/tests/judges.spec.ts holds those words to the instant in lock.ts.
 const REPO = "https://github.com/alejandro-publius/second-look";
 
 // No stored record answers to a sample id on the live site, so the sample record is the one a
@@ -30,8 +35,11 @@ const stampDay = logStampDay(auditEntries(), otsStatus().proofs);
 
 // The judges' front door. The participant's front door, /, carries the wordmark and About and
 // nothing else, so a person taking the test is never one tap from the answer key or the code.
-// Judge mode leads because it stores nothing. The real test is the study, so it comes second and
-// says so, and a judge's first tap never adds a session to the data. Every door has one line under
+// Judge mode leads because it stores nothing. The door to the AI's one question comes second: it
+// is the one place on the site where a judge meets the checker's question, it stores nothing
+// either, and it stood last of eighteen doors, five screens down (audit finding
+// first-two-minutes-1). The real test is the study, so it comes after both and says so, and a
+// judge's first taps never add a session to the data. Every door has one line under
 // it: what it shows and about how long it takes (CRITIC_02 D03 and D11). The clip's length is on
 // one door only, and the door to the city view says it is the end of a walk (CRITIC_09 Q04).
 // The clips show natural creeks, so an honest walk finds little for a city to do. The city door
@@ -57,6 +65,28 @@ const DOORS: { href: string; label: string; note: string; params?: Record<string
   { href: "/credits", label: "nav.credits", note: "judges.credits_note" },
 ];
 
+type Door = (typeof DOORS)[number];
+
+function door(d: Door) {
+  return (
+    <Row
+      key={d.label}
+      label={
+        d.href.startsWith("https://") ? (
+          <a className="row-link" href={d.href} rel="noreferrer">
+            {t(d.label, d.params)}
+          </a>
+        ) : (
+          <Link className="row-link" href={d.href}>
+            {t(d.label, d.params)}
+          </Link>
+        )
+      }
+      value={t(d.note, d.params)}
+    />
+  );
+}
+
 export default function JudgesPage() {
   return (
     <div className="stack">
@@ -66,25 +96,10 @@ export default function JudgesPage() {
           this page opens with its own line instead (CRITIC_04 F04). */}
       <p>{t("judges.intro")}</p>
       <nav className="card" aria-label={t("judges.title")}>
-        {DOORS.map((d) => (
-          <Row
-            key={d.label}
-            label={
-              d.href.startsWith("https://") ? (
-                <a className="row-link" href={d.href} rel="noreferrer">
-                  {t(d.label, d.params)}
-                </a>
-              ) : (
-                <Link className="row-link" href={d.href}>
-                  {t(d.label, d.params)}
-                </Link>
-              )
-            }
-            value={t(d.note, d.params)}
-          />
-        ))}
+        {DOORS.slice(0, 1).map(door)}
         {/* Part 2's judge mode (UPDATE_31 section 2 item 9): feel the checker's question. */}
         <JudgesAssistDoor />
+        {DOORS.slice(1).map(door)}
       </nav>
     </div>
   );
