@@ -125,6 +125,8 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
   );
   await page.getByRole("button", { name: "Start the check" }).click();
   await page.getByRole("button", { name: "U shape" }).click(); // channel form
+  // WCAG 2.4.3: the next question's heading takes focus (tests/check.spec.ts says why).
+  await expect(page.locator("h1#question")).toBeFocused();
   // The count's total stays the same when a follow-up such as "Which ones?" appears (REVIEW_03 R42).
   const counts: string[] = [];
   let sawFollowUp = false;
@@ -135,13 +137,15 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
         .isVisible()
     )
       break;
-  // WCAG 2.4.3: the next question's heading takes focus (tests/check.spec.ts says why).
-  await expect(page.locator("h1#question")).toBeFocused();
     const count = page.getByText(/^Question \d+ of \d+$/);
     if (await count.isVisible()) counts.push(await count.innerText());
     if (await page.getByRole("heading", { name: "Which ones?" }).isVisible())
       sawFollowUp = true;
     if (await page.getByRole("button", { name: "Finish" }).isVisible()) {
+      // The follow-ups' heading takes focus when they appear, as each question's does.
+      await expect(
+        page.getByTestId("walk-followups").getByRole("heading", { level: 2 }),
+      ).toBeFocused();
       await page.getByRole("button", { name: "Finish" }).click();
       continue;
     }
@@ -152,10 +156,6 @@ test("a walk shows its credit, builds a demo record on the phone, and sends it t
       .getByRole("main")
       .getByRole("group")
       .first()
-      // The follow-ups' heading takes focus when they appear, as each question's does.
-      await expect(
-        page.getByTestId("walk-followups").getByRole("heading", { level: 2 }),
-      ).toBeFocused();
       .getByRole("button");
     if (await skip.first().isVisible()) await skip.first().click();
     else if (await none.isVisible()) await none.click();
@@ -1127,6 +1127,14 @@ test("the list of languages is whole on the first screen of every walk, and its 
       en["check.lang_note"],
     );
     expect(note.y).toBeGreaterThan(start.y + start.height);
+    // WCAG 3.3.2: the list has a label a sighted person can read, right above it, and Start the
+    // check is still whole on this first screen with the label there.
+    const label = page.getByText(en["check.lang_label_short"], { exact: true });
+    await expect(label).toBeVisible();
+    expect(en["check.lang_label_short"]).toBe("Questions in");
+    const labelBox = (await label.boundingBox())!;
+    expect(labelBox.y + labelBox.height, w.id).toBeLessThanOrEqual(box.y);
+    expect(start.y + start.height, w.id).toBeLessThanOrEqual(height);
     await expect(page.locator("select")).toHaveCount(1);
   }
   // The list is for choosing before the walk starts: a question screen has none.
@@ -1137,11 +1145,3 @@ test("the list of languages is whole on the first screen of every walk, and its 
   );
   await expect(page.locator("select")).toHaveCount(0);
 });
-    // WCAG 3.3.2: the list has a label a sighted person can read, right above it, and Start the
-    // check is still whole on this first screen with the label there.
-    const label = page.getByText(en["check.lang_label_short"], { exact: true });
-    await expect(label).toBeVisible();
-    expect(en["check.lang_label_short"]).toBe("Questions in");
-    const labelBox = (await label.boundingBox())!;
-    expect(labelBox.y + labelBox.height, w.id).toBeLessThanOrEqual(box.y);
-    expect(start.y + start.height, w.id).toBeLessThanOrEqual(height);
