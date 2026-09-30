@@ -24,7 +24,10 @@ Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamp
 for the team on Sep 25, D66). Their logs are in `~/second-look-backups/logs/`.
 
 Traps: after any change to `content/locales/en.json`, run `scripts/build_worker_content.py`. The
-web build rewrites the tracked `apps/web/public/_headers`; restore it before committing. A change
+web build rewrites the tracked `apps/web/public/_headers`; restore it before committing (closed on
+Sep 29 in 2f77812: a local or test build now writes the same policy production sends, so the
+tracked file no longer changes; only a change to `apps/web/security-headers.mjs` or to the warm-up
+photos changes it, and then the new file is committed). A change
 to a README section the report quotes needs `make report-pdf`, and the README cites the report's
 page count, so render and rebuild until both settle. A lockfile written by the Mac's npm 11 can
 fail CI's npm 10; write lockfiles with `npx -y npm@10`. CI runs on pushes to `main` and `depth`.
@@ -52,7 +55,10 @@ open; F88 is logged in `docs/deviations.md` and its remedy is Alex's.
   `/two` shows our record alone and says so; `scripts/cache_their_records.py` runs daily at 07:30
   (launchd `com.secondlook.theirs`) and fills the cache the day the name resolves again. The
   sandbox re-push job on Sep 28, Sep 30 and Oct 1 will fail the same way until then. This terminal
-  refused a fetch pinned to their last known address, so none was built.
+  refused a fetch pinned to their last known address, so none was built. (Closed on Sep 28: the
+  name resolved again that day, the daily job fetched their record and `/two` shows it with the
+  fetch time; the re-push found our resources there and their server refused the Library update
+  with HTTP 400. The name has come and gone since; the README's Known weaknesses keeps the state.)
 - Open review findings from pull request #8 (`docs/internal/reviews/REVIEW_02.md`): F86, POST
   `/api/demo/answer` has no server lock check before Sep 28, so 16 POSTs reveal the gold key
   (closed on Sep 24: the route answers 403 until the lock, on both servers, `docs/deviations.md`);
@@ -114,7 +120,7 @@ in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid 
 | Thing | Where |
 |---|---|
 | Site | https://second-look-79t.pages.dev (from `main`, d6c9d2b), API on the same origin under `/api` |
-| Preview of `depth` | https://depth.second-look-79t.pages.dev, API on the same origin, `make deploy-preview` |
+| Preview of `depth` | https://depth.second-look-79t.pages.dev, API on the same origin, which is the live API and the live database, `make deploy-preview` |
 | API | https://second-look-api.thealexschroeder.workers.dev/health (the bare address answers 404 by design) |
 | Database | D1 `second-look`, id `aff80e0b-6165-4e53-96f5-ff15716221df` |
 

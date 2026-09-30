@@ -1,6 +1,6 @@
 # Judge scorecard
 
-The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin, as of 2026-09-25. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
+The five criteria the organizers score, 1 to 10 each, with where to look for each one and what is still thin, as of 2026-09-30. Written for judges who have a few minutes. Every claim points at a file or a command, and nothing here is a result number: those live in `results/` and the README. Under each heading is our own mark, in words rather than a number, because it is our judgment and not a measurement.
 
 The technical report, [`docs/REPORT.pdf`](REPORT.pdf), says the same at more length.
 
@@ -16,7 +16,7 @@ Our mark: strong. The per-feature score travels with every observation in their 
 | City actions are OneAquaHealth's own restoration measures, from their Policy Brief (2026), page 9 | `/walk/v02`, then "See this creek as a city would"; the live creek page stays empty until the first real check |
 | One action each for the person, the pet and the city, from approved sentences with sources | `content/approved_sentences.yaml`; the health card on the sample record, `docs/screens/spot-health.webp` (local build) |
 
-Thin: no person has taken the test yet, so there is no measured effect of the lesson on people. A paid research panel may add sessions before the data lock on Sep 28, if Alex launches it; they would count in the one pre-registered analysis, reported whatever it shows. Said in README, Known weaknesses.
+Thin: no person finished the test before the first lock on Sep 28, so there is no measured effect of the lesson on people yet. The same study runs a second time, up to the second lock on Fri Oct 2 at 21:00 PDT, with a paid research panel beside the public link once Alex launches it; its one pre-registered analysis runs once after that lock and is reported whatever it shows. Said in README, Known weaknesses.
 
 ## Innovation and creativity (20%)
 
@@ -46,11 +46,11 @@ Our mark: strong. The paid model run is done, and `make reproduce` grades its nu
 | Frames from open creek footage, screened by Vision and by eye, every drop with its reason | `videos/frames.json`; `videos/review.json`; `evals/footage.py` |
 | Python and the TypeScript Worker proved equal by golden vectors, walks included | `evals/golden_vectors.py`; `worker/test/golden.test.ts` |
 
-Thin: the benchmark's intervals count its three runs of the same photos as new answers, so they are too narrow (`docs/MODEL_CARD.md`). From Sep 28 judge mode gives away the answer key, so a volunteer could carry a perfect score into their checks; see README, Known weaknesses. The citizen observer is modelled as a Practitioner because R4 has no better fit; the question is open with the guide's authors (`docs/ig_proposal.md`). Their sandbox's name has not resolved since Sep 23 (hl7-eu/oah issue 8), so the mirror cannot be read there today; the read-back of Sep 21 stands in.
+Thin: the benchmark's intervals count its three runs of the same photos as new answers, so they are too narrow (`docs/MODEL_CARD.md`). Once judge mode is open it gives away the answer key, so a volunteer could carry a perfect score into their checks, and it was open for two days between the first lock and the second wave; see README, Known weaknesses. The citizen observer is modelled as a Practitioner because R4 has no better fit; the question is open with the guide's authors (`docs/ig_proposal.md`). Their sandbox's name stopped resolving on Sep 23 (hl7-eu/oah issue 8), came back on Sep 28 and has come and gone since; `/two` shows their lab record from the last copy the Mac fetched, and their server refused the update of our Library entry on Sep 28.
 
 ## Usability and user experience (15%)
 
-Our mark: partial. English only, and the form's wording waits on a check against the official app.
+Our mark: partial. The creek check asks the official app's questions word for word, in its six languages, checked against the app's public bundle; our own words around them are English only.
 
 
 | What to look at | Where |
@@ -60,7 +60,7 @@ Our mark: partial. English only, and the form's wording waits on a check against
 | Reading age measured on every string in CI | `make readability` |
 | Tap targets and contrast measured in CI | `make design-check` |
 
-Thin: English only; a Spanish draft is not in the build.
+Thin: our own words are English only, and so are the test and the lessons; a Spanish draft of them is not in the build. The app's translations whose meaning differs from the English show in English, marked (`docs/notes/app_translations.md`).
 
 ## Feasibility and scalability (15%)
 
@@ -69,9 +69,9 @@ Our mark: strong. Free to run, a follower city scaffolds in seconds, and a city 
 
 | What to look at | Where |
 |---|---|
-| OneAquaHealth's five steps for a follower city, set up for Berkeley the way a follower city would; no volunteer has been trained or tested and no real visit exists yet | README, Feasibility: set up for Berkeley the way a follower city would |
+| OneAquaHealth's five steps for a follower city, set up for Berkeley the way a follower city would; nobody finished the test before the first lock, the second wave is what fills it, and no real visit exists yet | README, Feasibility: set up for Berkeley the way a follower city would |
 | A second city scaffold, its lists still to fill | `fhir/fsh/city-heraklion.fsh`; `content/regions/heraklion.yaml` |
 | Free to run on Cloudflare, no card | `docs/notes/hosting.md` |
 | The example offered back to their guide | `docs/ig_proposal.md` |
 
-Thin: four photos per feature is coarse, and the photos come from open collections in several countries, not from the creek a Berkeley volunteer stands in. The daily jobs, the backups, the uptime check and the one run of the analysis after the lock run on one team member's laptop, not yet on the Worker's own schedule; see README, Known weaknesses.
+Thin: four photos per feature is coarse, and the photos come from open collections in several countries, not from the creek a Berkeley volunteer stands in. The daily jobs, the backups, the uptime check and the one run of the analysis after each lock run on one team member's laptop, not yet on the Worker's own schedule; see README, Known weaknesses.

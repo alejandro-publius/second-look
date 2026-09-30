@@ -31,7 +31,7 @@ The integrator owns: `core/records.py`, `core/lock.py`, `core/content_loader.py`
 ## Shared shapes (already written, import them)
 
 - `core/records.py`: `FeatureId`, `FEATURES`, `AnswerValue` (present, absent, cant_tell), `TestAnswer` (yes, no, cant_tell), `Arm`, `FeatureScore`, `Observer`, `Spot`, `CheckResult`, `VisitRecord`, `TestSitting`. `SCORE_VALID_DAYS = 90`, `ITEMS_PER_FEATURE = 4`.
-- `core/lock.py`: `DATA_LOCK_UTC` (2026-09-28T01:00:00Z), `is_before_lock(ts)`.
+- `core/lock.py`: `DATA_LOCK_UTC` (2026-09-28T01:00:00Z, the first lock), `is_before_lock(ts)`; for the second wave (UPDATE_33) `WAVE2_OPEN_UTC` (2026-09-30T04:00:00Z), `SECOND_LOCK_UTC` (2026-10-03T04:00:00Z), `JUDGE_MODE_OPENS_UTC` (the second lock), `is_before_second_lock(ts)`, `is_in_wave2(started_at)` and `is_judge_mode_shut(ts)`. The Worker mirrors the two instants in `worker/src/index.ts`, and the web app in `apps/web/lib/lock.ts`.
 - `core/content_loader.py`: `load_content(root) -> Content` with `.features`, `.form["items"]`, `.test_items`, `.followups`, `.sentences`, `.locale`, `.glossary`, `.regions`, `.lessons`, `.photos` (id to `Photo`), `.content_hash()`, plus `placeholder_report(content) -> list[str]` (human inputs missing). Raises `ContentError` with every problem.
 
 ## Content files (integrator owns, everyone reads)

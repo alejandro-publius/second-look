@@ -23,7 +23,7 @@ answer can't tell when no stream is in view. On
 {{claim:results/footage_latest.json#/gate/candidates}} candidate flags, each on a feature that model
 had not passed. The HL7 validator found {{claim:results/fhir_validation.json#/errors}} errors in
 {{claim:results/fhir_validation.json#/files_validated}} records checked against OneAquaHealth's
-guide. No person has taken the test yet, and this report makes no claim about people; a paid research panel may add sessions before the lock, and they would be reported once, after it.
+guide. Nobody finished the test before the first lock, so the AI numbers above measure no person. What people did in the second wave, paid panel and public link alike, is in the rows of section 3.1, filled once after the second lock by the pre-registered analysis, whatever the result.
 
 ## 1. The problem
 
@@ -31,17 +31,17 @@ guide. No person has taken the test yet, and this report makes no claim about pe
 
 ## 2. Method
 
-How a model's answer becomes a flag, or nothing, is drawn in [`docs/diagrams/ai-gate.svg`](docs/diagrams/ai-gate.svg). It is too wide to print here with text you can read, and 2.2 gives the same steps in words.
+How a model's answer becomes a flag, or nothing, is drawn in [`docs/diagrams/ai-gate.svg`](docs/diagrams/ai-gate.svg), too wide to print here; 2.2 gives the same steps in words.
 
 ### 2.1 The test
 
 Sixteen photos, four per feature, two with the feature and two without, in a new random order for
 each person. The answers are Yes, No and Can't tell, and Can't tell counts as wrong. The score is
-kept per feature, out of 4, and stored in the record of the test sitting; a dated qualification
-for the test and a Provenance link carry it to every Observation the person makes. The question
-wording and the analysis were written into `docs/analysis_plan.md` and tagged `prereg-v1`, and
-the key was frozen as a hash in `results/key_hash.json`, on Sep 21, the day the test opened, before
-the first paid model run on Sep 23. The dates here are Pacific time.
+kept per feature, out of 4, in the record of the test sitting; a dated qualification and a
+Provenance link carry it to every Observation the person makes. The question wording and the
+analysis were written into `docs/analysis_plan.md` and tagged `prereg-v1`, and the key was frozen
+as a hash in `results/key_hash.json`, on Sep 21, the day the test opened, before the first paid
+model run on Sep 23. The dates here are Pacific time.
 
 ### 2.2 The gate
 
@@ -78,7 +78,7 @@ against the text by `scripts/verify_claims.py` in CI. Failed runs stay in `resul
 
 ## 4. The FHIR mapping
 
-The records one visit makes, and how the score reaches every Observation, are drawn in [`docs/diagrams/fhir-graph.svg`](docs/diagrams/fhir-graph.svg). It is too wide to print here with text you can read; the list of what one visit produces, later in this section, names the same records.
+The records one visit makes, and how the score reaches every Observation, are drawn in [`docs/diagrams/fhir-graph.svg`](docs/diagrams/fhir-graph.svg), too wide to print here; the list of what one visit produces, later in this section, names the same records.
 
 {{section:README.md#How OneAquaHealth is used}}
 
@@ -100,27 +100,23 @@ One creek visit becomes these resources (`docs/fhir_mapping.md`):
 
 1. **A measured observer, carried in the record.** A two-minute test gives each volunteer a score
    per feature, and OneAquaHealth's own profiles carry it, through a qualification and Provenance,
-   to every Observation that person makes. A city analyst reads each answer beside how well its
+   to every Observation that person makes; a city analyst reads each answer beside how well its
    observer sees.
 2. **A model that may ask and never decide.** A model is licensed feature by feature by the same
-   test people take, from a committed pass table. Its output becomes a flag through one gate or is
+   test people take, from a committed pass table; its output becomes a flag through one gate or is
    dropped, and the record is built from human inputs only.
-3. **Measurement that shows its failures.** The pass table, the benchmark with its intervals, the
-   run that measured our own config, and the plant photos that no model could judge are all in
-   `results/`, with the cost of every call.
+3. **Measurement that shows its failures.** The pass table, the benchmark with its intervals and
+   the plant photos that no model could judge are all in `results/`, with the cost of every call.
 4. **Open work, and work given back.** The code is MIT. What we contributed back, as the README lists it:
 
 {{section:README.md#Contributed back}}
 
 ## 7. How to check this report
 
-- `make judge-check` runs the tests with no key and no network.
-- `make verify-claims` checks every number in the README and the docs against `results/`.
-- `make report-pdf` builds this file again from its sources; a test fails when the PDF is older
-  than the README sections and results it was built from.
-- The model card, the data card and the threat model are `docs/MODEL_CARD.md`,
-  `docs/DATA_CARD.md` and `docs/THREAT_MODEL.md`.
-
+`make judge-check` runs the tests with no key and no network; `make verify-claims` checks every
+number in the README and the docs against `results/`; `make report-pdf` builds this file again
+from its sources, and a test fails when the PDF is older than them. The model card, the data card
+and the threat model are `docs/MODEL_CARD.md`, `docs/DATA_CARD.md` and `docs/THREAT_MODEL.md`.
 AI coding tools wrote most of the code and the text, from written briefs, and every change was
-checked by `make check` before it was committed. The people set the direction and made every
+checked by `make check` before it was committed; the people set the direction and made every
 decision that needs a person, as the README says under "How this was built".
