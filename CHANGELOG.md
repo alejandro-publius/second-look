@@ -138,3 +138,23 @@ checked against `results/`.
 - The third party list and `/credits` name the official app's words as the OneAquaHealth
   project's, under neither of our licences.
 - The decisions of Sep 26 and Sep 29 written into `docs/DECISIONS.md`.
+### Wed Sep 30
+
+- The deploy of Sep 29's seven fix packages recorded good after the phone checks.
+- The second wave's three OpenTimestamps proofs (the `prereg-v3` tag, plan v3, the audit head)
+  confirmed in a Bitcoin block, so `/verify` shows them confirmed.
+- The second lock's job made to survive its one night: the commands that only read from the
+  network are tried three times, 90 seconds apart; a macOS notice says when it is done or
+  failed; its `make check` takes a free port; `make lock-analysis-2-ready` says when `main` and
+  `depth` disagree; the read-only phone check no longer fails when a stranger finishes a sitting
+  while it runs; a bracketed wrangler notice no longer stops the deploy; the report may run to 12
+  pages once the rows are in.
+- The video cut made again from clips recorded today: the creek check in the app's own words and
+  six languages, judge mode shown as a judge sees it now, 3:45, nothing marked draft.
+- The README, the judge documents, the Devpost text and the report made true for the second
+  wave: judge mode shut until the second lock and why, the two days it was open, the paid panel,
+  the wave's result not in yet, our own words English only while the check speaks six languages.
+- Six audit lenses finished read-only (the lock path, submission readiness, the AI made visible,
+  a follower city, accessibility, bugs in new code); what they confirmed above minor is fixed
+  above or in the next lines; no new audit after them.
+
