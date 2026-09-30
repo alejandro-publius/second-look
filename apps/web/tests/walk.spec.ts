@@ -1127,14 +1127,17 @@ test("the list of languages is whole on the first screen of every walk, and its 
       en["check.lang_note"],
     );
     expect(note.y).toBeGreaterThan(start.y + start.height);
-    // WCAG 3.3.2: the list has a label a sighted person can read, right above it, and Start the
-    // check is still whole on this first screen with the label there.
+    // WCAG 3.3.2: the list has a label a sighted person can read, on its left on the same line,
+    // so the pair is no taller than the list alone and Start the check stays whole on the first
+    // screen of a 390 by 844 phone, which the test above holds.
     const label = page.getByText(en["check.lang_label_short"], { exact: true });
     await expect(label).toBeVisible();
     expect(en["check.lang_label_short"]).toBe("Questions in");
     const labelBox = (await label.boundingBox())!;
-    expect(labelBox.y + labelBox.height, w.id).toBeLessThanOrEqual(box.y);
-    expect(start.y + start.height, w.id).toBeLessThanOrEqual(height);
+    expect(labelBox.x + labelBox.width, w.id).toBeLessThanOrEqual(box.x);
+    const labelMiddle = labelBox.y + labelBox.height / 2;
+    expect(labelMiddle, w.id).toBeGreaterThan(box.y);
+    expect(labelMiddle, w.id).toBeLessThan(box.y + box.height);
     await expect(page.locator("select")).toHaveCount(1);
   }
   // The list is for choosing before the walk starts: a question screen has none.

@@ -9,8 +9,8 @@ import { t } from "@/lib/t";
  * around them stay English, each marked, until a person has checked a translation.
  *
  * A walk shows the two parts apart (audit finding phone-ux-languages-5): the list alone right
- * under the walk's title, where the first screen shows it, under a short visible label (WCAG
- * 3.3.2), and the note further down, below Start, where it pushes nothing off the screen.
+ * under the walk's title, where the first screen shows it, with a short visible label beside it
+ * (WCAG 3.3.2), and the note further down, below Start, where it pushes nothing off the screen.
  */
 export function LanguagePicker({
   part = "all",
@@ -24,10 +24,14 @@ export function LanguagePicker({
     </p>
   );
   if (part === "note") return note;
+  // On a walk the label sits on the list's left, in the label and control columns of a range
+  // row, so the pair is no taller than the list alone and Start the check stays on the first
+  // screen of a phone. The check has room for the full label above the list.
+  const compact = part === "list";
   const list = (
-    <label className="field">
-      <span className={part === "list" ? "field-label small" : "field-label"}>
-        {t(part === "list" ? "check.lang_label_short" : "check.lang_label")}
+    <label className={compact ? "field range-row" : "field"}>
+      <span className={compact ? "field-label small" : "field-label"}>
+        {t(compact ? "check.lang_label_short" : "check.lang_label")}
       </span>
       <span className="select-wrap">
         <select
