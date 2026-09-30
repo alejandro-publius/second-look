@@ -131,7 +131,8 @@ checked against `results/`.
 - Judge mode (`/demo`, `/t2/demo` and the two routes behind them) is shut again from 17:46 PDT,
   because it shows if each answer is right on the study's own photos. It opens at the second
   lock, Oct 3 at 04:00 UTC, which is Fri Oct 2 at 21:00 PDT. The two pages say when and why.
-  The live checks and the lock's clock in `apps/web/lib/lock.ts` are tested in `make check`.
+  The live checks go by that opening time, and what `apps/web/lib/lock.ts` answers is tested in
+  Node inside `make check`.
 - The model card says where people meet the checker's question, which is part 2, and the data
   card counts part 2's photos as a set of their own.
 - The third party list and `/credits` name the official app's words as the OneAquaHealth
