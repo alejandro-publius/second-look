@@ -1,4 +1,4 @@
-Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. The AI's help is measured, not assumed: a second, pre-registered block tests whether the checker's one question makes people more accurate. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that with a two-minute photo test. Each volunteer gets a score for each of four kinds of creek damage, saved with every observation they make. The AI takes the same test. It may only ask a volunteer to look again, only where it passed, and only after the volunteer has answered. The AI's help is measured, not assumed: a second test, planned before anyone took it, checks whether that one question makes people more accurate. What the AI may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
 
 # Devpost: every field, ready to paste
 
@@ -24,10 +24,10 @@ A two-minute photo test that scores volunteer creek observers, then saves each s
 
 ## Track statement (line one of the description)
 
-629 characters
+677 characters
 
 ```text
-Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that, per person and per feature, with a two-minute photo test, and we save the result with every observation. AI takes the same test. It may only raise a question on features where it passed, and the volunteer always answers first. The AI's help is measured, not assumed: a second, pre-registered block tests whether the checker's one question makes people more accurate. What the checker may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that with a two-minute photo test. Each volunteer gets a score for each of four kinds of creek damage, saved with every observation they make. The AI takes the same test. It may only ask a volunteer to look again, only where it passed, and only after the volunteer has answered. The AI's help is measured, not assumed: a second test, planned before anyone took it, checks whether that one question makes people more accurate. What the AI may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
 ```
 
 ## The problem
@@ -42,14 +42,13 @@ Professional surveyors fixed this long ago. In the UK's River Habitat Survey, on
 
 ## How the solution aligns with OneAquaHealth
 
-895 characters
-
+939 characters
 <!-- claim: results/fhir_validation.json#/errors = 0 -->
 
 ```text
 OneAquaHealth says citizen data should stand beside lab data under the same profiles and value sets. A lab result is trusted because its quality checks travel with it. Second Look gives a volunteer's observation the same thing: their score per feature, stored in the record of their test sitting beside a dated Practitioner qualification, and linked through Provenance to every Observation they make.
 
-The four features are the ones the project lead named. The creek check follows the official Citizen Science App's items in its order. The health card ends in one action each for the person, the pet and the city, and the city actions are OneAquaHealth's own restoration measures from the OneAquaHealth Policy Brief (2026), page 9. Sample records from both emitters validate against their implementation guide at commit b907cf0 with zero errors, and golden vectors hold the live emitter to them.
+The four features are the ones the project lead named. The creek check asks the official Citizen Science App's questions word for word, in its order and in six of its languages. The health card ends in one action each for the person, the pet and the city, and the city actions are OneAquaHealth's own restoration measures from the OneAquaHealth Policy Brief (2026), page 9. Sample records from both emitters validate against their implementation guide at commit b907cf0 with zero errors, and golden vectors hold the live emitter to them.
 ```
 
 ## Innovation and practical value
@@ -88,8 +87,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-1384 characters
-
+1729 characters
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->
 <!-- claim: results/benchmark_20260924T054939Z.json#/pool/n_photos = 16 -->
@@ -99,10 +97,11 @@ Take the test: https://second-look-79t.pages.dev (no camera needed).
 Judges start here: https://second-look-79t.pages.dev/judges
 
 /t: consent, warm-up, then the lesson and 16 photos, in an order the server picks at random (half the people see the photos first and get the lesson after their score), and a score per feature.
-/demo: judge mode with feedback after each answer.
-/check: the guided creek check, one question per screen, with follow-ups chosen by code.
+/demo: judge mode with feedback after each answer. Shut while the study's second wave runs, because it shows the answers to the study's photos; open from that wave's lock.
+/t2/demo: the AI's one question. Eight photos; when the checker disagrees with your answer it asks you to look again, and you decide. Nothing is stored. Open from the same lock.
+/check: the guided creek check in the official app's own words and six languages, one question per screen, with follow-ups chosen by code.
 /walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. The clips show natural creeks, so a measure appears when the walk reports damage, for example Artificial for the bank. /city?creek=strawberry-creek stays empty until the first real check.
-/two: a volunteer Observation of ours in the viewer built for a lab result; their sandbox's lab record joins it when their name resolves again.
+/two: a volunteer Observation of ours beside a lab result from their sandbox, in the same viewer, with the time the lab result was fetched.
 /how-we-know: which features each vision model passed on the 16-photo test, and what the gate kept and dropped on real creek footage, with the frames.
 /walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a demo record with its own link, never counted.
 
