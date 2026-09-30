@@ -1,11 +1,11 @@
 {
   "script": "scripts/count_tests.py",
   "synthetic": false,
-  "generated_at_utc": "2026-09-30T06:47:57+00:00",
-  "measured_at_commit": "9c4f88a",
+  "generated_at_utc": "2026-09-30T09:15:13+00:00",
+  "measured_at_commit": "8020d0a",
   "tree_had_changes": true,
   "python": {
-    "tests": 2624,
+    "tests": 2632,
     "files": 148,
     "command": "uv run pytest --collect-only -q"
   },
