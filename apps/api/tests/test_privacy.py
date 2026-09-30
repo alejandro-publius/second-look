@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
 
 from apps.api.security import (
     STUDY_LIMIT,
@@ -13,6 +12,7 @@ from apps.api.security import (
     reset_rate_limits,
 )
 from apps.api.tests.conftest import SESSION_BODY, freeze_now, full_session
+from core.lock import JUDGE_MODE_OPENS_UTC
 
 
 class ListHandler(logging.Handler):
@@ -51,7 +51,7 @@ def test_demo_route_is_rate_limited_separately(client, monkeypatch):
 
     monkeypatch.setattr(DEMO_LIMIT, "limit", 2)
     reset_rate_limits()
-    freeze_now(datetime(2026, 9, 28, 1, 0, 1, tzinfo=UTC))  # judge mode is open after the lock
+    freeze_now(JUDGE_MODE_OPENS_UTC)  # judge mode is open from the second lock on
     codes = [
         client.post("/api/demo/answer", json={"item_id": "t01", "answer": "yes"}).status_code
         for _ in range(3)

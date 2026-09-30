@@ -1,0 +1,437 @@
+{
+  "generated_at_utc": "2026-09-29T20:31:36Z",
+  "script": "evals/usability_analysis.py",
+  "synthetic": false,
+  "stamp": "20260929",
+  "input": "/Users/alexvintera/second-look-depth/data/export",
+  "plan_sha256": "86da527e30c0a8e8492b6fb22c3056be1a2ad3087b5ca8c6f4a0a1bd58aed9cf",
+  "plan": {
+    "items": "docs/analysis_plan.md items 4 to 7 and 9",
+    "seed": 20260920,
+    "bootstrap_resamples": 10000,
+    "permutations": 10000,
+    "alpha": 0.05,
+    "min_completed_per_arm": 20,
+    "min_test_seconds": 40.0,
+    "data_lock_utc": "2026-09-28T01:00:00Z"
+  },
+  "counts": {
+    "randomized": {
+      "untrained": 25,
+      "trained": 25
+    },
+    "started": {
+      "untrained": 23,
+      "trained": 24
+    },
+    "completed": {
+      "untrained": 23,
+      "trained": 23
+    },
+    "analysed": {
+      "untrained": 0,
+      "trained": 0
+    },
+    "randomized_untrained": 25,
+    "randomized_trained": 25,
+    "started_untrained": 23,
+    "started_trained": 24,
+    "analysed_untrained": 0,
+    "analysed_trained": 0,
+    "completed_untrained": 0,
+    "completed_before_exclusions_untrained": 23,
+    "completed_trained": 0,
+    "completed_before_exclusions_trained": 23,
+    "note": "completed_<arm> counts completed sessions kept after the exclusions; completed.<arm> counts every session that finished all 16 items"
+  },
+  "exclusions": [
+    {
+      "order": 0,
+      "rule": "started at or after the data lock (never analysed, plan item 7)",
+      "removed": 1,
+      "remaining": 50,
+      "note": ""
+    },
+    {
+      "order": 1,
+      "rule": "did not finish all 16 items",
+      "removed": 4,
+      "remaining": 46,
+      "note": ""
+    },
+    {
+      "order": 2,
+      "rule": "test finished in under 40 seconds",
+      "removed": 45,
+      "remaining": 1,
+      "note": ""
+    },
+    {
+      "order": 3,
+      "rule": "repeat visit from the same browser token (only the first completed session counts)",
+      "removed": 0,
+      "remaining": 1,
+      "note": ""
+    },
+    {
+      "order": 4,
+      "rule": "flagged as QA (is_test)",
+      "removed": 0,
+      "remaining": 1,
+      "note": ""
+    },
+    {
+      "order": 5,
+      "rule": "filled the hidden form field",
+      "removed": 1,
+      "remaining": 0,
+      "note": ""
+    },
+    {
+      "order": 6,
+      "rule": "dry run before launch",
+      "removed": 0,
+      "remaining": 0,
+      "note": "no launch time given; the table was wiped at launch, so nothing to remove here"
+    }
+  ],
+  "primary": {
+    "n_trained": 0,
+    "n_untrained": 0,
+    "mean_trained": null,
+    "mean_untrained": null,
+    "untrained_mean": null,
+    "trained_mean": null,
+    "difference": null,
+    "ci_low": null,
+    "ci_high": null,
+    "difference_points": null,
+    "ci95_points": null,
+    "permutation_p": null,
+    "rejects_at_alpha_05": null,
+    "hedges_g": null,
+    "status": "not computed: an arm is empty"
+  },
+  "score_distribution": {
+    "bins": "items right, 0 to 16",
+    "untrained": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "trained": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "per_feature": {},
+  "per_item": {
+    "t01": {
+      "feature": "artificial_bank",
+      "gold": "present",
+      "photo_id": "ph-bank-01",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t02": {
+      "feature": "artificial_bank",
+      "gold": "present",
+      "photo_id": "ph-bank-02",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t03": {
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "photo_id": "ph-bank-03",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t04": {
+      "feature": "artificial_bank",
+      "gold": "absent",
+      "photo_id": "ph-bank-04",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t05": {
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "photo_id": "ph-channel-01",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t06": {
+      "feature": "dug_out_channel",
+      "gold": "present",
+      "photo_id": "ph-channel-02",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t07": {
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "photo_id": "ph-channel-03",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t08": {
+      "feature": "dug_out_channel",
+      "gold": "absent",
+      "photo_id": "ph-channel-04",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t09": {
+      "feature": "invasive_plant",
+      "gold": "present",
+      "photo_id": "ph-plant-01",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t10": {
+      "feature": "invasive_plant",
+      "gold": "present",
+      "photo_id": "ph-plant-02",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t11": {
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "photo_id": "ph-plant-03",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t12": {
+      "feature": "invasive_plant",
+      "gold": "absent",
+      "photo_id": "ph-plant-04",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t13": {
+      "feature": "pipe_running",
+      "gold": "present",
+      "photo_id": "ph-pipe-01",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t14": {
+      "feature": "pipe_running",
+      "gold": "present",
+      "photo_id": "ph-pipe-02",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t15": {
+      "feature": "pipe_running",
+      "gold": "absent",
+      "photo_id": "ph-pipe-03",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    },
+    "t16": {
+      "feature": "pipe_running",
+      "gold": "absent",
+      "photo_id": "ph-pipe-04",
+      "untrained": null,
+      "n_untrained": 0,
+      "trained": null,
+      "n_trained": 0
+    }
+  },
+  "cant_tell_share": {
+    "untrained": null,
+    "trained": null
+  },
+  "yes_share": {
+    "untrained": null,
+    "trained": null
+  },
+  "median_times": {
+    "test_seconds": {
+      "untrained": {
+        "median": null,
+        "n": 0
+      },
+      "trained": {
+        "median": null,
+        "n": 0
+      }
+    },
+    "lesson_seconds": {
+      "untrained": {
+        "median": null,
+        "n": 0,
+        "note": "lesson offered after the test; only people who opened it are counted"
+      },
+      "trained": {
+        "median": null,
+        "n": 0,
+        "note": "lesson before the test"
+      }
+    }
+  },
+  "by_source": {},
+  "by_device": {},
+  "by_prior_experience": {},
+  "warmup": {},
+  "sensitivity": {
+    "partial_completers_scored_wrong": {
+      "n_trained": 0,
+      "n_untrained": 0,
+      "mean_trained": null,
+      "mean_untrained": null,
+      "untrained_mean": null,
+      "trained_mean": null,
+      "difference": null,
+      "ci_low": null,
+      "ci_high": null,
+      "difference_points": null,
+      "ci95_points": null,
+      "permutation_p": null,
+      "rejects_at_alpha_05": null,
+      "hedges_g": null,
+      "status": "not computed: an arm is empty",
+      "exclusions": [
+        {
+          "order": 0,
+          "rule": "started at or after the data lock (never analysed, plan item 7)",
+          "removed": 1,
+          "remaining": 50,
+          "note": ""
+        },
+        {
+          "order": 1,
+          "rule": "answered no items at all (sensitivity run keeps partial completers)",
+          "removed": 3,
+          "remaining": 47,
+          "note": ""
+        },
+        {
+          "order": 2,
+          "rule": "test finished in under 40 seconds",
+          "removed": 45,
+          "remaining": 2,
+          "note": ""
+        },
+        {
+          "order": 3,
+          "rule": "repeat visit from the same browser token (only the first completed session counts)",
+          "removed": 0,
+          "remaining": 2,
+          "note": ""
+        },
+        {
+          "order": 4,
+          "rule": "flagged as QA (is_test)",
+          "removed": 1,
+          "remaining": 1,
+          "note": ""
+        },
+        {
+          "order": 5,
+          "rule": "filled the hidden form field",
+          "removed": 1,
+          "remaining": 0,
+          "note": ""
+        },
+        {
+          "order": 6,
+          "rule": "dry run before launch",
+          "removed": 0,
+          "remaining": 0,
+          "note": "no launch time given; the table was wiped at launch, so nothing to remove here"
+        }
+      ]
+    },
+    "without_prior_experience": {
+      "n_trained": 0,
+      "n_untrained": 0,
+      "mean_trained": null,
+      "mean_untrained": null,
+      "untrained_mean": null,
+      "trained_mean": null,
+      "difference": null,
+      "ci_low": null,
+      "ci_high": null,
+      "difference_points": null,
+      "ci95_points": null,
+      "permutation_p": null,
+      "rejects_at_alpha_05": null,
+      "hedges_g": null,
+      "status": "not computed: an arm is empty",
+      "removed_for_prior_experience": 0
+    }
+  },
+  "data_quality": {
+    "correct_column_mismatches": 0,
+    "note": "correctness is recomputed from answer and gold; the export column is only checked"
+  },
+  "chart_title": "items right out of 16, per person, by arm",
+  "outputs": {
+    "json": "usability_20260929.json",
+    "markdown": "usability_20260929.md",
+    "chart": "usability_20260929.png"
+  }
+}

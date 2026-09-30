@@ -470,8 +470,8 @@
   "test.confirm": "Next photo",
   "test.pick_first": "Choose an answer first.",
   "test.resuming": "Picking up where you left off…",
-  "demo.shut_title": "Judge mode opens on Sep 28",
-  "demo.shut_body": "Judge mode gives feedback on the same sixteen photos the study uses, so it would hand out the answer key while the study is running. It opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.",
+  "demo.shut_title": "Judge mode opens on Oct 3",
+  "demo.shut_body": "A second wave of the study is running, and judge mode says if each answer is right on the same sixteen photos, so it is shut again. It opens when the data locks: Oct 3 at 04:00 UTC, which is Friday Oct 2 at 21:00 PDT.",
   "demo.shut_meanwhile": "Until then, everything else is open.",
   "judges.title": "For judges",
   "judges.intro": "Every part of Second Look, in the order that makes the point. Nothing here is stored except the test, a creek check you choose to send, and a finished walk's demo record, kept 30 days and never counted.",
@@ -674,9 +674,11 @@
   "part2.to_test": "Go to the test",
   "part2.demo_title": "Assisted second look, judge mode",
   "part2.demo_intro": "The eight photos of the second look, as the assisted group sees them, with feedback after every answer. Nothing here is stored.",
-  "part2.demo_shut_body": "This judge mode tells you if each answer is right, on the same photos the study uses. So it opens when the data locks: Sep 28 at 01:00 UTC, which is Sunday Sep 27 at 18:00 PDT.",
+  "part2.demo_shut_body": "A second wave of the study is running, and this judge mode says if each answer is right on the same photos, so it is shut again. It opens when the data locks: Oct 3 at 04:00 UTC, which is Friday Oct 2 at 21:00 PDT.",
   "judges.assist": "Assisted second look, try it",
   "judges.assist_note": "Eight photos as the assisted group sees them. When the checker disagrees with you it asks you to look again, and you decide. Feedback after every answer, nothing stored. Opens on Sep 28.",
   "verify.proof.prereg_tag_v2": "The tag prereg-v2, which fixes part 2's analysis plan in git",
-  "verify.proof.analysis_plan_v2": "Part 2's analysis plan"
+  "verify.proof.analysis_plan_v2": "Part 2's analysis plan",
+  "verify.proof.prereg_tag_v3": "The tag prereg-v3, which fixes the second wave's analysis plan in git",
+  "verify.proof.analysis_plan_v3": "The second wave's analysis plan"
 }

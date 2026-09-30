@@ -167,7 +167,7 @@ def port_free(port: int) -> bool:
         return s.connect_ex(("127.0.0.1", port)) != 0
 
 
-# make submit-check is red by design until Sep 30, on the video link and the repository being
+# make submit-check is red by design until Oct 3, on the video link and the repository being
 # public (docs/ACCEPTANCE.md row 14 prints exactly that). It passes here only when those two are
 # its only failures.
 SUBMIT_EXPECTED_RED = {"video_link", "repo_public"}

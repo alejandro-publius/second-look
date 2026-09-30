@@ -16,9 +16,9 @@ Start every session by reading PLAN.md, then only the brief section the session 
 10. The sandbox is a mirror of our store: conditional creates, meta.tag on everything, delete only ledger ids, never delete by search, never $expunge. One exception: a conditional update is allowed on our own Library entry only, matched by our own identifier, because that match can only ever hit our resource. Read-only GETs allowed from Session E at one per second, 50 per session.
 11. FHIR R4 4.0.1. IG pinned to hl7-eu/oah b907cf0 in fhir/ig.lock. Package built by SUSHI 3.20.1. Every emitted resource validated in CI.
 12. Every number in README or docs comes from evals/ through results/. scripts/verify_claims.py runs in CI. Never hand-edit a number.
-13. docs/analysis_plan.md is tagged prereg-v1 before the first participant. Analysis refuses real data before the lock, 2026-09-28T01:00:00Z. Changes go in docs/deviations.md.
+13. docs/analysis_plan.md is tagged prereg-v1 before the first participant. Analysis refuses real data before the lock, 2026-09-28T01:00:00Z. The second wave (UPDATE_33) runs under docs/analysis_plan_v3.md, tagged prereg-v3, and locks at 2026-10-03T04:00:00Z. The tagged plans and the tagged analysis scripts are never edited. Changes go in docs/deviations.md.
 14. No secret is ever committed: `.env.example` is tracked, `.env` is not. ANTHROPIC_API_KEY lives in `.env` in this repo on this Mac, and is never exported in the shell that starts `claude` (Update 07 section 4).
-15. Repo private until Sep 30. Small honest commits. Never rewrite history, squash or backdate.
+15. Repo private until Oct 3 (the deadline moved to Oct 4, UPDATE_33). Small honest commits. Never rewrite history, squash or backdate.
 16. Code MIT. Our photos and copy CC BY 4.0. The README states both.
 17. WCAG 2.2 AA. Alt text never gives away a test answer.
 18. Plain words, reading age about 12, no hype words, no em or en dashes anywhere in the repo, including commit messages.

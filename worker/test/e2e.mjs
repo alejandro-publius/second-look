@@ -16,7 +16,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worker = join(here, "..");
 const PORT = Number(process.env.E2E_PORT ?? 8791);
 const RAIN_PORT = PORT + 1;
-// A second, short lived Worker whose clock reads the data lock itself (review REVIEW_03 R52).
+// A second, short lived Worker whose clock reads the time judge mode opens (review REVIEW_03 R52),
+// and before it one whose clock reads the first lock, where judge mode once opened.
 const AFTER_PORT = PORT + 2;
 const QA_KEY = "e2e-qa-key-0123456789abcdef";
 const EXPORT_TOKEN = "e2e-export-token-0123456789abcdef";
@@ -24,10 +25,15 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const PERSIST = join(worker, ".wrangler", "e2e-state");
 const PERSIST_AFTER = join(worker, ".wrangler", "e2e-state-after-lock");
 const CONTENT = JSON.parse(readFileSync(join(worker, "src", "content.json"), "utf8"));
-// Judge mode's lock (core/lock.py). The main Worker's clock is fixed one second before it, the
-// second Worker's at it, so both sides of the lock run on every run, whatever today is.
-const LOCK = "2026-09-28T01:00:00Z";
-const JUST_BEFORE_LOCK = "2026-09-28T00:59:59Z";
+// Judge mode opens at the second lock (JUDGE_MODE_OPENS_UTC in core/lock.py, UPDATE_33). The main
+// Worker's clock is fixed one second before it, the second Worker's at it, so both sides run on
+// every run, whatever today is. FIRST_LOCK is the study's first data lock: judge mode opened
+// there until UPDATE_33 shut it again, and createSession still marks post_lock by it.
+// scripts/tests/test_lock_mirror.py holds these three to core/lock.py.
+const FIRST_LOCK = "2026-09-28T01:00:00Z";
+const LOCK = "2026-10-03T04:00:00Z";
+const JUST_BEFORE_LOCK = "2026-10-03T03:59:59Z";
+const SHUT_DETAIL = "Judge mode opens on Oct 3.";
 
 // Wrangler never gets a terminal here: no metrics prompt, no update check, no stdin to wait on,
 // and a hard time limit so a hang in CI fails with its output instead of eating the job. The
@@ -634,27 +640,59 @@ try {
   assert.deepEqual(d1("SELECT COUNT(*) AS n FROM walk_checks"), [{ n: 0 }], "the cron deleted the checks with their record");
   assert.deepEqual(await unmoved(), beforeWalk, "a walk's checks are never a creek check's");
 
-  // 8b. Judge mode's answer route is shut until the data lock (review finding F86): before it,
-  // sixteen answers would be the live test's key. This Worker's clock reads one second before
-  // the lock; a second Worker's reads the lock itself, where the route opens (REVIEW_03 R52).
-  at("judge mode shut before the lock");
-  const demo = await api("POST", "/api/demo/answer", { item_id: "t01", answer: "yes" });
-  assert.equal(demo.status, 403);
-  assert.equal(demo.data.detail, "Judge mode opens on Sep 28.");
-
-  at("judge mode open at the lock");
-  spawnSync("rm", ["-rf", PERSIST_AFTER]);
-  const afterLock = await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: LOCK });
-  const judge = async (itemId, answer) => {
-    const res = await fetch(`http://127.0.0.1:${AFTER_PORT}/api/demo/answer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ item_id: itemId, answer }) });
+  // 8b. Judge mode's two answer routes are shut until the second lock (review finding F86,
+  // UPDATE_33): before it, their answers would be the key to the photos the second wave of the
+  // study uses. This Worker's clock reads one second before the second lock, which is days after
+  // the first lock; a second Worker's reads the first lock itself, where judge mode once opened;
+  // a third's reads the second lock, where the routes open (REVIEW_03 R52).
+  const postTo = (base) => async (path, body) => {
+    const res = await fetch(`${base}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     return { status: res.status, data: await res.json() };
   };
+  const shut = { status: 403, data: { detail: SHUT_DETAIL } };
+  const a01 = CONTENT.part2_items?.[0]?.id ?? "a01";
+  at("judge mode shut one second before the second lock");
+  const justBefore = postTo(BASE);
+  assert.deepEqual(await justBefore("/api/demo/answer", { item_id: "t01", answer: "yes" }), shut);
+  assert.deepEqual(await justBefore("/api/t2/demo", { item_id: a01, answer: "yes" }), shut);
+  // Shut whatever is asked: an item nobody knows gets the same 403, not a 404.
+  assert.deepEqual(await justBefore("/api/demo/answer", { item_id: "t99", answer: "yes" }), shut);
+
+  at("judge mode shut at the first lock, where it once opened");
+  spawnSync("rm", ["-rf", PERSIST_AFTER]);
+  const atFirstLock = await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: FIRST_LOCK });
+  const atFirst = postTo(`http://127.0.0.1:${AFTER_PORT}`);
+  assert.deepEqual(await atFirst("/api/demo/answer", { item_id: "t01", answer: "yes" }), shut);
+  assert.deepEqual(await atFirst("/api/t2/demo", { item_id: a01, answer: "yes" }), shut);
+  await stopDev(atFirstLock);
+
+  at("judge mode open at the second lock");
+  spawnSync("rm", ["-rf", PERSIST_AFTER]);
+  const afterLock = await startDev(AFTER_PORT, PERSIST_AFTER, { E2E_NOW: LOCK });
+  const judge = postTo(`http://127.0.0.1:${AFTER_PORT}`);
   const t01 = CONTENT.test_items.find((i) => i.id === "t01");
   const right = t01.gold === "present" ? "yes" : "no";
-  assert.deepEqual(await judge("t01", right), { status: 200, data: { correct: true } });
-  assert.deepEqual(await judge("t01", right === "yes" ? "no" : "yes"), { status: 200, data: { correct: false } });
-  assert.equal((await judge("t99", "yes")).status, 404);
+  assert.deepEqual(await judge("/api/demo/answer", { item_id: "t01", answer: right }), { status: 200, data: { correct: true } });
+  assert.deepEqual(await judge("/api/demo/answer", { item_id: "t01", answer: right === "yes" ? "no" : "yes" }), { status: 200, data: { correct: false } });
+  assert.equal((await judge("/api/demo/answer", { item_id: "t99", answer: "yes" })).status, 404);
+  const part2Judge = await judge("/api/t2/demo", { item_id: a01, answer: "yes" });
+  assert.equal(part2Judge.status, 200, JSON.stringify(part2Judge.data));
+  assert.equal(typeof part2Judge.data.correct, "boolean");
   await stopDev(afterLock);
+
+  // 8b2. The stored post_lock mark is the first lock's, and UPDATE_33 did not change it: every
+  // sitting made after the first lock is stored with post_lock 1, the ones made between the two
+  // locks too. createSession reads the real clock, not E2E_NOW, so this goes by each sitting's
+  // own stored start time. The second wave does not read the mark: it goes by the start time.
+  at("a sitting made after the first lock is stored with post_lock 1");
+  const sittings = d1("SELECT id, started_at, post_lock FROM session");
+  assert.ok(sittings.length >= 2, "the run has made sittings by now");
+  for (const s of sittings) {
+    assert.equal(s.post_lock, Date.parse(s.started_at) >= Date.parse(FIRST_LOCK) ? 1 : 0, `${s.id} started at ${s.started_at}`);
+  }
+  assert.ok(sittings.every((s) => s.post_lock === 1), "the first lock has passed, so every sitting made now carries the mark");
+  const betweenLocks = sittings.filter((s) => Date.parse(s.started_at) < Date.parse(LOCK)).length;
+  console.log(`worker e2e: ${betweenLocks} of ${sittings.length} sittings started between the two locks, each stored with post_lock 1`);
 
   // 8c. The public counts by source (review REVIEW_03 R48). Two real sittings, not marked as
   // tests: one from the panel's link and one whose source is a panel id pasted into the link,

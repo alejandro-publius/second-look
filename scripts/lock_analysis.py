@@ -32,6 +32,26 @@ push, it rolls production back to what was live when it started, resets this che
 started (keeping the other jobs' files), and writes the failure to the status issue and to
 ~/second-look-backups/lock.log. Nothing is ever half pushed: the push is atomic.
 
+The second run (UPDATE_33, docs/analysis_plan_v3.md): `make lock-analysis-2`, which is this
+script with `--wave 2`. launchd runs it once at 2026-10-03T04:10:00Z (the job `lock2`), ten
+minutes after the second lock. It is the same chain with four differences. It refuses before the
+second lock. "Already done" looks at the second wave's own results, results/usability_w2_<date>
+.json, so the first wave's result does not stop it. It runs evals/wave2_analysis.py once, which
+runs both registered analyses on the second window, and writes results/lock_analysis_w2.json and
+a data_lock line of its own in the audit log. And it fills the second wave's own two rows in the
+README; the first wave's rows stay as they are, word for word.
+
+One more difference, which closes a trap of Sep 29. The daily re-push job adds a line to
+audit/log.jsonl in this checkout when the partner's sandbox answers, and commits nothing. The
+first run refuses that change like any other, so the line had to be committed by hand before it
+could run. The second run carries such lines: when the only change to the audit log is lines
+added at its end, of a kind a Mac job writes (scripts/mac_jobs.py, `audit_kinds`), and the chain
+holds, the lines stay in the log, in their place, and go into the lock's commit ahead of its own
+data_lock line. Nothing is set aside and nothing is lost. If origin/depth added lines of its own
+meanwhile, the carried lines no longer follow the last one, so they are chained again after it
+with their own time, kind and payload hash, and the lines as they were are kept in
+~/second-look-backups/set-aside-<time>/. Any other change to the audit log is refused by name.
+
 Everything that leaves this Mac goes through scripts/outward.py; commands that stay on it go
 through Local. The tests replace both (scripts/tests/test_lock_analysis.py).
 """
@@ -53,6 +73,8 @@ from pathlib import Path
 from typing import Any
 
 from core.lock import DATA_LOCK_UTC
+from evals import wave2_analysis
+from evals.wave2_analysis import SECOND_LOCK_UTC
 from scripts import audit_log, mac_jobs, panel_status, study_export
 from scripts import deploy_record as dr
 from scripts import rollback as rb
@@ -82,6 +104,19 @@ NOBODY_FINISHED = "Nobody finished the test before the lock, so nothing here mea
 SOMEBODY = "What people did before the lock is in the human row below the AI tables."
 # make check's web build and FHIR validation rewrite these two; they are not the lock's to commit.
 REWRITTEN_BY_CHECK = ("apps/web/public/_headers", "results/fhir_validation.json")
+# The second wave's two rows (docs/analysis_plan_v3.md), beside the first wave's and never in
+# their place.
+WAVE2_START = "<!-- wave2-row -->"
+WAVE2_END = "<!-- /wave2-row -->"
+WAVE2_PART2_START = "<!-- wave2-row-2 -->"
+WAVE2_PART2_END = "<!-- /wave2-row-2 -->"
+# The summary sentence once the second wave has run, with people in it or without.
+SECOND_SOMEBODY = (
+    "Nobody finished the test before the first lock. What people did in the second wave is in "
+    "its own rows below the AI tables."
+)
+SECOND_NOBODY = "Nobody finished the test before either lock, so nothing here measures people."
+AUDIT_LOG = "audit/log.jsonl"
 SOURCE_WORDS = {
     "panel": "the research panel",
     "poster": "a poster",
@@ -100,6 +135,47 @@ def real_clock() -> datetime:
 
 def stamp(ts: datetime) -> str:
     return ts.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+@dataclass(frozen=True)
+class Wave:
+    """What differs between the two runs of the lock job. Everything else is shared."""
+
+    number: int
+    lock_utc: datetime
+    lock_words: str  # how a log line names the lock
+    job_words: str  # how a line on the status issue names the job
+    analysis: str  # the script that is run once
+    results: str  # the file name of a real result of this wave, as a pattern
+    record: str
+    make: str  # the make target that runs it again
+    # Whether lines a Mac job added to the audit log are carried into the lock's commit.
+    carries_audit_lines: bool
+
+
+FIRST = Wave(
+    number=1,
+    lock_utc=DATA_LOCK_UTC,
+    lock_words="the data lock",
+    job_words="Data lock",
+    analysis="evals/usability_analysis.py",
+    results=r"usability_\d{8}\.json",
+    record=RECORD,
+    make="lock-analysis",
+    carries_audit_lines=False,
+)
+SECOND = Wave(
+    number=2,
+    lock_utc=SECOND_LOCK_UTC,
+    lock_words="the second data lock",
+    job_words="Second data lock",
+    analysis="evals/wave2_analysis.py",
+    results=r"usability_w2_\d{8}\.json",
+    record="results/lock_analysis_w2.json",
+    make="lock-analysis-2",
+    carries_audit_lines=True,
+)
+WAVES = {1: FIRST, 2: SECOND}
 
 
 class Failed(Exception):
@@ -145,29 +221,50 @@ def people_kept(result: dict[str, Any]) -> int:
     return int(counts.get("completed_trained", 0)) + int(counts.get("completed_untrained", 0))
 
 
-def human_row(result: dict[str, Any], rel: str) -> str:
+def human_row(result: dict[str, Any], rel: str, wave: Wave = FIRST) -> str:
     """The README text for the one real result: claim tokens only, filled by render_readme."""
     md = rel.removesuffix(".json") + ".md"
 
     def claim(pointer: str) -> str:
         return "{{claim:" + rel + "#" + pointer + "}}"
 
-    # Only counts after the plan's exclusions: the counts before them hold the QA sittings too.
-    if people_kept(result) == 0:
-        body = (
+    if wave.number == 1:
+        start, end = HUMAN_START, HUMAN_END
+        nobody = (
             "No finished test from a person was kept before the data lock at "
             f"{claim('/plan/data_lock_utc')}: {claim('/counts/completed_trained')} with the "
             f"lesson and {claim('/counts/completed_untrained')} without it, so there is no human "
             f"row. The one pre-registered run, with what each of the plan's rules removed, is in "
             f"[`{md}`]({md})."
         )
-        return f"{HUMAN_START}\n\n{body}\n\n{HUMAN_END}"
+        people = (
+            f"People, before the data lock at {claim('/plan/data_lock_utc')}, in the one "
+            f"pre-registered run ([`{md}`]({md})):"
+        )
+    else:
+        start, end = WAVE2_START, WAVE2_END
+        window = (
+            f"from {claim('/window/open_utc')} to the second lock at {claim('/window/lock_utc')}"
+        )
+        nobody = (
+            f"The second wave, under plan `prereg-v3`: no finished test from a person was kept "
+            f"{window}: {claim('/counts/completed_trained')} with the lesson and "
+            f"{claim('/counts/completed_untrained')} without it, so the second wave has no "
+            f"human row either. Its one run, with what each of the plan's rules removed, is in "
+            f"[`{md}`]({md})."
+        )
+        people = (
+            f"People in the second wave, under plan `prereg-v3`: sittings that started {window}, "
+            f"in the wave's one run ([`{md}`]({md})):"
+        )
+    # Only counts after the plan's exclusions: the counts before them hold the QA sittings too.
+    if people_kept(result) == 0:
+        return f"{start}\n\n{nobody}\n\n{end}"
     primary = result.get("primary") or {}
     lines = [
-        HUMAN_START,
+        start,
         "",
-        f"People, before the data lock at {claim('/plan/data_lock_utc')}, in the one "
-        f"pre-registered run ([`{md}`]({md})):",
+        people,
         "",
         "| People | With the lesson | Without it |",
         "|---|---|---|",
@@ -185,7 +282,7 @@ def human_row(result: dict[str, Any], rel: str) -> str:
             f"| Kept, who came through {words} (`{label}`) | "
             f"{claim(f'/by_source/{label}/trained')} | {claim(f'/by_source/{label}/untrained')} |"
         )
-    lines += ["", status_line(primary, claim), "", HUMAN_END]
+    lines += ["", status_line(primary, claim), "", end]
     return "\n".join(lines)
 
 
@@ -206,8 +303,10 @@ def status_line(primary: dict[str, Any], claim: Callable[[str], str]) -> str:
     return "An arm kept nobody, so there is no difference to work out; this is a description."
 
 
-def part2_row(result: dict[str, Any] | None, rel: str) -> str:
+def part2_row(result: dict[str, Any] | None, rel: str, wave: Wave = FIRST) -> str:
     """The README's second human row (UPDATE_31): claim tokens only, or why there is none."""
+    if wave.number != 1:
+        return wave2_part2_row(result, rel)
     if result is None:
         return (
             f"{PART2_START}\nDoes the checker's question help? Nobody took part 2 before the data "
@@ -234,11 +333,73 @@ def part2_row(result: dict[str, Any] | None, rel: str) -> str:
     return f"{PART2_START}\n{body} {PART2_SCOPE}\n{PART2_END}"
 
 
+def wave2_part2_row(result: dict[str, Any] | None, rel: str) -> str:
+    """Part 2's row for the second wave: the same words, the wave named, its own place."""
+    lead = "Does the checker's question help, in the second wave?"
+    if result is None:
+        return (
+            f"{WAVE2_PART2_START}\n{lead} Nobody took part 2 in the second wave, so there is "
+            f"nothing to report.\n{WAVE2_PART2_END}"
+        )
+    md = rel.removesuffix(".json") + ".md"
+
+    def claim(pointer: str) -> str:
+        return "{{claim:" + rel + "#" + pointer + "}}"
+
+    n = f"assisted {claim('/primary/n_assisted')}, unassisted {claim('/primary/n_unassisted')}"
+    primary = result.get("primary") or {}
+    if primary.get("status") == "confirmatory":
+        body = (
+            f"{lead} {n}, difference {claim('/primary/difference')} points, interval "
+            f"{claim('/primary/ci_low')} to {claim('/primary/ci_high')}, in the wave's one run "
+            f"under plan `prereg-v3` ([`{md}`]({md}))."
+        )
+    else:
+        body = (
+            f"{lead} Too few people finished part 2 for the plan's test: {n}, and the plan "
+            f"needs 20 in each ([`{md}`]({md}))."
+        )
+    return f"{WAVE2_PART2_START}\n{body} {PART2_SCOPE}\n{WAVE2_PART2_END}"
+
+
 def place_part2_row(readme: str, row: str) -> str:
     a, b = readme.find(PART2_START), readme.find(PART2_END)
     if a < 0 or b < a:
         raise Failed("readme", "the README has no place for part 2's row")
     return readme[:a] + row + readme[b + len(PART2_END) :]
+
+
+def place_between(readme: str, row: str, start: str, end: str, what: str) -> str:
+    a, b = readme.find(start), readme.find(end)
+    if a < 0 or b < a:
+        raise Failed("readme", f"the README has no place for {what}")
+    return readme[:a] + row + readme[b + len(end) :]
+
+
+def first_wave_rows(readme: str) -> str:
+    """The first wave's two rows as the README holds them, markers included."""
+    a, b = readme.find(HUMAN_START), readme.find(PART2_END)
+    if a < 0 or b < a:
+        raise Failed("readme", "the README does not hold the first wave's rows")
+    return readme[a : b + len(PART2_END)]
+
+
+def place_wave2_rows(readme: str, row: str, part2: str, finished: bool) -> str:
+    """The README with the second wave's two rows in their own places. The first wave's rows
+    must come out exactly as they went in, or nothing is written."""
+    before = first_wave_rows(readme)
+    out = place_between(readme, row, WAVE2_START, WAVE2_END, "the second wave's row")
+    out = place_between(
+        out, part2, WAVE2_PART2_START, WAVE2_PART2_END, "the second wave's part 2 row"
+    )
+    out = out.replace(NOBODY_FINISHED, SECOND_SOMEBODY if finished else SECOND_NOBODY)
+    try:
+        after = first_wave_rows(out)
+    except Failed:
+        after = ""
+    if after != before:
+        raise Failed("readme", "the first wave's rows would have changed")
+    return out
 
 
 def place_human_row(readme: str, row: str, finished: bool) -> str:
@@ -254,11 +415,11 @@ def place_human_row(readme: str, row: str, finished: bool) -> str:
     return out.replace(NOBODY_YET, SOMEBODY if finished else NOBODY_FINISHED)
 
 
-def real_results(root: Path) -> list[Path]:
-    """Real analysis results already in results/: after the lock there must be exactly one."""
+def real_results(root: Path, wave: Wave = FIRST) -> list[Path]:
+    """Real analysis results of one wave already in results/: after its lock, exactly one."""
     found = []
     for path in sorted((root / "results").glob("usability_*.json")):
-        if not re.fullmatch(r"usability_\d{8}\.json", path.name):
+        if not re.fullmatch(wave.results, path.name):
             continue
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
@@ -290,6 +451,16 @@ def porcelain(text: str) -> list[str]:
     return paths
 
 
+def added_lines(committed: str, working: str) -> list[str] | None:
+    """The lines added at the end of a file, or None when the change is anything else."""
+    if not working.startswith(committed) or (committed and not committed.endswith("\n")):
+        return None
+    added = working[len(committed) :]
+    if not added.endswith("\n"):
+        return None
+    return added.splitlines()
+
+
 def qa_key_from(root: Path) -> str | None:
     """The QA key from the environment or this checkout's .env. It is never printed."""
     key = os.environ.get("QA_KEY")
@@ -318,6 +489,7 @@ class Start:
     head: str  # where the checkout is once it is current, which a failure returns to
     before: str  # where it was when the job began, before the fast-forward
     kept: dict[str, bytes | None]  # the other Mac jobs' files, set aside for the run
+    carried: tuple[str, ...] = ()  # lines a Mac job added to the audit log, which stay in it
 
 
 class Lock:
@@ -331,7 +503,9 @@ class Lock:
         backups: Path | None = None,
         qa_key: Callable[[], str | None] = lambda: None,
         say: Callable[[str], None] = print,
+        wave: Wave = FIRST,
     ) -> None:
+        self.wave = wave
         self.root = root
         self.out = out
         self.local = local
@@ -355,7 +529,8 @@ class Lock:
     # -- small helpers -----------------------------------------------------
 
     def log(self, line: str) -> None:
-        text = f"{stamp(self.clock())} lock: {line}"
+        name = "lock" if self.wave.number == 1 else f"lock {self.wave.number}"
+        text = f"{stamp(self.clock())} {name}: {line}"
         self.say(text)
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         with self.log_path.open("a", encoding="utf-8") as f:
@@ -375,10 +550,89 @@ class Lock:
     # -- the steps ---------------------------------------------------------
 
     def already_done(self) -> str | None:
-        found = real_results(self.root)
+        found = real_results(self.root, self.wave)
         if found:
             return f"the lock analysis already ran: {found[0].relative_to(self.root)}"
         return None
+
+    def audit_lines(self) -> tuple[list[str], str]:
+        """The lines a Mac job added to the audit log in this checkout, and why they cannot be
+        carried, which is empty when they can."""
+        if not self.wave.carries_audit_lines:
+            return [], "this run carries no lines"
+        path = self.root / AUDIT_LOG
+        committed = self.git("show", f"HEAD:{AUDIT_LOG}")
+        working = path.read_text(encoding="utf-8") if path.is_file() else ""
+        added = added_lines(committed.out if committed.ok else "", working)
+        if not added:
+            return [], "it was changed, not only added to at its end"
+        kinds = mac_jobs.mac_job_audit_kinds()
+        try:
+            entries = [json.loads(line) for line in added]
+            other = sorted({str(e["kind"]) for e in entries} - set(kinds))
+            audit_log.verify(path)
+        except (ValueError, KeyError, TypeError, audit_log.AuditError) as e:
+            return [], f"its chain does not hold with the added lines: {e}"
+        if other:
+            return [], f"an added line is of a kind no Mac job writes: {', '.join(other)}"
+        return added, ""
+
+    def refused(self, changed: Sequence[str]) -> list[str]:
+        """The local changes this run will not start with, each by name, the reason with it."""
+        theirs = mac_jobs.mac_job_files()
+        out = []
+        for path in changed:
+            if allowed(path, theirs):
+                continue
+            if path == AUDIT_LOG and self.wave.carries_audit_lines:
+                why = self.audit_lines()[1]
+                if why:
+                    out.append(f"{path} ({why})")
+                continue
+            out.append(path)
+        return out
+
+    def carry(self, start: Start) -> None:
+        """Put the carried lines at the end of the audit log, unless it holds them already."""
+        if not start.carried:
+            return
+        path = self.root / AUDIT_LOG
+        have = path.read_text(encoding="utf-8").splitlines() if path.is_file() else []
+        missing = [line for line in start.carried if line not in have]
+        if not missing:
+            self.log("the audit log already holds the lines the other Mac job added")
+            return
+        entries = [json.loads(line) for line in missing]
+        last, n = audit_log.last_hash(path), len(have)
+        follows = entries[0]["prev_hash"] == last and entries[0]["seq"] == n + 1
+        if not follows:
+            # origin/depth added lines of its own, so these no longer follow the last one. They
+            # are chained again after it: the same time, kind and payload hash, a new place.
+            aside = self.backups / f"set-aside-{self.started_at.strftime('%Y%m%dT%H%M%SZ')}"
+            (aside / AUDIT_LOG).parent.mkdir(parents=True, exist_ok=True)
+            (aside / AUDIT_LOG).write_text("\n".join(missing) + "\n", encoding="utf-8")
+            chained = []
+            for entry in entries:
+                n += 1
+                again = {**entry, "seq": n, "prev_hash": last}
+                again["hash"] = hashlib.sha256(audit_log.hashed_text(again).encode()).hexdigest()
+                last = again["hash"]
+                chained.append(json.dumps(again, separators=(",", ":")))
+            missing = chained
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as f:
+            f.write("\n".join(missing) + "\n")
+        audit_log.verify(path)
+        kinds = ", ".join(sorted({str(e["kind"]) for e in entries}))
+        self.log(
+            f"carried {len(missing)} line(s) another Mac job added to the audit log ({kinds}), "
+            + (
+                "as written"
+                if follows
+                else "chained again after the lines origin/depth added; as written they are in "
+                f"set-aside-{self.started_at.strftime('%Y%m%dT%H%M%SZ')}"
+            )
+        )
 
     def freshen(self) -> None:
         step = "fresh checkout"
@@ -389,18 +643,23 @@ class Lock:
             step, self.git("status", "--porcelain=v1", "-z", "--untracked-files=all"), "git status"
         )
         changed = sorted(set(porcelain(status.out)))
-        theirs = mac_jobs.mac_job_files()
-        other = [p for p in changed if not allowed(p, theirs)]
+        other = self.refused(changed)
         if other:
             raise Failed(step, "local changes other than the Mac jobs' files: " + ", ".join(other))
+        carried: tuple[str, ...] = ()
+        if AUDIT_LOG in changed:
+            carried = tuple(self.audit_lines()[0])
         # The other jobs' files are set aside for the whole run, so make check, the commit and
-        # the deploy all see exactly what is committed; put_back returns them at the end.
+        # the deploy all see exactly what is committed; put_back returns them at the end. The
+        # lines added to the audit log are not set aside: carry() puts them back below.
         kept: dict[str, bytes | None] = {}
         for rel in changed:
+            if rel == AUDIT_LOG and carried:
+                continue
             path = self.root / rel
             kept[rel] = path.read_bytes() if path.is_file() else None
         before = self.head()
-        self.start = Start(before, before, kept)
+        self.start = Start(before, before, kept, carried)
         for rel in changed:
             if self.git("cat-file", "-e", f"HEAD:{rel}").ok:
                 self.must(
@@ -418,12 +677,16 @@ class Lock:
         self.must(step, fetched, "git fetch origin")
         self.must(step, self.git("merge", "--ff-only", "origin/depth"), "fast-forward")
         after = self.head()
-        self.start = Start(after, before, kept)
+        self.start = Start(after, before, kept, carried)
         self.log(
             f"fast-forwarded from {before[:7]} to {after[:7]}"
             if before != after
             else f"already at origin/depth, {after[:7]}"
         )
+        try:
+            self.carry(self.start)
+        except (OSError, ValueError, KeyError, audit_log.AuditError) as e:
+            raise Failed(step, f"the lines added to the audit log could not be carried: {e}") from e
 
     def preflight(self) -> None:
         step = "preflight"
@@ -509,9 +772,9 @@ class Lock:
     def analysis(self) -> None:
         step = "analysis"
         done = self.local.run(
-            ["uv", "run", "python", "evals/usability_analysis.py"], cwd=self.root, timeout=1800
+            ["uv", "run", "python", self.wave.analysis], cwd=self.root, timeout=1800
         )
-        self.must(step, done, "evals/usability_analysis.py")
+        self.must(step, done, self.wave.analysis)
         m = re.search(r"^wrote json: (.+)$", done.out, re.M)
         if not m:
             raise Failed(step, "the analysis did not say where it wrote its result")
@@ -522,6 +785,9 @@ class Lock:
             raise Failed(step, f"{path.name} is not a real result")
         self.result_rel = path.relative_to(self.root).as_posix()
         export = self.root / "data" / "export"
+        hashed: tuple[str, ...] = ("sessions.csv", "responses.csv")
+        if self.wave.number != 1:
+            hashed += tuple(n for n in PART2_FILES if (export / n).exists())
         record = {
             "generated_at_utc": stamp(self.clock()),
             "script": SCRIPT,
@@ -530,16 +796,28 @@ class Lock:
             "analysis": self.result_rel,
             "status": (self.result.get("primary") or {}).get("status"),
             "backup_file": self.backup_file.name if self.backup_file else None,
-            "export_sha256": {
-                n: sha256_file(export / n) for n in ("sessions.csv", "responses.csv")
-            },
+            "export_sha256": {n: sha256_file(export / n) for n in hashed},
             "checkout_at_start": self.start.head if self.start else None,
         }
-        self.part2_analysis(export)
+        if self.wave.number == 1:
+            self.part2_analysis(export)
+        else:
+            self.part2_of_the_wave(done.out)
         record["part2_analysis"] = self.result2_rel or None
         record["part2_status"] = ((self.result2 or {}).get("primary") or {}).get("status")
-        (self.root / RECORD).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-        self.log(f"ran the pre-registered analysis once: {self.result_rel}, {record['status']}")
+        if self.wave.number != 1:
+            window = self.result.get("window") or {}
+            record["wave"] = self.wave.number
+            record["plan"] = window.get("plan")
+            record["window"] = {k: window.get(k) for k in ("open_utc", "lock_utc")}
+        (self.root / self.wave.record).write_text(
+            json.dumps(record, indent=2) + "\n", encoding="utf-8"
+        )
+        self.log(
+            f"ran the pre-registered analysis once: {self.result_rel}, {record['status']}"
+            if self.wave.number == 1
+            else f"ran the second wave's analysis once: {self.result_rel}, {record['status']}"
+        )
         # The audit log's own line for the lock, which the done list asks for and nothing wrote
         # (found on 2026-09-29): the record above, by its hash, chained to every line before it.
         # It goes into the lock's commit, and a failed run undoes it with everything else.
@@ -548,6 +826,25 @@ class Lock:
         except audit_log.AuditError as e:
             raise Failed(step, f"the audit log refused the data_lock line: {e}") from e
         self.log(f"the audit log holds the data lock, receipt {receipt[:12]}")
+
+    def part2_of_the_wave(self, said: str) -> None:
+        """The second wave's part 2 result, which the wave's one script wrote in the same run,
+        or none at all when the export has no part 2 files."""
+        step = "part 2 analysis"
+        m = re.search(r"^wrote part 2 json: (.+)$", said, re.M)
+        if not m:
+            if not re.search(r"^part 2: the export holds no part 2 files", said, re.M):
+                raise Failed(step, "the analysis did not say what it did with part 2")
+            self.log("part 2 has no files in the export, so its row says nobody took it")
+            return
+        path = Path(m.group(1).strip())
+        path = path if path.is_absolute() else self.root / path
+        self.result2 = json.loads(path.read_text(encoding="utf-8"))
+        if self.result2.get("synthetic") is not False:
+            raise Failed(step, f"{path.name} is not a real result")
+        self.result2_rel = path.relative_to(self.root).as_posix()
+        status = (self.result2.get("primary") or {}).get("status")
+        self.log(f"ran the second wave's part 2 analysis once: {self.result2_rel}, {status}")
 
     def part2_analysis(self, export: Path) -> None:
         """Part 2 (UPDATE_31), right after part 1: the one run tagged prereg-v2, or none at all
@@ -577,13 +874,19 @@ class Lock:
         finished = people_kept(self.result) > 0
         path = self.root / "README.md"
         text = path.read_text(encoding="utf-8")
-        path.write_text(
-            place_part2_row(
+        if self.wave.number == 1:
+            placed = place_part2_row(
                 place_human_row(text, human_row(self.result, self.result_rel), finished),
                 part2_row(self.result2, self.result2_rel),
-            ),
-            encoding="utf-8",
-        )
+            )
+        else:
+            placed = place_wave2_rows(
+                text,
+                human_row(self.result, self.result_rel, self.wave),
+                part2_row(self.result2, self.result2_rel, self.wave),
+                finished,
+            )
+        path.write_text(placed, encoding="utf-8")
 
         # The README quotes the report's page count and the report quotes the README, so render
         # and rebuild until both settle, then check every claim.
@@ -601,7 +904,8 @@ class Lock:
             raise Failed(step, "a number in the human row found no value in the result")
         make("verify-claims")
         self.log(
-            "the README's human row is in, "
+            ("the README's human row is in, " if self.wave.number == 1 else "")
+            + ("the README's rows for the second wave are in, " if self.wave.number != 1 else "")
             + ("with people" if finished else "saying nobody finished")
         )
 
@@ -705,6 +1009,15 @@ class Lock:
     def status_line(self) -> str:
         counts = self.result.get("counts") or {}
         status = (self.result.get("primary") or {}).get("status")
+        if self.wave.number != 1:
+            return (
+                f"Second data lock done ({stamp(self.clock())}): the second wave's analysis ran "
+                f"once under plan prereg-v3 ({self.result_rel}, {status}); completed and kept, "
+                f"trained {counts.get('completed_trained', 0)} and untrained "
+                f"{counts.get('completed_untrained', 0)}. {self.part2_status()} "
+                f"Commit {self.head()[:7]} is on depth and main, deployed, the phone tests "
+                "pass, and judge mode is open."
+            )
         return (
             f"Data lock done ({stamp(self.clock())}): the pre-registered analysis ran once "
             f"({self.result_rel}, {status}); completed and kept, trained "
@@ -717,6 +1030,12 @@ class Lock:
     def part2_status(self) -> str:
         if self.result2 is None:
             return "Part 2: nobody took it before the lock."
+        if self.wave.number != 1:
+            p = self.result2.get("primary") or {}
+            return (
+                f"Part 2 of the second wave ({self.result2_rel}, {p.get('status')}): assisted "
+                f"{p.get('n_assisted')}, unassisted {p.get('n_unassisted')}."
+            )
         p = self.result2.get("primary") or {}
         return (
             f"Part 2 ({self.result2_rel}, {p.get('status')}): assisted {p.get('n_assisted')}, "
@@ -733,10 +1052,12 @@ class Lock:
             notes.append(self.undo_repo(self.start))
         line = (
             f"FAILED at {failure.step}: {failure.detail}. " + " ".join(notes) +
-            " Nothing was pushed. Fix it, then run make lock-analysis again."
+            f" Nothing was pushed. Fix it, then run make {self.wave.make} again."
         )  # fmt: skip
         self.log(line)
-        posted = self.out.comment(f"Data lock job: {line} (log: ~/second-look-backups/lock.log)")
+        posted = self.out.comment(
+            f"{self.wave.job_words} job: {line} (log: ~/second-look-backups/lock.log)"
+        )
         if not posted.ok:
             self.log(f"could not write to the status issue either: {posted.tail()}")
 
@@ -762,6 +1083,13 @@ class Lock:
         for rel in self.git("ls-files", "--others", "--exclude-standard").out.splitlines():
             (self.root / rel).unlink(missing_ok=True)
         self.put_back(start)
+        try:
+            self.carry(start)
+        except (OSError, ValueError, KeyError, audit_log.AuditError) as e:
+            return (
+                f"The checkout is back at {start.head[:7]}, with the other jobs' files kept, "
+                f"but the lines added to the audit log could not be put back: {e}."
+            )
         return f"The checkout is back at {start.head[:7]}, with the other jobs' files kept."
 
     def put_back(self, start: Start) -> None:
@@ -796,7 +1124,7 @@ class Lock:
         if branch != "depth":
             problems.append(f"the checkout {self.root} is on {branch or 'nothing'}, not depth")
         status = self.git("status", "--porcelain=v1", "-z", "--untracked-files=all")
-        other = [p for p in porcelain(status.out) if not allowed(p, mac_jobs.mac_job_files())]
+        other = self.refused(porcelain(status.out))
         if other:
             problems.append("local changes the lock job would refuse: " + ", ".join(other[:8]))
         for tool in ("uv", "npx", "node", "gh", "make", "pandoc", "java", "gitleaks"):
@@ -820,16 +1148,25 @@ class Lock:
         # Rows not yet marked good still count: the job marks them after its read-only check.
         as_if_good = [replace(r, checked=True) for r in rows]
         problems += dr.good_for_live(as_if_good, live_w, live_p)[2]
+        if self.wave.number != 1:
+            # What the second wave's analysis would refuse for once the lock has passed: the
+            # tag missing from this checkout, the script not pinned, a plan or a script changed.
+            why = wave2_analysis.refusal_reason(self.wave.lock_utc, self.root)
+            if why:
+                problems.append(
+                    "the second wave's analysis would refuse: "
+                    + why.removeprefix("Refusing to run: ")
+                )
         return problems
 
     # -- the whole thing ---------------------------------------------------
 
     def run(self) -> int:
         now = self.clock()
-        if now < DATA_LOCK_UTC:
+        if now < self.wave.lock_utc:
             self.log(
-                f"refused: it is {stamp(now)}, before the data lock at {stamp(DATA_LOCK_UTC)}; "
-                "nothing was done"
+                f"refused: it is {stamp(now)}, before {self.wave.lock_words} at "
+                f"{stamp(self.wave.lock_utc)}; nothing was done"
             )
             return 3
         try:
@@ -851,10 +1188,14 @@ class Lock:
             self.readme()
             self.check()
             head = self.commit(
-                "Data lock: the one pre-registered analysis, and the README's human row\n\n"
-                f"Run by {SCRIPT} after the lock at {stamp(DATA_LOCK_UTC)}, from the backup "
-                f"{self.backup_file.name if self.backup_file else ''}. main moves here by "
-                "fast-forward."
+                (
+                    "Data lock: the one pre-registered analysis, and the README's human row\n\n"
+                    if self.wave.number == 1
+                    else "Second data lock: the second wave's one analysis, and its README rows\n\n"
+                )
+                + f"Run by {SCRIPT} after the lock at {stamp(self.wave.lock_utc)}, from the "
+                f"backup {self.backup_file.name if self.backup_file else ''}. main moves here "
+                "by fast-forward."
             )
             self.log(f"main will move to {head[:7]} by fast-forward")
             self.push(dry=True)
@@ -862,7 +1203,8 @@ class Lock:
             self.judge_mode()
             self.mark_good()
             self.commit(
-                "Record the deploy after the data lock as good\n\nThe phone tests passed.",
+                f"Record the deploy after {self.wave.lock_words} as good\n\n"
+                "The phone tests passed.",
                 only=[HOSTING],
             )
             self.push(dry=False)
@@ -899,8 +1241,21 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="only say whether this Mac and checkout are ready for the lock; change nothing",
     )
+    parser.add_argument(
+        "--wave",
+        type=int,
+        choices=sorted(WAVES),
+        default=1,
+        help="2 is the second run, for the second wave, after the second lock",
+    )
     args = parser.parse_args(argv)
-    lock = Lock(root=ROOT, out=Outward(), local=Local(), qa_key=lambda: qa_key_from(ROOT))
+    lock = Lock(
+        root=ROOT,
+        out=Outward(),
+        local=Local(),
+        qa_key=lambda: qa_key_from(ROOT),
+        wave=WAVES[args.wave],
+    )
     if args.ready:
         problems = lock.readiness()
         for p in problems:
