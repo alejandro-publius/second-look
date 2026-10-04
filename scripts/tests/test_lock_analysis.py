@@ -257,6 +257,7 @@ class World:
             backups=self.backups,
             qa_key=kw.pop("qa_key", lambda: "q" * 32),
             say=lambda s: None,
+            sleep=kw.pop("sleep", lambda _seconds: None),
             **kw,
         )
 
@@ -674,12 +675,26 @@ def test_the_status_lines_follow_the_plans_rule() -> None:
 
 
 def test_the_real_readme_still_has_the_place_for_the_human_row() -> None:
-    """If this fails, the lock job would fail at 18:10 on Sep 27: keep the paragraph that starts
-    with HUMAN_LEAD (or a human-row block) and the NOBODY_YET sentence in the README."""
+    """The first wave's row stays replaceable after either second-wave outcome.
+
+    The summary sentence changes after the second lock; the row markers are the contract.
+    """
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    placed = la.place_human_row(readme, f"{la.HUMAN_START}\n\nx\n\n{la.HUMAN_END}", True)
-    assert placed.count(la.HUMAN_START) == 1 and la.HUMAN_LEAD not in placed
-    assert la.NOBODY_YET in readme or la.SOMEBODY in readme or la.NOBODY_FINISHED in readme
+    versions = [readme]
+    for finished in (False, True):
+        versions.append(
+            la.place_wave2_rows(
+                readme,
+                f"{la.WAVE2_START}\nsecond wave\n{la.WAVE2_END}",
+                f"{la.WAVE2_PART2_START}\npart 2\n{la.WAVE2_PART2_END}",
+                finished,
+            )
+        )
+    for version in versions:
+        placed = la.place_human_row(version, f"{la.HUMAN_START}\n\nx\n\n{la.HUMAN_END}", True)
+        assert placed.count(la.HUMAN_START) == 1 and la.HUMAN_LEAD not in placed
+        assert placed.count(la.HUMAN_END) == 1
+        assert placed.split(la.HUMAN_END, 1)[1] == version.split(la.HUMAN_END, 1)[1]
 
 
 # ---------------------------------------------------------------------------
@@ -1100,9 +1115,10 @@ def test_wave2_the_whole_chain_and_the_first_waves_result_does_not_stop_it(world
 
 
 def test_wave2_every_script_the_second_run_names_is_a_file(world2: World) -> None:
-    assert second(world2).run() == 0
+    assert second(world2, read_only_deploy_checks=True).run() == 0
     scripts = scripts_named(world2)
     assert "evals/wave2_analysis.py" in scripts
+    assert "apps/web/scripts/live-check.mjs" not in scripts
     assert "evals/usability_analysis.py" not in scripts
     assert "apps/web/scripts/demo-open-check.mjs" in scripts
     assert "apps/web/scripts/live-readonly.mjs" in scripts and "scripts/deploy.sh" in scripts
@@ -1144,7 +1160,9 @@ def as_it_was_before_the_second_run(w: World, start: str, origin: tuple[str, str
 
 
 def test_wave2_a_failed_make_check_leaves_everything_as_it_was(world2: World) -> None:
-    world2.local.fail[("make", "check")] = Done(2, "", "FAILED scripts/tests/test_x.py::test_y")
+    world2.local.fail[("make", "check")] = Done(
+        2, "FAILED scripts/tests/test_x.py::test_y", "make: *** [test] Error 1"
+    )
     start, origin = world2.head(), world2.origin_refs()
     log_before = (world2.root / la.AUDIT_LOG).read_bytes()
     assert second(world2).run() == 1
@@ -1154,6 +1172,9 @@ def test_wave2_a_failed_make_check_leaves_everything_as_it_was(world2: World) ->
     said = world2.out.comments[-1]
     assert said.startswith("Second data lock job: FAILED at make check") and "test_y" in said
     assert "run make lock-analysis-2 again" in said
+    saved = world2.backups / "logs" / "lock2-check.log"
+    assert "test_y" in saved.read_text() and "make: *** [test] Error 1" in saved.read_text()
+    assert saved.stat().st_mode & 0o777 == 0o600
     mac_files_untouched(world2)
 
 

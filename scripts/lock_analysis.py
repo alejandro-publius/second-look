@@ -510,8 +510,10 @@ class Lock:
         say: Callable[[str], None] = print,
         wave: Wave = FIRST,
         sleep: Callable[[float], None] = time.sleep,
+        read_only_deploy_checks: bool = False,
     ) -> None:
         self.wave = wave
+        self.read_only_deploy_checks = read_only_deploy_checks
         self.sleep = sleep
         self.root = root
         self.out = out
@@ -952,7 +954,17 @@ class Lock:
         done = self.local.run(
             ["make", "check"], cwd=self.root, env={"WEB_PORT": str(port)}, timeout=5400
         )
-        self.must("make check", done, "make check")
+        check_log = self.backups / "logs" / f"lock{self.wave.number}-check.log"
+        check_log.parent.mkdir(parents=True, exist_ok=True)
+        with check_log.open("w", encoding="utf-8") as log:
+            os.chmod(check_log, 0o600)
+            log.write(done.out + "\n" + done.err)
+        if not done.ok:
+            first = next(
+                (line for line in done.out.splitlines() if line.startswith(("FAILED ", "ERROR "))),
+                done.tail(),
+            )
+            raise Failed("make check", f"{first}; full output: {check_log}")
         self.git("checkout", "--", *REWRITTEN_BY_CHECK)
         self.log("make check is green")
 
@@ -990,12 +1002,18 @@ class Lock:
             ),
             "the study contract tests",
         )
+        read_only = self.read_only_deploy_checks
+        phone_script = "live-readonly.mjs" if read_only else "live-check.mjs"
         live = self.out.run(
-            ["node", "apps/web/scripts/live-check.mjs"],
+            ["node", f"apps/web/scripts/{phone_script}"],
             cwd=self.root,
             env={"SITE_URL": SITE, "QA_KEY": self.qa_key or ""},
         )
-        self.must(step, live, "the phone check with the QA key")
+        self.must(
+            step,
+            live,
+            "the read-only phone check" if read_only else "the phone check with the QA key",
+        )
         self.must(
             "deploy web",
             self.out.run(["bash", "scripts/deploy.sh", "web"], cwd=self.root, env=env),
@@ -1318,6 +1336,7 @@ def main(argv: list[str] | None = None) -> int:
         local=Local(),
         qa_key=lambda: qa_key_from(ROOT),
         wave=WAVES[args.wave],
+        read_only_deploy_checks=os.environ.get("LOCK_READ_ONLY_DEPLOY_CHECKS") == "1",
     )
     if args.ready:
         problems = lock.readiness()
