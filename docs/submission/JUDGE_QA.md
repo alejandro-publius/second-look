@@ -23,8 +23,8 @@ Proof: `content/regions/california-bay-area.yaml` (`approved: true`, `approved_b
 ## FHIR standards
 
 **5. Does it really validate against the OneAquaHealth guide?**
-Yes. The guide is pinned at hl7-eu/oah b907cf0 and built from source with SUSHI 3.20.1, and CI runs the HL7 validator over sample records from both emitters, the Python API and the live Worker; golden vectors hold the Worker's emitter to the Python one.
-The latest run has zero errors.
+The saved validation run checks sample records from both emitters against the guide pinned at hl7-eu/oah b907cf0, built from source with SUSHI 3.20.1. Golden vectors compare the Worker emitter with the Python reference on covered inputs. Observation and Location use the guide's profiles; the observer qualification and supporting resources also use base R4 conventions.
+The saved run has zero errors, with warnings recorded in the result file and terminology checks enabled. It does not cover every input; the empty-target Provenance case is documented in docs/KNOWN_BUGS.md.
 Proof: `fhir/ig.lock`; `results/fhir_validation.json`; `make fhir-validate`. <!-- claim: results/fhir_validation.json#/errors = 0 -->
 
 **6. Why is a volunteer a Practitioner?**
@@ -60,7 +60,7 @@ Proof: `content/approved_sentences.yaml`; CLAUDE.md hard rule 5; `core/tests/tes
 ## Digital health and outreach
 
 **13. Did the lesson actually help people?**
-Not from the first wave, and we will not pretend: the tagged plan did not plan recruitment, no person finished the test before the first lock on Sep 28, and the one analysis ran once and said an arm was empty. So the same study runs a second time, up to the second lock on Fri Oct 2 at 21:00 PDT, under plan v3, with a paid research panel beside the public link once Alex launches it; its participants are paid, a difference the plan records. Ten minutes after that lock the pre-registered analysis runs once, and the answer, whatever it is, goes into the README's rows for the second wave: with at least 20 finished sessions per arm it makes its one confirmatory test, with fewer it reports a description with counts, and nothing else depends on them. Judge mode was open for two days between the waves, so a person who used it may know the answers; the plan says to hold that against the wave.
+No human benefit was estimated from the first wave: its analysis included no eligible completed sittings and reported an empty arm. The second-wave lock under plan v3 has now passed. This checkout contains the plan, but no second-wave result or evidence that a paid panel launched. The plan permits a paid panel beside the public link and defines how to report a sufficiently large sample or a smaller descriptive result. The owner's scheduled-job status needs checking before claiming that the analysis ran. Earlier access to judge mode could expose the answer key; the plan records that limitation.
 Proof: `docs/analysis_plan.md` item 7; `docs/analysis_plan_v3.md` items 1, 5 and 7; `results/usability_20260929.md`; `docs/deviations.md`.
 
 **14. Is the health advice safe?**
@@ -72,13 +72,13 @@ For the test: a random session id and a hashed random browser token, no names, e
 Proof: `docs/DATA_HANDLING.md`; `apps/api/tests/test_privacy.py`.
 
 **16. Is it readable for a 12 year old?**
-Every string a person can see is measured in CI and fails above the cap.
+The readability check measures the text it covers against a cap, with documented exceptions. That is a useful editing check, not evidence that every intended reader understands every screen.
 Proof: `make readability`; `content/readability_exceptions.yaml`.
 
 ## Engineering
 
 **17. How do we know the numbers in the README are real?**
-Each number carries a claim that points into `results/`, and `scripts/verify_claims.py` fails CI if one drifts. No number is typed by hand.
+Marked numerical claims point into `results/`, and `scripts/verify_claims.py` detects drift in those claims. This checks consistency with saved files, not the truth of every sentence or the validity of a scientific conclusion. `make reproduce` independently regrades the runs for which raw evidence was retained and names its exceptions.
 Proof: `make verify-claims`.
 
 **18. Can a judge check it without a key or the network?**
@@ -86,11 +86,11 @@ Yes, with one limit it names. `make judge-check` runs the tests, grades the AI n
 Proof: `make judge-check`; `Makefile`.
 
 **19. Is CI green?**
-Answer on the day from the Actions tab. As of Sep 30 the last run that started, at 93bb002 on Sep 26, was green on both branches. From a334b11 on, GitHub has started no job: each run ends in about 3 seconds with GitHub's own note that the account's payments failed or its spending limit needs to be raised. That is the account's billing, not the code; `make check` and `make judge-check` run the same steps on any machine. Before that it was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's). It was red on Sep 24 from 0326e78 to bef7015, and on Sep 25 at e9898ed and 635955f, when a test count moved and WRITEUP.md and docs/ACCEPTANCE.md were rendered but not committed; since then `make test-counts` renders every doc itself and `verify-claims` names the doc that drifted. On Sep 25 two browser tests also timed out or raced on depth (90c4045 and 65a4a29) and were made robust. It was green on both branches again from a7b563a to 93bb002.
+Answer on the day from the Actions tab. As of Sep 30 the last run that started, at 93bb002 on Sep 26, was green on both branches. From a334b11 on, GitHub has started no job: each run ends in about 3 seconds with GitHub's own note that the account's payments failed or its spending limit needs to be raised. Those notes attribute the interruption to account billing; inspect the current Actions diagnostic before treating that as confirmed today. `make check` and `make judge-check` have different scopes, including fresh versus saved FHIR validation evidence. Before that it was red at times from Sep 21 to Sep 24 for reasons outside the product (a runner without the browser, tests that read a folder only the Mac had, a lockfile written by a newer npm than CI's). It was red on Sep 24 from 0326e78 to bef7015, and on Sep 25 at e9898ed and 635955f, when a test count moved and WRITEUP.md and docs/ACCEPTANCE.md were rendered but not committed; since then `make test-counts` renders every doc itself and `verify-claims` names the doc that drifted. On Sep 25 two browser tests also timed out or raced on depth (90c4045 and 65a4a29) and were made robust. It was green on both branches again from a7b563a to 93bb002.
 Proof: https://github.com/alejandro-publius/second-look/actions
 
 ## Blockchain
 
 **20. Is this on a blockchain?**
-No. It is a hash-chained audit log: each line carries the hash of the one before, so a changed line breaks the chain. So far it records the key freeze, the launch wipe, the three plan tags (`prereg-v1`, `prereg-v2` and `prereg-v3`), the sandbox re-push of Sep 28 and the first data lock; the second lock joins it when the second wave's analysis runs. No tokens, no consensus, no ledger shared with anyone. Since Sep 24 its last hash is stamped with OpenTimestamps on each day the log has changed, a public timestamp service that anchors many hashes in one Bitcoin transaction: a timestamp for our log, not a chain of ours (`/verify`, `proofs/`).
+No. It is a hash-chained audit log: each line carries the hash of the one before, so a changed line breaks the chain. So far it records the key freeze, the launch wipe, the three plan tags (`prereg-v1`, `prereg-v2` and `prereg-v3`), the sandbox re-push of Sep 28 and the first data lock; this checkout does not yet contain the second wave's lock entry. No tokens, no consensus, no ledger shared with anyone. Since Sep 24 its last hash is stamped with OpenTimestamps on each day the log has changed, a public timestamp service that anchors many hashes in one Bitcoin transaction: a timestamp for our log, not a chain of ours (`/verify`, `proofs/`).
 Proof: `audit/log.jsonl`; `uv run python scripts/verify_audit.py`; `docs/notes/plan_hash.md`.
