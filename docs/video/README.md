@@ -1,17 +1,42 @@
 # The video
 
+Two videos are made from this folder. The one to upload is the second, voiced by ElevenLabs on Oct 4. The first, read by Alex over open creek footage, is kept as it was built: its words, shot list and upload page are in [`v1/`](v1/), and the rest of its files are in this folder.
+
+## The video voiced by ElevenLabs
+
+| File | What it is |
+|---|---|
+| [`VOICE_SCRIPT.md`](VOICE_SCRIPT.md) | The words, one beat per slide, how they are voiced, and the file each number comes from |
+| [`SHOTLIST.md`](SHOTLIST.md) | What is on screen under each beat, how the cut is built, and the credits |
+| [`UPLOAD.md`](UPLOAD.md) | The title, description and tags, and how to upload it to YouTube and Devpost |
+| [`../../apps/web/scripts/record-eleven.mjs`](../../apps/web/scripts/record-eleven.mjs) | The screen recordings, against a local build and the mocked API |
+
+`scripts/tests/test_video_words.py` holds the voice script and the shot list to the same words, every number in them to its file, and the upload page to the credits and the AI voice.
+
+The voice and the cut are made on Alex's Mac, outside the repository, in `~/second-look-media/build/`: `tts.py` voices the words with the ElevenLabs API, one part per run of sentences between the scripted pauses (the key lives in `~/.config/elevenlabs/.env`, never here), and `build_video.py` lays the slides, the recordings, the voice and the captions into one 1920 by 1080 file, `~/second-look-media/eleven-final/second-look.mp4`, with `second-look.srt` and `plan.json` beside it.
+
+The recordings, from `apps/web` (the walk clips are not committed, so copy `public/walks/*.mp4` in first; the build writes the live address into `public/_headers`, so `git restore` it afterwards):
+
+```
+NEXT_PUBLIC_API_ORIGIN=https://second-look-79t.pages.dev npm run build
+WEB_PORT=3170 npm run start
+SCREENS_API_ORIGIN=https://second-look-79t.pages.dev WEB_PORT=3170 CLIPS_RAW=$HOME/second-look-media/eleven-clips/raw node scripts/record-eleven.mjs
+```
+
+## The first video, read by Alex
+
 UPDATE_30 section 4. This folder holds everything the video is made from, except the video files themselves, which never go in the repository.
 
 | File | What it is |
 |---|---|
-| [`SHOTLIST.md`](SHOTLIST.md) | The 14 beats: what is on screen, the words, and which clip plays when |
-| [`VOICE_SCRIPT.md`](VOICE_SCRIPT.md) and [`teleprompter.html`](teleprompter.html) | The same words, for reading aloud |
+| [`v1/SHOTLIST.md`](v1/SHOTLIST.md) | The 14 beats: what is on screen, the words, and which clip plays when |
+| [`v1/VOICE_SCRIPT.md`](v1/VOICE_SCRIPT.md) and [`v1/teleprompter.html`](v1/teleprompter.html) | The same words, for reading aloud |
 | [`footage.csv`](footage.csv), [`CREDITS.md`](CREDITS.md) | The open creek footage and photos, and their credits |
 | [`rough_cut.json`](rough_cut.json) | The rough cut with title cards and a scratch voice (`make video-rough`) |
 | [`final_cut.json`](final_cut.json) | The final cut: its length, size, beats, credits, the captions file's SHA-256 and whether a voice was used |
-| [`UPLOAD.md`](UPLOAD.md) | The title, description, tags and thumbnail, and how to upload it to YouTube and Devpost |
+| [`v1/UPLOAD.md`](v1/UPLOAD.md) | The title, description, tags and thumbnail, and how to upload it to YouTube and Devpost |
 
-## The two commands
+### The two commands
 
 **1. Captions only, ready now:**
 
@@ -36,9 +61,9 @@ With a voice, the captions are no longer drawn on the picture. They go into the 
 
 **For a review:** `make video-frames` saves one frame every 10 seconds of the built cut, named by the second (`frame_000.png`, `frame_010.png` and so on), in `~/second-look-media/final/frames/`, or in `FRAMES=/another/folder`.
 
-## What is in the cut
+### What is in the cut
 
-- The words of each beat from `SHOTLIST.md`, the same words as `VOICE_SCRIPT.md`, drawn as captions a sentence or two at a time, two lines at most, on a box about 90 percent solid so no page text shows through. Over footage a caption sits above the credit line; over screen recordings alone it sits lower, under the phone page. They are spread over the beat by their length. No caption asks for faster reading than 17 letters a second: a beat whose words need longer runs longer than the shot list says.
+- The words of each beat from `v1/SHOTLIST.md`, the same words as `v1/VOICE_SCRIPT.md`, drawn as captions a sentence or two at a time, two lines at most, on a box about 90 percent solid so no page text shows through. Over footage a caption sits above the credit line; over screen recordings alone it sits lower, under the phone page. They are spread over the beat by their length. No caption asks for faster reading than 17 letters a second: a beat whose words need longer runs longer than the shot list says.
 - Each screen recording starts where its marks file says its use begins, past the consent and warm-up screens, and a screen part whose From in the shot list names a mark starts there (the check's dry weather pipe question). A recording shorter than its part holds its last frame: no screen starts over. A phone recording is 886 pixels tall from the top of the frame, the same size bare or in the phone outline.
 - While the caption says "the link on screen", the live link is on screen beside the phone.
 - Beat 11, `/two`, is left out: the clips are recorded against the mock API, whose lab result is made up, so the recording would show the mock's lab result, not theirs, and on Sep 25 `/api/two` on the live site said `theirs_status` down as well. `LEFT_OUT` in `scripts/video_final.py` holds it, and `final_cut.json` says why under `left_out`.
@@ -50,7 +75,7 @@ With a voice, the captions are no longer drawn on the picture. They go into the 
 
 It must run under 4:00, and `scripts/submit_check.py` wants at least 3 minutes. The script refuses to build a cut that is too long, and never puts a grey "missing" card in the final cut: if a clip, a screen recording or a credit is missing, it names it and stops.
 
-## What it needs
+### What it needs
 
 - `ffmpeg` and `ffprobe` (Homebrew's are in `/opt/homebrew/bin`).
 - The creek clips in `~/second-look-media/clips/`, made by `scripts/fetch_footage.py` and `scripts/cut_footage.py`.
@@ -64,6 +89,6 @@ It must run under 4:00, and `scripts/submit_check.py` wants at least 3 minutes. 
 
   then, from the repository root, `SCREENS_URL=http://127.0.0.1:3217 SCREENS_API_ORIGIN=https://second-look-79t.pages.dev CLIPS_RAW=$HOME/second-look-media/screens/raw make video-clips`. The mock answers the live address, and the recorder refuses every other request that would leave the Mac, so no recording adds anything anywhere; the curl line on the record page shows the live address. The walk page plays its clip only if `apps/web/public/walks/` holds it before the build (`uv run python scripts/build_walks.py --clips-only`).
 
-## Tests
+### Tests
 
 `uv run pytest -q scripts/tests/test_video_final.py` checks the caption timing, the credits, the 4:00 limit and which voice file is used, with no ffmpeg. When ffmpeg is on the machine it also builds a tiny cut from made-up clips, first silent and then with a short tone standing in for the voice, both ways. It never uses a real voice. Another build checks that a short phone recording starts at its mark, holds its last frame, sits at the top at its full size and has the live link beside it. Other tests hold what a judge found in the first cut and what the audit of Sep 29 found in the second: the test is two minutes and about four with its lesson wherever it is timed, no caption points below the video, the check's words say the questions are the app's own, word for word, in six languages, and never draft, beat 11 is left out with its reason, and the caption box hides the page and keeps clear of the credit line and the phone page. It also fails when `SHOTLIST.md` has changed since `final_cut.json` was written, which means the cut is out of date: run `make video-final` again. `scripts/tests/test_video_beats.py` checks that every label `record-clips.mjs` clicks is still a button the app has (the app's answer words changed on Sep 26 and the recorder had not followed), and that the recorder never sets the browser's clock past a lock, so no recording shows judge mode open while it is shut.

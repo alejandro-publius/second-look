@@ -83,7 +83,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-1709 characters
+1726 characters
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->
 <!-- claim: results/benchmark_20260924T054939Z.json#/pool/n_photos = 16 -->
@@ -101,7 +101,7 @@ Judges start here: https://second-look-79t.pages.dev/judges
 /how-we-know: which features each vision model passed on the 16-photo test, and what the gate kept and dropped on real creek footage, with the frames.
 /walk: check a creek from your desk. 3 short clips of creeks in 3 countries, the same check while you watch, and a demo record with its own link, never counted.
 
-Video: [VIDEO LINK] (released under CC BY-SA 4.0; creek footage from Wikimedia Commons, credited in the video)
+Video: [VIDEO LINK] (released under CC BY-SA 4.0; narrated by an AI voice; every photo and clip in it is credited in the video)
 ```
 
 ## Users and impact on ecosystem and human health
@@ -165,7 +165,7 @@ in `make check` fails when it is older than its sources. This section is not a p
 [VIDEO LINK: paste the upload URL here on the day]
 ```
 
-The video is released under CC BY-SA 4.0, because several of the creek clips in it are CC BY-SA. The creek footage and photos are openly licensed files from Wikimedia Commons, not our own; each one is credited on screen, in `docs/video/CREDITS.md` and on the app's `/credits` page. Put the same licence line in the video's description where it is uploaded. This paragraph has no link on purpose: `make submit-check` looks for a line with the word video and a link, and only the real upload link may pass it.
+The video is released under CC BY-SA 4.0, because photos in it are CC BY-SA. The narration is an AI voice, from ElevenLabs, reading the team's words; the pictures are the team's slides and recordings of the app, and where a recording shows sample records the picture says so. Every photo and clip in it is credited at its end and in its YouTube description (`docs/video/UPLOAD.md`), and the photos in the lesson and the test on the app's `/credits` page. Put the same licence line in the video's description where it is uploaded. This paragraph has no link on purpose: `make submit-check` looks for a line with the word video and a link, and only the real upload link may pass it.
 
 ## Gallery images, in this order
 
