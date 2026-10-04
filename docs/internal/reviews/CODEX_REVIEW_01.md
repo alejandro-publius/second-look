@@ -4,6 +4,9 @@ Review date: October 3, 2026, Pacific time (October 4 UTC).
 Baseline: `ae32d2081b89be7e8e63beb21b9df6776e937ed8`, branch `codex`, from `origin/depth`.
 GitHub's `depth` ref independently matched that commit during this review.
 
+
+**Access follow-up:** Alex subsequently enabled full terminal access. PR [#23](https://github.com/alejandro-publius/second-look/pull/23) is now open, and Rachel has a pending write-access invitation. See the access follow-up below for live checks and final verification; it supersedes the initial delivery blockers.
+
 ## Verdict and scope
 
 **Current project: 7.8/10, provisionally. Submission: not ready.** These are separate judgments. The code has a strong, specific idea: assess the observer, carry that limited evidence with the observation, and let a tested model ask rather than answer. Preserve that idea and the existing implementation. The missing public repository and video link can prevent a good prototype from being judged at all.
@@ -290,6 +293,24 @@ After the edits, `make check` again stopped in pytest: 30 failed, 2571 passed, s
 The PDF render probe failed before writing any repository artifact because Chromium could not register its Mach port. No PDF, stamp, result, runtime source, tagged plan or video file was changed.
 
 The public-doc changes are committed locally as `8a76838` (Clarify evidence limits and study status in public docs). A second local commit contains this review. The GitHub connector created the remote `codex` branch at the baseline and an unattached tree, then rejected commit creation with "MCP tool call requires approval, but approval policy is never". No alternate tool was used to bypass that restriction. Consequently the changes could not be pushed and no pull request was opened. The remote branch still has no review changes. The required clipboard command, `pbcopy < docs/internal/reviews/CODEX_REVIEW_01.md`, returned exit status one in this sandbox; a successful clipboard copy cannot be claimed. The full file remains available at the requested worktree path. A complete PR description is saved locally at `/private/tmp/sl-codex-review/pr-body.md` for the intended PR into `depth`, titled "Codex review: claims checked, scores, safe fixes".
+
+## Access follow-up after Alex enabled full access
+
+Checked at 2026-10-04T05:35:50+00:00. The changes below are observations from the resumed run, not retroactive claims about the restricted initial run.
+
+- GitHub CLI authentication succeeds as `alejandro-publius`. The original two review commits were pushed without force, and PR [#23](https://github.com/alejandro-publius/second-look/pull/23) is open into `depth`, with the requested title. No merge, deployment or visibility change was performed.
+- GitHub invitation 335990556 grants `rachelselbrede` write access when accepted. It was sent successfully; acceptance and Devpost team membership are still not established.
+- All twelve requested live GET routes listed in section three returned HTTP 200 through curl with normal TLS verification. `/health` returned `status: ok`. No real sitting, part-two sitting or creek check was started. HTTP success and visible HTML do not establish a complete interactive user journey.
+- Visible live `/judges` text still promises the repository is public from October 3, while GitHub reports it private. `/how-we-know` confirms the creek checker is off, no walk carries its question, and the displayed footage examples are unlabelled. `/verify` reports the seven-entry chain at build time and a September 30 timestamp-status check.
+- Live count response: `{"by_arm":{"untrained":{"randomized":0,"completed":0},"trained":{"randomized":1,"completed":1}},"by_source":{"poster":0,"chat":0,"friends":0,"creek_group":0,"other":1,"panel":0},"post_lock":0}`. These counters are not an eligible-study estimate or proof of participant identities. The panel count is zero.
+- The live FHIR validation JSON exactly matches the committed September 27 artifact: seventeen files, zero errors, seventy warnings, terminology on. It is still a saved run, not validation of all future records.
+- A Homebrew Java seventeen executable is available and the validator script can select it. The earlier PATH-only inspection did not establish that this executable was missing.
+
+`make check` completed with `CHECK GREEN`. Python: 2623 passed, five skipped, nine documented xfailed cases. Worker: twenty-seven passed. Readability, diagram renders, numerical claims, web build, design checks and secret scanning also passed. The fresh official FHIR validation reported 0 errors and 70 warnings across 17 records, with terminology checks on. The run is saved locally at `/private/tmp/sl-codex-review/fhir-validation-full-access.json`. Its generated timestamp update was not included in the documentation-only PR; the original committed result file was restored after retaining that fresh evidence.
+
+`make submit-check` now has only two failures: `video_link` and `repo_public`. The earlier demo URL access failure is resolved. The complete judge-check was not repeated after the full check passed; its earlier restricted-environment outcome remains in the baseline ledger. No checklist tests, known expected failures, frozen areas or runtime code were changed. The baseline score remains 7.8/10; confidence in the build is now stronger.
+
+The updated full review was copied to the macOS clipboard, and the pasted bytes were compared with this file before the final commit.
 
 ## Numeric claim inventory
 
