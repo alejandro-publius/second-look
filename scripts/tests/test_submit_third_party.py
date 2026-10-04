@@ -163,12 +163,18 @@ def test_report_line_names_the_failures(capsys: pytest.CaptureFixture[str]) -> N
     assert capsys.readouterr().out.strip().endswith("submit-check: 2 failed: a, c")
 
 
-def test_real_repo_gh_reports_private() -> None:
-    """The proving command's expected failure: the repo is private until Oct 3."""
-    rc, out = submit_check.default_runner(REPO)(["gh", "repo", "view", "--json", "visibility"])
+def test_real_repo_visibility_matches_the_submission_gate(tmp_path: Path) -> None:
+    """Publication changes visibility; the gate must agree with GitHub on either side."""
+    rc, out = submit_check.default_runner(REPO)(
+        ["gh", "repo", "view", submit_check.REPO_SLUG, "--json", "visibility"]
+    )
     if rc != 0:
         pytest.skip("gh not logged in")
-    assert json.loads(out)["visibility"] == "PRIVATE"
+    visibility = json.loads(out)["visibility"]
+    checks = submit_check.run_checks(
+        build_root(tmp_path), runner=fake_runner(visibility), fetch=lambda _url: 200
+    )
+    assert ("repo_public" not in names_failed(checks)) == (visibility == "PUBLIC")
 
 
 def test_third_party_parses_both_lockfiles(tmp_path: Path) -> None:

@@ -263,6 +263,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `E2E_PORT` | `8791` | `worker/test/e2e.mjs` | the port of `wrangler dev` in the Worker e2e |
 | `E2E_COMPAT_DATE` | `2026-08-18` | `worker/test/e2e.mjs` | a compatibility date the local runtime knows |
 | `DEMO_URL` | `https://second-look-79t.pages.dev/demo` | `apps/web/scripts/demo-open-check.mjs` | which judge mode page `make demo-open-check` reads; judge mode opens at the second lock, 2026-10-03T04:00:00Z |
+| `LOCK_READ_ONLY_DEPLOY_CHECKS` | not set | `scripts/lock_analysis.py` | `1` uses the read-only phone check after Worker deployment; local study contract tests still run and no live test sitting is sent |
 | `ALLOW_BRANCH` | not set | `scripts/deploy.sh` | `yes` lets a deploy run from a branch other than `main` |
 | `BACKUP_DIR` | `~/second-look-backups` for D1, `data/backups` for the local database | `scripts/backup_d1.sh`, `scripts/backup_db.sh`, `scripts/restore_db.sh`, `scripts/restore_drill_d1.sh` | where backups are written and read |
 | `BACKUP_KEEP` | `30` | `scripts/backup_d1.sh` | how many D1 dumps to keep |

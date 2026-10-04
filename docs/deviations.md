@@ -72,3 +72,9 @@ unchanged: October 3 at 04:00 UTC. The failed attempt's export is retained in th
 private backup folder. Job failures now retain the full check output there too.
 This retry uses `LOCK_READ_ONLY_DEPLOY_CHECKS=1`: local study contract tests and
 read-only production phone checks, with no new sitting sent to the live study.
+
+The first late retry stopped before deployment because the configuration table
+lacked the new read-only option and a separate test still required the repository
+to be private. The table now documents the option, and the visibility test checks
+that the submission gate agrees with GitHub whether the repository is private or
+public. The failed check output was retained before the next retry.
