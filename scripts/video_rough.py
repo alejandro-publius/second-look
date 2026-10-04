@@ -1,6 +1,7 @@
 """The rough cut, as far as software can take it (Update 14 section 7 item 3, UPDATE_22 6.4).
 
-Reads the two tables in docs/video/SHOTLIST.md and builds one 1920 by 1080, 30 fps video:
+Reads the two tables in docs/video/v1/SHOTLIST.md (the first video, read by Alex) and builds one
+1920 by 1080, 30 fps video:
 
 - a 3 second title card before each beat, with its start time and what is on screen;
 - the beat itself, from its parts in the table "Footage in each beat": open creek footage from
@@ -38,7 +39,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-SHOTLIST = ROOT / "docs" / "video" / "SHOTLIST.md"
+SHOTLIST = ROOT / "docs" / "video" / "v1" / "SHOTLIST.md"
 CLIPS = ROOT / "docs" / "video" / "clips"
 RAW = CLIPS / "raw"
 FOOTAGE = Path(
@@ -431,7 +432,7 @@ def main(argv: list[str] | None = None) -> int:
     text = SHOTLIST.read_text(encoding="utf-8")
     beats = rows(text)
     if not beats:
-        print("video-rough: no rows in docs/video/SHOTLIST.md")
+        print("video-rough: no rows in docs/video/v1/SHOTLIST.md")
         return 1
     table = footage_parts(text)
     unknown = sorted(set(table) - {b["time"] for b in beats})

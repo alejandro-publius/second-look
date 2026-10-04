@@ -171,7 +171,7 @@ def test_the_committed_summary_matches_the_script_it_was_built_from() -> None:
 
 def test_the_test_is_two_minutes_and_about_four_with_its_lesson_wherever_it_is_timed() -> None:
     # The first cut said "about four minutes" at 0:46 and "the two-minute test" at the end.
-    readme = (SHOTLIST.parents[2] / "README.md").read_text(encoding="utf-8")
+    readme = (SHOTLIST.parents[3] / "README.md").read_text(encoding="utf-8")
     wording = "two-minute test (about four minutes with its lesson)"
     assert wording in readme
     assert any(wording in line for line in END_CARD)

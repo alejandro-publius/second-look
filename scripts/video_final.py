@@ -4,8 +4,8 @@
 footage clips and screen recordings as the rough cut (scripts/video_rough.py), with no title cards
 and no scratch voice:
 
-- the words of each beat (the "Alex says" column of docs/video/SHOTLIST.md, the same words as
-  docs/video/VOICE_SCRIPT.md) burned in as captions, a sentence or two at a time, spread over the
+- the words of each beat (the "Alex says" column of docs/video/v1/SHOTLIST.md, the same words as
+  docs/video/v1/VOICE_SCRIPT.md) burned in as captions, a sentence or two at a time, spread over the
   beat by their length. A beat runs as long as the shot list says, or longer if its words need
   more time to read at MAX_CPS letters a second;
 - every footage clip keeps the credit line scripts/cut_footage.py drew in its lower left corner,
@@ -32,7 +32,7 @@ that order) replaces the captions' own timing. Which way it fits depends on the 
   beat gets its own stretch of voice and keeps its shot list length, or grows to hold it;
 - "whole voice": with no voice_beats.txt the voice plays unbroken from the first words, after any
   quiet at its start, and each beat is cut to where its words should fall, by its share of the
-  script's letters. A left out beat is taken as not read, as docs/video/VOICE_SCRIPT.md asks.
+  script's letters. A left out beat is taken as not read, as docs/video/v1/VOICE_SCRIPT.md asks.
 
 With a voice the captions are no longer burned in: they go into the mp4 as a subtitles track. The
 captions are always written beside the mp4 as an .srt. Nothing here writes a video file into the

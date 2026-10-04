@@ -107,7 +107,7 @@ def test_every_beat_the_table_names_is_in_the_shot_list() -> None:
     assert set(TABLE) <= {b["time"] for b in BEATS}
 
 
-ROOT = SHOTLIST.parents[2]
+ROOT = SHOTLIST.parents[3]
 RECORDER = ROOT / "apps" / "web" / "scripts" / "record-clips.mjs"
 FORM = ROOT / "content" / "form.yaml"
 LOCALE = ROOT / "content" / "locales" / "en.json"
@@ -194,7 +194,7 @@ def test_bad_tables_are_refused() -> None:
 def test_devpost_says_the_video_licence_without_faking_a_video_link() -> None:
     # make submit-check passes the video slot on any line with "video" and a link, so the licence
     # line next to the slot must carry no link of its own.
-    devpost = (SHOTLIST.parents[1] / "devpost.md").read_text(encoding="utf-8")
+    devpost = (SHOTLIST.parents[2] / "devpost.md").read_text(encoding="utf-8")
     lines = [ln for ln in devpost.splitlines() if "CC BY-SA 4.0" in ln and "video" in ln.lower()]
     assert lines, "docs/devpost.md must say the video is CC BY-SA 4.0"
     assert all(not video_links(ln) for ln in lines)
