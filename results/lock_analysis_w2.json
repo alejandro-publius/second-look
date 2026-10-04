@@ -1,0 +1,24 @@
+{
+  "generated_at_utc": "2026-10-04T07:21:35Z",
+  "script": "scripts/lock_analysis.py",
+  "synthetic": false,
+  "stamp": "w2_20261004",
+  "analysis": "results/usability_w2_20261004.json",
+  "status": "not computed: an arm is empty",
+  "backup_file": "second-look-20261004T072131Z.sql",
+  "export_sha256": {
+    "sessions.csv": "31079ee27d427783a5b48e9cd27888384868b3cbcc63dee1486814060053e8dc",
+    "responses.csv": "5ab69864d56f0638da182ddea67b45d4e2eaecb8874905c1c263b51d90b067da",
+    "part2_sessions.csv": "f1902df8a1166f7f5b0e1de08056b664261cff86deefaafcfc53df74832fa96d",
+    "part2_responses.csv": "cec72b8321d25d9508c5cab49e2bb758198966d238935942c27a83ce78b9697b"
+  },
+  "checkout_at_start": "e8cfb9dd7986beb583253e3a1883aa35394d6848",
+  "part2_analysis": "results/assist_w2_20261004.json",
+  "part2_status": "not computed: an arm is empty",
+  "wave": 2,
+  "plan": "docs/analysis_plan_v3.md",
+  "window": {
+    "open_utc": "2026-09-30T04:00:00Z",
+    "lock_utc": "2026-10-03T04:00:00Z"
+  }
+}

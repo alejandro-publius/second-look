@@ -8,7 +8,7 @@
   "pages": 9,
   "pandoc": "pandoc 3.9.0.2",
   "pdf": "docs/REPORT.pdf",
-  "pdf_sha256": "3d24603941dc1c110fadaf3cf6e756fe2b78d0271c73c6dab4092a6ba70170dc",
+  "pdf_sha256": "9fa0bc8b4f37f150e4630d2ba5b9d4f16c702680e025e3a7a412ecd923b864de",
   "playwright": "1.63.0",
   "sources": [
     "README.md",
@@ -20,6 +20,7 @@
     "docs/report/template.html",
     "results/assist_20260929.json",
     "results/assist_flags.json",
+    "results/assist_w2_20261004.json",
     "results/benchmark_20260924T054939Z.json",
     "results/consensus_coarseness.json",
     "results/fhir_validation.json",
@@ -32,7 +33,8 @@
     "results/model_sweep_20260924T054756Z.json",
     "results/precache_budget.json",
     "results/usability_20260929.json",
+    "results/usability_w2_20261004.json",
     "results/wave2_window.json"
   ],
-  "sources_sha256": "73008ece5bac30882852544071b7197ac2d3ea7285a2500f5ff3a0405ae95c08"
+  "sources_sha256": "476028c004ad0947d41c226b3db6d6546360ff795106a4aafc09f11c2a9eee2c"
 }

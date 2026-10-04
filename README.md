@@ -12,7 +12,7 @@ Track 3, AI-Supported Assessment. The track says citizen observations can be inc
 >
 > **What the AI does.** A vision model takes the same 16-photo test. Where it passed, it may ask the person to look again, once, and only after the person has answered. The person decides what to do with that, and the model never writes the record. You can meet the question in the assisted judge mode, [`/t2/demo`](https://second-look-79t.pages.dev/t2/demo): eight photos, nothing stored, and no model is called while you answer. It asks only when it disagrees with you, so answer Can't tell on a photo of a bank, a channel or a pipe to see it. Judge mode is shut while the second wave of the study runs, because it shows the answers to the study's photos, and opens at that wave's lock, <!--v:results/wave2_window.json#/lock_local-->Friday Oct 2, 2026 at 21:00 PDT<!--/v-->. In the creek check on the live site the checker is off today, so every answer you see there is a person's.
 >
-> **What is not known yet.** Nobody finished the test before the lock, so nothing here measures people. A second wave of the same study runs up to the lock named just above; its result goes in the rows below the AI tables once, after that lock, whatever it is.
+> **What is not known yet.** Nobody finished the test before either lock, so nothing here measures people. A second wave of the same study runs up to the lock named just above; its result goes in the rows below the AI tables once, after that lock, whatever it is.
 >
 > **Train. Check. Verify. Record. Act.**
 
@@ -72,7 +72,7 @@ How this answers the organizers' five headers: *The problem* and *Innovation and
 
 ## Numbers at a glance
 
-**The result, in short.** Nobody finished the test before the lock, so nothing here measures people. The AI's result: every model passed built banks, and none passed plants that do not belong. The instruction says to answer can't tell when no stream is in view, and the models often named the plant right and still said can't tell ([`docs/MODEL_CARD.md`](docs/MODEL_CARD.md)). On the point numbers each model beat the floor a checker gets by always answering No, <!--v:results/model_card.json#/benchmark/always_no/correct-->24<!--/v--> of <!--v:results/model_card.json#/benchmark/always_no/n-->48<!--/v-->. The three runs repeat the same photos, so the intervals are too narrow to say more. On <!--v:results/footage_pool.json#/frames_kept-->46<!--/v--> frames of real creek footage the gate dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags.
+**The result, in short.** Nobody finished the test before either lock, so nothing here measures people. The AI's result: every model passed built banks, and none passed plants that do not belong. The instruction says to answer can't tell when no stream is in view, and the models often named the plant right and still said can't tell ([`docs/MODEL_CARD.md`](docs/MODEL_CARD.md)). On the point numbers each model beat the floor a checker gets by always answering No, <!--v:results/model_card.json#/benchmark/always_no/correct-->24<!--/v--> of <!--v:results/model_card.json#/benchmark/always_no/n-->48<!--/v-->. The three runs repeat the same photos, so the intervals are too narrow to say more. On <!--v:results/footage_pool.json#/frames_kept-->46<!--/v--> frames of real creek footage the gate dropped <!--v:results/footage_latest.json#/gate/dropped-->29<!--/v--> of <!--v:results/footage_latest.json#/gate/candidates-->64<!--/v--> candidate flags.
 
 ### The AI, on the same 16 photos and on real creek footage
 
@@ -114,12 +114,12 @@ Does the checker's question help? Too few people finished part 2 for the plan's 
 
 <!-- wave2-row -->
 
-A second wave of the same study runs from <!--v:results/wave2_window.json#/open_utc-->2026-09-30T04:00:00Z<!--/v--> to the second lock at <!--v:results/wave2_window.json#/lock_utc-->2026-10-03T04:00:00Z<!--/v-->, which is <!--v:results/wave2_window.json#/lock_local-->Friday Oct 2, 2026 at 21:00 PDT<!--/v-->, under plan v3 ([`docs/analysis_plan_v3.md`](docs/analysis_plan_v3.md)). Its result is reported here once, after that lock, whatever it is.
+The second wave, under plan `prereg-v3`: no finished test from a person was kept from <!--v:results/usability_w2_20261004.json#/window/open_utc-->2026-09-30T04:00:00Z<!--/v--> to the second lock at <!--v:results/usability_w2_20261004.json#/window/lock_utc-->2026-10-03T04:00:00Z<!--/v-->: <!--v:results/usability_w2_20261004.json#/counts/completed_trained-->0<!--/v--> with the lesson and <!--v:results/usability_w2_20261004.json#/counts/completed_untrained-->0<!--/v--> without it, so the second wave has no human row either. Its one run, with what each of the plan's rules removed, is in [`results/usability_w2_20261004.md`](results/usability_w2_20261004.md).
 
 <!-- /wave2-row -->
 
 <!-- wave2-row-2 -->
-Part 2 of the second wave, the checker's question, is reported here once, after the same lock.
+Does the checker's question help, in the second wave? Too few people finished part 2 for the plan's test: assisted <!--v:results/assist_w2_20261004.json#/primary/n_assisted-->0<!--/v-->, unassisted <!--v:results/assist_w2_20261004.json#/primary/n_unassisted-->0<!--/v-->, and the plan needs 20 in each ([`results/assist_w2_20261004.md`](results/assist_w2_20261004.md)). This measures one thing only: whether the checker's question helps a person whose first answer was wrong or Can't tell. It does not show that the checker cannot mislead anyone, because every flag in this set was correct (Known weaknesses).
 <!-- /wave2-row-2 -->
 
 ## Gallery
