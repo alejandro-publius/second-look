@@ -338,7 +338,8 @@ test("the assisted second look door, to the AI's one question, is the second doo
 // the shut page, which names the same moment as the door.
 test("the door to the AI's one question says it is judge mode for part 2, shut while the second wave runs, and leads to the shut page before the second lock", async ({ page }) => {
   await mockApi(page);
-  await page.clock.install({ time: BEFORE_SECOND_LOCK });
+  // Hold Date fixed across both navigations; timers and animations can still run.
+  await page.clock.setFixedTime(BEFORE_SECOND_LOCK);
   await page.goto("/judges");
   const row = page.getByRole("navigation", { name: "For judges" }).locator(".row").nth(1);
   const line = row.locator(".row-value");
