@@ -15,7 +15,7 @@
  */
 // The cache name carries the content hash, so new photos and new copy replace the placeholders
 // on the next visit instead of hiding behind a stale cache. build-content.mjs rewrites this line.
-const VERSION = "sl-9ef4e60523c322a7";
+const VERSION = "sl-fa7a36fea4214cf4";
 const PRECACHE = `${VERSION}-precache`;
 const RUNTIME = `${VERSION}-runtime`;
 // The list is kept in the precache too, so the fetch handler can read its fallbacks offline.

@@ -166,10 +166,10 @@ holds the table they are built from.
 | `com.secondlook.hl7` | daily at 09:00 | `scripts/hl7_watch.py`: reads hl7-eu/oah pull request 5 and issues 6, 7 and 8 with `gh`; a new comment from a maintainer goes to the status issue. It never replies | `make mac-jobs-install` |
 | `com.secondlook.uptime` | every 10 minutes | `scripts/uptime.py`: GETs `/`, `/judges`, `/city`, one walk, `/health` and the counts on the live site; two failures in a row write `~/second-look-backups/uptime.log`, one status issue comment and a notification | `make mac-jobs-install` |
 | `com.secondlook.lock` | once, at 18:10 on Sep 27 in California (2026-09-28T01:10:00Z) | `scripts/lock_analysis.py`: the data lock, `make lock-analysis` | `make lock-analysis-install` |
-| `com.secondlook.part2_retention` | once, Nov 30, 2026 at 09:00 Pacific, or on wake | `scripts/cleanup_part2.py --execute`: keeps a de-identified export and clears only the two raw part 2 tables; never runs early or repeats after completion | `uv run python scripts/mac_jobs.py install --only part2_retention` |
+| `com.secondlook.part2_retention` | once, Nov 30, 2026 at 09:00 Pacific, or on wake | `scripts/cleanup_part2.py --execute`: keeps a de-identified export and clears only the two raw part 2 tables; never runs early or repeats after completion | `uv run python scripts/mac_jobs.py install --root ~/second-look-retention --only part2_retention` |
 | `com.secondlook.lock2` | once, at 21:10 on Oct 2 in California (2026-10-03T04:10:00Z) | `scripts/lock_analysis.py --wave 2`: the second data lock, for the second wave of the study, `make lock-analysis-2` | `make lock-analysis-2-install` |
 
-Which of the nine a follower city would run at all:
+Which of these jobs a follower city would run at all:
 
 - Six are this study's own and stop with it: `lock`, `lock2`, `hl7`, `uptime`, `anchor`, and
   `theirs`, which feeds the `/two` demo.
