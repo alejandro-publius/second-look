@@ -171,7 +171,7 @@ export function Part2Flow() {
               {t("end.panel_code", { code: PANEL_COMPLETION_CODE })}
             </p>
           ) : null}
-          <p>{t("end.done")}</p>
+          <p>{t("part2.done")}</p>
           <p>{t("end.last_line")}</p>
         </div>
       );

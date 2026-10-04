@@ -37,6 +37,10 @@ Usability test (the two-minute test at `/t`):
 Part 2, the assisted second look (`/t2`, offered on the score screen of the test; on the live
 Worker only, the Python API has no part 2):
 
+The offer and end screens state that part 2 stores answers, whether the checker asked for
+a second look, the choice after it and timings, linked to the same random session id as the
+first test. No name, email or other detail that identifies a person is collected.
+
 - `part2_session`: one row for each test sitting that was offered the second look and chose. It
   holds a random id of its own, the id of the part 1 session it follows, that session's arm, the
   part 2 arm (assisted or unassisted), the block id, the order of the eight photos, when the
@@ -203,9 +207,16 @@ if we change hosts, change both this file and the consent text.
   `scripts/cleanup_uploads.py` deletes the files and their rows after 30 days, each time it is
   run. A visitor never sees another visitor's upload; each is served only with the token
   returned to the uploader.
-- Part 2 tables (`part2_session`, `part2_response`): no code deletes them. They are kept as
-  `session` and `response` are. `docs/analysis_plan_v2.md` item 10 says the anonymous part 2
-  response table is published; when the raw part 2 tables are dropped is not written down yet.
+- Part 2 raw records (`part2_session`, `part2_response`): on November 30, 2026 at
+  09:00 Pacific, after the winners are announced, the Mac job `com.secondlook.part2_retention`
+  keeps a de-identified export and deletes the contents of these two tables only. The empty
+  tables remain so the database schema stays intact. The export has no browser token hash;
+  original session ids are replaced with labels that link its rows only. It stays in the
+  private `~/second-look-backups/part2-retention/` folder. The aggregates in `results/` stay.
+  If the Mac sleeps through the scheduled time, launchd runs the job when it wakes. A dated
+  guard prevents an early deletion, and a completion receipt prevents a repeat the next year.
+  Existing database backups can retain earlier copies until they rotate out after the next
+  30 daily backups; this job does not delete other study or creek records.
 - Study tables (`session`, `response`): kept until the analysis is published, then the
   anonymous response table (the export CSVs) is published with the results and the raw tables
   are dropped. Dry-run rows are wiped at launch by `scripts/wipe_for_launch.py`, which writes

@@ -83,3 +83,17 @@ The successful retry started on October 4 at 07:21:20 UTC and pushed its results
 and deployment record at 07:28:45 UTC. Both second-wave comparisons retained no
 eligible completed sittings, so neither produced a human effect estimate. The
 receipt is `results/lock_analysis_w2.json`; the published reports list the exclusions.
+
+## 2026-10-04: part 2 storage wording and retention after both locks
+
+Alex authorized a wording correction to the part 2 offer and end screens after both data
+locks. They now name the answers, the checker's prompt and the person's choice, and the
+timings, linked to the same random session id, with no identifying details. The public
+`/api/t2/counts` endpoint showed no part 2 participants or declines before this correction;
+no part 2 participant was affected. No question, allocation, answer, timing, endpoint, tagged
+plan or analysis changed. The shared content hash changes with the corrected display text.
+
+Alex set November 30, 2026 as the date to delete raw part 2 records after the winners are
+announced. A Mac job will keep a de-identified export and then clear only `part2_response`
+and `part2_session`. Aggregates remain. The privacy page and DATA_HANDLING document explain
+the date, export and existing backup retention.

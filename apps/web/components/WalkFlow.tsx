@@ -94,6 +94,7 @@ function Clip({ walk }: { walk: Walk }) {
         preload="none"
         poster={poster?.url}
         aria-label={t("walk.clip_label", { creek: walk.creek_name })}
+        aria-describedby={`clip-description-${walk.id}`}
       >
         <source src={`/${walk.clip.file}`} type="video/mp4" />
         <Photo id={walk.poster_photo_id} />
@@ -764,6 +765,12 @@ export function WalkFlow({ walk }: { walk: Walk }) {
       {stage.name === "watch" ? <LanguagePicker part="list" /> : null}
       {stage.name === "loading" ? null : <Clip walk={walk} />}
       {body}
+      {stage.name !== "loading" ? (
+        <section className="stack" aria-labelledby={`clip-description-title-${walk.id}`}>
+          <h2 id={`clip-description-title-${walk.id}`}>{t("walk.description_title")}</h2>
+          <p id={`clip-description-${walk.id}`}>{t(`walk.description.${walk.id}`)}</p>
+        </section>
+      ) : null}
     </div>
   );
 }

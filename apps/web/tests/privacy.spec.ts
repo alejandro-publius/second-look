@@ -65,24 +65,16 @@ test("the language picked on /check is kept on the phone, and /privacy says so",
   await expect(phone).toContainText("Until you close the tab: the kind of link you came from and your pick on the first page.");
 });
 
-// UPDATE_33: nobody took the test before the first lock, so the same study runs a second time,
-// from 2026-09-30T04:00:00Z to the second lock, 2026-10-03T04:00:00Z, under
-// docs/analysis_plan_v3.md. The page says so in plain words, under the list of what is stored.
-test("/privacy says the test has two windows and names the second lock", async ({ page }) => {
+// Both locked analyses are complete; retention now has a fixed date.
+test("/privacy gives the closed windows and the part 2 retention date", async ({ page }) => {
   await mockApi(page);
   await page.goto("/privacy");
   const main = page.getByRole("main");
-  const windows = main.locator("p").filter({ hasText: /^The test runs in two windows\./ });
-  await expect(windows).toHaveCount(1);
-  await expect(windows).toContainText("The second closes on Oct 3 at 04:00 UTC, which is Fri Oct 2 at 21:00 PDT.");
-  await expect(windows).toContainText("Both windows store the same things, listed above.");
-  await expect(windows).toContainText("the anonymous answer table is published with the results, whatever they show");
-  await expect(windows).toContainText("docs/analysis_plan_v3.md");
-  // The paragraph follows the list of what is stored, so "listed above" is true.
-  const order = await main.evaluate((el) => {
-    const list = el.querySelector("ul");
-    const p = [...el.querySelectorAll("p")].find((x) => x.textContent?.startsWith("The test runs in two windows."));
-    return list && p ? Boolean(list.compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING) : null;
-  });
-  expect(order).toBe(true);
+  await expect(main).toContainText("Both study windows have closed.");
+  await expect(main).toContainText("Neither wave retained an eligible completed sitting");
+  const retention = main.locator("p").filter({ hasText: /^On November 30, 2026/ });
+  await expect(retention).toContainText("raw second-look answers and session records");
+  await expect(retention).toContainText("We keep a de-identified export and the summary results.");
+  await expect(retention).toContainText("no browser token hash or original session ids");
+  await expect(retention).toContainText("after the next 30 daily backups");
 });
