@@ -1,4 +1,4 @@
-// make design-check. Fails on anything docs/internal/updates/UPDATE_06.md section 6 bans, inside apps/web
+// make design-check. Fails on anything the team's working notes (UPDATE 06) section 6 bans, inside apps/web
 // and content/. Static rules run always; the tap target measurement runs Playwright against the
 // built app on the phone viewport, over the stage 1 screens only. SKIP_TAP=1 skips that part.
 import { spawn, spawnSync } from "node:child_process";

@@ -4,13 +4,13 @@ Working notes: the build plan as it was written on Sep 20, kept public on purpos
 Names, models, owners and dates here may have changed since; what was built is in the README, and
 every change to this plan is in `docs/DECISIONS.md`.
 
-Version 2, Sun Sep 20 2026. Folds docs/internal/updates/UPDATE_02.md into the plan from docs/internal/MASTER_BRIEF.md section 17. Precedence: the latest file in docs/internal/updates/ wins over the brief; the brief wins over this plan unless a change is recorded in docs/DECISIONS.md.
+Version 2, Sun Sep 20 2026. Folds the team's working notes (UPDATE 02) into the plan from the team's working notes (MASTER BRIEF) section 17. Precedence: the latest file in the team's working notes wins over the brief; the brief wins over this plan unless a change is recorded in docs/DECISIONS.md.
 
 Tags: MUST before the Wednesday Sep 23 launch. SHOULD before the Saturday Sep 26 freeze. COULD only if everything above it is green.
 
 ## How we work
 
-Alex works only in this terminal and relays reports to the planner. Every session, and every decision point, ends with the report block from docs/internal/updates/UPDATE_02.md section 1 and nothing after it. Short replies, paths and key lines only, targeted tests while working, one full `make check` per milestone.
+Alex works only in this terminal and relays reports to the planner. Every session, and every decision point, ends with the report block from the team's working notes (UPDATE 02) section 1 and nothing after it. Short replies, paths and key lines only, targeted tests while working, one full `make check` per milestone.
 
 ## Decisions made now, one path each
 
@@ -173,15 +173,15 @@ Mon: record and edit the video to about 3:45; full dry-run submission by midnigh
 
 ## Decision points
 
-From docs/internal/updates/UPDATE_03.md, recovered on 2026-09-21. The current state of each kill test is
-in docs/internal/KILL_TESTS.md.
+From the team's working notes (UPDATE 03), recovered on 2026-09-21. The current state of each kill test is
+in the team's working notes (KILL TESTS).
 
 - **Launch decision, Tuesday Sep 22 at 22:00 PDT.** Go if P1 passed, K3 and K4 passed for at
   least three features, and `make preflight` is green. Otherwise do not launch a test we cannot
   stand behind. Take F1 and keep building the record. **P1 has not passed as written**: the
   skeleton runs on docker compose, not on a real host, because no hosting account existed
   yet. That is the single thing most likely to stop the launch. (Since Update 09 it runs on
-  Cloudflare and P1 passed there; see docs/internal/KILL_TESTS.md.)
+  Cloudflare and P1 passed there; see the team's working notes (KILL TESTS).)
 - **Reach check: decided on Sep 21, not on Sep 24.** Nobody was recruited in person, so the headline is F1
   from here: the full loop, the AI on the same 16 photos and on open creek footage, and a citizen
   record validated in their own format. Whatever sessions arrive are reported as a description
@@ -202,7 +202,7 @@ in docs/internal/KILL_TESTS.md.
 - **F2. Their profiles reject a citizen record, or the sandbox refuses writes.** The headline
   becomes the lesson and the test on strangers, entered in Track 1. The FHIR work ships as plain
   valid R4 plus docs/ig_gap_report.md. **Not in force:** P2 passed with terminology on and K6
-  passed, both recorded in docs/internal/KILL_TESTS.md.
+  passed, both recorded in the team's working notes (KILL TESTS).
 - **F3. A feature cannot be photographed or labelled reliably.** Three features, 12 items, written
   into the plan before the tag.
 - **F4. The models ace the early photos.** The checker is described as a second pair of eyes that

@@ -1,5 +1,5 @@
 // Is judge mode open on the live site? First asked by UPDATE_27 for Sep 28, a dated item in
-// docs/internal/DONE.md; since UPDATE_33 judge mode is shut again until the second lock,
+// the team's working notes (DONE); since UPDATE_33 judge mode is shut again until the second lock,
 // 2026-10-03T04:00:00Z, because a second wave of the study runs until then.
 //
 // Judge mode is shut until that lock and the page decides by the browser's own clock, so this

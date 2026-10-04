@@ -1,4 +1,4 @@
-// The landing budgets from docs/internal/updates/UPDATE_06.md section 5, as Update 07 section 1 moved them.
+// The landing budgets from the team's working notes (UPDATE 06) section 5, as Update 07 section 1 moved them.
 // Measured on a throttled 4G profile with a 4x slower CPU:
 //   largest paint under 2.5s, layout shift under 0.05,
 //   and no more than 25 KB compressed of OUR code on the landing route.

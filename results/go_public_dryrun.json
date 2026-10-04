@@ -25,7 +25,7 @@
   {
    "step": "notes",
    "result": "PASS",
-   "output": "removed 120 files under docs/internal and reworded 149 mentions in 26 files, in commit 99b14e8; 6 readers keep the path and cope without it"
+   "output": "removed 120 files under the team's working notes and reworded 149 mentions in 26 files, in commit 99b14e8; 6 readers keep the path and cope without it"
   },
   {
    "step": "tests",
@@ -77,7 +77,7 @@
    {
     "step": "notes",
     "result": "PASS",
-    "output": "removed 120 files under docs/internal and reworded 149 mentions in 26 files, in commit 7c16c43; 6 readers keep the path and cope without it"
+    "output": "removed 120 files under the team's working notes and reworded 149 mentions in 26 files, in commit 7c16c43; 6 readers keep the path and cope without it"
    },
    {
     "step": "tests",

@@ -3,7 +3,7 @@ import { mockApi } from "./mock-api.mjs";
 
 // WCAG 2.2 SC 1.4.10 Reflow: no screen may scroll sideways on a phone. /city once rendered 537
 // CSS pixels wide on a 390 pixel phone because a bare source URL could not wrap
-// (docs/internal/reviews/DESIGN_REVIEW_02.md finding 1). /credits once rendered 713 wide because a
+// (the team's working notes (DESIGN REVIEW 02) finding 1). /credits once rendered 713 wide because a
 // footage title sat in a row's end slot, which never shrinks (REVIEW_03 R26).
 for (const path of ["/", "/check", "/spot?id=example", "/two", "/quick?spot=example", "/city?creek=strawberry-creek", "/judges", "/credits", "/walk", "/verify", "/accessibility"]) {
   test(`${path} fits the phone width`, async ({ page }) => {

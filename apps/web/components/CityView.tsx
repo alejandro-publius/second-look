@@ -203,7 +203,7 @@ export function CityView({ creekId }: { creekId: string | null }) {
   }, [creekId]);
 
   // Every state has the page's one level-one heading, the loading and empty ones too (axe
-  // page-has-heading-one on /city, docs/internal/reviews/A11Y_00.md).
+  // page-has-heading-one on /city, the team's working notes (A11Y 00)).
   // A link that names no creek, such as bare /city, says so and lists every region pack with its
   // creeks, rather than speak of "this creek" without naming one (CRITIC_11 W02).
   // The creek links are plain links, so each one loads its page whole. This page reads its query

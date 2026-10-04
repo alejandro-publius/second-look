@@ -1,6 +1,6 @@
 # Second Look: design
 
-Source of truth for how this product looks and reads. It follows docs/internal/updates/UPDATE_06.md, which wins
+Source of truth for how this product looks and reads. It follows the team's working notes (UPDATE 06), which wins
 over every earlier file on look, reading and feel. It changes no rule about privacy, the gate, the
 analysis or FHIR. Stage 1 covers `/`, consent, the test item, the lesson card, the end screen and
 `/demo`. Everything else is spec, not yet built.

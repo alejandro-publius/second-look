@@ -112,7 +112,7 @@ self.addEventListener("fetch", (event) => {
 });
 
 // The cache key of a page: its path, plus src when the link has one. A research panel adds its own
-// identifiers to our link, and nothing but src from a link may be kept (docs/internal/PANEL_STUDY.md).
+// identifiers to our link, and nothing but src from a link may be kept (the team's working notes (PANEL STUDY)).
 // Every page reads its query in the browser, so one copy per path and src serves any query.
 function pageKey(req) {
   const url = new URL(req.url);

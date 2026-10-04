@@ -95,7 +95,7 @@ diagrams-render:
 dash-check:
 	$(PY) scripts/check_dashes.py
 
-# The look and feel gate from docs/internal/updates/UPDATE_06.md section 6. Runs after web-build because
+# The look and feel gate from the team's working notes (UPDATE 06) section 6. Runs after web-build because
 # the tap target measurement drives the built app on the phone viewport.
 design-check:
 	cd $(WEB) && WEB_PORT=$(WEB_PORT) node scripts/design-check.mjs
@@ -203,9 +203,9 @@ submit-check:
 	$(PY) scripts/submit_check.py
 
 # UPDATE_27 sections 0 and 3: the definition of done. Runs the command of every item in
-# docs/internal/DONE.md and prints PASS, RED, BLOCKED or HUMAN per item, then the line
+# the team's working notes (DONE) and prints PASS, RED, BLOCKED or HUMAN per item, then the line
 # "RED: <n> BLOCKED: <n> HUMAN: <n>". Red until the work is done, so it is not part of make check.
-# The panel study (docs/internal/PANEL_STUDY.md): completed sessions by source and arm, live.
+# The panel study (the team's working notes (PANEL STUDY)): completed sessions by source and arm, live.
 # scripts/panel_status.py --issue also puts them under the status issue's top paragraph.
 panel-status:
 	$(PY) scripts/panel_status.py
@@ -223,7 +223,7 @@ lock-analysis:
 lock-analysis-ready:
 	$(PY) scripts/lock_analysis.py --ready
 
-# The launchd jobs (docs/internal/MAC_JOBS.md), all run from one checkout, ~/second-look-depth
+# The launchd jobs (the team's working notes (MAC JOBS)), all run from one checkout, ~/second-look-depth
 # unless JOBS_ROOT says otherwise. lock-analysis-install installs only the one-off lock job.
 JOBS_ROOT ?= $(HOME)/second-look-depth
 mac-jobs-install:
@@ -242,7 +242,7 @@ mac-jobs-today:
 # day, changing nothing. lock-analysis-2-install installs only that job, for 2026-10-03T04:10:00Z.
 # wave2-window writes results/wave2_window.json, the window as the README quotes it before the
 # second lock. wave2-synthetic runs the second wave's analysis on made up sittings, into a folder
-# outside the repo. mac-jobs-doc writes the jobs table into docs/internal/MAC_JOBS.md.
+# outside the repo. mac-jobs-doc writes the jobs table into the team's working notes (MAC JOBS).
 .PHONY: lock-analysis-2 lock-analysis-2-ready lock-analysis-2-install wave2-window wave2-synthetic mac-jobs-doc
 lock-analysis-2:
 	$(PY) scripts/lock_analysis.py --wave 2

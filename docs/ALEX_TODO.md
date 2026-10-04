@@ -7,7 +7,7 @@ Everything on this page needs your voice, your eyes or your account. Everything 
 Times are Pacific.
 
 The deadline moved: Devpost now says submissions close on Sun Oct 4 at 21:00 PDT, and judging
-runs from Oct 5 to Oct 15 (read on Sep 29, `docs/internal/updates/UPDATE_33.md`). Nobody took the
+runs from Oct 5 to Oct 15 (read on Sep 29, the team's working notes (UPDATE 33)). Nobody took the
 test before the first lock on Sep 27, so a second wave of the study runs until Fri Oct 2 at
 21:00 PDT under its own plan, and step 1 is what fills it.
 
@@ -24,7 +24,7 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
 1. **From Tue Sep 29, 21:00, as early as you can, 15 minutes: launch the panel.** Wait until the
    top of the status issue says the second wave is open (judge mode shut again, plan v3 tagged
    and stamped). Then make a researcher account on Prolific, add about 450 dollars, create the
-   study from `docs/internal/PANEL_STUDY.md` (every field is written out there, the link and the
+   study from the team's working notes (PANEL STUDY) (every field is written out there, the link and the
    completion code too) and publish it. The panel asks about ethics approval: its step 3 says
    what to check first. It runs by itself and must stop taking people a few hours before the
    second lock, Fri Oct 2 at 21:00; `make panel-status` shows how many have finished.
@@ -38,7 +38,7 @@ on this Mac are new: the OpenTimestamps anchor (06:00) and the iNaturalist cache
    their dates page says submissions run to Oct 4, while their rules page still says "Hackathon
    Period: September 16 to September 30" and that projects must be developed in that period:
    ask which holds, so that work after Sep 30 is within the rules. Second, post
-   `docs/internal/MESSAGE_TRANSLATIONS.md`: some of their app's translations seem to ask a
+   the team's working notes (MESSAGE TRANSLATIONS): some of their app's translations seem to ask a
    different question from the English.
 
 4. **Through Thu Oct 15: keep the Mac plugged in and awake.** On macOS 15: System Settings,

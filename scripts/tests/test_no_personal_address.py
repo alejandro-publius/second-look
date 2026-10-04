@@ -1,6 +1,6 @@
 """No file git would commit names a personal mail address or a Cloudflare account id.
 
-The repository turns public on Oct 3. `docs/internal` leaves the tip before it does
+The repository turns public on Oct 3. the team's working notes leaves the tip before it does
 (`scripts/go_public.py`), so that folder alone is left out of the scan. An address at a
 university or a company is not a hit: the consent screen gives one on purpose, as the contact.
 
@@ -23,7 +23,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).parents[2]
-LEFT_OUT = "docs/internal/"
+LEFT_OUT = "the team's working notes"
 
 # Mail providers anyone can sign up to, so an address there is a person's own.
 PROVIDERS = (
@@ -151,7 +151,7 @@ def test_the_scan_leaves_out_the_working_notes_and_files_that_are_not_text(tmp_p
     (tmp_path / "docs" / "internal" / "report.md").write_text(line)
     (tmp_path / "docs" / "notes" / "hosting.md").write_text("# Hosting\n\n" + line)
     (tmp_path / "photo.jpg").write_bytes(b"\xff\xd8\0\0" + line.encode())
-    names = ["docs/internal/report.md", "docs/notes/hosting.md", "photo.jpg", "gone.md"]
+    names = ["the team's working notes (report)", "docs/notes/hosting.md", "photo.jpg", "gone.md"]
     assert scan(tmp_path, names) == ["docs/notes/hosting.md:3: holds a personal mail address"]
 
 

@@ -249,7 +249,7 @@ def test_the_lines_the_second_run_carries_are_of_the_kind_the_re_push_job_writes
 
 
 @pytest.mark.skipif(
-    not DOC.parent.is_dir(), reason="docs/internal/ is removed when the repository goes public"
+    not DOC.parent.is_dir(), reason="the team's working notes is removed when the repository goes public"
 )
 def test_mac_jobs_md_lists_every_job_with_its_time_log_and_ran_today_command() -> None:
     text = DOC.read_text(encoding="utf-8")

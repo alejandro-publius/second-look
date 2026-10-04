@@ -15,7 +15,7 @@ What happens to a flagged string: it falls back to English in that language, wit
 "English" tag, and the reason is kept beside it in `fallback` in content/app_strings.json. The
 rest of that question stays in the app's own words. When the app fixes a string, `make
 app-strings-check` goes red, and the fallback can be lifted after a person reads the new words.
-The organizers get the list in a short message (docs/internal/MESSAGE_TRANSLATIONS.md) for Alex
+The organizers get the list in a short message (the team's working notes (MESSAGE TRANSLATIONS)) for Alex
 to post.
 
 Added on 2026-09-29, same bundle: the plant list under "Which ones?" ends on a not sure answer.

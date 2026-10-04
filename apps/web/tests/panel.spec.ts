@@ -3,7 +3,7 @@ import { PANEL_COMPLETION_CODE } from "../lib/panel";
 import { mockApi, watchRequests } from "./mock-api.mjs";
 import { answerAllItems, BASE, finishLesson, passConsent, pickWarmup } from "./helpers";
 
-// The panel study (UPDATE_29 section 1, docs/internal/PANEL_STUDY.md). A panel appends its own
+// The panel study (UPDATE_29 section 1, the team's working notes (PANEL STUDY)). A panel appends its own
 // identifiers to the link; only src may survive, nothing else may be stored or sent, the consent
 // screen adds one sentence and the end screen shows the completion code, for that source only.
 const PANEL_SENTENCE =
@@ -36,7 +36,7 @@ test("panel: identifiers stripped, the sentence on consent, the code after the s
 
   // No panel identifier reached an API call, a request body, any request after the page itself, or
   // storage. The first request is the browser loading the page from the panel's link, before any of
-  // our code runs; docs/internal/PANEL_STUDY.md says so.
+  // our code runs; the team's working notes (PANEL STUDY) says so.
   expect(urls[0]).toContain("PROLIFIC_PID");
   const everything = JSON.stringify(calls) + urls.slice(1).join(" ") + (await page.evaluate(() => JSON.stringify({ ...sessionStorage }) + JSON.stringify({ ...localStorage })));
   for (const id of ["pid5f3a9", "study77", "sess42", "PROLIFIC_PID", "STUDY_ID", "SESSION_ID"]) {

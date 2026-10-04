@@ -3634,10 +3634,10 @@
    "file": "docs/ALEX_TODO.md",
    "line": 28,
    "kind": "backtick",
-   "target": "docs/internal/PANEL_STUDY.md",
+   "target": "the team's working notes (PANEL STUDY)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PANEL_STUDY.md"
+   "detail": "the team's working notes (PANEL STUDY)"
   },
   {
    "file": "docs/ALEX_TODO.md",
@@ -4183,10 +4183,10 @@
    "file": "docs/CONTRACTS.md",
    "line": 14,
    "kind": "backtick",
-   "target": "docs/internal/updates/UPDATE_02.md",
+   "target": "the team's working notes (UPDATE 02)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/updates/UPDATE_02.md"
+   "detail": "the team's working notes (UPDATE 02)"
   },
   {
    "file": "docs/CONTRACTS.md",
@@ -4660,19 +4660,19 @@
    "file": "docs/CONTRACTS.md",
    "line": 27,
    "kind": "backtick",
-   "target": "docs/internal/MASTER_BRIEF.md",
+   "target": "the team's working notes (MASTER BRIEF)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/MASTER_BRIEF.md"
+   "detail": "the team's working notes (MASTER BRIEF)"
   },
   {
    "file": "docs/CONTRACTS.md",
    "line": 27,
    "kind": "backtick",
-   "target": "docs/internal/updates/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/updates"
+   "detail": "the team's working notes (updates)"
   },
   {
    "file": "docs/CONTRACTS.md",
@@ -4705,10 +4705,10 @@
    "file": "docs/CONTRACTS.md",
    "line": 27,
    "kind": "backtick",
-   "target": "docs/internal/BUILD_LOG.md",
+   "target": "the team's working notes (BUILD LOG)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/BUILD_LOG.md"
+   "detail": "the team's working notes (BUILD LOG)"
   },
   {
    "file": "docs/CONTRACTS.md",
@@ -4795,10 +4795,10 @@
    "file": "docs/CONTRACTS.md",
    "line": 29,
    "kind": "backtick",
-   "target": "docs/internal/BUILD_LOG.md",
+   "target": "the team's working notes (BUILD LOG)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/BUILD_LOG.md"
+   "detail": "the team's working notes (BUILD LOG)"
   },
   {
    "file": "docs/CONTRACTS.md",
@@ -5470,10 +5470,10 @@
    "file": "docs/DECISIONS.md",
    "line": 67,
    "kind": "backtick",
-   "target": "docs/internal/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal"
+   "detail": "the team's working notes"
   },
   {
    "file": "docs/DECISIONS.md",
@@ -5614,10 +5614,10 @@
    "file": "docs/DECISIONS.md",
    "line": 91,
    "kind": "backtick",
-   "target": "docs/internal",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal"
+   "detail": "the team's working notes"
   },
   {
    "file": "docs/DECISIONS.md",
@@ -5659,10 +5659,10 @@
    "file": "docs/DECISIONS.md",
    "line": 95,
    "kind": "backtick",
-   "target": "docs/internal/PANEL_STUDY.md",
+   "target": "the team's working notes (PANEL STUDY)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PANEL_STUDY.md"
+   "detail": "the team's working notes (PANEL STUDY)"
   },
   {
    "file": "docs/DECISIONS.md",
@@ -5740,19 +5740,19 @@
    "file": "docs/HANDOFF_NEXT.md",
    "line": 5,
    "kind": "backtick",
-   "target": "docs/internal/DONE.md",
+   "target": "the team's working notes (DONE)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/DONE.md"
+   "detail": "the team's working notes (DONE)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
    "line": 7,
    "kind": "backtick",
-   "target": "docs/internal/PLAN_TO_DONE.md",
+   "target": "the team's working notes (PLAN TO DONE)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PLAN_TO_DONE.md"
+   "detail": "the team's working notes (PLAN TO DONE)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
@@ -5767,37 +5767,37 @@
    "file": "docs/HANDOFF_NEXT.md",
    "line": 11,
    "kind": "backtick",
-   "target": "docs/internal/PLAN_TO_DONE.md",
+   "target": "the team's working notes (PLAN TO DONE)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PLAN_TO_DONE.md"
+   "detail": "the team's working notes (PLAN TO DONE)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
    "line": 11,
    "kind": "backtick",
-   "target": "docs/internal/DONE.md",
+   "target": "the team's working notes (DONE)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/DONE.md"
+   "detail": "the team's working notes (DONE)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
    "line": 12,
    "kind": "backtick",
-   "target": "docs/internal/updates/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/updates"
+   "detail": "the team's working notes (updates)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
    "line": 16,
    "kind": "backtick",
-   "target": "docs/internal/reviews/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/reviews"
+   "detail": "the team's working notes (reviews)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
@@ -5857,10 +5857,10 @@
    "file": "docs/HANDOFF_NEXT.md",
    "line": 53,
    "kind": "backtick",
-   "target": "docs/internal/reviews/REVIEW_02.md",
+   "target": "the team's working notes (REVIEW 02)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/reviews/REVIEW_02.md"
+   "detail": "the team's working notes (REVIEW 02)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
@@ -5884,10 +5884,10 @@
    "file": "docs/HANDOFF_NEXT.md",
    "line": 73,
    "kind": "backtick",
-   "target": "docs/internal/updates/UPDATE_14.md",
+   "target": "the team's working notes (UPDATE 14)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/updates/UPDATE_14.md"
+   "detail": "the team's working notes (UPDATE 14)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
@@ -5965,28 +5965,28 @@
    "file": "docs/HANDOFF_NEXT.md",
    "line": 124,
    "kind": "backtick",
-   "target": "docs/internal/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal"
+   "detail": "the team's working notes"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
    "line": 126,
    "kind": "backtick",
-   "target": "docs/internal/reports/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/reports"
+   "detail": "the team's working notes (reports)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
    "line": 130,
    "kind": "backtick",
-   "target": "docs/internal/DEPTH_MAP.md",
+   "target": "the team's working notes (DEPTH MAP)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/DEPTH_MAP.md"
+   "detail": "the team's working notes (DEPTH MAP)"
   },
   {
    "file": "docs/HANDOFF_NEXT.md",
@@ -8458,10 +8458,10 @@
    "file": "docs/adr/README.md",
    "line": 5,
    "kind": "backtick",
-   "target": "docs/internal/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal"
+   "detail": "the team's working notes"
   },
   {
    "file": "docs/adr/README.md",
@@ -8980,10 +8980,10 @@
    "file": "docs/deviations.md",
    "line": 35,
    "kind": "backtick",
-   "target": "docs/internal/PANEL_STUDY.md",
+   "target": "the team's working notes (PANEL STUDY)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PANEL_STUDY.md"
+   "detail": "the team's working notes (PANEL STUDY)"
   },
   {
    "file": "docs/deviations.md",
@@ -9319,7 +9319,7 @@
    "detail": "scripts/fhir_build.sh"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 8,
    "kind": "backtick",
    "target": "scripts/done_check.py",
@@ -9328,7 +9328,7 @@
    "detail": "scripts/done_check.py"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 31,
    "kind": "backtick",
    "target": "results/harden/",
@@ -9337,7 +9337,7 @@
    "detail": "results/harden"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 35,
    "kind": "backtick",
    "target": "apps/web/app",
@@ -9346,7 +9346,7 @@
    "detail": "apps/web/app"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 40,
    "kind": "backtick",
    "target": "apps/web/app",
@@ -9355,7 +9355,7 @@
    "detail": "apps/web/app"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 41,
    "kind": "backtick",
    "target": "docs/screens",
@@ -9364,7 +9364,7 @@
    "detail": "docs/screens"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 52,
    "kind": "url",
    "target": "https://devpost.com/software/",
@@ -9373,7 +9373,7 @@
    "detail": "200"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 53,
    "kind": "backtick",
    "target": "docs/devpost.md",
@@ -9382,7 +9382,7 @@
    "detail": "docs/devpost.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 67,
    "kind": "backtick",
    "target": "docs/screens",
@@ -9391,7 +9391,7 @@
    "detail": "docs/screens"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 72,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev",
@@ -9400,7 +9400,7 @@
    "detail": "200"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 79,
    "kind": "backtick",
    "target": "core/gate.py",
@@ -9409,7 +9409,7 @@
    "detail": "core/gate.py"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 82,
    "kind": "backtick",
    "target": "docs/DATA_HANDLING.md",
@@ -9418,7 +9418,7 @@
    "detail": "docs/DATA_HANDLING.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 84,
    "kind": "backtick",
    "target": "apps/mcp/server.py",
@@ -9427,7 +9427,7 @@
    "detail": "apps/mcp/server.py"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 89,
    "kind": "backtick",
    "target": "docs/adr",
@@ -9436,7 +9436,7 @@
    "detail": "docs/adr"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 90,
    "kind": "backtick",
    "target": "apps/web",
@@ -9445,16 +9445,16 @@
    "detail": "apps/web"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 99,
    "kind": "backtick",
-   "target": "docs/internal/reviews/",
+   "target": "the team's working notes",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/reviews"
+   "detail": "the team's working notes (reviews)"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 101,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/accessibility",
@@ -9463,7 +9463,7 @@
    "detail": "200"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 114,
    "kind": "backtick",
    "target": "docs/devpost.md",
@@ -9472,7 +9472,7 @@
    "detail": "docs/devpost.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 117,
    "kind": "backtick",
    "target": "docs/ALEX_TODO.md",
@@ -9481,7 +9481,7 @@
    "detail": "docs/ALEX_TODO.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 135,
    "kind": "backtick",
    "target": "docs/devpost.md",
@@ -9490,7 +9490,7 @@
    "detail": "docs/devpost.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 136,
    "kind": "backtick",
    "target": "docs/devpost.md",
@@ -9499,16 +9499,16 @@
    "detail": "docs/devpost.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 144,
    "kind": "backtick",
-   "target": "docs/internal/PANEL_STUDY.md",
+   "target": "the team's working notes (PANEL STUDY)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PANEL_STUDY.md"
+   "detail": "the team's working notes (PANEL STUDY)"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 146,
    "kind": "url",
    "target": "https://second-look-79t.pages.dev/api/test/counts",
@@ -9517,7 +9517,7 @@
    "detail": "200"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 149,
    "kind": "backtick",
    "target": "docs/analysis_plan.md",
@@ -9526,7 +9526,7 @@
    "detail": "docs/analysis_plan.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 154,
    "kind": "backtick",
    "target": "docs/MODEL_CARD.md",
@@ -9535,7 +9535,7 @@
    "detail": "docs/MODEL_CARD.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 155,
    "kind": "backtick",
    "target": "docs/THREAT_MODEL.md",
@@ -9544,7 +9544,7 @@
    "detail": "docs/THREAT_MODEL.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 156,
    "kind": "backtick",
    "target": "docs/REPORT.pdf",
@@ -9553,7 +9553,7 @@
    "detail": "docs/REPORT.pdf"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 156,
    "kind": "backtick",
    "target": "docs/devpost.md",
@@ -9562,7 +9562,7 @@
    "detail": "docs/devpost.md"
   },
   {
-   "file": "docs/internal/DONE.md",
+   "file": "the team's working notes (DONE)",
    "line": 157,
    "kind": "backtick",
    "target": "docs/DATA_CARD.md",
@@ -9571,16 +9571,16 @@
    "detail": "docs/DATA_CARD.md"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 3,
    "kind": "backtick",
-   "target": "docs/internal/DONE.md",
+   "target": "the team's working notes (DONE)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/DONE.md"
+   "detail": "the team's working notes (DONE)"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 11,
    "kind": "backtick",
    "target": "docs/notes/hosting.md",
@@ -9589,7 +9589,7 @@
    "detail": "docs/notes/hosting.md"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 15,
    "kind": "backtick",
    "target": "docs/ALEX_TODO.md",
@@ -9598,7 +9598,7 @@
    "detail": "docs/ALEX_TODO.md"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 37,
    "kind": "backtick",
    "target": "docs/ALEX_TODO.md",
@@ -9607,7 +9607,7 @@
    "detail": "docs/ALEX_TODO.md"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 43,
    "kind": "backtick",
    "target": "docs/notes/hosting.md",
@@ -9616,7 +9616,7 @@
    "detail": "docs/notes/hosting.md"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 46,
    "kind": "backtick",
    "target": "results/harden/",
@@ -9625,7 +9625,7 @@
    "detail": "results/harden"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 61,
    "kind": "backtick",
    "target": "docs/devpost.md",
@@ -9634,7 +9634,7 @@
    "detail": "docs/devpost.md"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 83,
    "kind": "backtick",
    "target": "docs/devpost.md",
@@ -9643,22 +9643,22 @@
    "detail": "docs/devpost.md"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 97,
    "kind": "backtick",
-   "target": "docs/internal/PANEL_STUDY.md",
+   "target": "the team's working notes (PANEL STUDY)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PANEL_STUDY.md"
+   "detail": "the team's working notes (PANEL STUDY)"
   },
   {
-   "file": "docs/internal/PLAN_TO_DONE.md",
+   "file": "the team's working notes (PLAN TO DONE)",
    "line": 100,
    "kind": "backtick",
-   "target": "docs/internal/PANEL_STUDY.md",
+   "target": "the team's working notes (PANEL STUDY)",
    "in_code": true,
    "status": "ok",
-   "detail": "docs/internal/PANEL_STUDY.md"
+   "detail": "the team's working notes (PANEL STUDY)"
   },
   {
    "file": "docs/notes/app_strings.md",

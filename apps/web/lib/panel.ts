@@ -1,5 +1,5 @@
 /**
- * The panel study (docs/internal/PANEL_STUDY.md, UPDATE_29 section 1). A person who arrives with
+ * The panel study (the team's working notes (PANEL STUDY), UPDATE_29 section 1). A person who arrives with
  * ?src=panel sees one extra sentence on the consent screen and this code after the score. Nothing
  * else changes. The code is fixed and public on purpose: the panel only checks that a person
  * reached the end, and no panel identifier from the link is ever kept (lib/session.ts strips it).

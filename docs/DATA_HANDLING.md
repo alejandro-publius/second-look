@@ -281,7 +281,7 @@ both `scripts/lock_analysis.py`) takes one more backup on this Mac and exports t
 from it (`scripts/study_export.py`, the same files the export route gives), so the one
 pre-registered run of each wave reads exactly the snapshot that is kept. That export stays
 outside the repo: in `data/export`, which git ignores, and in a copy next to the backup in
-`~/second-look-backups/`. A restore drill was run once before launch; docs/internal/BUILD_LOG.md
+`~/second-look-backups/`. A restore drill was run once before launch; the team's working notes (BUILD LOG)
 records it.
 
 ## The audit log

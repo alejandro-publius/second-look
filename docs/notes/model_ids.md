@@ -33,7 +33,7 @@ match its pricing row. Two things worth writing down from that page:
 - Claude Haiku 4.5 retires no sooner than 2026-10-15. That is after the deadline, but anyone
   rerunning our evals later should expect to swap it.
 
-The three models docs/internal/MASTER_BRIEF.md names for the test run, cheapest first:
+The three models the team's working notes (MASTER BRIEF) names for the test run, cheapest first:
 
 | Model | Id used in our config | Input per MTok | Output per MTok | Batch input | Batch output |
 |---|---|---|---|---|---|

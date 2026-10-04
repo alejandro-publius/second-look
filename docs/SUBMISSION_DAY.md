@@ -2,7 +2,7 @@
 
 The exact order for going public and submitting, with the command for each step and what to
 check after it. Times are Pacific (PDT). The organizers moved the deadline to Sun Oct 4 at 21:00
-(read from Devpost on Sep 29, `docs/internal/updates/UPDATE_33.md`). The repository goes public
+(read from Devpost on Sep 29, the team's working notes (UPDATE 33)). The repository goes public
 on the morning of Sat Oct 3, the day before the deadline day, and nothing changes after 09:00
 that day: the freeze, 36 hours before the deadline. We submit on Sun Oct 4 by 18:00.
 

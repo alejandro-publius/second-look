@@ -1,6 +1,6 @@
 """Every launchd job on the Mac, in one table, with one installer and one check for each.
 
-docs/internal/MAC_JOBS.md is written from this table and a test keeps the two the same. The jobs
+the team's working notes (MAC JOBS) is written from this table and a test keeps the two the same. The jobs
 run as Alex from one checkout, `~/second-look-depth` by default, and log under
 `~/second-look-backups/`. The lock job (scripts/lock_analysis.py) reads `writes` to know which
 files in its checkout the other jobs may have changed, and leaves those alone.
@@ -11,7 +11,7 @@ files in its checkout the other jobs may have changed, and leaves those alone.
   uv run python scripts/mac_jobs.py ran-today NAME                 exit 0 when its log moved today
   uv run python scripts/mac_jobs.py today                          all of them, one line each
   uv run python scripts/mac_jobs.py doc [--check]                  write the table into
-                                                                  docs/internal/MAC_JOBS.md, or
+                                                                  the team's working notes (MAC JOBS), or
                                                                   exit 1 when it differs
 """
 
@@ -218,7 +218,7 @@ def mac_job_audit_kinds() -> tuple[str, ...]:
 
 
 def doc_row(job: Job) -> str:
-    """One row of the table in docs/internal/MAC_JOBS.md."""
+    """One row of the table in the team's working notes (MAC JOBS)."""
     runs = " ".join((job.script(), *job.options()))
     return (
         f"| `{job.label}` | {job.when} | `{runs}`: {job.what} | "
@@ -235,7 +235,7 @@ def doc_with_table(text: str) -> str:
     """The document with its table written from JOBS. Its other words are left as they are."""
     start = text.find(DOC_HEAD)
     if start < 0:
-        raise SystemExit("mac-jobs: docs/internal/MAC_JOBS.md has no table to write into")
+        raise SystemExit("mac-jobs: the team's working notes (MAC JOBS) has no table to write into")
     end = start
     for line in text[start:].splitlines(keepends=True):
         if not line.startswith("|"):

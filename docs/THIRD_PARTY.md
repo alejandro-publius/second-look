@@ -38,13 +38,13 @@ Generated on 2026-09-30 by `uv run python scripts/third_party.py` from `uv.lock`
 
 ## Design references
 
-Read during the design pass (docs/internal/updates/UPDATE_06.md). Nothing is copied from either:
+Read during the design pass (the team's working notes (UPDATE 06)). Nothing is copied from either:
 no brand colour, name, logo or font was taken. They informed structure and restraint only.
 
 - Vercel Web Interface Guidelines, MIT
   (https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md).
   `apps/web` was audited against every rule in it; the findings are in
-  docs/internal/reviews/DESIGN_REVIEW_01.md.
+  the team's working notes (DESIGN REVIEW 01).
 - VoltAgent awesome-design-md, MIT (https://github.com/VoltAgent/awesome-design-md). The Airbnb
   file for how a product lets photographs lead, the Wise file for how forms stay clear. Structure
   of docs/design/DESIGN.md borrows their shape: one read, tokens, components, do and do not.

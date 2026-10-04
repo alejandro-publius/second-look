@@ -2,7 +2,7 @@
 
 One short record per decision that shapes the code: the context, the decision, what follows from
 it, the date, and the commit or file that carries it. They are written from `docs/DECISIONS.md`,
-the dated one-line log, and from the working notes in `docs/internal/`. A new decision gets the
+the dated one-line log, and from the working notes in the team's working notes. A new decision gets the
 next number and a line here; a decision that is replaced keeps its record, marked with what
 replaced it. `scripts/tests/test_adr.py` checks that every record is listed here and has its parts.
 

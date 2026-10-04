@@ -6,18 +6,18 @@ reasons are in `docs/DECISIONS.md` and `docs/deviations.md`.
 
 ## UPDATE_27 and UPDATE_29, the loop to RED: 0 (Sep 24, 14:00Z)
 
-The definition of done is `docs/internal/DONE.md`; `make done-check` prints PASS, RED, BLOCKED or
+The definition of done is the team's working notes (DONE); `make done-check` prints PASS, RED, BLOCKED or
 HUMAN per line and ends with `RED: <n> BLOCKED: <n> HUMAN: <n>`. The plan is
-`docs/internal/PLAN_TO_DONE.md`. Work on `p29/integrate` (worktree `~/second-look-int27`), run
+the team's working notes (PLAN TO DONE). Work on `p29/integrate` (worktree `~/second-look-int27`), run
 `make check`, `make e2e` and the Worker e2e, then fast-forward `depth` and `main`, deploy in the
 order of `docs/notes/hosting.md` (schema, Worker, `live-check.mjs` with the QA key, Pages from
 `~/second-look`, then `live-readonly.mjs`). Reading order for a fresh session: `CLAUDE.md`,
-`PLAN.md`, this file, `docs/internal/PLAN_TO_DONE.md`, `docs/internal/DONE.md`, the newest
-`docs/internal/updates/`.
+`PLAN.md`, this file, the team's working notes (PLAN TO DONE), the team's working notes (DONE), the newest
+the team's working notes.
 
-Where it stands (Sep 27, 06:40Z, after UPDATE_32): `main` and `depth` at b2eaa67, deployed code d107902 (Worker 03d9374e, Pages 1f90ef9f, recorded good); the creek check quotes the official app in its six languages and records the language; `make done-check` RED: 0 BLOCKED: 12 HUMAN: 9; GitHub Actions starts no job (billing, Alex's) so four CI lines are BLOCKED-IF; report `docs/internal/reports/20260927T063000Z-weekend.md`. The paragraph below is the state before it.
+Where it stands (Sep 27, 06:40Z, after UPDATE_32): `main` and `depth` at b2eaa67, deployed code d107902 (Worker 03d9374e, Pages 1f90ef9f, recorded good); the creek check quotes the official app in its six languages and records the language; `make done-check` RED: 0 BLOCKED: 12 HUMAN: 9; GitHub Actions starts no job (billing, Alex's) so four CI lines are BLOCKED-IF; report the team's working notes (20260927T063000Z-weekend). The paragraph below is the state before it.
 
-Where it stands (Sep 26, 00:10Z, after UPDATE_30): `main` and `depth` at 7dd0ea3 plus the report commit, CI green, Worker d5527e10 and Pages ce38185d recorded good in docs/notes/hosting.md. `make done-check` is RED: 0 BLOCKED: 6 HUMAN: 9; the BLOCKED lines wait on the lock (2026-09-28T01:00:00Z) and their sandbox. Nothing is due from a session before the lock: the lock job on the Mac (Sun Sep 27, 18:10 PDT, from ~/second-look-depth) backs up, runs the tagged analysis once, fills the README's human row, deploys and pushes, and writes to the status issue; uptime, the sandbox retry, the hl7-eu/oah watch, backups, anchoring and iNaturalist run on their own (docs/internal/MAC_JOBS.md). A second session works on UPDATE_31 (the assisted study) in ~/second-look-assisted on branch assisted and integrates once this report is on origin/depth. What is left is Alex's (docs/ALEX_TODO.md) and Sep 30's go-public (docs/SUBMISSION_DAY.md).
+Where it stands (Sep 26, 00:10Z, after UPDATE_30): `main` and `depth` at 7dd0ea3 plus the report commit, CI green, Worker d5527e10 and Pages ce38185d recorded good in docs/notes/hosting.md. `make done-check` is RED: 0 BLOCKED: 6 HUMAN: 9; the BLOCKED lines wait on the lock (2026-09-28T01:00:00Z) and their sandbox. Nothing is due from a session before the lock: the lock job on the Mac (Sun Sep 27, 18:10 PDT, from ~/second-look-depth) backs up, runs the tagged analysis once, fills the README's human row, deploys and pushes, and writes to the status issue; uptime, the sandbox retry, the hl7-eu/oah watch, backups, anchoring and iNaturalist run on their own (the team's working notes (MAC JOBS)). A second session works on UPDATE_31 (the assisted study) in ~/second-look-assisted on branch assisted and integrates once this report is on origin/depth. What is left is Alex's (docs/ALEX_TODO.md) and Sep 30's go-public (docs/SUBMISSION_DAY.md).
 
 Two daily jobs are new on the Mac: `com.secondlook.anchor` (06:00, OpenTimestamps) and
 `com.secondlook.inaturalist` (07:45; it asked nothing until the Bay Area plant list was approved
@@ -59,7 +59,7 @@ open; F88 is logged in `docs/deviations.md` and its remedy is Alex's.
   name resolved again that day, the daily job fetched their record and `/two` shows it with the
   fetch time; the re-push found our resources there and their server refused the Library update
   with HTTP 400. The name has come and gone since; the README's Known weaknesses keeps the state.)
-- Open review findings from pull request #8 (`docs/internal/reviews/REVIEW_02.md`): F86, POST
+- Open review findings from pull request #8 (the team's working notes (REVIEW 02)): F86, POST
   `/api/demo/answer` has no server lock check before Sep 28, so 16 POSTs reveal the gold key
   (closed on Sep 24: the route answers 403 until the lock, on both servers, `docs/deviations.md`);
   F06 to F08, the analysis can be run on real data before the lock through test flags (closed on
@@ -82,7 +82,7 @@ open; F88 is logged in `docs/deviations.md` and its remedy is Alex's.
 
 ## Update 14 status, end of the prompt 15 run
 
-The brief is `docs/internal/updates/UPDATE_14.md`, resumed by `UPDATE_15.md`. A cloud session
+The brief is the team's working notes (UPDATE 14), resumed by `UPDATE_15.md`. A cloud session
 (prompt 18, status issue #4) worked in parallel while this branch sat unpushed; its work is merged
 in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid run.
 
@@ -96,7 +96,7 @@ in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid 
 | 6 Merge and deploy | done on Sep 23 by UPDATE_19: proof, D1 tables, Worker, phone tests, merge, Pages, phone tests again; sandbox checked |
 | 7 Video | shot list, recordings and rough cut done; creek footage and Alex's voice are his |
 | 8 Submission pack | done: docs/devpost.md, make go-public, docs/ALEX_TODO.md; submit-check fails only on video_link and repo_public |
-| 9 Report | docs/internal/reports/, this run |
+| 9 Report | the team's working notes, this run |
 
 ## Traps found in this run
 
@@ -133,13 +133,13 @@ in (7f2b1d5). No API key exists in `.env`, so every AI number waits on the paid 
   city actions is named on `/city` and in the README. The proposal mentions the `morophology`
   spelling. Hosting is Cloudflare only: `fly.toml` is gone and `scripts/deploy.sh` deploys the
   Worker and the Pages site from `main` in the merge order. The planning notes live in
-  `docs/internal/` (brief, updates, reports, reviews, kill tests, ledger, build log, depth map,
+  the team's working notes (brief, updates, reports, reviews, kill tests, ledger, build log, depth map,
   team pack, recruiting messages, day plans); every live path points there; new reports go to
-  `docs/internal/reports/`. The README carries no placeholder, no gray image and no synthetic
+  the team's working notes. The README carries no placeholder, no gray image and no synthetic
   number: the results section says results arrive with the model run. Tier 3 of Update 10 runs
   the day UPDATE_12's numbers exist; the real warm-up photographs exist on no branch yet.
 
-- `docs/internal/DEPTH_MAP.md`: every feature, read out of the repo. 45 built, 3 parked, 6 missing.
+- the team's working notes (DEPTH MAP): every feature, read out of the repo. 45 built, 3 parked, 6 missing.
 - **Update 10C.** Draft pull request #1, "Depth: do not merge before data lock", exists so CI
   runs on every push to `depth`; it stays a draft. The merge order after data lock is written in
   `docs/notes/hosting.md` (Worker first, phone tests, then the Pages file, phone tests again).

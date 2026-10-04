@@ -767,7 +767,7 @@ evals/       every reported number               results/ their outputs, failure
 fhir/        the pinned guide, our FSH, golden records, the sandbox ledger
 scripts/     checks, gates, the footage pipeline, the sandbox mirror
 tools/diagrams/  the pinned Mermaid renderer: make diagrams-render draws docs/diagrams, make diagrams checks them
-docs/        product docs; docs/internal/ holds the working notes, removed before the repo opens
+docs/        product docs
 CHANGELOG.md  what shipped, day by day, Sep 16 to Oct 3; the v1.0 release notes come from it
 ```
 
