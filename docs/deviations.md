@@ -78,3 +78,8 @@ lacked the new read-only option and a separate test still required the repositor
 to be private. The table now documents the option, and the visibility test checks
 that the submission gate agrees with GitHub whether the repository is private or
 public. The failed check output was retained before the next retry.
+
+The successful retry started on October 4 at 07:21:20 UTC and pushed its results
+and deployment record at 07:28:45 UTC. Both second-wave comparisons retained no
+eligible completed sittings, so neither produced a human effect estimate. The
+receipt is `results/lock_analysis_w2.json`; the published reports list the exclusions.

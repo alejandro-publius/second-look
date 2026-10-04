@@ -1443,9 +1443,10 @@ def test_the_real_readme_has_the_place_for_the_second_waves_rows() -> None:
     assert la.first_wave_rows(placed) == la.first_wave_rows(readme)
     assert readme.index(la.PART2_END) < readme.index(la.WAVE2_START)
     assert readme.index(la.WAVE2_END) < readme.index(la.WAVE2_PART2_START)
-    assert (
-        la.NOBODY_FINISHED in readme or la.SECOND_SOMEBODY in readme or la.SECOND_NOBODY in readme
-    )
+    for marker in (la.WAVE2_START, la.WAVE2_END, la.WAVE2_PART2_START, la.WAVE2_PART2_END):
+        assert readme.count(marker) == 1
+    assert placed.count(row) == 1
+    assert placed.count(part2) == 1
     if not la.real_results(ROOT, la.SECOND):
         # Until the second run, the place says what is true, with the window from results/.
         held = readme[readme.index(la.WAVE2_START) : readme.index(la.WAVE2_END)]

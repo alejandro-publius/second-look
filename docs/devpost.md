@@ -1,8 +1,8 @@
-Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that with a two-minute photo test. Each volunteer gets a score for each of four kinds of creek damage, saved with every observation they make. The AI takes the same test. It may only ask a volunteer to look again, only where it passed, and only after the volunteer has answered. The AI's help is measured, not assumed: a second test, planned before anyone took it, checks whether that one question makes people more accurate. What the AI may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that with a two-minute photo test. Each volunteer gets a score for each of four kinds of creek damage, saved with every observation they make. The AI takes the same test. It may only ask a volunteer to look again, only where it passed, and only after the volunteer has answered. The AI's help must be measured, not assumed. A second test, planned before anyone took it, is designed to check whether that one question makes people more accurate; its benefit is not yet established. What the AI may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
 
 # Devpost: every field, ready to paste
 
-UPDATE_14 section 8 item 1. Each field is one code block, so one tap copies it; the count is characters, spaces included. The text is the paste kit from pull request #5 (its DEVPOST_PASTE.md, not copied), brought up to date: the video walks and the creek footage are added, and every number carries a claim marker checked against `results/` by `uv run python scripts/verify_claims.py --file docs/devpost.md`, except the names and fixed facts that `scripts/submit_check.py` lists with a reason each (a version, a model's name, the 72 hour rain window). The track statement is this file's first line, as it is the README's. This file is the one to paste from.
+UPDATE_14 section 8 item 1. Each field is one code block, so one tap copies it; where a count is given, it is characters, spaces included. The text is the paste kit from pull request #5 (its DEVPOST_PASTE.md, not copied), brought up to date: the video walks and the creek footage are added, and every number carries a claim marker checked against `results/` by `uv run python scripts/verify_claims.py --file docs/devpost.md`, except the names and fixed facts that `scripts/submit_check.py` lists with a reason each (a version, a model's name, the 72 hour rain window). The track statement is this file's first line, as it is the README's. This file is the one to paste from.
 
 The video link is a slot on purpose. The paid model run happened on Sep 23 and 24; its numbers live in the README's AI table, checked against `results/`, and this text states the pass table only in words.
 
@@ -24,10 +24,8 @@ A two-minute photo test that scores volunteer creek observers, then saves each s
 
 ## Track statement (line one of the description)
 
-677 characters
-
 ```text
-Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that with a two-minute photo test. Each volunteer gets a score for each of four kinds of creek damage, saved with every observation they make. The AI takes the same test. It may only ask a volunteer to look again, only where it passed, and only after the volunteer has answered. The AI's help is measured, not assumed: a second test, planned before anyone took it, checks whether that one question makes people more accurate. What the AI may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
+Track 3, AI-Supported Assessment. The track says citizen observations can be inconsistent and error-prone. We measure that with a two-minute photo test. Each volunteer gets a score for each of four kinds of creek damage, saved with every observation they make. The AI takes the same test. It may only ask a volunteer to look again, only where it passed, and only after the volunteer has answered. The AI's help must be measured, not assumed. A second test, planned before anyone took it, is designed to check whether that one question makes people more accurate; its benefit is not yet established. What the AI may and may not do is in its [model card](https://github.com/alejandro-publius/second-look/blob/main/docs/MODEL_CARD.md).
 ```
 
 ## The problem
@@ -53,14 +51,12 @@ The four features are the ones the project lead named. The creek check asks the 
 
 ## Innovation and practical value
 
-681 characters
-
 ```text
 Measure each volunteer, per feature, and store the measure with the data. The analyst sees "4 of 4 on built banks, tested Sep 23" beside an answer, never a blended grade or a probability. A city picks its own threshold.
 
 Follow-up questions are chosen by code from the answers, the person's scores and the weather, two at most. For example: "It has not rained here for N days. Is anything coming out of that pipe?" A pipe running in dry weather is worth a lab test, and the record already has the shape for sending that request and for the result coming back.
 
-It costs nothing to run: Cloudflare's free plan, no card. A follower city adopts it with OneAquaHealth's own five steps.
+The hosted prototype uses Cloudflare's free tiers, subject to their limits. Model evaluation, optional recruitment and ongoing maintenance are separate costs. The adoption guide follows OneAquaHealth's five-step recipe; a real city integration still needs local configuration and validation.
 ```
 
 ## Effective use of data, technology, AI, APIs and standards
@@ -87,7 +83,7 @@ Data: no names, emails or free text in the test; a random session id; EXIF strip
 
 ## A clear demonstration of what was built
 
-1729 characters
+1709 characters
 <!-- claim: results/footage_pool.json#/walks = 3 -->
 <!-- claim: results/footage_pool.json#/walk_country_count = 3 -->
 <!-- claim: results/benchmark_20260924T054939Z.json#/pool/n_photos = 16 -->
@@ -97,8 +93,8 @@ Take the test: https://second-look-79t.pages.dev (no camera needed).
 Judges start here: https://second-look-79t.pages.dev/judges
 
 /t: consent, warm-up, then the lesson and 16 photos, in an order the server picks at random (half the people see the photos first and get the lesson after their score), and a score per feature.
-/demo: judge mode with feedback after each answer. Shut while the study's second wave runs, because it shows the answers to the study's photos; open from that wave's lock.
-/t2/demo: the AI's one question. Eight photos; when the checker disagrees with your answer it asks you to look again, and you decide. Nothing is stored. Open from the same lock.
+/demo: judge mode with feedback after each answer. It is now open; it was shut during the second wave because it shows the answers to the study's photos.
+/t2/demo: the AI's one question. Eight photos; when the checker disagrees with your answer it asks you to look again, and you decide. Nothing is stored. This mode is now open.
 /check: the guided creek check in the official app's own words and six languages, one question per screen, with follow-ups chosen by code.
 /walk/v02, then "See this creek as a city would": the record your answers make, each answer with its FHIR, and what the creek needs in OneAquaHealth's own measures. The clips show natural creeks, so a measure appears when the walk reports damage, for example Artificial for the bank. /city?creek=strawberry-creek stays empty until the first real check.
 /two: a volunteer Observation of ours beside a lab result from their sandbox, in the same viewer, with the time the lab result was fetched.
@@ -110,10 +106,12 @@ Video: [VIDEO LINK] (released under CC BY-SA 4.0; creek footage from Wikimedia C
 
 ## Users and impact on ecosystem and human health
 
-784 characters
+1015 characters
 
 ```text
 Users: volunteers who check creeks, and the city and project staff who read their records.
+
+Human evidence: neither study wave retained an eligible completed sitting, so we could not measure whether the lesson or the checker helps people. Both pre-registered analyses and their exclusions are published in the repository.
 
 Ecosystem: the four features people miss are built banks, a dug-out channel, invasive plants, and pipes and drain outlets; the answers on built banks and pipes tell a city what a creek needs. The official app has no question for a dug-out channel, so the check asks none, and plants have no city measure of their own. Scoring observers per feature means a city can act on the observations it can trust, and send a lab test where two trained people both saw a pipe running in dry weather.
 
@@ -181,4 +179,4 @@ Upload these five, 1500 by 1000 each, from `docs/submission/gallery/` (made by `
 
 ## Team
 
-Alex Velazquez and Rachel Selbrede. Invite Rachel to the Devpost draft (docs/ALEX_TODO.md).
+Alex Velazquez and Rachel Selbrede (https://github.com/rachelselbrede). Confirm that Rachel has accepted the GitHub invitation and joined the Devpost draft; these are separate steps (docs/ALEX_TODO.md).

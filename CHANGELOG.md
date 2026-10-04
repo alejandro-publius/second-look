@@ -2,9 +2,20 @@
 
 What shipped, day by day, in plain words. Days are Pacific time. The v1.0 section is the text of
 the v1.0 tag and of its GitHub release, which `make go-public GO=yes` makes once the repository
-is public, on the morning of Sat Oct 3. A day gets its line once it has shipped, and `make
+is public. Publication completed overnight on Sun Oct 4. A day gets its line once it has shipped, and `make
 go-public` stops before the flip if a day with commits has none. The numbers live in the README,
 checked against `results/`.
+
+## After publication
+
+### Sun Oct 4
+
+- Made the repository public after scanning its fetched history, without rewriting it.
+- Retried the failed second-wave lock job with the original cutoff and exclusions, published
+  the results, and deployed. Neither wave retained eligible completed sittings.
+- Fixed the advancing browser clock in the judge-mode test and stamped the new audit head.
+- Merged the Codex claims review, updated the submission copy and report, and kept the limits
+  of the evidence beside the results. The video link remains due before submission.
 
 ## v1.0: the hackathon build, Sep 16 to Oct 3, 2026
 

@@ -51,7 +51,7 @@ A table from the fake client licenses nothing.
 `core/tests/test_checker.py::test_synthetic_pass_table_never_licenses_a_flag_by_default`,
 `core/tests/test_harden_gate_properties.py::test_the_committed_pass_table_licenses_only_what_it_marks_passed`.
 
-## 3. Two languages, one answer: the ports proved equal
+## 3. Two languages, matching answers on the tested inputs
 
 **What was hard.** The tested code is Python. The live site runs on a Cloudflare Worker with a D1
 database, and a Python Worker could not reach D1: D1 is a prepared statement binding, not a

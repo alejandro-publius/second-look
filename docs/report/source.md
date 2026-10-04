@@ -23,7 +23,7 @@ answer can't tell when no stream is in view. On
 {{claim:results/footage_latest.json#/gate/candidates}} candidate flags, each on a feature that model
 had not passed. The HL7 validator found {{claim:results/fhir_validation.json#/errors}} errors in
 {{claim:results/fhir_validation.json#/files_validated}} records checked against OneAquaHealth's
-guide. Nobody finished the test before the first lock, so the AI numbers above measure no person. What people did in the second wave, paid panel and public link alike, is in the rows of section 3.1, filled once after the second lock by the pre-registered analysis, whatever the result.
+guide. Neither wave retained an eligible completed sitting, so we could not estimate a human benefit. The human rows in section 3.1 report the pre-registered analyses and link to their exclusions. The late retry of the second lock kept the original cutoff; docs/deviations.md records the delay.
 
 ## 1. The problem
 

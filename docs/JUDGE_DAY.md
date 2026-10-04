@@ -1,10 +1,6 @@
 # A judge's day
 
-The exact path a judge can follow on the live site, https://second-look-79t.pages.dev, from
-Oct 5 to Oct 15, with what they should see at each step. Judge mode (/demo and /t2/demo) is
-shut while the second wave of the study runs, because it shows the answers to the study's photos,
-and opens at that wave's lock, Oct 3 at 04:00 UTC (Fri Oct 2, 21:00 PDT); before that its page
-says when it opens. The repository is public from Sat Oct 3, and the deadline is Sun Oct 4.
+A path through the live site, https://second-look-79t.pages.dev, with what to expect at each step. Judge mode (/demo and /t2/demo) is open. It was shut during the second study wave because it shows the answers to the study's photos. The [repository](https://github.com/alejandro-publius/second-look) is public. Both waves' results are in the README; neither retained eligible completed sittings.
 
 ## In 45 seconds
 
@@ -20,10 +16,8 @@ says when it opens. The repository is public from Sat Oct 3, and the deadline is
    passed on the same 16-photo test people take, and what the gate kept and dropped on real creek
    footage, with the frames. Under "Kept" is the AI's one question as a person would meet it,
    "The checker noticed something that may be concrete walls and other built banks. Want to look
-   again?", with the model's note under it. This is the one place to see that question while
-   judge mode is shut.
-4. Open "The AI's one question, try it" (/t2/demo), the second door on /judges, once judge mode
-   is open. Answer Can't tell when asked about banks, a channel or a pipe. You see "The checker
+   again?", with the model's note under it. You can try the question yourself in the next step.
+4. Open "The AI's one question, try it" (/t2/demo), the second door on /judges. Answer Can't tell when asked about banks, a channel or a pipe. You see "The checker
    noticed something here. Look again?", and you keep or change your answer. It never asks about
    plants, because no model passed that feature. Nothing is stored, and no model is called while
    you answer.
@@ -34,9 +28,7 @@ models take the same test, and a model may only ask about a feature it passed.
 ## In 10 minutes
 
 The README's own path, under For judges, starts with the test itself; this one starts with judge
-mode, which shows the same photos and stores nothing. While judge mode is shut, start at step 2
-and take the test itself from the README's path instead: your sitting then counts in the second
-wave, so answer as a volunteer would.
+mode, which shows the same photos and stores nothing. The study windows have closed.
 
 1. **Judge mode** (/demo): the 16 photos with "Right." or "Not this time." after each answer, then
    the score per feature. It stores nothing. About three minutes.
@@ -54,7 +46,7 @@ wave, so answer as a volunteer would.
    page says when the copy was fetched. About a minute.
 5. **The audit log** (/verify): every line of the log, checked again in your browser, with its
    Bitcoin timestamp. Under a minute.
-6. **The repository** (public from Sat Oct 3): the README's "For judges" section, the technical report
+6. **[The repository](https://github.com/alejandro-publius/second-look)**: the README's "For judges" section, the technical report
    (docs/REPORT.pdf) and `make judge-check`, which runs the checks again in about five minutes with
    no key and no network, and names in its summary the AI numbers it can check only as recorded.
 

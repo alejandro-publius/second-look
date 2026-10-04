@@ -8,7 +8,7 @@
   "pages": 9,
   "pandoc": "pandoc 3.9.0.2",
   "pdf": "docs/REPORT.pdf",
-  "pdf_sha256": "9fa0bc8b4f37f150e4630d2ba5b9d4f16c702680e025e3a7a412ecd923b864de",
+  "pdf_sha256": "0ca68baa147a3bf50f0c72dea88acbbcae4e02e2747091a6b406e726cc3273a9",
   "playwright": "1.63.0",
   "sources": [
     "README.md",
@@ -36,5 +36,5 @@
     "results/usability_w2_20261004.json",
     "results/wave2_window.json"
   ],
-  "sources_sha256": "476028c004ad0947d41c226b3db6d6546360ff795106a4aafc09f11c2a9eee2c"
+  "sources_sha256": "a1f15a13c9c0d6f6d1e5645816b64d8c1261ac090b2737656e04f25c2033205b"
 }
