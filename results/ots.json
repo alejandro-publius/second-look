@@ -1,10 +1,10 @@
 {
- "checked_utc": "2026-09-30T07:13:21Z",
+ "checked_utc": "2026-10-04T07:43:44Z",
  "service": "OpenTimestamps, a public timestamp service that anchors hashes in Bitcoin",
  "client": "opentimestamps-client 0.7.2",
  "upgraded": true,
  "counts": {
-  "pending": 0,
+  "pending": 1,
   "confirmed": 10,
   "unchecked": 0,
   "broken": 0
@@ -160,6 +160,22 @@
    "problem": null,
    "audit_seq": 7,
    "status": "confirmed"
+  },
+  {
+   "proof": "proofs/audit-head-2026-10-04.ots",
+   "file": "proofs/audit-head-2026-10-04",
+   "what": "audit_head",
+   "file_sha256": "918da1fd9cce5e310cbd6e959e963ccd0228033d29856889cf310fd0446ce679",
+   "calendars": [
+    "https://alice.btc.calendar.opentimestamps.org",
+    "https://bob.btc.calendar.opentimestamps.org",
+    "https://btc.calendar.catallaxy.com",
+    "https://finney.calendar.eternitywall.com"
+   ],
+   "bitcoin": null,
+   "problem": null,
+   "audit_seq": 11,
+   "status": "pending"
   },
   {
    "proof": "proofs/prereg-v1.tag.ots",
