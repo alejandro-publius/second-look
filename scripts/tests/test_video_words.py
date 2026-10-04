@@ -155,6 +155,22 @@ def test_the_record_and_the_city_page_say_on_screen_that_their_records_are_sampl
             assert 'A note on screen: "Sample records, made up for this video."' in row[2], row[1]
 
 
+# Alex, Oct 4: the slides are AI illustrations, credited the same way in the video's description,
+# beside its link on Devpost, and in the README, which says no AI image is in the app.
+CREDIT = "Illustrations made with ChatGPT image generation. Narration voice by ElevenLabs."
+
+
+def test_the_ai_illustrations_and_voice_are_credited_beside_the_video_link_and_in_the_readme() -> (
+    None
+):
+    devpost = (ROOT / "docs" / "devpost.md").read_text(encoding="utf-8")
+    video_lines = [ln for ln in devpost.splitlines() if ln.startswith("Video: [VIDEO LINK]")]
+    assert video_lines and all(CREDIT in ln for ln in video_lines)
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "No AI-generated images anywhere" not in readme
+    assert CREDIT in readme
+
+
 def test_the_upload_description_credits_what_the_video_shows_and_names_the_ai_voice() -> None:
     page = (VIDEO / "UPLOAD.md").read_text(encoding="utf-8")
     title, description, tags = (code_block(page, h) for h in ("Title", "Description", "Tags"))
@@ -174,6 +190,7 @@ def test_the_upload_description_credits_what_the_video_shows_and_names_the_ai_vo
     assert "by Roger Kidd, CC BY-SA 2.0" in description
     assert "credited one by one at https://second-look-79t.pages.dev/credits" in description
     assert "The narration is an AI voice" in description
+    assert CREDIT in description
     assert (
         "This video is released under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)"
         in description
