@@ -11,11 +11,10 @@ const REPO = "https://github.com/alejandro-publius/second-look";
 const EN: Record<string, string> = content.locale;
 // Audit findings time-bombs-1 and first-two-minutes-4: the doors said "Opens on Sep 30" and "It
 // opens on Sep 28", fixed strings that turn false on those days. Then the deadline moved
-// (UPDATE_33): the repository is public from Oct 3, and judge mode, which was open from Sep 28,
+// (UPDATE_33): judge mode, which was open from Sep 28,
 // is shut again while a second wave of the study runs, until the second lock,
 // 2026-10-03T04:00:00Z. The page has no clock and is read on both sides of that instant, so
 // these words are true before it and after it.
-const PUBLIC_FROM = "The repository is public from Oct 3.";
 const JUDGE_MODE_SHUT_WHILE = "It is shut while the second wave of the study runs, because the study uses the same photos.";
 const JUDGE_MODE_OPEN_FROM = "Open from Oct 3 at 04:00 UTC, which is Friday Oct 2 at 21:00 PDT.";
 // Words that are true on one side of a day only: a day to come, or a state as of today.
@@ -43,7 +42,7 @@ test("every door on /judges has one line under it with about how long it takes",
   expect(untimed, "doors that do not say how long they take").toEqual([]);
 });
 
-test("the repository doors link the README, the report, the model card, the footage example and the code, and say the repository is public from Oct 3", async ({ page }) => {
+test("the repository doors link the README, the report, the model card, the footage example and the code, without a publication-date promise", async ({ page }) => {
   await mockApi(page);
   await page.goto("/judges");
   for (const [name, href] of [
@@ -58,7 +57,7 @@ test("the repository doors link the README, the report, the model card, the foot
   ]) {
     const link = page.getByRole("link", { name, exact: true });
     await expect(link).toHaveAttribute("href", href);
-    await expect(page.locator(".row").filter({ has: link })).toContainText(PUBLIC_FROM);
+    await expect(page.locator(".row").filter({ has: link })).not.toContainText(/public from|goes public|will open/i);
   }
 });
 
@@ -113,15 +112,13 @@ test("the judge mode doors name the instant judge mode opens, as lock.ts and the
   }
   const repoNotes = ["repo", "readme", "day", "qa", "report", "ai_example", "model_card"].map((k) => `judges.${k}_note`);
   for (const key of repoNotes) {
-    expect(EN[key], key).toContain(PUBLIC_FROM);
+    expect(EN[key], key).not.toMatch(/public from|goes public|will open/i);
     expect(EN[key], key).not.toMatch(OLD_DAYS);
   }
   for (const key of ["demo.shut_body", "part2.demo_shut_body"]) {
     expect(EN[key], key).toContain(`${utc}, which is ${local}.`);
   }
   expect(EN["demo.shut_title"]).toBe(`Judge mode opens on ${month} ${opens.getUTCDate()}`);
-  // The repository goes public on the same day, some hours later.
-  expect(PUBLIC_FROM).toBe(`The repository is public from ${month} ${opens.getUTCDate()}.`);
 });
 
 // Every door that was on the page before the AI's door moved up is still there, once each.

@@ -10,10 +10,7 @@ import { logStampDay } from "@/lib/verify-text";
 
 export const metadata: Metadata = { title: `${t("judges.title")}: ${t("app.name")}` };
 
-// The repository is private until Oct 3 (hard rule 15; the deadline moved, UPDATE_33) and public
-// from that day. Each door's line says "public from Oct 3", which is true before that day and
-// after it, so the words need no clock and no second deploy. Judge mode's two doors speak the
-// same way: judge mode is shut while the second wave of the study runs and open from the second
+// Repository links are public. Judge mode's doors describe the study window and its second
 // lock, 2026-10-03T04:00:00Z (apps/web/lib/lock.ts, JUDGE_MODE_OPENS_UTC), and each door says
 // "shut while the second wave of the study runs" and "open from Oct 3 at 04:00 UTC".
 // apps/web/tests/judges.spec.ts holds those words to the instant in lock.ts.
