@@ -223,7 +223,7 @@ a row names something the code no longer reads, or when a default below differs 
 | `SECOND_LOOK_SCREENS` | `docs/video/clips` | `scripts/video_final.py` | the screen recordings the final cut uses (`make video-final SCREENS=...` sets it) |
 | `SECOND_LOOK_VOICE` | `~/second-look-media/voice` | `scripts/video_final.py` | where a voice file is looked for, outside the repo |
 | `SECOND_LOOK_FINAL` | `~/second-look-media/final` | `scripts/video_final.py` | where the final cut, its .srt and the thumbnail are written, outside the repo |
-| `SCREENS_API_ORIGIN` | not set | `apps/web/scripts/record-clips.mjs` | the API address a recorded build calls; the mock answers it, so nothing reaches it |
+| `SCREENS_API_ORIGIN` | not set | `apps/web/scripts/record-clips.mjs`, `apps/web/scripts/record-eleven.mjs` | the API address a recorded build calls; the mock answers it, so nothing reaches it |
 | `SECOND_LOOK_CLIPS` | `~/second-look-media/clips` | `scripts/video_rough.py` | the cut clips the rough cut reads |
 | `SECOND_LOOK_SAY_VOICE` | `Samantha` | `scripts/video_rough.py` | the macOS voice of the scratch narration |
 | `SECOND_LOOK_CONTACT` | the project's GitHub noreply address | `scripts/find_open_photos.py`, `scripts/find_open_videos.py` | the contact in the user agent of the photo and video searches |
@@ -259,7 +259,8 @@ a row names something the code no longer reads, or when a default below differs 
 | `SCREENS_URL` | `http://127.0.0.1:3100`, or the `WEB_PORT` | `apps/web/scripts/screens.mjs` and the other screen scripts | the site the screenshots and clips are taken from |
 | `SKIP_TAP` | not set | `apps/web/scripts/design-check.mjs` | `1` skips the tap target measurement |
 | `POSTER_PORT` | `3102` | `apps/web/scripts/poster.mjs` | the port the poster is printed from |
-| `CLIPS_RAW` | a folder under `docs/video/clips` | `apps/web/scripts/record-clips.mjs` | where the raw screen recordings go |
+| `CLIPS_RAW` | a folder under `docs/video/clips` | `apps/web/scripts/record-clips.mjs`, `apps/web/scripts/record-eleven.mjs` | where the raw screen recordings go |
+| `ONLY` | every clip | `apps/web/scripts/record-eleven.mjs` | a comma list of clip names to record again, for the video voiced by ElevenLabs |
 | `README_HTML` | none | `apps/web/scripts/record-clips.mjs` | the rendered README the clip script films |
 | `E2E_PORT` | `8791` | `worker/test/e2e.mjs` | the port of `wrangler dev` in the Worker e2e |
 | `E2E_COMPAT_DATE` | `2026-08-18` | `worker/test/e2e.mjs` | a compatibility date the local runtime knows |
