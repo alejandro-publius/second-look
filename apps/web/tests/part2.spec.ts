@@ -77,6 +77,12 @@ test("assisted: the question appears only for a disagreeing flag, Keep and Chang
   await answerItem(page, "No");
   // a04, a06, a07 and a08 right: 4 of 8.
   await expect(page.getByTestId("part2-score")).toHaveText("4 of 8 right");
+  await expect(page.getByRole("main")).toContainText("We saved your answers");
+  await expect(page.getByRole("main")).toContainText("whether the checker asked you to look again");
+  await expect(page.getByRole("main")).toContainText("what you chose");
+  await expect(page.getByRole("main")).toContainText("the time each step took");
+  await expect(page.getByRole("main")).toContainText("the same random session id");
+  await expect(page.getByRole("main")).toContainText("We stored no name, email");
   const choices = calls.filter((c) => c.path === "/api/t2/choice").map((c) => c.body);
   expect(choices.map((c) => [c.item_id, c.choice, c.changed_to ?? null])).toEqual([
     ["a01", "keep", null],

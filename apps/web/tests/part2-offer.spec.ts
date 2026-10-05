@@ -16,10 +16,17 @@ async function toScore(page: Page) {
   await expect(page.getByRole("heading", { name: "Your score" })).toBeVisible();
 }
 
-test("the score screen offers part 2 in one line, and Start opens it", async ({ page }) => {
+test("the score screen explains stored part 2 data, and Start opens it", async ({ page }) => {
   await mockApi(page, { part2Arm: "assisted" });
   await toScore(page);
   await expect(page.getByTestId("part2-offer")).toContainText(OFFER);
+  const offer = page.getByTestId("part2-offer");
+  await expect(offer).toContainText("We store your answers");
+  await expect(offer).toContainText("whether the checker asked you to look again");
+  await expect(offer).toContainText("what you chose");
+  await expect(offer).toContainText("the time each step took");
+  await expect(offer).toContainText("the same random session id");
+  await expect(offer).toContainText("We store no name, email");
   await page.getByRole("button", { name: "Start the second look" }).click();
   await expect(page).toHaveURL(/\/t2$/);
   await expect(page.getByRole("heading", { name: "A second look" })).toBeVisible();

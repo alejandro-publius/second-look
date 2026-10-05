@@ -28,6 +28,8 @@ from datetime import UTC, date, datetime, tzinfo
 from pathlib import Path
 from typing import Any
 
+from scripts.cleanup_part2 import DELETE_AT
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ROOT = Path("~/second-look-depth")
 BACKUPS = Path("~/second-look-backups")
@@ -179,6 +181,16 @@ def jobs(tz: tzinfo | None = None) -> tuple[Job, ...]:
             "logs/lock.err",
             calendar=lock_calendar(tz),
             shows_it_ran="lock.log",
+        ),
+        Job(
+            "part2_retention",
+            "once, on 2026-11-30 at 09:00 Pacific, or on wake after it",
+            "keeps a de-identified export, then clears only part2_response and part2_session; "
+            "a completion receipt prevents another deletion",
+            uv_run("scripts/cleanup_part2.py", "--execute"),
+            "logs/part2-retention.log",
+            "logs/part2-retention.err",
+            calendar=lock_calendar(tz, DELETE_AT),
         ),
         Job(
             "lock2",

@@ -51,7 +51,7 @@ def install(
 
 def test_every_job_runs_a_script_that_exists_and_has_a_distinct_label() -> None:
     labels = [j.label for j in mac_jobs.JOBS]
-    assert len(labels) == len(set(labels)) == 9
+    assert len(labels) == len(set(labels)) == 10
     for job in mac_jobs.JOBS:
         assert (ROOT / job.script()).is_file(), job.script()
         assert (job.calendar is None) != (job.interval is None)
@@ -122,7 +122,8 @@ def test_install_writes_and_loads_every_job_from_the_checkout(tmp_path: Path) ->
         "scripts/sandbox_retry.py"
     )
     calls = (tmp_path / "calls.log").read_text()
-    assert calls.count("launchctl bootstrap") == 9 and calls.count("plutil -lint") == 9
+    assert calls.count("launchctl bootstrap") == len(mac_jobs.JOBS)
+    assert calls.count("plutil -lint") == len(mac_jobs.JOBS)
 
 
 def test_install_only_the_lock(tmp_path: Path) -> None:

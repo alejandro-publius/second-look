@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -1150,4 +1151,24 @@ test("the list of languages is whole on the first screen of every walk, and its 
     content.app_strings.strings.it.items.channel_form.text,
   );
   await expect(page.locator("select")).toHaveCount(0);
+});
+
+// Each silent clip has a written alternative linked to its video control.
+test("all walk clips have visible text alternatives and pass axe", async ({ page }) => {
+  await mockApi(page);
+  for (const walk of walks) {
+    await page.goto(`${BASE}/walk/${walk.id}`);
+    const video = page.locator("video.walk-clip");
+    const id = `clip-description-${walk.id}`;
+    await expect(video).toHaveAttribute("aria-describedby", id);
+    const description = page.locator(`#${id}`);
+    await expect(description).toBeVisible();
+    expect((await description.innerText()).split(" ").length).toBeGreaterThan(20);
+    await expect(description).not.toContainText(/walk.description|healthy|polluted|invasive/i);
+    const result = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    console.log(`axe /walk/${walk.id}: ${result.violations.length} violations`);
+    expect(result.violations).toEqual([]);
+  }
 });
