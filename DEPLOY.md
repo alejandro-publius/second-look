@@ -196,7 +196,7 @@ a row names something the code no longer reads, or when a default below differs 
 |---|---|---|---|
 | `DATABASE_URL` | `sqlite:///./data/local.db` | `apps/api/settings.py`, `apps/api/migrations/env.py`, `scripts/backup_db.sh`, `scripts/restore_db.sh` | the Python API's database: SQLite locally, Postgres in docker compose |
 | `EXPORT_TOKEN` | `change-me-long-random`, which counts as not set | `apps/api/settings.py`, `worker/src/index.ts` | opens `/api/test/export` |
-| `QA_KEY` | `change-me-long-random`, which counts as not set | `apps/api/settings.py`, `worker/src/index.ts`, `apps/web/scripts/live-check.mjs` | marks a sitting as a test; live-check refuses to run without it |
+| `QA_KEY` | `change-me-long-random`, which counts as not set | `apps/api/settings.py`, `worker/src/index.ts`, `apps/web/scripts/live-check.mjs`, `apps/web/scripts/record-journey.mjs` | marks a sitting as a test; live-check refuses to run without it, and the demo journey sends it with its one live test sitting |
 | `PUBLIC_WEB_ORIGIN` | `http://localhost:3000` | `apps/api/settings.py` | the one origin the Python API allows for CORS; `make dev` sets the dev site's |
 | `API_ORIGIN` | `http://localhost:8000` | `apps/api/settings.py`, `scripts/smoke.py` | where the API is, for the compose smoke test |
 | `RAINFALL_DRY_MM` | `2.5` | `apps/api/settings.py` | rain in the window, in millimetres, at or under which it counts as dry |
@@ -260,7 +260,9 @@ a row names something the code no longer reads, or when a default below differs 
 | `SKIP_TAP` | not set | `apps/web/scripts/design-check.mjs` | `1` skips the tap target measurement |
 | `POSTER_PORT` | `3102` | `apps/web/scripts/poster.mjs` | the port the poster is printed from |
 | `CLIPS_RAW` | a folder under `docs/video/clips` | `apps/web/scripts/record-clips.mjs`, `apps/web/scripts/record-eleven.mjs` | where the raw screen recordings go |
-| `ONLY` | every clip | `apps/web/scripts/record-eleven.mjs` | a comma list of clip names to record again, for the video voiced by ElevenLabs |
+| `ONLY` | every clip | `apps/web/scripts/record-eleven.mjs`, `apps/web/scripts/record-journey.mjs` | a comma list of clip names to record again, for the video voiced by ElevenLabs |
+| `CLIPS_OUT` | `docs/video/clips/journey` | `apps/web/scripts/record-journey.mjs` | where the demo journey's screencast frames go, one folder per clip |
+| `WHERE` | `live,local` | `apps/web/scripts/record-journey.mjs` | which clips to record: the live site's, the local build's, or both |
 | `README_HTML` | none | `apps/web/scripts/record-clips.mjs` | the rendered README the clip script films |
 | `E2E_PORT` | `8791` | `worker/test/e2e.mjs` | the port of `wrangler dev` in the Worker e2e |
 | `E2E_COMPAT_DATE` | `2026-08-18` | `worker/test/e2e.mjs` | a compatibility date the local runtime knows |

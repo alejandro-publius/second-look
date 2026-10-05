@@ -9,18 +9,19 @@ Two videos are made from this folder. The one to upload is the second, voiced by
 | [`VOICE_SCRIPT.md`](VOICE_SCRIPT.md) | The words, one beat per slide, how they are voiced, and the file each number comes from |
 | [`SHOTLIST.md`](SHOTLIST.md) | What is on screen under each beat, how the cut is built, and the credits |
 | [`UPLOAD.md`](UPLOAD.md) | The title, description and tags, and how to upload it to YouTube and Devpost |
-| [`../../apps/web/scripts/record-eleven.mjs`](../../apps/web/scripts/record-eleven.mjs) | The screen recordings, against a local build and the mocked API |
+| [`../../apps/web/scripts/record-journey.mjs`](../../apps/web/scripts/record-journey.mjs) | The demo's screen recordings: the live site with the QA key wherever the flow allows, a local build with the mocked API for the screens that need a real creek check |
 
 `scripts/tests/test_video_words.py` holds the voice script and the shot list to the same words, every number in them to its file, and the upload page to the credits and the AI voice.
 
-The voice and the cut are made on Alex's Mac, outside the repository, in `~/second-look-media/build/`: `tts.py` voices the words with the ElevenLabs API, one part per run of sentences between the scripted pauses (the key lives in `~/.config/elevenlabs/.env`, never here), and `build_video.py` lays the slides, the recordings, the voice and the captions into one 1920 by 1080 file, `~/second-look-media/eleven-final/second-look.mp4`, with `second-look.srt` and `plan.json` beside it.
+The voice and the cut are made on Alex's Mac, outside the repository, in `~/second-look-media/build/`: `tts.py` voices the words with the ElevenLabs API, one part per run of sentences between the scripted pauses (the key lives in `~/.config/elevenlabs/.env`, never here), `patch_slides.py` patches three slides to match the words, and `build_journey.py` lays the slides, the screen recordings, the voice and the captions into one 1920 by 1080 file, `~/second-look-media/eleven-final/second-look.mp4`, with `second-look.srt` and `plan.json` beside it. The slideshow cut made before it is kept in `~/second-look-media/eleven-final/fallback/`.
 
-The recordings, from `apps/web` (the walk clips are not committed, so copy `public/walks/*.mp4` in first; the build writes the live address into `public/_headers`, so `git restore` it afterwards):
+The recordings, from `apps/web`, with `QA_KEY` taken from the repository's ignored `.env` (the walk clips are not committed, so copy `public/walks/*.mp4` in first; the local build writes the live address into `public/_headers`, so `git restore` it afterwards):
 
 ```
+QA_KEY=... WHERE=live CLIPS_OUT=$HOME/second-look-media/journey node scripts/record-journey.mjs
 NEXT_PUBLIC_API_ORIGIN=https://second-look-79t.pages.dev npm run build
 WEB_PORT=3170 npm run start
-SCREENS_API_ORIGIN=https://second-look-79t.pages.dev WEB_PORT=3170 CLIPS_RAW=$HOME/second-look-media/eleven-clips/raw node scripts/record-eleven.mjs
+WEB_PORT=3170 SCREENS_API_ORIGIN=https://second-look-79t.pages.dev WHERE=local CLIPS_OUT=$HOME/second-look-media/journey node scripts/record-journey.mjs
 ```
 
 ## The first video, read by Alex

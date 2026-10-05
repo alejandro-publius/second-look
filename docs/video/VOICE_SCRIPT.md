@@ -1,6 +1,6 @@
-# Voice script: the video voiced by ElevenLabs, 4:17
+# Voice script: the demo voiced by ElevenLabs, 4:16
 
-The words the ElevenLabs voice reads, one beat per row, the cover and then one beat per slide. They are the words in the "Words" column of `docs/video/SHOTLIST.md`, and `scripts/tests/test_video_words.py` fails if the two files ever differ, if a number in them stops matching the file it comes from, or if a word says what a pipe means. Alex wrote the words on Oct 4 and changed two the same day: beat 9 says "a good rating", as the app's best rating is "Good quality", and beat 13 says "Coming back takes a few taps." The first video, read by Alex, is kept in `docs/video/v1/`.
+The words the ElevenLabs voice reads, one beat per row, the cover and then one beat per slide. They are the words in the "Words" column of `docs/video/SHOTLIST.md`, and `scripts/tests/test_video_words.py` fails if the two files ever differ, if a number in them stops matching the file it comes from, or if a word says what a pipe means. Alex wrote the words on Oct 4 and changed two the same day: beat 9 says "a good rating", as the app's best rating is "Good quality", and beat 13 says "Coming back takes a few taps." The demo plays these words over the app itself; no word needed changing to match the screens. The first video, read by Alex, is kept in `docs/video/v1/`.
 
 ## How it is voiced
 

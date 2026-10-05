@@ -4,7 +4,7 @@ Everything needed to put the video voiced by ElevenLabs on YouTube as unlisted a
 
 ## Which file
 
-`~/second-look-media/eleven-final/second-look.mp4`: 4:17 (257.9 seconds), 1920 by 1080, 30 fps, captions burned in. `second-look.srt` beside it holds the same captions as text.
+`~/second-look-media/eleven-final/second-look.mp4`: 4:16 (256.9 seconds), 1920 by 1080, 30 fps, captions burned in. `second-look.srt` beside it holds the same captions as text.
 
 Check it before uploading:
 
@@ -31,7 +31,7 @@ Code: https://github.com/alejandro-publius/second-look
 
 Made for the OneAquaHealth hackathon, Track 3, AI-Supported Assessment.
 
-Illustrations made with ChatGPT image generation. Narration voice by ElevenLabs. The narration is an AI voice, the ElevenLabs voice Sarah, reading words the team wrote. The slides are AI illustrations; the screens are recordings of the app, and where a recording shows sample records, made up for the video, the picture says so.
+Illustrations made with ChatGPT image generation. Narration voice by ElevenLabs. The narration is an AI voice, the ElevenLabs voice Sarah, reading words the team wrote. The video shows the app in use: the test, a video walk, the checker, the record and the audit log were recorded on the live site, with the test stored as a test and the walk as a demo record, never counted; the screens that need real creek checks were recorded on a local build with sample records, made up for the video, and the picture says so. The slides are AI illustrations.
 
 This video is released under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/), because photos in it are CC BY-SA.
 
