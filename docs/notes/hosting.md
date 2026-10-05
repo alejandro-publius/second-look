@@ -176,6 +176,8 @@ job checks before it deploys anything.
 <!-- deploys:start -->
 | When (UTC) | Part | Commit | Id | Archive | Checked |
 |---|---|---|---|---|---|
+| 2026-10-05T02:53:03Z | web | `1969bc9` | `e9597fc4` | `~/second-look-backups/deploys/web-20261005T025303Z-1969bc9` | yes |
+| 2026-10-05T02:52:11Z | worker | `1969bc9` | `c66df85a-58a0-422c-b827-0b797ac7cd8f` |  | yes |
 | 2026-10-04T08:14:12Z | web | `66734a9` | `701e9ff5` | `~/second-look-backups/deploys/web-20261004T081412Z-66734a9` | yes |
 | 2026-10-04T07:28:35Z | web | `a2ce4f4` | `a7ebf7ea` | `~/second-look-backups/deploys/web-20261004T072835Z-a2ce4f4` | yes |
 | 2026-10-04T07:27:47Z | worker | `a2ce4f4` | `a8116d64-de6b-430e-b980-6a8f77d92e5e` |  | yes |
@@ -194,8 +196,6 @@ job checks before it deploys anything.
 | 2026-09-26T02:16:49Z | web | `c21412a` | `5f5811e9` | `~/second-look-backups/deploys/web-20260926T021649Z-c21412a` | yes |
 | 2026-09-26T02:16:10Z | worker | `c21412a` | `67d4ed55-fe2f-4bd2-9b6d-5eac12311688` |  | yes |
 | 2026-09-26T01:43:37Z | web | `6f582c0` | `4a30cefe` | `~/second-look-backups/deploys/web-20260926T014337Z-6f582c0` | yes |
-| 2026-09-26T01:42:29Z | worker | `6f582c0` | `ab917e11-043c-4ca6-94e6-697bd7f3db61` |  | yes |
-| 2026-09-25T22:57:39Z | web | `5acd34a` | `ce38185d` | `~/second-look-backups/deploys/web-20260925T225739Z-5acd34a` | yes |
 <!-- deploys:end -->
 
 ## What is not done
